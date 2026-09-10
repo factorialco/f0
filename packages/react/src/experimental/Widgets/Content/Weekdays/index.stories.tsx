@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { Weekdays } from "./index"
+import { Weekdays } from "."
 
 const meta: Meta = {
   title: "Widgets/Content/Weekdays",

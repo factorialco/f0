@@ -1,9 +1,7 @@
 import { lazy, Suspense, useState, type ReactNode } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Pencil } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { useF0Chat, useF0ChatEmit } from "../providers/F0ChatProvider"
 
 /**
@@ -41,7 +39,9 @@ export const ChatPostComposer = (): ReactNode => {
 
   // With neither a way to publish nor a flow to hand off to, the affordance
   // would promise something the panel cannot do — so it isn't rendered.
-  if (!createPost && !composePost) return null
+  if (!createPost && !composePost) {
+    return null
+  }
 
   const open = () => {
     emit.onPostCompositionStarted()
@@ -72,16 +72,14 @@ export const ChatPostComposer = (): ReactNode => {
           </span>
         </button>
       </div>
-      {dialogOpen && (
-        // No fallback: the dialog is its own overlay, and a skeleton of one
-        // flashing over the feed is worse than the click taking a beat.
+      {dialogOpen ? (
         <Suspense fallback={null}>
           <ChatPostComposerDialog
             onClose={() => setDialogOpen(false)}
             searchMembers={searchMembers}
           />
         </Suspense>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -2,16 +2,13 @@
 
 import { format } from "date-fns"
 import { useCallback, useMemo, useState, type ReactNode } from "react"
-
 import { F0ActionBar } from "@/components/F0ActionBar"
-
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { LinkProvider } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { Page } from "@/patterns/Navigation/Page"
 import { F0Toast } from "@/ui/Toast"
-
 import { isPost, type F0ChatCreatePostInput, type F0ChatPost } from "../types"
 import { MockPostComposer } from "./MockPostComposer"
 import { type MockPostDraft } from "./mockPostComposerTypes"
@@ -78,15 +75,15 @@ export const MockCommunitySurface = ({
         fallback
       )}
 
-      {openSurface?.kind === "composer" && (
+      {openSurface?.kind === "composer" ? (
         <ComposerPage
           convId={openSurface.convId}
           postId={openSurface.postId}
           onNotice={setNotice}
         />
-      )}
+      ) : null}
 
-      {notice && (
+      {notice ? (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
           <F0Toast
             title={notice}
@@ -95,7 +92,7 @@ export const MockCommunitySurface = ({
             onClose={() => setNotice(null)}
           />
         </div>
-      )}
+      ) : null}
     </>
   )
 }
@@ -136,7 +133,9 @@ const DetailPage = ({
 
   // The post can vanish under us — deleting it from its own menu is a supported
   // thing to do — so close rather than render a page about nothing.
-  if (!post || !seed) return null
+  if (!post || !seed) {
+    return null
+  }
 
   const comments = app.postComments[postId] ?? []
   const visits = app.postVisits[postId] ?? []
@@ -217,7 +216,9 @@ const ScheduledPreviewPage = ({
   )
 
   // Publishing or cancelling it from here takes it off the list under our feet.
-  if (!scheduled || !seed) return null
+  if (!scheduled || !seed) {
+    return null
+  }
 
   const { input } = scheduled
   const preview: F0ChatPost = {

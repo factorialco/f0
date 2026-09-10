@@ -1,10 +1,5 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Link } from "@/components/F0Link"
-import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
-import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
-import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
-import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,7 +8,11 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
+import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
@@ -42,13 +41,58 @@ type RowProps<
   item: R
   selectedItems: Map<number | string, R>
   handleSelectItemChange: (item: R, checked: boolean) => void
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   itemDefinition: (record: R) => ItemDefinition
 }
 
 /**
  * Group List: Renders the list for a group
  */
+/**
+ * A row's own actions: inline on a wide row, a dropdown on a narrow one. Draws
+ * nothing when the collection defines no item actions.
+ */
+const ListRowItemActions = ({
+  primaryItemActions,
+  dropdownItemActions,
+  mobileDropdownItemActions,
+  hasMobileItemActions,
+  dropDownOpen,
+  onDropDownOpenChange,
+}: Pick<
+  ReturnType<typeof useItemActions>,
+  | "primaryItemActions"
+  | "dropdownItemActions"
+  | "mobileDropdownItemActions"
+  | "hasMobileItemActions"
+  | "dropDownOpen"
+> & {
+  onDropDownOpenChange: ReturnType<
+    typeof useItemActions
+  >["handleDropDownOpenChange"]
+}) => (
+  <>
+    <ItemActionsRowContainer
+      dropDownOpen={dropDownOpen}
+      className="pointer-events-auto hidden md:flex"
+    >
+      <ItemActionsRow
+        primaryItemActions={primaryItemActions}
+        dropdownItemActions={dropdownItemActions}
+        handleDropDownOpenChange={onDropDownOpenChange}
+      />
+    </ItemActionsRowContainer>
+
+    {hasMobileItemActions ? (
+      <ItemActionsMobile
+        className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
+        items={mobileDropdownItemActions}
+        onOpenChange={onDropDownOpenChange}
+      />
+    ) : null}
+  </>
+)
+
 export const Row = <
   Record extends RecordType,
   Filters extends FiltersDefinition,
@@ -79,7 +123,7 @@ export const Row = <
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "list", i18n)
+    return renderProperty({ item, property, visualization: "list", i18n })
   }
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
@@ -116,7 +160,7 @@ export const Row = <
         className="pointer-events-auto absolute inset-0"
       ></div>
       <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
-        {source.selectable && id !== undefined && (
+        {source.selectable && id !== undefined ? (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
           <div
             className={cn(
@@ -135,8 +179,8 @@ export const Row = <
               hideLabel
             />
           </div>
-        )}
-        {itemHref && (
+        ) : null}
+        {itemHref ? (
           <F0Link
             href={itemHref}
             className="pointer-events-auto absolute inset-0 block"
@@ -146,7 +190,7 @@ export const Row = <
           >
             <span className="sr-only">{actions.view}</span>
           </F0Link>
-        )}
+        ) : null}
         <ItemTeaser
           title={itemDef.title}
           avatar={itemDef.avatar}
@@ -159,7 +203,9 @@ export const Row = <
           .map((field) => {
             const content = renderCell(item, field)
 
-            if (!content) return null
+            if (!content) {
+              return null
+            }
 
             return (
               <div key={String(field.label)}>
@@ -170,29 +216,17 @@ export const Row = <
             )
           })}
       </div>
-      {source.itemActions && (
-        <>
-          <ItemActionsRowContainer
-            dropDownOpen={dropDownOpen}
-            className="pointer-events-auto hidden md:flex"
-          >
-            <ItemActionsRow
-              primaryItemActions={primaryItemActions}
-              dropdownItemActions={dropdownItemActions}
-              handleDropDownOpenChange={handleDropDownOpenChange}
-            />
-          </ItemActionsRowContainer>
-
-          {hasMobileItemActions && (
-            <ItemActionsMobile
-              className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          )}
-        </>
-      )}
-      {source.selectable && id !== undefined && (
+      {source.itemActions ? (
+        <ListRowItemActions
+          primaryItemActions={primaryItemActions}
+          dropdownItemActions={dropdownItemActions}
+          mobileDropdownItemActions={mobileDropdownItemActions}
+          hasMobileItemActions={hasMobileItemActions}
+          dropDownOpen={dropDownOpen}
+          onDropDownOpenChange={handleDropDownOpenChange}
+        />
+      ) : null}
+      {source.selectable && id !== undefined ? (
         <div
           className={cn(
             "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
@@ -208,7 +242,7 @@ export const Row = <
             hideLabel
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

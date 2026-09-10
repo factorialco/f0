@@ -1,7 +1,5 @@
 import { Fragment } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import type { CurrencyDef } from "../amount"
@@ -162,13 +160,13 @@ const formatNumberParts = ({
 const FormattedNumberContent = ({ parts }: { parts: FormattedNumberParts }) => {
   return (
     <>
-      {parts.unitsPosition === "left" && parts.units && (
+      {parts.unitsPosition === "left" && parts.units ? (
         <span>{parts.units.toString()}</span>
-      )}
+      ) : null}
       {parts.value}
-      {parts.unitsPosition === "right" && parts.units && (
+      {parts.unitsPosition === "right" && parts.units ? (
         <span>{parts.units.toString()}</span>
-      )}
+      ) : null}
     </>
   )
 }
@@ -283,13 +281,13 @@ export const CompoundCell = (
 
         return (
           <Fragment key={`${segment.type}-${index}`}>
-            {index > 0 && (
+            {index > 0 ? (
               <span
                 className={cn(toneClassByValue.secondary, "whitespace-pre")}
               >
                 {separator}
               </span>
-            )}
+            ) : null}
             <span
               className={cn(
                 toneClassByValue[tone],

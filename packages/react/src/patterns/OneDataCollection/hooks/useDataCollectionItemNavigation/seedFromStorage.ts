@@ -8,7 +8,6 @@ import {
 import { SearchOptions } from "@/hooks/datasource/types/search.typings"
 import { DataCollectionStorage } from "@/lib/providers/datacollection"
 import { resolveDataCollectionFilters } from "@/lib/providers/datacollection/readDataCollectionStorage"
-
 import { AppliedCollectionState } from "./types"
 
 const isKeyOf = <T extends object>(

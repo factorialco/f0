@@ -1,5 +1,4 @@
 import { ComponentProps, forwardRef } from "react"
-
 import { Indicator } from "@/ui/indicator"
 
 export interface IndicatorsListProps {

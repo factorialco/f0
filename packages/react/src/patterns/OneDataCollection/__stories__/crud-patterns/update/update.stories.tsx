@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { F0Text } from "@/components/F0Text"
 import { Pencil, Save } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { useF0Form } from "@/patterns/F0Form"
-
+import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
 import {
   cardVisualization,
   createResourceDataAdapter,
@@ -103,11 +100,11 @@ function RightPositionDialogScenario({
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && (
+        {previewedResource ? (
           <div className="flex h-full flex-col p-4">
             <CrudContentPlaceholder minHeight="h-[calc(95dvh-12.5rem)]" />
           </div>
-        )}
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
@@ -129,7 +126,7 @@ function RightPositionDialogScenario({
         }}
         disableContentPadding
       >
-        {selectedResource && (
+        {selectedResource ? (
           <ResourceFormF0
             key={selectedResource.id}
             mode="update"
@@ -137,7 +134,7 @@ function RightPositionDialogScenario({
             formRef={formRef}
             onSuccess={() => setSelectedResource(null)}
           />
-        )}
+        ) : null}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -204,7 +201,9 @@ function UpdateWithSameFormScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {previewedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
@@ -359,7 +358,9 @@ function CardActionsUpdateScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {previewedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}

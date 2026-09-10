@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { F0AiChat, F0AiChatProvider } from "@/kits/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
@@ -12,8 +9,7 @@ import {
   MockConnectedMessagesContainer,
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0AnalyticsDashboard } from "../index"
+import { F0AnalyticsDashboard } from ".."
 import type { DashboardItem } from "../types"
 import { mixedItems } from "./mockDataMixed"
 
@@ -69,7 +65,12 @@ const TargetObserverLayout = ({
           items={items}
           onAskAiTarget={({ id, point, quote }) => {
             setObservedTarget(
-              `${id}: ${point ? `point=${point.category}/${point.value}` : "widget"}; quote=${quote.text}`
+              (() => {
+                const target = point
+                  ? `point=${point.category}/${point.value}`
+                  : "widget"
+                return `${id}: ${target}; quote=${quote.text}`
+              })()
             )
           }}
         />
@@ -92,7 +93,9 @@ const openAskOneMenu = async (canvasElement: HTMLElement) => {
   await userEvent.click(trigger)
 
   const menuId = trigger.getAttribute("aria-controls")
-  if (!menuId) throw new Error("The widget menu trigger has no aria-controls")
+  if (!menuId) {
+    throw new Error("The widget menu trigger has no aria-controls")
+  }
 
   const menu = await waitFor(() => {
     const element = canvasElement.ownerDocument.getElementById(menuId)
@@ -157,13 +160,16 @@ export const WidgetQuotedInChat: Story = {
   render: () => <AskOneLayout />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    let menu: ReturnType<typeof within> | undefined
+    const opened: Partial<Awaited<ReturnType<typeof openAskOneMenu>>> = {}
 
     await step("Open the widget actions menu", async () => {
-      menu = (await openAskOneMenu(canvasElement)).menu
+      opened.menu = (await openAskOneMenu(canvasElement)).menu
     })
 
-    if (!menu) throw new Error("The widget actions menu did not open")
+    const menu = opened.menu
+    if (!menu) {
+      throw new Error("The widget actions menu did not open")
+    }
 
     await step("Ask One about the widget", async () => {
       await userEvent.click(
@@ -198,13 +204,16 @@ export const TargetObserver: Story = {
   render: () => <TargetObserverLayout />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    let menu: ReturnType<typeof within> | undefined
+    const opened: Partial<Awaited<ReturnType<typeof openAskOneMenu>>> = {}
 
     await step("Open the widget actions menu", async () => {
-      menu = (await openAskOneMenu(canvasElement)).menu
+      opened.menu = (await openAskOneMenu(canvasElement)).menu
     })
 
-    if (!menu) throw new Error("The widget actions menu did not open")
+    const menu = opened.menu
+    if (!menu) {
+      throw new Error("The widget actions menu did not open")
+    }
 
     await step("Ask One about the widget", async () => {
       await userEvent.click(
@@ -240,8 +249,9 @@ export const PointTargetObserver: Story = {
       trigger.focus()
       await userEvent.keyboard("{Enter}")
       const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
+      if (!menuId) {
         throw new Error("The point menu trigger has no aria-controls")
+      }
       const menu = await waitFor(() => {
         const element = canvasElement.ownerDocument.getElementById(menuId)
         expect(element).toBeInTheDocument()
@@ -295,8 +305,9 @@ export const ChartPointFlow: Story = {
       await expect(trigger).toHaveFocus()
       await userEvent.keyboard("{Enter}")
       const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
+      if (!menuId) {
         throw new Error("The point menu trigger has no aria-controls")
+      }
 
       const menu = await waitFor(() => {
         const element = canvasElement.ownerDocument.getElementById(menuId)

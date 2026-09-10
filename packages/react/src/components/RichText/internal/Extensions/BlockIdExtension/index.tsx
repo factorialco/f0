@@ -120,10 +120,12 @@ export const BlockIdExtension = Extension.create({
           let modified = false
 
           // Collect affected ranges from all transactions
-          const affectedRanges: Array<{ from: number; to: number }> = []
+          const affectedRanges: { from: number; to: number }[] = []
 
           transactions.forEach((transaction) => {
-            if (!transaction.docChanged) return
+            if (!transaction.docChanged) {
+              return
+            }
 
             // Get the mapping from old to new state
             transaction.steps.forEach((step) => {

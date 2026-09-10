@@ -1,16 +1,13 @@
+import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@testing-library/jest-dom/vitest"
 import { createRef, useState } from "react"
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest"
-
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
-
-import type { F0SelectItemProps, F0SelectProps } from "../types"
-
+import { F0Select } from ".."
 import { Search } from "../../../icons/app"
-import { F0Select } from "../index"
+import type { F0SelectItemProps, F0SelectProps } from "../types"
 
 const mockOptions: F0SelectItemProps<string, RecordType>[] = [
   {
@@ -1475,6 +1472,27 @@ describe("Select", () => {
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
     })
     expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("closes the dropdown when a bottom action is clicked", async () => {
+    const handleAction = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        actions={[{ label: "Reset", onClick: handleAction }]}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByRole("button", { name: "Reset" }))
+
+    expect(handleAction).toHaveBeenCalledOnce()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
   })
 
   it("renders a custom apply-button label when applySelectionLabel is provided", async () => {

@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-
 import { createPageLayoutBlock } from "../utils"
 import { Block, BlockProps } from "./Block"
 
@@ -18,7 +17,9 @@ const PageLayoutContentBlockComponent = ({
   className,
   ...props
 }: BlockProps & BlockContentExtraProps) => {
-  if (!title) return null
+  if (!title) {
+    return null
+  }
 
   const TitleTag = titleLevel
 
@@ -38,9 +39,9 @@ const PageLayoutContentBlockComponent = ({
           {title}
         </TitleTag>
 
-        {description && (
+        {description ? (
           <p className="text-sm text-f1-foreground-secondary">{description}</p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex-1">{children}</div>

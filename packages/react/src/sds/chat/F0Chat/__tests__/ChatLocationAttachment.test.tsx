@@ -1,7 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ChatLocationAttachment } from "../components/ChatLocationAttachment"
 import { type F0ChatLocationAttachment } from "../types"
 import { summariseAttachments } from "../utils/reply-preview"

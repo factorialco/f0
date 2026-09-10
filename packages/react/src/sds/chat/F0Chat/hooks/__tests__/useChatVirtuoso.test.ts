@@ -8,9 +8,7 @@ import {
   type Mock,
   vi,
 } from "vitest"
-
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { type ChatRow } from "../../utils/grouping"
 import {
   lastSeenRowIndex,

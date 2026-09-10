@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { IconType } from "@/components/F0Icon"
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { CollectionActions } from "../CollectionActions"
 
@@ -62,12 +60,12 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
         }
         onClick={() =>
           (onClick as (value: string, item: unknown) => void)(
-            (items as Array<{ value: string }>)[0].value,
-            (items as Array<unknown>)[0]
+            (items as { value: string }[])[0].value,
+            (items as unknown[])[0]
           )
         }
       >
-        {(items as Array<{ label: string }>)[0]?.label}
+        {(items as { label: string }[])[0]?.label}
       </button>
     </div>
   ),

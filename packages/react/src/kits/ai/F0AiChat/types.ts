@@ -1,6 +1,5 @@
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
-
 import type {
   CanvasActions,
   CanvasContent,
@@ -169,10 +168,19 @@ export type AiChatCredits = {
 export type AiChatCreditWarning = {
   /** The severity level of the warning. */
   level: "soft"
+  /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+  text?: string
+  /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+  actionLabel?: string
   /** Called when the user dismisses the credit warning banner. */
   onDismiss?: () => void
   /** Called when the user clicks the "Get Credits" button. */
   onGetCredits?: () => void
+  /**
+   * Icon rendered to the left of the "Get Credits" label. Only used when
+   * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+   */
+  getCreditsIcon?: IconType
 }
 
 /**
@@ -563,4 +571,30 @@ export type AiChatTranslations = TranslationShape<typeof aiTranslations>
 export interface AiChatTranslationsProviderProps {
   children: React.ReactNode
   translations: AiChatTranslations
+}
+
+export type AiChatUsageLimitsSection = {
+  id: string
+  /** Already localized. */
+  label: string
+  /** Already localized, e.g. "Renews Sep 4". */
+  description?: string
+  usedPercentage: number
+  unlimited?: boolean
+}
+
+/**
+ * Host-resolved numbers for `F0AiChatUsageLimitsButton`. Percentages only: the
+ * product avoids credit counts in the chat.
+ */
+export type AiChatUsageLimits = {
+  /** The viewer's own allowance, 0–100. */
+  usedPercentage: number
+  /** Already localized, e.g. "Resets in 3h 6m". */
+  description?: string
+  unlimited?: boolean
+  /** Extra rows below a divider, typically for admins. */
+  sections?: AiChatUsageLimitsSection[]
+  /** Renders the "Your company" row. */
+  onSeeCompany?: () => void
 }

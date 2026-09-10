@@ -1,16 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
+import { F0Icon } from "@/components/F0Icon"
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
+import Handle from "@/icons/app/Handle"
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
+import { cn } from "@/lib/utils"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { F0Icon } from "@/components/F0Icon"
-import Handle from "@/icons/app/Handle"
-import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
-import { cn } from "@/lib/utils"
-
 import type {
   DashboardItem as DashboardItemType,
   DashboardItemFiltersConfig,
@@ -18,7 +15,6 @@ import type {
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
-
 import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
 import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
@@ -116,7 +112,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // Build item lookup
   const itemMap = useMemo(() => {
     const map = new Map<string, DashboardItemType<Filters>>()
-    for (const item of items) map.set(item.id, item)
+    for (const item of items) {
+      map.set(item.id, item)
+    }
     return map
   }, [items])
 
@@ -145,7 +143,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // ─── Narrow detection ───────────────────────────────────────
   useEffect(() => {
     const el = containerRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setIsNarrow(entry.contentRect.width < NARROW_THRESHOLD)
@@ -165,7 +165,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // ─── Emit layout changes ────────────────────────────────────
   const emitLayout = useCallback(
     (newRows: Row[]) => {
-      if (!onLayoutChange) return
+      if (!onLayoutChange) {
+        return
+      }
       const layout: DashboardItemLayout[] = []
       let y = 0
       for (const row of newRows) {
@@ -197,12 +199,16 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
    */
   const handleItemContentHeightChange = useCallback(
     (itemId: string, requiredHeight: number) => {
-      if (requiredHeight <= 0) return
+      if (requiredHeight <= 0) {
+        return
+      }
       const needed = Math.ceil(requiredHeight)
 
       setRows((prev) => {
         const rowIdx = prev.findIndex((row) => row.ids.includes(itemId))
-        if (rowIdx === -1 || prev[rowIdx].height >= needed) return prev
+        if (rowIdx === -1 || prev[rowIdx].height >= needed) {
+          return prev
+        }
 
         const next = [...prev]
         next[rowIdx] = { ...next[rowIdx], height: needed }
@@ -310,15 +316,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // Found once when the drag starts, not on every move — this runs per
       // `pointermove`. The rect is still read live, since the panel can be
       // resized mid-drag.
-      for (const chatEl of chatDropZonesRef.current) {
-        const c = chatEl.getBoundingClientRect()
-        if (
-          clientX >= c.left &&
-          clientX <= c.right &&
-          clientY >= c.top &&
-          clientY <= c.bottom
-        )
-          return null
+      if (isPointInsideAny(chatDropZonesRef.current, clientX, clientY)) {
+        return null
       }
 
       const rowEls = containerRef.current
@@ -329,17 +328,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           )
         : []
       const cur = rowsRef.current
-      if (rowEls.length === 0 || rowEls.length !== cur.length) return null
+      if (rowEls.length === 0 || rowEls.length !== cur.length) {
+        return null
+      }
 
       const rects = rowEls.map((el) => el.getBoundingClientRect())
       // Nearest row band, splitting the gap between rows at its midpoint.
-      let i = rects.length - 1
-      for (let k = 0; k < rects.length - 1; k++) {
-        if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
-          i = k
-          break
-        }
-      }
+      const i = nearestRowIndex(rects, clientY)
 
       const rect = rects[i]
       const row = cur[i]
@@ -347,25 +342,24 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       const isFromThisRow = draggedId ? row.ids.includes(draggedId) : false
       const third = rect.height / 3
 
-      if (clientY < rect.top + third)
+      if (clientY < rect.top + third) {
         return { type: "new-row", afterRowIdx: i - 1 }
-      if (clientY > rect.bottom - third)
+      }
+      if (clientY > rect.bottom - third) {
         return { type: "new-row", afterRowIdx: i }
+      }
 
       // Middle third → merge into the row.
-      if (isFromThisRow && row.ids.length === 1) return null
-      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow)
+      if (isFromThisRow && row.ids.length === 1) {
+        return null
+      }
+      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow) {
         return { type: "new-row", afterRowIdx: i }
+      }
 
       const cards = rowEls[i].querySelectorAll("[data-card-id]")
-      let position = row.ids.length
-      for (let c = 0; c < cards.length; c++) {
-        const cr = cards[c].getBoundingClientRect()
-        if (clientX < cr.left + cr.width / 2) {
-          position = c
-          break
-        }
-      }
+      const position = insertPositionInRow(cards, clientX, row.ids.length)
+
       return { type: "into-row", rowIdx: i, position }
     },
     []
@@ -376,7 +370,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // Only the primary (left) button drags. `typeof` guard: in real
       // browsers `button` is always a number (0 for left), but keep going
       // when it's absent so the gesture isn't wrongly suppressed.
-      if (typeof e.button === "number" && e.button !== 0) return
+      if (typeof e.button === "number" && e.button !== 0) {
+        return
+      }
       e.preventDefault()
       e.stopPropagation()
 
@@ -392,8 +388,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           if (
             Math.hypot(ev.clientX - startX, ev.clientY - startY) <
             DRAG_START_THRESHOLD
-          )
+          ) {
             return
+          }
 
           hasStartedDrag = true
           setDragId(id)
@@ -443,8 +440,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
         const draggedId = dragIdRef.current
         const target = dropTargetRef.current
-        if (commit && hasStartedDrag && draggedId && target)
+        if (commit && hasStartedDrag && draggedId && target) {
           commitDrop(draggedId, target)
+        }
         dragIdRef.current = null
         dropTargetRef.current = null
         chatDropZonesRef.current = []
@@ -629,7 +627,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           <div key={ri} className="relative">
             {/* Drop line before this row. The first row also gets one so an
                 item can be reordered to the very top (afterRowIdx -1). */}
-            {canDrag && <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />}
+            {canDrag ? (
+              <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />
+            ) : null}
             <div
               data-dashboard-row=""
               className={cn(
@@ -652,7 +652,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             >
               {row.ids.map((id, ci) => {
                 const item = itemMap.get(id)
-                if (!item) return null
+                if (!item) {
+                  return null
+                }
                 const isDragging = dragId === id
                 const showIndicatorBefore =
                   isDropRow &&
@@ -693,7 +695,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               })}
             </div>
             {/* Row resize handle — only in edit mode */}
-            {canDrag && (
+            {canDrag ? (
               <div
                 className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
                 onMouseDown={(e) => {
@@ -728,20 +730,20 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               >
                 <div className="h-1 w-16 rounded-full bg-transparent transition-colors group-hover/resize:bg-f1-foreground-tertiary" />
               </div>
-            )}
+            ) : null}
           </div>
         )
       })}
 
       {/* Drop line after the last row — reorder to the very bottom */}
-      {canDrag && (
+      {canDrag ? (
         <RowGapDropZone active={!!isNewRowTarget(displayRows.length - 1)} />
-      )}
+      ) : null}
 
       {/* Floating ghost that tracks the cursor during a pointer drag. Its
           position is written imperatively in the pointermove handler so the
           grid doesn't re-render on every mouse move. */}
-      {dragId && (
+      {dragId ? (
         <div
           ref={ghostRef}
           className="pointer-events-none fixed left-0 top-0 z-50 max-w-xs truncate rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg"
@@ -749,7 +751,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         >
           {itemMap.get(dragId)?.title ?? ""}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -779,7 +781,9 @@ function RowItem({
 
   useEffect(() => {
     const el = itemRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     // Deliberately NOT rAF-scheduled: rAF never fires in hidden/background
     // tabs, and a re-rendering parent can re-run this effect (cancelling the
@@ -791,7 +795,9 @@ function RowItem({
 
     const measure = () => {
       queued = false
-      if (disposed) return
+      if (disposed) {
+        return
+      }
       // Report only genuine overflow: the wrapper is flex-stretched to the
       // row height, so its own height always equals the row's — a useless
       // (and ratcheting) signal. `scrollHeight` exceeds `clientHeight` only
@@ -803,7 +809,9 @@ function RowItem({
     }
 
     const scheduleMeasure = () => {
-      if (queued) return
+      if (queued) {
+        return
+      }
       queued = true
       queueMicrotask(measure)
     }
@@ -835,7 +843,7 @@ function RowItem({
 
   return (
     <>
-      {showIndicatorBefore && <DropIndicator />}
+      {showIndicatorBefore ? <DropIndicator /> : null}
       <div
         ref={itemRef}
         data-card-id={id}
@@ -844,7 +852,7 @@ function RowItem({
           isDragging && "opacity-40 scale-[0.97]"
         )}
       >
-        {canDrag && (
+        {canDrag ? (
           // Pointer-based drag (not native HTML5 DnD): a `pointerdown` on the
           // grip starts a document-tracked gesture. Native drag was unusable
           // here — its ghost never tracked the cursor over a chart canvas, and
@@ -858,10 +866,10 @@ function RowItem({
           >
             <F0Icon icon={Handle} size="xs" />
           </div>
-        )}
+        ) : null}
         {children}
       </div>
-      {showIndicatorAfter && <DropIndicator />}
+      {showIndicatorAfter ? <DropIndicator /> : null}
     </>
   )
 }
@@ -897,6 +905,51 @@ function RowGapDropZone({ active }: { active: boolean }) {
 }
 
 // ─── Layout helpers ─────────────────────────────────────────────
+
+/** Whether the point is inside any of these elements, measured live. */
+function isPointInsideAny(
+  elements: Iterable<Element>,
+  clientX: number,
+  clientY: number
+): boolean {
+  for (const element of elements) {
+    const rect = element.getBoundingClientRect()
+    if (
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+/** The row whose band holds the pointer, each gap between rows split at its midpoint. */
+function nearestRowIndex(rects: DOMRect[], clientY: number): number {
+  for (let k = 0; k < rects.length - 1; k++) {
+    if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
+      return k
+    }
+  }
+  return rects.length - 1
+}
+
+/** Where in the row a drop lands: before the first card the pointer is left of. */
+function insertPositionInRow(
+  cards: ArrayLike<Element>,
+  clientX: number,
+  fallback: number
+): number {
+  for (let c = 0; c < cards.length; c++) {
+    const rect = cards[c].getBoundingClientRect()
+    if (clientX < rect.left + rect.width / 2) {
+      return c
+    }
+  }
+  return fallback
+}
 
 /**
  * Build initial rows from items.
@@ -955,7 +1008,9 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
       rowMap.set(y, entry)
     }
     entry.ids.push(item.id)
-    if (h > entry.maxHeight) entry.maxHeight = h
+    if (h > entry.maxHeight) {
+      entry.maxHeight = h
+    }
   }
 
   // Convert map to sorted array of rows
@@ -986,7 +1041,9 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
 
     currentIds.push(item.id)
     currentSlots += weight
-    if (h > currentMaxHeight) currentMaxHeight = h
+    if (h > currentMaxHeight) {
+      currentMaxHeight = h
+    }
   }
   if (currentIds.length > 0) {
     rows.push({ ids: currentIds, height: currentMaxHeight })
@@ -1003,9 +1060,13 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
   let min = DEFAULT_MIN_ROW_HEIGHT
   for (const id of row.ids) {
     const item = itemMap.get(id)
-    if (!item) continue
+    if (!item) {
+      continue
+    }
     const h = MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT
-    if (h > min) min = h
+    if (h > min) {
+      min = h
+    }
   }
   return min
 }
@@ -1029,7 +1090,9 @@ function getRowContentMinHeight(
   rowEl: HTMLElement | null | undefined,
   measurableCardIds: ReadonlySet<string>
 ): number {
-  if (!rowEl || measurableCardIds.size === 0) return 0
+  if (!rowEl || measurableCardIds.size === 0) {
+    return 0
+  }
   const prevHeight = rowEl.style.height
   const prevMinHeight = rowEl.style.minHeight
 
@@ -1060,9 +1123,15 @@ function getRowContentMinHeight(
 function getSlotWeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
-  if (item.type === "metric") return 1
-  if (item.type === "chart") return 2
-  if (item.type === "collection") return MAX_PER_ROW
+  if (item.type === "metric") {
+    return 1
+  }
+  if (item.type === "chart") {
+    return 2
+  }
+  if (item.type === "collection") {
+    return MAX_PER_ROW
+  }
   return 2
 }
 
@@ -1079,8 +1148,12 @@ function getSlotWeight<Filters extends FiltersDefinition>(
 function resolveItemHeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
-  if (item.itemHeight && item.itemHeight > 0) return item.itemHeight
-  if (item.rowSpan) return item.rowSpan * 48
+  if (item.itemHeight && item.itemHeight > 0) {
+    return item.itemHeight
+  }
+  if (item.rowSpan) {
+    return item.rowSpan * 48
+  }
   return ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT
 }
 

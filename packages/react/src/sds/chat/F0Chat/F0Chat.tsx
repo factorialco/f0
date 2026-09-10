@@ -1,7 +1,6 @@
 import { type DragEvent, type ReactNode, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
+import { ChatCommunityShelf } from "./components/ChatCommunityShelf"
 import { ChatComposer } from "./components/ChatComposer"
 import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"
@@ -9,7 +8,6 @@ import { ChatHeader } from "./components/ChatHeader"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
 import { ChatPostComposer } from "./components/ChatPostComposer"
-import { ChatCommunityShelf } from "./components/ChatCommunityShelf"
 import { ChatReadOnlyNotice } from "./components/ChatReadOnlyNotice"
 import {
   ChatConnecting,
@@ -72,19 +70,25 @@ const ChatShell = ({
       data-f0-chat-shell=""
       className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
       onDragEnter={(e) => {
-        if (!isFileDrag(e)) return
+        if (!isFileDrag(e)) {
+          return
+        }
         e.preventDefault()
         e.stopPropagation()
         dragDepth.current++
         setDragging(true)
       }}
       onDragOver={(e) => {
-        if (!isFileDrag(e)) return
+        if (!isFileDrag(e)) {
+          return
+        }
         e.preventDefault()
         e.stopPropagation()
       }}
       onDragLeave={(e) => {
-        if (!isFileDrag(e)) return
+        if (!isFileDrag(e)) {
+          return
+        }
         e.preventDefault()
         e.stopPropagation()
         dragDepth.current--
@@ -94,13 +98,17 @@ const ChatShell = ({
         }
       }}
       onDrop={(e) => {
-        if (!isFileDrag(e)) return
+        if (!isFileDrag(e)) {
+          return
+        }
         e.preventDefault()
         e.stopPropagation()
         dragDepth.current = 0
         setDragging(false)
         const files = Array.from(e.dataTransfer.files)
-        if (files.length > 0) dropFiles(files)
+        if (files.length > 0) {
+          dropFiles(files)
+        }
       }}
     >
       <ChatHeader
@@ -117,7 +125,7 @@ const ChatShell = ({
       {/* Under the header and OUTSIDE the transcript: chrome, not a row, and
           the virtualizer must not have to measure around it. Its sheet opens
           OVER the transcript for the same reason. */}
-      {isCommunity && <ChatCommunityShelf />}
+      {isCommunity ? <ChatCommunityShelf /> : null}
       {status === "connecting" ? (
         <ChatConnecting />
       ) : status === "error" ? (

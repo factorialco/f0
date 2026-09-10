@@ -2,9 +2,13 @@ import { useCallback, useState } from "react"
 
 let measureCanvas: HTMLCanvasElement | null = null
 function getTextWidth(text: string, font: string): number {
-  if (!measureCanvas) measureCanvas = document.createElement("canvas")
+  if (!measureCanvas) {
+    measureCanvas = document.createElement("canvas")
+  }
   const ctx = measureCanvas.getContext("2d")
-  if (!ctx) return 0
+  if (!ctx) {
+    return 0
+  }
   ctx.font = font
   return Math.ceil(ctx.measureText(text).width)
 }

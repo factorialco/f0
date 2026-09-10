@@ -1,8 +1,4 @@
-import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   F0Card,
   type CardImageAspectRatio,
@@ -15,17 +11,17 @@ import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
+import { useGroups } from "@/hooks/datasource/useGroups"
 import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { PropertyDefinition } from "../../../property-render"
@@ -41,7 +37,7 @@ export type CardVisualizationOptions<
   _Filters extends FiltersDefinition,
   _Sortings extends SortingsDefinition,
 > = {
-  cardProperties: ReadonlyArray<CardPropertyDefinition<T>>
+  cardProperties: readonly CardPropertyDefinition<T>[]
   title: (record: T) => string
   description?: (record: T) => string
   avatar?: (record: T) => CardAvatarVariant
@@ -129,7 +125,7 @@ type GroupCardsProps<
   items: Record[]
   selectedItems: Map<number | string, Record>
   handleSelectItemChange: (item: Record, checked: boolean) => void
-  cardProperties: ReadonlyArray<CardPropertyDefinition<Record>>
+  cardProperties: readonly CardPropertyDefinition<Record>[]
   title: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
@@ -177,8 +173,8 @@ const GroupCards = <
 >) => {
   function getMetadata(
     item: Record,
-    properties: ReadonlyArray<CardPropertyDefinition<Record>>
-  ): Array<CardMetadata> {
+    properties: readonly CardPropertyDefinition<Record>[]
+  ): CardMetadata[] {
     return properties
       .map((property) => {
         if (property.hide?.(item)) {
@@ -191,17 +187,20 @@ const GroupCards = <
         }
 
         const cardProperty = convertToCardMetadataProperty(result)
-        if (!cardProperty) return null
+        if (!cardProperty) {
+          return null
+        }
 
         const propertyWithLabel = {
           ...cardProperty,
           label: property.label,
         } as CardMetadataProperty
 
-        if (propertyWithLabel.type === "file")
+        if (propertyWithLabel.type === "file") {
           return {
             property: propertyWithLabel,
           }
+        }
 
         return {
           icon: property.icon ?? Placeholder,
@@ -273,18 +272,7 @@ const GroupCards = <
         const metadata = getMetadata(item, cardProperties)
 
         return (
-          <motion.div
-            key={index}
-            layout
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            custom={index}
-            variants={getAnimationVariants({
-              delay: 0.02,
-              duration: 0.3,
-            })}
-          >
+          <div key={index}>
             <F0Card
               key={index}
               title={title(item)}
@@ -307,7 +295,7 @@ const GroupCards = <
               metadata={metadata}
               fullHeight={true}
             />
-          </motion.div>
+          </div>
         )
       })}
     </CardGrid>
@@ -450,31 +438,30 @@ export const CardCollection = <
           </CardGrid>
         ) : (
           <>
-            {data?.type === "grouped" &&
-              data.groups.map((group) => {
-                return (
-                  <>
-                    <GroupHeader
-                      label={group.label}
-                      itemCount={group.itemCount}
-                      onOpenChange={(open) => setGroupOpen(group.key, open)}
-                      open={openGroups[group.key]}
-                      selectable={!!source.selectable}
-                      showOpenChange={collapsible}
-                      select={
-                        groupAllSelectedStatus[group.key]?.checked
-                          ? true
-                          : groupAllSelectedStatus[group.key]?.indeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onSelectChange={(checked) =>
-                        handleSelectGroupChange(group, checked)
-                      }
-                      className="px-page pb-2 pt-4"
-                    />
-                    <AnimatePresence>
-                      {(!collapsible || openGroups[group.key]) && (
+            {data?.type === "grouped"
+              ? data.groups.map((group) => {
+                  return (
+                    <>
+                      <GroupHeader
+                        label={group.label}
+                        itemCount={group.itemCount}
+                        onOpenChange={(open) => setGroupOpen(group.key, open)}
+                        open={openGroups[group.key]}
+                        selectable={!!source.selectable}
+                        showOpenChange={collapsible}
+                        select={
+                          groupAllSelectedStatus[group.key]?.checked
+                            ? true
+                            : groupAllSelectedStatus[group.key]?.indeterminate
+                              ? "indeterminate"
+                              : false
+                        }
+                        onSelectChange={(checked) =>
+                          handleSelectGroupChange(group, checked)
+                        }
+                        className="px-page pb-2 pt-4"
+                      />
+                      {!collapsible || openGroups[group.key] ? (
                         <GroupCards
                           key={group.key}
                           source={source}
@@ -493,13 +480,13 @@ export const CardCollection = <
                           compact={compact}
                           tmpFullWidth={tmpFullWidth}
                         />
-                      )}
-                    </AnimatePresence>
-                  </>
-                )
-              })}
+                      ) : null}
+                    </>
+                  )
+                })
+              : null}
 
-            {data?.type === "flat" && (
+            {data?.type === "flat" ? (
               <GroupCards
                 source={source}
                 items={data.records}
@@ -517,7 +504,7 @@ export const CardCollection = <
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
               />
-            )}
+            ) : null}
           </>
         )}
       </div>

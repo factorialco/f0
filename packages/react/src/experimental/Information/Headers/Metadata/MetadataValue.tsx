@@ -1,16 +1,15 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
-import { getColor } from "@/kits/Charts/utils/colors"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { AlertCircle, Warning } from "@/icons/app"
+import { getColor } from "@/kits/Charts/utils/colors"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/ui/progress"
-
-import { MetadataItem } from "./index"
+import { MetadataItem } from "."
 
 const DATE_ICON_STYLES = {
   warning: {
@@ -41,7 +40,7 @@ export function MetadataValue({
       return (
         <div className="flex items-center gap-1">
           <F0Avatar avatar={value.variant} size="xs" />
-          {value.text && <span>{value.text}</span>}
+          {value.text ? <span>{value.text}</span> : null}
         </div>
       )
 
@@ -64,11 +63,11 @@ export function MetadataValue({
       return collapse ? (
         <div className="flex items-center justify-center gap-1 font-medium">
           {value.data[0]}
-          {value.data.length > 1 && (
+          {value.data.length > 1 ? (
             <span className="tabular-nums text-f1-foreground-secondary">
               +{value.data.length - 1}
             </span>
-          )}
+          ) : null}
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
@@ -82,11 +81,11 @@ export function MetadataValue({
       return collapse ? (
         <div className="flex flex-wrap items-center justify-center gap-1 font-medium">
           <F0TagRaw text={value.tags[0]} />
-          {value.tags.length > 1 && (
+          {value.tags.length > 1 ? (
             <span className="tabular-nums text-f1-foreground-secondary">
               +{value.tags.length - 1}
             </span>
-          )}
+          ) : null}
         </div>
       ) : (
         <div
@@ -139,11 +138,11 @@ export function MetadataValue({
               aria-valuetext={value.label}
             />
           </div>
-          {value.label && (
+          {value.label ? (
             <span className="whitespace-nowrap text-sm font-medium">
               {value.label}
             </span>
-          )}
+          ) : null}
         </div>
       )
     }

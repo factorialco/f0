@@ -1,5 +1,4 @@
 import { cva } from "cva"
-
 import { mentionClasses } from "@/lib/recipes"
 import { cn } from "@/lib/utils"
 
@@ -95,10 +94,22 @@ export const actionVariants = cva({
 
 export const buttonSizeVariants = cva({
   variants: {
+    /*
+      Each size carries the radius of all THREE layers, because a button is
+      three: its own box, the `before:` inner fill the `ai` variant paints, and
+      the `after:` overlay that draws the ring every bordered variant relies on.
+      The size only used to correct the first two, while every variant hardcodes
+      `after:rounded` — so at `sm` the ring was drawn 2px rounder than the button
+      it outlines, and at `lg` 2px squarer, which reads as a halo slipping off
+      the corners. Only `md` happened to agree, which is why it went unseen.
+
+      The values follow the mapping documented on the radius tokens themselves:
+      sm → `rounded-sm`, md → `rounded`, lg → `rounded-md`.
+    */
     size: {
-      sm: "rounded-sm text-base before:rounded-[7px] [&_.main]:h-6 [&_.main]:px-2",
-      md: "rounded text-base before:rounded-[9px] [&_.main]:h-8 [&_.main]:px-3",
-      lg: "rounded-md text-lg before:rounded-[11px] [&_.main]:h-10 [&_.main]:px-4",
+      sm: "rounded-sm text-base before:rounded-[7px] after:rounded-sm [&_.main]:h-6 [&_.main]:px-2",
+      md: "rounded text-base before:rounded-[9px] after:rounded [&_.main]:h-8 [&_.main]:px-3",
+      lg: "rounded-md text-lg before:rounded-[11px] after:rounded-md [&_.main]:h-10 [&_.main]:px-4",
     },
   },
   defaultVariants: { size: "md" },

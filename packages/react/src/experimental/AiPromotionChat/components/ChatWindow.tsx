@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import type { ReactNode } from "react"
-
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiPromotionChat } from "../providers/AiPromotionChatStateProvider"
 
@@ -19,7 +18,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
 
   return (
     <AnimatePresence>
-      {open && (
+      {open ? (
         <motion.div
           key="chat-window"
           aria-hidden={!open}
@@ -55,7 +54,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
             </motion.div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

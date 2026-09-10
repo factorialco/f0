@@ -1,5 +1,3 @@
-import type { ZodRawShape, ZodType } from "zod"
-
 import {
   createContext,
   useCallback,
@@ -9,16 +7,16 @@ import {
   useRef,
   useState,
 } from "react"
+import type { ZodRawShape, ZodType } from "zod"
 import { z } from "zod"
 import { zodToJsonSchema } from "zod-to-json-schema"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormDefinitionSingleSchema,
   F0FormDefinitionPerSection,
   F0WizardFormStep,
 } from "@/patterns/F0WizardForm/types"
-
+import { getF0Config, inferFieldType, unwrapZodSchema } from "./f0Schema"
 import type {
   F0FormErrorTriggerMode,
   F0FormSchema,
@@ -27,8 +25,6 @@ import type {
   F0FormSubmitConfig,
 } from "./types"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
-
-import { getF0Config, inferFieldType, unwrapZodSchema } from "./f0Schema"
 
 /**
  * Entry in the AI form registry
@@ -117,6 +113,13 @@ export interface F0AiAvailableFormDefinition<
  * of calling {@link useF0FormDefinition} (i.e. {@link F0FormDefinitionSingleSchema}
  * or {@link F0FormDefinitionPerSection}).
  */
+/** Either brand of `F0FormDefinition`, as {@link isF0FormDefinition} narrows to. */
+type F0FormDefinitionAny =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | F0FormDefinitionSingleSchema<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | F0FormDefinitionPerSection<any>
+
 export type AvailableFormDefinitionItem =
   | F0AiAvailableFormDefinition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,7 +133,7 @@ export type AvailableFormDefinitionItem =
  */
 function isF0FormDefinition(
   item: AvailableFormDefinitionItem
-): item is F0FormDefinitionSingleSchema<any> | F0FormDefinitionPerSection<any> {
+): item is F0FormDefinitionAny {
   return (
     "_brand" in item &&
     ((item as { _brand: unknown })._brand === "single" ||
@@ -166,6 +169,47 @@ function unwrapToZodObject(schema: ZodType): { shape?: ZodRawShape } {
   return {}
 }
 
+/** Per-section values, `{ sectionId: { field: val } }`, flattened to `{ field: val }`. */
+function flattenSectionValues(
+  values: Record<string, Record<string, unknown>>
+): Record<string, unknown> {
+  const flat: Record<string, unknown> = {}
+  for (const sectionValues of Object.values(values)) {
+    Object.assign(flat, sectionValues)
+  }
+  return flat
+}
+
+/**
+ * The defaults the registry publishes.
+ *
+ * `F0AiAvailableFormDefinition.defaultValues` supports function values, so a
+ * `defaultValuesFn` is assigned raw — downstream virtual-entry creation checks
+ * `typeof def.defaultValues === "function"` to derive `defaultValuesFn` on the
+ * entry. A per-section function is wrapped so its output arrives flat too.
+ */
+function resolveAvailableDefaultValues(
+  item: F0FormDefinitionAny,
+  flatDefaultValues: Record<string, unknown> | undefined
+): F0AiAvailableFormDefinition["defaultValues"] {
+  if (!item.defaultValuesFn) {
+    return flatDefaultValues
+  }
+
+  if (item._brand !== "per-section") {
+    return item.defaultValuesFn as (
+      params: Record<string, unknown>
+    ) => Promise<Record<string, unknown>>
+  }
+
+  const perSectionFn = item.defaultValuesFn as (
+    params: Record<string, unknown>
+  ) => Promise<Record<string, Record<string, unknown>>>
+
+  return async (params: Record<string, unknown>) =>
+    flattenSectionValues(await perSectionFn(params))
+}
+
 /**
  * Normalises any {@link AvailableFormDefinitionItem} into an
  * {@link F0AiAvailableFormDefinition} so the rest of the registry can
@@ -174,7 +218,9 @@ function unwrapToZodObject(schema: ZodType): { shape?: ZodRawShape } {
 function toAvailableFormDefinition(
   item: AvailableFormDefinitionItem
 ): F0AiAvailableFormDefinition {
-  if (!isF0FormDefinition(item)) return item
+  if (!isF0FormDefinition(item)) {
+    return item
+  }
 
   // Build a mapping of sectionId → field keys for per-section definitions
   const perSectionFieldKeys: Record<string, string[]> | undefined =
@@ -201,7 +247,9 @@ function toAvailableFormDefinition(
             item.schema as Record<string, F0FormSchema>
           )) {
             const unwrapped = unwrapToZodObject(sectionSchema)
-            if (!unwrapped.shape) continue
+            if (!unwrapped.shape) {
+              continue
+            }
             for (const [key, fieldSchema] of Object.entries(unwrapped.shape)) {
               if (key in shapes) {
                 console.warn(
@@ -232,13 +280,16 @@ function toAvailableFormDefinition(
           )) {
             const sectionValues: Record<string, unknown> = {}
             for (const key of fieldKeys) {
-              if (key in values) sectionValues[key] = values[key]
+              if (key in values) {
+                sectionValues[key] = values[key]
+              }
             }
             fullData[sectionId] = sectionValues
           }
           // Call onSubmit for each section (matching per-section contract)
           const sectionIds = Object.keys(sectionSchemas)
           for (const sectionId of sectionIds) {
+            // oxlint-disable-next-line no-await-in-loop -- sections submit one after another, as the per-section form does
             await (
               originalOnSubmit as F0FormDefinitionPerSection<F0PerSectionSchema>["onSubmit"]
             )({
@@ -251,47 +302,17 @@ function toAvailableFormDefinition(
       }
     : undefined
 
-  // Flatten per-section defaultValues from { sectionId: { field: val } } to { field: val }
-  let flatDefaultValues: Record<string, unknown> | undefined
-  if (item._brand === "per-section" && item.defaultValues) {
-    flatDefaultValues = {}
-    for (const sectionDefaults of Object.values(
-      item.defaultValues as Record<string, Record<string, unknown>>
-    )) {
-      Object.assign(flatDefaultValues, sectionDefaults)
-    }
-  } else {
-    flatDefaultValues = item.defaultValues as
-      | Record<string, unknown>
-      | undefined
-  }
+  const flatDefaultValues =
+    item._brand === "per-section" && item.defaultValues
+      ? flattenSectionValues(
+          item.defaultValues as Record<string, Record<string, unknown>>
+        )
+      : (item.defaultValues as Record<string, unknown> | undefined)
 
-  // Preserve defaultValuesFn from useF0FormDefinition outputs.
-  // F0AiAvailableFormDefinition.defaultValues supports function values, so we
-  // assign the raw async fn there — downstream virtual-entry creation checks
-  // `typeof def.defaultValues === "function"` to derive defaultValuesFn on the entry.
-  let resolvedDefaultValues: F0AiAvailableFormDefinition["defaultValues"] =
+  const resolvedDefaultValues = resolveAvailableDefaultValues(
+    item,
     flatDefaultValues
-  if (item.defaultValuesFn) {
-    if (item._brand === "per-section") {
-      // Wrap to flatten per-section output { sectionId: { ...fields } } → { ...fields }
-      const perSectionFn = item.defaultValuesFn as (
-        params: Record<string, unknown>
-      ) => Promise<Record<string, Record<string, unknown>>>
-      resolvedDefaultValues = async (params: Record<string, unknown>) => {
-        const result = await perSectionFn(params)
-        const flat: Record<string, unknown> = {}
-        for (const sectionValues of Object.values(result)) {
-          Object.assign(flat, sectionValues)
-        }
-        return flat
-      }
-    } else {
-      resolvedDefaultValues = item.defaultValuesFn as (
-        params: Record<string, unknown>
-      ) => Promise<Record<string, unknown>>
-    }
-  }
+  )
 
   return {
     name: item.name,
@@ -432,14 +453,18 @@ function createVirtualFormRef(
             >
           }
           const fieldSchema = unwrapped.shape?.[fieldName]
-          if (!fieldSchema) return true
+          if (!fieldSchema) {
+            return true
+          }
           return fieldSchema.safeParse(values[fieldName]).success
         }
         return schema.safeParse(values).success
       },
       getErrors: () => {
         const result = schema.safeParse(values)
-        if (result.success) return {}
+        if (result.success) {
+          return {}
+        }
         const errors: Record<string, string> = {}
         for (const issue of result.error.issues) {
           const path = issue.path.join(".")
@@ -478,7 +503,9 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
 > {
   const unwrapped = unwrapZodSchema(schema) as { shape?: ZodRawShape }
   const shape = unwrapped.shape
-  if (!shape) return {}
+  if (!shape) {
+    return {}
+  }
 
   const result: Record<
     string,
@@ -524,7 +551,9 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
 function extractSectionDescriptions(
   sections?: Record<string, F0SectionConfig>
 ): Record<string, { title: string; description?: string }> {
-  if (!sections) return {}
+  if (!sections) {
+    return {}
+  }
 
   const result: Record<string, { title: string; description?: string }> = {}
   for (const [id, config] of Object.entries(sections)) {
@@ -670,7 +699,7 @@ export function F0AiFormRegistryProvider({
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
   const defaultValuesResolvingRef = useRef<Set<string>>(new Set())
   const defaultsEverResolvedRef = useRef<Map<string, string | null>>(new Map())
-  const fillQueueRef = useRef<Map<string, Array<() => void>>>(new Map())
+  const fillQueueRef = useRef<Map<string, (() => void)[]>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -703,7 +732,9 @@ export function F0AiFormRegistryProvider({
 
       for (const [name, entry] of entries) {
         const ref = entry.ref.current
-        if (!ref) continue
+        if (!ref) {
+          continue
+        }
 
         if (entry.virtual) {
           // Virtual entries → full runtime state for availableForms
@@ -811,6 +842,7 @@ export function F0AiFormRegistryProvider({
   }, [])
 
   const register = useCallback(
+    // oxlint-disable-next-line max-params -- public signature through useF0AiFormRegistry, change with a deprecation
     (
       name: string,
       ref: React.MutableRefObject<F0FormRef | null>,
@@ -851,7 +883,9 @@ export function F0AiFormRegistryProvider({
     (name: string) => {
       const entry = registryRef.current.get(name)
       // Only unregister if it's not a virtual entry (virtual lifecycle is managed by the effect)
-      if (entry?.virtual) return
+      if (entry?.virtual) {
+        return
+      }
       // Capture current values before removing, so the virtual ref preserves them
       const currentValues = entry?.ref.current?.getValues() ?? {}
       registryRef.current.delete(name)
@@ -952,7 +986,9 @@ export function F0AiFormRegistryProvider({
   const updateActiveFormDefaultValuesParams = useCallback(
     (formName: string, params: Record<string, unknown> | undefined) => {
       const entry = registryRef.current.get(formName)
-      if (!entry) return
+      if (!entry) {
+        return
+      }
       entry.defaultValuesParams = params
       // No rebuildDescriptions here — writing to the entry is enough.
       // The params will appear in the next natural rebuild (e.g. fillForm).
@@ -1013,27 +1049,33 @@ export function F0AiFormRegistryProvider({
 
   const hasDefaultValuesEverResolved = useCallback(
     (formName: string, paramsKey?: string | null) => {
-      if (!defaultsEverResolvedRef.current.has(formName)) return false
-      if (paramsKey === undefined) return true
+      if (!defaultsEverResolvedRef.current.has(formName)) {
+        return false
+      }
+      if (paramsKey === undefined) {
+        return true
+      }
       return defaultsEverResolvedRef.current.get(formName) === paramsKey
     },
     []
   )
 
-  // Sync virtual form definitions: register forms that aren't rendered,
-  // skip if a rendered (non-virtual) form with the same name already exists.
-  const virtualNamesRef = useRef<Set<string>>(new Set())
-  useEffect(() => {
-    const defs = availableFormDefinitions ?? []
-    const nextVirtualNames = new Set<string>()
-
-    for (const def of defs) {
-      nextVirtualNames.add(def.name)
+  /**
+   * Register one definition as a virtual form: no component renders it, so the
+   * registry owns a ref of its own. A rendered form with the same name wins,
+   * and an already-registered virtual one is left alone.
+   */
+  const registerVirtualForm = useCallback(
+    (def: NonNullable<typeof availableFormDefinitions>[number]) => {
       const existing = registryRef.current.get(def.name)
       // Skip if a rendered form already owns this name
-      if (existing && !existing.virtual) continue
+      if (existing && !existing.virtual) {
+        return
+      }
       // Skip if already registered as virtual
-      if (existing?.virtual) continue
+      if (existing?.virtual) {
+        return
+      }
 
       // Never invoke function-type defaultValues during virtual registration.
       // They fire side effects (API calls) for ALL definitions, not just the active one.
@@ -1078,32 +1120,52 @@ export function F0AiFormRegistryProvider({
         submitConfig: def.submitConfig,
         errorTriggerMode: def.errorTriggerMode,
       })
+    },
+    []
+  )
+
+  /** Drop these names' virtual entries, leaving any rendered form in place. */
+  const removeVirtualEntries = useCallback((names: Iterable<string>) => {
+    for (const name of names) {
+      if (registryRef.current.get(name)?.virtual) {
+        registryRef.current.delete(name)
+      }
+    }
+  }, [])
+
+  // Sync virtual form definitions: register forms that aren't rendered,
+  // skip if a rendered (non-virtual) form with the same name already exists.
+  const virtualNamesRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    const defs = availableFormDefinitions ?? []
+    const nextVirtualNames = new Set<string>()
+
+    for (const def of defs) {
+      nextVirtualNames.add(def.name)
+      registerVirtualForm(def)
     }
 
     // Remove virtual entries that are no longer in the definitions
-    for (const prevName of virtualNamesRef.current) {
-      if (!nextVirtualNames.has(prevName)) {
-        const entry = registryRef.current.get(prevName)
-        if (entry?.virtual) {
-          registryRef.current.delete(prevName)
-        }
-      }
-    }
+    removeVirtualEntries(
+      [...virtualNamesRef.current].filter(
+        (prevName) => !nextVirtualNames.has(prevName)
+      )
+    )
 
     virtualNamesRef.current = nextVirtualNames
     rebuildDescriptions()
 
     return () => {
       // Cleanup: remove all virtual entries from this effect
-      for (const name of nextVirtualNames) {
-        const entry = registryRef.current.get(name)
-        if (entry?.virtual) {
-          registryRef.current.delete(name)
-        }
-      }
+      removeVirtualEntries(nextVirtualNames)
       rebuildDescriptions()
     }
-  }, [availableFormDefinitions, rebuildDescriptions])
+  }, [
+    availableFormDefinitions,
+    rebuildDescriptions,
+    registerVirtualForm,
+    removeVirtualEntries,
+  ])
 
   const value: F0AiFormRegistryContextValue = useMemo(
     () => ({

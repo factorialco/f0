@@ -1,10 +1,8 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { EmptySortingValue, SortingSelector } from "../SortingSelector"
 
 const sortings: SortingsDefinition = {

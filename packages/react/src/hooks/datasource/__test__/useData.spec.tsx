@@ -1,10 +1,8 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
-import { FiltersState } from "@/patterns/OneFilterPicker/types"
 import { PromiseState } from "@/lib/promise-to-observable"
-
+import { FiltersState } from "@/patterns/OneFilterPicker/types"
 import {
   BaseDataAdapter,
   BaseFetchOptions,
@@ -122,7 +120,7 @@ describe("useData", () => {
       })
       expect(result.current.isLoading).toBe(false)
       expect(result.current.isInitialLoading).toBe(false)
-      expect(result.current.error).toBe(null)
+      expect(result.current.error).toBeNull()
     })
 
     it("should handle synchronous paginated data", async () => {
@@ -249,26 +247,6 @@ describe("useData", () => {
   })
 
   describe("with filters", () => {
-    it("should apply filters to synchronous data", () => {
-      const filters: Partial<FiltersState<TestFilters>> = {
-        search: "Test 1",
-      }
-      const source = createMockDataSource(
-        ({ filters }: { filters: FiltersState<TestFilters> }) => ({
-          records: mockData.filter((item) =>
-            filters.search ? item.name.includes(filters.search) : true
-          ),
-        })
-      )
-
-      const { result } = renderHook(() => useData(source, { filters }))
-
-      expect(result.current.data).toMatchObject({
-        records: [mockData[0]],
-        type: "flat",
-      })
-    })
-
     it("should apply filters to synchronous data", () => {
       const filters: Partial<FiltersState<TestFilters>> = {
         search: "Test 1",

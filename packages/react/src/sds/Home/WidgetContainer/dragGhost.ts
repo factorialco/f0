@@ -18,7 +18,9 @@ export const takeCardGhost = (
 ): HTMLElement | null => {
   const copy = card?.cloneNode(true)
 
-  if (!(copy instanceof HTMLElement)) return null
+  if (!(copy instanceof HTMLElement)) {
+    return null
+  }
 
   // The original goes invisible while dragged and may carry the sortable's own
   // transform; the copy is the one you see, and it stands still.
@@ -48,10 +50,14 @@ export const takePageSurface = (
   surface: Element | null | undefined,
   card: Element | null | undefined
 ): PageSurfaceGhost | null => {
-  if (!surface || !card) return null
+  if (!surface || !card) {
+    return null
+  }
 
   const copy = surface.cloneNode(true)
-  if (!(copy instanceof HTMLElement)) return null
+  if (!(copy instanceof HTMLElement)) {
+    return null
+  }
 
   copy.classList.remove("-z-10")
   copy.style.position = "absolute"
@@ -82,13 +88,17 @@ export const takePageSurface = (
   }
 }
 
-const TRANSPARENT = ["rgba(0, 0, 0, 0)", "transparent", ""]
+const TRANSPARENT = new Set(["rgba(0, 0, 0, 0)", "transparent", ""])
 
 const opaqueBackgroundOf = (from: Element): string | null => {
-  if (typeof getComputedStyle !== "function") return null
+  if (typeof getComputedStyle !== "function") {
+    return null
+  }
   for (let el: Element | null = from; el; el = el.parentElement) {
     const colour = getComputedStyle(el).backgroundColor
-    if (!TRANSPARENT.includes(colour)) return colour
+    if (!TRANSPARENT.has(colour)) {
+      return colour
+    }
   }
   return null
 }

@@ -1,9 +1,7 @@
-import type { Dispatch, SetStateAction } from "react"
-
 import { useDeepCompareEffect } from "@reactuses/core"
+import type { Dispatch, SetStateAction } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { useDebouncedState } from "../useDebouncedState"
-
 import {
   DataSource,
   DataSourceDefinition,
@@ -25,7 +23,7 @@ import { SearchOptions } from "./types/search.typings"
  */
 
 export const getDataSourcePaginationType = <
-  D extends { paginationType?: PaginationType | undefined | never },
+  D extends { paginationType?: PaginationType },
 >(
   dataAdapter: D
 ): PaginationType => {
@@ -105,7 +103,7 @@ export function useDataSource<
     grouping,
     ...rest
   }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>,
-  deps: ReadonlyArray<unknown> = []
+  deps: readonly unknown[] = []
 ): DataSource<R, FiltersSchema, Sortings, Grouping> {
   /******************* FILTERS STATE***************************************************/
   const [currentFilters, _setCurrentFilters] = useState<
@@ -133,7 +131,9 @@ export function useDataSource<
   }
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentFilters) return
+    if (!externalCurrentFilters) {
+      return
+    }
     setCurrentFilters(externalCurrentFilters)
   }, [externalCurrentFilters])
 
@@ -168,7 +168,9 @@ export function useDataSource<
   }
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentSortings) return
+    if (!externalCurrentSortings) {
+      return
+    }
     setCurrentSortings(externalCurrentSortings)
   }, [externalCurrentSortings])
   /******************* SEARCH ***************************************************/
@@ -187,7 +189,9 @@ export function useDataSource<
   >(currentSearch, 200)
 
   useEffect(() => {
-    if (searchOptions.sync) return
+    if (searchOptions.sync) {
+      return
+    }
     setDebouncedCurrentSearch(currentSearch)
   }, [currentSearch, searchOptions.sync, setDebouncedCurrentSearch])
 

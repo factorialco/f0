@@ -1,6 +1,6 @@
 import { format, isSameDay, isTomorrow, type Locale } from "date-fns"
 import { useEffect, useRef, useState, type ReactNode } from "react"
-
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -15,7 +15,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
-
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat, useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
@@ -23,7 +22,6 @@ import {
   type F0ChatPinnedPost,
   type F0ChatScheduledPost,
 } from "../types"
-import { ButtonInternal } from "@/components/F0Button/internal"
 
 type ShelfList = "pinned" | "scheduled" | "draft"
 
@@ -76,15 +74,22 @@ export const ChatCommunityShelf = (): ReactNode => {
   // A list that empties while it is open (the last pin unpinned) has nothing
   // left to show, and an empty state under a chip that is gone reads as a bug.
   useEffect(() => {
-    if (open === "pinned" && pinned.length === 0) setOpen(null)
-    if (open === "scheduled" && scheduled.length === 0) setOpen(null)
-    if (open === "draft" && drafts.length === 0) setOpen(null)
+    if (open === "pinned" && pinned.length === 0) {
+      setOpen(null)
+    }
+    if (open === "scheduled" && scheduled.length === 0) {
+      setOpen(null)
+    }
+    if (open === "draft" && drafts.length === 0) {
+      setOpen(null)
+    }
   }, [open, pinned.length, scheduled.length, drafts.length])
 
   // Nothing on any shelf ⇒ no shelf. An empty strip is a row of chrome that
   // says nothing, above a feed that is what people came for.
-  if (pinned.length === 0 && scheduled.length === 0 && drafts.length === 0)
+  if (pinned.length === 0 && scheduled.length === 0 && drafts.length === 0) {
     return null
+  }
 
   const toggle = (list: ShelfList) => {
     if (open === list) {
@@ -106,6 +111,13 @@ export const ChatCommunityShelf = (): ReactNode => {
     scheduled: Clock,
     draft: FileFilled,
   }
+  // Spelled out rather than built from `list`: a composed key is invisible to
+  // the i18n tooling, so a missing translation only shows up at runtime.
+  const chipLabels: Record<ShelfList, string> = {
+    pinned: i18n.t("chat.community.pinnedPosts"),
+    scheduled: i18n.t("chat.community.scheduledPosts"),
+    draft: i18n.t("chat.community.draftPosts"),
+  }
 
   /** One chip and the popover it opens. */
   const shelf = (list: ShelfList, rows: ReactNode) => (
@@ -115,7 +127,9 @@ export const ChatCommunityShelf = (): ReactNode => {
         // Only ever close ITSELF. Crossing to the other shelf dismisses this
         // popover a beat after the chip already opened the other one, and a
         // blind `setOpen(null)` would take that one down with it.
-        if (!next) setOpen((current) => (current === list ? null : current))
+        if (!next) {
+          setOpen((current) => (current === list ? null : current))
+        }
       }}
     >
       <PopoverAnchor asChild>
@@ -125,7 +139,7 @@ export const ChatCommunityShelf = (): ReactNode => {
         <span data-shelf-chip={list} className="flex">
           <ButtonInternal
             icon={icons[list]}
-            label={`${i18n.t(`chat.community.${list}Posts`)} ${counts[list]}`}
+            label={`${chipLabels[list]} ${counts[list]}`}
             pressed={open === list}
             onClick={() => toggle(list)}
             variant="outline"
@@ -152,8 +166,9 @@ export const ChatCommunityShelf = (): ReactNode => {
           // press is TWO interactions — the pointer, and the focus that lands
           // on the chip — and stopping only the first still dismissed on the
           // second.
-          if (stripRef.current?.contains(event.target as Node))
+          if (stripRef.current?.contains(event.target as Node)) {
             event.preventDefault()
+          }
         }}
         onCloseAutoFocus={(event) => {
           // Radix returns focus to the TRIGGER, and there is none here — only
@@ -183,23 +198,26 @@ export const ChatCommunityShelf = (): ReactNode => {
       aria-label={i18n.t("chat.community.shelfLabel")}
       className="flex pb-2 shrink-0 items-center gap-1.5 px-4 overflow-x-auto overflow-y-hidden"
     >
-      {pinned.length > 0 &&
-        shelf(
-          "pinned",
-          <PinnedRows posts={pinned} onDone={() => setOpen(null)} />
-        )}
-      {scheduled.length > 0 &&
-        shelf(
-          "scheduled",
-          <ScheduledRows posts={scheduled} onDone={() => setOpen(null)} />
-        )}
+      {pinned.length > 0
+        ? shelf(
+            "pinned",
+            <PinnedRows posts={pinned} onDone={() => setOpen(null)} />
+          )
+        : null}
+      {scheduled.length > 0
+        ? shelf(
+            "scheduled",
+            <ScheduledRows posts={scheduled} onDone={() => setOpen(null)} />
+          )
+        : null}
       {/* Last, and it is the right place: pinned and scheduled are facts about
           the CHANNEL, and this one is only about you. */}
-      {drafts.length > 0 &&
-        shelf(
-          "draft",
-          <DraftRows posts={drafts} onDone={() => setOpen(null)} />
-        )}
+      {drafts.length > 0
+        ? shelf(
+            "draft",
+            <DraftRows posts={drafts} onDone={() => setOpen(null)} />
+          )
+        : null}
     </div>
   )
 }
@@ -292,12 +310,12 @@ const ScheduledRows = ({
                   <F0Icon icon={Clock} size="sm" />
                   {formatWhen(post.scheduledFor, locale)}
                 </span>
-                {post.event && (
+                {post.event ? (
                   <F0TagRaw
                     icon={Calendar}
                     text={i18n.t("chat.community.scheduledEvent")}
                   />
-                )}
+                ) : null}
               </>
             }
             onClick={
@@ -445,11 +463,11 @@ const Row = ({
         />
       </div>
     )}
-    {actions.length > 0 && (
+    {actions.length > 0 ? (
       <div className="shrink-0">
         <Dropdown items={actions} icon={EllipsisHorizontal} size="sm" />
       </div>
-    )}
+    ) : null}
   </li>
 )
 
@@ -467,10 +485,7 @@ const Label = ({
   meta?: ReactNode
 }): ReactNode => (
   <>
-    {thumbnailUrl && (
-      // Square and small: it is a landmark, not the picture. Decorative on
-      // purpose — the title beside it already names the post, and a screen
-      // reader gains nothing from "image" in between.
+    {thumbnailUrl ? (
       <span className="size-12 shrink-0 overflow-hidden rounded-md bg-f1-background-secondary">
         <img
           src={thumbnailUrl}
@@ -480,7 +495,7 @@ const Label = ({
           className="size-full object-cover"
         />
       </span>
-    )}
+    ) : null}
     <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
       {/* One line: these shelves are for finding one thing among a few, and a
           wrapped title turns the sheet into a wall. */}
@@ -497,14 +512,14 @@ const Label = ({
       </span>
       {/* Two lines of the post itself. A column of headlines all read alike —
           this is usually what tells you whether it is the one you meant. */}
-      {excerpt && (
+      {excerpt ? (
         <span className="line-clamp-2 w-full text-f1-foreground-secondary">
           {excerpt}
         </span>
-      )}
-      {meta && (
+      ) : null}
+      {meta ? (
         <span className="mt-0.5 flex flex-wrap items-center gap-2">{meta}</span>
-      )}
+      ) : null}
     </span>
   </>
 )

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { LAYOUT_SETTLE_MS } from "./layoutTransition"
 
 /**

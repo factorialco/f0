@@ -4,7 +4,6 @@
  */
 import { getColor } from "@/kits/Charts/utils/colors"
 import { Progress } from "@/ui/progress"
-
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
 import { WithPlaceholder } from "../types"
@@ -70,11 +69,11 @@ export const ProgressBarCell = (
           className="w-full"
         />
       </div>
-      {!hideLabel && (
+      {!hideLabel ? (
         <div className="flex-shrink-0 text-sm font-medium text-f1-foreground">
           {label}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

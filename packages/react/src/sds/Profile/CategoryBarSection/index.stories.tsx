@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { CategoryBarSection } from "./index"
+import { CategoryBarSection } from "."
 
 const meta: Meta<typeof CategoryBarSection> = {
   title: "Profile/CategoryBarSection",

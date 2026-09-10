@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { TRACKING_INTERVAL_MS } from "../utils"
 
 export interface UseVideoTrackingOptions {
@@ -22,7 +21,9 @@ export function useVideoTracking({
   const enabled = !!onTrackAction
 
   useEffect(() => {
-    if (!video || !enabled) return
+    if (!video || !enabled) {
+      return
+    }
 
     let trackingInterval: ReturnType<typeof setInterval> | null = null
     const clearTrackingInterval = () => {

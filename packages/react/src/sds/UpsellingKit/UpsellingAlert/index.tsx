@@ -4,7 +4,6 @@ import { Cross } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
 type AlertAction = {
@@ -103,18 +102,18 @@ function _UpsellingAlert({
                 description ? "items-start" : "items-center"
               )}
             >
-              {icon && (
+              {icon ? (
                 <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-sm border border-solid text-f1-icon-promote [background:hsl(var(--promote-50)/0.1)] [border-color:hsl(var(--promote-50)/0.1)]">
                   <F0Icon icon={icon} size="sm" />
                 </div>
-              )}
+              ) : null}
               <div className="flex flex-col gap-0.5">
                 <p className="font-medium text-f1-foreground">{title}</p>
-                {description && (
+                {description ? (
                   <p className="text-base text-f1-foreground-secondary">
                     {description}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
             <div className={cn("flex flex-shrink-0 @xs:pl-0", icon && "pl-8")}>
@@ -132,7 +131,7 @@ function _UpsellingAlert({
               />
             </div>
           </div>
-          {onDismiss && (
+          {onDismiss ? (
             <div
               className={cn(
                 "flex-shrink-0 self-start",
@@ -141,7 +140,7 @@ function _UpsellingAlert({
             >
               <DismissButton onDismiss={onDismiss} />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

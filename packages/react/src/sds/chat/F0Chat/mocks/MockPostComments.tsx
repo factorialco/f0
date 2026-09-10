@@ -1,10 +1,8 @@
 import { forwardRef, useEffect, useRef, useState, type ReactNode } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { type F0ChatMention, type F0ChatUser } from "../types"
-
 import { MockPostComment } from "./MockPostComment"
 import { type MockPostThread } from "./mockPostDetailTypes"
 import { splitName } from "./mockPostUtils"
@@ -53,15 +51,21 @@ export const MockPostComments = forwardRef<
   // a textarea inside a scroll container jumps it to the top of the viewport,
   // which puts the box under the panel's own header.
   useEffect(() => {
-    if (!autoFocus) return
+    if (!autoFocus) {
+      return
+    }
     const node = inputRef.current
-    if (!node) return
+    if (!node) {
+      return
+    }
     node.focus({ preventScroll: true })
     node.scrollIntoView({ block: "center" })
   }, [autoFocus])
 
   const submit = async () => {
-    if (!onCreateComment || draft.trim().length === 0) return
+    if (!onCreateComment || draft.trim().length === 0) {
+      return
+    }
     setSaving(true)
     try {
       await onCreateComment(draft.trim())
@@ -83,7 +87,7 @@ export const MockPostComments = forwardRef<
       </p>
       <div className="my-8 w-[30px] border-0 border-b-2 border-solid border-f1-border-critical-bold" />
 
-      {onCreateComment && (
+      {onCreateComment ? (
         <div ref={ref} className="flex gap-3 pb-6">
           <F0AvatarPerson
             firstName={firstName}
@@ -115,7 +119,7 @@ export const MockPostComments = forwardRef<
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Newest first — the reordering the product does client-side, made part
           of the contract instead: the host hands them over in whatever order
@@ -136,7 +140,7 @@ export const MockPostComments = forwardRef<
           ))}
       </ul>
 
-      {comments.hasMore && (
+      {comments.hasMore ? (
         <div className="flex justify-center pt-2">
           <F0Button
             variant="ghost"
@@ -146,7 +150,7 @@ export const MockPostComments = forwardRef<
             loading={comments.loading}
           />
         </div>
-      )}
+      ) : null}
     </section>
   )
 })

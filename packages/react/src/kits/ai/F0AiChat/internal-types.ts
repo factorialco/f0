@@ -2,7 +2,6 @@ import {
   type CanvasActions,
   type CanvasEntityDefinition,
 } from "../canvas/types"
-import { type PanelBounds } from "./utils/panelWidth"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -22,6 +21,7 @@ import {
   F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
 } from "./types"
+import { type PanelBounds } from "./utils/panelWidth"
 
 /**
  * Internal state for the AiChat provider. Pure UI / config concerns —

@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import {
   BaseFetchOptions,
   DataAdapter,
@@ -174,17 +172,23 @@ export function useItemNeighbors<
 
     promise.then(
       (response) => {
-        if (latestKeyRef.current !== requestKey) return
+        if (latestKeyRef.current !== requestKey) {
+          return
+        }
         cacheRef.current.set(requestKey, response)
         if (cacheRef.current.size > CACHE_MAX_ENTRIES) {
           const oldestKey = cacheRef.current.keys().next().value
-          if (oldestKey !== undefined) cacheRef.current.delete(oldestKey)
+          if (oldestKey !== undefined) {
+            cacheRef.current.delete(oldestKey)
+          }
         }
         setResolved({ key: requestKey, neighbors: response })
         setIsResolving(false)
       },
-      (cause) => {
-        if (latestKeyRef.current !== requestKey) return
+      (cause: unknown) => {
+        if (latestKeyRef.current !== requestKey) {
+          return
+        }
         const dataError: DataError = {
           message: "Error fetching item neighbors",
           cause,

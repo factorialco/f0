@@ -1,18 +1,14 @@
-import { useCallback, useState } from "react"
-
 import userEvent from "@testing-library/user-event"
+import { useCallback, useState } from "react"
 import { describe, it, expect, vi } from "vitest"
 import { z } from "zod"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import type {
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
 } from "../../F0Form/fields/file/types"
 import type { F0Field } from "../../F0Form/fields/types"
-
 import { F0FormField } from "../F0FormField"
 
 function createMockUploadHook(): UseFileUpload {
@@ -555,7 +551,7 @@ describe("F0FormField", () => {
 
       // No help text in the document
       const helpTexts = screen.queryAllByText(/Username/)
-      expect(helpTexts.length).toBe(1) // Only label, no help text
+      expect(helpTexts).toHaveLength(1) // Only label, no help text
     })
   })
 

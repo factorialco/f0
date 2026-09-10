@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 
 const setOptionMock = vi.fn()
@@ -37,7 +36,9 @@ vi.mock("../utils/useContainerSize", () => ({
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     legend?: { show?: boolean }
     radar: {
@@ -50,7 +51,9 @@ function getLatestOption() {
 /** Run the tooltip formatter the way ECharts would on hover. */
 function hover(params: unknown) {
   const formatter = getLatestOption().tooltip?.formatter
-  if (!formatter) throw new Error("the chart built no tooltip formatter")
+  if (!formatter) {
+    throw new Error("the chart built no tooltip formatter")
+  }
   return formatter(params)
 }
 

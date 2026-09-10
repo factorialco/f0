@@ -1,6 +1,5 @@
 import { composeStories } from "@storybook/react-vite"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   zeroRender as render,
   screen,
@@ -8,7 +7,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import * as stories from "../index.stories"
 
 vi.mock("react-virtuoso", async (importOriginal) => {
@@ -140,7 +138,7 @@ describe("the drafts shelf", () => {
       await screen.findByRole("menuitem", { name: /^publish$/i })
     )
 
-    await waitFor(() => expect(cards().length).toBe(before + 1))
+    await waitFor(() => expect(cards()).toHaveLength(before + 1))
     expect(
       cards().some((card) => card.textContent?.includes("Bike parking"))
     ).toBe(true)
@@ -193,7 +191,7 @@ describe("the drafts shelf", () => {
 
     await waitFor(() => expect(chip(/drafts 3/i)).toBeVisible())
     // Nothing published: a draft is not visible to anyone.
-    expect(cards().length).toBe(before)
+    expect(cards()).toHaveLength(before)
 
     await userEvent.click(chip(/drafts 3/i))
     await waitFor(() => expect(sheet()).toBeVisible())

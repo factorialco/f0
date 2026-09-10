@@ -1,16 +1,12 @@
 import React, { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-
 import type {
   F0FormDefinitionSingleSchema,
   F0FormDefinitionPerSection,
 } from "@/patterns/F0WizardForm/types"
-
 import { zeroRender as render, waitFor, act } from "@/testing/test-utils"
-
 import type { F0AiAvailableFormDefinition } from "../F0AiFormRegistry"
-
 import {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
@@ -911,14 +907,14 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
               capturedRegistry = r
             }}
           />
-          {showForm && (
+          {showForm ? (
             <F0Form
               name="canvas-form"
               schema={formSchema}
               defaultValues={{ name: "Alice", email: "alice@test.com" }}
               onSubmit={async () => ({ success: true })}
             />
-          )}
+          ) : null}
         </F0AiFormRegistryProvider>
       )
     }

@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { PageHeaderNavigationProvider } from "@/experimental/Navigation/Header/PageHeader"
 import { PageNavigation } from "@/experimental/Navigation/Header/PageNavigation"
@@ -11,8 +10,7 @@ import {
 } from "@/lib/providers/datacollection"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { DEPARTMENTS_MOCK, generateMockUsers, MockUser } from "@/mocks"
-
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 import {
   DataCollectionSourceDefinition,
   useDataCollectionSource,
@@ -149,7 +147,9 @@ const UserDetail = ({
     collectionId: COLLECTION_ID,
     activeItemId: userId,
     onActiveItemChange: (id) => {
-      if (typeof id === "string") onNavigate(id)
+      if (typeof id === "string") {
+        onNavigate(id)
+      }
     },
     getItemTitle: (user) => user.name,
   })
@@ -168,7 +168,7 @@ const UserDetail = ({
           <div className="flex items-center gap-2">
             {/* PageHeader renders this same thing from the provided context;
                 shown standalone here to keep the story focused */}
-            {navigation && <PageNavigation {...navigation} />}
+            {navigation ? <PageNavigation {...navigation} /> : null}
             <F0Button
               variant="outline"
               size="sm"
@@ -227,10 +227,10 @@ const DetailNavigationDemo = () => {
             direct-link scenario.
           </span>
         </div>
-        {activeUserId && (
+        {activeUserId ? (
           <UserDetail userId={activeUserId} onNavigate={setActiveUserId} />
-        )}
-        {listMounted && <UserList onOpenUser={setActiveUserId} />}
+        ) : null}
+        {listMounted ? <UserList onOpenUser={setActiveUserId} /> : null}
       </div>
     </DataCollectionStorageProvider>
   )

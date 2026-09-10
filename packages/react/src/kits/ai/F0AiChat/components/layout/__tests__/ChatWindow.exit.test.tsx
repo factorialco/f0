@@ -1,6 +1,5 @@
 import { motionTokens } from "@factorialco/f0-core"
 import { describe, expect, it } from "vitest"
-
 import { resolveWindowExit } from "../ChatWindow"
 
 const RIGHT_DOCKED = "inset(0 0 0 100%)"

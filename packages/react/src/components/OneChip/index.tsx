@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "cva"
 import { useId } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
@@ -77,9 +76,9 @@ const _Chip = ({
   const closeDescriptionId = useId()
   const content = (
     <>
-      {avatar && <F0Avatar avatar={avatar} size="xs" />}
+      {avatar ? <F0Avatar avatar={avatar} size="xs" /> : null}
       <div className="flex items-center gap-0.5">
-        {icon && <F0Icon icon={icon} size="sm" />}
+        {icon ? <F0Icon icon={icon} size="sm" /> : null}
         <span
           id={onClose ? closeDescriptionId : undefined}
           className={deactivated ? "text-f1-foreground" : undefined}
@@ -114,7 +113,7 @@ const _Chip = ({
       ) : (
         content
       )}
-      {onClose && (
+      {onClose ? (
         <button
           type="button"
           onClick={(e) => {
@@ -133,7 +132,7 @@ const _Chip = ({
         >
           <F0Icon icon={CrossedCircle} size="sm" />
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

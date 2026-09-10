@@ -6,12 +6,10 @@ import {
   useEffect,
   useState,
 } from "react"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { ProductCard } from "@/sds/UpsellingKit/ProductCard"
 import { Carousel } from "@/experimental/Navigation/Carousel"
 import AlertCircle from "@/icons/app/AlertCircle"
 import ChevronRight from "@/icons/app/ChevronRight"
@@ -20,6 +18,7 @@ import Megaphone from "@/icons/app/Megaphone"
 import { Image } from "@/lib/imageHandler"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
+import { ProductCard } from "@/sds/UpsellingKit/ProductCard"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +41,7 @@ type ProductUpdate = {
 type ProductUpdatesProp = {
   label: string
   updatesPageUrl: string
-  getUpdates: () => Promise<Array<ProductUpdate>>
+  getUpdates: () => Promise<ProductUpdate[]>
   hasUnread?: boolean
   currentModule: string
   onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"]
@@ -63,25 +62,23 @@ type ProductUpdatesProp = {
     sectionTitle: string
 
     onClose?: () => void
-    products: Array<
-      {
-        title: string
-        description: string
-        onClick: () => void
-        dismissable: boolean
-        onClose?: () => void
-        trackVisibility?: (open: boolean) => void
-      } & (
-        | {
-            module?: never
-            type: "one-campaign"
-          }
-        | {
-            module: ModuleId
-            type?: never
-          }
-      )
-    >
+    products: ({
+      title: string
+      description: string
+      onClick: () => void
+      dismissable: boolean
+      onClose?: () => void
+      trackVisibility?: (open: boolean) => void
+    } & (
+      | {
+          module?: never
+          type: "one-campaign"
+        }
+      | {
+          module: ModuleId
+          type?: never
+        }
+    ))[]
   }
 }
 
@@ -154,35 +151,33 @@ const ProductUpdates = ({
           style={{ maxHeight: "min(90vh, 760px)" }}
         >
           <Header title={label} url={updatesPageUrl} onClick={onHeaderClick} />
-          {state === "fetching" && <ProductUpdatesSkeleton />}
+          {state === "fetching" ? <ProductUpdatesSkeleton /> : null}
           <div className="scrollbar-macos flex-1 overflow-y-auto">
-            {state === "idle" && updates !== null && updates.length === 0 && (
+            {state === "idle" && updates !== null && updates.length === 0 ? (
               <div className="p-2 pt-0">
                 <NoUpdates {...emptyScreen} buttonUrl={updatesPageUrl} />
               </div>
-            )}
-            {state === "idle" && updates !== null && updates.length > 0 && (
+            ) : null}
+            {state === "idle" && updates !== null && updates.length > 0 ? (
               <div className="px-1">
                 <FeaturedDropdownItem
                   {...featuredUpdate}
                   onClick={onItemClick}
                 />
-                {updates.length > 1 && (
-                  <>
-                    <div className="pb-1">
-                      {restUpdates.map((update, index) => (
-                        <DropdownItem
-                          key={index}
-                          {...update}
-                          onClick={onItemClick}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
+                {updates.length > 1 ? (
+                  <div className="pb-1">
+                    {restUpdates.map((update, index) => (
+                      <DropdownItem
+                        key={index}
+                        {...update}
+                        onClick={onItemClick}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            )}
-            {state === "error" && (
+            ) : null}
+            {state === "error" ? (
               <div className="p-2 pt-0">
                 <ErrorScreen
                   {...errorScreen}
@@ -191,16 +186,16 @@ const ProductUpdates = ({
                   }}
                 />
               </div>
-            )}
+            ) : null}
           </div>
-          {state === "idle" && crossSelling && crossSelling.isVisible && (
+          {state === "idle" && crossSelling && crossSelling.isVisible ? (
             <DiscoverMoreProducts
               isVisible={crossSelling.isVisible}
               onClose={crossSelling.onClose}
               crossSelling={crossSelling}
               onDropdownClose={() => setOpen(false)}
             />
-          )}
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>
@@ -262,7 +257,7 @@ const FeaturedDropdownItem = ({
                 {updated}
               </p>
             </div>
-            {unread && <UnreadDot className="mt-1.5" />}
+            {unread ? <UnreadDot className="mt-1.5" /> : null}
           </div>
         </div>
       </Link>
@@ -298,7 +293,7 @@ const DropdownItem = ({
               {updated}
             </p>
           </div>
-          {unread && <UnreadDot className="mt-1.5" />}
+          {unread ? <UnreadDot className="mt-1.5" /> : null}
         </div>
       </Link>
     </DropdownMenuItem>
@@ -473,7 +468,7 @@ const DiscoverMoreProducts = ({
               {crossSelling?.sectionTitle}
             </p>
 
-            {onClose && (
+            {onClose ? (
               <div className="relative z-10 h-6 w-6">
                 <F0Button
                   variant="ghost"
@@ -484,7 +479,7 @@ const DiscoverMoreProducts = ({
                   label="Close"
                 />
               </div>
-            )}
+            ) : null}
           </div>
 
           <Carousel

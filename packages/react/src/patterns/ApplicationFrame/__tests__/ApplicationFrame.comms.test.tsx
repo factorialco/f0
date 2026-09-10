@@ -1,6 +1,5 @@
 import { composeStories } from "@storybook/react-vite"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   zeroRender as render,
   screen,
@@ -8,7 +7,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import * as stories from "../index.stories"
 
 vi.mock("react-virtuoso", async (importOriginal) => {

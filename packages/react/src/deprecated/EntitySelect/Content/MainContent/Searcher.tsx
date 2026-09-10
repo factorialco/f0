@@ -1,8 +1,6 @@
 import { Search } from "lucide-react"
-
-import { CrossedCircle } from "@/icons/app"
-
 import { F0Icon } from "@/components/F0Icon"
+import { CrossedCircle } from "@/icons/app"
 import { focusNextFocusable, focusPreviousFocusable } from "../../ListItem"
 
 export const Searcher = ({
@@ -47,14 +45,14 @@ export const Searcher = ({
         value={search}
         onChange={(e) => onSearch(e.target.value)}
       />
-      {search && (
+      {search ? (
         <F0Icon
           icon={CrossedCircle}
           size="md"
           onClick={() => onSearch("")}
           className="cursor-pointer text-f1-icon-secondary"
         />
-      )}
+      ) : null}
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -11,7 +10,6 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-
 import type { GraphVisualizationOptions } from "./types"
 import { useDataCollectionTreeData } from "./useDataCollectionTreeData"
 
@@ -410,7 +408,7 @@ describe("useDataCollectionTreeData — two-phase hydration", () => {
       result.current.nodes.find((node) => node.id === "vp1")?.data.name
     ).toBe("Renamed")
     expect(result.current.expandedNodes.has("ceo")).toBe(true)
-    expect(fetchData.mock.calls.length).toBe(fetchesBefore)
+    expect(fetchData.mock.calls).toHaveLength(fetchesBefore)
     expect(result.current.nodes.map((node) => node.id)).not.toContain("mgr1")
   })
 
@@ -442,7 +440,7 @@ describe("useDataCollectionTreeData — two-phase hydration", () => {
     expect(
       result.current.nodes.find((node) => node.id === "vp3")?.parentId
     ).toBe("ceo")
-    expect(fetchData.mock.calls.length).toBe(fetchesBefore)
+    expect(fetchData.mock.calls).toHaveLength(fetchesBefore)
   })
 
   it("liveUpdate remove drops a node with its descendants and prunes expansion", async () => {

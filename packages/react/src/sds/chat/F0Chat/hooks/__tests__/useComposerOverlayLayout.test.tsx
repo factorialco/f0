@@ -1,9 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRender as render, screen } from "@/testing/test-utils"
-
-import { useComposerOverlayLayout } from "../useComposerOverlayLayout"
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../../utils/chat-layout"
+import { useComposerOverlayLayout } from "../useComposerOverlayLayout"
 
 let resizeCallback: ResizeObserverCallback | undefined
 const observe = vi.fn()
@@ -14,7 +12,7 @@ const ComposerLayoutHarness = ({ enabled }: { enabled: boolean }) => {
 
   return (
     <div ref={shellRef} data-testid="shell">
-      {enabled && <div ref={composerOverlayRef}>Composer</div>}
+      {enabled ? <div ref={composerOverlayRef}>Composer</div> : null}
     </div>
   )
 }

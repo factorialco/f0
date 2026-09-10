@@ -1,7 +1,5 @@
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import { type SidebarChatKind } from "./types"
 
 /** Unread-count pill shared by chat items and collapsed group headers. Caps at

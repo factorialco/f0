@@ -1,11 +1,7 @@
 import type { ComponentPropsWithRef, ReactNode } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
-import type { GraphNodeState, GraphNodeVariant } from "./types"
-
 import {
   STACKED_NODE_AVATAR,
   STACKED_NODE_HEIGHT,
@@ -13,6 +9,7 @@ import {
   STACKED_NODE_TITLE_BY_ZOOM,
   STACKED_NODE_TITLE_GAP,
 } from "../../constants"
+import type { GraphNodeState, GraphNodeVariant } from "./types"
 
 interface F0GraphNodeStackedRowProps {
   /**
@@ -39,6 +36,81 @@ interface F0GraphNodeStackedRowProps {
  * but it is a strip: fixed height, indented a little narrower than the card, no
  * subtitle, no expand affordance.
  */
+/** The avatar's own box, which carries the rings at dot zoom. */
+const StackedRowAvatar = ({
+  avatar,
+  isDot,
+  isMarked,
+}: {
+  avatar: NonNullable<F0GraphNodeStackedRowProps["avatar"]>
+  /** At dot zoom the avatar IS the visible node, so the rings live here. */
+  isDot: boolean
+  isMarked: boolean
+}) => (
+  <div
+    className={cn(
+      "flex shrink-0 items-center justify-center",
+      // F0Avatar owns its own silhouette, so this radius only shapes the ring.
+      isDot && "rounded-md",
+      isDot && isMarked && "ring-2 ring-f1-background-selected ring-offset-0",
+      isDot &&
+        "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0"
+    )}
+    style={{ width: STACKED_NODE_AVATAR, height: STACKED_NODE_AVATAR }}
+  >
+    <F0Avatar size="md" avatar={avatar} />
+  </div>
+)
+
+/**
+ * What the row holds: skeletons while it loads, else the avatar and the title.
+ *
+ * The title is dropped entirely at dot zoom rather than faded — the card has
+ * no text there either, and a row that kept it would be the only legible
+ * label on a canvas of dots.
+ */
+const StackedRowContent = ({
+  loading,
+  avatar,
+  title,
+  titleType,
+  isDot,
+  isMarked,
+}: Pick<F0GraphNodeStackedRowProps, "loading" | "avatar" | "title"> & {
+  /** The title's type styles, or `null` at dot zoom where there is no title. */
+  titleType: (typeof STACKED_NODE_TITLE_BY_ZOOM)[keyof typeof STACKED_NODE_TITLE_BY_ZOOM]
+  isDot: boolean
+  isMarked: boolean
+}) => {
+  if (loading) {
+    return (
+      <>
+        <Skeleton
+          className="shrink-0 rounded-full"
+          style={{ width: STACKED_NODE_AVATAR, height: STACKED_NODE_AVATAR }}
+        />
+        {titleType ? <Skeleton className="h-3 w-24 flex-1 rounded-xs" /> : null}
+      </>
+    )
+  }
+
+  return (
+    <>
+      {avatar ? (
+        <StackedRowAvatar avatar={avatar} isDot={isDot} isMarked={isMarked} />
+      ) : null}
+      {titleType ? (
+        <p
+          className="min-w-0 flex-1 truncate font-medium tracking-[-0.07px] text-f1-foreground"
+          style={titleType}
+        >
+          {title}
+        </p>
+      ) : null}
+    </>
+  )
+}
+
 export const F0GraphNodeStackedRow = ({
   shellProps,
   variant,
@@ -92,54 +164,17 @@ export const F0GraphNodeStackedRow = ({
         gap: STACKED_NODE_TITLE_GAP,
       }}
     >
-      {loading ? (
-        <>
-          <Skeleton
-            className="shrink-0 rounded-full"
-            style={{ width: STACKED_NODE_AVATAR, height: STACKED_NODE_AVATAR }}
-          />
-          {titleType && <Skeleton className="h-3 w-24 flex-1 rounded-xs" />}
-        </>
-      ) : (
-        <>
-          {avatar && (
-            <div
-              className={cn(
-                "flex shrink-0 items-center justify-center",
-                // Selection and focus rings live here in dot, where the avatar
-                // is the whole visible node (F0Avatar owns its own silhouette,
-                // so this radius only shapes the ring).
-                isDot && "rounded-md",
-                isDot &&
-                  isMarked &&
-                  "ring-2 ring-f1-background-selected ring-offset-0",
-                isDot &&
-                  "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0"
-              )}
-              style={{
-                width: STACKED_NODE_AVATAR,
-                height: STACKED_NODE_AVATAR,
-              }}
-            >
-              <F0Avatar size="md" avatar={avatar} />
-            </div>
-          )}
-          {/* Dropped entirely at dot zoom rather than faded: the card has no
-              text there either, and a row that keeps it would be the only
-              legible label on a canvas of dots. */}
-          {titleType && (
-            <p
-              className="min-w-0 flex-1 truncate font-medium tracking-[-0.07px] text-f1-foreground"
-              style={titleType}
-            >
-              {title}
-            </p>
-          )}
-        </>
-      )}
+      <StackedRowContent
+        loading={loading}
+        avatar={avatar}
+        title={title}
+        titleType={titleType}
+        isDot={isDot}
+        isMarked={isMarked}
+      />
       {/* Trailing content follows the title: it is a detail-level affordance,
           and at dot zoom there is no text for it to sit beside. */}
-      {trailing && titleType && (
+      {trailing && titleType ? (
         // Its own affordance: clicking a small action must not also select and
         // fly to the node. Two paths would select it — the row's `onClick`,
         // stopped here, and the canvas `pointerup` handler, which fires
@@ -151,7 +186,7 @@ export const F0GraphNodeStackedRow = ({
         >
           {trailing}
         </div>
-      )}
+      ) : null}
     </div>
   )
 

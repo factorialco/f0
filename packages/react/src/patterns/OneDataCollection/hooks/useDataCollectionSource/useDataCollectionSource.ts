@@ -5,7 +5,6 @@
 
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
-
 import {
   DataAdapter,
   FiltersDefinition,
@@ -15,7 +14,6 @@ import {
   useDataSource,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { navigationFilterTypes } from "../../navigationFilters"
 import {
@@ -44,7 +42,7 @@ export const useDataCollectionSource = <
     NavigationFilters,
     Grouping
   >,
-  deps: ReadonlyArray<unknown> = []
+  deps: readonly unknown[] = []
 ): DataCollectionSource<
   R,
   FiltersSchema,
@@ -90,15 +88,27 @@ export const useDataCollectionSource = <
   })
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentNavigationFilters) return
+    if (!externalCurrentNavigationFilters) {
+      return
+    }
     setCurrentNavigationFilters(externalCurrentNavigationFilters)
   }, [externalCurrentNavigationFilters])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedSummaries = useMemo(() => summaries, deps)
 
+  // Pinned to the same `deps` that already govern the data adapter: the source
+  // returned below carries live filter state, so it cannot be memoized itself.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoizedDefinition = useMemo(() => source, deps)
+
+  // Opt-in: it turns a forgotten dep from harmless into a stale closure, which
+  // is not a decision a version bump should make for a consumer.
+  const definition = source.memoizeDefinition ? memoizedDefinition : undefined
+
   return {
     ...datasource,
+    definition,
     summaries: memoizedSummaries,
     navigationFilters,
     currentNavigationFilters,

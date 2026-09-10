@@ -1,14 +1,11 @@
 import { motion } from "motion/react"
 import { forwardRef, useState, type KeyboardEvent } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn, focusRing } from "@/lib/utils"
-
-import type { F0AiInsightCardProps } from "./types"
-
 import { CardHeader } from "./components/CardHeader"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardSparkline } from "./components/CardSparkline"
+import type { F0AiInsightCardProps } from "./types"
 import { cardVariants, headingVariants } from "./variants"
 
 export type CardInternalProps = F0AiInsightCardProps & {
@@ -44,7 +41,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.currentTarget !== event.target) return
+      if (event.currentTarget !== event.target) {
+        return
+      }
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
         onClick?.()
@@ -53,7 +52,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
 
     return (
       <div className="relative">
-        {selected && (
+        {selected ? (
           <>
             <div
               data-testid="selected-border"
@@ -74,7 +73,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               )}
             />
           </>
-        )}
+        ) : null}
         <div
           ref={ref}
           role={onClick ? "button" : undefined}

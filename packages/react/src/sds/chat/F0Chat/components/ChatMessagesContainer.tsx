@@ -12,10 +12,8 @@ import {
   useState,
 } from "react"
 import { type ItemProps, type ListProps, Virtuoso } from "react-virtuoso"
-
 import { cn } from "@/lib/utils"
 import { ScrollBar } from "@/ui/scrollarea"
-
 import {
   AT_BOTTOM_THRESHOLD_PX,
   useChatVirtuoso,
@@ -54,8 +52,12 @@ const dateForRow = (rows: ChatRow[], from: number): string | null => {
     // `rowItem` rather than a two-branch check, so a feed of nothing but posts
     // doesn't leave the sticky pill empty.
     const item = rowItem(row)
-    if (item) return item.createdAt
-    if (row.type === "separator") return row.at
+    if (item) {
+      return item.createdAt
+    }
+    if (row.type === "separator") {
+      return row.at
+    }
   }
   return null
 }
@@ -185,15 +187,11 @@ const ChatBottomGap = (): ReactNode => {
 
   return (
     <>
-      {!canSend && (
-        // `mt-auto` takes whatever room the transcript left over, so a short
-        // conversation keeps its messages at the top and the notice sits at
-        // the bottom instead of hanging under the last one. With a full
-        // transcript there is no free space and this does nothing.
+      {!canSend ? (
         <div className="mt-auto">
           <ChatReadOnlyNotice channel={channel} />
         </div>
-      )}
+      ) : null}
       <div
         data-testid="chat-bottom-gap"
         style={{ height: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)` }}
@@ -371,7 +369,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   const prevTypingActiveRef = useRef(typingActive)
   // Last non-empty typing users, so the bubble still has faces while it leaves.
   const lastTypingUsersRef = useRef(visibleTypingUsers)
-  if (typingActive) lastTypingUsersRef.current = visibleTypingUsers
+  if (typingActive) {
+    lastTypingUsersRef.current = visibleTypingUsers
+  }
 
   // A new incoming message whose author was (just) typing — the dots' message.
   const appendedFromTyper =
@@ -400,7 +400,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   }, [effectiveTypingLeaving, lastItem?.id, typingActive, typingLeaving])
 
   useEffect(() => {
-    if (!typingLeaving) return
+    if (!typingLeaving) {
+      return
+    }
     const timer = setTimeout(() => setTypingLeaving(false), TYPING_EXIT_MS)
     return () => clearTimeout(timer)
   }, [typingLeaving])
@@ -420,7 +422,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   const prevShowTypingRowRef = useRef(showTypingRow)
   if (prevShowTypingRowRef.current !== showTypingRow) {
     prevShowTypingRowRef.current = showTypingRow
-    if (showTypingRow) typingEntryRef.current.fresh = true
+    if (showTypingRow) {
+      typingEntryRef.current.fresh = true
+    }
   }
   const displayRows = useMemo<ChatRow[]>(() => {
     const out = [...rows]
@@ -525,7 +529,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   // One re-anchor per transcript session, while it is still hidden.
   const entryAssertedRef = useRef<string | null>(null)
   useLayoutEffect(() => {
-    if (!ready || entryAssertedRef.current === listKey) return
+    if (!ready || entryAssertedRef.current === listKey) {
+      return
+    }
     entryAssertedRef.current = listKey
     reassertEntry()
   }, [listKey, ready, reassertEntry])
@@ -588,8 +594,12 @@ export const ChatMessagesContainer = (): ReactNode => {
     // the whole feed on arrival at the bottom would claim a dozen screenfuls
     // were read because the reader flung past them — and `hovering` is a
     // pointer-only signal, so it would never clear at all on a keyboard.
-    if (isCommunity) return
-    if (seeingAll && unreadCount > 0) markRead?.()
+    if (isCommunity) {
+      return
+    }
+    if (seeingAll && unreadCount > 0) {
+      markRead?.()
+    }
   }, [isCommunity, seeingAll, unreadCount, markRead])
 
   // Seed the "already shown" set on first render with messages — only genuinely
@@ -696,7 +706,7 @@ export const ChatMessagesContainer = (): ReactNode => {
         )}
       />
 
-      {ready && (
+      {ready ? (
         <ChatViewportOverlays
           atTop={atTop}
           scrolledUp={scrolledUp}
@@ -709,9 +719,9 @@ export const ChatMessagesContainer = (): ReactNode => {
           reducedMotion={reducedMotion}
           onJumpToBottom={jumpToBottom}
         />
-      )}
+      ) : null}
     </div>
   )
 }
 
-const EMPTY_SET: Set<string> = new Set()
+const EMPTY_SET = new Set<string>()

@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { coachmarkStore } from "../store"
 import type { CoachmarkItem } from "../types"
 
@@ -101,7 +100,7 @@ describe("coachmarkStore", () => {
   // stacked on the same target.
   describe("renderer election", () => {
     it("elects the lowest mounted id and hands over on release", () => {
-      expect(coachmarkStore.getActiveRendererId()).toBe(null)
+      expect(coachmarkStore.getActiveRendererId()).toBeNull()
       expect(coachmarkStore.hasProvider()).toBe(false)
 
       const first = coachmarkStore.acquireRenderer()
@@ -115,7 +114,7 @@ describe("coachmarkStore", () => {
       expect(coachmarkStore.getActiveRendererId()).toBe(second.id)
 
       second.release()
-      expect(coachmarkStore.getActiveRendererId()).toBe(null)
+      expect(coachmarkStore.getActiveRendererId()).toBeNull()
       expect(coachmarkStore.hasProvider()).toBe(false)
     })
 

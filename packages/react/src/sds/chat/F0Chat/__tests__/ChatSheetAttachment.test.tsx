@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import * as XLSX from "xlsx"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -8,7 +7,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
@@ -73,7 +71,9 @@ beforeAll(() => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string) => {
-      if (String(url).includes("broken")) return { ok: false, status: 404 }
+      if (String(url).includes("broken")) {
+        return { ok: false, status: 404 }
+      }
       return { ok: true, arrayBuffer: async () => workbookBuffer() }
     })
   )

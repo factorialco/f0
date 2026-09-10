@@ -1,7 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { GroupingDefinition } from "@/hooks/datasource"
 import {
   Add,
@@ -38,15 +36,14 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { mockImage } from "@/testing/mocks/images"
-
-import type { CustomVisualizationProps } from "../visualizations/collection"
-
+import { OneDataCollection } from ".."
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import type { CustomVisualizationProps } from "../visualizations/collection"
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -327,7 +324,9 @@ export const WithLinkedItems: Story = {
       filters,
       presets: filterPresets,
       itemUrl: (item) => {
-        if (item.id === "user-1") return undefined
+        if (item.id === "user-1") {
+          return undefined
+        }
         return `/users/${item.id}`
       },
       sortings: {
@@ -1488,12 +1487,12 @@ export const WithSynchronousData: Story = {
         fetchData: ({ filters, sortings, navigationFilters }) => {
           // Ensure sortings are properly applied
           return {
-            records: filterUsers(
-              mockUsers,
-              filters,
-              sortings,
-              navigationFilters
-            ),
+            records: filterUsers({
+              users: mockUsers,
+              filterValues: filters,
+              sortingState: sortings,
+              navigationFilters,
+            }),
           }
         },
       },

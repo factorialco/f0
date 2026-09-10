@@ -1,7 +1,5 @@
 import { type RefObject } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { type HighlightSegment } from "../hooks/highlight-utils"
 
 type ChatTextareaFieldProps = {
@@ -21,6 +19,8 @@ type ChatTextareaFieldProps = {
   isAutocompleteOpen: boolean
   autocompleteListboxId?: string
   activeAutocompleteOptionId?: string
+  isInvalid?: boolean
+  errorMessageId?: string
   /** When true, a typed `@mention` / ghost completion is shown via the overlay
    * and the textarea text is hidden (caret stays visible). */
   hasOverlay: boolean
@@ -62,6 +62,8 @@ export const ChatTextareaField = ({
   isAutocompleteOpen,
   autocompleteListboxId,
   activeAutocompleteOptionId,
+  isInvalid,
+  errorMessageId,
   hasOverlay,
 }: ChatTextareaFieldProps) => {
   return (
@@ -79,7 +81,7 @@ export const ChatTextareaField = ({
         {value.endsWith("\n") ? value + "_" : value || " "}
       </div>
 
-      {hasOverlay && (
+      {hasOverlay ? (
         <div
           ref={highlightRef}
           aria-hidden
@@ -97,26 +99,20 @@ export const ChatTextareaField = ({
               image's width is gone with it. */}
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
-              // Same colour pattern as the bubble: you / @here amber, others
-              // info. Tone and background carry the whole distinction: no
-              // padding, and — load-bearing — no weight change. A `<textarea>`
-              // lays its entire run out at one weight, so a heavier mention
-              // here paints wider than the transparent glyphs the caret is
-              // positioned from, and every character from the mention onward
-              // sits off its boundary. Measured at 14px Inter, `font-medium`
-              // cost ~0.1px per mention character, plateauing at 1.25px (8.9%
-              // of an em) across the rest of the line — enough to park the
-              // caret inside a glyph instead of between two.
-              <span
-                key={i}
-                // COLOUR ONLY. Not `font-medium`, however much a mention wants
-                // the emphasis: this span is the overlay's glyphs and the caret
-                // comes from the textarea underneath, so a heavier weight lays
-                // the highlight out at a different width than the letters it
-                // is supposed to be sitting on, and the two drift apart across
-                // the line. Emphasis here has to come from colour or a tint.
-                className="text-f1-foreground-secondary"
-              >
+              // The bubble's colour, so a mention reads the same before and
+              // after sending: secondary foreground, no background, and no
+              // distinction between mentioning you, `@here` or anyone else.
+              //
+              // Colour only — deliberately NOT the bubble's `font-medium`, and
+              // this is load-bearing. A `<textarea>` lays its entire run out at
+              // one weight, so a heavier mention in the overlay paints wider
+              // than the transparent glyphs the caret is positioned from, and
+              // every character from the mention onward sits off its boundary.
+              // Measured at 14px Inter, `font-medium` cost ~0.1px per mention
+              // character, plateauing at 1.25px (8.9% of an em) across the rest
+              // of the line — enough to park the caret inside a glyph instead
+              // of between two.
+              <span key={i} className="text-f1-foreground-secondary">
                 {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
@@ -128,7 +124,7 @@ export const ChatTextareaField = ({
             )
           )}
         </div>
-      )}
+      ) : null}
 
       <textarea
         ref={textareaRef}
@@ -150,6 +146,8 @@ export const ChatTextareaField = ({
         aria-expanded={isAutocompleteOpen}
         aria-controls={autocompleteListboxId}
         aria-activedescendant={activeAutocompleteOptionId}
+        aria-invalid={isInvalid || undefined}
+        aria-describedby={isInvalid ? errorMessageId : undefined}
         className={cn(
           "col-start-1 row-start-1",
           "w-full resize-none bg-transparent outline-none",

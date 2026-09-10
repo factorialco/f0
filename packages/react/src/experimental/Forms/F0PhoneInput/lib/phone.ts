@@ -1,14 +1,11 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-
 import {
   getCountries,
   getCountryCallingCode,
   parsePhoneNumberFromString,
 } from "libphonenumber-js"
 import metadata from "libphonenumber-js/min/metadata"
-
 import type { CountryCode } from "@/lib/countries"
-
 import type { F0PhoneInputChangeMeta, F0PhoneInputValue } from "../types"
 
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
@@ -23,8 +20,12 @@ const mainCountryForCallingCode = (
   allowed?: PhoneCountry[]
 ): PhoneCountry | undefined => {
   const group = metadata.country_calling_codes[callingCode]
-  if (!group) return undefined
-  if (!allowed) return group[0]
+  if (!group) {
+    return undefined
+  }
+  if (!allowed) {
+    return group[0]
+  }
   return group.find((country) => allowed.includes(country))
 }
 
@@ -33,7 +34,9 @@ const onlyDigits = (value: string): string => value.replace(/\D/g, "")
 export const toPhoneCountry = (
   code: CountryCode | undefined
 ): PhoneCountry | undefined => {
-  if (!code) return undefined
+  if (!code) {
+    return undefined
+  }
   const upper = code.toUpperCase() as PhoneCountry
   return getCountries().includes(upper) ? upper : undefined
 }
@@ -49,7 +52,9 @@ export const dialCodeFor = (country: PhoneCountry): string =>
 export const countryForDialCode = (
   dialCode: string
 ): PhoneCountry | undefined => {
-  if (!DIAL_CODE_PATTERN.test(dialCode.trim())) return undefined
+  if (!DIAL_CODE_PATTERN.test(dialCode.trim())) {
+    return undefined
+  }
   return mainCountryForCallingCode(onlyDigits(dialCode))
 }
 
@@ -62,13 +67,55 @@ export const countryForPartialE164 = (
   partialE164: string,
   allowed?: PhoneCountry[]
 ): PhoneCountry | undefined => {
-  if (!partialE164.startsWith("+")) return undefined
+  if (!partialE164.startsWith("+")) {
+    return undefined
+  }
   const digits = onlyDigits(partialE164)
   for (let length = 1; length <= Math.min(3, digits.length); length++) {
     const country = mainCountryForCallingCode(digits.slice(0, length), allowed)
-    if (country) return country
+    if (country) {
+      return country
+    }
   }
   return undefined
+}
+
+/** A full international number stored in `number`, which wins over any prefix. */
+const internationalToE164 = (raw: string): string | undefined => {
+  const parsed = parsePhoneNumberFromString(raw)
+  if (parsed) {
+    return parsed.number
+  }
+  const digits = onlyDigits(raw)
+  return digits ? `+${digits}` : undefined
+}
+
+/**
+ * A national number carrying a stored dial code. Parsing with the country
+ * strips trunk prefixes (e.g. GB "07911…").
+ */
+const prefixedToE164 = (raw: string, prefix: string): string => {
+  const country = countryForDialCode(prefix)
+  const parsed = country
+    ? parsePhoneNumberFromString(raw, country)
+    : parsePhoneNumberFromString(`${prefix}${onlyDigits(raw)}`)
+  if (parsed) {
+    return parsed.number
+  }
+  return `${prefix}${onlyDigits(raw)}`
+}
+
+/** A national number with no stored prefix, read against the selected country. */
+const nationalToE164 = (
+  raw: string,
+  country: PhoneCountry
+): string | undefined => {
+  const parsed = parsePhoneNumberFromString(raw, country)
+  if (parsed) {
+    return parsed.number
+  }
+  const digits = onlyDigits(raw)
+  return digits ? `+${getCountryCallingCode(country)}${digits}` : undefined
 }
 
 /**
@@ -81,37 +128,26 @@ export const valueToE164 = (
   value: F0PhoneInputValue | undefined,
   fallbackCountry?: PhoneCountry
 ): string | undefined => {
-  if (!value) return undefined
+  if (!value) {
+    return undefined
+  }
   const raw = value.number?.trim() ?? ""
   const prefix = value.prefix?.trim()
 
-  // A full international number stored in `number` wins over the prefix
   if (raw.startsWith("+")) {
-    const parsed = parsePhoneNumberFromString(raw)
-    if (parsed) return parsed.number
-    const digits = onlyDigits(raw)
-    return digits ? `+${digits}` : undefined
+    return internationalToE164(raw)
   }
 
-  if (!raw) return undefined
+  if (!raw) {
+    return undefined
+  }
 
   if (prefix && DIAL_CODE_PATTERN.test(prefix)) {
-    const country = countryForDialCode(prefix)
-    // Parsing with the country strips trunk prefixes (e.g. GB "07911…")
-    const parsed = country
-      ? parsePhoneNumberFromString(raw, country)
-      : parsePhoneNumberFromString(`${prefix}${onlyDigits(raw)}`)
-    if (parsed) return parsed.number
-    return `${prefix}${onlyDigits(raw)}`
+    return prefixedToE164(raw, prefix)
   }
 
   if (fallbackCountry) {
-    const parsed = parsePhoneNumberFromString(raw, fallbackCountry)
-    if (parsed) return parsed.number
-    const digits = onlyDigits(raw)
-    return digits
-      ? `+${getCountryCallingCode(fallbackCountry)}${digits}`
-      : undefined
+    return nationalToE164(raw, fallbackCountry)
   }
 
   return undefined
@@ -128,7 +164,9 @@ export const e164ToValue = (
   e164: string | undefined,
   country: PhoneCountry | undefined
 ): F0PhoneInputValue | undefined => {
-  if (!e164) return undefined
+  if (!e164) {
+    return undefined
+  }
 
   const parsed = parsePhoneNumberFromString(e164)
   if (parsed) {
@@ -161,7 +199,9 @@ export const isValidPhoneValue = (
   fallbackCountry?: CountryCode
 ): boolean => {
   const e164 = valueToE164(value, toPhoneCountry(fallbackCountry))
-  if (!e164) return false
+  if (!e164) {
+    return false
+  }
   return parsePhoneNumberFromString(e164)?.isValid() ?? false
 }
 
@@ -170,7 +210,9 @@ export const isPossiblePhoneValue = (
   fallbackCountry?: CountryCode
 ): boolean => {
   const e164 = valueToE164(value, toPhoneCountry(fallbackCountry))
-  if (!e164) return false
+  if (!e164) {
+    return false
+  }
   return parsePhoneNumberFromString(e164)?.isPossible() ?? false
 }
 
@@ -194,10 +236,16 @@ export const buildMeta = (
 export const countryForValue = (
   value: F0PhoneInputValue | undefined
 ): PhoneCountry | undefined => {
-  if (!value) return undefined
+  if (!value) {
+    return undefined
+  }
   const e164 = valueToE164(value)
   const parsed = e164 ? parsePhoneNumberFromString(e164) : undefined
-  if (parsed?.country) return parsed.country
-  if (value.prefix) return countryForDialCode(value.prefix)
+  if (parsed?.country) {
+    return parsed.country
+  }
+  if (value.prefix) {
+    return countryForDialCode(value.prefix)
+  }
   return undefined
 }

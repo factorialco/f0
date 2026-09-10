@@ -1,5 +1,6 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import type {
@@ -12,10 +13,7 @@ import type {
   SelectedItemsState,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 import { WithDataTestIdProps } from "@/lib/data-testid"
-
 import { Action } from "./components/SelectBottomActions"
 
 // Helper type to resolve the actual record type
@@ -78,7 +76,7 @@ type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
   defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
   onChange?: (
     value: T,
-    originalItem?: ResolvedRecordType<R> | undefined,
+    originalItem?: ResolvedRecordType<R>,
     option?: F0SelectItemObject<T, ResolvedRecordType<R>>
   ) => void
   /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
@@ -95,7 +93,7 @@ type F0SelectSelectionProps<T extends string, R = unknown> =
       defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>
       onChange?: (
         value: T,
-        originalItem?: ResolvedRecordType<R> | undefined,
+        originalItem?: ResolvedRecordType<R>,
         option?: F0SelectItemObject<T, ResolvedRecordType<R>>
       ) => void
       onSelectItems?: never
@@ -150,10 +148,10 @@ type F0SelectDataProps<T extends string, R = unknown> =
       source?: never
       mapOptions?: never
       searchFn?: (
-        option: F0SelectItemProps<T, unknown>,
+        option: F0SelectItemProps<T>,
         search?: string
       ) => boolean | undefined
-      options: F0SelectItemProps<T, unknown>[]
+      options: F0SelectItemProps<T>[]
     }
 
 type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<

@@ -1,16 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useCallback, useRef, useState } from "react"
-
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type {
   F0Field,
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
 } from "@/patterns/F0Form/fields/types"
-
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0FormField } from "../F0FormField"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -26,13 +22,17 @@ function useMockUpload(): FileUploadHookReturn {
     setProgress(0)
 
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
 
     setStatus("uploading")
 
     for (let i = 1; i <= 10; i++) {
       await sleep(200)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
 
@@ -119,7 +119,7 @@ export const Textarea: Story = {
 /**
  * A number input field.
  */
-export const Number: Story = {
+const NumberField: Story = {
   render() {
     const [value, setValue] = useState<number | undefined>(undefined)
 
@@ -177,7 +177,7 @@ export const Select: Story = {
 /**
  * A date picker field.
  */
-export const Date: Story = {
+const DateField: Story = {
   render() {
     const [value, setValue] = useState<globalThis.Date | undefined>(undefined)
 
@@ -734,3 +734,9 @@ export const LoadingState: Story = {
     )
   },
 }
+
+// Exported under the global's name so the story id stays `--number`.
+export { NumberField as Number }
+
+// Exported under the global's name so the story id stays `--date`.
+export { DateField as Date }

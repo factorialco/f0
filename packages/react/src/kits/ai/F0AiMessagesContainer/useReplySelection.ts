@@ -33,7 +33,9 @@ function computeAnchor(
   // `intersectsNode` is the cross-browser way to ask "does this selection
   // touch our element at all?". If it doesn't, the selection belongs to
   // another message (or elsewhere on the page) and we bail out.
-  if (!range.intersectsNode(container)) return null
+  if (!range.intersectsNode(container)) {
+    return null
+  }
 
   const containerRange = document.createRange()
   containerRange.selectNodeContents(container)
@@ -50,7 +52,9 @@ function computeAnchor(
   }
 
   const text = clamped.toString().trim()
-  if (text.length < MIN_SELECTION_LENGTH) return null
+  if (text.length < MIN_SELECTION_LENGTH) {
+    return null
+  }
 
   // Anchor the popover to the clamped range. If the clamped rect collapses
   // (can happen when the selection boundaries sit on a block edge), fall
@@ -71,11 +75,17 @@ export function useReplySelection({
   const clear = useCallback(() => setAnchor(null), [])
 
   useEffect(() => {
-    if (!enabled) return
-    if (typeof window === "undefined") return
+    if (!enabled) {
+      return
+    }
+    if (typeof window === "undefined") {
+      return
+    }
 
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const readAndApply = () => {
       const selection = window.getSelection()

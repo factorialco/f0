@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -18,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { NavigationItem } from "../utils"
 import { DropdownItemContent } from "./DropdownItem"
 
@@ -192,7 +190,9 @@ export function DropdownInternal({
   // `disabled` flips back to false. In controlled mode this fires the
   // consumer's `onOpenChange(false)` — a disabled menu must never stay open.
   useEffect(() => {
-    if (disabled && rawOpen) setOpen(false)
+    if (disabled && rawOpen) {
+      setOpen(false)
+    }
   }, [disabled, rawOpen, setOpen])
   // Mask the value passed to Radix during render so a disabled menu cannot
   // flash open before the effect above commits the state reset.

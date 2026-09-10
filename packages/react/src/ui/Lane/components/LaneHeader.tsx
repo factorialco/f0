@@ -1,8 +1,8 @@
 import { F0Button } from "@/components/F0Button"
 import { F0TagDot, NewColor } from "@/components/tags/F0TagDot"
 import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
-import { Counter } from "@/ui/Counter"
 import { Plus } from "@/icons/app"
+import { Counter } from "@/ui/Counter"
 
 type LaneHeaderProps = {
   label: string
@@ -29,7 +29,7 @@ export const LaneHeader = ({
         <F0TagStatus text={label} variant={variant || "neutral"} />
       )}
       <Counter size="md" type="default" value={count} />
-      {showPrimary && (
+      {showPrimary ? (
         <div className="ml-auto flex items-center gap-1 pr-1">
           <F0Button
             variant="ghost"
@@ -40,7 +40,7 @@ export const LaneHeader = ({
             onClick={onPrimaryAction}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

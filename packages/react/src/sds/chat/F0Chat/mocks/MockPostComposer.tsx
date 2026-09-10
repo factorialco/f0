@@ -1,22 +1,20 @@
 import { useMemo, useRef, useState, type ReactNode } from "react"
-
 import { Calendar, FileFilled } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
-
-import { PublishDialog } from "./MockPublishDialog"
+import {
+  type MockPostComposerProps,
+  type MockPostDraft,
+} from "./mockPostComposerTypes"
 import {
   postFormSchema,
   postSections,
   type PostFormValues,
 } from "./mockPostSchema"
+import { PublishDialog } from "./MockPublishDialog"
 import { ScheduleDialog } from "./MockScheduleDialog"
-import {
-  type MockPostComposerProps,
-  type MockPostDraft,
-} from "./mockPostComposerTypes"
 
 /**
  * The rich text field's value: the HTML plus the ids it mentions. The two
@@ -42,7 +40,9 @@ const emptyValues = (variant: "post" | "event"): PostFormValues =>
 /** A `Date`, an ISO string or a timestamp as ISO — `undefined` if it is none of
  * those, or a date that doesn't exist. */
 const toIsoDate = (value: unknown): string | undefined => {
-  if (value === null || value === undefined || value === "") return undefined
+  if (value === null || value === undefined || value === "") {
+    return undefined
+  }
   const date =
     value instanceof Date
       ? value
@@ -331,7 +331,7 @@ export const MockPostComposer = ({
         <F0Form formDefinition={formDefinition} formRef={formRef} />
       </div>
 
-      {publishOpen && (
+      {publishOpen ? (
         <PublishDialog
           communities={communities}
           communityId={audience.communityId}
@@ -353,9 +353,9 @@ export const MockPostComposer = ({
           onPublish={() => runWithValidation("publish")}
           onClose={closePublish}
         />
-      )}
+      ) : null}
 
-      {scheduleOpen && onSchedule && (
+      {scheduleOpen && onSchedule ? (
         <ScheduleDialog
           communities={communities}
           communityId={audience.communityId}
@@ -369,7 +369,7 @@ export const MockPostComposer = ({
           }}
           onClose={() => setScheduleOpen(false)}
         />
-      )}
+      ) : null}
     </F0Dialog>
   )
 }

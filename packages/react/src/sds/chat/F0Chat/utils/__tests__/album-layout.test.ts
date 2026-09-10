@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { albumCells, singlePhotoRatio } from "../album-layout"
 
 const photo = (width?: number, height?: number) => ({ width, height })
@@ -11,11 +10,11 @@ describe("singlePhotoRatio", () => {
   })
 
   it("clamps a tower so it can't push the conversation off screen", () => {
-    expect(singlePhotoRatio(100, 1000)).toBe(1.4)
+    expect(singlePhotoRatio(100, 1000)).toBeCloseTo(1.4)
   })
 
   it("clamps a panorama so it doesn't collapse to a strip", () => {
-    expect(singlePhotoRatio(1000, 100)).toBe(0.6)
+    expect(singlePhotoRatio(1000, 100)).toBeCloseTo(0.6)
   })
 
   it("falls back to a square without intrinsic dimensions", () => {

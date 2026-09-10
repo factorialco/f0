@@ -1,5 +1,4 @@
 import { createContext, useContext } from "react"
-
 import { DataCollectionStorage, DataCollectionStorageHandler } from "./types"
 
 const noopHandler = {

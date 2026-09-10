@@ -1,5 +1,4 @@
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
-
 import {
   type F0ChatAttachedKind,
   type F0ChatAttachment,
@@ -14,7 +13,9 @@ const VIDEO_EXTENSIONS = new Set(["m4v", "mov", "mp4", "ogv", "webm"])
 
 /** Compact binary size used in composer validation messages. */
 export const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024) {
+    return `${bytes} B`
+  }
   if (bytes < 1024 * 1024) {
     const kilobytes = bytes / 1024
     return `${Number.isInteger(kilobytes) ? kilobytes : kilobytes.toFixed(1)} KB`
@@ -29,7 +30,9 @@ export const formatFileSize = (bytes: number): string => {
 
 /** Whether a generic file attachment can render in the native F0 video player. */
 export const isVideoFileAttachment = (file: F0ChatFileAttachment): boolean => {
-  if (file.mimeType?.toLowerCase().startsWith("video/")) return true
+  if (file.mimeType?.toLowerCase().startsWith("video/")) {
+    return true
+  }
 
   return [file.name, file.url].some((candidate) => {
     const cleanCandidate = candidate.split(/[?#]/, 1)[0] ?? ""
@@ -82,11 +85,15 @@ export const documentPreviewKind = (
 ): ChatDocumentKind | null => {
   const mime = file.mimeType?.toLowerCase() ?? ""
   for (const [fragment, kind] of MIME_KINDS) {
-    if (mime.includes(fragment)) return kind
+    if (mime.includes(fragment)) {
+      return kind
+    }
   }
   const name = file.name.toLowerCase()
   const dot = name.lastIndexOf(".")
-  if (dot <= 0) return null
+  if (dot <= 0) {
+    return null
+  }
   return EXTENSION_KINDS[name.slice(dot + 1)] ?? null
 }
 
@@ -115,8 +122,12 @@ export const withinPreviewSizeLimit = (
 export const attachedKindOf = (
   attachment: F0ChatImageAttachment | F0ChatFileAttachment
 ): F0ChatAttachedKind => {
-  if (attachment.kind === "image") return "image"
-  if (isVideoFileAttachment(attachment)) return "video"
+  if (attachment.kind === "image") {
+    return "image"
+  }
+  if (isVideoFileAttachment(attachment)) {
+    return "video"
+  }
   return documentPreviewKind(attachment) ? "document" : "file"
 }
 
@@ -128,6 +139,33 @@ export type PartitionedChatAttachments = {
   locations: F0ChatLocationAttachment[]
   voices: F0ChatVoiceAttachment[]
   cards: F0ChatCardAttachment[]
+}
+
+/**
+ * Which bucket a file attachment lands in. An upload still in flight (it has a
+ * `progress`) is always a plain file: its URL is transient, so neither the
+ * video player nor the document preview can open it yet.
+ */
+const classifyFileAttachment = (
+  attachment: F0ChatFileAttachment
+):
+  | { bucket: "videos" }
+  | { bucket: "documents"; kind: ChatDocumentKind }
+  | { bucket: "files" } => {
+  if (attachment.progress !== undefined) {
+    return { bucket: "files" }
+  }
+
+  if (isVideoFileAttachment(attachment)) {
+    return { bucket: "videos" }
+  }
+
+  const kind = documentPreviewKind(attachment)
+  if (kind && withinPreviewSizeLimit(attachment, kind)) {
+    return { bucket: "documents", kind }
+  }
+
+  return { bucket: "files" }
 }
 
 /** Classifies each attachment exactly once for the transcript renderer. */
@@ -145,37 +183,29 @@ export const partitionChatAttachments = (
   }
 
   for (const attachment of attachments) {
-    if (attachment.kind === "image") {
-      result.images.push(attachment)
-      continue
-    }
-    if (attachment.kind === "card") {
-      result.cards.push(attachment)
-      continue
-    }
-    if (attachment.kind === "location") {
-      result.locations.push(attachment)
-      continue
-    }
-    if (attachment.kind === "voice") {
-      result.voices.push(attachment)
-      continue
-    }
-
-    if (
-      attachment.progress === undefined &&
-      isVideoFileAttachment(attachment)
-    ) {
-      result.videos.push(attachment)
-      continue
-    }
-
-    const kind =
-      attachment.progress === undefined ? documentPreviewKind(attachment) : null
-    if (kind && withinPreviewSizeLimit(attachment, kind)) {
-      result.documents.push({ file: attachment, kind })
-    } else {
-      result.files.push(attachment)
+    switch (attachment.kind) {
+      case "image":
+        result.images.push(attachment)
+        break
+      case "card":
+        result.cards.push(attachment)
+        break
+      case "location":
+        result.locations.push(attachment)
+        break
+      case "voice":
+        result.voices.push(attachment)
+        break
+      default: {
+        const classified = classifyFileAttachment(attachment)
+        if (classified.bucket === "videos") {
+          result.videos.push(attachment)
+        } else if (classified.bucket === "documents") {
+          result.documents.push({ file: attachment, kind: classified.kind })
+        } else {
+          result.files.push(attachment)
+        }
+      }
     }
   }
 

@@ -48,7 +48,9 @@ export const useAudioPlayer = (
 
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio) {
+      return
+    }
 
     const handleLoadedMetadata = () => {
       setDuration(
@@ -136,7 +138,9 @@ export const useAudioPlayer = (
   const seek = useCallback(
     (seconds: number) => {
       const audio = audioRef.current
-      if (!audio) return
+      if (!audio) {
+        return
+      }
       const max = Number.isFinite(audio.duration) ? audio.duration : seconds
       const clamped = Math.min(Math.max(seconds, 0), max)
       audio.currentTime = clamped
@@ -149,7 +153,9 @@ export const useAudioPlayer = (
   const setPlaybackRate = useCallback(
     (rate: number) => {
       const audio = audioRef.current
-      if (!audio) return
+      if (!audio) {
+        return
+      }
       audio.playbackRate = rate
       setPlaybackRateState(rate)
     },

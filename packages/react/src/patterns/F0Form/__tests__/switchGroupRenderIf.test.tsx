@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
-
+import { f0FormField, F0Form } from "@/patterns/F0Form"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-import { f0FormField, F0Form } from "@/patterns/F0Form"
-import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 /**
  * Flipping the first switch SPLITS a contiguous switch group: fields appear

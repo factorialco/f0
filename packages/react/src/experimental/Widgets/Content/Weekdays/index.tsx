@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { ToggleGroup, ToggleGroupItem } from "@/deprecated/ToggleGroup"
 
 interface WeekdaysProps {

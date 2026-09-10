@@ -1,14 +1,23 @@
 import { motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
-
+import { F0Icon } from "@/components/F0Icon"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
+import { ChevronDown } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
+
+// The description is a single run of prose, so the paragraphs markdown wraps it
+// in must not add their own vertical rhythm inside the two-line clamp.
+const PROSE = "[&>p]:m-0 [&>p+p]:mt-2"
 
 export const Description = ({ description }: { description: string }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [needsTruncation, setNeedsTruncation] = useState(false)
   const translations = useI18n()
+  const descriptionId = useId()
+  const reducedMotion = useReducedMotion()
 
   /*
    * We render a hidden block (`measure`) which we then use to read the height of the
@@ -30,6 +39,13 @@ export const Description = ({ description }: { description: string }) => {
   return (
     <div className="flex max-w-[640px] flex-col gap-1">
       <motion.div
+        // The clamp only hides overflow, so a clamped-away link stays focusable:
+        // expand on focus or it is reachable while invisible (WCAG 2.4.7).
+        onFocusCapture={() => {
+          if (needsTruncation) {
+            setIsExpanded(true)
+          }
+        }}
         initial={false}
         animate={{
           height: isExpanded
@@ -37,7 +53,7 @@ export const Description = ({ description }: { description: string }) => {
             : (descriptionSize.height ?? "3rem"),
         }}
         transition={{
-          duration: needsTruncation ? 0.15 : 0,
+          duration: reducedMotion || !needsTruncation ? 0 : 0.15,
           ease: [0.165, 0.84, 0.44, 1],
         }}
         className={cn(
@@ -50,28 +66,53 @@ export const Description = ({ description }: { description: string }) => {
           className="pointer-events-none invisible absolute left-0 top-0 -z-10 text-lg text-f1-foreground-secondary"
           aria-hidden="true"
         >
-          {description}
+          <F0RichTextDisplay
+            format="markdown"
+            content={description}
+            className={PROSE}
+          />
         </div>
         <div
           ref={descriptionRef}
+          id={descriptionId}
           className={cn(
             "text-lg text-f1-foreground-secondary",
             !isExpanded && "line-clamp-2"
           )}
         >
-          {description}
+          <F0RichTextDisplay
+            format="markdown"
+            content={description}
+            className={PROSE}
+          />
         </div>
       </motion.div>
-      {(needsTruncation || isExpanded) && (
+      {needsTruncation || isExpanded ? (
         <button
+          type="button"
+          aria-controls={descriptionId}
+          aria-expanded={isExpanded}
           onClick={() => setIsExpanded((current) => !current)}
-          className="relative w-fit font-medium text-f1-foreground after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-[1.5px] after:bg-f1-border after:transition-all after:content-[''] hover:after:bg-f1-border-hover"
+          className={cn(
+            "flex w-fit items-center gap-1 font-medium text-f1-foreground transition-colors hover:text-f1-foreground-secondary",
+            focusRing()
+          )}
         >
           {isExpanded
             ? translations.actions.showLess
             : translations.actions.showAll}
+          {/* Decorative: the button is already named by its own label. */}
+          <F0Icon
+            icon={ChevronDown}
+            size="sm"
+            aria-hidden
+            className={cn(
+              !reducedMotion && "transition-transform duration-200 ease-out",
+              isExpanded && "rotate-180"
+            )}
+          />
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -1,11 +1,9 @@
 import { useCallback, useRef, useState, type ReactNode } from "react"
-
 import { F0RichTextEditor } from "@/components/RichText/F0RichTextEditor/F0RichTextEditor"
 import { type F0RichTextEditorHandle } from "@/components/RichText/F0RichTextEditor/F0RichTextEditor"
 import { type MentionedUser } from "@/components/RichText/internal/Extensions/Mention/types"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
 import { useF0Chat, useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMention, type F0ChatUser } from "../types"
 import { stripHtml } from "../utils/posts"
@@ -68,7 +66,9 @@ export const ChatPostComposerDialog = ({
   }, [hasDraft, dismiss])
 
   const publish = async () => {
-    if (!createPost || !canPublish) return
+    if (!createPost || !canPublish) {
+      return
+    }
     setPublishing(true)
     editorRef.current?.setError(null)
     try {
@@ -145,7 +145,9 @@ export const ChatPostComposerDialog = ({
           // dialog's implicit submit, which would publish a half-written post
           // from the title field.
           onKeyDown={(event) => {
-            if (event.key === "Enter") event.preventDefault()
+            if (event.key === "Enter") {
+              event.preventDefault()
+            }
           }}
           className="w-full rounded-md border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-lg font-medium text-f1-foreground outline-none placeholder:font-normal placeholder:text-f1-foreground-tertiary focus-visible:border-f1-border-selected"
         />

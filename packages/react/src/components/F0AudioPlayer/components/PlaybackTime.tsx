@@ -1,5 +1,4 @@
 import { cva } from "cva"
-
 import type { F0AudioPlayerSize } from "../types"
 import { formatPlaybackTime } from "../utils"
 

@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { New } from "@/icons/app"
@@ -8,17 +7,15 @@ import ChevronDown from "@/icons/app/ChevronDown"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"
 import Minimize from "@/icons/app/Minimize"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { Action } from "@/ui/Action"
-
-import type { F0AiChatHeaderProps } from "./types"
-
 import { CreditsPopover } from "./components/CreditsPopover"
 import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
+import type { F0AiChatHeaderProps } from "./types"
 
 /**
  * Picks the right credits popover to render based on which prop the host
@@ -34,14 +31,17 @@ const CreditsPopoverPicker = ({
   /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
   trigger?: ReactNode
 }) => {
-  if (employeeCredits)
+  if (employeeCredits) {
     return (
       <EmployeeCreditsPopover
         employeeCredits={employeeCredits}
         trigger={trigger}
       />
     )
-  if (credits) return <CreditsPopover credits={credits} trigger={trigger} />
+  }
+  if (credits) {
+    return <CreditsPopover credits={credits} trigger={trigger} />
+  }
   return null
 }
 
@@ -165,7 +165,7 @@ export const F0AiChatHeader = ({
         )}
       >
         <div className="flex min-w-0 flex-1 items-center">
-          {!lockVisualizationMode && (
+          {!lockVisualizationMode ? (
             <Action
               variant="ghost"
               size="md"
@@ -179,7 +179,7 @@ export const F0AiChatHeader = ({
                 <F0Icon icon={ChevronDown} color="default" size="md" />
               </div>
             </Action>
-          )}
+          ) : null}
         </div>
         <motion.div
           className="flex shrink-0 items-center"
@@ -216,7 +216,7 @@ export const F0AiChatHeader = ({
           ease: "easeOut",
         }}
       >
-        {hasMessages && !lockVisualizationMode && (
+        {hasMessages && !lockVisualizationMode ? (
           <ButtonInternal
             variant="ghost"
             hideLabel
@@ -224,7 +224,7 @@ export const F0AiChatHeader = ({
             icon={New}
             onClick={onNewChat}
           />
-        )}
+        ) : null}
         <CreditsPopoverPicker
           credits={credits}
           employeeCredits={employeeCredits}

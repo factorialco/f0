@@ -1,9 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
+import { describe, expect, it, vi } from "vitest"
 import { BarGraph, Download } from "@/icons/app"
-
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { F0CanvasCard } from "../F0CanvasCard"
 
 describe("F0CanvasCard", () => {

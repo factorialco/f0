@@ -5,8 +5,28 @@ import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
 import { cn, focusRing } from "@/lib/utils"
 import { Progress } from "@/ui/progress"
-
 import type { F0TimelineRowNestedtaskProps } from "../types"
+
+/** A nestedtask's name, struck through once it is done, and its description. */
+const NestedtaskTitle = ({
+  status,
+  title,
+  description,
+}: Pick<F0TimelineRowNestedtaskProps, "status" | "title" | "description">) => (
+  <>
+    <span
+      className={cn(
+        "text-base font-semibold text-f1-foreground whitespace-nowrap",
+        status === "completed" && "line-through"
+      )}
+    >
+      {title}
+    </span>
+    {description ? (
+      <F0Text content={description} variant="description" as="span" />
+    ) : null}
+  </>
+)
 
 export const NestedtaskHeader = ({
   props,
@@ -47,17 +67,11 @@ export const NestedtaskHeader = ({
               focusRing()
             )}
           >
-            <span
-              className={cn(
-                "text-base font-semibold text-f1-foreground whitespace-nowrap",
-                status === "completed" && "line-through"
-              )}
-            >
-              {title}
-            </span>
-            {description && (
-              <F0Text content={description} variant="description" as="span" />
-            )}
+            <NestedtaskTitle
+              status={status}
+              title={title}
+              description={description}
+            />
             <F0Icon
               icon={expanded ? ChevronUp : ChevronDown}
               size="xs"
@@ -66,20 +80,14 @@ export const NestedtaskHeader = ({
           </button>
         ) : (
           <div className="flex items-center gap-3">
-            <span
-              className={cn(
-                "text-base font-semibold text-f1-foreground whitespace-nowrap",
-                status === "completed" && "line-through"
-              )}
-            >
-              {title}
-            </span>
-            {description && (
-              <F0Text content={description} variant="description" as="span" />
-            )}
+            <NestedtaskTitle
+              status={status}
+              title={title}
+              description={description}
+            />
           </div>
         )}
-        {completedCount !== undefined && taskCount !== undefined && (
+        {completedCount !== undefined && taskCount !== undefined ? (
           <div
             className="flex items-center gap-2"
             aria-label={`${completedCount} of ${taskCount} completed`}
@@ -97,7 +105,7 @@ export const NestedtaskHeader = ({
               {completedCount}/{taskCount}
             </span>
           </div>
-        )}
+        ) : null}
       </div>
     </>
   )

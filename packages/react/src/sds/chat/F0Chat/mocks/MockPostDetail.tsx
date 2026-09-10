@@ -1,6 +1,5 @@
 import { format } from "date-fns"
 import { useMemo, useRef, useState, type ReactNode } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay/F0RichTextDisplay"
@@ -22,11 +21,10 @@ import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { isVideo } from "@/sds/Home/Communities/Post/CommunityPost/video"
 import { Reactions } from "@/sds/social/Reactions"
-
 import { MockPostAcknowledgeBar } from "./MockPostAcknowledgeBar"
 import { MockPostComments } from "./MockPostComments"
-import { MockPostVisits } from "./MockPostVisits"
 import { type MockPostDetailProps } from "./mockPostDetailTypes"
+import { MockPostVisits } from "./MockPostVisits"
 
 /**
  * A post, opened. The destination rather than a way to one — so unlike the feed
@@ -112,10 +110,14 @@ export const MockPostDetail = ({
   const hasVideoCover = !!post.mediaUrl && isVideo(post.mediaUrl)
 
   const requestClose = () => {
-    if (!onClose) return
+    if (!onClose) {
+      return
+    }
     // F0 reports; the host decides whether leaving is allowed. See
     // `onDismissAttempt` — blocking navigation is the host's router, not ours.
-    if (onDismissAttempt && !onDismissAttempt({ acknowledgePending })) return
+    if (onDismissAttempt && !onDismissAttempt({ acknowledgePending })) {
+      return
+    }
     onClose()
   }
 
@@ -129,7 +131,7 @@ export const MockPostDetail = ({
             column — not in a header bar. The way OUT is the page header's
             breadcrumb back to Home, as in the product; a close button here read
             as a dialog's, on something that is a page. */}
-        {canManage && (
+        {canManage ? (
           <div className="flex w-full max-w-[600px] items-center justify-end gap-1 px-4 pt-4">
             <Dropdown items={menuItems}>
               <F0Button
@@ -141,12 +143,12 @@ export const MockPostDetail = ({
               />
             </Dropdown>
           </div>
-        )}
+        ) : null}
 
         {/* The cover breaks OUT of the reading column — full width, capped at
             300px, `contain` so a portrait photo is letterboxed rather than
             cropped through someone's face. */}
-        {post.mediaUrl && !post.event && (
+        {post.mediaUrl && !post.event ? (
           <div className="w-full px-4">
             {hasVideoCover ? (
               <video
@@ -164,7 +166,7 @@ export const MockPostDetail = ({
               />
             )}
           </div>
-        )}
+        ) : null}
 
         <div className="w-full max-w-[600px] px-4">
           {/* Title + the 30px red rule under it — the single most recognisable
@@ -174,29 +176,29 @@ export const MockPostDetail = ({
           </p>
           <div className="my-8 w-[30px] border-0 border-b-2 border-solid border-f1-border-critical-bold" />
 
-          {post.event && (
+          {post.event ? (
             <div className="mb-8 flex flex-wrap gap-2">
               <span className="flex items-center gap-1.5 rounded-md bg-f1-background-secondary px-2.5 py-1 text-sm text-f1-foreground-secondary">
                 <F0Icon icon={Calendar} size="sm" />
                 {format(new Date(post.event.date), "PPPPp", { locale })}
               </span>
-              {post.event.place && (
+              {post.event.place ? (
                 <span className="flex items-center gap-1.5 rounded-md bg-f1-background-secondary px-2.5 py-1 text-sm text-f1-foreground-secondary">
                   <F0Icon icon={Building} size="sm" />
                   {post.event.place}
                 </span>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
 
-          {post.description && (
+          {post.description ? (
             <F0RichTextDisplay
               content={post.description}
               className="FactorialOneTextEditor break-words"
             />
-          )}
+          ) : null}
 
-          {post.attachments && post.attachments.length > 0 && (
+          {post.attachments && post.attachments.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-3">
               {post.attachments.map((attachment) => (
                 <a
@@ -215,7 +217,7 @@ export const MockPostDetail = ({
                 </a>
               ))}
             </div>
-          )}
+          ) : null}
 
           {/* The signature is at the FOOT of the body, not the head. This screen
               has no author header — you arrived because you already knew what
@@ -233,7 +235,7 @@ export const MockPostDetail = ({
 
           <MockPostVisits visits={visits} />
 
-          {interactionsOn && (
+          {interactionsOn ? (
             <>
               {/* No `action` on the reactions bar: unlike the feed card, the
                   detail has the comment box itself a screen below, so a button
@@ -267,19 +269,19 @@ export const MockPostDetail = ({
                 searchMembers={searchMembers}
               />
             </>
-          )}
+          ) : null}
         </div>
       </div>
 
-      {post.requiredAction && (
+      {post.requiredAction ? (
         <MockPostAcknowledgeBar
           requiredAction={post.requiredAction}
           onAcknowledge={onAcknowledge}
           onLater={onClose ? requestClose : undefined}
         />
-      )}
+      ) : null}
 
-      {confirmingDelete && onDelete && (
+      {confirmingDelete && onDelete ? (
         <DeletePostDialog
           onCancel={() => setConfirmingDelete(false)}
           onConfirm={async () => {
@@ -287,7 +289,7 @@ export const MockPostDetail = ({
             await onDelete()
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }

@@ -1,21 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { Profiler, useEffect, useRef, useState, type ReactNode } from "react"
+import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0Chat } from "./F0Chat"
 import { ChatBubble } from "./components/ChatBubble"
 import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
+import { F0Chat } from "./F0Chat"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
+import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import {
   MockChatAppProvider,
   useConversationRuntime,
 } from "./mocks/MockChatApp"
 import { MockCommunitySurface } from "./mocks/MockCommunitySurface"
-import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
 import { ChatUIProvider } from "./providers/ChatUIProvider"
@@ -201,6 +198,27 @@ const carmen: F0ChatUser = {
   avatar: { type: "person", firstName: "Carmen", lastName: "Rodríguez" },
   profileHref: "/people/carmen",
 }
+const unicodeNfc: F0ChatUser = {
+  id: "unicode-nfc",
+  name: "Garc\u00EDa",
+  subtitle: "NFC profile",
+  avatar: { type: "person", firstName: "NFC", lastName: "García" },
+  profileHref: "/people/unicode-nfc",
+}
+const unicodeNfd: F0ChatUser = {
+  id: "unicode-nfd",
+  name: "Garci\u0301a",
+  subtitle: "NFD profile",
+  avatar: { type: "person", firstName: "NFD", lastName: "García" },
+  profileHref: "/people/unicode-nfd",
+}
+const unicodeHangul: F0ChatUser = {
+  id: "unicode-hangul",
+  name: "\uAC01",
+  subtitle: "Composed Hangul profile",
+  avatar: { type: "person", firstName: "각", lastName: "" },
+  profileHref: "/people/unicode-hangul",
+}
 
 const groupChannel = {
   id: "grp-product",
@@ -269,6 +287,87 @@ const GroupConversation = (): ReactNode => {
         <F0Chat headerActions={headerActions} />
       </F0ChatProvider>
     </Frame>
+  )
+}
+
+/** Manual regression surface for canonically equivalent mention spellings. */
+const UnicodeMentionConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: { ...groupChannel, id: "grp-unicode-mentions" },
+    me,
+    others: [unicodeNfc, unicodeNfd, unicodeHangul],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "unicode-edit-accent",
+        author: me,
+        body: "Before @Garci\u0301a, after",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        mentions: [{ id: unicodeNfc.id, name: unicodeNfc.name }],
+      },
+      {
+        id: "unicode-distinct-identities",
+        author: me,
+        body: "Two people: @Garc\u00EDa and @Garci\u0301a",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        mentions: [unicodeNfc, unicodeNfd],
+      },
+      {
+        id: "unicode-edit-hangul",
+        author: me,
+        body: "Hangul: @\u1100\u1161\u11A8, ready",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        mentions: [{ id: unicodeHangul.id, name: unicodeHangul.name }],
+      },
+    ],
+  })
+
+  return (
+    <div className="flex w-full flex-col gap-4 bg-f1-background p-4 text-f1-foreground lg:flex-row">
+      <aside className="w-full shrink-0 rounded-lg border border-solid border-f1-border p-4 lg:w-80">
+        <h2 className="mb-2 text-lg font-medium">Manual mention checks</h2>
+        <ol className="list-decimal space-y-2 pl-5 text-sm">
+          <li>Open the first message’s actions menu and choose Edit.</li>
+          <li>
+            Insert text immediately before the mention. Only the mention stays
+            highlighted.
+          </li>
+          <li>
+            Change a character inside the mention. The entire mention is
+            removed.
+          </li>
+          <li>
+            Reopen it and change the comma immediately after the mention. The
+            mention stays highlighted.
+          </li>
+          <li>
+            Focus or hover both mentions in “Two people”. Their profile
+            subtitles must stay distinct and the keyboard focus ring must be
+            visible.
+          </li>
+          <li>
+            Edit the Hangul message. Its decomposed body remains one complete
+            mention.
+          </li>
+          <li>
+            With a screen reader, confirm each focused mention is announced once
+            with its profile subtitle.
+          </li>
+        </ol>
+      </aside>
+      <div className="min-w-0 flex-1">
+        <Frame>
+          <F0ChatProvider runtime={runtime}>
+            <F0Chat />
+          </F0ChatProvider>
+        </Frame>
+      </div>
+    </div>
   )
 }
 
@@ -400,7 +499,9 @@ const StormHud = ({
         const distance =
           viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
         samples.push(distance)
-        if (samples.length > 120) samples.shift()
+        if (samples.length > 120) {
+          samples.shift()
+        }
         const canvas = canvasRef.current
         const ctx = canvas?.getContext("2d")
         if (canvas && ctx) {
@@ -412,8 +513,11 @@ const StormHud = ({
           samples.forEach((s, i) => {
             const x = (i / 119) * canvas.width
             const y = canvas.height - (s / max) * (canvas.height - 4) - 2
-            if (i === 0) ctx.moveTo(x, y)
-            else ctx.lineTo(x, y)
+            if (i === 0) {
+              ctx.moveTo(x, y)
+            } else {
+              ctx.lineTo(x, y)
+            }
           })
           ctx.stroke()
         }
@@ -513,6 +617,29 @@ const Conversation = ({
     <Frame>
       <F0ChatProvider runtime={runtime}>
         <F0Chat headerActions={headerActions} />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+const MessageLengthConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 8,
+    olderPages: 0,
+    ambientEveryMs: 0,
+  })
+  const constrainedRuntime = {
+    ...runtime,
+    maxMessageCharacters: 10,
+  } satisfies F0ChatRuntime
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={constrainedRuntime}>
+        <F0Chat />
       </F0ChatProvider>
     </Frame>
   )
@@ -906,7 +1033,9 @@ const VideoConversation = (): ReactNode => {
 const ColdStartVideoConversation = (): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (isOpen) return <VideoConversation />
+  if (isOpen) {
+    return <VideoConversation />
+  }
 
   return (
     <div className="flex h-[680px] items-center justify-center">
@@ -1044,6 +1173,13 @@ export const Snapshot: Story = {
       </section>
       <section
         className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-message-limit"
+      >
+        <h2 className="text-lg font-medium">Message character limit</h2>
+        <MessageLengthConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
         data-testid="snapshot-documents"
       >
         <h2 className="text-lg font-medium">Document attachments</h2>
@@ -1093,6 +1229,18 @@ export const Snapshot: Story = {
       )
     })
 
+    await step("Show the message length validation", async () => {
+      const messageLimit = within(canvas.getByTestId("snapshot-message-limit"))
+      const composer = messageLimit.getByRole("combobox", {
+        name: /write something here/i,
+      })
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+      await expect(
+        messageLimit.getByText("Messages can be up to 10 characters")
+      ).toBeVisible()
+    })
+
     await step("Render document snapshots", async () => {
       const documents = within(canvas.getByTestId("snapshot-documents"))
       canvas
@@ -1132,6 +1280,43 @@ export const Snapshot: Story = {
 export const ComposerMotion: Story = {
   name: "Composer micro-interactions",
   render: () => <Conversation initialCount={8} />,
+}
+
+export const MessageCharacterLimit: Story = {
+  name: "Message character limit",
+  render: () => <MessageLengthConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+
+    await step("Keep an oversized draft and show the limit", async () => {
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+
+      const alert = canvas.getByRole("alert")
+      await expect(alert).toHaveTextContent(
+        "Messages can be up to 10 characters"
+      )
+      await expect(composer).toHaveValue("12345678901")
+      await expect(composer).toHaveFocus()
+      await expect(composer).toHaveAttribute("aria-invalid", "true")
+      await expect(composer).toHaveAttribute("aria-describedby", alert.id)
+    })
+
+    await step("Clear the error after correction and send", async () => {
+      await userEvent.clear(composer)
+      await userEvent.type(composer, "1234567890")
+      await waitFor(() => expect(canvas.queryByRole("alert")).toBeNull())
+      await expect(composer).not.toHaveAttribute("aria-invalid")
+      await expect(composer).not.toHaveAttribute("aria-describedby")
+
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+      await waitFor(() => expect(canvas.getByText("1234567890")).toBeVisible())
+    })
+  },
 }
 
 /** Minimized-chat regression (360px panel): the waveform compresses before
@@ -1306,6 +1491,27 @@ export const ComposerHotkeys: Story = {
       // decides about focus — assert after that window, not before.
       await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
     })
+
+    await step("Escape backs out of the quote, keeping the draft", async () => {
+      await userEvent.type(composer, "ya lo miro")
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("button", { name: /remove quote/i })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer).toHaveValue("ya lo miro")
+    })
+
+    await step("The next Escape clears the draft", async () => {
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+    })
+
+    await step("Undo puts the cleared draft back", async () => {
+      await userEvent.keyboard("{Meta>}z{/Meta}")
+      await waitFor(() => expect(composer).toHaveValue("ya lo miro"))
+    })
   },
 }
 
@@ -1313,6 +1519,135 @@ export const ComposerHotkeys: Story = {
 export const Group: Story = {
   name: "Group with mentions",
   render: () => <GroupConversation />,
+}
+
+/** Canonical Unicode mention spans, identity, and edit-boundary QA. */
+export const UnicodeMentionEditing: Story = {
+  name: "Unicode mention editing (QA)",
+  tags: ["unicode-mention-regression"],
+  render: () => <UnicodeMentionConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const document = within(canvasElement.ownerDocument.body)
+    const composer = (): HTMLTextAreaElement =>
+      canvas.getByRole("combobox", {
+        name: /write something here/i,
+      }) as HTMLTextAreaElement
+    const surfaceFor = async (text: string): Promise<HTMLElement> => {
+      const surfaces = await canvas.findAllByTestId("chat-message-surface")
+      const surface = surfaces.find((candidate) =>
+        candidate.textContent?.includes(text)
+      )
+      expect(surface).toBeDefined()
+      return surface!
+    }
+    const openEdit = async (text: string): Promise<HTMLTextAreaElement> => {
+      const surface = await surfaceFor(text)
+      const messageRow = surface.parentElement
+      expect(messageRow).toBeDefined()
+      await userEvent.hover(surface)
+      const menu = await waitFor(() => {
+        const trigger = within(messageRow!).getByRole("button", {
+          name: /message actions/i,
+        })
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+        return trigger
+      })
+      await userEvent.click(menu)
+      await userEvent.click(
+        await document.findByRole("button", { name: /^Edit$/i })
+      )
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /cancel edit/i })
+        ).toBeVisible()
+      )
+      return composer()
+    }
+    const highlightedMention = (text: string): HTMLElement | undefined => {
+      const composerSurface = canvas.getByTestId("chat-composer-surface")
+      return [
+        ...composerSurface.querySelectorAll<HTMLElement>("[aria-hidden] span"),
+      ].find((node) => node.textContent === text)
+    }
+
+    await step(
+      "Keep an insertion before the mention outside its span",
+      async () => {
+        const field = await openEdit("Before")
+        const at = field.value.indexOf("@")
+        await userEvent.click(field)
+        field.setSelectionRange(at, at)
+        await userEvent.type(field, "x", { skipClick: true })
+
+        await waitFor(() =>
+          expect(field).toHaveValue("Before x@Garci\u0301a, after")
+        )
+        await waitFor(() =>
+          expect(highlightedMention("@Garci\u0301a")).toBeVisible()
+        )
+        expect(highlightedMention("x@Garci\u0301a")).toBeUndefined()
+      }
+    )
+
+    await step("Remove the whole mention when editing inside it", async () => {
+      const field = composer()
+      const at = field.value.indexOf("@")
+      field.setSelectionRange(at + 1, at + 2)
+      await userEvent.type(field, "X", { skipClick: true })
+
+      await waitFor(() => expect(field).toHaveValue("Before x, after"))
+      expect(highlightedMention("@Garci\u0301a")).toBeUndefined()
+      await userEvent.click(
+        canvas.getByRole("button", { name: /cancel edit/i })
+      )
+    })
+
+    await step(
+      "Keep canonically equal occurrences tied to each profile",
+      async () => {
+        const nfc = canvas.getByRole("link", {
+          name: "@García, NFC profile",
+        })
+        const nfd = canvas.getByRole("link", {
+          name: "@García, NFD profile",
+        })
+
+        await userEvent.hover(nfc)
+        await expect(
+          await document.findByText("NFC profile")
+        ).toBeInTheDocument()
+        await userEvent.unhover(nfc)
+        await waitFor(() =>
+          expect(document.queryByText("NFC profile")).not.toBeInTheDocument()
+        )
+        await userEvent.hover(nfd)
+        await expect(
+          await document.findByText("NFD profile")
+        ).toBeInTheDocument()
+        await userEvent.unhover(nfd)
+
+        nfc.focus()
+        await expect(nfc).toHaveFocus()
+        await expect(
+          await document.findByText("NFC profile")
+        ).toBeInTheDocument()
+        nfd.focus()
+        await expect(nfd).toHaveFocus()
+        await expect(
+          await document.findByText("NFD profile")
+        ).toBeInTheDocument()
+      }
+    )
+
+    await step("Anchor the complete decomposed Hangul occurrence", async () => {
+      const field = await openEdit("Hangul")
+      await expect(field).toHaveValue("Hangul: @\u1100\u1161\u11A8, ready")
+      await waitFor(() =>
+        expect(highlightedMention("@\u1100\u1161\u11A8")).toBeVisible()
+      )
+    })
+  },
 }
 
 /** Membership events as centered system rows (added / left / removed) with

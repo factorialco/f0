@@ -1,11 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useI18n } from "@/lib/providers/i18n"
-
 import {
   useF0ChatChannelType,
   useF0ChatEmit,
@@ -13,6 +11,92 @@ import {
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { DateTimeSeparator } from "./DateTimeSeparator"
+
+/**
+ * The control that takes you back to the newest message, and the unread count
+ * it carries. The inner `key={unreadCount}` re-plays the pop each time the
+ * count changes.
+ */
+const ChatJumpToBottomButton = ({
+  visible,
+  unreadCount,
+  hasMoreNewer,
+  transitionDuration,
+  reducedMotion,
+  onJumpToBottom,
+}: {
+  visible: boolean
+  unreadCount: number
+  /** There are newer messages off screen, so this is "back to latest". */
+  hasMoreNewer: boolean
+  transitionDuration: number
+  reducedMotion: boolean
+  onJumpToBottom: () => void
+}) => {
+  const i18n = useI18n()
+  const emit = useF0ChatEmit()
+  const isCommunity = useF0ChatChannelType() === "community"
+
+  // A community counts POSTS, not messages — and this label is the control's
+  // accessible name, so it is where the count is actually read aloud.
+  const countKey = isCommunity
+    ? unreadCount === 1
+      ? "chat.newPostsCount.one"
+      : "chat.newPostsCount.other"
+    : unreadCount === 1
+      ? "chat.unreadCount.one"
+      : "chat.unreadCount.other"
+
+  const label =
+    unreadCount > 0
+      ? i18n.t(countKey, { count: unreadCount })
+      : hasMoreNewer
+        ? i18n.chat.backToLatest
+        : i18n.chat.scrollToBottom
+
+  return (
+    <AnimatePresence>
+      {visible ? (
+        <motion.div
+          data-testid="chat-jump-overlay"
+          className="pointer-events-none absolute inset-x-0 flex justify-center"
+          style={{ bottom: `calc(${CHAT_COMPOSER_HEIGHT} + 0.75rem)` }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{
+            duration: transitionDuration,
+            ease: EASE_OUT_SWIFT,
+          }}
+        >
+          <motion.div
+            key={unreadCount}
+            className="pointer-events-auto"
+            initial={
+              reducedMotion || unreadCount === 0 ? false : { scale: 0.95 }
+            }
+            animate={{ scale: 1 }}
+            transition={{
+              duration: transitionDuration,
+              ease: EASE_OUT_SWIFT,
+            }}
+          >
+            <ButtonInternal
+              onClick={() => {
+                onJumpToBottom()
+                emit.onJumpedToBottom()
+              }}
+              variant="neutral"
+              icon={ArrowDown}
+              label={label}
+              hideLabel={unreadCount === 0 && !hasMoreNewer}
+            />
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  )
+}
 
 export const ChatViewportOverlays = ({
   atTop,
@@ -38,99 +122,49 @@ export const ChatViewportOverlays = ({
   onJumpToBottom: () => void
 }): ReactNode => {
   const i18n = useI18n()
-  const emit = useF0ChatEmit()
-  const isCommunity = useF0ChatChannelType() === "community"
   const transitionDuration = reducedMotion ? 0 : 0.15
 
   return (
     <>
       <AnimatePresence>
-        {!atTop && <ScrollShadow position="top" key="chat-header-shadow" />}
+        {!atTop ? (
+          <ScrollShadow position="top" key="chat-header-shadow" />
+        ) : null}
       </AnimatePresence>
 
       <AnimatePresence>
         {scrolledUp &&
-          (!atTop || hasMoreOlder || loadingOlder) &&
-          stickyDate && (
-            <motion.div
-              className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: transitionDuration }}
+        (!atTop || hasMoreOlder || loadingOlder) &&
+        stickyDate ? (
+          <motion.div
+            className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: transitionDuration }}
+          >
+            <div
+              className="z-50"
+              aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
             >
-              <div
-                className="z-50"
-                aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
-              >
-                <DateTimeSeparator
-                  at={stickyDate}
-                  withTime
-                  loading={loadingOlder}
-                />
-              </div>
-            </motion.div>
-          )}
+              <DateTimeSeparator
+                at={stickyDate}
+                withTime
+                loading={loadingOlder}
+              />
+            </div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showJumpButton && (
-          <motion.div
-            data-testid="chat-jump-overlay"
-            className="pointer-events-none absolute inset-x-0 flex justify-center"
-            style={{ bottom: `calc(${CHAT_COMPOSER_HEIGHT} + 0.75rem)` }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{
-              duration: transitionDuration,
-              ease: EASE_OUT_SWIFT,
-            }}
-          >
-            <motion.div
-              key={unreadCount}
-              className="pointer-events-auto"
-              initial={
-                reducedMotion || unreadCount === 0 ? false : { scale: 0.95 }
-              }
-              animate={{ scale: 1 }}
-              transition={{
-                duration: transitionDuration,
-                ease: EASE_OUT_SWIFT,
-              }}
-            >
-              <ButtonInternal
-                onClick={() => {
-                  onJumpToBottom()
-                  emit.onJumpedToBottom()
-                }}
-                variant="neutral"
-                icon={ArrowDown}
-                label={
-                  unreadCount > 0
-                    ? // A community counts POSTS, and the pill is where the
-                      // count is actually read aloud — it is the control's
-                      // accessible name.
-                      i18n.t(
-                        isCommunity
-                          ? unreadCount === 1
-                            ? "chat.newPostsCount.one"
-                            : "chat.newPostsCount.other"
-                          : unreadCount === 1
-                            ? "chat.unreadCount.one"
-                            : "chat.unreadCount.other",
-                        { count: unreadCount }
-                      )
-                    : hasMoreNewer
-                      ? i18n.chat.backToLatest
-                      : i18n.chat.scrollToBottom
-                }
-                hideLabel={unreadCount === 0 && !hasMoreNewer}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ChatJumpToBottomButton
+        visible={showJumpButton}
+        unreadCount={unreadCount}
+        hasMoreNewer={hasMoreNewer}
+        transitionDuration={transitionDuration}
+        reducedMotion={reducedMotion}
+        onJumpToBottom={onJumpToBottom}
+      />
     </>
   )
 }

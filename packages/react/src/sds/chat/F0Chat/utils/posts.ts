@@ -1,7 +1,6 @@
 import { type TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { type ReactionsProps } from "@/sds/social/Reactions"
 import { type ReactionProps } from "@/sds/social/Reactions/reaction"
-
 import { type F0ChatPost, type F0ChatReaction, type F0ChatUser } from "../types"
 
 /**
@@ -34,7 +33,9 @@ export const communityAuthorFrom = (
 ):
   | { firstName: string; lastName: string; avatarUrl?: string; url?: string }
   | undefined => {
-  if (!author) return undefined
+  if (!author) {
+    return undefined
+  }
   const spaceAt = author.name.indexOf(" ")
   const firstName =
     spaceAt === -1 ? author.name : author.name.slice(0, spaceAt).trim()

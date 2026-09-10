@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest"
-
-import { flattenChatRows, freshTailIds, rowItem } from "../utils/grouping"
 import {
   type F0ChatMessage,
   type F0ChatPost,
   type F0ChatSystemMessage,
 } from "../types"
+import { flattenChatRows, freshTailIds, rowItem } from "../utils/grouping"
 
 const msg = (
   id: string,

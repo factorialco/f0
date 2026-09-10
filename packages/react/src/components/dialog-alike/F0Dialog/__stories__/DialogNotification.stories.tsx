@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { Placeholder } from "@/icons/app"
 import CrossIcon from "@/icons/app/Cross"
-
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { DialogNotificationInternal } from "../internal/DialogNotification"
 import { dialogNotificationTypes } from "../types"
@@ -35,6 +32,7 @@ const meta: Meta<typeof DialogNotificationInternal> = {
         "secondaryAction",
         "isOpen",
         "onClose",
+        "dismissable",
       ],
     }),
   },
@@ -101,6 +99,7 @@ export const Warning: Story = {
     type: "warning",
     title: "Warning",
     description: "Proceed with caution.",
+    isOpen: false,
   },
 }
 

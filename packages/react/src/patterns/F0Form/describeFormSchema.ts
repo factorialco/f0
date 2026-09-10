@@ -1,7 +1,4 @@
 import { ZodTypeAny } from "zod"
-
-import type { F0FormSchema } from "./types"
-
 import {
   F0FieldType,
   getF0Config,
@@ -9,6 +6,7 @@ import {
   unwrapToZodObject,
 } from "./f0Schema"
 import { isFieldRequired } from "./fields/schema"
+import type { F0FormSchema } from "./types"
 
 /**
  * Serializable description of a single form field,
@@ -47,7 +45,9 @@ export function describeFormSchema(
   for (const [fieldId, fieldSchema] of Object.entries(shape)) {
     const zodSchema = fieldSchema as ZodTypeAny
     const config = getF0Config(zodSchema)
-    if (!config) continue
+    if (!config) {
+      continue
+    }
 
     const fieldType = inferFieldType(zodSchema, config)
     const required = isFieldRequired(zodSchema, fieldType)

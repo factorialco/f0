@@ -1,18 +1,16 @@
 import { type ReactNode } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { type AiChatCreditWarning } from "../../F0AiChat/types"
 
 const creditWarningConfig = {
   soft: {
     text: "" as string,
-    bg: "bg-f1-background-info",
-    fontColor: "text-f1-foreground-info",
-    formBorder: "[&_form]:border-f1-border-info",
+    bg: "bg-f1-background-secondary",
+    fontColor: "text-f1-foreground-secondary",
+    formBorder: "[&_form]:border-f1-border",
   },
 }
 
@@ -27,12 +25,16 @@ export const CreditWarningWrapper = ({
 }: CreditWarningWrapperProps) => {
   const translation = useI18n()
 
-  if (!creditWarning) return children
+  if (!creditWarning) {
+    return children
+  }
 
   const config = {
     ...creditWarningConfig[creditWarning.level],
-    text: translation.ai.creditWarning.soft,
+    text: creditWarning.text ?? translation.ai.creditWarning.soft,
   }
+  const actionLabel =
+    creditWarning.actionLabel ?? translation.ai.creditWarning.getCredits ?? ""
 
   return (
     <div
@@ -45,16 +47,17 @@ export const CreditWarningWrapper = ({
           {config.text}
         </p>
         <div className="flex shrink-0 items-center gap-1">
-          {creditWarning.onGetCredits && (
+          {creditWarning.onGetCredits ? (
             <F0Button
-              label={translation.ai.creditWarning.getCredits ?? ""}
+              label={actionLabel}
               size="sm"
               variant="outline"
-              tooltip={translation.ai.creditWarning.getCredits ?? ""}
+              icon={creditWarning.getCreditsIcon}
+              tooltip={actionLabel}
               onClick={creditWarning.onGetCredits}
             />
-          )}
-          {creditWarning.onDismiss && (
+          ) : null}
+          {creditWarning.onDismiss ? (
             <F0Button
               label={translation.ai.creditWarning.dismiss ?? ""}
               size="sm"
@@ -63,7 +66,7 @@ export const CreditWarningWrapper = ({
               hideLabel
               onClick={creditWarning.onDismiss}
             />
-          )}
+          ) : null}
         </div>
       </div>
       {children}

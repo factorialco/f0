@@ -9,9 +9,7 @@ import {
 } from "react"
 import { type ItemProps, type ListItem } from "react-virtuoso"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatRuntime } from "../types"

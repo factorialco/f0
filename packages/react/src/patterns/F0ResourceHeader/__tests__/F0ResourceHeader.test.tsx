@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { Download } from "@/icons/app"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
-import { F0ResourceHeader } from "../index"
+import {
+  act,
+  zeroRender as render,
+  screen,
+  userEvent,
+} from "@/testing/test-utils"
+import { F0ResourceHeader } from ".."
 
 describe("F0ResourceHeader", () => {
   it("renders secondary dropdown actions and calls the selected actions", async () => {
@@ -79,5 +82,46 @@ describe("F0ResourceHeader", () => {
         expect.objectContaining({ value: "csv", label: "Export CSV" })
       )
     )
+  })
+  it("renders a plain string description as text", () => {
+    render(<F0ResourceHeader title="Reports" description="Quarterly revenue" />)
+
+    // Twice: the visible copy plus the hidden one that measures unclamped height.
+    expect(screen.getAllByText("Quarterly revenue")).toHaveLength(2)
+  })
+
+  it("renders a markdown link in the description", () => {
+    render(
+      <F0ResourceHeader
+        title="Reports"
+        description="See the [rubric](https://example.com/rubric)"
+      />
+    )
+
+    // Only the visible copy reaches the a11y tree, not the measure clone.
+    expect(screen.getAllByRole("link")).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "rubric" })).toHaveAttribute(
+      "href",
+      "https://example.com/rubric"
+    )
+  })
+
+  it("leaves an unclamped description alone when focus enters it", async () => {
+    render(
+      <F0ResourceHeader
+        title="Reports"
+        description="See the [rubric](https://example.com/rubric)"
+      />
+    )
+
+    // Focus expands a clamped description; one that always fit hid nothing, so
+    // it must not raise a "show less" toggle over nothing.
+    await act(async () => {
+      screen.getByRole("link", { name: "rubric" }).focus()
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /show/i })
+    ).not.toBeInTheDocument()
   })
 })

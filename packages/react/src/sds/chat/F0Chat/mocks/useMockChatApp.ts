@@ -9,9 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { BellOff } from "@/icons/app"
-
 import {
   isPost,
   isUserMessage,
@@ -223,11 +221,15 @@ const toggled = (
 ): F0ChatReaction[] => {
   const reactions = current ? [...current] : []
   const idx = reactions.findIndex((r) => r.emoji === emoji)
-  if (idx === -1) return [...reactions, { emoji, count: 1, reactedByMe: true }]
+  if (idx === -1) {
+    return [...reactions, { emoji, count: 1, reactedByMe: true }]
+  }
   const reaction = reactions[idx]
   const count = reaction.count + (reaction.reactedByMe ? -1 : 1)
   // The last person removing theirs takes the pill with them.
-  if (count <= 0) return reactions.filter((_, i) => i !== idx)
+  if (count <= 0) {
+    return reactions.filter((_, i) => i !== idx)
+  }
   reactions[idx] = { ...reaction, count, reactedByMe: !reaction.reactedByMe }
   return reactions
 }
@@ -292,7 +294,9 @@ const MockChatAppContext = createContext<MockChatAppValue | null>(null)
 
 export const useMockChatApp = (): MockChatAppValue => {
   const ctx = useContext(MockChatAppContext)
-  if (!ctx) throw new Error("useMockChatApp requires MockChatAppProvider")
+  if (!ctx) {
+    throw new Error("useMockChatApp requires MockChatAppProvider")
+  }
   return ctx
 }
 
@@ -374,7 +378,9 @@ export const useMockChatStore = (): MockChatAppValue => {
     (convId: string, fn: (s: ConvState) => ConvState) => {
       setStates((prev) => {
         const current = prev[convId]
-        if (!current) return prev
+        if (!current) {
+          return prev
+        }
         return { ...prev, [convId]: fn(current) }
       })
     },
@@ -475,12 +481,18 @@ export const useMockChatStore = (): MockChatAppValue => {
       // `multiTyping` group, a random 1–3 people type — and each of them sends a
       // message once they all finish writing.
       const replySeed = SEED_BY_ID.get(convId)
-      if (!replySeed) return
+      if (!replySeed) {
+        return
+      }
       // Nobody answers a community with a chat message. (Nothing sends one
       // there either — this is the belt to the composer's braces.)
-      if (replySeed.type === "community") return
+      if (replySeed.type === "community") {
+        return
+      }
       const onlineParticipants = replySeed.participants.filter((p) => p.online)
-      if (onlineParticipants.length === 0) return
+      if (onlineParticipants.length === 0) {
+        return
+      }
       const typers =
         replySeed.type === "group" &&
         replySeed.multiTyping &&
@@ -582,8 +594,12 @@ export const useMockChatStore = (): MockChatAppValue => {
           // post is not a "user message", so a guard that only let those
           // through computed the new list and threw it away, which is a
           // reaction button that visibly does nothing.
-          if (!isUserMessage(m) && !isPost(m)) return m
-          if (m.id !== messageId) return m
+          if (!isUserMessage(m) && !isPost(m)) {
+            return m
+          }
+          if (m.id !== messageId) {
+            return m
+          }
           return { ...m, reactions: toggled(m.reactions, emoji) }
         }),
       }))
@@ -597,7 +613,9 @@ export const useMockChatStore = (): MockChatAppValue => {
         const target = s.messages
           .filter(isUserMessage)
           .find((m) => m.id === messageId)
-        if (!target) return s
+        if (!target) {
+          return s
+        }
         const beyondWindow =
           Date.now() - new Date(target.createdAt).getTime() > 5 * 60_000
         return {
@@ -638,7 +656,9 @@ export const useMockChatStore = (): MockChatAppValue => {
 
   const loadOlder = useCallback(
     (convId: string) => {
-      if (loadingOlder[convId] || (olderLeft.current[convId] ?? 0) <= 0) return
+      if (loadingOlder[convId] || (olderLeft.current[convId] ?? 0) <= 0) {
+        return
+      }
       setLoadingOlder((p) => ({ ...p, [convId]: true }))
       after(700, () => {
         patch(convId, (s) => {
@@ -715,7 +735,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       const post = states[convId]?.messages.find(
         (item): item is F0ChatPost => isPost(item) && item.id === postId
       )
-      if (!seed || !post) return
+      if (!seed || !post) {
+        return
+      }
 
       const knownVisits = postVisits[postId]
       const visits = knownVisits ?? buildVisits(post, seed.participants)
@@ -729,8 +751,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       }
 
       if (!firstVisit) {
-        if (!knownVisits)
+        if (!knownVisits) {
           setPostVisits((prev) => ({ ...prev, [postId]: visits }))
+        }
         return
       }
 
@@ -761,7 +784,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       // The counter on the feed card is the same number, so it moves too.
       setStates((prev) => {
         const current = prev[convId]
-        if (!current) return prev
+        if (!current) {
+          return prev
+        }
         return {
           ...prev,
           [convId]: {
@@ -802,7 +827,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       }))
       setStates((prev) => {
         const current = prev[convId]
-        if (!current) return prev
+        if (!current) {
+          return prev
+        }
         return {
           ...prev,
           [convId]: {
@@ -848,13 +875,19 @@ export const useMockChatStore = (): MockChatAppValue => {
       patch(convId, (s) => ({
         ...s,
         messages: s.messages.map((item) => {
-          if (!isPost(item) || item.id !== postId) return item
+          if (!isPost(item) || item.id !== postId) {
+            return item
+          }
           const next = { ...item }
-          if (change.title !== undefined) next.title = change.title
-          if (change.description !== undefined)
+          if (change.title !== undefined) {
+            next.title = change.title
+          }
+          if (change.description !== undefined) {
             next.description = change.description
-          if (change.allowCommentsAndReactions !== undefined)
+          }
+          if (change.allowCommentsAndReactions !== undefined) {
             next.allowCommentsAndReactions = change.allowCommentsAndReactions
+          }
           if (change.requiredAction !== undefined) {
             next.requiredAction = change.requiredAction
               ? // Editing must not un-acknowledge the people who already have.
@@ -975,7 +1008,9 @@ export const useMockChatStore = (): MockChatAppValue => {
   const publishScheduledNow = useCallback(
     (convId: string, id: string) => {
       const post = (scheduled[convId] ?? []).find((item) => item.id === id)
-      if (!post) return
+      if (!post) {
+        return
+      }
       setScheduled((prev) => ({
         ...prev,
         [convId]: (prev[convId] ?? []).filter((item) => item.id !== id),
@@ -1052,7 +1087,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       const post = states[convId]?.messages.find(
         (item): item is F0ChatPost => isPost(item) && item.id === postId
       )
-      if (!post) return
+      if (!post) {
+        return
+      }
       patchPost(convId, postId, {
         allowCommentsAndReactions: post.allowCommentsAndReactions === false,
       })

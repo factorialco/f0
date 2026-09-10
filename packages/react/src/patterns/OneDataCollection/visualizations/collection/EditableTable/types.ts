@@ -3,7 +3,7 @@ import type {
   F0SelectItemObject,
   F0SelectItemProps,
 } from "@/components/F0Select"
-
+import type { Action as SelectAction } from "@/components/F0Select/components/SelectBottomActions"
 import {
   DataSourceDefinition,
   FiltersDefinition,
@@ -11,18 +11,16 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
-import type {
-  TableColumnDefinition,
-  TableVisualizationOptions,
-  TableVisualizationSettings,
-} from "../Table/types"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import type {
+  TableColumnDefinition,
+  TableVisualizationOptions,
+  TableVisualizationSettings,
+} from "../Table/types"
 import { EditableTableCellEditType } from "./components/cells"
 
 export type AddRowActionsResult =
@@ -108,6 +106,11 @@ export type SelectCellConfig<R extends RecordType> = {
   clearable?: boolean
   showSearchBox?: boolean
   defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined
+  /**
+   * Buttons rendered below the options, for what a value cannot express —
+   * dropping a scheduled change, say. Pass a function to decide them per row.
+   */
+  actions?: SelectAction[] | ((item: R) => SelectAction[] | undefined)
 } & (
   | {
       options:
@@ -274,7 +277,7 @@ export type EditableTableVisualizationOptions<
   TableVisualizationOptions<R, _Filters, Sortings, Summaries>,
   "columns"
 > & {
-  columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[]
   /**
    * Called when a cell value changes. Receives an object with the full updated
    * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by

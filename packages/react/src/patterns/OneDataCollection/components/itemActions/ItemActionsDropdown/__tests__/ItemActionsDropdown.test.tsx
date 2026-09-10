@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ItemActionsDropdown } from "../ItemActionsDropdown"
 
 // Mock the imported components

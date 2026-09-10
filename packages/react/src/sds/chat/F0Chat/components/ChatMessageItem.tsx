@@ -7,12 +7,10 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
   useChatComposeActions,
@@ -57,8 +55,12 @@ const SELF_HANDLING_DESCENDANTS =
  */
 const isSelfHandling = (target: Element, stopAt: Element): boolean => {
   for (let node: Element | null = target; node; node = node.parentElement) {
-    if (node === stopAt) return false
-    if (node.matches(SELF_HANDLING_DESCENDANTS)) return true
+    if (node === stopAt) {
+      return false
+    }
+    if (node.matches(SELF_HANDLING_DESCENDANTS)) {
+      return true
+    }
   }
   return true
 }
@@ -120,7 +122,9 @@ export const ChatMessageItem = ({
   // the React root). A click faster than this is handled by the placeholder
   // itself; a hover slower than this reaches an already-real trigger.
   const armActionsSoon = useCallback(() => {
-    if (armTimerRef.current != null) return
+    if (armTimerRef.current != null) {
+      return
+    }
     armTimerRef.current = window.setTimeout(() => {
       armTimerRef.current = null
       armActions()
@@ -128,12 +132,16 @@ export const ChatMessageItem = ({
   }, [armActions])
   useEffect(
     () => () => {
-      if (armTimerRef.current != null) window.clearTimeout(armTimerRef.current)
+      if (armTimerRef.current != null) {
+        window.clearTimeout(armTimerRef.current)
+      }
     },
     []
   )
   useLayoutEffect(() => {
-    if (!restoreActionsFocusRef.current) return
+    if (!restoreActionsFocusRef.current) {
+      return
+    }
     restoreActionsFocusRef.current = false
     actionsWrapperRef.current?.querySelector("button")?.focus()
   }, [actionsArmed])
@@ -191,9 +199,15 @@ export const ChatMessageItem = ({
 
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
-      if (!canQuote) return
-      if (!(event.target instanceof Element)) return
-      if (isSelfHandling(event.target, event.currentTarget)) return
+      if (!canQuote) {
+        return
+      }
+      if (!(event.target instanceof Element)) {
+        return
+      }
+      if (isSelfHandling(event.target, event.currentTarget)) {
+        return
+      }
       startReply(message)
     },
     [canQuote, message, startReply]
@@ -211,7 +225,7 @@ export const ChatMessageItem = ({
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
           items-end keeps the avatar gutter level with the bottom of it. */}
-      {hasContent && (
+      {hasContent ? (
         <div
           className={cn(
             // 4px here + the outer surface's own 2px of padding stand the
@@ -259,7 +273,7 @@ export const ChatMessageItem = ({
               onDoubleClick={handleDoubleClick}
               data-testid="chat-message-surface"
             >
-              {hasAttachments && (
+              {hasAttachments ? (
                 <ChatMessageAttachments
                   message={message}
                   isMine={isMine}
@@ -267,8 +281,8 @@ export const ChatMessageItem = ({
                   isLastOfRun={isLastOfRun}
                   hasAvatar={hasAvatar}
                 />
-              )}
-              {hasBubble && (
+              ) : null}
+              {hasBubble ? (
                 <ChatBubble
                   message={message}
                   isMine={isMine}
@@ -282,16 +296,16 @@ export const ChatMessageItem = ({
                   isLastOfRun={isLastOfRun}
                   hasAvatar={hasAvatar}
                 />
-              )}
+              ) : null}
             </div>
             {/* Sending indicator for own messages, in the slot next to the
                 bubble (the row is flex-row-reverse for mine, so it reads to
                 the bubble's left). Adding/removing it never shifts the bubble
                 (right-anchored) nor the row height — stable measurements for
                 the virtualizer. */}
-            {isMine && message.status === "sending" && (
+            {isMine && message.status === "sending" ? (
               <SendingClock sentAt={message.createdAt} />
-            )}
+            ) : null}
             {/* Deleted tombstones have nothing to act on, and an in-flight
                 (sending) message can't be acted on yet either — only the clock
                 shows until it settles. The menu stays visible while open (not
@@ -301,69 +315,69 @@ export const ChatMessageItem = ({
                 ignores `hasActions`: retrying and discarding a local echo are
                 never permissions. */}
             {!message.deleted &&
-              message.status !== "sending" &&
-              (hasActions || message.status === "failed") && (
-                <div
-                  ref={actionsWrapperRef}
-                  className={cn(
-                    message.status === "failed"
-                      ? "opacity-100"
-                      : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
-                    actionsOpen && "opacity-100"
-                  )}
-                >
-                  {message.status === "failed" ? (
-                    // The alert fades in on a live failure (the branch switch
-                    // remounts it, so `initial` applies) — never on a
-                    // scroll-back of an old failure.
-                    <motion.div
-                      initial={
-                        wasFailedAtMountRef.current || reducedMotion
-                          ? false
-                          : { opacity: 0, scale: 0.9 }
-                      }
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={microEnterTransition}
-                    >
-                      <ChatMessageActions
-                        message={message}
-                        isMine={isMine}
-                        open={actionsOpen}
-                        onOpenChange={setActionsOpen}
-                      />
-                    </motion.div>
-                  ) : actionsArmed ? (
+            message.status !== "sending" &&
+            (hasActions || message.status === "failed") ? (
+              <div
+                ref={actionsWrapperRef}
+                className={cn(
+                  message.status === "failed"
+                    ? "opacity-100"
+                    : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
+                  actionsOpen && "opacity-100"
+                )}
+              >
+                {message.status === "failed" ? (
+                  // The alert fades in on a live failure (the branch switch
+                  // remounts it, so `initial` applies) — never on a
+                  // scroll-back of an old failure.
+                  <motion.div
+                    initial={
+                      wasFailedAtMountRef.current || reducedMotion
+                        ? false
+                        : { opacity: 0, scale: 0.9 }
+                    }
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={microEnterTransition}
+                  >
                     <ChatMessageActions
                       message={message}
                       isMine={isMine}
                       open={actionsOpen}
                       onOpenChange={setActionsOpen}
                     />
-                  ) : (
-                    // Same trigger the popover renders, minus the popover and
-                    // tooltip machinery — indistinguishable until interaction.
-                    // Activating it (click, tap, Enter) arms AND opens, so the
-                    // very first interaction behaves exactly like the real one.
-                    <ButtonInternal
-                      variant="outline"
-                      hideLabel
-                      noAutoTooltip
-                      label={i18n.chat.moreActions}
-                      icon={Ellipsis}
-                      pressed={false}
-                      onClick={() => {
-                        armActions()
-                        setActionsOpen(true)
-                      }}
-                    />
-                  )}
-                </div>
-              )}
+                  </motion.div>
+                ) : actionsArmed ? (
+                  <ChatMessageActions
+                    message={message}
+                    isMine={isMine}
+                    open={actionsOpen}
+                    onOpenChange={setActionsOpen}
+                  />
+                ) : (
+                  // Same trigger the popover renders, minus the popover and
+                  // tooltip machinery — indistinguishable until interaction.
+                  // Activating it (click, tap, Enter) arms AND opens, so the
+                  // very first interaction behaves exactly like the real one.
+                  <ButtonInternal
+                    variant="outline"
+                    hideLabel
+                    noAutoTooltip
+                    label={i18n.chat.moreActions}
+                    icon={Ellipsis}
+                    pressed={false}
+                    onClick={() => {
+                      armActions()
+                      setActionsOpen(true)
+                    }}
+                  />
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
       <AnimatePresence initial={false}>
-        {hasReactions && (
+        {hasReactions ? (
           // Reactions grow the row in (height + fade) when the first one lands
           // on a visible message, and collapse it back out when the last one is
           // removed — never a pop. The transcript's slide layer absorbs the
@@ -386,7 +400,7 @@ export const ChatMessageItem = ({
               <ChatMessageReactions message={message} isMine={isMine} />
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   )

@@ -1,5 +1,3 @@
-import { useEffect, useLayoutEffect, useState } from "react"
-
 import {
   animate,
   type MotionValue,
@@ -7,9 +5,8 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react"
-
+import { useEffect, useLayoutEffect, useState } from "react"
 import { useReducedMotion } from "@/lib/a11y"
-
 import {
   GENIE_CLOSE_MS,
   GENIE_GLYPH_DELAY_MS,
@@ -109,7 +106,9 @@ export const useRailMotion = ({
    */
   const [live, setLive] = useState(false)
   useEffect(() => {
-    if (drawn) setLive(true)
+    if (drawn) {
+      setLive(true)
+    }
   }, [drawn])
   const animated = live && !reducedMotion
 
@@ -137,7 +136,9 @@ export const useRailMotion = ({
   useLayoutEffect(() => {
     // Nothing reads the variable until the rail is drawn, so there is nothing to
     // animate from either.
-    if (!drawn) return
+    if (!drawn) {
+      return
+    }
     if (!animated) {
       widthValue.jump(width)
       return

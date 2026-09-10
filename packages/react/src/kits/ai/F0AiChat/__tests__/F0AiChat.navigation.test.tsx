@@ -1,9 +1,7 @@
 import { useState, type ReactNode } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { LinkProvider } from "@/lib/linkHandler"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
 import {
   AiChatStateProvider,
   useAiChat,
@@ -26,14 +24,18 @@ const Controls = (): ReactNode => {
 /** A host with a router: the path changes, as it does in the product. */
 const Host = ({ initialPath = "/home" }: { initialPath?: string }) => {
   const [path, setPath] = useState(initialPath)
+  // A real re-render with the path UNCHANGED. It has to be its own state:
+  // `setPath(path)` would hand React the same value and React would bail out
+  // of the render entirely, so the test would pass without ever exercising
+  // the effect it is about.
+  const [, bumpRender] = useState(0)
   return (
     <LinkProvider currentPath={path}>
       <AiChatStateProvider enabled chatMessages={<div>CHAT</div>}>
         <button type="button" onClick={() => setPath("/time-off")}>
           navigate
         </button>
-        {/* Same path again — a re-render, not a navigation. */}
-        <button type="button" onClick={() => setPath(path)}>
+        <button type="button" onClick={() => bumpRender((n) => n + 1)}>
           re-render
         </button>
         <Controls />

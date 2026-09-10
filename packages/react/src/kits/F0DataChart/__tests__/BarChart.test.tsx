@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom/vitest"
 import {
   afterAll,
   afterEach,
@@ -8,9 +9,7 @@ import {
   it,
   vi,
 } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { act, zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
 import { resolveChartTheme } from "../utils/theme"
@@ -38,14 +37,16 @@ const { linearGradientMock } = vi.hoisted(() => ({
 }))
 
 /** Handlers the chart registered, so tests can fire ECharts events at it. */
-const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
+let chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
 
 /** Fire an ECharts event at every handler the component registered for it. */
 function emitChartEvent(event: string, params: unknown) {
   // Wrapped in `act` because the handlers set React state, and the assertion
   // reads the `setOption` payload that the resulting render produces.
   act(() => {
-    for (const handler of chartHandlers[event] ?? []) handler(params)
+    for (const handler of chartHandlers[event] ?? []) {
+      handler(params)
+    }
   })
 }
 
@@ -56,7 +57,8 @@ vi.mock("echarts", () => ({
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
     on: vi.fn((event: string, handler: (params: unknown) => void) => {
-      ;(chartHandlers[event] ??= []).push(handler)
+      chartHandlers[event] ??= []
+      chartHandlers[event].push(handler)
     }),
     off: vi.fn(),
     dispatchAction: vi.fn(),
@@ -83,7 +85,9 @@ type BarItemStyle = { color?: string; borderRadius?: number | number[] }
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     legend?: { show?: boolean }
     grid?: { right?: number | string }
@@ -113,7 +117,9 @@ type LabelLayoutParams = {
 
 function getMainSeries() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return (
     call[0] as {
       series: {
@@ -145,7 +151,9 @@ function getMainSeries() {
 /** Root-level animation keys that drive the hover blur cross-fade */
 function getAnimationOptions() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     animation?: boolean
     animationDuration?: number
@@ -176,7 +184,7 @@ function getBorderRadii(seriesIndex: number) {
 
 beforeEach(() => {
   setOptionMock.mockClear()
-  for (const key of Object.keys(chartHandlers)) delete chartHandlers[key]
+  chartHandlers = {}
   containerSize.width = 800
   containerSize.height = 320
 })
@@ -618,8 +626,8 @@ describe("BarChart — stacked segment polish", () => {
     const series = getMainSeries()
     for (const entry of series) {
       expect(entry?.emphasis?.focus).toBe("series")
-      expect(entry?.blur?.itemStyle?.opacity).toBe(0.4)
-      expect(entry?.blur?.label?.opacity).toBe(0.4)
+      expect(entry?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
+      expect(entry?.blur?.label?.opacity).toBeCloseTo(0.4)
     }
   })
 
@@ -644,7 +652,7 @@ describe("BarChart — stacked segment polish", () => {
     // [main, target] — the ghost is a separate series, so `focus: "series"`
     // blurs it too; it must dim to the same 40%.
     const target = getMainSeries()[1]
-    expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
+    expect(target?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
   })
 
   it("runs the blur cross-fade without animating entrance or updates", () => {
@@ -706,7 +714,7 @@ describe("BarChart — stacked segment polish", () => {
       // just arrives instantly instead of fading.
       expect(getAnimationOptions().stateAnimation?.duration).toBe(0)
       expect(getMainSeries()[0]?.emphasis?.focus).toBe("series")
-      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBe(0.4)
+      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
     })
 
     it("overrides a consumer-provided cross-fade duration", () => {
@@ -988,7 +996,9 @@ describe("BarChart — hideOverflowingLabels", () => {
 describe("BarChart — item tooltip", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
-    if (!call) throw new Error("setOption was never called")
+    if (!call) {
+      throw new Error("setOption was never called")
+    }
     return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
       .tooltip?.formatter
   }
@@ -2308,7 +2318,9 @@ describe("BarChart — overachievement", () => {
 describe("BarChart — target progress row", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
-    if (!call) throw new Error("setOption was never called")
+    if (!call) {
+      throw new Error("setOption was never called")
+    }
     return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
       .tooltip?.formatter
   }

@@ -21,12 +21,16 @@ export const useMicrotaskBatch = <Value>(
   return useCallback((value: Value) => {
     latestRef.current = value
     hasLatestRef.current = true
-    if (scheduledRef.current) return
+    if (scheduledRef.current) {
+      return
+    }
 
     scheduledRef.current = true
     queueMicrotask(() => {
       scheduledRef.current = false
-      if (!mountedRef.current || !hasLatestRef.current) return
+      if (!mountedRef.current || !hasLatestRef.current) {
+        return
+      }
       const latest = latestRef.current as Value
       latestRef.current = undefined
       hasLatestRef.current = false

@@ -1,11 +1,10 @@
 import { useState, type ReactNode } from "react"
-
 import { F0DatePicker } from "@/components/F0DatePicker"
 import { F0Select } from "@/components/F0Select"
 import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
+import { type MockCommunityOption } from "./mockPostComposerTypes"
 import {
   asDayValue,
   combineDateAndTime,
@@ -13,7 +12,6 @@ import {
   timeOf,
   timezoneAbbreviation,
 } from "./mockPostComposerUtils"
-import { type MockCommunityOption } from "./mockPostComposerTypes"
 
 /**
  * "Publish this, but later."
@@ -54,7 +52,9 @@ export const ScheduleDialog = ({
       primaryAction={{
         label: i18n.t("communities.composer.confirm"),
         onClick: () => {
-          if (!date) return
+          if (!date) {
+            return
+          }
           onConfirm(combineDateAndTime(date, time))
         },
         disabled: !canConfirm,

@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, memo, useState } from "react"
-
 import {
   AvatarVariant,
   CompanyAvatarVariant,
@@ -17,7 +16,6 @@ import { InfoCircleLine } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { ButtonCopy } from "@/ui/ButtonCopy"
-
 import { MetadataValue } from "./MetadataValue"
 
 type MetadataItemValue =
@@ -131,6 +129,117 @@ export interface MetadataProps {
   rowGap?: MetadataRowGap
 }
 
+const getValueToCopy = (
+  value: MetadataItemValue,
+  copyValue?: string
+): string => {
+  if (copyValue) {
+    return copyValue
+  }
+  let _exhaustiveCheck: never
+  switch (value.type) {
+    case "text":
+      return value.content
+    case "avatar":
+      return value.text
+    case "status":
+    case "dot-tag":
+      return value.label
+    case "date":
+      return value.formattedDate
+    case "tag-list":
+      return value.tags.join(", ")
+    case "data-list":
+      return value.data.join(", ")
+    case "list":
+      return ""
+    case "progress-bar": {
+      const normalizedMax =
+        typeof value.max === "number" && value.max > 0 ? value.max : 100
+      return value.label ?? `${value.value}/${normalizedMax}`
+    }
+    default:
+      _exhaustiveCheck = value // Nice hack to ensure we covered all cases
+      return _exhaustiveCheck
+  }
+}
+
+/**
+ * The card that comes up on hover: the value in full, and the row's own
+ * actions beside it.
+ */
+const MetadataHoverCard = ({
+  item,
+  open,
+  isAction,
+  isList,
+}: {
+  item: MetadataItem
+  open: boolean
+  /** The row carries actions, so the card leaves room for them. */
+  isAction: boolean
+  /** A list value grows downwards, so the card top-aligns instead. */
+  isList: boolean
+}) => (
+  <AnimatePresence>
+    {open ? (
+      <motion.div
+        className={cn(
+          "absolute -left-1.5 -top-1.5 z-50 hidden max-h-[80vh] items-start justify-center gap-1.5 overflow-y-auto whitespace-nowrap rounded-sm bg-f1-background py-1 pl-1.5 shadow-md ring-1 ring-inset ring-f1-border-secondary md:flex",
+          !isList && "h-8 items-start",
+          isAction ? "pr-1" : "pr-1.5"
+        )}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.1 }}
+      >
+        <div
+          className={cn(
+            "flex h-6 items-center font-medium text-f1-foreground",
+            isList && "h-auto items-start pt-0.5"
+          )}
+        >
+          <MetadataValue item={item} />
+        </div>
+        {isAction ? (
+          <motion.div
+            className="flex gap-1"
+            initial={{ x: -16 }}
+            animate={{ x: 0 }}
+            exit={{ x: -16 }}
+            transition={{ duration: 0.1 }}
+          >
+            {item.actions?.map((action, index) => {
+              if (isMetadataCopyAction(action)) {
+                return (
+                  <ButtonCopy
+                    key={`copy-${index}`}
+                    valueToCopy={getValueToCopy(item.value, action.copyValue)}
+                  />
+                )
+              }
+              return (
+                <Tooltip label={action.label} key={`tooltip-${index}`}>
+                  <F0Button
+                    key={`action-${index}`}
+                    size="sm"
+                    variant="neutral"
+                    label={action.label}
+                    hideLabel
+                    icon={action.icon}
+                    onClick={action.onClick}
+                  />
+                </Tooltip>
+              )
+            })}
+          </motion.div>
+        ) : null}
+      </motion.div>
+    ) : null}
+  </AnimatePresence>
+)
+
 function MetadataItem({ item }: { item: MetadataItem }) {
   const [isActive, setIsActive] = useState(false)
   const isList =
@@ -139,48 +248,13 @@ function MetadataItem({ item }: { item: MetadataItem }) {
   const isAction = Boolean(item.actions?.length)
   const hasHover = isAction || isList
 
-  const getValueToCopy = (
-    value: MetadataItemValue,
-    copyValue?: string
-  ): string => {
-    if (copyValue) {
-      return copyValue
-    }
-    let _exhaustiveCheck: never
-    switch (value.type) {
-      case "text":
-        return value.content
-      case "avatar":
-        return value.text
-      case "status":
-      case "dot-tag":
-        return value.label
-      case "date":
-        return value.formattedDate
-      case "tag-list":
-        return value.tags.join(", ")
-      case "data-list":
-        return value.data.join(", ")
-      case "list":
-        return ""
-      case "progress-bar": {
-        const normalizedMax =
-          typeof value.max === "number" && value.max > 0 ? value.max : 100
-        return value.label ?? `${value.value}/${normalizedMax}`
-      }
-      default:
-        _exhaustiveCheck = value // Nice hack to ensure we covered all cases
-        return _exhaustiveCheck
-    }
-  }
-
   return (
     <div className="flex h-8 items-center gap-2">
-      {item.icon && (
+      {item.icon ? (
         <span className="flex shrink-0 items-center text-f1-foreground-secondary">
           <F0Icon icon={item.icon} size="md" />
         </span>
-      )}
+      ) : null}
       <div
         className={cn(
           "flex w-28 items-center gap-1 truncate text-f1-foreground-secondary md:w-fit",
@@ -188,7 +262,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         )}
       >
         {item.label}
-        {item.info && (
+        {item.info ? (
           <div className="flex h-4 w-4 items-center text-f1-foreground-tertiary hover:cursor-help">
             <Tooltip
               label={item.info.title}
@@ -197,7 +271,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
               <F0Icon icon={InfoCircleLine} size="sm" />
             </Tooltip>
           </div>
-        )}
+        ) : null}
       </div>
       <div
         role="button"
@@ -217,7 +291,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         >
           <MetadataValue item={item} collapse />
         </div>
-        {isAction && (
+        {isAction ? (
           <div className="w-full md:hidden">
             <MobileDropdown
               items={
@@ -231,68 +305,13 @@ function MetadataItem({ item }: { item: MetadataItem }) {
               <MetadataValue item={item} collapse />
             </MobileDropdown>
           </div>
-        )}
-        <AnimatePresence>
-          {isActive && hasHover && (
-            <motion.div
-              className={cn(
-                "absolute -left-1.5 -top-1.5 z-50 hidden max-h-[80vh] items-start justify-center gap-1.5 overflow-y-auto whitespace-nowrap rounded-sm bg-f1-background py-1 pl-1.5 shadow-md ring-1 ring-inset ring-f1-border-secondary md:flex",
-                !isList && "h-8 items-start",
-                isAction ? "pr-1" : "pr-1.5"
-              )}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
-            >
-              <div
-                className={cn(
-                  "flex h-6 items-center font-medium text-f1-foreground",
-                  isList && "h-auto items-start pt-0.5"
-                )}
-              >
-                <MetadataValue item={item} />
-              </div>
-              {isAction && (
-                <motion.div
-                  className="flex gap-1"
-                  initial={{ x: -16 }}
-                  animate={{ x: 0 }}
-                  exit={{ x: -16 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  {item.actions?.map((action, index) => {
-                    if (isMetadataCopyAction(action)) {
-                      return (
-                        <ButtonCopy
-                          key={`copy-${index}`}
-                          valueToCopy={getValueToCopy(
-                            item.value,
-                            action.copyValue
-                          )}
-                        />
-                      )
-                    } else {
-                      return (
-                        <Tooltip label={action.label} key={`tooltip-${index}`}>
-                          <F0Button
-                            key={`action-${index}`}
-                            size="sm"
-                            variant="neutral"
-                            label={action.label}
-                            hideLabel
-                            icon={action.icon}
-                            onClick={action.onClick}
-                          />
-                        </Tooltip>
-                      )
-                    }
-                  })}
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        ) : null}
+        <MetadataHoverCard
+          item={item}
+          open={isActive && hasHover}
+          isAction={isAction}
+          isList={isList}
+        />
       </div>
     </div>
   )
@@ -313,9 +332,9 @@ const _Metadata = memo(function Metadata({
       {cleanedItems.map((item, index) => (
         <Fragment key={`metadata-item-${index}`}>
           <MetadataItem item={item} />
-          {index < cleanedItems.length - 1 && (
+          {index < cleanedItems.length - 1 ? (
             <div className="hidden h-4 w-[1px] bg-f1-border md:block" />
-          )}
+          ) : null}
         </Fragment>
       ))}
     </div>

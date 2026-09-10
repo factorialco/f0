@@ -1,9 +1,6 @@
 import { useIsPresent } from "motion/react"
-import { forwardRef, useEffect, useState } from "react"
-
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import type { IconType } from "@/components/F0Icon"
-import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
@@ -17,15 +14,21 @@ import { cn } from "@/lib/utils"
 import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import {
+  DataCollectionSource,
+  DataCollectionSourceDefinition,
+} from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
 import { tableCellContentClassName } from "@/ui/value-display/const"
-
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { getColumnId } from "../hooks/useColums"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import type {
   CellRendererProps,
   ColId,
@@ -33,10 +36,6 @@ import type {
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
-
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
-import { getColumnId } from "../hooks/useColums"
-import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -49,7 +48,24 @@ export type RowProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataCollectionSource<
+  /**
+   * The definition, memoized on the source's `deps` — not the live source,
+   * whose identity churns on every consumer render.
+   */
+  source: DataCollectionSourceDefinition<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+  /**
+   * Supplied only to rows that render nested children, which need the current
+   * filters and sortings to fetch them. Absent, and so stable, for flat rows.
+   */
+  liveSource?: DataCollectionSource<
     R,
     Filters,
     Sortings,
@@ -61,10 +77,15 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
   onItemCheckedChange?: (item: R, checked: boolean) => void
-  selectedItems: Map<string | number, R>
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  /** This row's own selected state. Passed as a scalar so a selection change
+   * only alters the prop of the row that changed, not of every row. */
+  isSelected?: boolean
+  /** Only supplied for rows that render nested children, which need it to derive
+   * their own children's state. Absent for flat rows, so their props stay
+   * identical across a selection change. */
+  selectedItems?: Map<string | number, R>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
   frozenColumnsLeft: number
   checkColumnWidth: number
   noBorder?: boolean
@@ -143,9 +164,10 @@ const RowComponentInner = <
 >(
   {
     source,
+    liveSource,
     item,
-    onCheckedChange,
     onItemCheckedChange,
+    isSelected: isSelectedProp,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -190,6 +212,14 @@ const RowComponentInner = <
     (selectionInherited || source.selectionDisabled?.(item) === true)
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
+  // Derived here rather than passed in: as a prop it was an inline arrow built
+  // per row per render, which alone made the row's memo comparison fail every
+  // time (measured: 50 mismatches for 25 rows across two commits).
+  const onCheckedChange = useCallback(
+    (checked: boolean) => onItemCheckedChange?.(item, checked),
+    [onItemCheckedChange, item]
+  )
+
   const i18n = useI18n()
 
   // Play the green "flash on add" highlight once, when a newly-added row
@@ -201,7 +231,9 @@ const RowComponentInner = <
   const [flashing, setFlashing] = useState(isNew)
 
   useEffect(() => {
-    if (!flashing) return
+    if (!flashing) {
+      return
+    }
     const timeout = setTimeout(() => setFlashing(false), ROW_FLASH_DURATION_MS)
     return () => clearTimeout(timeout)
   }, [flashing])
@@ -210,7 +242,11 @@ const RowComponentInner = <
     item: R,
     column: TableColumnDefinition<R, Sortings, Summaries>
   ) => {
-    return renderProperty(item, column, "table", i18n, {
+    return renderProperty({
+      item,
+      property: column,
+      visualization: "table",
+      i18n,
       tableAlign: column.align ?? "left",
     })
   }
@@ -243,36 +279,48 @@ const RowComponentInner = <
   // clicked mid-exit must not reach them. `true` outside AnimatePresence.
   const isPresent = useIsPresent()
 
+  // Requires the live source, which Table hands to exactly the rows
+  // `itemsWithChildren` claims. Should they ever disagree, render flat.
+  const delegatesToNestedRow =
+    rowWithChildren && hasChildrenLoaded && !!liveSource
+
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
-  const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
-  useEffect(() => {
-    if (
-      id === undefined ||
-      selectionDisabled ||
-      !willRenderOwnRow ||
-      !registerSelectable ||
-      !isPresent
-    )
-      return
-    registerSelectable(id, item)
-    return () => unregisterSelectable?.(id)
-  }, [
-    id,
-    item,
-    selectionDisabled,
-    willRenderOwnRow,
-    registerSelectable,
-    unregisterSelectable,
-    isPresent,
-  ])
+  const willRenderOwnRow = !delegatesToNestedRow
+  const isRegistered =
+    id !== undefined && !selectionDisabled && willRenderOwnRow && isPresent
 
-  if (rowWithChildren && hasChildrenLoaded) {
+  const itemRef = useRef(item)
+  itemRef.current = item
+
+  // Deliberately not keyed on `item`: a page append rebuilds the record of
+  // every row, and re-running this effect for that would take each row out of
+  // the registry and put it straight back in — a membership change per rendered
+  // row, on every page.
+  useEffect(() => {
+    if (id === undefined || !isRegistered || !registerSelectable) {
+      return
+    }
+    registerSelectable(id, itemRef.current)
+    return () => unregisterSelectable?.(id)
+  }, [id, isRegistered, registerSelectable, unregisterSelectable])
+
+  // "Select all" is served the items the registry holds, so a row whose record
+  // is replaced has to refresh its entry. Re-registering an id already present
+  // only overwrites the item; membership, and the id list built from it, are
+  // untouched.
+  useEffect(() => {
+    if (id === undefined || !isRegistered || !registerSelectable) {
+      return
+    }
+    registerSelectable(id, item)
+  }, [id, item, isRegistered, registerSelectable])
+
+  if (delegatesToNestedRow && liveSource) {
     return (
       <NestedRow
-        source={source}
+        source={liveSource}
         item={item}
-        onCheckedChange={onCheckedChange}
         onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}
         columns={columns}
@@ -296,7 +344,7 @@ const RowComponentInner = <
     )
   }
 
-  const isSelected = id !== undefined && selectedItems.has(id)
+  const isSelected = isSelectedProp ?? false
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   const cellRenderedClass = CellRenderer
@@ -328,7 +376,7 @@ const RowComponentInner = <
         referenceTypeClasses[referenceRowType]
       )}
     >
-      {source.selectable && (
+      {source.selectable ? (
         <TableCell
           width={checkColumnWidth}
           sticky={{ left: 0 }}
@@ -341,7 +389,7 @@ const RowComponentInner = <
           )}
           referenceRowType={referenceRowType}
         >
-          {id !== undefined && (
+          {id !== undefined ? (
             <div
               className={cn(
                 "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
@@ -350,7 +398,7 @@ const RowComponentInner = <
               )}
             >
               <Checkbox
-                checked={selectionInherited || selectedItems.has(id)}
+                checked={selectionInherited || isSelected}
                 indeterminate={selectionInherited}
                 onCheckedChange={onCheckedChange}
                 disabled={selectionDisabled}
@@ -358,9 +406,9 @@ const RowComponentInner = <
                 hideLabel
               />
             </div>
-          )}
+          ) : null}
         </TableCell>
-      )}
+      ) : null}
 
       {columns.map((column, cellIndex) => {
         const headerGroup = headerGroups?.find((group) => {
@@ -431,10 +479,10 @@ const RowComponentInner = <
       })}
 
       {hasItemActions &&
-        !loading &&
-        !nestedRowProps?.onLoadMoreChildren &&
-        !nestedRowProps?.onAddRow &&
-        (fromVisualization === "editableTable" ? (
+      !loading &&
+      !nestedRowProps?.onLoadMoreChildren &&
+      !nestedRowProps?.onAddRow ? (
+        fromVisualization === "editableTable" ? (
           <TableCell
             key={`table-cell-${groupIndex}-${index}-actions`}
             sticky={{ right: 0 }}
@@ -466,7 +514,7 @@ const RowComponentInner = <
               </ItemActionsRowContainer>
             </td>
             {/** Mobile item actions */}
-            {hasMobileItemActions && (
+            {hasMobileItemActions ? (
               <TableCell
                 key={`table-cell-${groupIndex}-${index}-actions`}
                 width={68}
@@ -482,9 +530,10 @@ const RowComponentInner = <
                   onOpenChange={handleDropDownOpenChange}
                 />
               </TableCell>
-            )}
+            ) : null}
           </>
-        ))}
+        )
+      ) : null}
     </TableRow>
   )
 }

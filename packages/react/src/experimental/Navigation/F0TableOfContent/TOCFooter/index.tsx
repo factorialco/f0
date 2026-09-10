@@ -1,7 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-
 import { TOCAction } from "../types"
 
 interface TOCFooterProps {
@@ -33,7 +32,7 @@ export function TOCFooter({ actions }: TOCFooterProps) {
           >
             {action.label}
           </OneEllipsis>
-          {action.icon && <F0Icon icon={action.icon} color="secondary" />}
+          {action.icon ? <F0Icon icon={action.icon} color="secondary" /> : null}
         </div>
       ))}
     </div>

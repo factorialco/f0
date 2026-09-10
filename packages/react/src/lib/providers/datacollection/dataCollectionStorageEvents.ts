@@ -34,7 +34,9 @@ export const subscribeToDataCollectionStorageChanges = (
   listeners.add(listener)
   return () => {
     listeners.delete(listener)
-    if (listeners.size === 0) listenersByCollectionId.delete(collectionId)
+    if (listeners.size === 0) {
+      listenersByCollectionId.delete(collectionId)
+    }
   }
 }
 

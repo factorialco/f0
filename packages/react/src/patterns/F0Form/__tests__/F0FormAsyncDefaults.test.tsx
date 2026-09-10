@@ -1,7 +1,6 @@
 import React from "react"
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
 import { z } from "zod"
-
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import {
   zeroRender as render,
@@ -9,7 +8,6 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 

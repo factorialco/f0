@@ -1,6 +1,5 @@
 import { format } from "date-fns"
 import { useState, type ReactNode } from "react"
-
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
@@ -31,7 +30,9 @@ export const MockPostAcknowledgeBar = ({
   const isCompleted = !!completedAt
 
   const acknowledge = async () => {
-    if (!onAcknowledge) return
+    if (!onAcknowledge) {
+      return
+    }
     setPendingRequest(true)
     try {
       await onAcknowledge()

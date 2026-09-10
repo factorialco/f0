@@ -1,12 +1,10 @@
 import { forwardRef } from "react"
-
 import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
-
 import EmptyBarChart from "./Backgrounds/EmptyBarChart"
 import EmptyLineChart from "./Backgrounds/EmptyLineChart"
 
@@ -71,23 +69,25 @@ const _ChartWidgetEmptyState = forwardRef<HTMLDivElement, Props>(
               bgClassName
             )}
           >
-            {type === "bar-chart" && (
+            {type === "bar-chart" ? (
               <div className="absolute bottom-1 left-4 right-4">
                 <EmptyBarChart className="w-full" />
               </div>
-            )}
-            {type === "line-chart" && <EmptyLineChart className="w-full" />}
+            ) : null}
+            {type === "line-chart" ? (
+              <EmptyLineChart className="w-full" />
+            ) : null}
           </div>
           <div className="relative flex min-h-28 flex-1 flex-col items-start gap-5">
             <p className="flex w-3/4 text-xl font-semibold">{content}</p>
-            {buttonLabel && (
+            {buttonLabel ? (
               <F0Button
                 label={buttonLabel}
                 icon={buttonIcon}
                 variant={buttonVariant}
                 onClick={buttonAction}
               />
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>

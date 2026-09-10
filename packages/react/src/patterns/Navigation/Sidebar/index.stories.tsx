@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { Comment, Home } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import {
   exampleActions,
   exampleEmptyState,
@@ -62,11 +59,7 @@ const meta: Meta<typeof Sidebar> = {
   },
   args: {
     header: <Header defaultSelected="1" />,
-    body: (
-      <>
-        <Menu {...SidebarMenuStories.Default.args} />
-      </>
-    ),
+    body: <Menu {...SidebarMenuStories.Default.args} />,
     footer: <SidebarFooter {...SidebarFooterStories.Default.args} />,
   } satisfies ComponentProps<typeof Sidebar>,
 }
@@ -78,11 +71,7 @@ type Story = StoryObj<typeof Sidebar>
 export const Default: Story = {
   args: {
     header: <Header defaultSelected="1" />,
-    body: (
-      <>
-        <Menu {...SidebarMenuStories.Default.args} />
-      </>
-    ),
+    body: <Menu {...SidebarMenuStories.Default.args} />,
     footer: <SidebarFooter {...SidebarFooterStories.Default.args} />,
   },
   decorators: [

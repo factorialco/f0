@@ -1,9 +1,9 @@
+import { useEffect, useId, useRef, useState } from "react"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
-import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Comment as CommentIcon,
@@ -16,9 +16,8 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
+import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useId, useRef, useState } from "react"
-
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
@@ -235,7 +234,9 @@ export const BaseCommunityPost = ({
     event.preventDefault()
     event.stopPropagation()
 
-    if (!description) return
+    if (!description) {
+      return
+    }
 
     setExpandedDescription({ id, description })
   }
@@ -247,7 +248,9 @@ export const BaseCommunityPost = ({
   }, [descriptionExpanded])
 
   useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescription(null)
+    if (!descriptionExpandable) {
+      setExpandedDescription(null)
+    }
   }, [descriptionExpandable])
 
   useEffect(() => {
@@ -266,7 +269,9 @@ export const BaseCommunityPost = ({
 
     updateDescriptionOverflow()
 
-    if (typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
     resizeObserver.observe(descriptionElement)
@@ -336,7 +341,7 @@ export const BaseCommunityPost = ({
             {/* `inLabel` goes with the group link, not the author: on its own
                 it is a dangling "in" (or, with no author at all, a capitalised
                 "In" followed by nothing). */}
-            {!hideGroup && (
+            {!hideGroup ? (
               <>
                 <span
                   className={cn(
@@ -356,7 +361,7 @@ export const BaseCommunityPost = ({
                   {group.title}
                 </F0Link>
               </>
-            )}
+            ) : null}
           </div>
 
           {/* `text-base`, like the author line above it: the two are one
@@ -366,14 +371,14 @@ export const BaseCommunityPost = ({
             {date}
             {/* Beside the date rather than by the title: it is a fact about the
                 post's standing, not part of what it says. */}
-            {pinned && (
+            {pinned ? (
               <F0Icon
                 icon={PushPinSolid}
                 size="xs"
                 aria-label={pinnedLabel}
                 role={pinnedLabel ? "img" : undefined}
               />
-            )}
+            ) : null}
           </span>
         </div>
         {/* THE ACTIONS SIT ON THE AVATAR'S ROW, not on the first line of the
@@ -396,13 +401,13 @@ export const BaseCommunityPost = ({
                 title={act.label ?? ""}
               />
             ))}
-            {dropdownItems?.length && (
+            {dropdownItems?.length ? (
               <Dropdown
                 items={dropdownItems}
                 icon={EllipsisHorizontal}
                 size="sm"
               />
-            )}
+            ) : null}
           </div>
           <div className="md:hidden">
             <Dropdown
@@ -430,7 +435,7 @@ export const BaseCommunityPost = ({
         >
           {title}
         </p>
-        {description && (
+        {description ? (
           <>
             <PostDescription
               ref={descriptionRef}
@@ -441,20 +446,20 @@ export const BaseCommunityPost = ({
               className={cn(descriptionExpanded && focusRing())}
             />
             {descriptionExpandable &&
-              !noDescriptionClamp &&
-              isDescriptionOverflowing &&
-              !descriptionExpanded && (
-                <ExpandDescriptionButton
-                  describedBy={titleId}
-                  controls={descriptionId}
-                  expanded={descriptionExpanded}
-                  onClick={handleExpandDescription}
-                />
-              )}
+            !noDescriptionClamp &&
+            isDescriptionOverflowing &&
+            !descriptionExpanded ? (
+              <ExpandDescriptionButton
+                describedBy={titleId}
+                controls={descriptionId}
+                expanded={descriptionExpanded}
+                onClick={handleExpandDescription}
+              />
+            ) : null}
           </>
-        )}
+        ) : null}
       </div>
-      {mediaUrl && !event && (
+      {mediaUrl && !event ? (
         // FILLS THE POST, UP TO THE READING COLUMN. The old 480px cap dated
         // from when the avatar's gutter took a chunk of the card and the media
         // sat in what was left; with the body starting at the card's own edge it
@@ -495,14 +500,14 @@ export const BaseCommunityPost = ({
             </>
           )}
         </div>
-      )}
-      {event && (
+      ) : null}
+      {event ? (
         <div className="w-full @[744px]:max-w-content">
           <PostEvent {...event} />
         </div>
-      )}
+      ) : null}
       <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-      {!noReactionsButton && (
+      {!noReactionsButton ? (
         <Reactions
           items={reactions?.items ?? []}
           onInteraction={reactions?.onInteraction}
@@ -512,7 +517,7 @@ export const BaseCommunityPost = ({
             icon: CommentIcon,
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }
@@ -542,16 +547,16 @@ export const CommunityPostSkeleton = ({
       <div className="mt-3">
         <PostDescription.Skeleton />
       </div>
-      {withImage && !withEvent && (
+      {withImage && !withEvent ? (
         <div className="mt-3 aspect-video w-full overflow-hidden rounded-xl md:w-2/3">
           <Skeleton className="h-full w-full rounded-2xs" />
         </div>
-      )}
-      {withEvent && (
+      ) : null}
+      {withEvent ? (
         <div className="mt-3 w-full md:w-2/3">
           <PostEvent.Skeleton />
         </div>
-      )}
+      ) : null}
       <div className="mt-3 flex flex-row items-center gap-1 py-1">
         <Skeleton className="h-2.5 w-14 rounded-2xs" />
         <Skeleton className="h-2.5 w-14 rounded-2xs" />

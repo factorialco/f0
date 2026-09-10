@@ -1,10 +1,8 @@
 import { memo, useMemo, useRef, type ReactNode } from "react"
-
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { CommunityPost } from "@/sds/Home/Communities/Post/CommunityPost"
-
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
 import {
   useChatActivePostId,
@@ -65,7 +63,9 @@ const ChatPostRowComponent = ({
 
   const dropdownItems = useMemo<DropdownItem[] | undefined>(() => {
     const actions = postActions(post)
-    if (actions.length === 0) return undefined
+    if (actions.length === 0) {
+      return undefined
+    }
     return actions.map((action) => ({
       label: action.label,
       icon: action.icon,
@@ -83,7 +83,9 @@ const ChatPostRowComponent = ({
   // a post they came to the bottom of. First source in a tick wins.
   const openedThisTick = useRef(false)
   const open = (source: "card" | "comment") => {
-    if (openedThisTick.current) return
+    if (openedThisTick.current) {
+      return
+    }
     openedThisTick.current = true
     queueMicrotask(() => {
       openedThisTick.current = false

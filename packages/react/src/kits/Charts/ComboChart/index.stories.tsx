@@ -1,6 +1,5 @@
 import { Meta } from "@storybook/react-vite"
-
-import { ComboChart } from "./index"
+import { ComboChart } from "."
 
 const meta: Meta = {
   title: "Charts/ComboChart",
@@ -173,7 +172,7 @@ export const Biaxial: Meta<typeof ComboChart<typeof departmentConfig>> = {
     },
     yAxis: {
       hide: false,
-      tickFormatter: (value: string) => `${value}`,
+      tickFormatter: (value: string) => value,
     },
     legend: true,
   },

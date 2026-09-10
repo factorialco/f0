@@ -1,7 +1,5 @@
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 
 /**

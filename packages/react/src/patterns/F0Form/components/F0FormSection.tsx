@@ -1,23 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/patterns/SectionHeader"
 import { Form as FormProvider } from "@/ui/form"
-
-import type {
-  F0FormErrorTriggerMode,
-  F0FormSchema,
-  F0FormSubmitResult,
-  F0PerSectionSectionConfig,
-  F0PerSectionSubmitConfig,
-  RenderCustomFieldFunction,
-} from "../types"
-import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
-
 import { createConditionalResolver } from "../conditionalResolver"
 import { FIELD_GAP } from "../constants"
 import { F0FormContext } from "../context"
@@ -27,6 +15,15 @@ import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "../groupingUtils"
+import type {
+  F0FormErrorTriggerMode,
+  F0FormSchema,
+  F0FormSubmitResult,
+  F0PerSectionSectionConfig,
+  F0PerSectionSubmitConfig,
+  RenderCustomFieldFunction,
+} from "../types"
+import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
 import { RowRenderer } from "./RowRenderer"
@@ -49,7 +46,9 @@ function flattenFormErrors(
 
   function walk(obj: Record<string, unknown>, prefix: string) {
     for (const [key, value] of Object.entries(obj)) {
-      if (key === "root") continue
+      if (key === "root") {
+        continue
+      }
       const path = prefix ? `${prefix}.${key}` : key
       if (value && typeof value === "object" && !Array.isArray(value)) {
         const err = value as Record<string, unknown>
@@ -293,7 +292,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             )}
           >
             <SectionHeader title={title} description={description ?? ""} />
-            {sectionConfig?.action && (
+            {sectionConfig?.action ? (
               <F0Button
                 label={sectionConfig.action.label}
                 icon={sectionConfig.action.icon}
@@ -302,7 +301,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                 variant="outline"
                 size="md"
               />
-            )}
+            ) : null}
           </div>
 
           <div className={`flex flex-col ${FIELD_GAP}`}>
@@ -359,13 +358,13 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             })}
           </div>
 
-          {rootError && (
+          {rootError ? (
             <p className="mt-4 text-base font-medium text-f1-foreground-critical">
               {rootError.message}
             </p>
-          )}
+          ) : null}
 
-          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
+          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) ? (
             <div className="mt-4 flex justify-end">
               <F0Button
                 type="submit"
@@ -375,7 +374,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                 disabled={hasErrors || isFormLoading}
               />
             </div>
-          )}
+          ) : null}
         </form>
       </FormProvider>
     </F0FormContext.Provider>

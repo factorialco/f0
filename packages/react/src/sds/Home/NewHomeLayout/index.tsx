@@ -11,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type F0IconProps } from "@/components/F0Icon"
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
 import { Action } from "@/ui/Action"
-
 import {
   entranceDelay,
   entranceTransition,
@@ -49,7 +47,7 @@ import {
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
-import { SlotWidget } from "../SlotWidget"
+import { HomeTrackingProvider, type HomeTrackingOptions } from "../tracking"
 import { useScrollFade } from "../useScrollFade"
 import {
   WidgetContainer,
@@ -284,6 +282,197 @@ const RAIL_ACTION_TONES = {
 >
 
 /**
+ * The genie, identical whichever face the glyph wears.
+ *
+ * THE ARRIVAL IS A SLIDE, NOT A SCALE. A glyph used to come in from 1.18 and
+ * leave at 1.3, which was the card's own retract read at glyph size — and that
+ * only meant anything while the cards were really shrinking onto them. They fade
+ * where they stand now (`WidgetMotion`), so the strip does the one thing left
+ * that says the two states are changing places rather than one replacing the
+ * other: it slides in off the column that is closing, and back out the same way.
+ *
+ * THE PRESS IS THE ONLY SCALE, and it is TRANSIENT. A held fractional scale is
+ * rasterized once and then stretched: the glyph's icon and a pill's figures go
+ * soft, and they stay soft for as long as you keep the pointer there, which is
+ * exactly when they are being read. The hover and open states say what they have
+ * to say with the panel they open, the tooltip, and the button's own hover
+ * border.
+ */
+const useGlyphMotion = (order: number, delayMs: number) => {
+  const reducedMotion = useReducedMotion()
+
+  return {
+    initial: {
+      opacity: 0,
+      x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX,
+    },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX },
+    whileTap: reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE },
+    transition: withReducedMotion(
+      { ...glyphTransition, delay: entranceDelay(order, delayMs) },
+      reducedMotion
+    ),
+  }
+}
+
+/* Same accent dot HomeListItem draws for unread rows — the ring keeps it
+   legible over any glyph, action button included. */
+const GlyphUpdatesDot = ({ hasUpdates }: { hasUpdates?: boolean }) =>
+  hasUpdates ? (
+    <span className="pointer-events-none absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
+  ) : null
+
+// The action's button IS the glyph — one control, so nothing is nested in
+// anything and the strip's geometry is untouched (`size-10` + `compact`
+// hold the button to the 40px every other glyph is).
+//
+// Which means the panel can't be a click any more: hover opens it as ever,
+// and FOCUS opens it too, so reaching the glyph by keyboard still gets you
+// to the widget's own controls — they are the next thing in the tab order.
+//
+// With a `text` the whole thing becomes a PILL: the reading, then the same
+// button at the end of it. The pill costs the strip NO ROOM it would not have
+// spent on the plain glyph — 40px of the column's rhythm, and the width it
+// needs taken off the left, out over the feed.
+//
+// The tooltip is `instant`: it is the only place the action's NAME is
+// written, and the glyph is a control you point at on your way past. The
+// default 700ms wait is for a label that merely confirms what you can
+// already read — here it withheld the whole thing.
+const RailActionGlyph = ({
+  widget,
+  action,
+  order,
+  open,
+  delayMs,
+  onOpen,
+  onCancelOpen,
+}: {
+  widget: HomeWidgetItem
+  action: NonNullable<HomeWidgetItem["railAction"]>
+  /** Place in the strip's stagger. */
+  order: number
+  open: boolean
+  /** When this strip's first glyph starts arriving. */
+  delayMs: number
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  onCancelOpen: () => void
+}) => {
+  const glyphMotion = useGlyphMotion(order, delayMs)
+  // The flash pauses while the widget is FLOATING, because the panel is open
+  // for exactly one reason — the pointer (or the focus ring) is on the glyph —
+  // and a face that changed under the pointer would make the click a coin toss
+  // about which icon was pressed.
+  const actionFace = useFlash(!!action.flashing && !open)
+  /**
+   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card is out with the same
+   * reading in full context, so the pill goes and leaves the button it was
+   * built around — which also takes the overhang out of the panel's way.
+   *
+   * THE BUTTON ITSELF DOES NOT CHANGE while that happens. Its colours come
+   * from whether the action HAS a reading, not from whether the pill is drawn
+   * right now (`action.text`, not this) — a control that repaints under the
+   * pointer is one you cannot aim at, and hover is exactly when you are aiming.
+   */
+  const text = action.text && !open ? action.text : undefined
+  /** What the state's colour paints — the pill, the button, and its icon. */
+  const tone = RAIL_ACTION_TONES[action.tone ?? "neutral"]
+
+  return (
+    <Tooltip label={action.label} instant>
+      <motion.div
+        className={cn(
+          // `pointer-events-auto` against the strip's `none`: a pill is wider
+          // than the rail's column, and the box holding it must not become a
+          // 100px dead margin down the side of the feed.
+          //
+          // `group` so the BUTTON can answer this whole box's hover — see its
+          // border below.
+          "group pointer-events-auto relative shrink-0",
+          // The pill is the GLYPH'S OWN geometry, grown sideways: the button
+          // unchanged inside it, a `p-1` band around it, and `rounded-lg` — one
+          // step up from the button's `rounded-md`, which is what the radius
+          // scale says a container holding an `lg` control takes. Nothing here
+          // is a shape the strip doesn't already use.
+          //
+          // `-my-1 -mr-1` IS WHAT KEEPS IT A GLYPH. That band is drawing, not
+          // layout: paid for in flow it made the pill a 48px item in a column of
+          // 40px ones, and since the reading is DROPPED while the widget floats
+          // (`text` above), pointing at the pill shrank it back to 40 and shunted
+          // every glyph under it up by 8px — the strip rearranging itself under
+          // the pointer that was aiming at it. Taken back out of the flow at each
+          // edge the band overhangs, the pill occupies exactly the glyph's slot
+          // whether it is carrying a reading or not, and nothing below it moves.
+          text
+            ? cn(
+                "-mr-1 -my-1 flex flex-row items-center gap-1 rounded-lg p-1",
+                tone.pill
+              )
+            : "rounded-lg"
+        )}
+        onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+        onMouseLeave={onCancelOpen}
+        onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
+        {...glyphMotion}
+      >
+        {text ? <GlyphReading text={text} ticking={!!action.ticking} /> : null}
+        <Action
+          type="button"
+          // `ghost` and then painted: the tone decides this button's fill and
+          // its icon TOGETHER with the pill's, and a variant would bring a
+          // second opinion about both.
+          variant="ghost"
+          // THE SAME BUTTON either way — 40px at the strip's own radius,
+          // whether it is standing alone as the glyph or sitting at the end of
+          // a pill. A reading beside it doesn't make it a different control.
+          size="lg"
+          // FLAT, like every other glyph in the strip. A button's elevation
+          // chrome — the drop shadow and the `::after` top highlight — is for a
+          // control raised off a page; here it reads as a border, and the
+          // highlight's own radius is a step tighter than an `lg` button's, so
+          // it cuts a visible arc across each corner. The strip is tiles.
+          className={cn(
+            // `[&_.main]:px-0` — the button is 40px of icon, not a label with
+            // room around it, and an `lg` button's own padding would squeeze a
+            // 24px glyph out of a 40px box. The tile centres it instead.
+            "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none [&_.main]:px-0",
+            action.text ? tone.button : tone.solo,
+            // THE BORDER ANSWERS THE WHOLE GLYPH, not just its 40px: the pill is
+            // one object, and pointing at the reading is pointing at the thing
+            // the button belongs to. It stays for as long as the widget is out
+            // (`open`), so crossing from the glyph into the card it opened
+            // doesn't switch the button off behind you.
+            "ring-inset group-hover:ring-1",
+            open && "ring-1",
+            action.text ? tone.ring : tone.soloRing
+          )}
+          // "Resume" on its own doesn't say which glyph this is; the tooltip
+          // can lean on the strip for that, an accessible name can't.
+          aria-label={`${action.label}, ${widgetTitle(widget)}`}
+          onClick={() => action.onClick()}
+        >
+          <F0Icon
+            // The strip's own glyph size: `F0AvatarIcon` at `lg` draws its icon
+            // at 24px, and an action glyph that drew a smaller one read as a
+            // different KIND of tile rather than the same tile doing something.
+            size="lg"
+            // `color` rather than a text class: it marks the svg
+            // `data-has-color`, which is what stops the button variant's own
+            // icon rules from painting over the tone.
+            color={action.text ? tone.icon : tone.soloIcon}
+            // No widget icon means no second face to flash to — the action's
+            // is the only one there is.
+            icon={actionFace || !widget.icon ? action.icon : widget.icon}
+          />
+        </Action>
+        <GlyphUpdatesDot hasUpdates={widget.hasUpdates} />
+      </motion.div>
+    </Tooltip>
+  )
+}
+
+/**
  * One widget as the collapsed strip shows it: its own catalog glyph, standing in
  * for the whole card — or, when the widget carries a `railAction`, that action's
  * button wearing the same 40px.
@@ -312,174 +501,21 @@ const CollapsedGlyph = ({
   onCancelOpen: () => void
   onClose: () => void
 }) => {
-  const reducedMotion = useReducedMotion()
   const action = widget.railAction
-  // The flash pauses while the widget is FLOATING, because the panel is open for
-  // exactly one reason — the pointer (or the focus ring) is on the glyph — and a
-  // face that changed under the pointer would make the click a coin toss about
-  // which icon was pressed.
-  const actionFace = useFlash(!!action?.flashing && !open)
-  /**
-   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card is out with the same
-   * reading in full context, so the pill goes and leaves the button it was built
-   * around — which also takes the overhang out of the panel's way.
-   *
-   * THE BUTTON ITSELF DOES NOT CHANGE while that happens. Its colours come from
-   * whether the action HAS a reading, not from whether the pill is drawn right
-   * now (`action.text`, not this) — a control that repaints under the pointer is
-   * one you cannot aim at, and hover is exactly when you are aiming.
-   */
-  const text = action?.text && !open ? action.text : undefined
-  /** What the state's colour paints — the pill, the button, and its icon. */
-  const tone = RAIL_ACTION_TONES[action?.tone ?? "neutral"]
 
-  /**
-   * The genie, identical whichever face the glyph wears.
-   *
-   * THE ARRIVAL IS A SLIDE, NOT A SCALE. A glyph used to come in from 1.18 and
-   * leave at 1.3, which was the card's own retract read at glyph size — and that
-   * only meant anything while the cards were really shrinking onto them. They fade
-   * where they stand now (`WidgetMotion`), so the strip does the one thing left
-   * that says the two states are changing places rather than one replacing the
-   * other: it slides in off the column that is closing, and back out the same way.
-   *
-   * THE PRESS IS THE ONLY SCALE, and it is TRANSIENT. A held fractional scale is
-   * rasterized once and then stretched: the glyph's icon and a pill's figures go
-   * soft, and they stay soft for as long as you keep the pointer there, which is
-   * exactly when they are being read. The hover and open states say what they have
-   * to say with the panel they open, the tooltip, and the button's own hover
-   * border.
-   */
-  const glyphMotion = {
-    initial: {
-      opacity: 0,
-      x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX,
-    },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX },
-    whileTap: reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE },
-    transition: withReducedMotion(
-      { ...glyphTransition, delay: entranceDelay(order, delayMs) },
-      reducedMotion
-    ),
-  }
-
-  /* Same accent dot HomeListItem draws for unread rows — the ring keeps it
-     legible over any glyph, action button included. */
-  const updatesDot = widget.hasUpdates ? (
-    <span className="pointer-events-none absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
-  ) : null
+  const glyphMotion = useGlyphMotion(order, delayMs)
 
   if (action) {
-    // The action's button IS the glyph — one control, so nothing is nested in
-    // anything and the strip's geometry is untouched (`size-10` + `compact`
-    // hold the button to the 40px every other glyph is).
-    //
-    // Which means the panel can't be a click any more: hover opens it as ever,
-    // and FOCUS opens it too, so reaching the glyph by keyboard still gets you
-    // to the widget's own controls — they are the next thing in the tab order.
-    //
-    // With a `text` the whole thing becomes a PILL: the reading, then the same
-    // button at the end of it. The pill costs the strip NO ROOM it would not have
-    // spent on the plain glyph — 40px of the column's rhythm, and the width it
-    // needs taken off the left, out over the feed.
-    //
-    // The tooltip is `instant`: it is the only place the action's NAME is
-    // written, and the glyph is a control you point at on your way past. The
-    // default 700ms wait is for a label that merely confirms what you can
-    // already read — here it withheld the whole thing.
     return (
-      <Tooltip label={action.label} instant>
-        <motion.div
-          className={cn(
-            // `pointer-events-auto` against the strip's `none`: a pill is wider
-            // than the rail's column, and the box holding it must not become a
-            // 100px dead margin down the side of the feed.
-            //
-            // `group` so the BUTTON can answer this whole box's hover — see its
-            // border below.
-            "group pointer-events-auto relative shrink-0",
-            // The pill is the GLYPH'S OWN geometry, grown sideways: the button
-            // unchanged inside it, a `p-1` band around it, and `rounded-lg` — one
-            // step up from the button's `rounded-md`, which is what the radius
-            // scale says a container holding an `lg` control takes. Nothing here
-            // is a shape the strip doesn't already use.
-            //
-            // `-my-1 -mr-1` IS WHAT KEEPS IT A GLYPH. That band is drawing, not
-            // layout: paid for in flow it made the pill a 48px item in a column of
-            // 40px ones, and since the reading is DROPPED while the widget floats
-            // (`text` above), pointing at the pill shrank it back to 40 and shunted
-            // every glyph under it up by 8px — the strip rearranging itself under
-            // the pointer that was aiming at it. Taken back out of the flow at each
-            // edge the band overhangs, the pill occupies exactly the glyph's slot
-            // whether it is carrying a reading or not, and nothing below it moves.
-            text
-              ? cn(
-                  "-mr-1 -my-1 flex flex-row items-center gap-1 rounded-lg p-1",
-                  tone.pill
-                )
-              : "rounded-lg"
-          )}
-          onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
-          onMouseLeave={onCancelOpen}
-          onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
-          {...glyphMotion}
-        >
-          {text ? (
-            <GlyphReading text={text} ticking={!!action.ticking} />
-          ) : null}
-          <Action
-            type="button"
-            // `ghost` and then painted: the tone decides this button's fill and
-            // its icon TOGETHER with the pill's, and a variant would bring a
-            // second opinion about both.
-            variant="ghost"
-            // THE SAME BUTTON either way — 40px at the strip's own radius,
-            // whether it is standing alone as the glyph or sitting at the end of
-            // a pill. A reading beside it doesn't make it a different control.
-            size="lg"
-            // FLAT, like every other glyph in the strip. A button's elevation
-            // chrome — the drop shadow and the `::after` top highlight — is for a
-            // control raised off a page; here it reads as a border, and the
-            // highlight's own radius is a step tighter than an `lg` button's, so
-            // it cuts a visible arc across each corner. The strip is tiles.
-            className={cn(
-              // `[&_.main]:px-0` — the button is 40px of icon, not a label with
-              // room around it, and an `lg` button's own padding would squeeze a
-              // 24px glyph out of a 40px box. The tile centres it instead.
-              "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none [&_.main]:px-0",
-              action.text ? tone.button : tone.solo,
-              // THE BORDER ANSWERS THE WHOLE GLYPH, not just its 40px: the pill is
-              // one object, and pointing at the reading is pointing at the thing
-              // the button belongs to. It stays for as long as the widget is out
-              // (`open`), so crossing from the glyph into the card it opened
-              // doesn't switch the button off behind you.
-              "ring-inset group-hover:ring-1",
-              open && "ring-1",
-              action.text ? tone.ring : tone.soloRing
-            )}
-            // "Resume" on its own doesn't say which glyph this is; the tooltip
-            // can lean on the strip for that, an accessible name can't.
-            aria-label={`${action.label}, ${widgetTitle(widget)}`}
-            onClick={() => action.onClick()}
-          >
-            <F0Icon
-              // The strip's own glyph size: `F0AvatarIcon` at `lg` draws its icon
-              // at 24px, and an action glyph that drew a smaller one read as a
-              // different KIND of tile rather than the same tile doing something.
-              size="lg"
-              // `color` rather than a text class: it marks the svg
-              // `data-has-color`, which is what stops the button variant's own
-              // icon rules from painting over the tone.
-              color={action.text ? tone.icon : tone.soloIcon}
-              // No widget icon means no second face to flash to — the action's
-              // is the only one there is.
-              icon={actionFace || !widget.icon ? action.icon : widget.icon}
-            />
-          </Action>
-          {updatesDot}
-        </motion.div>
-      </Tooltip>
+      <RailActionGlyph
+        widget={widget}
+        action={action}
+        order={order}
+        open={open}
+        delayMs={delayMs}
+        onOpen={onOpen}
+        onCancelOpen={onCancelOpen}
+      />
     )
   }
 
@@ -507,7 +543,7 @@ const CollapsedGlyph = ({
             {widgetTitle(widget).charAt(0)}
           </span>
         )}
-        {updatesDot}
+        <GlyphUpdatesDot hasUpdates={widget.hasUpdates} />
       </span>
     </motion.button>
   )
@@ -521,6 +557,7 @@ const SCROLLBAR_HIDDEN = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
+const NO_BOX = { display: "contents" } as const
 const PANEL_LEAVE_MS = 150
 const PANEL_OPEN_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
@@ -648,6 +685,17 @@ export interface NewHomeLayoutProps {
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
   onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
+  /**
+   * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+   * shape the AI kit takes (`ai.tracking`).
+   *
+   * A widget is declarative: its rows carry an `href` and never an `onClick`,
+   * so a host had no seam to observe a row from and its analytics could not see
+   * the Home at all. These fire for EVERY widget in the column, so a newly
+   * added one is measured without remembering anything. Nothing here changes
+   * behaviour — a row still navigates through its own anchor.
+   */
+  tracking?: HomeTrackingOptions
   /** The daytime gradient period for the page surface. */
   period?: HomePeriod
   /** Fixed px width of the side rail. */
@@ -725,6 +773,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       renderWidgetPreview,
       onClickAddNewWidget,
       onReorderWidgets,
+      tracking,
       period = "morning",
       asideWidth = 396,
       mainWidth = MAIN_WIDTH,
@@ -757,10 +806,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // what decides it is the room THIS layout has.
     useLayoutEffect(() => {
       const el = rootRef.current
-      if (!el) return
+      if (!el) {
+        return
+      }
       const read = () => setRootWidth(el.clientWidth)
       read()
-      if (typeof ResizeObserver !== "function") return
+      if (typeof ResizeObserver !== "function") {
+        return
+      }
       const observer = new ResizeObserver(read)
       observer.observe(el)
       return () => observer.disconnect()
@@ -773,7 +826,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // during the render that first sees a width, rather than from an effect, keeps
     // it from lagging a paint behind the measurement.
     const [hasMeasured, setHasMeasured] = useState(false)
-    if (rootWidth > 0 && !hasMeasured) setHasMeasured(true)
+    if (rootWidth > 0 && !hasMeasured) {
+      setHasMeasured(true)
+    }
 
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
@@ -783,23 +838,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // arrangeable column takes new widgets.
     const canAddToSide = (side: WidgetContainerSide) =>
       canEditSide(side) && (addableWidgetContainers?.includes(side) ?? true)
-
-    const render = (widget: HomeWidgetItem) => {
-      const node = renderWidget ? (
-        renderWidget(widget, ctx)
-      ) : (
-        <SlotWidget
-          header={widget.header}
-          params={widget.params}
-          fullHeight={widget.fullHeight}
-          slots={widget.slots}
-          loading={widget.loading}
-          slotRenderers={slotRenderers}
-          ctx={ctx}
-        />
-      )
-      return node
-    }
 
     // EACH COLUMN SCROLLS ITSELF: the grid is bounded to the viewport minus the
     // gutter it sits in, and each column takes its own overflow inside it. Both
@@ -866,22 +904,31 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const hasRailColumn =
       sideReady && !stacked && (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
     const loosePins = {
-      pinned: stacked ? rightWidgets.filter((widget) => widget.locked) : [],
-      rest: stacked ? rightWidgets.filter((widget) => !widget.locked) : [],
+      pinned: rightWidgets.filter((widget) => widget.locked),
+      rest: rightWidgets.filter((widget) => !widget.locked),
     }
+    const [hosts, setHosts] = useState<Record<string, HTMLElement | null>>({})
+    const hostRefs = useRef(
+      new Map<string, (node: HTMLElement | null) => void>()
+    )
+    const hostRef = (id: string) => {
+      const kept = hostRefs.current.get(id)
+      if (kept) {
+        return kept
+      }
+      const fresh = (node: HTMLElement | null) =>
+        setHosts((was) => (was[id] === node ? was : { ...was, [id]: node }))
+      hostRefs.current.set(id, fresh)
+      return fresh
+    }
+    const widgetHostFor = stacked
+      ? (widget: HomeWidgetItem) => hosts[widget.id] ?? null
+      : undefined
+
     // The pins go BETWEEN blocks of `children` — after `stackedPinsAfter` of
     // them — because "just under the shortcuts" is a place inside content this
     // layout doesn't own. Splitting the children is the only way to reach it.
     const childBlocks = Children.toArray(children)
-    const mainBlocks = !stacked
-      ? childBlocks
-      : [
-          ...childBlocks.slice(0, stackedPinsAfter),
-          ...loosePins.pinned.map((widget) => (
-            <Fragment key={widget.id}>{render(widget)}</Fragment>
-          )),
-          ...childBlocks.slice(stackedPinsAfter),
-        ]
     // ARRIVAL, in reading order: each block of the main column rises in one beat
     // after the one above it, and the widgets under them (the container's own
     // `entrance.order`) carry the same count on rather than restarting it — a
@@ -890,14 +937,27 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // Each block keeps the key `Children.toArray` gave it, so the wrapper is
     // identified by the block it wraps: keyed by index instead, reordering the
     // content would re-key every wrapper below the change and replay its entrance.
-    const mainChildren = mainBlocks.map((block, order) => (
+    const asBlock = (block: ReactNode, order: number) => (
       <HomeEntrance
         key={isValidElement(block) && block.key != null ? block.key : order}
         order={order}
       >
         {block}
       </HomeEntrance>
-    ))
+    )
+    const mainChildren = [
+      ...childBlocks.slice(0, stackedPinsAfter).map(asBlock),
+      ...loosePins.pinned.map((widget) => (
+        <div
+          key={`pin-host-${widget.id}`}
+          ref={hostRef(widget.id)}
+          style={NO_BOX}
+        />
+      )),
+      ...childBlocks
+        .slice(stackedPinsAfter)
+        .map((block, index) => asBlock(block, stackedPinsAfter + index)),
+    ]
 
     const openWidget = collapsed
       ? rightWidgets.find((widget) => widget.id === openId)
@@ -907,16 +967,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (collapsed) return
-      if (openTimer.current) clearTimeout(openTimer.current)
+      if (collapsed) {
+        return
+      }
+      if (openTimer.current) {
+        clearTimeout(openTimer.current)
+      }
       openTimer.current = null
       setOpenId(null)
     }, [collapsed])
 
     useEffect(
       () => () => {
-        if (openTimer.current) clearTimeout(openTimer.current)
-        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+        if (openTimer.current) {
+          clearTimeout(openTimer.current)
+        }
+        if (leaveTimer.current) {
+          clearTimeout(leaveTimer.current)
+        }
       },
       []
     )
@@ -943,7 +1011,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      * size halfway through the fade.
      */
     const closingId = useRef<string | null>(null)
-    if (openId) closingId.current = openId
+    if (openId) {
+      closingId.current = openId
+    }
     const shownId = useRef<string | null>(null)
     shownId.current = openId
     const panelWidgetId =
@@ -1010,11 +1080,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         }
 
     const cancelLeave = () => {
-      if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      if (leaveTimer.current) {
+        clearTimeout(leaveTimer.current)
+      }
       leaveTimer.current = null
     }
     const cancelOpen = () => {
-      if (openTimer.current) clearTimeout(openTimer.current)
+      if (openTimer.current) {
+        clearTimeout(openTimer.current)
+      }
       openTimer.current = null
     }
     const scheduleLeave = () => {
@@ -1044,7 +1118,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     ) => {
       cancelLeave()
       cancelOpen()
-      if (shownId.current === id) return
+      if (shownId.current === id) {
+        return
+      }
       if (instant) {
         showFromAnchor(id, anchor)
         return
@@ -1055,12 +1131,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       )
     }
 
-    return (
+    const layout = (
       <motion.div
         ref={(node) => {
           rootRef.current = node
-          if (typeof ref === "function") ref(node)
-          else if (ref) ref.current = node
+          if (typeof ref === "function") {
+            ref(node)
+          } else if (ref) {
+            ref.current = node
+          }
         }}
         className={cn(
           // `isolate` so the surface layer's -z-10 stays INSIDE this layout
@@ -1176,12 +1255,12 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 the top-right controls, after the rail's own collapse button. It
                 draws NOTHING unless the AI chat context is enabled, so a Home
                 without One keeps the row it had. */}
-            {!hideOneSwitch && (
+            {!hideOneSwitch ? (
               <F0OneSwitch
                 tooltip={oneSwitchTooltip}
                 autoOpen={oneSwitchAutoOpen}
               />
-            )}
+            ) : null}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should
@@ -1232,9 +1311,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // class cannot take one. 672px by default (`MAIN_WIDTH`) — the
             // column's own width, no longer the reading column's.
             style={{ maxWidth: `${mainWidth}px` }}
-            widgets={
-              stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets
-            }
+            widgets={leftWidgets}
+            afterWidgets={loosePins.rest.map((widget) => (
+              <div
+                key={`loose-host-${widget.id}`}
+                ref={hostRef(widget.id)}
+                style={NO_BOX}
+              />
+            ))}
             footnote={mainFootnote}
             slotRenderers={slotRenderers}
             renderWidget={renderWidget}
@@ -1258,7 +1342,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 : undefined
             }
             // The widgets pick the stagger up where the freeform blocks left it.
-            entrance={{ order: mainChildren.length }}
+            entrance={{ order: childBlocks.length }}
           >
             {mainChildren}
           </WidgetContainer>
@@ -1399,10 +1483,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             built the rail's widgets again from nothing: a tile that had loaded
             went back to loading, a running clock restarted, an animation
             replayed. Presentation changes now move ONE render around instead of
-            replacing it. (Stacked is the exception, and cannot be otherwise:
-            below `md` the rail's widgets belong to the main column's flow,
-            interleaved with content this layout doesn't own.) */}
-        {stacked || !sideReady ? null : (
+            replacing it. */}
+        {!sideReady ? null : (
           <motion.aside
             ref={railFade.ref}
             // With nothing hovered there is no panel to see or to read out — but
@@ -1410,7 +1492,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // waits for the retract, because `display: none` cannot be animated
             // out of: applied on the frame the rail collapses, it would delete the
             // cards instead of letting them go into the glyphs.
-            hidden={railInPanel && rail.panelHidden}
+            hidden={stacked || (railInPanel && rail.panelHidden)}
             className={cn(
               "min-h-0 overflow-y-auto overflow-x-hidden",
               SCROLLBAR_HIDDEN,
@@ -1449,28 +1531,29 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // panel's one-widget filter belongs to the panel; while the rail is
               // still retracting the column is still a column, and its cards have
               // a fade to finish (`stow`).
-              visibleWidgetId={railInPanel ? panelWidgetId : undefined}
+              visibleWidgetId={
+                !stacked && railInPanel ? panelWidgetId : undefined
+              }
               // Whether the strip owns them yet. Nothing about the strip's
               // geometry comes with it: the cards fade where they stand, so
               // there is nothing for them to be mapped onto.
-              stow={{ stowed: collapsed }}
+              stow={{ stowed: !stacked && collapsed }}
+              widgetHostFor={widgetHostFor}
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
               ctx={ctx}
               // The rail virtualizes only while it is a COLUMN — as a floating
               // panel it is one card in a box of its own, and the container reads
               // that off `visibleWidgetId` by itself, mounting only the card the
-              // panel shows. The setting stays put through the change: it decides
-              // how the widgets are drawn, and a prop that came and went would be
-              // one more thing moving mid-gesture.
-              virtualized={virtualizationFor("right")}
+              // panel shows.
+              virtualized={stacked ? false : virtualizationFor("right")}
               // NOT gated on `collapsed`: whether the column is arrangeable
               // decides its tree's SHAPE (a draggable column is wrapped in a
               // DndContext), and a shape that changed when the rail collapsed
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
-              disableDrag={collapsed}
+              disableDrag={collapsed || stacked}
               dragSurfaceSelector="[data-page-surface]"
               onReorder={
                 onReorderWidgets
@@ -1486,7 +1569,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.
               onClickAddNewWidget={
-                onClickAddNewWidget && canAddToSide("right") && !collapsed
+                onClickAddNewWidget &&
+                canAddToSide("right") &&
+                !collapsed &&
+                !stacked
                   ? () => onClickAddNewWidget("right")
                   : undefined
               }
@@ -1536,6 +1622,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           />
         ) : null}
       </motion.div>
+    )
+
+    return (
+      <HomeTrackingProvider tracking={tracking}>{layout}</HomeTrackingProvider>
     )
   }
 )

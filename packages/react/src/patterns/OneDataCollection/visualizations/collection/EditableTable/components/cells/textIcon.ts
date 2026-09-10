@@ -1,7 +1,5 @@
 import type { IconType } from "@/components/F0Icon"
-
 import { getFieldInputIcon } from "@/lib/field-input-icons"
-
 import type { TextCellConfig } from "../../types"
 
 /**
@@ -12,7 +10,11 @@ import type { TextCellConfig } from "../../types"
 export function resolveTextCellIcon(
   config: TextCellConfig | undefined
 ): IconType | undefined {
-  if (!config) return undefined
-  if (config.icon) return config.icon
+  if (!config) {
+    return undefined
+  }
+  if (config.icon) {
+    return config.icon
+  }
   return getFieldInputIcon(config.inputType)
 }

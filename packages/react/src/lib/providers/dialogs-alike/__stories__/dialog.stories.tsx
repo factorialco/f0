@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Delete, Pencil } from "@/icons/app"
-
 import { dialogs } from "../imperative"
 import { dialogsAlikeStore } from "../store"
 import { DialogActionValue } from "../types"
@@ -502,7 +499,10 @@ export const NonBlocking: Story = {
         description:
           'The primary action runs for 3s. Because it is nonBlocking, "Cancel" stays clickable while it runs.',
         content: (
-          <div>Click "Start", then notice "Cancel" is still enabled.</div>
+          <div>
+            Click &quot;Start&quot;, then notice &quot;Cancel&quot; is still
+            enabled.
+          </div>
         ),
         actions: {
           primary: {

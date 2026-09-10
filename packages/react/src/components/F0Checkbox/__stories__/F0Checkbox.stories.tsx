@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0Checkbox } from "../F0Checkbox"
 
 const meta = {
@@ -13,6 +10,7 @@ const meta = {
   tags: ["stable", "!autodocs"],
   title: "Checkbox",
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
     docs: {
       description: {
@@ -24,6 +22,10 @@ const meta = {
     title: {
       control: "text",
       description: "The title of the checkbox",
+    },
+    description: {
+      control: "text",
+      description: "A secondary line of text rendered under the title",
     },
     id: {
       control: "text",
@@ -95,6 +97,35 @@ export const WithDataTestId: Story = {
   },
 }
 
+export const WithDescription: Story = {
+  args: {
+    title: "Share usage data",
+    description: "Helps us understand which features are worth keeping.",
+  },
+  render: (args) => {
+    const [checked, setChecked] = useState(false)
+    return (
+      <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const checkbox = canvas.getByRole("checkbox")
+    const description = canvas.getByText(
+      "Helps us understand which features are worth keeping."
+    )
+
+    // The description is the checkbox's accessible description, not part of its
+    // name, so the title alone still names the control.
+    await expect(checkbox).toHaveAttribute("aria-label", "Share usage data")
+    await expect(checkbox).toHaveAttribute(
+      "aria-describedby",
+      description.getAttribute("id")
+    )
+  },
+}
+
 export const Disabled: Story = {
   args: {
     title: "Disabled checkbox",
@@ -143,6 +174,21 @@ export const Snapshot: Story = {
       <F0Checkbox title="Indeterminate" indeterminate />
       <F0Checkbox title="Disabled" disabled />
       <F0Checkbox title="Disabled checked" disabled checked={true} />
+      <F0Checkbox
+        title="With description"
+        description="A second line of context under the title."
+        checked={false}
+      />
+      <F0Checkbox
+        title="With description, checked"
+        description="A second line of context under the title."
+        checked={true}
+      />
+      <F0Checkbox
+        title="With description, disabled"
+        description="A second line of context under the title."
+        disabled
+      />
     </div>
   ),
 }

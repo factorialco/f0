@@ -1,7 +1,5 @@
 import { ReactNode, forwardRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { validLayoutChildrenGuard } from "../internal/utils"
 
 export interface PageProps {
@@ -46,7 +44,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
             "border-t border-solid border-t-f1-border-secondary sm:border-t-0"
           )}
         >
-          {header && (
+          {header ? (
             <header
               className={cn(
                 stickyHeader && "sticky top-0 z-30 bg-f1-background"
@@ -54,11 +52,11 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
             >
               {header}
             </header>
-          )}
+          ) : null}
           <div className="flex-1">{mainContent}</div>
         </main>
 
-        {aside && (
+        {aside ? (
           <aside
             className={cn(
               "min-w-30 sm:basis-1/4 md:max-w-80",
@@ -68,7 +66,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
           >
             {aside}
           </aside>
-        )}
+        ) : null}
       </div>
     </div>
   )

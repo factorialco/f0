@@ -1,10 +1,8 @@
 import { FC, Fragment } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import ApprovalStep, { ApprovalStepProps } from "./ApprovalStep"
 
 type ApprovalStep = ApprovalStepProps
@@ -36,9 +34,9 @@ const _OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
               >
                 <span>{index + 1}</span>
               </div>
-              {index !== steps.length - 1 && (
+              {index !== steps.length - 1 ? (
                 <div className="h-[96px] w-px bg-f1-border-secondary" />
-              )}
+              ) : null}
             </div>
           ))}
         </div>
@@ -52,9 +50,9 @@ const _OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
                 approvers={step.approvers}
                 approvalDate={step.approvalDate}
               />
-              {index !== steps.length - 1 && (
+              {index !== steps.length - 1 ? (
                 <div className="h-px w-full bg-f1-border-secondary" />
-              )}
+              ) : null}
             </Fragment>
           ))}
         </div>

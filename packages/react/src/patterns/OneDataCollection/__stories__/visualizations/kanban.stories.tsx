@@ -1,10 +1,8 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useRef, useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 import { Delete, Pencil, Plus } from "@/icons/app"
-
 import {
   createDataAdapter,
   ExampleComponent,
@@ -340,7 +338,9 @@ export const KanbanWithGroupingHiddenGroupSelect: Story = {
         const groups = await canvas.findAllByTestId(/^kanban-group-/)
         expect(groups.length).toBeGreaterThan(1)
         const [firstGroupEl] = groups
-        if (!firstGroupEl) return
+        if (!firstGroupEl) {
+          return
+        }
         const firstGroup = within(firstGroupEl)
         expect(
           firstGroup.queryByRole("checkbox", { name: "Select all" })

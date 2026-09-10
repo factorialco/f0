@@ -1,13 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
-
 import {
   userEvent,
   zeroRender as render,
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 
 /**
  * A footer with TWO secondary actions: `F0Dialog` renders them as a split

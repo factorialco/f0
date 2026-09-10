@@ -1,15 +1,14 @@
+import {
+  NODE_BOX_INSET,
+  STACKED_GROUP_PADDING,
+  STACKED_NODE_WIDTH_INSET,
+} from "./constants"
 import type {
   GraphEdge,
   LayoutDirection,
   PositionedNode,
   TreeNode,
 } from "./types"
-
-import {
-  NODE_BOX_INSET,
-  STACKED_GROUP_PADDING,
-  STACKED_NODE_WIDTH_INSET,
-} from "./constants"
 
 /**
  * React Flow `fitViewOptions.nodes` for the initial frame: `[{ id }]` to open
@@ -47,6 +46,9 @@ export interface ViewportRect {
  * Whether a node box (top-left `x`/`y`, size `width`/`height`) overlaps `rect`.
  * Pure AABB intersection — the core predicate behind node-array windowing.
  */
+// Hot path (runs per node on every pan and zoom). Primitives avoid allocating
+// a box object per call.
+// oxlint-disable-next-line max-params
 export function nodeIntersectsRect(
   x: number,
   y: number,
@@ -101,10 +103,15 @@ export function computeStackGroups<T>(
 } {
   const rowsByParent = new Map<string, string[]>()
   for (const node of visibleTreeNodes) {
-    if (!stackedNodeIndex.has(node.id) || node.parentId === null) continue
+    if (!stackedNodeIndex.has(node.id) || node.parentId === null) {
+      continue
+    }
     const siblings = rowsByParent.get(node.parentId)
-    if (siblings) siblings.push(node.id)
-    else rowsByParent.set(node.parentId, [node.id])
+    if (siblings) {
+      siblings.push(node.id)
+    } else {
+      rowsByParent.set(node.parentId, [node.id])
+    }
   }
 
   const isHorizontal = direction === "LR" || direction === "RL"
@@ -115,7 +122,9 @@ export function computeStackGroups<T>(
   const previousRow = new Map<string, string>()
 
   for (const [parentId, rowIds] of rowsByParent) {
-    if (rowIds.some((id) => positionMap.get(id) === undefined)) continue
+    if (rowIds.some((id) => positionMap.get(id) === undefined)) {
+      continue
+    }
 
     // Order the column by the coordinate the layout actually produced, not by
     // the order this traversal happened to see the rows in. A row's slot comes
@@ -171,7 +180,9 @@ export function computeStackGroups<T>(
         height: r.height,
       })
       groupOf.set(id, group.id)
-      if (index > 0) previousRow.set(id, rowIds[index - 1]!)
+      if (index > 0) {
+        previousRow.set(id, rowIds[index - 1]!)
+      }
     })
     groups.set(parentId, group)
   }
@@ -234,7 +245,9 @@ export function findStackHoverZoneAt(
 export function computeLayoutBounds(
   nodes: PositionedNode[]
 ): { x: number; y: number; width: number; height: number } | null {
-  if (nodes.length === 0) return null
+  if (nodes.length === 0) {
+    return null
+  }
   let minX = Infinity
   let minY = Infinity
   let maxX = -Infinity
@@ -337,7 +350,9 @@ export function resolveStackedParents<T>(nodes: TreeNode<T>[]): {
   const stackedNodeIndex = new Map<string, number>()
 
   for (const node of nodes) {
-    if (!node.stackNodes || node.children.length === 0) continue
+    if (!node.stackNodes || node.children.length === 0) {
+      continue
+    }
     // Both signals matter. `childrenCount` is what a lazy consumer declares
     // before its children arrive, but it is optional on the public `GraphNode`
     // and the tree builder defaults it to 0 — so a child that already HAS
@@ -348,8 +363,9 @@ export function resolveStackedParents<T>(nodes: TreeNode<T>[]): {
       node.children.some(
         (child) => child.childrenCount > 0 || child.children.length > 0
       )
-    )
+    ) {
       continue
+    }
     stackedParentIds.add(node.id)
     node.children.forEach((child, index) => {
       stackedNodeIndex.set(child.id, index)

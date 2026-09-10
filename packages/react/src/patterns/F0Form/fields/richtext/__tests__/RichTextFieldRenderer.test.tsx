@@ -1,9 +1,7 @@
 import type { ComponentProps } from "react"
 import type { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
 import type { ResolvedField } from "../../types"
 import { RichTextFieldRenderer } from "../RichTextFieldRenderer"
 import type { F0RichTextField, RichTextValue } from "../types"

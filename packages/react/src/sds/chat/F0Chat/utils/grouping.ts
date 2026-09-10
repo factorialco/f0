@@ -18,7 +18,9 @@ const needsSeparator = (
   current: F0ChatItem,
   previous: F0ChatItem | undefined
 ): boolean => {
-  if (!previous) return true
+  if (!previous) {
+    return true
+  }
   return (
     calendarDaysApart(
       new Date(previous.createdAt),
@@ -80,8 +82,12 @@ export type ChatRow =
  * the item union grows.
  */
 export const rowItem = (row: ChatRow): F0ChatItem | null => {
-  if (row.type === "message" || row.type === "system") return row.message
-  if (row.type === "post") return row.post
+  if (row.type === "message" || row.type === "system") {
+    return row.message
+  }
+  if (row.type === "post") {
+    return row.post
+  }
   // `footer` is excluded deliberately: it carries a message but IS not one —
   // it's a derived row under the last one, and the callers here mean "the item
   // this row is", not "an item this row mentions".
@@ -100,14 +106,21 @@ export type FlattenedChat = {
 /** Two builds of the same key produce an equivalent row (same message object,
  * same flags) — safe to reuse the previous object so `memo` holds. */
 const sameRow = (a: ChatRow, b: ChatRow): boolean => {
-  if (a.type !== b.type) return false
-  if (a.type === "separator" && b.type === "separator") return a.at === b.at
-  if (a.type === "system" && b.type === "system") return a.message === b.message
+  if (a.type !== b.type) {
+    return false
+  }
+  if (a.type === "separator" && b.type === "separator") {
+    return a.at === b.at
+  }
+  if (a.type === "system" && b.type === "system") {
+    return a.message === b.message
+  }
   // `isLast` is part of it: without it, the post that WAS last keeps the flag
   // when a newer one arrives, and the feed ends up with a gap in its dividers
   // in the middle — the same trap `isLastOfRun` has below.
-  if (a.type === "post" && b.type === "post")
+  if (a.type === "post" && b.type === "post") {
     return a.post === b.post && a.isLast === b.isLast
+  }
   if (a.type === "message" && b.type === "message") {
     return (
       a.message === b.message &&
@@ -232,7 +245,9 @@ export function flattenChatRows(
       previousUser.author.id !== item.author.id
     if (!isFirstOfRun && lastMessageRowIndex >= 0) {
       const prevRow = rows[lastMessageRowIndex]
-      if (prevRow.type === "message") prevRow.isLastOfRun = false
+      if (prevRow.type === "message") {
+        prevRow.isLastOfRun = false
+      }
     }
 
     rows.push({
@@ -255,7 +270,9 @@ export function flattenChatRows(
   const rowCache = new Map<string, ChatRow>()
   for (let i = 0; i < rows.length; i++) {
     const previous = previousRows?.get(rows[i].key)
-    if (previous && sameRow(previous, rows[i])) rows[i] = previous
+    if (previous && sameRow(previous, rows[i])) {
+      rows[i] = previous
+    }
     rowCache.set(rows[i].key, rows[i])
   }
 
@@ -272,10 +289,14 @@ export function freshTailIds(
   messages: F0ChatItem[],
   prevLastId: string | null
 ): string[] {
-  if (prevLastId === null) return []
+  if (prevLastId === null) {
+    return []
+  }
   const fresh: string[] = []
   for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].id === prevLastId) return fresh.reverse()
+    if (messages[i].id === prevLastId) {
+      return fresh.reverse()
+    }
     fresh.push(messages[i].id)
   }
   // Previous tail not found: the loaded window was replaced, not appended to.

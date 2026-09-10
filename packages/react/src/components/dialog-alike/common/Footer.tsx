@@ -1,10 +1,8 @@
 import { useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
-
 import {
   DialogInternalProps,
   DialogVariant,
@@ -36,13 +34,13 @@ export const Footer = (props: FooterProps) => {
   }
 
   const toPromise = (onClick: () => void | Promise<void>) => {
-    return new Promise((resolve) => {
-      resolve(onClick())
-    })
+    return Promise.resolve(onClick())
   }
 
   const renderPrimaryAction = () => {
-    if (!hasPrimaryAction) return null
+    if (!hasPrimaryAction) {
+      return null
+    }
 
     const _variant = props.type === "critical" ? "critical" : "default"
 
@@ -59,9 +57,13 @@ export const Footer = (props: FooterProps) => {
           }))}
           onClick={async (value) => {
             // Guard against re-triggering while an action is still pending.
-            if (isPrimaryDropdownLoading) return
+            if (isPrimaryDropdownLoading) {
+              return
+            }
             const action = primaryActions.find((a) => a.value === value)
-            if (!action) return
+            if (!action) {
+              return
+            }
             setIsPrimaryDropdownLoading(true)
             try {
               await toPromise(action.onClick)
@@ -105,24 +107,25 @@ export const Footer = (props: FooterProps) => {
             : "justify-end"
         )}
       >
-        {secondaryActions.length > 0 &&
-          secondaryActions.map((action) => (
-            <ButtonInternal
-              key={action.value ?? action.label}
-              block={props.variant === "notification"}
-              label={action.label}
-              onClick={async () => {
-                await toPromise(action.onClick)
-                if (action.closeOnClick) {
-                  props.onClose()
-                }
-              }}
-              variant="outline"
-              icon={action.icon}
-              disabled={action.disabled}
-              loading={action.loading}
-            />
-          ))}
+        {secondaryActions.length > 0
+          ? secondaryActions.map((action) => (
+              <ButtonInternal
+                key={action.value ?? action.label}
+                block={props.variant === "notification"}
+                label={action.label}
+                onClick={async () => {
+                  await toPromise(action.onClick)
+                  if (action.closeOnClick) {
+                    props.onClose()
+                  }
+                }}
+                variant="outline"
+                icon={action.icon}
+                disabled={action.disabled}
+                loading={action.loading}
+              />
+            ))
+          : null}
         {renderPrimaryAction()}
       </div>
     </div>

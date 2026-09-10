@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react"
-
 import { ButtonVariant, F0Button } from "@/components/F0Button"
-import { withDataTestId } from "@/lib/data-testid"
 import CrossIcon from "@/icons/app/Cross"
+import { withDataTestId } from "@/lib/data-testid"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
 import { Label } from "@/ui/label"
-
 import { LoadingStateProps, UpsellingButton } from "../UpsellingButton"
 import {
   ErrorMessageProps,
@@ -81,7 +79,7 @@ function _ProductWidget({
       {!isDismissed ? (
         <Card style={{ width }} className="relative bg-f1-background p-1">
           <CardContent>
-            {dismissible && (
+            {dismissible ? (
               <div className="absolute right-2 top-2 z-10">
                 <F0Button
                   variant="ghost"
@@ -92,11 +90,11 @@ function _ProductWidget({
                   label="Close"
                 />
               </div>
-            )}
+            ) : null}
             <div>
               <div>
-                {mediaUrl &&
-                  (isVideo ? (
+                {mediaUrl ? (
+                  isVideo ? (
                     <video
                       src={mediaUrl}
                       autoPlay
@@ -111,7 +109,8 @@ function _ProductWidget({
                       alt={title}
                       className="h-full w-full rounded-md"
                     />
-                  ))}
+                  )
+                ) : null}
               </div>
               <div className="flex flex-col gap-[2px] p-3">
                 <Label className="text-lg font-medium">{title}</Label>
@@ -121,7 +120,7 @@ function _ProductWidget({
               </div>
             </div>
           </CardContent>
-          {actions && (
+          {actions ? (
             <CardFooter className="p-3">
               {actions.map((action) =>
                 action.type === "upsell" ? (
@@ -149,7 +148,7 @@ function _ProductWidget({
                 )
               )}
             </CardFooter>
-          )}
+          ) : null}
         </Card>
       ) : null}
     </>

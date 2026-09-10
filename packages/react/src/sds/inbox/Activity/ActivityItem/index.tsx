@@ -1,5 +1,4 @@
 import { useIntersectionObserver } from "usehooks-ts"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { IconType } from "@/components/F0Icon"
 import { Bell as BellIcon } from "@/icons/app"
@@ -77,9 +76,9 @@ export const BaseActivityItem = ({
         </div>
       </div>
       <div className="ml-1">
-        {isUnread && (
+        {isUnread ? (
           <div className="mt-1.5 size-2 rounded-full bg-f1-icon-accent" />
-        )}
+        ) : null}
       </div>
     </div>
   )

@@ -1,12 +1,10 @@
 import { format } from "date-fns"
 import { type ReactNode } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { EyeVisible } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { type MockPostVisitList } from "./mockPostDetailTypes"
 
 /**
@@ -44,7 +42,9 @@ export const MockPostVisits = ({
   )
 
   const canOpen = visits.canSee && visits.count > 0 && !!visits.items?.length
-  if (!canOpen) return <div className="py-4 text-sm">{counter}</div>
+  if (!canOpen) {
+    return <div className="py-4 text-sm">{counter}</div>
+  }
 
   return (
     <div className="py-4 text-sm">

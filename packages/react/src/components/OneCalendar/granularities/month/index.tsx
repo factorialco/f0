@@ -8,8 +8,11 @@ import {
   parse,
   startOfMonth,
 } from "date-fns"
-
-import { DateRange, DateRangeComplete } from "../../types"
+import {
+  DateRange,
+  DateRangeComplete,
+  OptionalCalendarSelection,
+} from "../../types"
 import {
   formatDateRange,
   formatDateToString,
@@ -26,7 +29,7 @@ import { MonthView } from "./MonthView"
 const MONTH_FORMAT = "MM/yyyy"
 
 export function toMonthGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
+  T extends OptionalCalendarSelection,
 >(date: T): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfMonth, endOfMonth)
 }
@@ -38,14 +41,11 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
   }
 }
 
-const formatMonthShort = (date: Date | DateRange | undefined | null) => {
+const formatMonthShort = (date: OptionalCalendarSelection) => {
   return formatDateToString(date, MONTH_FORMAT)
 }
 
-const formatMonthLong = (
-  date: Date | DateRange | undefined | null,
-  locale = "en-US"
-) => {
+const formatMonthLong = (date: OptionalCalendarSelection, locale = "en-US") => {
   const dateRange = toMonthGranularityDateRange(date)
   if (!dateRange) {
     return ""

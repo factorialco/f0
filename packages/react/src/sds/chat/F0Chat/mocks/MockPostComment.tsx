@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay/F0RichTextDisplay"
@@ -10,7 +9,6 @@ import { getAgo } from "@/lib/date"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { type F0ChatPostComment } from "../types"
-
 import { splitName } from "./mockPostUtils"
 
 /**
@@ -66,7 +64,9 @@ export const MockPostComment = ({
   ]
 
   const save = async () => {
-    if (!onEdit || draft.trim().length === 0) return
+    if (!onEdit || draft.trim().length === 0) {
+      return
+    }
     setBusy(true)
     try {
       await onEdit(comment.id, draft)
@@ -120,7 +120,7 @@ export const MockPostComment = ({
             <div className="min-w-0 flex-1 whitespace-pre-wrap break-words text-sm text-f1-foreground">
               <F0RichTextDisplay content={comment.text} />
             </div>
-            {canAct && items.length > 0 && (
+            {canAct && items.length > 0 ? (
               <Dropdown items={items}>
                 <F0Button
                   variant="ghost"
@@ -130,7 +130,7 @@ export const MockPostComment = ({
                   label={i18n.t("communities.detail.postActions")}
                 />
               </Dropdown>
-            )}
+            ) : null}
           </div>
         )}
         <p className="mt-1.5 text-sm text-f1-foreground-secondary">
@@ -140,7 +140,7 @@ export const MockPostComment = ({
         </p>
       </div>
 
-      {confirmingDelete && onDelete && (
+      {confirmingDelete && onDelete ? (
         <div
           role="alertdialog"
           aria-label={i18n.t("communities.detail.deleteComment")}
@@ -172,7 +172,7 @@ export const MockPostComment = ({
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </li>
   )
 }

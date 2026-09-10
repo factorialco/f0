@@ -1,11 +1,12 @@
+import "./types"
+import { useDeepCompareEffect } from "@reactuses/core"
+import DOMPurify from "dompurify"
 import type {
   GridItemHTMLElement,
   GridStack,
   GridStackOptions,
   GridStackWidget,
 } from "gridstack"
-
-import { useDeepCompareEffect } from "@reactuses/core"
 import { motion } from "motion/react"
 import React, {
   type PropsWithChildren,
@@ -15,10 +16,8 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { GridStackReactWidget } from "../F0GridStack"
 import { GridStackContext } from "./grid-stack-context"
-import "./types"
 import { convertWidgetRecursive } from "./widget-utils"
 
 interface GridStackProviderProps {
@@ -220,22 +219,26 @@ export function GridStackProvider({
    * Sync widgets to gridstack
    */
   useDeepCompareEffect(() => {
-    if (!gridStack) return
+    if (!gridStack) {
+      return
+    }
 
     // Get the previous state
     const widgetsInGridstack = gridStack.save()
     if (!Array.isArray(widgetsInGridstack)) {
       return
     }
-    const widgetsInGridstackIds = widgetsInGridstack.map((widget) => widget.id)
+    const widgetsInGridstackIds = new Set(
+      widgetsInGridstack.map((widget) => widget.id)
+    )
     const newWidgets = widgets || []
-    const newWidgetsIds = newWidgets.map((widget) => widget.id)
+    const newWidgetsIds = new Set(newWidgets.map((widget) => widget.id))
 
     /**
      * Add new widgets to gridstack
      */
     const widgetsToAdd = newWidgets.filter(
-      (widget) => !widgetsInGridstackIds.includes(widget.id!)
+      (widget) => !widgetsInGridstackIds.has(widget.id!)
     )
     if (widgetsToAdd.length > 0) {
       // Update ref synchronously BEFORE adding widgets to GridStack
@@ -286,7 +289,7 @@ export function GridStackProvider({
      * Remove widgets from gridstack that are not in the widgets array
      */
     const widgetsToRemove = widgetsInGridstack.filter(
-      (widget) => !newWidgetsIds.includes(widget.id!)
+      (widget) => !newWidgetsIds.has(widget.id!)
     )
     if (widgetsToRemove.length > 0) {
       const idsToRemove = widgetsToRemove.map((w) => w.id!).filter(Boolean)
@@ -334,8 +337,15 @@ export function GridStackProvider({
             // Capture the static HTML and dimensions from the DOM before wrapping
             let staticHTML = ""
             if (widgetElement) {
-              // Clone the element with canvas content preserved
-              staticHTML = cloneElementWithCanvas(widgetElement)
+              // Clone the element with canvas content preserved, then sanitize:
+              // this markup came out of already-rendered DOM, so it is only as
+              // trustworthy as whatever the widget rendered, and it is about to
+              // go back through dangerouslySetInnerHTML. DOMPurify keeps
+              // everything the snapshot needs — data: URI images, inline
+              // styles, classes, SVG — and drops handlers.
+              staticHTML = DOMPurify.sanitize(
+                cloneElementWithCanvas(widgetElement)
+              )
             }
 
             next.set(
@@ -384,14 +394,14 @@ export function GridStackProvider({
      * Update widgets DOM elements in gridstack that are in the widgets array
      */
     const widgetsToUpdate = newWidgets.filter((widget) =>
-      widgetsInGridstackIds.includes(widget.id!)
+      widgetsInGridstackIds.has(widget.id!)
     )
     if (widgetsToUpdate.length > 0) {
-      const widgetsNeedingGridUpdate: Array<{
+      const widgetsNeedingGridUpdate: {
         id: string
         element: GridItemHTMLElement
         updateOptions: Partial<GridStackWidget>
-      }> = []
+      }[] = []
 
       widgetsToUpdate.forEach((widget) => {
         const widgetInGridstack = widgetsInGridstack.find(
@@ -517,7 +527,9 @@ export function GridStackProvider({
 
   // Toggle static mode imperatively without recreating the grid
   useEffect(() => {
-    if (!gridStack || isStatic === undefined) return
+    if (!gridStack || isStatic === undefined) {
+      return
+    }
     gridStack.setStatic(isStatic)
   }, [gridStack, isStatic])
 
@@ -530,8 +542,9 @@ export function GridStackProvider({
       !gridStack ||
       forcePositionSync === undefined ||
       forcePositionSync === prevForceSyncRef.current
-    )
+    ) {
       return
+    }
     prevForceSyncRef.current = forcePositionSync
 
     const widgetsToSync = widgets || []
@@ -555,7 +568,9 @@ export function GridStackProvider({
 
   // Ensure handle option is applied after widgets are synced and rendered
   useEffect(() => {
-    if (!gridStack || !convertedOptions.handle) return
+    if (!gridStack || !convertedOptions.handle) {
+      return
+    }
 
     // Update the handle option on the grid instance
     if (gridStack.opts) {
@@ -604,7 +619,9 @@ export function GridStackProvider({
       const updatedWidgets: GridStackReactWidget[] = layout
         .map((item) => {
           const widgetId = item.id
-          if (!widgetId) return null
+          if (!widgetId) {
+            return null
+          }
 
           // Retrieve React content from reactContentMapRef (always up-to-date synchronously)
           const content = reactContentMapRef.current.get(widgetId)
@@ -641,7 +658,9 @@ export function GridStackProvider({
   }, [gridStack])
 
   useEffect(() => {
-    if (!gridStack) return
+    if (!gridStack) {
+      return
+    }
 
     // Check if the gridStack instance is valid and has a DOM element
     // This prevents errors when the instance is destroyed or not fully initialized
@@ -682,7 +701,9 @@ export function GridStackProvider({
   }, [gridStack])
 
   useEffect(() => {
-    if (!gridStack) return
+    if (!gridStack) {
+      return
+    }
     // Only emit change if the gridStack instance is valid and widgets have been initialized
     // Skip the initial emitChange() to prevent overwriting widgets added via useEffect on mount
     if (

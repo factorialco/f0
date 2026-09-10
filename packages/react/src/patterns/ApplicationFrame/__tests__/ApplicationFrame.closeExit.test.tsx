@@ -1,10 +1,8 @@
 import { MotionGlobalConfig } from "motion"
 import { act } from "react"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 /**

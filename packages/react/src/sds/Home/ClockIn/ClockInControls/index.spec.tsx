@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { Office as OfficeIcon } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
-import { ClockInControls } from "./index"
+import { ClockInControls } from "."
 
 const defaultLabels = {
   clockedOut: "Clocked out",

@@ -1,15 +1,4 @@
 import { forwardRef } from "react"
-
-import { F0Link } from "@/components/F0Link"
-import { DropdownItem } from "@/experimental/Navigation/Dropdown"
-import { withDataTestId } from "@/lib/data-testid"
-import { experimentalComponent } from "@/lib/experimental"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn, focusRing } from "@/lib/utils"
-import { Card } from "@/ui/Card"
-import { Skeleton } from "@/ui/skeleton"
-import { Text } from "@/ui/Text"
-
 import {
   type CardPrimaryAction,
   type CardSecondaryAction,
@@ -24,7 +13,15 @@ import {
   type CardAvatarVariant,
 } from "@/components/F0Card/components/CardAvatar"
 import { type CardAlertProps } from "@/components/F0Card/types"
-
+import { F0Link } from "@/components/F0Link"
+import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
+import { withSkeleton } from "@/lib/skeleton"
+import { cn, focusRing } from "@/lib/utils"
+import { Card } from "@/ui/Card"
+import { Skeleton } from "@/ui/skeleton"
+import { Text } from "@/ui/Text"
 import {
   CardHorizontalActions,
   type CardHorizontalConfirmAction,
@@ -151,6 +148,62 @@ export interface F0CardHorizontalProps {
 }
 
 /**
+ * The left-hand group: the avatar, and the title with its description stacked
+ * under it. `inactive` strikes the text through.
+ */
+const CardHorizontalLeading = ({
+  avatar,
+  title,
+  description,
+  inactive,
+  descriptionAsSingleLine,
+  stackAt,
+}: Pick<
+  F0CardHorizontalProps,
+  | "avatar"
+  | "title"
+  | "description"
+  | "inactive"
+  | "descriptionAsSingleLine"
+  | "stackAt"
+> & { stackAt: NonNullable<F0CardHorizontalProps["stackAt"]> }) => (
+  <div
+    className={cn(
+      "flex min-w-0 flex-row gap-3",
+      // Centre a short single-line group against the taller controls, but
+      // let it fill from the top once it grows (see the class doc).
+      cardHorizontalLeadingAlignClassName[stackAt],
+      // Keep the avatar pinned to the top so it stays aligned with the
+      // title when the row grows (e.g. a long wrapping description).
+      avatar ? "items-start" : "items-center"
+    )}
+  >
+    {avatar ? <CardAvatar avatar={avatar} size="lg" /> : null}
+    <div className="flex min-w-0 flex-col gap-0">
+      <Text
+        variant="body"
+        content={title}
+        className={cn(
+          "break-words font-medium",
+          inactive && "text-f1-foreground-secondary line-through"
+        )}
+      />
+      {description ? (
+        <Text
+          variant="description"
+          content={description}
+          ellipsis={descriptionAsSingleLine || undefined}
+          className={cn(
+            !descriptionAsSingleLine && "break-words",
+            inactive && "line-through"
+          )}
+        />
+      ) : null}
+    </div>
+  </div>
+)
+
+/**
  * A single-row card: optional avatar on the left, stacked title + description,
  * and actions on the right. By default the actions stay inline at every width;
  * set `stackAt` to drop them onto their own line below a container breakpoint
@@ -209,7 +262,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
         onClick={disabled ? undefined : onClick}
         data-testid="card"
       >
-        {link && !disableOverlayLink && (
+        {link && !disableOverlayLink ? (
           <F0Link
             href={link}
             variant="unstyled"
@@ -218,43 +271,17 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
           >
             &nbsp;
           </F0Link>
-        )}
+        ) : null}
 
         <div className={cardHorizontalClassName[stackAt]}>
-          <div
-            className={cn(
-              "flex min-w-0 flex-row gap-3",
-              // Centre a short single-line group against the taller controls, but
-              // let it fill from the top once it grows (see the class doc).
-              cardHorizontalLeadingAlignClassName[stackAt],
-              // Keep the avatar pinned to the top so it stays aligned with the
-              // title when the row grows (e.g. a long wrapping description).
-              avatar ? "items-start" : "items-center"
-            )}
-          >
-            {avatar && <CardAvatar avatar={avatar} size="lg" />}
-            <div className="flex min-w-0 flex-col gap-0">
-              <Text
-                variant="body"
-                content={title}
-                className={cn(
-                  "break-words font-medium",
-                  inactive && "text-f1-foreground-secondary line-through"
-                )}
-              />
-              {description && (
-                <Text
-                  variant="description"
-                  content={description}
-                  ellipsis={descriptionAsSingleLine || undefined}
-                  className={cn(
-                    !descriptionAsSingleLine && "break-words",
-                    inactive && "line-through"
-                  )}
-                />
-              )}
-            </div>
-          </div>
+          <CardHorizontalLeading
+            avatar={avatar}
+            title={title}
+            description={description}
+            inactive={inactive}
+            descriptionAsSingleLine={descriptionAsSingleLine}
+            stackAt={stackAt}
+          />
 
           <CardHorizontalActions
             primaryAction={primaryAction}

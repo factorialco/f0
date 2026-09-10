@@ -566,7 +566,9 @@ const applyNestedFilters = (
   employees: Employee[],
   filters?: FiltersState<EmployeeNestedFilters>
 ): Employee[] => {
-  if (!filters) return employees
+  if (!filters) {
+    return employees
+  }
 
   return employees.filter((employee) => {
     if (
@@ -611,7 +613,9 @@ const applyFilters = (
   employees: Employee[],
   filters?: FiltersState<EmployeeFilters>
 ): Employee[] => {
-  if (!filters) return employees
+  if (!filters) {
+    return employees
+  }
 
   return employees.filter((employee) => {
     if (
@@ -652,7 +656,9 @@ const applyFilters = (
  * Apply search to employee list
  */
 const applySearch = (employees: Employee[], search?: string): Employee[] => {
-  if (!search) return employees
+  if (!search) {
+    return employees
+  }
 
   const searchLower = search.toLowerCase().trim()
   return employees.filter(
@@ -864,7 +870,9 @@ const applyMockFilters = (
   items: typeof mockItems,
   filters?: FiltersState<MockFilters>
 ): typeof mockItems => {
-  if (!filters) return items
+  if (!filters) {
+    return items
+  }
 
   return items.filter((item) => {
     // Role filter uses role name as value (no separate ID)
@@ -873,7 +881,9 @@ const applyMockFilters = (
       Array.isArray(filters.role) &&
       filters.role.length > 0
     ) {
-      if (!filters.role.includes(item.role)) return false
+      if (!filters.role.includes(item.role)) {
+        return false
+      }
     }
     // Workplace filter uses numeric ID
     if (
@@ -881,7 +891,9 @@ const applyMockFilters = (
       Array.isArray(filters.workplace) &&
       filters.workplace.length > 0
     ) {
-      if (!filters.workplace.includes(String(item.workplaceId))) return false
+      if (!filters.workplace.includes(String(item.workplaceId))) {
+        return false
+      }
     }
     // Legal entity filter uses numeric ID
     if (
@@ -889,8 +901,9 @@ const applyMockFilters = (
       Array.isArray(filters.legalEntity) &&
       filters.legalEntity.length > 0
     ) {
-      if (!filters.legalEntity.includes(String(item.legalEntityId)))
+      if (!filters.legalEntity.includes(String(item.legalEntityId))) {
         return false
+      }
     }
     return true
   })

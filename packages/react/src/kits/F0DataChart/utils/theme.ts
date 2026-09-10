@@ -138,7 +138,9 @@ const TEXT_STYLE: ChartThemeTextStyle = {
  *  - `.dark` on any wrapper `<div>` (dark-island components)
  */
 function isDarkMode(element?: Element | null): boolean {
-  if (typeof document === "undefined") return false
+  if (typeof document === "undefined") {
+    return false
+  }
   const target = element ?? document.documentElement
   return target.closest(".dark") !== null
 }
@@ -146,7 +148,9 @@ function isDarkMode(element?: Element | null): boolean {
 /** `transparent`, `rgba(…, 0)`, or unset — this element paints no background. */
 function paintsNoBackground(color: string): boolean {
   const value = color.trim()
-  if (value === "" || value === "transparent") return true
+  if (value === "" || value === "transparent") {
+    return true
+  }
   const alpha = /^rgba\(.*,\s*([\d.]+)\s*\)$/.exec(value)?.[1]
   return alpha !== undefined && Number.parseFloat(alpha) === 0
 }
@@ -167,7 +171,9 @@ function resolveContainerBackground(
   element: Element | null | undefined,
   fallback: string
 ): string {
-  if (typeof window === "undefined" || !element) return fallback
+  if (typeof window === "undefined" || !element) {
+    return fallback
+  }
 
   let current: Element | null = element
   while (current) {

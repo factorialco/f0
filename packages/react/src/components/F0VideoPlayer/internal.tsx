@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { SolidPlay } from "@/icons/app"
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { Controls } from "./components/Controls"
 import { useAudioDescription } from "./hooks/useAudioDescription"
 import { useFullscreen } from "./hooks/useFullscreen"
@@ -121,12 +119,16 @@ export function F0VideoPlayerInternal({
   // toggle) reloads the element; carry the position and play state across it.
   const preservePositionAcrossSwap = useCallback(() => {
     const el = video.videoRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const time = el.currentTime
     const wasPlaying = !el.paused
     const restore = () => {
       el.currentTime = time
-      if (wasPlaying) void el.play().catch(() => {})
+      if (wasPlaying) {
+        void el.play().catch(() => {})
+      }
       el.removeEventListener("loadedmetadata", restore)
     }
     el.addEventListener("loadedmetadata", restore)
@@ -142,7 +144,9 @@ export function F0VideoPlayerInternal({
 
   const toggleAudioDescription = useCallback(() => {
     // Only the described-source path swaps the source; the WebVTT path doesn't.
-    if (describedSrc) preservePositionAcrossSwap()
+    if (describedSrc) {
+      preservePositionAcrossSwap()
+    }
     setAudioDescriptionOn((on) => !on)
   }, [describedSrc, preservePositionAcrossSwap])
 
@@ -152,24 +156,32 @@ export function F0VideoPlayerInternal({
   const selectCaptionLanguage = useCallback(
     (locale: string) => {
       setCaptionLocale(locale)
-      if (!captions.showing) captions.toggle()
+      if (!captions.showing) {
+        captions.toggle()
+      }
     },
     [captions]
   )
   const disableCaptions = useCallback(() => {
-    if (captions.showing) captions.toggle()
+    if (captions.showing) {
+      captions.toggle()
+    }
   }, [captions])
 
   const selectAudioDescriptionLanguage = useCallback(
     (locale: string) => {
-      if (describedSrc) preservePositionAcrossSwap()
+      if (describedSrc) {
+        preservePositionAcrossSwap()
+      }
       setAudioDescriptionLocale(locale)
       setAudioDescriptionOn(true)
     },
     [describedSrc, preservePositionAcrossSwap]
   )
   const disableAudioDescription = useCallback(() => {
-    if (describedSrc) preservePositionAcrossSwap()
+    if (describedSrc) {
+      preservePositionAcrossSwap()
+    }
     setAudioDescriptionOn(false)
   }, [describedSrc, preservePositionAcrossSwap])
 
@@ -211,7 +223,9 @@ export function F0VideoPlayerInternal({
   const describedSourceAudioActive = Boolean(audioDescriptionOn && describedSrc)
   useEffect(() => {
     const el = video.videoRef.current
-    if (silent && el) el.muted = !describedSourceAudioActive
+    if (silent && el) {
+      el.muted = !describedSourceAudioActive
+    }
   }, [silent, describedSourceAudioActive, video.videoElement, video.videoRef])
 
   const handleKeyDown = useKeyboardShortcuts({
@@ -224,7 +238,9 @@ export function F0VideoPlayerInternal({
   })
 
   useEffect(() => {
-    if (autoFocus) wrapperRef.current?.focus({ preventScroll: true })
+    if (autoFocus) {
+      wrapperRef.current?.focus({ preventScroll: true })
+    }
   }, [autoFocus])
 
   // Advanced controls (native context menu / download, PiP, remote playback,
@@ -283,29 +299,29 @@ export function F0VideoPlayerInternal({
         // immediately (otherwise the opacity gate would hide the poster too).
         style={{ opacity: video.videoLoaded || poster ? 1 : 0 }}
       >
-        {captions.trackSrc && (
+        {captions.trackSrc ? (
           <track
             kind="captions"
             src={captions.trackSrc}
             label={t("videoPlayer.captions")}
             default={false}
           />
-        )}
-        {audioDescription.trackSrc && (
+        ) : null}
+        {audioDescription.trackSrc ? (
           <track
             kind="descriptions"
             src={audioDescription.trackSrc}
             label={t("videoPlayer.audioDescription")}
             default={false}
           />
-        )}
+        ) : null}
       </video>
 
       {/* Center play affordance while paused, so a still frame / poster reads
           as a video without hovering to reveal the controls. Visual only
           (`aria-hidden`, not focusable): the labelled play control lives in the
           controls bar and Space toggles playback on the focused region. */}
-      {!video.isPlaying && (
+      {!video.isPlaying ? (
         <div
           aria-hidden
           data-video-play-overlay
@@ -320,14 +336,14 @@ export function F0VideoPlayerInternal({
             <F0Icon icon={SolidPlay} size="lg" color="#fff" />
           </button>
         </div>
-      )}
+      ) : null}
 
       {/* Description text shown as a caption for deaf/HoH viewers when captions
           are on — the visual counterpart of the spoken audio description. Drawn
           here (top, distinct italic style) since browsers don't render
           `kind="descriptions"` tracks; `aria-hidden` because screen-reader users
           get the spoken description instead. */}
-      {captions.showing && audioDescription.activeCue && (
+      {captions.showing && audioDescription.activeCue ? (
         <div
           aria-hidden
           className="dark pointer-events-none absolute inset-x-0 top-0 z-[2] flex justify-center p-3"
@@ -339,7 +355,7 @@ export function F0VideoPlayerInternal({
             {audioDescription.activeCue}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Polite live region so play/pause via keyboard shortcuts is announced. */}
       <span className="sr-only" aria-live="polite">
@@ -348,7 +364,7 @@ export function F0VideoPlayerInternal({
 
       {/* Render the controls only once the video is ready — avoids focusable
           controls living inside an `aria-hidden` subtree before load. */}
-      {video.videoLoaded && (
+      {video.videoLoaded ? (
         <Controls
           isPlaying={video.isPlaying}
           currentTime={video.currentTime}
@@ -387,7 +403,7 @@ export function F0VideoPlayerInternal({
           onSeek={seek}
           download={download}
         />
-      )}
+      ) : null}
     </div>
   )
 }

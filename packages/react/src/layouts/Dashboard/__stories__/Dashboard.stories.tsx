@@ -1,16 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useEffect, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
-
-import { Dashboard, DashboardWidget } from "../"
+import { Dashboard, DashboardWidget } from ".."
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 
 const availableSizes = [
@@ -131,77 +128,73 @@ const meta = {
       const [editMode, setEditMode] = useState(false)
 
       return (
-        <>
-          <div className="h-full w-full">
-            <Layout.Page
-              header={
-                <div className="flex items-center gap-2 p-4">
-                  <div className="mr-5">
-                    <F0Checkbox
-                      title="Edit mode"
-                      checked={editMode}
-                      onCheckedChange={(checked) => {
-                        setEditMode(checked)
-                      }}
-                    />
-                  </div>
-                  <F0Button
-                    label="Increment Global Counter"
-                    onClick={() => {
-                      setGlobalCounter((prev) => prev + 1)
+        <div className="h-full w-full">
+          <Layout.Page
+            header={
+              <div className="flex items-center gap-2 p-4">
+                <div className="mr-5">
+                  <F0Checkbox
+                    title="Edit mode"
+                    checked={editMode}
+                    onCheckedChange={(checked) => {
+                      setEditMode(checked)
                     }}
                   />
-                  <p>Global counter: {globalCounter}</p>
                 </div>
-              }
-              aside={
-                <>
-                  <ul className="flex list-none flex-col gap-2 p-4">
-                    <li>
-                      <F0Button
-                        label="Add text widget"
-                        onClick={() => handleAddWidget("text")}
-                      />
-                    </li>
-                    <li>
-                      <F0Button
-                        label="Add chart widget"
-                        onClick={() => handleAddWidget("chart")}
-                      />
-                    </li>
-                    <li>
-                      <F0Button
-                        label="Add table widget"
-                        onClick={() => handleAddWidget("table")}
-                      />
-                    </li>
-                    <li>
-                      <F0Button
-                        label="Add kpi widget"
-                        onClick={() => handleAddWidget("kpi")}
-                      />
-                    </li>
-                  </ul>
-                </>
-              }
-            >
-              <Story
-                args={{
-                  ...args,
-                  widgets,
-                  deps: { globalCounter },
-                  onChange: (updatedWidgets) => {
-                    console.log("widgets onChange stories", updatedWidgets)
-                    setWidgets(updatedWidgets as DashboardWidget[])
-                  },
-                  editMode: editMode,
-                }}
-              />
-            </Layout.Page>
+                <F0Button
+                  label="Increment Global Counter"
+                  onClick={() => {
+                    setGlobalCounter((prev) => prev + 1)
+                  }}
+                />
+                <p>Global counter: {globalCounter}</p>
+              </div>
+            }
+            aside={
+              <ul className="flex list-none flex-col gap-2 p-4">
+                <li>
+                  <F0Button
+                    label="Add text widget"
+                    onClick={() => handleAddWidget("text")}
+                  />
+                </li>
+                <li>
+                  <F0Button
+                    label="Add chart widget"
+                    onClick={() => handleAddWidget("chart")}
+                  />
+                </li>
+                <li>
+                  <F0Button
+                    label="Add table widget"
+                    onClick={() => handleAddWidget("table")}
+                  />
+                </li>
+                <li>
+                  <F0Button
+                    label="Add kpi widget"
+                    onClick={() => handleAddWidget("kpi")}
+                  />
+                </li>
+              </ul>
+            }
+          >
+            <Story
+              args={{
+                ...args,
+                widgets,
+                deps: { globalCounter },
+                onChange: (updatedWidgets) => {
+                  console.log("widgets onChange stories", updatedWidgets)
+                  setWidgets(updatedWidgets as DashboardWidget[])
+                },
+                editMode: editMode,
+              }}
+            />
+          </Layout.Page>
 
-            <pre className="mt-10 overflow-x-auto text-xs"></pre>
-          </div>
-        </>
+          <pre className="mt-10 overflow-x-auto text-xs"></pre>
+        </div>
       )
     },
   ],

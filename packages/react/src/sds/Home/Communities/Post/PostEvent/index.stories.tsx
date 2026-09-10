@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentProps } from "react"
-
 import { mockImage } from "@/testing/mocks/images"
-
-import { BasePostEvent, PostEvent } from "./index"
+import { BasePostEvent, PostEvent } from "."
 
 const meta: Meta<typeof PostEvent> = {
   component: PostEvent,

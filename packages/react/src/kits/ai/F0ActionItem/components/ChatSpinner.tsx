@@ -1,10 +1,7 @@
-import type { CSSProperties, Ref } from "react"
-
 import { MotionGlobalConfig } from "motion"
+import type { CSSProperties, Ref } from "react"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import type { GlobeSpinState } from "./globeSpinMath"
 import {
   buildFrameInto,
@@ -50,23 +47,35 @@ const ChatSpinnerComponent = (
   const resumeRef = useRef<(() => void) | null>(null)
   // Pool — created lazily once per instance, reused across all frames.
   const stateRef = useRef<GlobeSpinState | null>(null)
-  if (stateRef.current === null) stateRef.current = createGlobeSpinState()
+  if (stateRef.current === null) {
+    stateRef.current = createGlobeSpinState()
+  }
 
   // Stable placeholder array for the JSX: one <polygon> per pool slot. We pay
   // the React mount cost ONCE; per-frame updates go straight to the DOM.
-  const placeholders = useMemo(() => new Array(QUAD_POOL_SIZE).fill(0), [])
+  const placeholders = useMemo(
+    () => Array.from({ length: QUAD_POOL_SIZE }, () => 0),
+    []
+  )
 
   const setRefs = (el: HTMLDivElement | null) => {
     wrapperRef.current = el
-    if (!ref) return
-    if (typeof ref === "function") ref(el)
-    else (ref as { current: HTMLDivElement | null }).current = el
+    if (!ref) {
+      return
+    }
+    if (typeof ref === "function") {
+      ref(el)
+    } else {
+      ;(ref as { current: HTMLDivElement | null }).current = el
+    }
   }
 
   useEffect(() => {
     const svg = svgRef.current
     const wrapper = wrapperRef.current
-    if (!svg || !wrapper) return
+    if (!svg || !wrapper) {
+      return
+    }
 
     const polys = svg.querySelectorAll(
       "polygon"
@@ -107,11 +116,64 @@ const ChatSpinnerComponent = (
           const q = quads[i]
           p.setAttribute("points", q.points)
           p.setAttribute("fill", q.color)
-          if (p.hasAttribute("display")) p.removeAttribute("display")
+          if (p.hasAttribute("display")) {
+            p.removeAttribute("display")
+          }
         } else if (!p.hasAttribute("display")) {
           p.setAttribute("display", "none")
         }
       }
+    }
+
+    /** The spin has finished: pause before the next one, or come to rest. */
+    const endSpin = (now: number) => {
+      if (playingRef.current) {
+        phase = "pause"
+        pauseStart = now
+      } else {
+        phase = "rest"
+      }
+    }
+
+    /** The pause is over: spin again, or come to rest. */
+    const endPause = (now: number) => {
+      if (playingRef.current) {
+        phase = "spin"
+        start = now
+      } else {
+        phase = "rest"
+      }
+    }
+
+    /**
+     * Fraction of TOTAL_ANGLE (two whole turns) to show this frame. "pause"
+     * and "rest" both leave it at 0 — the static mark.
+     */
+    const angleProgressAt = (now: number): number => {
+      if (variant === "continuous") {
+        // Constant forward rotation, deliberately un-eased: TOTAL_ANGLE is
+        // exactly two turns, so the 1 → 0 wrap is seamless, whereas easing it
+        // would drop a stall into every wrap — and this variant exists to read
+        // as "never resting", against a `default` that pauses for PAUSE_MS.
+        return ((now - start) % SPIN_MS) / SPIN_MS
+      }
+
+      if (phase === "spin") {
+        const p = Math.min((now - start) / SPIN_MS, 1)
+        // At p === 1 the mark is back at its base orientation; hand over to the
+        // pause on 0 so the resting pose is the plain One mark.
+        if (p >= 1) {
+          endSpin(now)
+          return 0
+        }
+        return spinEase(p)
+      }
+
+      if (phase === "pause" && now - pauseStart >= PAUSE_MS) {
+        endPause(now)
+      }
+
+      return 0
     }
 
     const tick = (now: number) => {
@@ -121,39 +183,7 @@ const ChatSpinnerComponent = (
         everTicked = true
       }
 
-      // Fraction of TOTAL_ANGLE (two whole turns) to show this frame.
-      let angleProgress = 0
-
-      if (variant === "continuous") {
-        // Constant forward rotation, deliberately un-eased: TOTAL_ANGLE is
-        // exactly two turns, so the 1 → 0 wrap is seamless, whereas easing it
-        // would drop a stall into every wrap — and this variant exists to read
-        // as "never resting", against a `default` that pauses for PAUSE_MS.
-        angleProgress = ((now - start) % SPIN_MS) / SPIN_MS
-      } else if (phase === "spin") {
-        const p = Math.min((now - start) / SPIN_MS, 1)
-        // At p === 1 the mark is back at its base orientation; hand over to the
-        // pause on 0 so the resting pose is the plain One mark.
-        angleProgress = p < 1 ? spinEase(p) : 0
-        if (p >= 1) {
-          if (playingRef.current) {
-            phase = "pause"
-            pauseStart = now
-          } else {
-            phase = "rest"
-          }
-        }
-      } else if (phase === "pause") {
-        if (now - pauseStart >= PAUSE_MS) {
-          if (playingRef.current) {
-            phase = "spin"
-            start = now
-          } else {
-            phase = "rest"
-          }
-        }
-      }
-      // "pause" and "rest" both leave angleProgress at 0 — the static mark.
+      const angleProgress = angleProgressAt(now)
 
       const axisPhase = ((now - mount) / PRECESSION_MS) % 1
       const count = buildFrameInto(state, angleProgress, size, axisPhase)
@@ -168,7 +198,9 @@ const ChatSpinnerComponent = (
     }
 
     const startLoop = () => {
-      if (rafId !== null || reduced) return
+      if (rafId !== null || reduced) {
+        return
+      }
       rafId = requestAnimationFrame(tick)
     }
     const stopLoop = () => {
@@ -185,9 +217,13 @@ const ChatSpinnerComponent = (
         // Off-screen, the observer will shift `start` forward by the elapsed
         // gap when we come back. Re-anchor the gap to now, or it gets counted
         // twice and `start` lands in the future — negative progress.
-        if (pausedAt !== null) pausedAt = start
+        if (pausedAt !== null) {
+          pausedAt = start
+        }
       }
-      if (visible) startLoop()
+      if (visible) {
+        startLoop()
+      }
     }
 
     // Initial paint so the spinner shows static geometry before the first
@@ -202,7 +238,9 @@ const ChatSpinnerComponent = (
       observer = new IntersectionObserver(
         (entries) => {
           const isVisible = entries[0]?.isIntersecting ?? true
-          if (isVisible === visible) return
+          if (isVisible === visible) {
+            return
+          }
           visible = isVisible
           if (isVisible) {
             if (pausedAt !== null && everTicked) {
@@ -234,7 +272,9 @@ const ChatSpinnerComponent = (
     }
     motionQuery?.addEventListener("change", onMotionPref)
 
-    if (variant === "continuous" || playingRef.current) startLoop()
+    if (variant === "continuous" || playingRef.current) {
+      startLoop()
+    }
 
     return () => {
       stopLoop()
@@ -246,7 +286,9 @@ const ChatSpinnerComponent = (
 
   useEffect(() => {
     playingRef.current = playing
-    if (playing) resumeRef.current?.()
+    if (playing) {
+      resumeRef.current?.()
+    }
   }, [playing])
 
   return (

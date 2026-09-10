@@ -1,11 +1,9 @@
 import { z } from "zod"
-
 import { type MentionsConfig } from "@/components/RichText/internal"
 import { CheckDouble, Link, Video } from "@/icons/app"
 import { type TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { f0FormField } from "@/patterns/F0Form"
 import { type F0SectionConfig } from "@/patterns/F0Form/types"
-
 import { type MockCommunityOption } from "./mockPostComposerTypes"
 
 const BODY_MAX_CHARACTERS = 10_000

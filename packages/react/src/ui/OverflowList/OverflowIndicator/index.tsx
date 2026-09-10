@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { FC } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -29,7 +28,7 @@ const OverflowIndicator: FC<OverflowIndicatorProps> = ({
       )}
     >
       <span>
-        {count < totalItemsCount && "+"}
+        {count < totalItemsCount ? "+" : null}
         {count}
       </span>
       <span>{i18n.actions.more}</span>

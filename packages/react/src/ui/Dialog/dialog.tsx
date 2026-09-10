@@ -1,7 +1,6 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-
 import { DialogClose } from "./components/DialogClose"
 import { DialogContent } from "./components/DialogContent"
 import { DialogDescription } from "./components/DialogDescription"

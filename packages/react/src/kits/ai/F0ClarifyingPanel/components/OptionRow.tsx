@@ -1,10 +1,7 @@
 import { forwardRef } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { cn, focusRing } from "@/lib/utils"
-
 import type { ClarifyingOption, ClarifyingSelectionMode } from "../types"
-
 import { RadioIndicator } from "./RadioIndicator"
 
 interface OptionRowProps {

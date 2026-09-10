@@ -1,11 +1,9 @@
 import { useState, type ReactNode } from "react"
-
 import { F0TextInput } from "@/components/F0TextInput"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { Bell, BellOff, Pencil, PushPin, PushPinSolid } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
 import {
   type F0ChatHeaderAction,
   type F0ChatRuntime,
@@ -88,7 +86,7 @@ export function useDemoHeaderActions(
           value={draftName}
           onChange={setDraftName}
         />
-        {members.length > 0 && (
+        {members.length > 0 ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium text-f1-foreground-secondary">
               {channel.memberCount ?? members.length} members
@@ -107,7 +105,7 @@ export function useDemoHeaderActions(
               ))}
             </div>
           </div>
-        )}
+        ) : null}
         <p className="text-sm text-f1-foreground-secondary">
           The host owns this dialog: the header action only fires a callback
           with the channel, and the app decides what to open (here, an F0Dialog

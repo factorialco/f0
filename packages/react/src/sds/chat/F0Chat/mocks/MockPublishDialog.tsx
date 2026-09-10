@@ -1,10 +1,8 @@
 import { type ReactNode } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Select } from "@/components/F0Select"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
 import { type MockCommunityOption } from "./mockPostComposerTypes"
 
 /**

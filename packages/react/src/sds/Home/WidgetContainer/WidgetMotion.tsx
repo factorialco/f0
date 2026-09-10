@@ -1,10 +1,7 @@
-import { type ReactNode } from "react"
-
 import { motion } from "motion/react"
-
+import { type ReactNode } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-
 import {
   ENTRANCE_RISE_PX,
   entranceTransition,
@@ -49,6 +46,14 @@ export interface WidgetMotionProps {
    * against a box with no height of its own.
    */
   fullHeight?: boolean
+  /**
+   * WHICH WIDGET'S BOX THIS IS, when nothing else says so. In an arrangeable
+   * column `SortableWidget` is the box and carries the id itself; everywhere
+   * else this wrapper is the only element between the column and the card, so
+   * without it a widget the reader cannot drag is a widget nothing outside f0
+   * can point at — a coachmark, a tour, a test.
+   */
+  widgetId?: string
   children: ReactNode
 }
 
@@ -80,6 +85,7 @@ export const WidgetMotion = ({
   arrival,
   stow,
   fullHeight,
+  widgetId,
   children,
 }: WidgetMotionProps) => {
   const reducedMotion = useReducedMotion()
@@ -99,6 +105,7 @@ export const WidgetMotion = ({
 
   return (
     <motion.div
+      data-widget-id={widgetId}
       className={cn(fullHeight && "h-full")}
       initial={
         arrival?.arriving

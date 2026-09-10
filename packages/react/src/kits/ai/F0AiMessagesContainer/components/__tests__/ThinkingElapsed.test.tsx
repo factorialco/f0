@@ -1,12 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   CLOCKS_ONLY,
   screen,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { Thinking } from "../Thinking"
 import { ThinkingElapsed } from "../ThinkingElapsed"
 

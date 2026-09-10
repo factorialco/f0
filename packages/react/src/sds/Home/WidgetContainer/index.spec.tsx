@@ -1,12 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { z } from "zod"
-
 import { Calendar, Clock } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import { type HomeWidgetItem, type WidgetParams } from "../slotRenderers"
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 
 const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
   id,
@@ -38,8 +36,8 @@ const Scroller = ({ children }: { children: React.ReactNode }) => (
 )
 
 /**
- * Which widgets are in the DOM, by id — read off the boxes a draggable column
- * marks every widget's card with.
+ * Which widgets are in the DOM, by id — read off the box every widget's card
+ * gets marked with, draggable column or not.
  */
 const mountedIds = (container: HTMLElement) =>
   [...container.querySelectorAll("[data-widget-id]")].map((el) =>
@@ -112,6 +110,30 @@ describe("WidgetContainer", () => {
     expect(
       screen.getByRole("button", { name: "Add widget" })
     ).toBeInTheDocument()
+  })
+
+  // A column nobody can rearrange still has to be addressable from outside f0 —
+  // a coachmark pointing at one of its widgets, a tour, a test.
+  test("marks every widget's box, arrangeable column or not", () => {
+    const { container } = zeroRender(
+      <WidgetContainer widgets={WIDGETS} onReorder={() => {}} />
+    )
+    expect(mountedIds(container)).toEqual(["clock", "events"])
+
+    const still = zeroRender(<WidgetContainer widgets={WIDGETS} />)
+    expect(mountedIds(still.container)).toEqual(["clock", "events"])
+  })
+
+  // Two nested elements answering to the same id would make which one a
+  // `querySelector` returns an accident of the tree.
+  test("marks it once, on one box", () => {
+    const { container } = zeroRender(
+      <WidgetContainer widgets={[widget("clock")]} onReorder={() => {}} />
+    )
+
+    expect(container.querySelectorAll('[data-widget-id="clock"]')).toHaveLength(
+      1
+    )
   })
 
   test("offers no menu at all without onRemoveWidget", () => {

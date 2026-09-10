@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, type MutableRefObject } from "react"
-
 import { type ChatRow, rowItem } from "../utils/grouping"
 
 /**
@@ -56,37 +55,55 @@ export const useVisiblePostReads = ({
   useEffect(() => {
     reportedRef.current = -1
     pendingRef.current = null
-    if (timerRef.current) clearTimeout(timerRef.current)
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
     timerRef.current = null
   }, [rows.length === 0])
 
   useEffect(
     () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
     },
     []
   )
 
   return useCallback(
     (index: number) => {
-      if (!enabled || !readyRef.current) return
-      if (typeof document !== "undefined" && document.hidden) return
-      if (index <= reportedRef.current) return
+      if (!enabled || !readyRef.current) {
+        return
+      }
+      if (typeof document !== "undefined" && document.hidden) {
+        return
+      }
+      if (index <= reportedRef.current) {
+        return
+      }
 
       // The pending target only ever deepens; the TIMER is never restarted. A
       // scroll reports a new index every frame, so restarting would postpone
       // the read for as long as the reader keeps moving — which is precisely
       // the case that should clear the badge.
       pendingRef.current = Math.max(pendingRef.current ?? -1, index)
-      if (timerRef.current !== null) return
+      if (timerRef.current !== null) {
+        return
+      }
 
       timerRef.current = setTimeout(() => {
         timerRef.current = null
         const target = pendingRef.current
         pendingRef.current = null
-        if (target === null || target <= reportedRef.current) return
-        if (!readyRef.current) return
-        if (typeof document !== "undefined" && document.hidden) return
+        if (target === null || target <= reportedRef.current) {
+          return
+        }
+        if (!readyRef.current) {
+          return
+        }
+        if (typeof document !== "undefined" && document.hidden) {
+          return
+        }
 
         reportedRef.current = target
         // Walk back to the last row that IS an item: the deepest row seen may

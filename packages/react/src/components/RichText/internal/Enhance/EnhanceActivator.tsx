@@ -8,12 +8,10 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChangeTone } from "@/icons/ai"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import { AIEnhanceMenu } from "./EnhanceMenu"
 import type { UseEnhanceReturn } from "./useEnhance"
 
@@ -88,11 +86,17 @@ const EnhanceActivator = memo(function EnhanceActivator({
     useState<FrozenViewportPosition | null>(null)
 
   useLayoutEffect(() => {
-    if (!open) return
-    if (isLocked && flowOwnerRef.current) return
+    if (!open) {
+      return
+    }
+    if (isLocked && flowOwnerRef.current) {
+      return
+    }
 
     const updateGeometry = () => {
-      if (!enhanceButtonRef.current) return
+      if (!enhanceButtonRef.current) {
+        return
+      }
 
       setTriggerHeight(enhanceButtonRef.current.offsetHeight)
 
@@ -264,7 +268,9 @@ const EnhanceActivator = memo(function EnhanceActivator({
   }
 
   const preventIfLocked = (event: Event) => {
-    if (isLocked) event.preventDefault()
+    if (isLocked) {
+      event.preventDefault()
+    }
   }
 
   return (
@@ -272,7 +278,9 @@ const EnhanceActivator = memo(function EnhanceActivator({
       open={open}
       modal={false}
       onOpenChange={(o) => {
-        if (!o && isLocked) return
+        if (!o && isLocked) {
+          return
+        }
         if (!o) {
           flowOwnerRef.current = false
         }
@@ -297,9 +305,9 @@ const EnhanceActivator = memo(function EnhanceActivator({
               only affordance: the menu stays hidden and reopens in review mode
               (unless the consumer renders its own review UI). */}
           {open &&
-            !isLoadingEnhance &&
-            !(hideReviewPanel && isAcceptChangesOpen) &&
-            (renderAsFixedLockedPanel ? (
+          !isLoadingEnhance &&
+          !(hideReviewPanel && isAcceptChangesOpen) ? (
+            renderAsFixedLockedPanel ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -348,7 +356,8 @@ const EnhanceActivator = memo(function EnhanceActivator({
                   <AIEnhanceMenu {...enhanceMenuProps} />
                 </motion.div>
               </Popover.Content>
-            ))}
+            )
+          ) : null}
         </AnimatePresence>
       </Popover.Portal>
     </Popover.Root>

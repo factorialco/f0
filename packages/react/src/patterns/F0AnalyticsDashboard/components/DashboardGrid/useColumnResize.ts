@@ -80,7 +80,9 @@ export function useColumnResize({
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
-      if (!gridElement) return
+      if (!gridElement) {
+        return
+      }
 
       e.stopPropagation()
       e.preventDefault()

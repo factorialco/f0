@@ -1,6 +1,5 @@
 import { composeStories } from "@storybook/react-vite"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   zeroRender as render,
   screen,
@@ -8,7 +7,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import * as stories from "../index.stories"
 
 vi.mock("react-virtuoso", async (importOriginal) => {
@@ -419,7 +417,7 @@ describe("a scheduled post", () => {
       screen.getAllByRole("button", { name: /publish now/i })[0]
     )
 
-    await waitFor(() => expect(cards().length).toBe(before + 1))
+    await waitFor(() => expect(cards()).toHaveLength(before + 1))
     expect(
       cards().some((card) => card.textContent?.includes("Padel tournament"))
     ).toBe(true)
@@ -467,7 +465,7 @@ describe("a scheduled post", () => {
       expect(screen.queryByTestId("community-post-composer")).toBeNull()
     )
     // Still four waiting, nothing new in the feed, and the new title on the shelf.
-    expect(cards().length).toBe(before)
+    expect(cards()).toHaveLength(before)
     await userEvent.click(chip(/scheduled 4/i))
     await waitFor(() =>
       expect(sheet().textContent).toContain("Padel tournament — last call")

@@ -1,5 +1,4 @@
 import { motion } from "motion/react"
-
 import { cn } from "@/lib/utils"
 
 export const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (

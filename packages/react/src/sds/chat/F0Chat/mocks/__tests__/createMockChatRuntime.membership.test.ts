@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest"
-
 import { BellOff, PalmTree } from "@/icons/app"
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { isSystemMessage, type F0ChatUser } from "../../types"
 import { useMockChatRuntime, type MockChatSeed } from "../createMockChatRuntime"
 

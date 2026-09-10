@@ -183,6 +183,19 @@ See `f0-component-patterns` skill for code examples.
 - Export component prop interfaces
 - No circular imports
 
+## Injecting HTML
+
+- `dangerouslySetInnerHTML` needs a sanitizer — `parseMarkdown()` /
+  `parseMarkdownDocument()` from `@/lib/markdown`, or `DOMPurify.sanitize()`
+- Put the props spread **before** `dangerouslySetInnerHTML`, never after: it is a
+  legal DOM prop, so spreading after it lets a caller replace the sanitized HTML
+- A component that sanitizes should `Omit<..., "dangerouslySetInnerHTML">` from
+  its props type, so the mistake is a type error rather than a silent bypass
+- Inline `<style>` needs a `nonce` or a strict CSP drops it silently
+
+Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
+`pnpm lint`, but oxc does not surface JS plugins in editors yet).
+
 ## Testing
 
 - Test files: `.test.tsx` / `.test.ts` — never `.spec.ts`
@@ -237,6 +250,21 @@ renderers) imports the same constant.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
 
+## Lint debt (ratchet)
+
+Rules with more violations than one PR can fix run as `"warn"` in the RATCHET
+group of `.oxlintrc.json`. `pnpm lint` shows only errors; `pnpm check:lint-debt`
+compares the warnings per file against `.scripts/lint-debt.json`, a baseline
+that may only shrink. It runs on staged files in the pre-commit hook and over
+the whole tree in CI.
+
+- A file that gains a warning fails the check. Fix the warning.
+- A file that loses one also fails: run `pnpm check:lint-debt --update` and
+  commit the baseline. That is what locks the win in.
+- `sonarjs/cognitive-complexity` (threshold 15) is in the group. Reduce it by
+  extracting the nested branches into named functions, not by raising the
+  threshold.
+
 ## Accessibility
 
 - `focusRing()` on all focusable elements
@@ -264,8 +292,9 @@ pnpm build          # build library and generate types
 pnpm vitest         # unit tests (watch)
 pnpm vitest:ci      # unit tests (CI, run once)
 pnpm test-storybook # Storybook interaction + a11y tests
-pnpm lint           # lint check
+pnpm lint           # lint check (errors only; warnings belong to the ratchet)
 pnpm lint-fix       # auto-fix lint issues
+pnpm check:lint-debt # ratchet rules: no file may gain a warning
 pnpm tsc            # type-check
 pnpm format         # auto-fix formatting (oxfmt) — run before every commit
 pnpm format:check   # check formatting without modifying files (same as CI)

@@ -1,15 +1,12 @@
 import { ReactNode } from "react"
-
+import type { TableHeaderInfo } from "@/experimental/OneTable"
+import { RecordType } from "@/hooks/datasource"
+import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
 import {
   metadataRenderer,
   ValueDisplayRendererDefinition,
   type ValueDisplayTableAlignment,
 } from "@/ui/value-display"
-import { RecordType } from "@/hooks/datasource"
-import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
-
-import type { TableHeaderInfo } from "@/experimental/OneTable"
-
 import { VisualizationType } from "./visualizations/collection/types"
 
 export type { TableHeaderInfo }
@@ -58,15 +55,21 @@ const undefinedValueByVisualization: Partial<
   list: undefined,
 }
 
-export const renderProperty = <R extends RecordType>(
-  item: R,
-  property: PropertyDefinition<R>,
-  visualization: VisualizationType,
-  i18n: TranslationsType,
-  options?: {
-    tableAlign?: ValueDisplayTableAlignment
-  }
-): ReactNode => {
+type RenderPropertyOptions<R extends RecordType> = {
+  item: R
+  property: PropertyDefinition<R>
+  visualization: VisualizationType
+  i18n: TranslationsType
+  tableAlign?: ValueDisplayTableAlignment
+}
+
+export const renderProperty = <R extends RecordType>({
+  item,
+  property,
+  visualization,
+  i18n,
+  tableAlign,
+}: RenderPropertyOptions<R>): ReactNode => {
   const renderDefinition = property.render(item)
 
   const undefinedValue =
@@ -79,7 +82,7 @@ export const renderProperty = <R extends RecordType>(
     {
       visualization,
       i18n,
-      tableAlign: options?.tableAlign,
+      tableAlign,
     },
     undefinedValue
   )

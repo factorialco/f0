@@ -1,6 +1,5 @@
 import { composeStories } from "@storybook/react-vite"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   zeroRender as render,
   screen,
@@ -8,7 +7,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import * as stories from "../index.stories"
 
 vi.mock("react-virtuoso", async (importOriginal) => {
@@ -263,7 +261,7 @@ describe("a community channel inside the application frame", () => {
     await userEvent.click(publish)
 
     // The composer closed and the post is at the foot of the feed.
-    await waitFor(() => expect(cards().length).toBe(before + 1))
+    await waitFor(() => expect(cards()).toHaveLength(before + 1))
     await waitFor(() =>
       expect(screen.queryByTestId("community-post-composer")).toBeNull()
     )
@@ -297,7 +295,7 @@ describe("a community channel inside the application frame", () => {
       await screen.findByRole("button", { name: /^publish$/i })
     )
 
-    await waitFor(() => expect(cards().length).toBe(before + 1))
+    await waitFor(() => expect(cards()).toHaveLength(before + 1))
 
     const published = cards()[cards().length - 1] as HTMLElement
     expect(published.textContent).toContain("Summer offsite")
@@ -372,7 +370,7 @@ describe("a community channel inside the application frame", () => {
     await waitFor(() =>
       expect(screen.getByText(/saved as draft/i)).toBeVisible()
     )
-    expect(cards().length).toBe(before)
+    expect(cards()).toHaveLength(before)
   })
 })
 

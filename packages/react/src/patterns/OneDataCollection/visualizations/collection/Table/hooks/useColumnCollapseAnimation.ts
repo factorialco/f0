@@ -32,7 +32,9 @@ export const useColumnCollapseAnimation = (
   enabled = true
 ) => {
   useLayoutEffect(() => {
-    if (transitions.length === 0) return
+    if (transitions.length === 0) {
+      return
+    }
 
     const container = containerRef.current
 
@@ -48,7 +50,7 @@ export const useColumnCollapseAnimation = (
     }
 
     const animations: Animation[] = []
-    const restores: Array<() => void> = []
+    const restores: (() => void)[] = []
     let cancelled = false
 
     transitions.forEach(({ groupId, cellClass, direction }) => {
@@ -78,7 +80,7 @@ export const useColumnCollapseAnimation = (
         }
       })
 
-      const settled: Array<Promise<unknown>> = []
+      const settled: Promise<unknown>[] = []
 
       cells.forEach((cell, index) => {
         const { width, paddingLeft, paddingRight } = measurements[index]
@@ -117,7 +119,9 @@ export const useColumnCollapseAnimation = (
         // column paints its own background on the cell, and fading the whole
         // cell would show the row's background through it while it moves.
         Array.from(cell.children).forEach((child) => {
-          if (!(child instanceof HTMLElement)) return
+          if (!(child instanceof HTMLElement)) {
+            return
+          }
           animations.push(
             child.animate(
               closing
@@ -140,7 +144,9 @@ export const useColumnCollapseAnimation = (
       })
 
       Promise.all(settled).then(() => {
-        if (!cancelled) onGroupFinished(groupId)
+        if (!cancelled) {
+          onGroupFinished(groupId)
+        }
       })
     })
 

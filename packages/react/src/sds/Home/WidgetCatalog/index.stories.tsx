@@ -1,11 +1,8 @@
-import { useState } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 import { z } from "zod"
-
 import { Calendar, Clock, File, PalmTree, Receipt, Target } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
-
 import {
   fromParams,
   homeSlot,
@@ -18,7 +15,7 @@ import {
   WidgetCatalog,
   type WidgetCatalogGroup,
   type WidgetCatalogItem,
-} from "./index"
+} from "."
 
 /**
  * Beyond its header and slots, a widget may carry the `Widget` frame's own

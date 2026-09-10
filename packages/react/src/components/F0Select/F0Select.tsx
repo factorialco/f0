@@ -1,5 +1,5 @@
-import { useDeepCompareEffect } from "@reactuses/core"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { cva } from "cva"
 import { isEqual } from "lodash"
 import {
@@ -12,12 +12,12 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F0InputField } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -47,23 +47,19 @@ import {
   VirtualItem,
 } from "@/ui/Select"
 import { textVariants } from "@/ui/Text"
-
-import type {
-  F0SelectItemObject,
-  F0SelectItemProps,
-  F0SelectProps,
-  ResolvedRecordType,
-} from "./types"
-
 import { Arrow } from "./components/Arrow"
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
 import { SelectionPreview } from "./components/SelectionPreview"
 import { SelectItem } from "./components/SelectItem"
 import { SelectTopActions } from "./components/SelectTopActions"
+import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+  F0SelectProps,
+  ResolvedRecordType,
+} from "./types"
 export * from "./types"
 
 const defaultSearchFn = (
@@ -646,25 +642,32 @@ const F0SelectComponent = forwardRef(function Select<
     [handleSelectAllItems]
   )
 
-  const getMultiSelectionPayload = useCallback(() => {
-    const checkedItems = Array.from(selectedState.items.values() || []).filter(
-      (item) => item.checked
-    )
-
-    const extractOriginalItem = (
+  // Extract the original item from a record.
+  // For static options: the record IS the option, and option.item contains the original data.
+  // For datasource: the record is the original data, optionMapper creates the option.
+  const extractOriginalItem = useCallback(
+    (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         return record as unknown as ResolvedRecordType<R>
       }
-
       const option = record as unknown as F0SelectItemObject<
         T,
         ResolvedRecordType<R>
       >
       return option.item
-    }
+    },
+    [source]
+  )
+
+  const getMultiSelectionPayload = useCallback(() => {
+    const checkedItems = Array.from(selectedState.items.values() || []).filter(
+      (item) => item.checked
+    )
 
     const records = checkedItems
       .map((item) => item.item)
@@ -695,7 +698,7 @@ const F0SelectComponent = forwardRef(function Select<
       originalItems,
       options,
     }
-  }, [optionMapper, selectedState.items, source])
+  }, [extractOriginalItem, optionMapper, selectedState.items, source])
 
   /**
    * Emit the value change. The type depends on the multiple prop and selectionMode.
@@ -718,25 +721,6 @@ const F0SelectComponent = forwardRef(function Select<
     // and clearing would trigger useSelectable to reset the selection
     if (!multiple && !openLocal && !asList) {
       setCurrentSearch(undefined)
-    }
-
-    // Helper to extract the original item from a record
-    // For static options: the record IS the option, and option.item contains the original data
-    // For datasource: the record is the original data, optionMapper creates the option
-    const extractOriginalItem = (
-      record: ActualRecordType | undefined
-    ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
-      if (source) {
-        // For datasource, the record itself is the original item
-        return record as unknown as ResolvedRecordType<R>
-      }
-      // For static options, extract the 'item' property from the option
-      const option = record as unknown as F0SelectItemObject<
-        T,
-        ResolvedRecordType<R>
-      >
-      return option.item
     }
 
     // TypeScript cannot infer the type of the onChange callback when it has generics,
@@ -819,6 +803,7 @@ const F0SelectComponent = forwardRef(function Select<
       }
     }
   }, [
+    extractOriginalItem,
     controlledInlineValue,
     getMultiSelectionPayload,
     hasDeferredApply,
@@ -907,6 +892,21 @@ const F0SelectComponent = forwardRef(function Select<
   const handleCancel = useCallback(() => {
     handleChangeOpenLocal(false)
   }, [handleChangeOpenLocal])
+
+  // A bottom action ends the interaction with the list — it navigates away, opens a dialog or
+  // resets the selection — so leaving the dropdown open would stack it over whatever the action
+  // put on screen.
+  const bottomActions = useMemo(
+    () =>
+      actions?.map((action) => ({
+        ...action,
+        onClick: () => {
+          handleChangeOpenLocal(false)
+          action.onClick()
+        },
+      })),
+    [actions, handleChangeOpenLocal]
+  )
 
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
@@ -1183,7 +1183,7 @@ const F0SelectComponent = forwardRef(function Select<
       bottom={
         !isFiltersOpen ? (
           <SelectBottomActions
-            actions={actions}
+            actions={bottomActions}
             showApplyButton={showApplyButton}
             applyLabel={applySelectionLabel}
             onApply={handleApply}
@@ -1212,7 +1212,7 @@ const F0SelectComponent = forwardRef(function Select<
             onFiltersOpenChange={setIsFiltersOpen}
             showPreview={showPreview}
           />
-          {multiple && !currentSearch && !isFiltersOpen && (
+          {multiple && !currentSearch && !isFiltersOpen ? (
             <SelectAll
               selectedCount={selectionMeta.selectedItemsCount}
               indeterminate={
@@ -1226,7 +1226,7 @@ const F0SelectComponent = forwardRef(function Select<
               items={getDisplayItemsForSelection}
               paddingTop={!showSearchBox && !localSource.filters}
             />
-          )}
+          ) : null}
         </>
       }
       right={
@@ -1315,7 +1315,7 @@ const F0SelectComponent = forwardRef(function Select<
             disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          {label && !hideLabel && (
+          {label && !hideLabel ? (
             <Label
               label={label}
               required={required}
@@ -1323,7 +1323,7 @@ const F0SelectComponent = forwardRef(function Select<
               icon={labelIcon}
               disabled={disabled}
             />
-          )}
+          ) : null}
           {/* Select Container */}
           <div
             className={cn(
@@ -1431,10 +1431,12 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
-                  : !!localValue[0]) && (
+                {(
+                  multiple
+                    ? localValue.length > 0 ||
+                      selectionMeta.selectedItemsCount > 0
+                    : !!localValue[0]
+                ) ? (
                   <SelectedItems
                     multiple={multiple}
                     totalSelectedCount={
@@ -1455,13 +1457,13 @@ const F0SelectComponent = forwardRef(function Select<
                     // their icons for the rows regardless.
                     hideItemIcon={!!icon}
                   />
-                )}
+                ) : null}
               </button>
             </F0InputField>
           )}
         </SelectTrigger>
       )}
-      {openLocal && selectContent}
+      {openLocal ? selectContent : null}
     </SelectPrimitive>
   )
 

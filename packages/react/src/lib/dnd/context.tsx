@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useContext, useMemo, useRef } from "react"
-
 import type { DndDriver } from "./types"
 
 type DndContextValue = {
@@ -10,7 +9,9 @@ const Ctx = createContext<DndContextValue | null>(null)
 
 export function useDndContext(): DndContextValue {
   const ctx = useContext(Ctx)
-  if (!ctx) throw new Error("useDndContext must be used within DndProvider")
+  if (!ctx) {
+    throw new Error("useDndContext must be used within DndProvider")
+  }
   return ctx
 }
 

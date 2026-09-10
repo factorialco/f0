@@ -1,7 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 import { createRef, type MutableRefObject } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { type F0ChatPost } from "../../types"
 import { type ChatRow } from "../../utils/grouping"
 import { POST_READ_DWELL_MS, useVisiblePostReads } from "../useVisiblePostReads"

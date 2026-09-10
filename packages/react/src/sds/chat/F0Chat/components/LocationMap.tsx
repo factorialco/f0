@@ -29,7 +29,9 @@ const useIsDarkContext = (
 
   useEffect(() => {
     const element = containerRef.current
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     const refresh = () => setIsDark(element.closest(".dark") !== null)
     refresh()
@@ -77,7 +79,9 @@ const LocationMap = ({
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
     appliedStyleUrlRef.current = styleUrlRef.current
     const map = new maplibregl.Map({
       container,
@@ -97,7 +101,9 @@ const LocationMap = ({
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || appliedStyleUrlRef.current === styleUrl) return
+    if (!map || appliedStyleUrlRef.current === styleUrl) {
+      return
+    }
     appliedStyleUrlRef.current = styleUrl
     map.setStyle(styleUrl)
   }, [styleUrl])
