@@ -65,7 +65,7 @@ describe("F0AiCallout", () => {
 
         const glyphs = container.querySelectorAll("[aria-hidden='true']")
         // The byline logo is always one of them; a semantic glyph makes two.
-        expect(glyphs.length).toBe(status === "neutral" ? 1 : 2)
+        expect(glyphs).toHaveLength(status === "neutral" ? 1 : 2)
         unmount()
       }
     })
@@ -116,7 +116,7 @@ describe("F0AiCallout", () => {
       )
 
       expect(warn).not.toHaveBeenCalled()
-      expect(container.querySelectorAll("[aria-hidden='true']").length).toBe(2)
+      expect(container.querySelectorAll("[aria-hidden='true']")).toHaveLength(2)
     })
   })
 
@@ -465,7 +465,7 @@ describe("F0AiCallout", () => {
         )
       }
 
-      expect(warn.mock.calls.length).toBe(afterMount)
+      expect(warn.mock.calls).toHaveLength(afterMount)
     })
 
     it("lets the caller drive the state", async () => {
