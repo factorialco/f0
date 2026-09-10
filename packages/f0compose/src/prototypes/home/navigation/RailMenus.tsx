@@ -8,6 +8,7 @@ import {
   Megaphone,
   Person,
   Phone,
+  Reset,
   Sliders,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useState } from "react"
@@ -86,6 +87,24 @@ export function RailPersonalMenu() {
       label: "Submit a complaint",
       icon: ExternalLink,
       onClick: () => open("trust-channel"),
+    },
+    {
+      label: "Reset prototype",
+      icon: Reset,
+      onClick: () => {
+        const keys = Object.keys(window.localStorage).filter((key) =>
+          key.startsWith("f0compose:home:")
+        )
+        const backup = Object.fromEntries(
+          keys.map((key) => [key, window.localStorage.getItem(key)])
+        )
+        window.sessionStorage.setItem(
+          "f0compose:home-reset-backup",
+          JSON.stringify(backup)
+        )
+        keys.forEach((key) => window.localStorage.removeItem(key))
+        window.location.assign(window.location.pathname)
+      },
     },
     { label: "Sign out", icon: Exit, critical: true, onClick: () => {} },
   ]
