@@ -21,6 +21,7 @@ import {
 } from "@/ui/popover"
 import { CoachmarkSpotlight } from "./CoachmarkSpotlight"
 import type { F0CoachmarkProps } from "./types"
+import { useDialogOpen } from "./useDialogOpen"
 
 const ARROW_WIDTH = 12
 const ARROW_HEIGHT = 6
@@ -209,6 +210,25 @@ const CoachmarkPanel = ({
   const viewportCentre = useViewportCentre()
 
   /**
+   * A DIALOG TAKES THE SCREEN, AND THE COACHMARK STANDS DOWN FOR IT — panel and
+   * shield both, for as long as the dialog is up, and back on the same step
+   * when it goes. A coachmark is an aside about the page; a dialog is a
+   * question that has to be answered before the page can be used at all, so
+   * nothing about the aside may cover it or swallow a press meant for it.
+   *
+   * Standing down rather than closing: the reader did not dismiss anything, and
+   * the walkthrough they are three steps into should still be there afterwards.
+   *
+   * `invisible` rather than a lower z-index, even though the layer below is
+   * exactly what this wants: Radix reads the panel's z-index ONCE, at mount,
+   * and writes it on the popper wrapper that positions it (see the layer note
+   * on the class list) — the panel cannot lower itself afterwards. And a dialog
+   * portalled into `#content` sits in that element's own stacking context,
+   * where no z-index of ours reaches it at all.
+   */
+  const dialogOpen = useDialogOpen()
+
+  /**
    * WHERE FOCUS BELONGS FOR THIS STEP. The panel, so the step is announced and
    * Enter cannot fire the action unread — unless the step asked for its own
    * element (`focusTarget`), in which case the field it is pointing at, which is
@@ -217,6 +237,13 @@ const CoachmarkPanel = ({
    * for something impossible still behaves like every other step.
    */
   const focusForStep = () => {
+    // Never while a dialog is up. Focus is also how a coachmark used to CLOSE
+    // one: a dialog that is not modal dismisses itself when focus leaves it,
+    // so the panel taking focus as it opened shut the dialog it had just
+    // stood down for.
+    if (dialogOpen) {
+      return
+    }
     const field = focusTarget ? fieldIn(target) : null
     ;(field ?? contentRef.current)?.focus()
   }
@@ -245,6 +272,20 @@ const CoachmarkPanel = ({
     focusForStep()
   }, [step?.current])
 
+  // Coming back from a dialog is an arrival like any other, so the step is
+  // announced again — it went unread while the panel was stood down, and
+  // whatever the dialog left focus on is not it.
+  const stoodDown = useRef(dialogOpen)
+  useEffect(() => {
+    if (stoodDown.current === dialogOpen) {
+      return
+    }
+    stoodDown.current = dialogOpen
+    if (!dialogOpen) {
+      focusForStep()
+    }
+  }, [dialogOpen])
+
   // On the last step (or a single-step coachmark) the action ends the coachmark,
   // so it says so; earlier steps say where the button goes.
   const isLastStep = !step || step.current >= step.total
@@ -270,6 +311,7 @@ const CoachmarkPanel = ({
         <CoachmarkSpotlight
           target={target}
           container={container}
+          suspended={dialogOpen}
           onOutsideInteraction={() => {
             wiggle()
             onOutsideInteraction?.()
@@ -347,15 +389,22 @@ const CoachmarkPanel = ({
         // owns `animation` on this same element. `duration-150` is the provider's
         // own `STEP_FADE_OUT_MS`, so the commit lands on a panel that has just
         // finished going.
+        //
+        // `z-[1240]`: the coachmark's own layer, one step under the dialog
+        // layer (`z-50`, 1250 in the f0 scale — see core's tailwind config), so
+        // a dialog portalled into the same overlay root paints over the panel
+        // whichever of the two mounted first. DOM order decided it before, and
+        // a coachmark opened while a dialog was up won.
         className={cn(
-          "w-72 overflow-visible rounded-lg border-none p-4",
+          "z-[1240] w-72 overflow-visible rounded-lg border-none p-4",
           "flex flex-col",
           "shadow-lg backdrop-blur-sm",
           "bg-f1-background-inverse text-f1-foreground-inverse",
           "dark:bg-f1-background-tertiary",
           overlay && "dark:bg-f1-background-secondary",
           "transition-opacity",
-          leaving ? "opacity-0 duration-150" : "opacity-100 duration-200"
+          leaving ? "opacity-0 duration-150" : "opacity-100 duration-200",
+          dialogOpen && "invisible"
         )}
       >
         {/* `dark` so every control inside resolves the tokens that suit a dark
