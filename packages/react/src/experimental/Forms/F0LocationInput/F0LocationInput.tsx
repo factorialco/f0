@@ -23,6 +23,30 @@ import type {
   LocationPart,
 } from "./types"
 
+/**
+ * The legacy `hint` and `error` shortcuts collapsed into the `status` the
+ * fields take, with `F0InputField`'s precedence: an error outranks a hint,
+ * and a hint outranks an explicit status.
+ */
+const resolveStatus = ({
+  status,
+  hint,
+  error,
+}: Pick<F0LocationInputProps, "status" | "hint" | "error">):
+  | InputFieldStatus
+  | undefined => {
+  if (error) {
+    return {
+      type: "error",
+      message: typeof error === "string" ? error : undefined,
+    }
+  }
+  if (hint) {
+    return { type: "default", message: hint }
+  }
+  return status
+}
+
 export const F0LocationInput = forwardRef<
   HTMLInputElement,
   F0LocationInputProps
@@ -161,17 +185,7 @@ export const F0LocationInput = forwardRef<
     clear()
   }
 
-  // Legacy `hint`/`error` shortcuts, mirroring F0InputField's semantics
-  let effectiveStatus: InputFieldStatus | undefined = status
-  if (hint) {
-    effectiveStatus = { type: "default", message: hint }
-  }
-  if (error) {
-    effectiveStatus = {
-      type: "error",
-      message: typeof error === "string" ? error : undefined,
-    }
-  }
+  const effectiveStatus = resolveStatus({ status, hint, error })
 
   const messagesId = useId()
 
