@@ -178,7 +178,16 @@ export function HybridHome({ children }: { children: ReactNode }) {
     const targets = container.querySelectorAll<HTMLElement>(
       "[data-hybrid-target], [data-hybrid-chat-target], [data-hybrid-dock]"
     )
-    targets.forEach((target) => observer.observe(target))
+    // Fixed-width destinations can move when a surrounding pane resizes
+    // without changing their own size (for example, folding the widget rail).
+    // Observe that layout chain too so the mounted composer follows it.
+    targets.forEach((target) => {
+      let ancestor: HTMLElement | null = target
+      while (ancestor && ancestor !== container) {
+        observer.observe(ancestor)
+        ancestor = ancestor.parentElement
+      }
+    })
     measure()
     return () => {
       observer.disconnect()
