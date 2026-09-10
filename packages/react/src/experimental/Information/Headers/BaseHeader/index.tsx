@@ -47,6 +47,11 @@ interface BaseHeaderProps {
       }
     | AvatarVariant
 
+  /**
+   * Markdown. Inline formatting only — a link out to the resource's source of
+   * truth is the case this exists for. Clamped to two lines behind a "show all"
+   * toggle.
+   */
   description?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]
