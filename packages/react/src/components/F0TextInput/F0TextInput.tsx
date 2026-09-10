@@ -1,15 +1,7 @@
 import { forwardRef } from "react"
 import { InputInternal, type InputInternalProps } from "./internal"
 
-/**
- * Props `InputInternal` accepts but `F0TextInput` does not offer.
- *
- * `onClickContent` turns a click anywhere on the value into a callback, which
- * only makes sense for a row that swaps a resting value for an editor. That
- * belongs to the pattern that owns the swap, so it reaches the input through
- * `InputInternal` rather than through the public component.
- */
-const privateProps = ["buttonToggle", "onClickContent"] as const
+const privateProps = ["buttonToggle"] as const
 
 export type F0TextInputProps = Omit<
   InputInternalProps,

@@ -223,14 +223,17 @@ export const Clearable: Story = {
 }
 
 /**
- * A details-row value cell built on the public component: the value as plain
- * text at rest, the ordinary bordered field while editing, Enter to commit and
- * Escape to revert.
+ * A details-row value cell. The value is plain text at rest, the ordinary
+ * bordered field while editing. Click the value or the pencil to start, Enter
+ * to commit, Escape to revert.
  *
- * The consumer owns the readonly flip and the draft. The input owns the keys
- * and the resting presentation, including the height, so the row does not move
- * when it becomes editable. The trailing buttons a details row also wants
- * (copy, pencil, comment) belong to the pattern that draws the row, not here.
+ * The consumer owns the readonly flip and the draft. The input owns the keys,
+ * the resting presentation, and the caret: `onClickContent` fires on the click
+ * and the field focuses itself once `readonly` lifts, so neither `autoFocus`
+ * nor a remount is needed.
+ *
+ * The trailing buttons a details row also wants (copy, comment, and the tick
+ * that confirms a commit) belong to the pattern that draws the row, not here.
  */
 const InlineEditingDemo = () => {
   const [value, setValue] = useState("ada.lovelace@example.com")
@@ -245,6 +248,11 @@ const InlineEditingDemo = () => {
   const revert = () => {
     setDraft(value)
     setEditing(false)
+  }
+
+  const startEditing = () => {
+    setDraft(value)
+    setEditing(true)
   }
 
   return (
@@ -263,6 +271,10 @@ const InlineEditingDemo = () => {
         // Clicking away is a commit, not a cancel: the only way to throw a
         // draft away is to say so with Escape.
         onBlur={editing ? () => commit(draft) : undefined}
+        onClickContent={editing ? undefined : startEditing}
+        // The pencil sits outside the field, so its click cannot put the caret
+        // in. This asks the field to take it as soon as it can.
+        focusOnEditable={editing}
       />
       <F0Button
         variant="ghost"
@@ -270,10 +282,7 @@ const InlineEditingDemo = () => {
         hideLabel
         icon={Icons.Pencil}
         label="Edit Email"
-        onClick={() => {
-          setDraft(value)
-          setEditing(true)
-        }}
+        onClick={startEditing}
       />
     </div>
   )
@@ -293,16 +302,33 @@ export const InlineEditing: Story = {
       .getByTestId("input-field-wrapper")
       .getBoundingClientRect()
 
-    await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
+    // The value itself starts the edit. The pointer has to land on the cell,
+    // because the disabled input swallows the mouse event rather than letting
+    // it bubble, and jsdom does no hit-testing to prove that.
+    const underPointer = document.elementFromPoint(
+      restingBox.left + restingBox.width / 2,
+      restingBox.top + restingBox.height / 2
+    )
+    await expect(underPointer).not.toBe(field())
+    await userEvent.click(underPointer as HTMLElement)
     await waitFor(() => expect(field()).not.toBeDisabled())
 
-    // The editor is the ordinary bordered field, at the height the resting
-    // cell already had. `getBoundingClientRect` is all zeros in jsdom, so only
-    // a real browser can check this.
+    // And the caret is already in it, without autoFocus or a remount.
+    await expect(field()).toHaveFocus()
+
+    // The editor is the ordinary bordered field, at the size the resting cell
+    // already had. `getBoundingClientRect` is all zeros in jsdom, so only a
+    // real browser can check this. Width matters as much as height here:
+    // dropping `transparent` used to collapse the field to the inner input's
+    // intrinsic width, clipping the value and leaving dead space beside it.
     const wrapper = canvas.getByTestId("input-field-wrapper")
     await expect(wrapper).toHaveClass("border-[1px]")
-    await expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(
+    const editingBox = wrapper.getBoundingClientRect()
+    await expect(Math.round(editingBox.height)).toBe(
       Math.round(restingBox.height)
+    )
+    await expect(Math.round(editingBox.width)).toBe(
+      Math.round(restingBox.width)
     )
 
     await userEvent.clear(field())
@@ -314,6 +340,7 @@ export const InlineEditing: Story = {
 
     // Escape reverts: the draft is thrown away and the committed value stands.
     await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
+    await waitFor(() => expect(field()).not.toBeDisabled())
     await userEvent.clear(field())
     await userEvent.type(field(), "discarded@example.com")
     await userEvent.keyboard("{Escape}")

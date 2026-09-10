@@ -262,7 +262,9 @@ Clicking anywhere in the content area puts the caret in the input. For an alread
 
 The click also has to reach the cell. A disabled control swallows the mouse event rather than letting it bubble, so the inner input becomes `pointer-events-none` once a resting value has an `onClickContent`. The same condition adds the text cursor and the `bg-f1-background-secondary` hover tint: a tint with nothing behind it is a lie.
 
-`onClickContent` is not part of `F0TextInput`'s public API. It only makes sense for a pattern that swaps a resting value for an editor, so it reaches the input through `InputInternal`. Buttons in the trailing area stop the click, so they never drag the caret into the field.
+Buttons in the trailing area stop the click, so they never drag the caret into the field.
+
+An edit control that sits _outside_ the field cannot use any of this: its click never reaches the content area, so flipping `readonly` off from a toolbar button leaves the caret on the button. `focusOnEditable` asks for the same deferral by prop. Set it alongside whatever makes the field editable and the caret lands as soon as the input can accept it.
 
 ---
 
@@ -639,7 +641,7 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
   </table>
 </Unstyled>
 
-### Masking
+### Masking and focus
 
 <Unstyled>
   <table>
@@ -663,6 +665,23 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
           Renders the value masked, with an eye to reveal it. Set for you by{" "}
           <code>F0TextInput type="password" | "private"</code>. See{" "}
           <a href="#masking">Masking</a>.
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>focusOnEditable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Puts the caret in the field as soon as it stops being{" "}
+          <code>readonly</code> or <code>disabled</code>. For an edit control
+          outside the field; clicking the value does this on its own. See{" "}
+          <a href="#clicking-a-resting-value">Clicking a resting value</a>.
         </td>
         <td>
           <code>false</code>

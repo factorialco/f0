@@ -246,6 +246,17 @@ export type InputFieldProps<T> = {
    * is silently treated as `submit` and on a textarea is not an attribute.
    */
   masked?: boolean
+  /**
+   * Puts the caret in the field as soon as it can take it, and nothing sooner.
+   *
+   * `autoFocus` only fires at mount, which is no use to a value that starts
+   * `readonly` and becomes editable later: while `readonly` the inner input is
+   * disabled, so `focus()` is a no-op. Set this alongside the flag that makes
+   * the field editable and the caret lands once the input can accept it, with
+   * no remount. Clicking the value does this on its own; this is for an edit
+   * control that sits outside the field.
+   */
+  focusOnEditable?: boolean
 }
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -291,6 +302,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       buttonToggle,
       transparent,
       masked: maskable,
+      focusOnEditable,
       ...props
     }: InputFieldProps<string>,
     ref
@@ -367,10 +379,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
      * editable or is a resting value about to become one.
      *
      * The second case cannot focus synchronously: while `readonly` the inner
-     * input is disabled, so `focus()` does nothing. The click flips the flag,
+     * input is disabled, so `focus()` does nothing. The click flips this ref,
      * the consumer flips `readonly`, and the effect below focuses once the
-     * input can actually take it. Buttons in the trailing area stop the click,
-     * so they never drag focus into the field.
+     * input can actually take it. `focusOnEditable` is the same deferral asked
+     * for by prop, for an edit control outside the field. Buttons in the
+     * trailing area stop the click, so they never drag focus into the field.
      */
     const focusOnEditableRef = useRef(false)
 
@@ -383,27 +396,31 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     useEffect(() => {
-      if (!focusOnEditableRef.current || noEdit) {
+      if (noEdit || (!focusOnEditableRef.current && !focusOnEditable)) {
         return
       }
       focusOnEditableRef.current = false
       focusInput()
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [noEdit])
-
-    const requestFocus = () => {
-      focusOnEditableRef.current = true
-      if (!noEdit) {
-        focusInput()
-      }
-    }
+    }, [noEdit, focusOnEditable])
 
     const handleClickContent = () => {
       if (disabled) {
         return
       }
-      requestFocus()
-      onClickContent?.()
+      if (!noEdit) {
+        focusInput()
+        onClickContent?.()
+        return
+      }
+      // Only arm the deferred focus when somebody is listening to the click and
+      // could flip `readonly` off in response. Arming it on a value that stays
+      // readonly leaves a live flag that would steal the caret the next time
+      // the field happens to become editable.
+      if (onClickContent) {
+        focusOnEditableRef.current = true
+        onClickContent()
+      }
     }
 
     const handleClickChildren = () => {
@@ -489,9 +506,15 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       <div
         className={cn(
           "flex flex-col gap-2",
+          // The width is unconditional. In a block or column parent the field
+          // filled its container anyway; as a row item it used to fall back to
+          // the child input's intrinsic width, so dropping `transparent` to
+          // start editing shrank the field and clipped the value. `min-w-0`
+          // lets it shrink past that width beside a sibling button.
+          "w-full min-w-0",
           "pointer-events-none",
           disabled && "cursor-not-allowed",
-          transparent && "bg-transparent h-full w-full",
+          transparent && "bg-transparent h-full",
           className
         )}
         ref={ref}

@@ -193,7 +193,9 @@ It never doubles up: a `password` or `private` field already sets it, so those t
 
 `readonly` together with `transparent` draws the value as plain text, without the field's border or the secondary "disabled form" background, but at the height and radius the editable field takes. Drop the two props and the same component is the ordinary bordered field again, at the same height, so a row does not move when it becomes editable.
 
-That plus the keyboard pair is inline editing: the consumer owns the `readonly` flip and the draft, and the input owns the keys and both presentations.
+That plus the keyboard pair is inline editing. The consumer owns the `readonly` flip and the draft; the input owns the keys, both presentations, and the caret.
+
+Two ways in, and the input handles focus for both. `onClickContent` fires when the value itself is clicked, and the field focuses once `readonly` lifts. For an edit control outside the field, such as a pencil in a toolbar, set `focusOnEditable` alongside the flag that makes the field editable. Neither needs `autoFocus` or a remount.
 
 <Canvas of={Stories.InlineEditing} />
 

@@ -36,6 +36,7 @@ export type InputInternalProps = Pick<
     | "readonly"
     | "onClickContent"
     | "masked"
+    | "focusOnEditable"
   > & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:

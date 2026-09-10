@@ -199,6 +199,28 @@ describe("F0InputField click-to-focus", () => {
     await waitFor(() => expect(container.querySelector("input")).toHaveFocus())
   })
 
+  it("does not arm the deferred focus when nothing is listening to the click", async () => {
+    // Clicking a value that stays readonly used to set the deferred-focus flag
+    // anyway, so the next unrelated flip to editable stole the caret.
+    const Harness = ({ editing }: { editing: boolean }) => (
+      <F0InputField
+        label="Email"
+        value="ada@example.com"
+        readonly={!editing}
+        transparent={!editing}
+      >
+        <input type="text" />
+      </F0InputField>
+    )
+
+    const { container, rerender } = render(<Harness editing={false} />)
+
+    await userEvent.click(screen.getByTestId("input-field-content"))
+    rerender(<Harness editing />)
+
+    expect(container.querySelector("input")).not.toHaveFocus()
+  })
+
   it("takes no focus and fires nothing while disabled", async () => {
     const onClickContent = vi.fn()
     const { container } = renderField({ disabled: true, onClickContent })
@@ -207,5 +229,67 @@ describe("F0InputField click-to-focus", () => {
 
     expect(onClickContent).not.toHaveBeenCalled()
     expect(container.querySelector("input")).not.toHaveFocus()
+  })
+})
+
+describe("F0InputField focusOnEditable", () => {
+  const Harness = ({
+    editing,
+    focusOnEditable,
+  }: {
+    editing: boolean
+    focusOnEditable?: boolean
+  }) => (
+    <F0InputField
+      label="Email"
+      value="ada@example.com"
+      readonly={!editing}
+      transparent={!editing}
+      focusOnEditable={focusOnEditable}
+    >
+      <input type="text" />
+    </F0InputField>
+  )
+
+  it("takes the caret once the field becomes editable", async () => {
+    // `autoFocus` fires only at mount, which is no use to a value that starts
+    // readonly: the inner input is disabled, so `focus()` is a no-op.
+    const { container, rerender } = render(<Harness editing={false} />)
+
+    expect(container.querySelector("input")).not.toHaveFocus()
+
+    rerender(<Harness editing focusOnEditable />)
+
+    await waitFor(() => expect(container.querySelector("input")).toHaveFocus())
+  })
+
+  it("waits, rather than focusing a readonly field", () => {
+    const { container } = render(<Harness editing={false} focusOnEditable />)
+
+    expect(container.querySelector("input")).not.toHaveFocus()
+  })
+})
+
+describe("F0InputField width", () => {
+  it("fills its container whether transparent or not", () => {
+    // The width used to come from `transparent` alone, so a field in a flex row
+    // collapsed to the child input's intrinsic width the moment it became
+    // editable, clipping the value.
+    const resting = render(
+      <F0InputField label="Email" value="ada@example.com" readonly transparent>
+        <input type="text" />
+      </F0InputField>
+    )
+    const editable = render(
+      <F0InputField label="Email" value="ada@example.com">
+        <input type="text" />
+      </F0InputField>
+    )
+
+    const root = (result: ReturnType<typeof render>) =>
+      result.container.firstElementChild
+
+    expect(root(resting)).toHaveClass("w-full")
+    expect(root(editable)).toHaveClass("w-full")
   })
 })
