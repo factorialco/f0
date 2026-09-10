@@ -366,12 +366,12 @@ const CoachmarkPanel = ({
           data-coachmark-body
           className="dark flex min-h-0 flex-col gap-6 overflow-y-auto"
         >
-          {/* Title and description are their own group on a tighter gap-1, the
-              same pairing F0Toast uses, so they read as one block. The outer
-              gap-6 then separates that block from the action row by a clear
-              margin, so the controls read as something you act on rather than
-              as a third line of text. */}
-          <div className="flex flex-col gap-1">
+          {/* Title and description are their own group on a tight gap-0.5, so
+              they read as one block rather than two lines. The outer gap-6 then
+              separates that block from the action row by a clear margin, so the
+              controls read as something you act on rather than as a third line
+              of text. */}
+          <div className="flex flex-col gap-0.5">
             <div className="flex flex-row items-start justify-between gap-2">
               <p id={titleId} className="font-semibold">
                 {title}
