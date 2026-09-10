@@ -5,8 +5,7 @@ import * as CompanyStories from "./company.stories"
 
 ### company
 
-Renders a company avatar. It supports the same badge as the person type (check
-it for more details).
+Renders a company avatar.
 
 #### Value type
 
@@ -14,9 +13,7 @@ it for more details).
 type value = {
     name: string
     src?: string // the avatar image
-    badge?: AvatarBadge
 }
-// Check PersonType for the AvatarBadge type
 ```
 
 <Canvas
@@ -33,3 +30,10 @@ render: (item) => ({
 `,
   }}
 />
+
+**Long name inside a fixed-width column**
+
+A name wider than its cell truncates with an ellipsis and shows the full name
+in a tooltip on hover, the same as the person type.
+
+<Canvas of={CompanyStories.CompanyTypeWithLongName} />
