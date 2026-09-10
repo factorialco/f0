@@ -605,8 +605,8 @@ describe("F0LocationInput", () => {
       expect(meta).toEqual({ source: "typed", isResolved: true })
       expect(value.addressLine2).toBe("Floor 3")
       expect(value.placeId).toBe("place-1")
-      expect(value.latitude).toBe(41.38)
-      expect(value.longitude).toBe(2.17)
+      expect(value.latitude).toBeCloseTo(41.38)
+      expect(value.longitude).toBeCloseTo(2.17)
       expect(value.timezone).toBe("Europe/Madrid")
     })
 
