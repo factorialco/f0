@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.99.0](https://github.com/factorialco/f0/compare/f0-react-v6.98.0...f0-react-v6.99.0) (2026-09-10)
+
+
+### Features
+
+* **F0AiCallout:** add the AI callout and deprecate F0Callout ([#5415](https://github.com/factorialco/f0/issues/5415)) ([ec8fb03](https://github.com/factorialco/f0/commit/ec8fb0321fdfc8964fdf8f026a18eb19dd0adc3e))
+
 ## [6.98.0](https://github.com/factorialco/f0/compare/f0-react-v6.97.2...f0-react-v6.98.0) (2026-09-10)
 
 
