@@ -168,6 +168,10 @@ export type AiChatCredits = {
 export type AiChatCreditWarning = {
   /** The severity level of the warning. */
   level: "soft"
+  /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+  text?: string
+  /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+  actionLabel?: string
   /** Called when the user dismisses the credit warning banner. */
   onDismiss?: () => void
   /** Called when the user clicks the "Get Credits" button. */

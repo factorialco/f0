@@ -855,6 +855,16 @@ export const WithCreditWarning: Story = {
   },
 }
 
+export const WithCreditWarningHostCopy: Story = {
+  args: {
+    creditWarning: {
+      ...CREDIT_WARNING,
+      text: "You've run out of One",
+      actionLabel: "Request",
+    },
+  },
+}
+
 export const WithPendingContext: Story = {
   args: {
     initialPendingContext: PENDING_CONTEXT,
