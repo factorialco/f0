@@ -568,3 +568,29 @@ export interface AiChatTranslationsProviderProps {
   children: React.ReactNode
   translations: AiChatTranslations
 }
+
+export type AiChatUsageLimitsSection = {
+  id: string
+  /** Already localized. */
+  label: string
+  /** Already localized, e.g. "Renews Sep 4". */
+  description?: string
+  usedPercentage: number
+  unlimited?: boolean
+}
+
+/**
+ * Host-resolved numbers for `F0AiChatUsageLimitsButton`. Percentages only: the
+ * product avoids credit counts in the chat.
+ */
+export type AiChatUsageLimits = {
+  /** The viewer's own allowance, 0–100. */
+  usedPercentage: number
+  /** Already localized, e.g. "Resets in 3h 6m". */
+  description?: string
+  unlimited?: boolean
+  /** Extra rows below a divider, typically for admins. */
+  sections?: AiChatUsageLimitsSection[]
+  /** Renders the "Your company" row. */
+  onSeeCompany?: () => void
+}

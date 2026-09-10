@@ -450,6 +450,13 @@ export const defaultTranslations = {
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?",
     },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage",
+    },
     reportCard: {
       tableLabel: "Table",
       openButton: "Open",
