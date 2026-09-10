@@ -59,7 +59,10 @@ export const AddressParts = ({
       {part("addressLine2")}
       {/* Container, not viewport: the block lives in side panels and dialogs */}
       <div className="@container">
-        <div className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
+        {/* `@xs` is the 24rem step: f0's preset redefines the container
+            breakpoints and its `@sm` is 40rem, wider than any form this row
+            sits in, so `@sm` never matched and the fields stacked */}
+        <div className="grid grid-cols-1 gap-3 @xs:grid-cols-3">
           {part("city")}
           {part("state")}
           {part("postalCode")}
