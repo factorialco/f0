@@ -242,10 +242,7 @@ export type InputFieldProps<T> = {
   maskToggleAlwaysVisible?: boolean
   /** Overrides the eye's `[show, hide]` names. Defaults to naming the field. */
   maskToggleLabels?: [string, string]
-  /**
-   * Focuses the field once it stops being `readonly` or `disabled`, which
-   * `autoFocus` cannot do because it only fires at mount.
-   */
+  /** Focuses the field once it stops being `readonly`, which `autoFocus` cannot. */
   focusOnEditable?: boolean
 }
 
@@ -311,8 +308,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const masked = !!maskable && !revealed
     const childIsInput = (children as React.ReactElement)?.type === "input"
 
-    // Not `:focus-within`: the trailing buttons share the wrapper, and
-    // focusing one of those is not editing the value.
+    // Not `:focus-within`: the trailing buttons share the wrapper.
     const [childFocused, setChildFocused] = useState(false)
 
     // For legacy reasons, error is a shortcut for status with type error
@@ -368,8 +364,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       props.onClear?.()
     }
 
-    // A resting value cannot focus synchronously: `readonly` disables the
-    // inner input, so `focus()` is a no-op until the consumer lifts it.
+    // `focus()` is a no-op until the consumer lifts `readonly`.
     const focusOnEditableRef = useRef(false)
 
     const focusInput = () => {
@@ -398,8 +393,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         onClickContent?.()
         return
       }
-      // Arming this with nobody listening leaves a flag that steals the caret
-      // whenever the field next becomes editable.
+      // Arming this with nobody listening would steal a later caret.
       if (onClickContent) {
         focusOnEditableRef.current = true
         onClickContent()
@@ -486,8 +480,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       <div
         className={cn(
           "flex flex-col gap-2",
-          // Without this a flex-row item collapses to the child input's
-          // intrinsic width and clips the value.
+          // Or a flex-row item collapses to the input's intrinsic width.
           "w-full min-w-0",
           "pointer-events-none",
           disabled && "cursor-not-allowed",
@@ -544,8 +537,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             readonly &&
               !transparent &&
               "border-f1-border-secondary bg-f1-background-secondary",
-            // Same box the editable field will occupy, so the row does not
-            // move when it is clicked.
+            // Same box the editable field takes, so the row does not move.
             isRestingValue && inputFieldVariants({ size, canGrow }),
             isClickableRestingValue &&
               "cursor-text hover:bg-f1-background-secondary",
@@ -583,8 +575,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               className="w-full min-w-0 flex-1"
             >
               {cloneElement(children as React.ReactElement, {
-                // Spread, not `undefined`: that would strip the child's own
-                // type (search, email, tel) down to text.
+                // Spread, or an `undefined` strips the child's own type.
                 ...(masked && childIsInput ? { type: "password" } : {}),
                 onChange: handleChange,
                 onBlur: () => {
