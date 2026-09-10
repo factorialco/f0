@@ -583,13 +583,50 @@ The address line inherits `F0Select`'s contract: the trigger is a `combobox`, th
 
 ### Keyboard interaction
 
-| Key                               | Result                                                  |
-| --------------------------------- | ------------------------------------------------------- |
-| `Enter` or `Space` on the trigger | Opens the dropdown with the search box focused          |
-| Typing                            | Searches after two characters; results replace the list |
-| `ArrowDown` / `ArrowUp`           | Moves through the options                               |
-| `Enter`                           | Picks the highlighted option                            |
-| `Escape`                          | Closes the dropdown and keeps the current value         |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>
+          Opens the dropdown from the trigger, with the search box focused.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Any character</kbd>
+        </td>
+        <td>Searches after two characters. Results replace the list.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd>
+        </td>
+        <td>Move through the options.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd>
+        </td>
+        <td>Picks the highlighted option.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Closes the dropdown and keeps the current value.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 ### Screen reader behavior
 
