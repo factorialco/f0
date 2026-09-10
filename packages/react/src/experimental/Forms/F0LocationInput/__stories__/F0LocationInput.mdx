@@ -118,6 +118,28 @@ Every `onChange` carries `meta`:
 - `source`: `"picked"` right after a suggestion resolves, `"typed"` for any manual edit.
 - `isResolved`: whether `placeId` and both coordinates are still present.
 
+### What `resolvePlace` has to return
+
+Every field is optional, so the type alone does not say how much of a place is
+enough. Two thresholds do:
+
+- **To show the address**, the value needs `formatted` **or** `addressLine1`.
+  With neither, the component has nothing to put in the field. A value that
+  carries only `placeId` and coordinates is still kept, but it reads as empty.
+- **To be usable for geolocation** - `isResolved: true` - the value needs
+  `placeId` **and both** `latitude` and `longitude`. One coordinate alone, or a
+  `placeId` with no coordinates, reports `isResolved: false`.
+
+Everything else is optional in practice as well as in the type. A provider that
+returns `formatted_address` without walking its address components is a normal,
+supported answer: the parts stay empty, the field shows the whole address, and
+the value is still resolved. Filling the parts is what makes `manualEntry`
+useful afterwards, not what makes the value valid.
+
+The component never inspects the provider. Mapping a provider response into
+`F0LocationInputValue` is the adapter's job, and it is the only place that has
+to know which provider is in use.
+
 ### Editing invalidates the pick
 
 Editing a part that moves the pin - the address line, city, state, postal code or country - drops `placeId`, `latitude`, `longitude` and `timezone` and emits `{ source: "typed", isResolved: false }`. The typed text is kept. Consumers that need coordinates for a typed address geocode it themselves.
