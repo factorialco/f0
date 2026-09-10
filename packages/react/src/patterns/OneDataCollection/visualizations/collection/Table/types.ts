@@ -41,6 +41,18 @@ export type WithOptionalSorting<
    * `width` that should not shrink below a given size.
    */
   minWidth?: number
+
+  /**
+   * Optional maximum width for the column in pixels. A ceiling only: the
+   * column still sizes itself to its content, it just stops growing here.
+   *
+   * Reach for this, not `width`, when the goal is to stop one long value from
+   * stretching a column. `width` is applied as the width, the min AND the max
+   * at once, which pins the column — and since the header label is the only
+   * part of a header cell that can shrink, a pinned column too narrow for its
+   * label renders no label at all.
+   */
+  maxWidth?: number
 }
 
 export type ColId = string
@@ -52,7 +64,13 @@ export type TableColumnDefinition<
 > = WithOptionalSorting<R, Sortings> &
   Pick<
     ComponentProps<typeof TableHead>,
-    "hidden" | "info" | "infoIcon" | "sticky" | "width" | "minWidth"
+    | "hidden"
+    | "info"
+    | "infoIcon"
+    | "sticky"
+    | "width"
+    | "minWidth"
+    | "maxWidth"
   > & {
     /**
      * Optional summary configuration for this column

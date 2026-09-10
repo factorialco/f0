@@ -37,6 +37,20 @@ interface TableHeadProps {
   minWidth?: ColumnWidth
 
   /**
+   * Optional maximum width for the header cell. When provided, overrides the
+   * maxWidth derived from `width`, so the column stops growing at this value
+   * while still shrinking to fit its content.
+   *
+   * Prefer this over `width` to stop one long value from stretching a column:
+   * `width` pins the cell (it is used as the width, the min and the max at
+   * once), which leaves the header label as the only part able to absorb a
+   * narrow column and lets it collapse to nothing. A `maxWidth` is a ceiling
+   * only, so the column still sizes itself to the wider of its content and
+   * its own header.
+   */
+  maxWidth?: ColumnWidth
+
+  /**
    * When true, the header cell will stick in the specified position when scrolling horizontally
    * @default undefined
    */
@@ -109,6 +123,7 @@ export function TableHead({
   children,
   width = "auto",
   minWidth,
+  maxWidth,
   sortState = "none",
   onSortClick,
   onClick,
@@ -146,6 +161,13 @@ export function TableHead({
         }
       : undefined
 
+  const colWidth = getColWidth(width)
+  const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
+  const colMaxWidth = maxWidth !== undefined ? getColWidth(maxWidth) : colWidth
+  // A capped cell has to clip, or the cap only moves the overflow instead of
+  // containing it.
+  const constrained = width !== "auto" || maxWidth !== undefined
+
   const content = (
     <div
       className={cn(
@@ -155,11 +177,11 @@ export function TableHead({
       )}
     >
       {typeof children === "string" ? (
-        <OneEllipsis className={cn(width !== "auto" && "overflow-hidden")}>
+        <OneEllipsis className={cn(constrained && "overflow-hidden")}>
           {children}
         </OneEllipsis>
       ) : (
-        <div className={cn("truncate", width !== "auto" && "overflow-hidden")}>
+        <div className={cn("truncate", constrained && "overflow-hidden")}>
           {children}
         </div>
       )}
@@ -228,9 +250,6 @@ export function TableHead({
     </div>
   )
 
-  const colWidth = getColWidth(width)
-  const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
-
   return (
     <TableHeadRoot
       className={cn(
@@ -256,7 +275,7 @@ export function TableHead({
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{
         width: colWidth,
-        maxWidth: colWidth,
+        maxWidth: colMaxWidth,
         minWidth: colMinWidth,
         left: stickyLeft,
         right: stickyRight,

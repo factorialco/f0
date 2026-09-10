@@ -443,6 +443,7 @@ const RowComponentInner = <
             onClick={itemOnClick}
             width={column.width}
             minWidth={column.minWidth}
+            maxWidth={column.maxWidth}
             sticky={getStickyPosition(cellIndex)}
             loading={loading}
             nestedRowProps={{

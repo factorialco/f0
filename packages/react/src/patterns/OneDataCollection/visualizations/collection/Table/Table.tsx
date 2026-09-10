@@ -1064,6 +1064,7 @@ export const TableCollection = <
                           key={`summary-${String(column.label)}`}
                           firstCell={cellIndex === 0}
                           width={column.width}
+                          maxWidth={column.maxWidth}
                           sticky={getStickyPosition(cellIndex)}
                           highlighted={!!column.highlighted}
                           className={cn(

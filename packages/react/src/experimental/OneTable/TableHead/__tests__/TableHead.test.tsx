@@ -208,3 +208,62 @@ describe("TableHead and TableCell highlighted", () => {
     expect(plainCell.className).not.toContain(highlightClass)
   })
 })
+
+describe("TableHead column width", () => {
+  const renderWidths = (props: {
+    width?: number
+    minWidth?: number
+    maxWidth?: number
+  }) =>
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead {...props}>Índice vs empresa</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell {...props}>3,20</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+  it("pins the cell when given a width, so the label has to absorb the deficit", () => {
+    renderWidths({ width: 80 })
+
+    const header = screen.getByRole("columnheader")
+    expect(header.style.width).toBe("80px")
+    expect(header.style.maxWidth).toBe("80px")
+    expect(header.style.minWidth).toBe("80px")
+  })
+
+  it("caps without pinning when given only a maxWidth", () => {
+    renderWidths({ maxWidth: 500 })
+
+    const header = screen.getByRole("columnheader")
+    // No width and no minWidth: the column still sizes itself to the wider of
+    // its content and its own header label, it just stops growing at the cap.
+    expect(header.style.width).toBe("")
+    expect(header.style.minWidth).toBe("")
+    expect(header.style.maxWidth).toBe("500px")
+  })
+
+  it("lets maxWidth override the ceiling that width would have set", () => {
+    renderWidths({ width: 80, maxWidth: 500 })
+
+    const header = screen.getByRole("columnheader")
+    expect(header.style.width).toBe("80px")
+    expect(header.style.minWidth).toBe("80px")
+    expect(header.style.maxWidth).toBe("500px")
+  })
+
+  it("caps the body cell too, so the cap holds for the whole column", () => {
+    renderWidths({ maxWidth: 500 })
+
+    const cell = screen.getByRole("cell")
+    expect(cell.style.maxWidth).toBe("500px")
+    expect(cell.style.width).toBe("")
+  })
+})

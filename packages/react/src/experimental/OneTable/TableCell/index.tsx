@@ -50,6 +50,14 @@ interface TableCellProps {
   minWidth?: number | "auto"
 
   /**
+   * Optional maximum width for the cell. When provided, overrides the
+   * maxWidth derived from `width`, so the cell stops growing at this value
+   * while still shrinking to fit its content. Use it to keep one long value
+   * from stretching its column — see the note on `TableHead.maxWidth`.
+   */
+  maxWidth?: number | "auto"
+
+  /**
    * When true, the header cell will stick in the specified position when scrolling horizontally
    * @default undefined
    */
@@ -112,6 +120,7 @@ export function TableCell({
   onClick,
   width = "auto",
   minWidth,
+  maxWidth,
   firstCell = false,
   sticky,
   colSpan,
@@ -133,6 +142,10 @@ export function TableCell({
 
   const colWidth = getColWidth(width)
   const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
+  const colMaxWidth = maxWidth !== undefined ? getColWidth(maxWidth) : colWidth
+  // A capped cell has to clip, or the cap only moves the overflow instead of
+  // containing it.
+  const constrained = width !== "auto" || maxWidth !== undefined
 
   const linkRef = useRef<HTMLAnchorElement>(null)
   const depth = nestedRowProps?.depth ?? 0
@@ -169,7 +182,7 @@ export function TableCell({
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{
         width: colWidth,
-        maxWidth: colWidth,
+        maxWidth: colMaxWidth,
         minWidth: colMinWidth,
         left: stickyLeft,
         right: stickyRight,
@@ -237,7 +250,7 @@ export function TableCell({
             ) : (
               <div
                 className={cn(
-                  width !== "auto" && "overflow-hidden",
+                  constrained && "overflow-hidden",
                   "relative z-[1] h-full"
                 )}
                 style={{
