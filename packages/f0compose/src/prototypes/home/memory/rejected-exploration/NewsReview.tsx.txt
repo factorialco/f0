@@ -1,0 +1,44 @@
+import { F0Box, F0Button, F0Text } from "@factorialco/f0-react"
+import { useEffect, useState } from "react"
+
+import { reviewSources } from "./data"
+
+/** A bounded, simulated source review; no background integrations are invoked. */
+export function NewsReview({ visit }: { visit: number }) {
+  const [review, setReview] = useState(0)
+  const [checking, setChecking] = useState(true)
+  const [expanded, setExpanded] = useState(false)
+  useEffect(() => {
+    setChecking(true)
+    const timer = window.setTimeout(() => setChecking(false), 3600)
+    return () => window.clearTimeout(timer)
+  }, [visit, review])
+  return (
+    <F0Box display="flex" flexDirection="column" gap="sm">
+      <F0Box display="flex" alignItems="center" gap="sm" flexWrap="wrap">
+        <F0Button
+          label={checking ? "Buscando novedades" : "Al día · Revisado ahora"}
+          loading={checking}
+          variant="ghost"
+          size="sm"
+          onClick={() => setReview((value) => value + 1)}
+        />
+        <F0Button
+          label="Factorial · Calendar · Slack"
+          variant="ghost"
+          size="sm"
+          onClick={() => setExpanded((value) => !value)}
+        />
+      </F0Box>
+      {expanded && (
+        <F0Box padding="md" background="secondary" borderRadius="lg" display="flex" flexDirection="column" gap="sm">
+          <F0Text content="Fuentes de ejemplo · Sin conexiones reales" variant="description" />
+          {reviewSources.map((source) => (
+            <F0Text key={source} content={`${source} · ${checking ? "Revisando…" : "Revisión completada"}`} variant="description" />
+          ))}
+          <F0Button label="Ocultar fuentes" variant="ghost" size="sm" onClick={() => setExpanded(false)} />
+        </F0Box>
+      )}
+    </F0Box>
+  )
+}

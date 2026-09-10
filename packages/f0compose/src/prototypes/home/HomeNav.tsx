@@ -290,7 +290,11 @@ function RowOptions({
       <div
         onClick={(event) => event.stopPropagation()}
         className="f0c-popover fixed z-50 flex w-[180px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
-        style={{ left: pos.left, top: pos.top, transformOrigin: "top left" }}
+        style={{
+          left: pos.left,
+          top: pos.top,
+          transformOrigin: "top left",
+        }}
       >
         {items(() => setPos(null))}
       </div>
@@ -359,7 +363,7 @@ function PinnedRow({ item }: { item: PinnedItem }) {
  * Rename (inline input) and Delete. The menu is portalled to <body> for
  * the same stacking-context reason as the rail user menu.
  */
-function RecentRow({
+export function RecentRow({
   conversation,
   active,
 }: {
@@ -495,7 +499,11 @@ function RecentsControl({
       <div className="fixed inset-0 z-40" onClick={() => setPos(null)} />
       <div
         className="f0c-popover fixed z-50 flex w-[220px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
-        style={{ top: pos.top, right: pos.right, transformOrigin: "top right" }}
+        style={{
+          top: pos.top,
+          right: pos.right,
+          transformOrigin: "top right",
+        }}
       >
         <MenuRow
           icon={<F0Icon icon={Comment} size="md" color="default" />}
@@ -579,87 +587,108 @@ function HomePanelBody() {
   // letting their threads back in through Recents would undo the change.
   // Drop the filter if you want them listed again.
   const sorted = [...conversations]
-    .filter((c) => !c.agentId)
+    .filter((c) => {
+      const owner = c.homeSetup?.profile ?? c.homeBriefing
+      // Opening Home alone is not a saved conversation. Keep actual exchanges
+      // in the existing Recents section, scoped to the current mock profile.
+      return (
+        !c.agentId &&
+        (!owner || owner === profile) &&
+        (!c.homeBriefing || c.messages.some((m) => m.role === "user"))
+      )
+    })
     .sort((a, b) => b.lastActiveAt - a.lastActiveAt)
   const visible =
     recentsFilter === "active" ? sorted.slice(0, RECENTS_ACTIVE_LIMIT) : sorted
 
   return (
-    <div className="flex flex-col gap-3 px-3 pb-1.5">
-      <div className="flex flex-col gap-0.5">
-        <NavRow
-          icon={Plus}
-          label="New"
-          onClick={() => {
-            // A clean canvas, not just a change of view (per Oskar).
-            // Home owns the widgets stack and lives outside this tree, so
-            // this goes through the same channel the reply-driven windows
-            // use. Collapse first: on a module screen the widgets are
-            // unmounted, so they close instantly and Home is reached with
-            // the stack already empty.
-            requestWindowsCollapse()
-            openScreen(null)
-          }}
-        />
-        {/* Agents is GONE from this panel (per Oskar, 2026-09-09) — the
+    <div className="flex h-full min-h-0 flex-col px-3 pb-3">
+      <div className="home-panel-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+        <div className="flex flex-col gap-0.5">
+          <NavRow
+            icon={Plus}
+            label="New"
+            onClick={() => {
+              // A clean canvas, not just a change of view (per Oskar).
+              // Home owns the widgets stack and lives outside this tree, so
+              // this goes through the same channel the reply-driven windows
+              // use. Collapse first: on a module screen the widgets are
+              // unmounted, so they close instantly and Home is reached with
+              // the stack already empty.
+              requestWindowsCollapse()
+              openScreen(null)
+            }}
+          />
+          {/* Agents is GONE from this panel (per Oskar, 2026-09-09) — the
             row and the group below it. Reports stays admin-only, so the
             employee panel is New / Routines / Files. */}
-        <NavRow icon={Clock} label="Routines" />
-        {/* Reports is NOT the Insights widget (per Oskar, 2026-08-31):
+          <NavRow icon={Clock} label="Routines" />
+          {/* Reports is NOT the Insights widget (per Oskar, 2026-08-31):
             Insights tells you about your own activity, Reports is for
             reports you build yourself with One. It used to open the
             Insights widget, which demoed the wrong concept — so it is
             visual-only like Agents and Routines until a Reports surface
             is designed. */}
-        {profile === "admin" && <NavRow icon={Graph} label="Reports" />}
-        {/* The glyph is f0's `HardDrive` — the icon the frame's own menu
-            item carries (Figma 2944:727924, instance "HardDrive" in the
-            same 20px box). Storage, not a stack of folders. Still the
-            Policies ODC sub-screen behind it. */}
+          {profile === "admin" && <NavRow icon={Graph} label="Reports" />}
+        </div>
+        {/* Pinned carries a different example per profile, straight from the
+          frame: a manager pins their triage queue, an employee pins their
+          own holidays. Both are DELETABLE now (Oskar, 2026-09-09), so the
+          group is gated on having a row left — the same rule Recents
+          follows, or you get a header standing over nothing. */}
+        {pinned.length > 0 && (
+          <SidebarGroup label="Pinned">
+            {pinned.map((item) => (
+              <PinnedRow key={item.id} item={item} />
+            ))}
+          </SidebarGroup>
+        )}
+        {/* Recents is admin-only — the employee panel in the frame stops at
+          Pinned. Conversations still work, they just aren't listed here. */}
+        {/* `sorted`, not `conversations`: agent threads are filtered out
+          above, so counting them here would leave "Recents" standing with
+          a header and no rows. */}
+        {sorted.length > 0 && (
+          <SidebarGroup
+            label="Recents"
+            trailing={
+              <RecentsControl
+                filter={recentsFilter}
+                total={sorted.length}
+                onChange={changeFilter}
+              />
+            }
+          >
+            {visible.map((conversation) => (
+              <RecentRow
+                key={conversation.id}
+                conversation={conversation}
+                active={conversation.id === activeId}
+              />
+            ))}
+          </SidebarGroup>
+        )}
+      </div>
+      <div className="mt-3 flex shrink-0 flex-col gap-0.5 border-0 border-t border-solid border-f1-border-secondary pt-3">
         <NavRow
           icon={HardDrive}
           label="Files"
           active={activeId === null && view === "policies"}
           onClick={() => openScreen("policies")}
         />
+        <NavRow
+          icon={ChartLine}
+          label="Activity"
+          active={activeId === null && view === "activity"}
+          onClick={() => openScreen("activity")}
+        />
+        <NavRow
+          icon={Sliders}
+          label="Preferences"
+          active={activeId === null && view === "preferences"}
+          onClick={() => openScreen("preferences")}
+        />
       </div>
-      {/* Pinned carries a different example per profile, straight from the
-          frame: a manager pins their triage queue, an employee pins their
-          own holidays. Both are DELETABLE now (Oskar, 2026-09-09), so the
-          group is gated on having a row left — the same rule Recents
-          follows, or you get a header standing over nothing. */}
-      {pinned.length > 0 && (
-        <SidebarGroup label="Pinned">
-          {pinned.map((item) => (
-            <PinnedRow key={item.id} item={item} />
-          ))}
-        </SidebarGroup>
-      )}
-      {/* Recents is admin-only — the employee panel in the frame stops at
-          Pinned. Conversations still work, they just aren't listed here. */}
-      {/* `sorted`, not `conversations`: agent threads are filtered out
-          above, so counting them here would leave "Recents" standing with
-          a header and no rows. */}
-      {profile === "admin" && sorted.length > 0 && (
-        <SidebarGroup
-          label="Recents"
-          trailing={
-            <RecentsControl
-              filter={recentsFilter}
-              total={sorted.length}
-              onChange={changeFilter}
-            />
-          }
-        >
-          {visible.map((conversation) => (
-            <RecentRow
-              key={conversation.id}
-              conversation={conversation}
-              active={conversation.id === activeId}
-            />
-          ))}
-        </SidebarGroup>
-      )}
     </div>
   )
 }
@@ -1135,12 +1164,18 @@ export const ADMIN_HUB: HubGroup[] = [
  * Company to Finance.
  */
 export const EMPLOYEE_HUB: HubGroup[] = [
-  { label: "Personal", items: ["Hours", "Absences", "Payslips", "Learning"] },
+  {
+    label: "Personal",
+    items: ["Hours", "Absences", "Payslips", "Learning"],
+  },
   { label: "Company", items: ["People", "Workplaces", "Handbook"] },
   { label: "Work", items: ["Time off", "Time tracking", "Projects"] },
   { label: "Pay", items: ["Compensation", "Benefits"] },
   { label: "Talent", items: ["Performance", "Engagement", "Training"] },
-  { label: "Finance", items: ["Planning", "Spend", "Purchasing", "Software"] },
+  {
+    label: "Finance",
+    items: ["Planning", "Spend", "Purchasing", "Software"],
+  },
 ]
 
 function HubPanelBody() {
@@ -1293,7 +1328,10 @@ export function HomeNav() {
     const strip = () => wrapper.removeAttribute("inert")
     strip()
     const observer = new MutationObserver(strip)
-    observer.observe(wrapper, { attributes: true, attributeFilter: ["inert"] })
+    observer.observe(wrapper, {
+      attributes: true,
+      attributeFilter: ["inert"],
+    })
     return () => observer.disconnect()
   }, [])
 
@@ -1477,7 +1515,9 @@ export function HomeNav() {
               Cal frame has no search under its header — its only field is
               the people picker inside "Meet with". */}
           {section !== "cal" && <SearchBar placeholder="Search…" />}
-          <div className="home-panel-scroll min-h-0 flex-1 overflow-y-auto">
+          <div
+            className={`home-panel-scroll min-h-0 flex-1 ${section === "home" ? "overflow-hidden" : "overflow-y-auto"}`}
+          >
             {section === "home" ? (
               <HomePanelBody />
             ) : section === "comms" ? (

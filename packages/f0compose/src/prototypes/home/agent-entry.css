@@ -381,6 +381,7 @@
 
 /* The navigation panel supplies the divider beside the full-width content. */
 body:has([data-hybrid-root][data-view="home"]) [data-home-panel],
+body:has([data-hybrid-root][data-view="activity"]) [data-home-panel],
 [data-home-panel][data-nav-section="hub"] {
   box-shadow: inset -1px 0 0 hsl(var(--neutral-10)) !important;
 }
@@ -432,4 +433,10 @@ body:has([data-hybrid-root][data-view="home"]) [data-home-panel],
   [data-hybrid-work] {
     --agent-panel-width: 100%;
   }
+}
+
+/* Home owns its original composer in the content flow, not a measured overlay. */
+[data-hybrid-root][data-view="home"] [data-hybrid-target] {
+  height: auto;
+  padding-bottom: 8px;
 }

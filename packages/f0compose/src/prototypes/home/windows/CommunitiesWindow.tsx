@@ -73,7 +73,7 @@ function PostFooter({ post }: { post: CommunityPost }) {
   )
 }
 
-function Post({ post }: { post: CommunityPost }) {
+export function Post({ post }: { post: CommunityPost }) {
   return (
     <div className="flex flex-col gap-2 border-0 border-t border-solid border-f1-border-secondary px-3 py-4">
       <PostHeader

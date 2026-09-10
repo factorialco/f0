@@ -1,6 +1,8 @@
 import { F0Button, F0Icon, IconType } from "@factorialco/f0-react"
 import {
   CalendarArrowRight,
+  SearchPerson,
+  File,
   ChartLine,
   Check,
   Ellipsis,
@@ -34,6 +36,11 @@ type MenuEntry =
   | { kind: "soon"; key: string; label: string; icon: IconType }
 
 const MENU_ENTRIES: MenuEntry[] = [
+  { kind: "widget", id: "payslip", icon: ChartLine },
+  { kind: "widget", id: "shifts", icon: CalendarArrowRight },
+  { kind: "widget", id: "holidays", icon: CalendarArrowRight },
+  { kind: "widget", id: "recruitment", icon: SearchPerson },
+  { kind: "widget", id: "documents", icon: File },
   { kind: "widget", id: "communities", icon: CommunitiesIcon },
   // "Anniversaries" IS the celebrations widget — birthdays and work
   // anniversaries. It was parked out of the menu while its design was

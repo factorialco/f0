@@ -29,6 +29,7 @@ import {
   resolveRun,
   type RunResolution,
 } from "./conversationStore"
+import { HomeQuestion, HomeArtifactView } from "../setup/HomeArtifacts"
 import { InsightCard } from "./InsightCard"
 
 /** Assistant copy supports the `**bold**` production replies use. */
@@ -227,7 +228,9 @@ function TurnFeedback({
         icon={reaction === "dislike" ? ThumbsDownFilled : ThumbsDown}
         hideLabel
         label="Bad response"
-        onClick={() => setReaction((r) => (r === "dislike" ? null : "dislike"))}
+        onClick={() =>
+          setReaction((r) => (r === "dislike" ? null : "dislike"))
+        }
       />
     </div>
   )
@@ -466,7 +469,9 @@ function BlockedRun({
         {resolution ? (
           <F0TagStatus text="Resolved" variant="positive" />
         ) : (
-          status && <F0TagStatus text={status.text} variant={status.variant} />
+          status && (
+            <F0TagStatus text={status.text} variant={status.variant} />
+          )
         )}
       </div>
       {run.reason && (
@@ -581,7 +586,9 @@ function RunTrace({ log }: { log?: string[] }) {
       <code className="font-mono flex flex-col gap-0.5 text-sm">
         {log.map((line, index) => {
           const kind = TRACE_KINDS.find((k) => line.startsWith(k.prefix))
-          const body = kind ? line.slice(kind.prefix.length).trimStart() : line
+          const body = kind
+            ? line.slice(kind.prefix.length).trimStart()
+            : line
           return (
             <span key={index} className="flex gap-1.5">
               <span
@@ -770,11 +777,14 @@ export function ConversationView({
   // for the user scrolling away.
   const pinnedRef = useRef(true)
   useEffect(() => {
-    const scroller = endRef.current?.closest<HTMLElement>(".home-canvas-scroll")
+    const scroller = endRef.current?.closest<HTMLElement>(
+      ".home-canvas-scroll"
+    )
     if (!scroller) return
     const onScroll = () => {
       pinnedRef.current =
-        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 160
+        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <
+        160
       // Drives the TOP fade (see .home-canvas-scroll[data-scrolled]). It
       // has to be conditional: the bottom fade can be permanent because
       // the composer is always down there, but a permanent top fade would
@@ -792,6 +802,29 @@ export function ConversationView({
     }
   }, [])
   useEffect(() => {
+    if (conversation.homeBriefing || conversation.homeSetup) {
+      const scroller = endRef.current?.closest<HTMLElement>(
+        ".home-canvas-scroll"
+      )
+      // A landing starts at the greeting. A new co-created preview starts
+      // at its beginning, so its tasks/report are seen before the next question.
+      const latestReply = [...rendered]
+        .reverse()
+        .find((m) => m.role === "assistant" && !m.question)
+      if (
+        scroller &&
+        conversation.homeBriefing &&
+        !conversation.messages.some((m) => m.role === "user")
+      )
+        scroller.scrollTop = 0
+      else if (latestReply) {
+        const target = scroller?.querySelector<HTMLElement>(
+          `[data-home-message="${latestReply.id}"]`
+        )
+        target?.scrollIntoView({ behavior: "auto", block: "start" })
+      }
+      return
+    }
     if (!pinnedRef.current) return
     endRef.current?.scrollIntoView({
       // Instant WHILE STREAMING: a smooth scroll re-triggered every 16ms
@@ -834,10 +867,14 @@ export function ConversationView({
           <ContextCard context={message.context} />
         ) : (
           <div className="rounded-[22px] border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3">
-            <p className="text-base text-f1-foreground">{message.content}</p>
+            <p className="text-base text-f1-foreground">
+              {message.content}
+            </p>
           </div>
         )}
       </div>
+    ) : message.question?.intentKey.startsWith("home:") ? (
+      <HomeQuestion conversation={conversation} message={message} />
     ) : message.question ? (
       // Pending → status line; answered/skipped → nothing (the panel
       // held the question, and the answer echoes as a user turn).
@@ -865,6 +902,15 @@ export function ConversationView({
           <p className="text-base text-f1-foreground">
             {renderInline(message.content)}
           </p>
+        )}
+        {message.homeArtifact && (
+          <HomeArtifactView
+            artifact={message.homeArtifact}
+            entrance={
+              !!conversation.homeBriefing &&
+              conversation.messages[0]?.id === message.id
+            }
+          />
         )}
         {message.plan && <PlanSteps steps={message.plan} />}
         {message.runs && (
@@ -903,7 +949,11 @@ export function ConversationView({
         // leave its margin behind as a phantom gap.
         if (!content) return null
         return (
-          <div key={message.id} className={spacingFor(index)}>
+          <div
+            key={message.id}
+            data-home-message={message.id}
+            className={spacingFor(index)}
+          >
             {content}
           </div>
         )

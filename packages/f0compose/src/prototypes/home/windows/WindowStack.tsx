@@ -125,7 +125,7 @@ export function WindowHeader({
 export const CARD_CLASS =
   "flex min-h-0 flex-col overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-[0_2px_20px_0_rgba(13,22,37,0.04)]"
 
-function WindowPanel({
+export function WindowPanel({
   windowKey,
   spec,
   weight,
@@ -284,6 +284,7 @@ export function MaximizedWindow({
  */
 export function WindowStack<Id extends string>({
   side,
+  verticalScroll = false,
   keyPrefix,
   noun,
   panelKey = (id) => id,
@@ -298,6 +299,8 @@ export function WindowStack<Id extends string>({
   onResizeColumnsBetween,
 }: {
   side: Side
+  /** Opt-in rail layout. Comms keeps its original column/resize behavior. */
+  verticalScroll?: boolean
   /** Namespaces `data-window-key` so the two stacks can never collide. */
   keyPrefix: string
   /** What this stack holds, for the resize handles' accessible names. */
@@ -340,11 +343,12 @@ export function WindowStack<Id extends string>({
 
   /** Hugs its content only until a row drag claims it (see manualHeight). */
   const hugs = (id: Id) =>
-    Boolean(specFor(id).autoHeight) && !state.manualHeight.includes(id)
+    verticalScroll ||
+    (Boolean(specFor(id).autoHeight) && !state.manualHeight.includes(id))
 
   // Claude-Code stacking: chunk into columns of two, in open order — the
   // window you already had keeps its slot. Every column shares the width.
-  const columns = chunkColumns(docked)
+  const columns = verticalScroll ? [docked] : chunkColumns(docked)
 
   // A RIGHT stack grows leftward (drag left = wider), a LEFT stack grows
   // rightward. One sign flip covers the whole mirror.
@@ -476,7 +480,9 @@ export function WindowStack<Id extends string>({
         <span className="h-full w-[3px] rounded-full bg-transparent transition-colors group-hover:bg-f1-border group-active:bg-f1-border" />
       </div>
       {(() => {
-        const colWeights = columns.map((_, i) => state.columnWeights[i] ?? 1)
+        const colWeights = columns.map(
+          (_, i) => state.columnWeights[i] ?? 1
+        )
         const colTotal = colWeights.reduce((a, b) => a + b, 0)
         return columns.map((column, columnIndex) => {
           const columnWeight = column.reduce(
@@ -509,11 +515,11 @@ export function WindowStack<Id extends string>({
                   flexGrow: colWeights[columnIndex] / colTotal,
                   flexBasis: 0,
                 }}
-                className="flex min-w-0 flex-col"
+                className={`flex min-w-0 flex-col ${verticalScroll ? "overflow-y-auto gap-2" : ""}`}
               >
                 {column.map((id, idx) => (
                   <Fragment key={panelKey(id)}>
-                    {idx > 0 && (
+                    {idx > 0 && !verticalScroll && (
                       // EVERY stacked pair is draggable (per Oskar). This used
                       // to degrade to an inert gap next to an auto-height
                       // panel, since a weight drag would move nothing — now

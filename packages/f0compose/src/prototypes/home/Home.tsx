@@ -1,3 +1,4 @@
+import { HomeToolbarActions } from "./windows/HomeToolbarActions"
 import {
   F0AvatarPerson,
   F0Button,
@@ -18,6 +19,7 @@ import type { PrototypeMeta } from "../types"
 import type { LeftPaneId } from "./comms/ChatsColumn"
 import type { WindowId } from "./windows/types"
 
+import { ActivityScreen } from "./activity/ActivityScreen"
 import { AgentsScreen } from "./agents/AgentsScreen"
 import { agentById } from "./agents/agentStore"
 import { AskFactorialButton } from "./AskFactorial"
@@ -41,11 +43,17 @@ import {
   type NeedsYouTask,
   type ProfilePerson,
 } from "./fixtures"
+import { enterHome } from "./one/conversationStore"
+import { HomeSessionBar, GuidedHome } from "./setup/HomeArtifacts"
+import { useWidgetCollapse } from "./windows/widgetCollapse"
 import { HomeNav } from "./HomeNav"
-import { ImportedHubScreen, hasImportedScreen } from "./hub/ImportedHubScreen"
+import {
+  ImportedHubScreen,
+  hasImportedScreen,
+} from "./hub/ImportedHubScreen"
 import { HybridHome } from "./HybridHome"
 import { ModuleScreen } from "./ModuleScreen"
-import { PreferencesScreen } from "./navigation/PreferencesScreen"
+import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import {
@@ -58,6 +66,7 @@ import { ConversationView } from "./one/ConversationView"
 import { PlayOutline } from "./one/PlayOutline"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
+import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { ClockInButton } from "./windows/ClockInButton"
@@ -779,6 +788,7 @@ function HomeNavbar({
   onToggleWindow,
   conversationTitle,
   conversationEmoji,
+  homeSession,
   screenTitle,
   screenModule,
   screenActions,
@@ -788,6 +798,7 @@ function HomeNavbar({
   onToggleWindow: (id: WindowId) => void
   /** When set, the navbar shows the conversation title + its actions. */
   conversationTitle?: string
+  homeSession?: boolean
   /**
    * The agent this conversation belongs to (Figma 2741:466470): its emoji
    * leads the title, and the play button goes — that one previews a
@@ -832,7 +843,7 @@ function HomeNavbar({
               </span>
             )}
             <span className="truncate text-base font-medium text-f1-foreground">
-              {conversationTitle}
+              {homeSession ? "Home" : conversationTitle}
             </span>
           </span>
         ) : screenTitle ? (
@@ -852,9 +863,14 @@ function HomeNavbar({
       <div className="flex shrink-0 items-center gap-2">
         {conversationTitle ? (
           <div className="flex items-center">
+            {homeSession ? (
+              <HomeToolbarActions openWindows={openWindows} />
+            ) : (
+              <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
+            )}
             {/* An agent's brief has nothing to preview — the frame shows
               only the ⋮ there. */}
-            {!conversationEmoji && (
+            {!conversationEmoji && !homeSession && (
               <F0Button
                 variant="ghost"
                 size="md"
@@ -864,13 +880,15 @@ function HomeNavbar({
                 onClick={() => onToggleWindow("preview")}
               />
             )}
-            <F0Button
-              variant="ghost"
-              size="md"
-              icon={Ellipsis}
-              hideLabel
-              label="Conversation options"
-            />
+            {!homeSession && (
+              <F0Button
+                variant="ghost"
+                size="md"
+                icon={Ellipsis}
+                hideLabel
+                label="Conversation options"
+              />
+            )}
           </div>
         ) : screenTitle ? (
           <div className="flex items-center">
@@ -902,7 +920,7 @@ function HomeNavbar({
               open={openWindows.includes("clockin")}
               onToggle={() => onToggleWindow("clockin")}
             />
-            <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
+            <HomeToolbarActions openWindows={openWindows} />
           </div>
         )}
         <AskFactorialButton />
@@ -1018,9 +1036,8 @@ function HomeCanvas() {
     screenView === "organization" ||
     screenView === "agents" ||
     (screenView !== null && hasImportedScreen(screenView))
-  // Agents owns its specialized brief composer; other screens reserve the
-  // shared agent strip below their scrolling content and fixed actions.
-  const showPromptBar = screenView !== "agents"
+  // Only Home owns an in-flow composer slot. Module chats use HybridHome’s side panel.
+  const showPromptBar = screenView === null
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
@@ -1051,7 +1068,8 @@ function HomeCanvas() {
         }
         // A maximized CHAT hides the widgets stack just as thoroughly, so
         // it has to give way too or the new widget lands behind it.
-        if (chats.state.maximized) chats.toggleMaximized(chats.state.maximized)
+        if (chats.state.maximized)
+          chats.toggleMaximized(chats.state.maximized)
         windows.open(id)
       }),
     [
@@ -1122,7 +1140,9 @@ function HomeCanvas() {
         const sameKind = (open: LeftPaneId) =>
           leftPaneKind(open) === leftPaneKind(id)
         // Read BEFORE the update — this asks what was ALREADY there.
-        const stacksWithSomething = chats.state.open.some((w) => !sameKind(w))
+        const stacksWithSomething = chats.state.open.some(
+          (w) => !sameKind(w)
+        )
         chats.openReplacing(id, sameKind)
         // A ticket takes the whole canvas only when it lands ALONE
         // (Figma 2725:444787); with a conversation beside it there is a
@@ -1151,6 +1171,9 @@ function HomeCanvas() {
   // Recents, New, Documents) must break out of a maximized window or the
   // click would appear dead behind the takeover.
   const profile = useProfile()
+  useEffect(() => {
+    if (!view && !chats.state.open.length) enterHome(profile)
+  }, [view, activeId, profile, chats.state.open.length])
   const person = PROFILE_PEOPLE[profile]
   const greeting = greetingTemplate.replace("%s", person.firstName)
   const { maximized } = windows.state
@@ -1186,14 +1209,24 @@ function HomeCanvas() {
   // PAIR overflows — when it is the wider of the two. The narrower one
   // keeps pushing, so the canvas always has one side to rest against.
 
-  const rightWidth = hideWidgets ? 0 : stackWidth(windows.state)
+  const { collapsed: collapsedWidgets } = useWidgetCollapse(profile)
+  const dockedWidgets = windows.state.open.filter(
+    (id) => !windows.state.floating.includes(id)
+  )
+  const rightWidth = hideWidgets
+    ? 0
+    : (dockedWidgets.some((id) => !collapsedWidgets.includes(id))
+        ? windows.state.columnWidth
+        : 0) +
+      (dockedWidgets.some((id) => collapsedWidgets.includes(id)) ? 56 : 0)
   const leftWidth = stackWidth(chats.state)
   const room = shellWidth - CANVAS_MIN_WIDTH
   const soloOverflows = (width: number) => shellWidth > 0 && width > room
   const pairOverflows = shellWidth > 0 && leftWidth + rightWidth > room
   const overlayColumns =
     rightWidth > 0 &&
-    (soloOverflows(rightWidth) || (pairOverflows && rightWidth >= leftWidth))
+    (soloOverflows(rightWidth) ||
+      (pairOverflows && rightWidth >= leftWidth))
   const overlayChats =
     leftWidth > 0 &&
     (soloOverflows(leftWidth) || (pairOverflows && leftWidth > rightWidth))
@@ -1268,7 +1301,9 @@ function HomeCanvas() {
       >
         <MaximizedWindow
           id={windows.state.maximized}
-          onRestore={() => windows.toggleMaximized(windows.state.maximized!)}
+          onRestore={() =>
+            windows.toggleMaximized(windows.state.maximized!)
+          }
           onClose={() => closeWindow(windows.state.maximized!)}
         />
       </div>
@@ -1293,7 +1328,10 @@ function HomeCanvas() {
   }
 
   return (
-    <div data-hybrid-source className="flex min-h-full w-full overflow-hidden">
+    <div
+      data-hybrid-source
+      className="flex min-h-full w-full overflow-hidden"
+    >
       {/* The pane the window stacks measure themselves against. The split
           conversation panel sits OUTSIDE it, so an overlaying stack
           (`absolute right-0`) pins to the panel's edge instead of covering
@@ -1349,7 +1387,16 @@ function HomeCanvas() {
               openWindows={windows.state.open}
               onToggleWindow={toggleWindow}
               conversationTitle={activeConversation?.title}
-              conversationEmoji={agentById(activeConversation?.agentId)?.emoji}
+              homeSession={
+                !!(
+                  activeConversation?.homeBriefing ||
+                  (activeConversation?.homeSetup &&
+                    !activeConversation.homeSetup.purpose)
+                )
+              }
+              conversationEmoji={
+                agentById(activeConversation?.agentId)?.emoji
+              }
               screenTitle={screenTitle}
             />
           </div>
@@ -1386,17 +1433,28 @@ function HomeCanvas() {
                   role="region"
                   aria-label="Conversation"
                 >
-                  <div className="flex justify-end">
-                    <F0Button
-                      label="Close conversation"
-                      icon={Cross}
-                      hideLabel
-                      variant="ghost"
-                      size="md"
-                      onClick={goHome}
-                    />
+                  {!activeConversation.homeBriefing && (
+                    <div className="flex justify-end">
+                      <F0Button
+                        label="Close conversation"
+                        icon={Cross}
+                        hideLabel
+                        variant="ghost"
+                        size="md"
+                        onClick={goHome}
+                      />
+                    </div>
+                  )}
+                  <div className="sticky top-0 z-10 mx-auto w-[712px] max-w-full f0c-canvas-surface">
+                    <HomeSessionBar conversation={activeConversation} />
                   </div>
-                  <ConversationView conversation={activeConversation} />
+                  {activeConversation.homeBriefing ||
+                  (activeConversation.homeSetup &&
+                    !activeConversation.homeSetup.purpose) ? (
+                    <GuidedHome conversation={activeConversation} />
+                  ) : (
+                    <ConversationView conversation={activeConversation} />
+                  )}
                 </div>
               ) : /* WINDOW views are absent from this chain on
                      purpose: they render in the layer below instead, and
@@ -1413,10 +1471,14 @@ function HomeCanvas() {
                 <CalendarScreen />
               ) : screenView === "policies" ? (
                 <PoliciesScreen />
+              ) : screenView === "activity" ? (
+                <ActivityScreen />
               ) : screenView === "agents" ? (
                 <AgentsScreen />
               ) : screenView ? (
-                screenView === "preferences" ? (
+                screenView === "personal-preferences" ? (
+                  <PersonalPreferencesScreen />
+                ) : screenView === "preferences" ? (
                   <PreferencesScreen />
                 ) : hasImportedScreen(screenView) ? (
                   <ImportedHubScreen key={screenView} view={screenView} />
@@ -1427,7 +1489,11 @@ function HomeCanvas() {
                 <div className="flex w-[712px] max-w-full flex-col gap-8">
                   <div className="flex items-center gap-3">
                     <PulseGreetingAvatar person={person} />
-                    <F0Heading content={greeting} variant="heading" as="h1" />
+                    <F0Heading
+                      content={greeting}
+                      variant="heading"
+                      as="h1"
+                    />
                   </div>
                   {profile === "employee" ? (
                     <EmployeeCanvas />
@@ -1456,8 +1522,7 @@ function HomeCanvas() {
                 </div>
               )}
             </div>
-            {/* See showPromptBar: the calendar and People frames carry no
-              composer. Every other screen keeps ONE pinned. */}
+            {/* The Home composer slot must not reserve space on module pages. */}
             {showPromptBar && (
               <div
                 data-home-promptbar

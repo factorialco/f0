@@ -8,7 +8,7 @@ import {
   type ProfileId,
 } from "../profileStore"
 /** Keeps the existing prototype's profile and appearance controls under Preferences. */
-export function PreferencesScreen() {
+export function PersonalPreferencesScreen() {
   const profile = useProfile()
   const [theme, setTheme] = useState(
     () => window.localStorage.getItem("f0compose:theme") ?? "light"
