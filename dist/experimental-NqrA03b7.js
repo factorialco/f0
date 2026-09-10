@@ -32506,7 +32506,20 @@ const YM = Jn(zM), _U = ({
                   "aria-hidden": r || void 0,
                   className: "flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary",
                   "data-testid": r ? "sidebar-group-avatar-fallback" : void 0,
-                  children: /* @__PURE__ */ h(fo, { emoji: D, size: "sm" })
+                  children: r ? (
+                    // ＃ IS NOT AN EMOJI — it is the typographic stand-in for a
+                    // community, which has no emoji to give (`PostsGroup` has no
+                    // field for one). So it must not go through the emoji font:
+                    // that stack ends in `sans-serif`, and U+FF03 has no glyph in
+                    // any of the emoji fonts before it, so the ＃ would fall
+                    // through to the browser's generic sans while the name beside
+                    // it stays Inter.
+                    D
+                  ) : (
+                    // NATIVE, not a twemoji image: at 20px the sprite reads soft
+                    // next to Inter, and it costs a network image per row.
+                    /* @__PURE__ */ h(fo, { emoji: D, size: "sm", mode: "native" })
+                  )
                 }
               )
             ) : /* @__PURE__ */ h(Qa, { size: "xs", avatar: g.avatar }),
@@ -37602,7 +37615,7 @@ const Od = (g, I) => {
     });
     y.observe(v), d.current = y;
   }, []), shouldMount: g };
-}, Jd = "w-[24rem] max-w-full", _G = "w-[32rem] max-w-full", kG = "gap-0.5", xG = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", DG = "bg-[hsl(222_31%_11%)]", SG = "bg-[hsl(220_39%_6%/0.72)]", RG = "bg-[hsl(220_39%_6%/0.6)]", MG = "bg-[hsl(220_39%_6%/0.55)]", PG = () => import("./LocationMap-DxaRMgKg.js"), VG = Sr(PG), GG = 3 / 2, EG = ({ latitude: g, longitude: I }) => `https://www.google.com/maps?q=${g},${I}`, pQ = ({
+}, Jd = "w-[24rem] max-w-full", _G = "w-[32rem] max-w-full", kG = "gap-0.5", xG = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", DG = "bg-[hsl(222_31%_11%)]", SG = "bg-[hsl(220_39%_6%/0.72)]", RG = "bg-[hsl(220_39%_6%/0.6)]", MG = "bg-[hsl(220_39%_6%/0.55)]", PG = () => import("./LocationMap-B3o8iGcS.js"), VG = Sr(PG), GG = 3 / 2, EG = ({ latitude: g, longitude: I }) => `https://www.google.com/maps?q=${g},${I}`, pQ = ({
   location: g,
   cornerClass: I = "rounded-xl",
   surfaceClassName: d,
@@ -43360,7 +43373,7 @@ const T3 = {
             "aria-hidden": V || void 0,
             className: "flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary",
             "data-testid": V ? "chat-group-avatar-fallback" : void 0,
-            children: /* @__PURE__ */ h(fo, { emoji: K, size: "sm" })
+            children: V ? K : /* @__PURE__ */ h(fo, { emoji: K, size: "sm", mode: "native" })
           }
         )
       ) : /* @__PURE__ */ h(Qa, { size: "sm", avatar: g.avatar }),
@@ -46748,7 +46761,7 @@ const sN = 1e3, IN = ({
     }
   );
 }, w4 = /* @__PURE__ */ new Set(), v4 = Sr(
-  () => import("./ChatPostComposerDialog-qkKks5m8.js").then((g) => ({
+  () => import("./ChatPostComposerDialog-DWuxZpgK.js").then((g) => ({
     default: g.ChatPostComposerDialog
   }))
 ), b4 = () => {
