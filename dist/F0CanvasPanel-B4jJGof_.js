@@ -118006,17 +118006,21 @@ const x0 = A.forwardRef(
     readonly: q,
     buttonToggle: e2,
     transparent: X,
+    // Renamed rather than left in the spread: the prop is the HTML attribute
+    // name, and React only recognises the camelCase spelling. Spread as-is it
+    // still reaches the DOM, but as an unknown attribute React warns about.
+    autocomplete: B,
     // Forwarded by NAME rather than left in the spread: F0InputField clones
     // the inner input with its own aria props, and an explicit `undefined`
     // there overwrites whatever the spread had already set. `aria-controls`
     // and `aria-expanded` were reaching F0InputField from nowhere for exactly
     // that reason, so a combobox built on Input announced nothing.
-    "aria-controls": B,
-    "aria-expanded": J,
-    "aria-activedescendant": S,
-    "aria-autocomplete": O,
-    ...G
-  }, N) => /* @__PURE__ */ i(
+    "aria-controls": J,
+    "aria-expanded": S,
+    "aria-activedescendant": O,
+    "aria-autocomplete": G,
+    ...N
+  }, s2) => /* @__PURE__ */ i(
     Y_,
     {
       label: n,
@@ -118035,10 +118039,10 @@ const x0 = A.forwardRef(
       placeholder: f || "",
       size: v,
       role: P,
-      "aria-controls": B,
-      "aria-expanded": J,
-      "aria-activedescendant": S,
-      "aria-autocomplete": O,
+      "aria-controls": J,
+      "aria-expanded": S,
+      "aria-activedescendant": O,
+      "aria-autocomplete": G,
       isEmpty: y,
       emptyValue: b,
       maxLength: L,
@@ -118053,7 +118057,7 @@ const x0 = A.forwardRef(
       appendTag: F,
       onFocus: R,
       onBlur: W,
-      inputRef: N,
+      inputRef: s2,
       readonly: q,
       buttonToggle: e2,
       transparent: X,
@@ -118061,7 +118065,8 @@ const x0 = A.forwardRef(
         "input",
         {
           type: t,
-          ...G,
+          autoComplete: B,
+          ...N,
           onKeyDown: Q,
           className: Y(
             "[&::-webkit-search-cancel-button]:hidden",
