@@ -1,11 +1,6 @@
-import {
-  ComponentProps,
-  HTMLInputTypeAttribute,
-  useMemo,
-  useState,
-} from "react"
+import { ComponentProps, HTMLInputTypeAttribute, useMemo } from "react"
 import { InputFieldProps } from "@/components/F0InputField"
-import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
+import { LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 
@@ -38,7 +33,11 @@ export type InputInternalProps = Pick<
     | "loading"
     | "transparent"
     | "onBlur"
+    | "onKeyDown"
     | "readonly"
+    | "onClickContent"
+    | "masked"
+    | "focusOnEditable"
   > & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
@@ -47,6 +46,8 @@ export type InputInternalProps = Pick<
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private"
     onPressEnter?: () => void
+    /** Fires on Escape. Does not call `preventDefault`, like `onPressEnter`. */
+    onPressEscape?: () => void
   }
 
 /**
@@ -65,68 +66,54 @@ const passwordManagerAvoidance = {
 const InputInternal = ({
   type,
   onPressEnter,
+  onPressEscape,
+  onKeyDown,
+  masked,
   ...props
 }: InputInternalProps) => {
-  const [showPassword, setShowPassword] = useState(false)
-
-  // `password` and `private` are both masked; the eye toggle flips them to text.
+  const i18n = useI18n()
   const maskable = type === "password" || type === "private"
 
-  const localType = useMemo(() => {
-    return maskable ? (showPassword ? "text" : "password") : type
-  }, [showPassword, maskable, type])
+  // The field does the masking, so hand it the unmasked type.
+  const localType = maskable ? "text" : type
 
   const localIcon = useMemo(() => {
     // Only `password` forces the lock icon; `private` keeps the consumer's icon.
     return type === "password" ? LockLocked : props.icon
   }, [type, props.icon])
 
-  const i18n = useI18n()
-  const buttonToggle: InputFieldProps<string>["buttonToggle"] = useMemo(() => {
-    if (type === "password") {
-      return {
-        label: [i18n.inputs.password.show, i18n.inputs.password.hide],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
-    }
-    if (type === "private") {
-      // Build the toggle's accessible name from the field label so screen-reader
-      // users can tell multiple private fields apart (e.g. "Show social security
-      // number"). The label feeds F0ButtonToggle's aria-label + title only — the
-      // toggle renders an icon, so there is no visible-text change.
-      return {
-        label: [
-          i18n.t("inputs.private.show", { label: props.label }),
-          i18n.t("inputs.private.hide", { label: props.label }),
-        ],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
-    }
-    return props.buttonToggle
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPassword, type, props.buttonToggle, props.label])
-
   return (
     <ShadcnInput
       {...props}
       {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
+      masked={maskable || masked}
+      // Checking what you just typed is what a credential field's eye is for.
+      maskToggleAlwaysVisible={maskable}
+      maskToggleLabels={
+        type === "password"
+          ? [i18n.inputs.password.show, i18n.inputs.password.hide]
+          : undefined
+      }
       // Email addresses are case-insensitive, so normalise to lowercase as the
       // user types (lowercasing preserves length, so the caret doesn't jump).
       onChange={(value) =>
         props.onChange?.(type === "email" ? value.toLowerCase() : value)
       }
       onKeyDown={(event) => {
+        onKeyDown?.(event)
+        // A consumer handling Enter itself should not see it fire twice.
+        if (event.defaultPrevented) {
+          return
+        }
         if (event.key === "Enter") {
           onPressEnter?.()
         }
+        if (event.key === "Escape") {
+          onPressEscape?.()
+        }
       }}
       icon={localIcon}
-      buttonToggle={buttonToggle}
     />
   )
 }

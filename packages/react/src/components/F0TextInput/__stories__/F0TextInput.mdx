@@ -155,7 +155,7 @@ The `type` prop accepts every native HTML input type **except `"number"`**, whic
 When `type="password"`:
 
 - A lock icon replaces any `icon` prop.
-- A trailing eye-toggle button appears, with i18n labels ("Show password" / "Hide password"), to flip between masked and visible text.
+- A trailing eye-toggle button appears, labelled "Show password", to flip between masked and visible text.
 - The `buttonToggle` prop becomes private — consumers cannot override the eye toggle while in password mode.
 
 <Canvas of={Stories.Password} />
@@ -167,10 +167,38 @@ When `type="password"`:
 - **No lock icon** — the consumer `icon` prop is respected (default: none), so the field does not read as a login credential.
 - **Password managers are disabled** — the field sets `autocomplete="off"` plus `data-1p-ignore`, `data-lpignore`, `data-bwignore` and `data-form-type="other"`, so 1Password, LastPass, Bitwarden and browser autofill never offer to save or fill it.
 
-A trailing eye-toggle flips between masked and visible text; its accessible name is built from the field label (e.g. "Show social security number") so screen-reader users can tell multiple private fields apart. As with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
+A trailing eye-toggle flips between masked and visible text; its accessible name is built from the field label (e.g. "Show Social security number") so screen-reader users can tell multiple masked fields apart. As with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
 
 <Canvas of={Stories.Private} />
 
-**Enter key**
+**Keyboard**
 
-`onPressEnter` fires when `Enter` is pressed while the input has focus. Useful for form-less search boxes, inline editing, or single-field submit flows. It does not call `preventDefault` — wrap the input in a `<form onSubmit>` if native form submission is also needed.
+Three keyboard props, in the order they run on every key:
+
+1. `onKeyDown` gets the raw event first, for any key.
+2. `onPressEnter` fires on `Enter`.
+3. `onPressEscape` fires on `Escape`.
+
+`onKeyDown` has the last word: call `preventDefault()` on it and neither shortcut fires, so a consumer that already handles `Enter` itself never sees it twice. Neither shortcut calls `preventDefault` on its own, so wrap the input in a `<form onSubmit>` if native form submission is also needed.
+
+`onPressEnter` + `onPressEscape` is the inline-editing pair: Enter commits, Escape reverts.
+
+**Masking without a type**
+
+`masked` renders any field's value hidden behind dots, with the same eye toggle `type="password"` and `type="private"` render on their own. Use it for a governed value that is not a credential and has no masked type of its own, such as an IBAN in a text field or a date of birth in a date picker.
+
+It never doubles up: a `password` or `private` field already sets it, so those types show one eye, not two.
+
+The two cases part company twice. On focus, a `masked` value loses its eye while you type it, leaving the clear button alone in the trailing area, because none of a details row's trailing controls applies to a half-finished draft; `password` and `private` keep theirs, because revealing what you just typed is exactly what a credential field's eye is for. And in naming: `password` says "Show password", while `private` and a bare `masked` are named after their own label, which is what tells two of them on one page apart.
+
+**Resting value**
+
+`readonly` together with `transparent` draws the value as plain text, without the field's border or the secondary "disabled form" background, but at the height and radius the editable field takes. Drop the two props and the same component is the ordinary bordered field again, at the same height, so a row does not move when it becomes editable.
+
+That plus the keyboard pair is inline editing. The consumer owns the `readonly` flip and the draft; the input owns the keys, both presentations, and the caret.
+
+Two ways in, and the input handles focus for both. `onClickContent` fires when the value itself is clicked, and the field focuses once `readonly` lifts. For an edit control outside the field, such as a pencil in a toolbar, set `focusOnEditable` alongside the flag that makes the field editable. Neither needs `autoFocus` or a remount.
+
+<Canvas of={Stories.InlineEditing} />
+
+The trailing buttons a details row also wants (copy, pencil, comment, and the tick that confirms a commit) are not here. They belong to the pattern that draws the row. A row is one cell for every kind of value: a select row and a date row show text at rest and mount `F0Select` or `F0DatePicker` only for editing, so the buttons cannot live inside any one input.

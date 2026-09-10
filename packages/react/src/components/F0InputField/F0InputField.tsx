@@ -13,9 +13,11 @@ import {
 } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
+import { F0Button } from "@/components/F0Button"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { CrossedCircle } from "@/icons/app"
+import { CrossedCircle, EyeInvisible, EyeVisible } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Spinner } from "@/ui/Spinner"
 import { AppendTag } from "./AppendTag"
@@ -234,6 +236,14 @@ export type InputFieldProps<T> = {
     onChange: (selected: boolean) => void
   }
   transparent?: boolean
+  /** Renders the value masked, with an eye button to reveal it. */
+  masked?: boolean
+  /** Keeps the eye up while the field has focus. Set for credential fields. */
+  maskToggleAlwaysVisible?: boolean
+  /** Overrides the eye's `[show, hide]` names. Defaults to naming the field. */
+  maskToggleLabels?: [string, string]
+  /** Focuses the field once it stops being `readonly`, which `autoFocus` cannot. */
+  focusOnEditable?: boolean
 }
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -278,16 +288,28 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-autocomplete": ariaAutocomplete,
       buttonToggle,
       transparent,
+      masked: maskable,
+      maskToggleAlwaysVisible,
+      maskToggleLabels,
+      focusOnEditable,
       ...props
     }: InputFieldProps<string>,
     ref
   ) => {
+    const i18n = useI18n()
     const generatedId = useId()
     const id = props.id ?? generatedId
 
     const noEdit = disabled || readonly
 
     const [localValue, setLocalValue] = useState(value)
+
+    const [revealed, setRevealed] = useState(false)
+    const masked = !!maskable && !revealed
+    const childIsInput = (children as React.ReactElement)?.type === "input"
+
+    // Not `:focus-within`: the trailing buttons share the wrapper.
+    const [childFocused, setChildFocused] = useState(false)
 
     // For legacy reasons, error is a shortcut for status with type error
     if (hint) {
@@ -342,9 +364,39 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       props.onClear?.()
     }
 
+    // `focus()` is a no-op until the consumer lifts `readonly`.
+    const focusOnEditableRef = useRef(false)
+
+    const focusInput = () => {
+      const element =
+        typeof inputRef === "object" && inputRef?.current
+          ? (inputRef.current as HTMLElement)
+          : null
+      element?.focus()
+    }
+
+    useEffect(() => {
+      if (noEdit || (!focusOnEditableRef.current && !focusOnEditable)) {
+        return
+      }
+      focusOnEditableRef.current = false
+      focusInput()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [noEdit, focusOnEditable])
+
     const handleClickContent = () => {
-      if (!disabled) {
+      if (disabled) {
+        return
+      }
+      if (!noEdit) {
+        focusInput()
         onClickContent?.()
+        return
+      }
+      // Arming this with nobody listening would steal a later caret.
+      if (onClickContent) {
+        focusOnEditableRef.current = true
+        onClickContent()
       }
     }
 
@@ -413,14 +465,26 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
+    // One dot per character would give the length away.
+    const maskedValue = "•".repeat(
+      Math.min(lengthProvider(localValue) || 8, 12)
+    )
+    const isRestingValue = !!transparent && !!readonly
+    const isClickableRestingValue =
+      isRestingValue && !!onClickContent && !disabled
+    // Nothing in the trailing area applies to a value being typed.
+    const showMaskToggle =
+      !!maskable && (!!maskToggleAlwaysVisible || !childFocused)
 
     return (
       <div
         className={cn(
           "flex flex-col gap-2",
+          // Or a flex-row item collapses to the input's intrinsic width.
+          "w-full min-w-0",
           "pointer-events-none",
           disabled && "cursor-not-allowed",
-          transparent && "bg-transparent h-full w-full",
+          transparent && "bg-transparent h-full",
           className
         )}
         ref={ref}
@@ -456,7 +520,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         ) : null}
         <div
           className={cn(
-            "relative h-fit transition-all",
+            // Named because the plain `group` below is bordered-only.
+            "group/field relative h-fit transition-all",
             !noEdit && !disabled && "hover:border-f1-border-hover",
             !transparent && [
               "border-[1px] border-solid border-f1-border bg-f1-background",
@@ -469,16 +534,23 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               inputFieldVariants({ size, canGrow }),
             ],
             "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
-            readonly && "border-f1-border-secondary bg-f1-background-secondary",
+            readonly &&
+              !transparent &&
+              "border-f1-border-secondary bg-f1-background-secondary",
+            // Same box the editable field takes, so the row does not move.
+            isRestingValue && inputFieldVariants({ size, canGrow }),
+            isClickableRestingValue &&
+              "cursor-text hover:bg-f1-background-secondary",
             disabled && "cursor-not-allowed bg-f1-background-tertiary",
 
-            transparent && "h-full w-full "
+            transparent && (isRestingValue ? "w-full" : "h-full w-full")
           )}
           data-testid="input-field-wrapper"
         >
           <div
             className="pointer-events-auto relative flex h-full w-full min-w-0 flex-1"
             onClick={handleClickContent}
+            data-testid="input-field-content"
           >
             {icon || avatar ? (
               <div
@@ -503,9 +575,17 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               className="w-full min-w-0 flex-1"
             >
               {cloneElement(children as React.ReactElement, {
+                // Spread, or an `undefined` strips the child's own type.
+                ...(masked && childIsInput ? { type: "password" } : {}),
                 onChange: handleChange,
-                onBlur: props.onBlur,
-                onFocus: props.onFocus,
+                onBlur: () => {
+                  setChildFocused(false)
+                  props.onBlur?.()
+                },
+                onFocus: () => {
+                  setChildFocused(true)
+                  props.onFocus?.()
+                },
                 onAnimationStart: handleAnimationStart,
                 disabled: noEdit,
                 readOnly: readonly,
@@ -521,7 +601,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
                 id,
-                value: localValue ?? "",
+                value:
+                  masked && !childIsInput ? maskedValue : (localValue ?? ""),
                 "aria-label": label || placeholder || "no-label",
                 "aria-busy": loading,
                 "aria-disabled": noEdit,
@@ -532,6 +613,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   disabled && "cursor-not-allowed",
+                  // A disabled input absorbs the click instead of bubbling it.
+                  isClickableRestingValue && "pointer-events-none cursor-text",
                   (children as React.ReactElement).props.className,
                   inputElementVariants({ size })
                 ),
@@ -563,7 +646,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             >
               <span className="min-w-0 truncate">{placeholder}</span>
             </div>
-            {clearable || hasAppend || loading ? (
+            {clearable || showMaskToggle || hasAppend || loading ? (
               <div
                 className={cn(
                   "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
@@ -600,6 +683,36 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                       </motion.button>
                     ) : null}
                   </AnimatePresence>
+                ) : null}
+
+                {showMaskToggle ? (
+                  <div
+                    className="flex min-h-6 items-center self-center"
+                    data-testid="input-field-mask-toggle"
+                  >
+                    <F0Button
+                      variant="ghost"
+                      size="sm"
+                      hideLabel
+                      icon={revealed ? EyeVisible : EyeInvisible}
+                      label={
+                        maskToggleLabels
+                          ? maskToggleLabels[revealed ? 1 : 0]
+                          : i18n.t(
+                              revealed
+                                ? "inputs.private.hide"
+                                : "inputs.private.show",
+                              { label }
+                            )
+                      }
+                      disabled={disabled}
+                      onClick={(event) => {
+                        // Or `onClickContent` fires too and takes the caret.
+                        event.stopPropagation()
+                        setRevealed(!revealed)
+                      }}
+                    />
+                  </div>
                 ) : null}
 
                 {hasAppend ? (

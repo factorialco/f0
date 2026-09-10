@@ -49,7 +49,7 @@ describe("F0TextInput", () => {
     it("renders an eye toggle that reveals the value when clicked", () => {
       render(<F0TextInput label="Password" type="password" />)
 
-      const toggle = screen.getByRole("button", { name: /show password/i })
+      const toggle = screen.getByRole("button", { name: "Show password" })
       fireEvent.click(toggle)
 
       const input = screen.getAllByLabelText("Password")[0] as HTMLInputElement
@@ -60,10 +60,10 @@ describe("F0TextInput", () => {
       render(<F0TextInput label="Password" type="password" />)
 
       const initialToggle = screen.getByRole("button", {
-        name: /show password/i,
+        name: "Show password",
       })
       fireEvent.click(initialToggle)
-      const hideToggle = screen.getByRole("button", { name: /hide password/i })
+      const hideToggle = screen.getByRole("button", { name: "Hide password" })
       fireEvent.click(hideToggle)
 
       const input = screen.getAllByLabelText("Password")[0] as HTMLInputElement
@@ -112,12 +112,18 @@ describe("F0TextInput", () => {
       expect(countIcons(privateRender.container)).toBeLessThan(
         countIcons(passwordRender.container)
       )
-      // The private eye toggle uses the neutral "Show" label (not "Show password").
+      // `private` is named after its own label; `password` keeps the fixed
+      // conventional string, so the two never share a name.
       expect(
         within(privateRender.container).queryByRole("button", {
-          name: /show password/i,
+          name: "Show password",
         })
       ).not.toBeInTheDocument()
+      expect(
+        within(passwordRender.container).getByRole("button", {
+          name: "Show password",
+        })
+      ).toBeInTheDocument()
       expect(
         within(privateRender.container).getByRole("button", { name: /show/i })
       ).toBeInTheDocument()
@@ -155,6 +161,147 @@ describe("F0TextInput", () => {
       fireEvent.keyDown(input, { key: "Escape" })
 
       expect(onPressEnter).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("onPressEscape", () => {
+    it("fires when Escape is pressed", () => {
+      const onPressEscape = vi.fn()
+      render(<F0TextInput label="Revert" onPressEscape={onPressEscape} />)
+
+      fireEvent.keyDown(screen.getAllByLabelText("Revert")[0], {
+        key: "Escape",
+      })
+
+      expect(onPressEscape).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not fire on other keys", () => {
+      const onPressEscape = vi.fn()
+      render(<F0TextInput label="Revert" onPressEscape={onPressEscape} />)
+
+      const input = screen.getAllByLabelText("Revert")[0]
+      fireEvent.keyDown(input, { key: "Enter" })
+      fireEvent.keyDown(input, { key: "Tab" })
+      fireEvent.keyDown(input, { key: "a" })
+
+      expect(onPressEscape).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("onKeyDown", () => {
+    it("receives every key, including the two with shortcuts", () => {
+      const onKeyDown = vi.fn()
+      render(<F0TextInput label="Keys" onKeyDown={onKeyDown} />)
+
+      const input = screen.getAllByLabelText("Keys")[0]
+      fireEvent.keyDown(input, { key: "a" })
+      fireEvent.keyDown(input, { key: "Enter" })
+      fireEvent.keyDown(input, { key: "Escape" })
+
+      expect(onKeyDown.mock.calls.map(([event]) => event.key)).toEqual([
+        "a",
+        "Enter",
+        "Escape",
+      ])
+    })
+
+    it("runs before the shortcuts, which still fire", () => {
+      const calls: string[] = []
+      render(
+        <F0TextInput
+          label="Order"
+          onKeyDown={() => calls.push("onKeyDown")}
+          onPressEnter={() => calls.push("onPressEnter")}
+        />
+      )
+
+      fireEvent.keyDown(screen.getAllByLabelText("Order")[0], { key: "Enter" })
+
+      expect(calls).toEqual(["onKeyDown", "onPressEnter"])
+    })
+
+    it("suppresses both shortcuts when it calls preventDefault", () => {
+      const onPressEnter = vi.fn()
+      const onPressEscape = vi.fn()
+      render(
+        <F0TextInput
+          label="Handled"
+          onKeyDown={(event) => event.preventDefault()}
+          onPressEnter={onPressEnter}
+          onPressEscape={onPressEscape}
+        />
+      )
+
+      const input = screen.getAllByLabelText("Handled")[0]
+      fireEvent.keyDown(input, { key: "Enter" })
+      fireEvent.keyDown(input, { key: "Escape" })
+
+      expect(onPressEnter).not.toHaveBeenCalled()
+      expect(onPressEscape).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("masked", () => {
+    it("names a bare masked field after its label, unlike password", () => {
+      render(<F0TextInput label="IBAN" value="ES91 2100" masked />)
+
+      expect(
+        screen.getByRole("button", { name: "Show IBAN" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Show password" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders one eye for type=private, not two", () => {
+      render(<F0TextInput label="SSN" type="private" value="123-45-6789" />)
+
+      expect(screen.getAllByRole("button", { name: /^show/i })).toHaveLength(1)
+    })
+
+    it("masks a plain text field when `masked` is set on its own", () => {
+      render(<F0TextInput label="IBAN" value="ES91 2100" masked />)
+
+      const input = screen.getAllByLabelText("IBAN")[0] as HTMLInputElement
+      expect(input.type).toBe("password")
+
+      fireEvent.click(screen.getByRole("button", { name: "Show IBAN" }))
+      expect(input.type).toBe("text")
+    })
+
+    it("keeps the eye on a readonly field while dropping its clear button", () => {
+      render(
+        <F0TextInput
+          label="Email"
+          value="ada@example.com"
+          masked
+          readonly
+          clearable
+        />
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Show Email" })
+      ).toBeInTheDocument()
+      expect(screen.queryByTestId("clear-button")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("resting value", () => {
+    it("drops the field chrome but keeps its height with readonly + transparent", () => {
+      render(
+        <F0TextInput
+          label="Email"
+          value="ada@example.com"
+          readonly
+          transparent
+        />
+      )
+
+      const wrapper = screen.getByTestId("input-field-wrapper")
+      expect(wrapper).not.toHaveClass("border-[1px]")
+      expect(wrapper).toHaveClass("h-[32px]")
     })
   })
 })

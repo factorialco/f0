@@ -202,7 +202,7 @@ The `F0InputField` is composed of several parts:
 **F0InputField does NOT**
 
 - Render its own `<input>`. Without `children` it renders empty chrome.
-- Manage focus programmatically. Forward `ref` from the consumer to the editable element.
+- Manage focus in general. Forward `ref` from the consumer to the editable element. The one exception is the click-to-edit path: clicking the value puts the caret in the field, waiting for `readonly` to lift first if it has to. See [Clicking a resting value](#clicking-a-resting-value).
 - Parse, validate or format values.
 - Set `aria-*` attributes on the editable element manually — the wrapper injects them via `cloneElement`.
 
@@ -233,6 +233,40 @@ The example below sets `maxLength={10}` and a `value` of `"long text should be t
 ### Autofill
 
 Browsers do not fire `change` events on autofill, which would leave the floating placeholder visible on top of the autofilled value. `F0InputField` listens to the WebKit `animationstart` event and polls `:-webkit-autofill` / `:autofill` to hide the placeholder until the autofill state clears.
+
+### Masking
+
+`masked` renders the value hidden behind a run of dots, with an eye button in the trailing area to reveal it. One implementation serves every masked field: `F0TextInput type="password"` and `type="private"` both set it rather than building their own toggle.
+
+<Canvas of={Stories.MaskedValue} />
+
+How the mask is drawn depends on the child, because there is no one way to hide a value:
+
+- **A real `<input>`** gets `type="password"` while hidden, so the browser's own protections apply, and its own type back (`email`, `tel`, `search`) when revealed.
+- **Any other editable child**, such as `F0Select`'s `<button>` trigger or a `<textarea>`, has its displayed value replaced with dots instead. `type="password"` on a `<button>` is silently treated as `submit`, and on a `<textarea>` it is not an attribute at all.
+
+The eye is named after the field by default, "Show Date of birth", which is what lets a screen-reader user tell two masked fields on one page apart. `F0TextInput type="password"` overrides that with the conventional fixed "Show password". It survives `readonly`, because a value you cannot type into is still one you can unmask, and `disabled` disables it.
+
+It does **not** survive focus. While the value is being typed the eye stands down and the clear button is the only thing in the trailing area, because none of the trailing controls applies to a draft. A credential field is the exception, and `F0TextInput` handles it: `type="password"` and `type="private"` keep their eye through focus, since checking what you just typed is the whole point of the button.
+
+### The resting value
+
+`readonly` + `transparent` draws the value as plain text: no border, no secondary "disabled form" background. It is how a details row shows a value it is not currently editing, and two things follow from it being the same cell the editable field will occupy:
+
+- **It keeps the field's height and radius.** A row that changes height when you click it moves the record under the reader, so the resting cell is the same box the editable field will take.
+- **The whole cell is the click target**, not just the text inside it.
+
+<Canvas of={Stories.RestingValue} />
+
+### Clicking a resting value
+
+Clicking anywhere in the content area puts the caret in the input. For an already-editable field that is immediate. For a resting value it cannot be: while `readonly` the inner input is disabled, so `focus()` is a no-op, and the caret has to land _after_ the consumer flips `readonly` off. The field waits for that transition and then focuses, which is why a consumer needs neither `autoFocus` nor a remount to move the caret.
+
+The click also has to reach the cell. A disabled control swallows the mouse event rather than letting it bubble, so the inner input becomes `pointer-events-none` once a resting value has an `onClickContent`. The same condition adds the text cursor and the `bg-f1-background-secondary` hover tint: a tint with nothing behind it is a lie.
+
+Buttons in the trailing area stop the click, so they never drag the caret into the field.
+
+An edit control that sits _outside_ the field cannot use any of this: its click never reaches the content area, so flipping `readonly` off from a toolbar button leaves the caret on the button. `focusOnEditable` asks for the same deferral by prop. Set it alongside whatever makes the field editable and the caret lands as soon as the input can accept it.
 
 ---
 
@@ -603,6 +637,56 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
         <td>The value to be set when the input is cleared.</td>
         <td>
           <code>''</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Masking and focus
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>masked</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Renders the value masked, with an eye to reveal it. Set for you by{" "}
+          <code>F0TextInput type="password" | "private"</code>. See{" "}
+          <a href="#masking">Masking</a>.
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>focusOnEditable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Puts the caret in the field as soon as it stops being{" "}
+          <code>readonly</code> or <code>disabled</code>. For an edit control
+          outside the field; clicking the value does this on its own. See{" "}
+          <a href="#clicking-a-resting-value">Clicking a resting value</a>.
+        </td>
+        <td>
+          <code>false</code>
         </td>
       </tr>
     </tbody>
