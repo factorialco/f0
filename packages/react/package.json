@@ -140,7 +140,7 @@
     "embla-carousel-wheel-gestures": "^8.0.1",
     "gridstack": "^12.3.3",
     "libphonenumber-js": "^1.13.9",
-    "maplibre-gl": "^5.24.0",
+    "maplibre-gl": "^6.4.1",
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
     "react-phone-number-input": "^3.4.17",
