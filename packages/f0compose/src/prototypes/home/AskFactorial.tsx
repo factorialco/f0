@@ -10,13 +10,17 @@ export const AgentEntryContext = createContext<{
 export function AskFactorialButton() {
   const entry = useContext(AgentEntryContext)
   if (!entry.visible) return null
+  return <AskFactorialAction onClick={entry.open} />
+}
+
+export function AskFactorialAction({ onClick }: { onClick: () => void }) {
   return (
     <F0Button
       label="Ask Factorial"
       icon={Comment}
       variant="outline"
       size="md"
-      onClick={entry.open}
+      onClick={onClick}
       data-testid="ask-factorial"
     />
   )

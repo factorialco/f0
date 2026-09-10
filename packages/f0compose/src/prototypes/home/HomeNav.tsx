@@ -72,10 +72,17 @@ import { avatarFor } from "@/fixtures/helpers"
 import type { Chat, ChatId } from "./comms/chats"
 import type { InboxTask } from "./inbox/inboxTasks"
 
-import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
+import {
+  TEAM_ABSENCE_FILTERS,
+  WORKPLACES,
+} from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
-import { requestChat, requestChatsClose, useOpenChats } from "./comms/chatStore"
+import {
+  requestChat,
+  requestChatsClose,
+  useOpenChats,
+} from "./comms/chatStore"
 import { hubSlug } from "./hub/hubSlug"
 import { motionKeyFor } from "./iconMotion"
 import { openInboxTasks } from "./inbox/inboxTasks"
@@ -125,13 +132,14 @@ type NavSectionId = "home" | "comms" | "inbox" | "cal" | "hub"
 const NAV_SECTION_KEY = "f0compose:home:nav-section"
 const NAV_OPEN_KEY = "f0compose:home:nav-open"
 
-const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] = [
-  { id: "home", label: "Home", icon: HomeIcon },
-  { id: "comms", label: "Comms", icon: Messages },
-  { id: "inbox", label: "Inbox", icon: InboxIcon },
-  { id: "cal", label: "Cal", icon: Calendar },
-  { id: "hub", label: "Hub", icon: HubIcon },
-]
+const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] =
+  [
+    { id: "home", label: "Home", icon: HomeIcon },
+    { id: "comms", label: "Comms", icon: Messages },
+    { id: "inbox", label: "Inbox", icon: InboxIcon },
+    { id: "cal", label: "Cal", icon: Calendar },
+    { id: "hub", label: "Hub", icon: HubIcon },
+  ]
 
 const PANEL_TITLES: Record<NavSectionId, string> = {
   home: "Home",
@@ -272,7 +280,9 @@ function RowOptions({
     event.stopPropagation()
     const rect = buttonRef.current?.getBoundingClientRect()
     if (!rect) return
-    setPos((open) => (open ? null : { left: rect.left, top: rect.bottom + 4 }))
+    setPos((open) =>
+      open ? null : { left: rect.left, top: rect.bottom + 4 }
+    )
   }
 
   // Portal events propagate through the REACT tree, not the DOM tree —
@@ -290,7 +300,11 @@ function RowOptions({
       <div
         onClick={(event) => event.stopPropagation()}
         className="f0c-popover fixed z-50 flex w-[180px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
-        style={{ left: pos.left, top: pos.top, transformOrigin: "top left" }}
+        style={{
+          left: pos.left,
+          top: pos.top,
+          transformOrigin: "top left",
+        }}
       >
         {items(() => setPos(null))}
       </div>
@@ -359,7 +373,7 @@ function PinnedRow({ item }: { item: PinnedItem }) {
  * Rename (inline input) and Delete. The menu is portalled to <body> for
  * the same stacking-context reason as the rail user menu.
  */
-function RecentRow({
+export function RecentRow({
   conversation,
   active,
 }: {
@@ -473,13 +487,17 @@ function RecentsControl({
   onChange: (filter: RecentsFilter) => void
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null)
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null)
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(
+    null
+  )
 
   const toggle = () => {
     const rect = buttonRef.current?.getBoundingClientRect()
     if (!rect) return
     setPos((p) =>
-      p ? null : { top: rect.bottom + 4, right: window.innerWidth - rect.right }
+      p
+        ? null
+        : { top: rect.bottom + 4, right: window.innerWidth - rect.right }
     )
   }
 
@@ -495,7 +513,11 @@ function RecentsControl({
       <div className="fixed inset-0 z-40" onClick={() => setPos(null)} />
       <div
         className="f0c-popover fixed z-50 flex w-[220px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
-        style={{ top: pos.top, right: pos.right, transformOrigin: "top right" }}
+        style={{
+          top: pos.top,
+          right: pos.right,
+          transformOrigin: "top right",
+        }}
       >
         <MenuRow
           icon={<F0Icon icon={Comment} size="md" color="default" />}
@@ -579,10 +601,21 @@ function HomePanelBody() {
   // letting their threads back in through Recents would undo the change.
   // Drop the filter if you want them listed again.
   const sorted = [...conversations]
-    .filter((c) => !c.agentId)
+    .filter((c) => {
+      const owner = c.homeSetup?.profile ?? c.homeBriefing
+      // Opening Home alone is not a saved conversation. Keep actual exchanges
+      // in the existing Recents section, scoped to the current mock profile.
+      return (
+        !c.agentId &&
+        (!owner || owner === profile) &&
+        (!c.homeBriefing || c.messages.some((m) => m.role === "user"))
+      )
+    })
     .sort((a, b) => b.lastActiveAt - a.lastActiveAt)
   const visible =
-    recentsFilter === "active" ? sorted.slice(0, RECENTS_ACTIVE_LIMIT) : sorted
+    recentsFilter === "active"
+      ? sorted.slice(0, RECENTS_ACTIVE_LIMIT)
+      : sorted
 
   return (
     <div className="flex flex-col gap-3 px-3 pb-1.5">
@@ -635,12 +668,12 @@ function HomePanelBody() {
           ))}
         </SidebarGroup>
       )}
-      {/* Recents is admin-only — the employee panel in the frame stops at
+      {/* Recents is now available to both profiles. The original employee frame stopped at
           Pinned. Conversations still work, they just aren't listed here. */}
       {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}
-      {profile === "admin" && sorted.length > 0 && (
+      {sorted.length > 0 && (
         <SidebarGroup
           label="Recents"
           trailing={
@@ -844,7 +877,13 @@ function CommsPanelBody() {
  * Rows are divided by an edge-to-edge hairline, so the padding lives on
  * the row rather than on the list.
  */
-function InboxPanelRow({ item, active }: { item: InboxTask; active: boolean }) {
+function InboxPanelRow({
+  item,
+  active,
+}: {
+  item: InboxTask
+  active: boolean
+}) {
   const [done, setDone] = useState(false)
   return (
     <div
@@ -1135,12 +1174,18 @@ export const ADMIN_HUB: HubGroup[] = [
  * Company to Finance.
  */
 export const EMPLOYEE_HUB: HubGroup[] = [
-  { label: "Personal", items: ["Hours", "Absences", "Payslips", "Learning"] },
+  {
+    label: "Personal",
+    items: ["Hours", "Absences", "Payslips", "Learning"],
+  },
   { label: "Company", items: ["People", "Workplaces", "Handbook"] },
   { label: "Work", items: ["Time off", "Time tracking", "Projects"] },
   { label: "Pay", items: ["Compensation", "Benefits"] },
   { label: "Talent", items: ["Performance", "Engagement", "Training"] },
-  { label: "Finance", items: ["Planning", "Spend", "Purchasing", "Software"] },
+  {
+    label: "Finance",
+    items: ["Planning", "Spend", "Purchasing", "Software"],
+  },
 ]
 
 function HubPanelBody() {
@@ -1269,7 +1314,9 @@ export function HomeNav() {
   const rootRef = useRef<HTMLDivElement>(null)
   const view = searchParams.get("view")
   const utilityView =
-    view === "marketplace" || view === "settings" || view === "notifications"
+    view === "marketplace" ||
+    view === "settings" ||
+    view === "notifications"
       ? view
       : null
   const panelVisible = panelOpen && !utilityView
@@ -1293,7 +1340,10 @@ export function HomeNav() {
     const strip = () => wrapper.removeAttribute("inert")
     strip()
     const observer = new MutationObserver(strip)
-    observer.observe(wrapper, { attributes: true, attributeFilter: ["inert"] })
+    observer.observe(wrapper, {
+      attributes: true,
+      attributeFilter: ["inert"],
+    })
     return () => observer.disconnect()
   }, [])
 
@@ -1334,7 +1384,8 @@ export function HomeNav() {
    * single label. That matches the proportion Linear gives its own inbox
    * list — roughly 1.7x its nav — which is the reference Oskar named.
    */
-  const panelWidth = section === "inbox" ? 419 : section === "cal" ? 293 : 240
+  const panelWidth =
+    section === "inbox" ? 419 : section === "cal" ? 293 : 240
 
   const collapse = () => {
     setPanelOpen(false)

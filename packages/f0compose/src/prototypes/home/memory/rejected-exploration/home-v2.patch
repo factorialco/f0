@@ -1,0 +1,528 @@
+diff --git a/packages/f0compose/src/prototypes/home-v2/Brief.tsx b/packages/f0compose/src/prototypes/home-v2/Brief.tsx
+index fa7382af1..d4dcf7065 100644
+--- a/packages/f0compose/src/prototypes/home-v2/Brief.tsx
++++ b/packages/f0compose/src/prototypes/home-v2/Brief.tsx
+@@ -8,6 +8,8 @@ import {
+ } from "@factorialco/f0-react"
+ import { useState } from "react"
+ 
++import { recordFor, type WidgetRecord } from "../home/home-widgets/catalog"
++import { CatalogWidget } from "../home/home-widgets/CatalogWidget"
+ import { community, tasks, team, topicFor, widgetFor } from "./data"
+ export function Brief({
+   topics,
+@@ -16,6 +18,7 @@ export function Brief({
+   compact = false,
+   previewGrid = false,
+   pinned = [],
++  onAsk,
+ }: {
+   topics: string[]
+   pin?: (widget: string) => void
+@@ -23,6 +26,7 @@ export function Brief({
+   compact?: boolean
+   previewGrid?: boolean
+   pinned?: string[]
++  onAsk?: (record: WidgetRecord) => void
+ }) {
+   const [expanded, setExpanded] = useState<string | null>(null)
+   return (
+@@ -33,6 +37,29 @@ export function Brief({
+       gap="lg"
+     >
+       {topics.map((topic) => {
++        const record = recordFor(topic)
++        if (record)
++          return (
++            <F0Box key={topic}>
++              <CatalogWidget
++                record={record}
++                onAsk={onAsk ?? (() => onOpen?.(`Explica ${topic}`))}
++              />
++              {pin && (
++                <F0Button
++                  label={
++                    pinned.includes(topic)
++                      ? "✓ Siempre a mano"
++                      : "Dejar siempre a mano"
++                  }
++                  size="sm"
++                  variant="ghost"
++                  disabled={pinned.includes(topic)}
++                  onClick={() => pin(topic)}
++                />
++              )}
++            </F0Box>
++          )
+         const name = topicFor(topic)
+         const widget = widgetFor(name)
+         return (
+diff --git a/packages/f0compose/src/prototypes/home-v2/Conversation.tsx b/packages/f0compose/src/prototypes/home-v2/Conversation.tsx
+index dd818e682..73777bb0c 100644
+--- a/packages/f0compose/src/prototypes/home-v2/Conversation.tsx
++++ b/packages/f0compose/src/prototypes/home-v2/Conversation.tsx
+@@ -1,6 +1,7 @@
+ import { F0Box, F0Text } from "@factorialco/f0-react"
+ import { useEffect, useRef, useState, type ReactNode } from "react"
+ 
++import type { WidgetRecord } from "../home/home-widgets/catalog"
+ import type { Message } from "./state"
+ 
+ import { Brief } from "./Brief"
+@@ -65,6 +66,7 @@ export function Transcript({
+   pinned,
+   onOpen,
+   onDone,
++  onAsk,
+ }: {
+   history: Message[]
+   pending: string | null
+@@ -72,6 +74,7 @@ export function Transcript({
+   pinned: string[]
+   onOpen: (text: string) => void
+   onDone: () => void
++  onAsk?: (record: WidgetRecord) => void
+ }) {
+   const viewport = useRef<HTMLDivElement>(null)
+   useEffect(() => {
+@@ -102,9 +105,12 @@ export function Transcript({
+               {entry.blocks && (
+                 <Brief
+                   topics={entry.blocks}
++                  onAsk={onAsk}
+                   compact={index === 0}
+                   previewGrid={index === 0}
+-                  pin={index > 0 && index === history.length - 1 ? pin : undefined}
++                  pin={
++                    index > 0 && index === history.length - 1 ? pin : undefined
++                  }
+                   pinned={pinned}
+                   onOpen={onOpen}
+                 />
+diff --git a/packages/f0compose/src/prototypes/home-v2/HomeV2.tsx b/packages/f0compose/src/prototypes/home-v2/HomeV2.tsx
+index 57f3befc1..4a9c59143 100644
+--- a/packages/f0compose/src/prototypes/home-v2/HomeV2.tsx
++++ b/packages/f0compose/src/prototypes/home-v2/HomeV2.tsx
+@@ -7,6 +7,20 @@ import { useSearchParams } from "react-router-dom"
+ import type { PrototypeMeta } from "../types"
+ 
+ import { FactorialAgentIcon } from "../home/FactorialAgentIcon"
++import { PROFILE_PEOPLE } from "../home/fixtures"
++import {
++  recordFor,
++  allowedCatalog,
++  type WidgetRecord,
++} from "../home/home-widgets/catalog"
++import {
++  useConversations,
++  startConversationWithContext,
++  goHome,
++  sendMessage,
++} from "../home/one/conversationStore"
++import { ConversationView } from "../home/one/ConversationView"
++import { useProfile } from "../home/profileStore"
+ import { Brief } from "./Brief"
+ import { Card, Reveal, Stack, Transcript } from "./Conversation"
+ import {
+@@ -24,6 +38,7 @@ import {
+ } from "./data"
+ import { initial, useSetup, type Message } from "./state"
+ import { WidgetRail } from "./WidgetRail"
++import { NewsReview } from "./NewsReview"
+ export const meta: PrototypeMeta = {
+   slug: "home-v2",
+   title: "Home · Tu agente personal",
+@@ -65,8 +80,18 @@ function Navigation() {
+     </F0Box>
+   )
+ }
+-export default function HomeV2() {
+-  const { state, setState, storageError } = useSetup()
++export default function HomeV2({
++  integrated = false,
++}: {
++  integrated?: boolean
++}) {
++  const profile = useProfile()
++  const person = PROFILE_PEOPLE[profile]
++  const { state, setState, storageError } = useSetup(profile)
++  const conversations = useConversations()
++  const active = integrated
++    ? conversations.conversations.find((c) => c.id === conversations.activeId)
++    : undefined
+   const [params, setParams] = useSearchParams()
+   const view = params.get("view")
+   const [pending, setPending] = useState<{
+@@ -83,9 +108,9 @@ export default function HomeV2() {
+   } | null>(null)
+   const [reset, setReset] = useState(false)
+   const [visitReady, setVisitReady] = useState(false)
+-  const configuring = !state.paused && state.step !== "done" && !view
++  const configuring = !active && !state.paused && state.step !== "done" && !view
+   const management = view === "routines" || view === "reports"
+-  const home = view === "home"
++  const home = view === "home" && !active
+   function say(
+     text: string,
+     next?: Step,
+@@ -116,6 +141,24 @@ export default function HomeV2() {
+       setPending(null)
+     }
+   }, [home, management, pending, setState])
++  function askWidget(record: WidgetRecord) {
++    if (integrated) {
++      setParams({})
++      startConversationWithContext(
++        {
++          kind: "metric",
++          title: record.title,
++          stats: [{ label: record.caption, value: record.value }],
++        },
++        `Explícame ${record.title.toLowerCase()}`,
++        { reply: record.explanation }
++      )
++    } else {
++      user(`Explícame ${record.title.toLowerCase()}`)
++      say(record.explanation.join("\n\n"))
++      setParams({})
++    }
++  }
+   function pin(widget: string) {
+     setState((s) => ({
+       ...s,
+@@ -156,6 +199,7 @@ export default function HomeV2() {
+     setParams({})
+   }
+   function revisit() {
++    if (integrated) goHome()
+     setState((s) => ({ ...s, visits: s.visits + 1, paused: s.step !== "done" }))
+     setVisitReady(false)
+     setParams({ view: "home" })
+@@ -228,13 +272,54 @@ export default function HomeV2() {
+   function send() {
+     const text = state.draft.trim()
+     if (!text) return
++    if (active) {
++      setState((s) => ({ ...s, draft: "" }))
++      sendMessage(text, active.id)
++      return
++    }
+     setState((s) => ({ ...s, draft: "" }))
+     user(text)
+     if (home) setParams({})
+-    const topics = detectTopics(text)
++    const genericTopics = detectTopics(text)
++    const extras = allowedCatalog(profile)
++      .filter((record) => {
++        const normalized = text
++          .toLowerCase()
++          .normalize("NFD")
++          .replace(/[\u0300-\u036f]/g, "")
++        const term = record.title
++          .toLowerCase()
++          .normalize("NFD")
++          .replace(/[\u0300-\u036f]/g, "")
++          .replace(/^(mi |mis |ultimos )/, "")
++        return (
++          normalized.includes(term) ||
++          (record.title === "Mi nómina" && /nomina|payslip/.test(normalized)) ||
++          (record.title === "Últimos candidatos" && /candidat/.test(normalized))
++        )
++      })
++      .map((record) => record.title)
++    const topics = extras.length
++      ? extras
++      : genericTopics.filter(
++          (topic) =>
++            profile === "admin" ||
++            !["Mi equipo", "Gastos y presupuesto"].includes(topic)
++        )
+     const widgetRequest =
+       /widget|derecha|siempre a mano|fij[ao]|fijar/i.test(text) ||
+       (configuring && state.step === "widgets")
++    if (
++      !widgetRequest &&
++      extras.length &&
++      /explica|entiend|ask factorial/i.test(text)
++    ) {
++      const record = recordFor(extras[0])
++      if (record) {
++        askWidget(record)
++        return
++      }
++    }
+     if (widgetRequest) {
+       if (!topics.length) {
+         say(
+@@ -334,7 +419,8 @@ export default function HomeV2() {
+             <F0Button
+               label="Empezar de nuevo"
+               onClick={() => {
+-                setState(initial())
++                if (integrated) goHome()
++                setState(initial(profile))
+                 setRemoved(null)
+                 setPending(null)
+                 setIntent(null)
+@@ -380,27 +466,56 @@ export default function HomeV2() {
+             <F0Box width={small ? "10" : "16"} height={small ? "10" : "16"}>
+               <FactorialAgentIcon width="100%" height="100%" />
+             </F0Box>
++            <F0Box display="flex" flexDirection="column" gap="sm">
+             <F0Heading
+               content={
+-                management
++                active
++                  ? "Tu agente personal"
++                  : management
+                   ? view === "routines"
+                     ? "Tus rutinas"
+                     : "Tu seguimiento y reports"
+                   : home
+                     ? state.visits > 1
+-                      ? "Alicia, retomamos donde lo dejamos"
++                      ? `${person.firstName}, retomamos donde lo dejamos`
+                       : state.priorities.includes("Decisiones pendientes")
+-                        ? "Alicia, hay dos cosas que conviene revisar"
+-                        : "Alicia, aquí tienes tu puesta al día"
+-                    : small
++                        ? `${person.firstName}, hay dos cosas que conviene revisar`
++                        : `${person.firstName}, aquí tienes tu puesta al día`
++                    : state.step === "done"
++                      ? `${person.firstName}, tu home está lista`
++                      : small
+                       ? "Seguimos preparando tu espacio"
+-                      : "Hola, Alicia. Vamos a preparar tu espacio."
++                      : `Hola, ${person.firstName}. Vamos a preparar tu espacio.`
+               }
+               variant={small ? "heading" : "heading-large"}
+               as="h1"
+             />
++            {!active && !management && <NewsReview visit={state.visits} />}
++            </F0Box>
+           </F0Box>
+-          {management ? (
++          {active ? (
++            <F0Box
++              grow
++              minHeight="0"
++              overflowY="auto"
++              role="region"
++              aria-label="Ask Factorial"
++            >
++              <F0Box
++                display="flex"
++                justifyContent="between"
++                alignItems="center"
++              >
++                <F0Heading content={active.title} />
++                <F0Button
++                  label="Volver a mi home"
++                  variant="ghost"
++                  onClick={goHome}
++                />
++              </F0Box>
++              <ConversationView conversation={active} />
++            </F0Box>
++          ) : management ? (
+             <F0Box grow minHeight="0" overflowY="auto">
+               <Stack>
+                 {!(view === "routines" ? state.routines : state.reports)
+@@ -456,6 +571,7 @@ export default function HomeV2() {
+                 {visitReady && (
+                   <Brief
+                     topics={state.priorities.slice(0, 3)}
++                    onAsk={askWidget}
+                     onOpen={(text) => {
+                       user(text)
+                       setParams({})
+@@ -484,6 +600,7 @@ export default function HomeV2() {
+           ) : (
+             <Transcript
+               history={state.history}
++              onAsk={askWidget}
+               pending={pending?.message.text ?? null}
+               onDone={done}
+               pin={!pending ? pin : undefined}
+@@ -586,7 +703,12 @@ export default function HomeV2() {
+                         label="Enviar"
+                         icon={ArrowUp}
+                         hideLabel
+-                        disabled={!!pending || !!intent || !state.draft.trim()}
++                        disabled={
++                          !!pending ||
++                          !!intent ||
++                          !!active?.thinking ||
++                          !state.draft.trim()
++                        }
+                         onClick={send}
+                       />
+                     </F0Box>
+@@ -607,6 +729,8 @@ export default function HomeV2() {
+           onOpen={openBlock}
+           undo={removed?.widget ?? null}
+           onUndo={undoWidget}
++          onAsk={askWidget}
++          profile={profile}
+         />
+       </F0Box>
+     </F0Box>
+diff --git a/packages/f0compose/src/prototypes/home-v2/WidgetRail.tsx b/packages/f0compose/src/prototypes/home-v2/WidgetRail.tsx
+index 354dec715..2c6756a03 100644
+--- a/packages/f0compose/src/prototypes/home-v2/WidgetRail.tsx
++++ b/packages/f0compose/src/prototypes/home-v2/WidgetRail.tsx
+@@ -1,6 +1,7 @@
+ import { F0Box, F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
+ import { useState } from "react"
+ 
++import { allowedCatalog, type WidgetRecord } from "../home/home-widgets/catalog"
+ import { Brief } from "./Brief"
+ import { widgetCatalog } from "./data"
+ export function WidgetRail({
+@@ -10,6 +11,8 @@ export function WidgetRail({
+   onOpen,
+   undo,
+   onUndo,
++  onAsk,
++  profile = "admin",
+ }: {
+   widgets: string[]
+   onAdd: (widget: string) => void
+@@ -17,8 +20,18 @@ export function WidgetRail({
+   onOpen: (text: string) => void
+   undo: string | null
+   onUndo: () => void
++  onAsk?: (record: WidgetRecord) => void
++  profile?: "admin" | "employee"
+ }) {
+   const [editing, setEditing] = useState(false)
++  const available = [
++    ...widgetCatalog.filter(
++      (w) =>
++        profile === "admin" ||
++        (w !== "Disponibilidad del equipo" && w !== "Presupuesto")
++    ),
++    ...allowedCatalog(profile).map((record) => record.title),
++  ]
+   return (
+     <F0Box
+       display="flex"
+@@ -47,7 +60,7 @@ export function WidgetRail({
+         />
+       </F0Box>
+       <F0Text
+-        content="Un punto de partida para tu equipo. Puedes cambiarlo aquí o pedírselo a tu agente."
++        content="Un punto de partida para ti. Puedes cambiarlo aquí o pedírselo a tu agente."
+         variant="description"
+       />
+       {undo && (
+@@ -70,7 +83,7 @@ export function WidgetRail({
+         <F0Box background="primary" padding="lg" borderRadius="lg">
+           <F0Box display="flex" flexDirection="column" gap="md">
+             <F0Text content="Añadir a mi home" variant="label" />
+-            {widgetCatalog.map((widget) => (
++            {available.map((widget) => (
+               <F0Button
+                 key={widget}
+                 label={
+@@ -98,7 +111,7 @@ export function WidgetRail({
+       )}
+       {widgets.map((widget) => (
+         <F0Box key={widget} role="group" aria-label={`Widget: ${widget}`}>
+-          <Brief topics={[widget]} compact onOpen={onOpen} />
++          <Brief topics={[widget]} compact onOpen={onOpen} onAsk={onAsk} />
+           {editing && (
+             <F0Button
+               label={`Quitar ${widget}`}
+diff --git a/packages/f0compose/src/prototypes/home-v2/data.ts b/packages/f0compose/src/prototypes/home-v2/data.ts
+index 6d7d8d8bc..302ea8280 100644
+--- a/packages/f0compose/src/prototypes/home-v2/data.ts
++++ b/packages/f0compose/src/prototypes/home-v2/data.ts
+@@ -151,3 +151,9 @@ export function isRemoval(text: string) {
+     ) || /no (quiero|necesito|muestres|mostrar|me interesa)/i.test(text)
+   )
+ }
++
++export const reviewSources = [
++  "Factorial: tareas y novedades",
++  "Google Calendar: agenda",
++  "Slack: mensajes relevantes",
++]
+diff --git a/packages/f0compose/src/prototypes/home-v2/state.ts b/packages/f0compose/src/prototypes/home-v2/state.ts
+index f577f5f10..97dac8cb6 100644
+--- a/packages/f0compose/src/prototypes/home-v2/state.ts
++++ b/packages/f0compose/src/prototypes/home-v2/state.ts
+@@ -26,12 +26,18 @@ export type State = {
+   intent: { text: string; topics: string[] } | null
+ }
+ export const key = "home-v2-personal-agent-phase1"
+-export function initial(): State {
++export function initial(profile: "admin" | "employee" = "admin"): State {
+   return {
+     step: "priorities",
+     paused: false,
+-    priorities: [...starterTopics],
+-    widgets: [...defaultWidgets],
++    priorities:
++      profile === "employee"
++        ? ["Mis vacaciones", "Mi agenda", "Communities"]
++        : [...starterTopics],
++    widgets:
++      profile === "employee"
++        ? ["Mi nómina", "Mis vacaciones", "Mi agenda"]
++        : [...defaultWidgets],
+     routines: [],
+     reports: [],
+     visits: 0,
+@@ -40,8 +46,14 @@ export function initial(): State {
+     history: [
+       {
+         who: "agent",
+-        text: "Soy tu agente personal. Mi objetivo es ayudarte a estar al día y quitarte trabajo. Como gestionas un equipo, he preparado este punto de partida. A la derecha tienes tus pendientes, disponibilidad y Communities, listos para usar.",
+-        blocks: ["Decisiones pendientes", "Communities"],
++        text:
++          profile === "employee"
++            ? "Soy tu agente personal. He preparado tu saldo de vacaciones y tu agenda como punto de partida. A la derecha tienes también tu nómina, lista para consultar."
++            : "Soy tu agente personal. He preparado tus pendientes y novedades como punto de partida. A la derecha tienes tus widgets de equipo, listos para usar.",
++        blocks:
++          profile === "employee"
++            ? ["Mis vacaciones", "Mi agenda"]
++            : ["Decisiones pendientes", "Communities"],
+         question: starterQuestion,
+       },
+     ],
+@@ -77,25 +89,28 @@ function valid(value: unknown): value is State {
+     )
+   )
+ }
+-export function useSetup() {
++export function useSetup(profile: "admin" | "employee" = "admin") {
++  const storageKey = `${key}:integrated:${profile}`
+   const [state, setState] = useState<State>(() => {
+     try {
+-      const value: unknown = JSON.parse(localStorage.getItem(key) ?? "null")
++      const value: unknown = JSON.parse(
++        localStorage.getItem(storageKey) ?? "null"
++      )
+       return valid(value)
+         ? { ...value, intent: value.intent ?? null }
+-        : initial()
++        : initial(profile)
+     } catch {
+-      return initial()
++      return initial(profile)
+     }
+   })
+   const [storageError, setStorageError] = useState(false)
+   useEffect(() => {
+     try {
+-      localStorage.setItem(key, JSON.stringify(state))
++      localStorage.setItem(storageKey, JSON.stringify(state))
+       setStorageError(false)
+     } catch {
+       setStorageError(true)
+     }
+-  }, [state])
++  }, [state, storageKey])
+   return { state, setState, storageError }
+ }

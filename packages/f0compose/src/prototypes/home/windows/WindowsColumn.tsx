@@ -1,6 +1,17 @@
 import type { WindowId, WindowsState } from "./types"
 import type { PanelSpec } from "./WindowStack"
+import { F0Button } from "@factorialco/f0-react"
+import { Comment } from "@factorialco/f0-react/icons/app"
+import { askWidget } from "../home-widgets/askWidget"
+import { WidgetRail } from "./WidgetRail"
 
+import {
+  PayslipWindow,
+  HolidaysWindow,
+  RecruitmentWindow,
+  DocumentsWindow,
+  ShiftsWindow,
+} from "../home-widgets/OriginalStackWidgets"
 import { CelebrationsWindow } from "./CelebrationsWindow"
 import { ClockInWindow, ClockInWindowCompact } from "./ClockInWindow"
 import { CommunitiesWindow } from "./CommunitiesWindow"
@@ -10,10 +21,7 @@ import { InboxWindow } from "./InboxWindow"
 import { InsightsWindow } from "./InsightsWindow"
 import { PreviewWindow } from "./PreviewWindow"
 import { animateWindowClose as animateClose } from "./windowMotion"
-import {
-  MaximizedWindow as GenericMaximizedWindow,
-  WindowStack,
-} from "./WindowStack"
+import { MaximizedWindow as GenericMaximizedWindow } from "./WindowStack"
 
 export { CANVAS_MIN_WIDTH, dockedColumnCount } from "./stack"
 
@@ -51,6 +59,19 @@ export const windowRegistry: Record<
   // Listed as "Anniversaries" in the widgets drawer — the content is
   // birthdays and work anniversaries either way; the id stays
   // `celebrations` so nothing else has to churn.
+  payslip: {
+    title: "My payslip",
+    content: PayslipWindow,
+    autoHeight: true,
+  },
+  holidays: {
+    title: "My time off",
+    content: HolidaysWindow,
+    autoHeight: true,
+  },
+  recruitment: { title: "Recruitment", content: RecruitmentWindow },
+  shifts: { title: "My shifts", content: ShiftsWindow },
+  documents: { title: "Recent documents", content: DocumentsWindow },
   celebrations: { title: "Anniversaries", content: CelebrationsWindow },
   clockin: {
     title: "Clock in",
@@ -68,7 +89,10 @@ export const windowRegistry: Record<
   // while Reports (the nav panel row) is for reports you build yourself
   // with One. An earlier rename collapsed the two — corrected here.
   insights: { title: "Insights", content: InsightsWindow },
-  preview: { title: "Performance review · Preview", content: PreviewWindow },
+  preview: {
+    title: "Performance review · Preview",
+    content: PreviewWindow,
+  },
 }
 
 /** Namespaces this stack's `data-window-key`s away from the chats'. */
@@ -78,10 +102,31 @@ export function widgetSpec(
   id: WindowId,
   onToggleFloat?: (id: WindowId) => void
 ): PanelSpec {
-  const { title, content: Content, autoHeight, canFloat } = windowRegistry[id]
+  const {
+    title,
+    content: Content,
+    autoHeight,
+    canFloat,
+  } = windowRegistry[id]
   return {
     title,
     content: <Content />,
+    actions: [
+      "payslip",
+      "holidays",
+      "recruitment",
+      "documents",
+      "shifts",
+    ].includes(id) ? (
+      <F0Button
+        label={`Ask Factorial about ${title}`}
+        icon={Comment}
+        hideLabel
+        size="md"
+        variant="ghost"
+        onClick={() => askWidget(id)}
+      />
+    ) : undefined,
     autoHeight,
     onToggleFloat:
       canFloat && onToggleFloat ? () => onToggleFloat(id) : undefined,
@@ -124,7 +169,11 @@ export function WindowsColumn({
   onClose: (id: WindowId) => void
   onToggleMaximized: (id: WindowId) => void
   onSetColumnWidth: (width: number) => void
-  onResizeBetween: (idx: number, deltaWeight: number, pair: WindowId[]) => void
+  onResizeBetween: (
+    idx: number,
+    deltaWeight: number,
+    pair: WindowId[]
+  ) => void
   onResizeColumnsBetween: (
     idx: number,
     deltaWeight: number,
@@ -133,7 +182,7 @@ export function WindowsColumn({
   ) => void
 }) {
   return (
-    <WindowStack
+    <WidgetRail
       side="right"
       keyPrefix={WIDGET_KEY_PREFIX}
       noun="widget"

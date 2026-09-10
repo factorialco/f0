@@ -1,4 +1,22 @@
 import { useSyncExternalStore } from "react"
+import { refreshHome } from "../setup/homeRefresh"
+import { PROFILE_PEOPLE } from "../fixtures"
+import type { ProfileId } from "../profileStore"
+import {
+  advanceSetup,
+  HOME_EXPERIENCE_VERSION,
+  initialSetup,
+  questionFor,
+  WIDGET_CHOICES,
+  normalize,
+  type HomeSetup,
+  type HomeArtifact,
+} from "../setup/homeSetup"
+import {
+  readWidgets,
+  changeWidgets,
+  undoWidgets,
+} from "../setup/widgetPreferences"
 
 import type { RunEntry } from "../agents/agentThreads"
 import type { WindowId } from "../windows/types"
@@ -13,7 +31,10 @@ import {
 } from "../agents/agentThreads"
 import { approveTasksByModule } from "../needsYouStore"
 import { setPeopleFocus } from "../people/peopleFocusStore"
-import { addSurveyQuestions, resetSurveyDraft } from "../windows/surveyDraft"
+import {
+  addSurveyQuestions,
+  resetSurveyDraft,
+} from "../windows/surveyDraft"
 import {
   INSIGHT_ANSWERS,
   type Insight,
@@ -49,6 +70,7 @@ export type QuestionCard = {
    * option can be picked, and picking every one resolves to "Both" —
    * which is the answer the intents already write copy for.
    */
+  selectedOptions?: string[]
   multi?: boolean
   /** Set once the user submits a choice (or free text via "Other"). */
   answer?: string
@@ -76,6 +98,7 @@ export type MessageContext = {
 }
 
 export type ChatMessage = {
+  homeArtifact?: HomeArtifact
   id: string
   role: "user" | "assistant"
   content: string
@@ -121,6 +144,8 @@ export type RunResolution = {
 }
 
 export type Conversation = {
+  homeSetup?: HomeSetup
+  homeBriefing?: ProfileId
   id: string
   title: string
   messages: ChatMessage[]
@@ -440,7 +465,8 @@ const INTENTS: {
   },
   {
     key: "survey",
-    match: (p) => /survey|encuesta|cuestionario|questionnaire|enps/i.test(p),
+    match: (p) =>
+      /survey|encuesta|cuestionario|questionnaire|enps/i.test(p),
     title: "Employee engagement survey",
     // Steps + reply mirror the production F0AiChat survey-creation turn.
     reasoning: [
@@ -495,7 +521,8 @@ const INTENTS: {
       if (answer === "Work-life balance") addSurveyQuestions([workLife])
       else if (answer === "Team collaboration")
         addSurveyQuestions([collaboration])
-      else if (answer === "Both") addSurveyQuestions([workLife, collaboration])
+      else if (answer === "Both")
+        addSurveyQuestions([workLife, collaboration])
     },
   },
   {
@@ -852,7 +879,9 @@ function deliverReply(
       if (isVisible(conversationId)) {
         intent?.onReply?.()
         if (intent?.opensWindow) {
-          windowListeners.forEach((listener) => listener(intent.opensWindow!))
+          windowListeners.forEach((listener) =>
+            listener(intent.opensWindow!)
+          )
         }
       }
     })
@@ -911,8 +940,12 @@ function createConversation(
  * drives intent matching — it is the question the click stands for — but
  * the turn renders as the card instead of as typed text.
  */
-function startWithContext(context: MessageContext, prompt: string): string {
-  const id = createConversation(prompt)
+function startWithContext(
+  context: MessageContext,
+  prompt: string,
+  script?: ReplyScript
+): string {
+  const id = createConversation(prompt, { script })
   patchConversation(id, (c) => ({
     ...c,
     title: context.title,
@@ -926,9 +959,10 @@ function startWithContext(context: MessageContext, prompt: string): string {
 /** The One button on a widget's card — answers in the canvas. */
 export function startConversationWithContext(
   context: MessageContext,
-  prompt: string
+  prompt: string,
+  script?: ReplyScript
 ): string {
-  return startWithContext(context, prompt)
+  return startWithContext(context, prompt, script)
 }
 
 /**
@@ -952,7 +986,9 @@ export function startConversationWithContext(
  * focus store. Give it a button and it works where Needs-you lives.
  */
 export function openInsightReading() {
-  const existing = state.conversations.find((c) => c.id === state.insightsId)
+  const existing = state.conversations.find(
+    (c) => c.id === state.insightsId
+  )
   if (existing) {
     emit({ ...state, activeId: existing.id, oneSeen: true })
     return
@@ -1204,6 +1240,19 @@ function skipOpenQuestions(c: Conversation): Conversation {
 export function sendMessage(prompt: string, conversationId?: string) {
   const id = conversationId ?? state.activeId
   if (!id) return
+  const current = state.conversations.find((c) => c.id === id)
+  if (current?.thinking || current?.streaming) return
+  if (
+    current?.homeBriefing ||
+    (current?.homeSetup && !current.homeSetup.purpose)
+  ) {
+    startConversation(prompt)
+    return
+  }
+  if (current?.homeSetup?.purpose) {
+    answerHomeSetup(id, prompt)
+    return
+  }
   patchConversation(id, (c) => ({
     ...skipOpenQuestions(c),
     thinking: true,
@@ -1323,7 +1372,22 @@ export function answerQuestion(
   messageId: string,
   answer: string
 ) {
-  const conversation = state.conversations.find((c) => c.id === conversationId)
+  const conversation = state.conversations.find(
+    (c) => c.id === conversationId
+  )
+  if (conversation?.homeSetup) {
+    const pending = conversation.messages.find(
+      (m) => m.id === messageId
+    )?.question
+    if (
+      pending &&
+      !pending.answer &&
+      !pending.skipped &&
+      !conversation.thinking
+    )
+      answerHomeSetup(conversationId, answer)
+    return
+  }
   const message = conversation?.messages.find((m) => m.id === messageId)
   const question = message?.question
   if (!question || question.answer || question.skipped) return
@@ -1429,6 +1493,7 @@ export function resolveRun(
 export function skipQuestion(conversationId: string, messageId: string) {
   patchConversation(conversationId, (c) => ({
     ...c,
+    ...(c.homeSetup ? { homeSetup: { ...c.homeSetup, paused: true } } : {}),
     messages: c.messages.map((m) =>
       m.id === messageId && m.question && !m.question.answer
         ? { ...m, question: { ...m.question, skipped: true } }
@@ -1458,7 +1523,15 @@ export function openConversation(id: string) {
  *  panel goes too — the nav is navigating away from the screen it belongs
  *  to. */
 export function goHome() {
-  emit({ ...state, activeId: null })
+  emit({
+    ...state,
+    activeId: null,
+    conversations: state.conversations.map((c) =>
+      c.id === state.activeId && c.homeSetup
+        ? { ...c, homeSetup: { ...c.homeSetup, paused: true } }
+        : c
+    ),
+  })
 }
 
 /** Rename from the Recents row menu. Empty titles are ignored. */
@@ -1485,7 +1558,9 @@ export function deleteConversation(id: string) {
  */
 export function deleteConversationsForAgent(agentId: string) {
   const doomed = new Set(
-    state.conversations.filter((c) => c.agentId === agentId).map((c) => c.id)
+    state.conversations
+      .filter((c) => c.agentId === agentId)
+      .map((c) => c.id)
   )
   if (doomed.size === 0) return
   emit({
@@ -1502,5 +1577,335 @@ export function clearConversations() {
     conversations: [],
     activeId: null,
     oneSeen: false,
+  })
+}
+
+// Home setup uses the original persisted conversations and original composer.
+// There is no parallel transcript, model runner, or real action integration.
+function homeQuestion(setup: HomeSetup): ChatMessage {
+  const question = questionFor(setup)
+  return {
+    id: `m${nextId++}`,
+    role: "assistant",
+    content: "",
+    question: {
+      intentKey: `home:${setup.step}`,
+      ...question,
+      selectedOptions:
+        setup.step === "widgets"
+          ? WIDGET_CHOICES.filter((w) =>
+              readWidgets(setup.profile).includes(w.id)
+            ).map((w) => w.label)
+          : setup.step === "priorities"
+            ? (setup.focuses ?? []).map((f) =>
+                f === "team"
+                  ? "My team and their requests"
+                  : f === "recruitment"
+                    ? "Hiring"
+                    : "My personal tasks"
+              )
+            : undefined,
+    },
+  }
+}
+export function homeSetupFor(profile: ProfileId): Conversation | undefined {
+  return state.conversations.find(
+    (c) => c.homeSetup?.profile === profile && !c.homeSetup.purpose
+  )
+}
+export function resumeHomeSetup(profile: ProfileId) {
+  const existing = homeSetupFor(profile)
+  if (existing) {
+    const setup: HomeSetup = {
+      ...existing.homeSetup!,
+      experienceVersion: HOME_EXPERIENCE_VERSION,
+      step: "edit",
+      paused: false,
+    }
+    patchConversation(existing.id, (c) => ({
+      ...c,
+      homeSetup: setup,
+      homeBriefing: profile,
+      lastActiveAt: Date.now(),
+      messages: [
+        ...c.messages.map((m) =>
+          m.question && !m.question.answer
+            ? { ...m, question: { ...m.question, skipped: true } }
+            : m
+        ),
+        {
+          id: `m${nextId++}`,
+          role: "assistant",
+          content:
+            "Let's adjust your home. Your previous choices and drafts are saved.",
+        },
+        homeQuestion(setup),
+      ],
+    }))
+    openConversation(existing.id)
+    return
+  }
+  const setup = initialSetup(profile)
+  const id = `c${nextId++}`
+  const conversation: Conversation = {
+    id,
+    title: "Personalise my home",
+    thinking: false,
+    lastActiveAt: Date.now(),
+    homeSetup: setup,
+    homeBriefing: profile,
+    messages: [
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: `Hi ${PROFILE_PEOPLE[profile].firstName}, I’m your personal agent. Let’s keep what matters handy and explore what I can automate for you.`,
+      },
+      homeQuestion(setup),
+    ],
+  }
+  emit({
+    ...state,
+    activeId: id,
+    conversations: [conversation, ...state.conversations],
+  })
+}
+export function startHomeWorkflow(
+  profile: ProfileId,
+  purpose: "routine" | "report"
+) {
+  const setup: HomeSetup = {
+    ...initialSetup(profile),
+    purpose,
+    step: purpose === "routine" ? "routines" : "reports",
+  }
+  const id = `c${nextId++}`
+  emit({
+    ...state,
+    activeId: id,
+    conversations: [
+      {
+        id,
+        title:
+          purpose === "routine" ? "Create a routine" : "Create a report",
+        thinking: false,
+        lastActiveAt: Date.now(),
+        homeSetup: setup,
+        messages: [
+          {
+            id: `m${nextId++}`,
+            role: "assistant",
+            content:
+              purpose === "routine"
+                ? "Let's draft a routine together. You'll review its conditions before saving. Nothing will run in this prototype."
+                : "Let's build a report together. We'll review its data and alert rule before saving.",
+          },
+          homeQuestion(setup),
+        ],
+      },
+      ...state.conversations,
+    ],
+  })
+}
+export function pauseHomeSetup(id: string) {
+  patchConversation(id, (c) => ({
+    ...c,
+    homeSetup: c.homeSetup ? { ...c.homeSetup, paused: true } : undefined,
+  }))
+  goHome()
+}
+function answerHomeSetup(id: string, answer: string) {
+  const conversation = state.conversations.find((c) => c.id === id)
+  const setup = conversation?.homeSetup
+  if (!setup || conversation.thinking || conversation.streaming) return
+  if (
+    /^(exit|save and exit|pause|stop|salir|guardar y salir|lo dejamos|mas tarde)$/.test(
+      normalize(answer)
+    )
+  ) {
+    patchConversation(id, (c) => ({
+      ...c,
+      messages: [
+        ...c.messages,
+        { id: `m${nextId++}`, role: "user", content: answer },
+      ],
+    }))
+    pauseHomeSetup(id)
+    return
+  }
+  if (/back to my home|volver a mi home/.test(normalize(answer))) {
+    goHome()
+    return
+  }
+  if (
+    !setup.purpose &&
+    /^(my |create a )?(routines?|reports?)$/.test(normalize(answer))
+  ) {
+    patchConversation(id, (c) => ({
+      ...c,
+      homeSetup: { ...setup, paused: true },
+    }))
+    startHomeWorkflow(
+      setup.profile,
+      /routine/.test(normalize(answer)) ? "routine" : "report"
+    )
+    return
+  }
+  if (!setup.purpose && /undo widget/.test(normalize(answer))) {
+    refreshHome(setup.profile)
+    undoWidgets(setup.profile)
+    patchConversation(id, (c) => ({
+      ...c,
+      messages: [
+        ...skipOpenQuestions(c).messages,
+        {
+          id: `m${nextId++}`,
+          role: "assistant",
+          content:
+            "Restored your previous widgets. What would you like to do next?",
+        },
+        homeQuestion(setup),
+      ],
+    }))
+    return
+  }
+  const result = advanceSetup(
+    setup,
+    setup.step === "widgets" &&
+      !/remove|hide|only|undo|keep|continue|done|save/.test(
+        normalize(answer)
+      )
+      ? `Only ${answer}`
+      : answer,
+    readWidgets(setup.profile)
+  )
+  if (
+    !setup.purpose &&
+    (result.widgets || result.artifact?.kind === "briefing")
+  )
+    refreshHome(setup.profile)
+  if (result.widgets) changeWidgets(setup.profile, result.widgets)
+  if (result.undo && !undoWidgets(setup.profile))
+    result.content = "There are no widget changes to undo yet."
+  // Commit the full logical turn atomically. Closing/reloading cannot lose
+  // the new agreement or leave a permanently unanswered pending spinner.
+  patchConversation(id, (c) => ({
+    ...c,
+    homeSetup: result.setup,
+    title:
+      c.homeBriefing && c.title.startsWith("Your updates")
+        ? "Personalise my home"
+        : c.title,
+    lastActiveAt: Date.now(),
+    messages: [
+      ...c.messages.map((m) =>
+        m.question && !m.question.answer && !m.question.skipped
+          ? { ...m, question: { ...m.question, answer } }
+          : m
+      ),
+      { id: `m${nextId++}`, role: "user", content: answer },
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: result.content,
+        homeArtifact: result.artifact,
+      },
+      homeQuestion(result.setup),
+    ],
+  }))
+}
+export function enterHome(profile: ProfileId) {
+  const active = state.conversations.find((c) => c.id === state.activeId)
+  if (active) {
+    const owner = active.homeSetup?.profile ?? active.homeBriefing
+    if (!owner || owner === profile) {
+      // Refresh persisted pending question options when this prototype changes.
+      if (active.homeSetup && !active.homeSetup.paused) {
+        const pending = [...active.messages]
+          .reverse()
+          .find(
+            (m) => m.question && !m.question.answer && !m.question.skipped
+          )
+        const updated = homeQuestion(active.homeSetup).question!
+        if (
+          pending &&
+          JSON.stringify(pending.question) !== JSON.stringify(updated)
+        )
+          patchConversation(active.id, (c) => ({
+            ...c,
+            messages: c.messages.map((m) =>
+              m.id === pending.id ? { ...m, question: updated } : m
+            ),
+          }))
+      }
+      return
+    }
+  }
+  const previous = homeSetupFor(profile)
+  const saved = previous?.homeSetup
+  const firstInterview =
+    !saved || saved.experienceVersion !== HOME_EXPERIENCE_VERSION
+  // An interrupted, unanswered interview resumes its original conversation.
+  if (
+    !firstInterview &&
+    saved &&
+    !saved.paused &&
+    saved.step !== "complete" &&
+    previous
+  ) {
+    openConversation(previous.id)
+    return
+  }
+  const setup: HomeSetup = firstInterview
+    ? {
+        ...(saved ?? initialSetup(profile)),
+        experienceVersion: HOME_EXPERIENCE_VERSION,
+        step: "priorities",
+        paused: false,
+      }
+    : saved!
+  const id = `c${nextId++}`
+  const conversation: Conversation = {
+    id,
+    title: `Your updates · ${new Date().toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`,
+    homeBriefing: profile,
+    thinking: false,
+    lastActiveAt: Date.now(),
+    ...(firstInterview
+      ? {
+          homeSetup: {
+            ...setup,
+            step: "priorities" as const,
+            paused: false,
+          },
+        }
+      : {}),
+    messages: [
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: "",
+        homeArtifact: {
+          kind: "briefing",
+          focus: setup.focus,
+          focuses: setup.focuses,
+          profile,
+        },
+      },
+      ...(firstInterview
+        ? [
+            {
+              id: `m${nextId++}`,
+              role: "assistant" as const,
+              content: `Hi ${PROFILE_PEOPLE[profile].firstName}, I'm your personal agent. I've put together a starting point for your home. Let's make it useful for you.`,
+            },
+            homeQuestion(setup),
+          ]
+        : []),
+    ],
+  }
+  emit({
+    ...state,
+    activeId: id,
+    conversations: [conversation, ...state.conversations],
   })
 }

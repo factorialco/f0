@@ -27,3 +27,27 @@ Original explorations remain in `f0-agent-entry` (5176) and `f0-agent-entry-top-
 - Browser: Home v2 loads with the three default widgets and shared agent artwork. Its phase-1 flows were independently verified by the owning task before this exact snapshot was copied.
 
 All product data and agent responses remain mocked.
+
+## Learning checkpoint — preserve the approved base
+
+Read [the prototype-agent learning record](memory/2026-09-09-preserve-approved-base.md) before continuing the home proposal. The main route must preserve HomeCanvas, HybridHome and the original composer. HomeV2 remains a separate exploration.
+
+## Original-home conversational configuration — 2026-09-10
+
+The interview is now mounted in `/p/home` using the original conversationStore, ConversationView and unchanged HybridHome composer. It covers priorities → briefing preview → persistent widgets/undo → simulated routine draft → simulated report draft, including save/exit/resume and source review on return. HomeV2 remains untouched. See [verification and remaining limits](memory/2026-09-10-conversational-home-verification.md). All changes remain local on `codex/home-first-version`, served at http://127.0.0.1:5180/p/home.
+
+## Structured home revision — 2026-09-10
+
+The interview-first presentation above is superseded by the user's approved structured entry: direct Needs-you tasks, the original Communities post and an F0 birthday, then the follow-up panel (its placement was corrected below). English UI, first-entry-only generation, finite simulated sources review, Edit, and saved exchanges in the original Recents menu are now implemented. HybridHome is extended to dock the existing panel; it is not replaced. Routines and reports remain in the same conversational journey. See [the current decisions, verification and limits](memory/2026-09-10-structured-home-revision.md) before editing further. The separate agent has not been modified.
+
+## Quality correction — current acceptance baseline
+
+The previous verification was insufficient. Read [the correction and direct browser evidence](memory/2026-09-10-quality-correction.md) and follow [the mandatory project acceptance rules](AGENTS.md). Questions now replace the visible composer using the complete F0 clarifying panel; default payroll/candidates complement central news; shifts are available; task row spacing matches the original 8px. Do not repeat test completion in the user’s browser storage. Local URL remains http://127.0.0.1:5180/p/home.
+
+## Guided home — latest agreed behavior
+
+[Guided-home decisions and checks](memory/2026-09-10-guided-home.md) supersede the sequential home→routine→report interview. Home configuration updates one visible briefing and fixed widgets from multi-select follow-ups, with agent continuation in the same slot. Free text opens a new conversation; routines and reports have independent original conversations and drafts. Shared F0 Ask button, sticky greeting/sources/Edit.
+
+## Widget rail and update feedback
+
+Read [the latest verification](memory/2026-09-10-widget-rail-loading.md) and [PR48 reuse details](windows/rail-reference.md). Selection confirmation now shows finite skeleton/bot feedback. Widgets fold into a persisted icon rail and scroll in one column. Ask Factorial moved into the original widget header actions. The sticky greeting uses the canvas background.
