@@ -893,6 +893,21 @@ const F0SelectComponent = forwardRef(function Select<
     handleChangeOpenLocal(false)
   }, [handleChangeOpenLocal])
 
+  // A bottom action ends the interaction with the list — it navigates away, opens a dialog or
+  // resets the selection — so leaving the dropdown open would stack it over whatever the action
+  // put on screen.
+  const bottomActions = useMemo(
+    () =>
+      actions?.map((action) => ({
+        ...action,
+        onClick: () => {
+          handleChangeOpenLocal(false)
+          action.onClick()
+        },
+      })),
+    [actions, handleChangeOpenLocal]
+  )
+
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
       const nextCommittedSelection = cloneSelectedState(selectedState)
@@ -1168,7 +1183,7 @@ const F0SelectComponent = forwardRef(function Select<
       bottom={
         !isFiltersOpen ? (
           <SelectBottomActions
-            actions={actions}
+            actions={bottomActions}
             showApplyButton={showApplyButton}
             applyLabel={applySelectionLabel}
             onApply={handleApply}

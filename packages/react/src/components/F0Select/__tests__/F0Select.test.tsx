@@ -1474,6 +1474,27 @@ describe("Select", () => {
     expect(handleChange).not.toHaveBeenCalled()
   })
 
+  it("closes the dropdown when a bottom action is clicked", async () => {
+    const handleAction = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        actions={[{ label: "Reset", onClick: handleAction }]}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByRole("button", { name: "Reset" }))
+
+    expect(handleAction).toHaveBeenCalledOnce()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+  })
+
   it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
     const user = userEvent.setup()
 
