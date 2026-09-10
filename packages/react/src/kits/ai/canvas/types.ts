@@ -425,7 +425,14 @@ export interface ChatDashboardColumn {
   id: string
   /** Display header label */
   label: string
-  /** Optional fixed width in pixels */
+  /**
+   * @deprecated A fixed pixel width pins the column (`width` is applied as the
+   * width, the min and the max at once), and a column pinned narrower than its
+   * header label renders no label — the ⓘ, the sort button and the padding in
+   * a header cell never shrink, so the label is the only part that can. The
+   * host ignores this field; it stays for dashboards saved while it was still
+   * being written. Cap a column with the table column's `maxWidth` instead.
+   */
   width?: number
   /**
    * Optional header tooltip explaining what the column represents — formula
