@@ -236,44 +236,15 @@ export type InputFieldProps<T> = {
     onChange: (selected: boolean) => void
   }
   transparent?: boolean
-  /**
-   * Renders the value masked, with an eye button to reveal it.
-   *
-   * One implementation for every masked field. On a real `<input>` the mask is
-   * a password field, so the browser's own protections apply; any other
-   * editable child (`F0Select`'s `<button>` trigger, a `<textarea>`) has its
-   * displayed value replaced with dots, because `type="password"` on a button
-   * is silently treated as `submit` and on a textarea is not an attribute.
-   */
+  /** Renders the value masked, with an eye button to reveal it. */
   masked?: boolean
-  /**
-   * Keeps the eye up while the field has focus.
-   *
-   * The eye normally goes away while you are typing: on a details row the
-   * trailing controls act on a value you are reading, and none of them applies
-   * mid-edit. A credential field is the exception, where revealing what you
-   * just typed is the point of the button, so `F0TextInput` sets this for
-   * `type="password"` and `type="private"`. Not part of any public input's API.
-   */
+  /** Keeps the eye up while the field has focus. Set for credential fields. */
   maskToggleAlwaysVisible?: boolean
-  /**
-   * Overrides the eye's `[show, hide]` accessible names.
-   *
-   * The default names the field, which is what tells two masked values on one
-   * page apart. `F0TextInput type="password"` overrides it with the
-   * conventional fixed "Show password", the string it has always used. Not part
-   * of any public input's API.
-   */
+  /** Overrides the eye's `[show, hide]` names. Defaults to naming the field. */
   maskToggleLabels?: [string, string]
   /**
-   * Puts the caret in the field as soon as it can take it, and nothing sooner.
-   *
-   * `autoFocus` only fires at mount, which is no use to a value that starts
-   * `readonly` and becomes editable later: while `readonly` the inner input is
-   * disabled, so `focus()` is a no-op. Set this alongside the flag that makes
-   * the field editable and the caret lands once the input can accept it, with
-   * no remount. Clicking the value does this on its own; this is for an edit
-   * control that sits outside the field.
+   * Focuses the field once it stops being `readonly` or `disabled`, which
+   * `autoFocus` cannot do because it only fires at mount.
    */
   focusOnEditable?: boolean
 }
@@ -336,15 +307,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const [localValue, setLocalValue] = useState(value)
 
-    // Revealing masks the value by forcing the child input's `type`, so the
-    // state has to live here rather than inside the eye button.
     const [revealed, setRevealed] = useState(false)
     const masked = !!maskable && !revealed
     const childIsInput = (children as React.ReactElement)?.type === "input"
 
-    // Tracked rather than read off `:focus-within`, because the child is not
-    // always an `<input>` and because the trailing buttons are inside the same
-    // wrapper: focusing one of them must not count as editing the value.
+    // Not `:focus-within`: the trailing buttons share the wrapper, and
+    // focusing one of those is not editing the value.
     const [childFocused, setChildFocused] = useState(false)
 
     // For legacy reasons, error is a shortcut for status with type error
@@ -400,17 +368,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       props.onClear?.()
     }
 
-    /**
-     * Clicking the value puts the caret in it, whether the field is already
-     * editable or is a resting value about to become one.
-     *
-     * The second case cannot focus synchronously: while `readonly` the inner
-     * input is disabled, so `focus()` does nothing. The click flips this ref,
-     * the consumer flips `readonly`, and the effect below focuses once the
-     * input can actually take it. `focusOnEditable` is the same deferral asked
-     * for by prop, for an edit control outside the field. Buttons in the
-     * trailing area stop the click, so they never drag focus into the field.
-     */
+    // A resting value cannot focus synchronously: `readonly` disables the
+    // inner input, so `focus()` is a no-op until the consumer lifts it.
     const focusOnEditableRef = useRef(false)
 
     const focusInput = () => {
@@ -439,10 +398,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         onClickContent?.()
         return
       }
-      // Only arm the deferred focus when somebody is listening to the click and
-      // could flip `readonly` off in response. Arming it on a value that stays
-      // readonly leaves a live flag that would steal the caret the next time
-      // the field happens to become editable.
+      // Arming this with nobody listening leaves a flag that steals the caret
+      // whenever the field next becomes editable.
       if (onClickContent) {
         focusOnEditableRef.current = true
         onClickContent()
@@ -514,22 +471,14 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
-    // Long values would give the length away, so the mask is a fixed-ish run
-    // of dots rather than one per character.
+    // One dot per character would give the length away.
     const maskedValue = "•".repeat(
       Math.min(lengthProvider(localValue) || 8, 12)
     )
-    // A value drawn as plain text, with no field chrome around it until the
-    // pointer arrives.
     const isRestingValue = !!transparent && !!readonly
-    // A resting value whose owner turns the click into something. The click has
-    // to reach the cell, and `readonly` disables the inner input, which in
-    // every browser swallows the mouse event instead of letting it bubble.
     const isClickableRestingValue =
       isRestingValue && !!onClickContent && !disabled
-    // Nothing in the trailing area applies to a value being typed, so the eye
-    // stands down with the rest of the controls. A credential field opts out:
-    // checking what you just typed is what its eye is for.
+    // Nothing in the trailing area applies to a value being typed.
     const showMaskToggle =
       !!maskable && (!!maskToggleAlwaysVisible || !childFocused)
 
@@ -537,11 +486,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       <div
         className={cn(
           "flex flex-col gap-2",
-          // The width is unconditional. In a block or column parent the field
-          // filled its container anyway; as a row item it used to fall back to
-          // the child input's intrinsic width, so dropping `transparent` to
-          // start editing shrank the field and clipped the value. `min-w-0`
-          // lets it shrink past that width beside a sibling button.
+          // Without this a flex-row item collapses to the child input's
+          // intrinsic width and clips the value.
           "w-full min-w-0",
           "pointer-events-none",
           disabled && "cursor-not-allowed",
@@ -581,9 +527,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         ) : null}
         <div
           className={cn(
-            // Named so a consumer can key its own hover reveal off the whole
-            // field, transparent or not: the plain `group` below only exists on
-            // the bordered variant.
+            // Named because the plain `group` below is bordered-only.
             "group/field relative h-fit transition-all",
             !noEdit && !disabled && "hover:border-f1-border-hover",
             !transparent && [
@@ -600,19 +544,13 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             readonly &&
               !transparent &&
               "border-f1-border-secondary bg-f1-background-secondary",
-            // A resting value is not a disabled form control, so it keeps the
-            // plain background. It does keep the field's height and radius,
-            // though: this is the same cell the editable field will occupy, and
-            // a row that changes height on click moves the record under the
-            // reader.
+            // Same box the editable field will occupy, so the row does not
+            // move when it is clicked.
             isRestingValue && inputFieldVariants({ size, canGrow }),
-            // The tint only appears when the click does something.
             isClickableRestingValue &&
               "cursor-text hover:bg-f1-background-secondary",
             disabled && "cursor-not-allowed bg-f1-background-tertiary",
 
-            // A resting value keeps the fixed height it got above; every other
-            // transparent field still fills its container.
             transparent && (isRestingValue ? "w-full" : "h-full w-full")
           )}
           data-testid="input-field-wrapper"
@@ -645,8 +583,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               className="w-full min-w-0 flex-1"
             >
               {cloneElement(children as React.ReactElement, {
-                // Only while masked: an explicit `undefined` here would strip
-                // the child's own type (search, email, tel) down to text.
+                // Spread, not `undefined`: that would strip the child's own
+                // type (search, email, tel) down to text.
                 ...(masked && childIsInput ? { type: "password" } : {}),
                 onChange: handleChange,
                 onBlur: () => {
@@ -684,8 +622,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   disabled && "cursor-not-allowed",
-                  // The click belongs to the cell, not the disabled input
-                  // that would otherwise absorb it.
+                  // A disabled input absorbs the click instead of bubbling it.
                   isClickableRestingValue && "pointer-events-none cursor-text",
                   (children as React.ReactElement).props.className,
                   inputElementVariants({ size })
@@ -779,9 +716,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                       }
                       disabled={disabled}
                       onClick={(event) => {
-                        // The content area has its own click handler
-                        // (`onClickContent`), which would otherwise fire
-                        // alongside and pull the caret into the field.
+                        // Or `onClickContent` fires too and takes the caret.
                         event.stopPropagation()
                         setRevealed(!revealed)
                       }}

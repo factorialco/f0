@@ -322,8 +322,7 @@ export const MaskedValue: Story = {
       canvas.getByRole("button", { name: "Hide This is the label" })
     ).toBeInTheDocument()
 
-    // The eye stands down while the value is being typed: nothing in the
-    // trailing area applies to a draft. Only the clear button stays.
+    // The eye stands down while the value is being typed.
     await userEvent.click(canvas.getByRole("textbox"))
     await waitFor(() =>
       expect(canvas.queryByTestId("input-field-mask-toggle")).toBeNull()
@@ -344,8 +343,7 @@ export const RestingValue: Story = {
     hideLabel: true,
     onClickContent: fn(),
   },
-  // The editable field below is the reference the play function measures the
-  // resting cell against.
+  // The second field is the reference the play function measures against.
   render: (args) => (
     <div className="flex w-80 flex-col gap-1 rounded-md border border-solid border-f1-border p-1">
       <F0InputField {...args}>
@@ -360,9 +358,8 @@ export const RestingValue: Story = {
     const canvas = within(canvasElement)
     const [resting] = canvas.getAllByLabelText("Email")
 
-    // Real hit-testing, which jsdom cannot do: `readonly` disables the inner
-    // input, and a disabled control swallows the mouse event rather than
-    // letting it bubble. So the pointer must land on the cell instead.
+    // Real hit-testing, which jsdom cannot do: the disabled input swallows
+    // the event, so the pointer has to land on the cell.
     await expect(resting).toBeDisabled()
     const box = resting.getBoundingClientRect()
     const underPointer = document.elementFromPoint(
@@ -374,9 +371,7 @@ export const RestingValue: Story = {
     await userEvent.click(underPointer as HTMLElement)
     await expect(args.onClickContent).toHaveBeenCalled()
 
-    // A resting value keeps the height the editable field has, so clicking a
-    // row does not move the record under the reader. `getBoundingClientRect`
-    // reports all zeros in jsdom, so only a real browser can check this.
+    // Same height as the editable field, so the row does not move.
     const [restingCell, editableCell] = canvas.getAllByTestId(
       "input-field-wrapper"
     )

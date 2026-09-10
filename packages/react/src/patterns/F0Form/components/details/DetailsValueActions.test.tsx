@@ -49,8 +49,6 @@ describe("DetailsValueActions", () => {
     })
 
     it("draws them in the design system's order, whatever order the props arrive in", () => {
-      // The order is the pattern's, not the consumer's: the act you are most
-      // likely to want sits closest to the value, copy at the edge.
       renderActions({ copyable: true, onRequestChange: vi.fn() })
 
       expect(actionNames()).toEqual(["Request a change to Email", "Copy Email"])
@@ -83,12 +81,10 @@ describe("DetailsValueActions", () => {
 
       const row = actionsRow()
       expect(row).toHaveClass("opacity-0")
-      // Revealed by the cell's own hover and focus-within, so the classes have
-      // to be keyed on the named field group the cell puts around them.
+      // Keyed on the named group the cell puts around them.
       expect(row).toHaveClass("group-hover/field:opacity-100")
       expect(row).toHaveClass("group-focus-within/field:opacity-100")
-      // And unreachable by the pointer while invisible, which matters on the
-      // fade-out and on any pointer that never hovers.
+      // Unclickable while invisible, which matters during the fade-out.
       expect(row).toHaveClass("pointer-events-none")
       expect(row).toHaveClass("group-hover/field:pointer-events-auto")
     })
@@ -122,8 +118,6 @@ describe("DetailsValueActions", () => {
       ).not.toBeInTheDocument()
       const tick = screen.getByRole("button", { name: "Email saved" })
 
-      // It stays pressable throughout: fixing a typo you spotted the instant
-      // it saved should not mean waiting out an animation.
       await userEvent.click(tick)
       expect(onEdit).toHaveBeenCalledTimes(1)
     })

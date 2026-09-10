@@ -34,11 +34,7 @@ export const defaultTranslations = {
     next: "Next",
   },
   inputs: {
-    /**
-     * `type="password"` keeps the conventional fixed string. Every other masked
-     * field, `private` and a bare `masked` included, is named after its own
-     * label, which is what tells two of them on one page apart.
-     */
+    /** Fixed, unlike every other masked field, which names its own label. */
     password: {
       show: "Show password",
       hide: "Hide password",

@@ -1,10 +1,6 @@
 /**
- * Writes `text` to the clipboard and reports whether it landed.
- *
- * Callers gate their success feedback on the return value: a "Copied" tick
- * shown after a rejected write is a lie the user only discovers when they
- * paste. `navigator.clipboard` is missing on insecure origins and rejects
- * without a user gesture, so the textarea path is not dead code.
+ * Writes `text` to the clipboard and reports whether it landed, so callers can
+ * gate their "Copied" feedback on it.
  */
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
@@ -13,19 +9,15 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
       return true
     }
   } catch {
-    // Fall through to the legacy path rather than reporting failure straight
-    // away — a rejected promise here is usually a permission prompt, not a
-    // browser without any clipboard at all.
+    // A rejection here is usually a permission prompt, not a missing API.
   }
 
   return copyWithExecCommand(text)
 }
 
 /**
- * `document.execCommand("copy")` is deprecated but still the only clipboard
- * write available on http:// origins and in older Safari. It copies the
- * current selection, so the text has to be selected in a real, focused node
- * first — hence the off-screen textarea.
+ * Deprecated, but the only clipboard write on http:// origins and in older
+ * Safari. It copies the selection, hence the off-screen textarea.
  */
 const copyWithExecCommand = (text: string): boolean => {
   if (typeof document === "undefined" || !document.body) {

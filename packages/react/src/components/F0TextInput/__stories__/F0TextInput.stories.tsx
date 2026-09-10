@@ -112,8 +112,6 @@ export const Password: Story = {
 
     await expect(input).toHaveAttribute("type", "password")
 
-    // `password` keeps the conventional fixed string. Every other masked
-    // field is named after its own label instead.
     await userEvent.click(canvas.getByRole("button", { name: "Show password" }))
     await expect(input).toHaveAttribute("type", "text")
 
@@ -219,19 +217,9 @@ export const Clearable: Story = {
 }
 
 /**
- * A details-row value cell. The value is plain text at rest, the ordinary
- * bordered field while editing. Click the value or the pencil to start, Enter
- * to commit, Escape to revert.
- *
- * The consumer owns the readonly flip and the draft. The input owns the keys,
- * the resting presentation, and the caret: `onClickContent` fires on the click
- * and the field focuses itself once `readonly` lifts, so neither `autoFocus`
- * nor a remount is needed.
- *
- * The trailing buttons a details row also wants (copy, comment, and the tick
- * that confirms a commit) belong to the pattern that draws the row, not here.
- * They all stand down while the value is being typed, the pencil below
- * included, leaving the clear button alone in the trailing area.
+ * A details-row value cell: plain text at rest, the ordinary bordered field
+ * while editing. Click the value or the pencil to start, Enter to commit,
+ * Escape to revert. The consumer owns the readonly flip and the draft.
  */
 const InlineEditingDemo = () => {
   const [value, setValue] = useState("ada.lovelace@example.com")
@@ -266,19 +254,13 @@ const InlineEditingDemo = () => {
         clearable={editing}
         onPressEnter={() => commit(draft)}
         onPressEscape={revert}
-        // Clicking away is a commit, not a cancel: the only way to throw a
-        // draft away is to say so with Escape.
+        // Clicking away commits; only Escape throws the draft away.
         onBlur={editing ? () => commit(draft) : undefined}
         onClickContent={editing ? undefined : startEditing}
-        // The pencil sits outside the field, so its click cannot put the caret
-        // in. This asks the field to take it as soon as it can.
+        // The pencil is outside the field, so its click cannot focus it.
         focusOnEditable={editing}
       />
-      {/*
-        The pencil is the row's, not the field's, so the row is what takes it
-        away while the value is being typed. Nothing in the trailing area
-        applies to a draft: the clear button is all that is left.
-      */}
+      {/* The pencil is the row's, so the row takes it away while typing. */}
       {editing ? null : (
         <F0Button
           variant="ghost"
@@ -301,16 +283,14 @@ export const InlineEditing: Story = {
     const field = () => canvas.getAllByLabelText("Email")[0] as HTMLInputElement
     const wrapper = () => canvas.getByTestId("input-field-wrapper")
 
-    // Read the starting value rather than assuming it. A play function that
-    // only works on a pristine mount is a flaky play function: the manager
-    // re-runs these on hot reload and on replay, without remounting.
+    // Read the starting value: the manager re-runs play functions on hot
+    // reload and on replay, without remounting.
     await waitFor(() => expect(field()).toBeDisabled())
     const committed = field().value
     const restingBox = wrapper().getBoundingClientRect()
 
-    // The value itself starts the edit. The pointer has to land on the cell,
-    // because the disabled input swallows the mouse event rather than letting
-    // it bubble, and jsdom does no hit-testing to prove that.
+    // The pointer has to land on the cell, because the disabled input
+    // swallows the event. jsdom does no hit-testing to prove it.
     const underPointer = document.elementFromPoint(
       restingBox.left + restingBox.width / 2,
       restingBox.top + restingBox.height / 2
@@ -319,7 +299,6 @@ export const InlineEditing: Story = {
     await userEvent.click(underPointer as HTMLElement)
     await waitFor(() => expect(field()).not.toBeDisabled())
 
-    // And the caret is already in it, without autoFocus or a remount.
     await expect(field()).toHaveFocus()
 
     // Only the clear button is left beside the value being typed.
@@ -330,23 +309,18 @@ export const InlineEditing: Story = {
       expect(canvas.getByTestId("clear-button")).toBeVisible()
     )
 
-    // The editor is the ordinary bordered field, and the row does not move
-    // under the reader: same height, same left edge. `getBoundingClientRect`
-    // is all zeros in jsdom, so only a real browser can check this.
+    // The row must not move: same height, same left edge. Zeros in jsdom.
     await expect(wrapper()).toHaveClass("border-[1px]")
     const editingBox = wrapper().getBoundingClientRect()
     await expect(Math.round(editingBox.height)).toBe(
       Math.round(restingBox.height)
     )
     await expect(Math.round(editingBox.left)).toBe(Math.round(restingBox.left))
-    // It may only grow, into the space the pencil gave up. Dropping
-    // `transparent` used to collapse the field to the inner input's intrinsic
-    // width instead, clipping the value and leaving dead space beside it.
+    // Only grows, into the space the pencil gave up. A collapse to the inner
+    // input's intrinsic width would clip the value.
     await expect(editingBox.width).toBeGreaterThanOrEqual(restingBox.width)
 
-    // Enter commits. Two fixed values, picking whichever is not already
-    // showing, so the story is deterministic for Chromatic and still proves a
-    // change however it started.
+    // Whichever value is not showing, so Chromatic sees no churn.
     const next =
       committed === "grace.hopper@example.com"
         ? "ada.lovelace@example.com"
@@ -359,9 +333,7 @@ export const InlineEditing: Story = {
     await waitFor(() => expect(field()).toBeDisabled())
     await expect(field()).toHaveValue(next)
 
-    // Escape reverts, and the pencil is the other way in: it sits outside the
-    // field, so `focusOnEditable` is what puts the caret there. It is back now
-    // that the row is at rest again.
+    // The pencil is the other way in, and `focusOnEditable` is what focuses.
     await waitFor(() =>
       expect(canvas.getByRole("button", { name: "Edit Email" })).toBeVisible()
     )
@@ -374,8 +346,6 @@ export const InlineEditing: Story = {
 
     await waitFor(() => expect(field()).toBeDisabled())
     await expect(field()).toHaveValue(next)
-    // And the starting value really was replaced along the way, so the commit
-    // above proved something.
     await expect(field()).not.toHaveValue(committed)
   },
 }

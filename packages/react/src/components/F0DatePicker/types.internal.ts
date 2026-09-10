@@ -14,7 +14,6 @@ export const inputFieldInheritedProps = [
   "hint",
   "loading",
   "transparent",
-  // A date of birth is a governed value like any other.
   "masked",
 ] as const
 

@@ -39,42 +39,21 @@ const useTransientFlag = (ms: number) => {
 }
 
 /**
- * The acts a details row offers on the value it shows.
- *
- * A closed set rather than a list of actions: the glyph, the order, the
- * accessible name and the confirmation for each job belong to the design
- * system, so the same job looks and reads the same in every row. There is no
- * slot for an arbitrary icon.
- *
- * The eye is not here. Masking is the input's own business, so it renders
- * inside the input's trailing area, to the left of this row.
+ * The acts a details row offers on the value it shows. A closed set, so the
+ * same job draws the same glyph in every row; there is no slot for an
+ * arbitrary icon. The eye is not here, because masking is the input's.
  */
 export type DetailsValueActionsInput = {
-  /**
-   * A copy button. Copies the row's current value and confirms with a positive
-   * tick, but only once the clipboard write actually succeeded.
-   */
+  /** A copy button. Confirms only once the clipboard write succeeded. */
   copyable?: boolean
-  /**
-   * A pencil. Present means the button shows; the row does not become editable
-   * on its own — the cell flips `readonly` off in response.
-   *
-   * Always a pencil, because it always means "you are about to type here". A
-   * value chosen from a list or a calendar is a different act, and it belongs
-   * to the component that owns that act.
-   */
+  /** A pencil. Shows the button; the cell flips `readonly` off in response. */
   onEdit?: () => void
   /**
-   * A comment glyph, for a value the viewer may read but not change: they say
-   * something about it and somebody else decides. Never a pencil — a pencil
-   * promises the click will let you type. Mutually exclusive with `onEdit`.
+   * A comment glyph, for a value the viewer may read but not set. Mutually
+   * exclusive with `onEdit`.
    */
   onRequestChange?: () => void
-  /**
-   * Turns the pencil into a tick, to confirm a value just committed. The cell
-   * holds it true for the length of the confirmation; the copy button confirms
-   * itself and needs nothing here.
-   */
+  /** Turns the pencil into a tick. The cell owns the confirmation's timer. */
   confirmed?: boolean
 }
 
@@ -86,11 +65,8 @@ type BuildActionsInput = DetailsValueActionsInput & {
 }
 
 /**
- * The pencil, or the tick that replaces it while a commit is confirming.
- *
- * The control that caused the confirmation carries it, rather than a tick
- * appearing beside a pencil. It stays pressable throughout: fixing a typo you
- * spotted the instant it saved should not mean waiting out an animation.
+ * The pencil, or the tick that replaces it while a commit is confirming. It
+ * stays pressable throughout, so a typo can be fixed straight away.
  */
 const editAction = (
   { confirmed, name }: BuildActionsInput,
@@ -125,10 +101,7 @@ const copyAction = ({
   onClick: onCopy,
 })
 
-/**
- * The fixed order: the act you are most likely to want sits closest to the
- * value, and copy, the one you reach for without reading, sits at the edge.
- */
+/** Fixed order, closest to the value first. */
 const buildActions = (input: BuildActionsInput): ResolvedAction[] =>
   [
     input.onEdit ? editAction(input, input.onEdit) : null,
@@ -146,23 +119,14 @@ export type DetailsValueActionsProps = DetailsValueActionsInput & {
   /** Disables every control. */
   disabled?: boolean
   /**
-   * `"hover"` fades the controls in on hover or focus-within, and holds them
-   * while one has focus or is confirming. Touch screens, where hover never
-   * fires, always get `"always"`.
+   * `"hover"` fades the controls in on the cell's hover or focus-within. Touch
+   * screens always get `"always"`.
    * @default "always"
    */
   visibility?: DetailsValueActionsVisibility
-  /**
-   * Reports whether a confirmation is showing, so the cell can go positive with
-   * it. The copy tick is owned here, so the cell cannot work it out.
-   */
+  /** Reports a showing confirmation, so the cell can tint with it. */
   onConfirmingChange?: (confirming: boolean) => void
-  /**
-   * Stands the whole row down while the value is being typed. None of these
-   * acts applies to a draft: the pencil is how you got here, and copying or
-   * querying a half-finished value is not something anyone wants. The clear
-   * button, which belongs to the input, stays.
-   */
+  /** Stands the row down while the value is being typed. */
   editing?: boolean
 }
 
@@ -213,8 +177,7 @@ export const DetailsValueActions = ({
     onConfirmingChange?.(confirming)
   }, [confirming, onConfirmingChange])
 
-  // A hover reveal has no way in on a touch screen, where hover never fires:
-  // there the controls stay put.
+  // Hover never fires on a touch screen, so there the controls stay put.
   const hidesUntilHover =
     visibility === "hover" && !isTouchScreen && !confirming
 
@@ -237,9 +200,8 @@ export const DetailsValueActions = ({
       {actions.map((action) => (
         <span
           key={action.key}
-          // The positive tint has to land inside the button: the button's own
-          // variant sets `text-f1-foreground`, so a colour set on this wrapper
-          // would never reach the glyph.
+          // Targets the glyph: the button's variant sets `text-f1-foreground`,
+          // which would win over a colour set on this wrapper.
           className={cn(action.positive && "[&_svg]:text-f1-icon-positive")}
         >
           <F0Button
@@ -250,19 +212,14 @@ export const DetailsValueActions = ({
             label={action.label}
             disabled={disabled}
             onClick={(event) => {
-              // The row's value area has its own click handler, which would
-              // otherwise fire alongside.
+              // Or the cell's own value handler fires too.
               event.stopPropagation()
               action.onClick()
             }}
           />
         </span>
       ))}
-      {/*
-        The confirmation lives in a live region rather than on the button:
-        an icon-only button carries its name in `aria-label`, and changing an
-        `aria-label` is not reliably announced.
-      */}
+      {/* A changing `aria-label` is not reliably announced. */}
       <span className="sr-only" aria-live="polite">
         {copyFailed
           ? i18n.forms.details.copyFailed

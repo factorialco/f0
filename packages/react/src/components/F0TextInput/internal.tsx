@@ -46,11 +46,7 @@ export type InputInternalProps = Pick<
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private"
     onPressEnter?: () => void
-    /**
-     * Fires on Escape. Pairs with `onPressEnter` for inline editing: Enter
-     * commits, Escape reverts. Like `onPressEnter` it does not call
-     * `preventDefault`.
-     */
+    /** Fires on Escape. Does not call `preventDefault`, like `onPressEnter`. */
     onPressEscape?: () => void
   }
 
@@ -76,13 +72,9 @@ const InputInternal = ({
   ...props
 }: InputInternalProps) => {
   const i18n = useI18n()
-  // `password` and `private` are masked by definition; the field's own eye
-  // flips them back. It owns the masking, so there is one implementation of
-  // the toggle rather than one per input type.
   const maskable = type === "password" || type === "private"
 
-  // The field forces `type="password"` while hidden, so hand it the unmasked
-  // type and let it do the masking.
+  // The field does the masking, so hand it the unmasked type.
   const localType = maskable ? "text" : type
 
   const localIcon = useMemo(() => {
@@ -96,13 +88,8 @@ const InputInternal = ({
       {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
       masked={maskable || masked}
-      // A credential field keeps its eye while you type: checking what you just
-      // entered is what the button is for. Any other masked value loses it,
-      // because the trailing controls act on a value being read.
+      // Checking what you just typed is what a credential field's eye is for.
       maskToggleAlwaysVisible={maskable}
-      // `password` keeps the conventional fixed string. Every other masked
-      // value, `private` included, is named after its own label, which is what
-      // tells two of them on one page apart.
       maskToggleLabels={
         type === "password"
           ? [i18n.inputs.password.show, i18n.inputs.password.hide]
@@ -115,9 +102,7 @@ const InputInternal = ({
       }
       onKeyDown={(event) => {
         onKeyDown?.(event)
-        // A consumer that handled the key itself gets the last word: without
-        // this, a component using `onKeyDown` to run its own Enter/Escape
-        // logic would see the shortcut fire a second time.
+        // A consumer handling Enter itself should not see it fire twice.
         if (event.defaultPrevented) {
           return
         }

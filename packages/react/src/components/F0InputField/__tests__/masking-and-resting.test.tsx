@@ -52,8 +52,7 @@ describe("F0InputField masking", () => {
   })
 
   it("masks a non-input child with dots instead of forcing a type", async () => {
-    // `type="password"` on a `<button>` is silently treated as `submit`, which
-    // would turn F0Select's trigger into a form submit.
+    // `type="password"` on a `<button>` means `submit`.
     const { container } = render(
       <F0InputField label="Legal gender" value="Female" masked>
         <button type="button" />
@@ -88,7 +87,6 @@ describe("F0InputField masking", () => {
   it("keeps the eye but drops the clear button when readonly", () => {
     renderField({ readonly: true, clearable: true, masked: true })
 
-    // A value you cannot type into is still one you can unmask.
     expect(screen.getByRole("button", { name: "Show Email" })).toBeEnabled()
     expect(screen.queryByTestId("clear-button")).not.toBeInTheDocument()
   })
@@ -108,8 +106,7 @@ describe("F0InputField masking", () => {
   })
 
   it("keeps the eye through focus when revealing while typing is the point", async () => {
-    // What `F0TextInput type="password" | "private"` sets: checking what you
-    // just entered is the whole job of a credential field's eye.
+    // What `F0TextInput type="password" | "private"` sets.
     const { container } = renderField({
       masked: true,
       maskToggleAlwaysVisible: true,
@@ -168,8 +165,6 @@ describe("F0InputField resting value (readonly + transparent)", () => {
   })
 
   it("keeps the height and radius of the field it turns into", () => {
-    // A row that changes height on click moves the record under the reader, so
-    // the resting cell is the same box the editable field will occupy.
     const resting = renderField({ readonly: true, transparent: true })
     const editable = renderField({})
 
@@ -192,13 +187,10 @@ describe("F0InputField resting value (readonly + transparent)", () => {
     const wrapper = screen.getByTestId("input-field-wrapper")
     expect(wrapper).toHaveClass("cursor-text")
     expect(wrapper).toHaveClass("hover:bg-f1-background-secondary")
-    // `readonly` disables the inner input, and a disabled control swallows the
-    // mouse event instead of letting it bubble — so the input has to stop being
-    // the pointer target.
+    // A disabled input swallows the click, so it stops being the target.
     expect(container.querySelector("input")).toHaveClass("pointer-events-none")
 
-    // jsdom does no hit-testing, so the pass-through itself is verified by the
-    // `RestingValue` play function in a real browser.
+    // The pass-through itself needs the `RestingValue` play function.
     await userEvent.click(screen.getByTestId("input-field-content"))
     expect(onClickContent).toHaveBeenCalledTimes(1)
   })
@@ -233,8 +225,7 @@ describe("F0InputField click-to-focus", () => {
   })
 
   it("waits for readonly to lift before focusing a resting value", async () => {
-    // While readonly the input is disabled, so `focus()` is a no-op. The caret
-    // has to land after the consumer flips readonly off.
+    // `focus()` is a no-op while the input is disabled.
     const Harness = () => {
       const [editing, setEditing] = useState(false)
       return (
@@ -258,8 +249,6 @@ describe("F0InputField click-to-focus", () => {
   })
 
   it("does not arm the deferred focus when nothing is listening to the click", async () => {
-    // Clicking a value that stays readonly used to set the deferred-focus flag
-    // anyway, so the next unrelated flip to editable stole the caret.
     const Harness = ({ editing }: { editing: boolean }) => (
       <F0InputField
         label="Email"
@@ -310,8 +299,7 @@ describe("F0InputField focusOnEditable", () => {
   )
 
   it("takes the caret once the field becomes editable", async () => {
-    // `autoFocus` fires only at mount, which is no use to a value that starts
-    // readonly: the inner input is disabled, so `focus()` is a no-op.
+    // `autoFocus` cannot do this: it fires at mount, while still disabled.
     const { container, rerender } = render(<Harness editing={false} />)
 
     expect(container.querySelector("input")).not.toHaveFocus()
@@ -330,9 +318,7 @@ describe("F0InputField focusOnEditable", () => {
 
 describe("F0InputField width", () => {
   it("fills its container whether transparent or not", () => {
-    // The width used to come from `transparent` alone, so a field in a flex row
-    // collapsed to the child input's intrinsic width the moment it became
-    // editable, clipping the value.
+    // Guards a flex-row collapse to the child input's intrinsic width.
     const resting = render(
       <F0InputField label="Email" value="ada@example.com" readonly transparent>
         <input type="text" />
