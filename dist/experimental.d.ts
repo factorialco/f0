@@ -8642,7 +8642,7 @@ export declare interface F0LocationInputProps {
     /** Overrides for the per-part labels, which default to translated copy */
     partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
-    countries?: CountryCode[];
+    allowedCountries?: CountryCode[];
     /**
      * Country the search is scoped to. The value's own country is never used
      * for this: the search only exists without manual entry, where nothing on

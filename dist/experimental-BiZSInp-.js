@@ -30199,7 +30199,7 @@ const vR = {
   label: g,
   value: I,
   onChange: d,
-  countries: m,
+  allowedCountries: m,
   size: F,
   disabled: b,
   readonly: y,
@@ -30324,7 +30324,7 @@ const vR = {
   onChange: F,
   manualEntry: b = !1,
   partLabels: y,
-  countries: r,
+  allowedCountries: r,
   defaultCountry: D,
   searchPlaces: V,
   resolvePlace: P,
@@ -30455,7 +30455,7 @@ const vR = {
             label: Pe.country,
             value: we?.country,
             onChange: ve,
-            countries: r,
+            allowedCountries: r,
             size: re,
             disabled: T,
             readonly: ne,
@@ -37741,7 +37741,7 @@ const Kd = (g, I) => {
     });
     y.observe(b), d.current = y;
   }, []), shouldMount: g };
-}, Wd = "w-[24rem] max-w-full", DG = "w-[32rem] max-w-full", SG = "gap-0.5", RG = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", MG = "bg-[hsl(222_31%_11%)]", PG = "bg-[hsl(220_39%_6%/0.72)]", VG = "bg-[hsl(220_39%_6%/0.6)]", GG = "bg-[hsl(220_39%_6%/0.55)]", EG = () => import("./LocationMap-DzHswQ9E.js"), TG = Ps(EG), NG = 3 / 2, ZG = ({ latitude: g, longitude: I }) => `https://www.google.com/maps?q=${g},${I}`, dQ = ({
+}, Wd = "w-[24rem] max-w-full", DG = "w-[32rem] max-w-full", SG = "gap-0.5", RG = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", MG = "bg-[hsl(222_31%_11%)]", PG = "bg-[hsl(220_39%_6%/0.72)]", VG = "bg-[hsl(220_39%_6%/0.6)]", GG = "bg-[hsl(220_39%_6%/0.55)]", EG = () => import("./LocationMap-CrtGXZn6.js"), TG = Ps(EG), NG = 3 / 2, ZG = ({ latitude: g, longitude: I }) => `https://www.google.com/maps?q=${g},${I}`, dQ = ({
   location: g,
   cornerClass: I = "rounded-xl",
   surfaceClassName: d,
