@@ -1,7 +1,22 @@
 import { useSyncExternalStore } from "react"
-import { refreshHome } from "../setup/homeRefresh"
-import { PROFILE_PEOPLE } from "../fixtures"
+
+import type { RunEntry } from "../agents/agentThreads"
 import type { ProfileId } from "../profileStore"
+import type { WindowId } from "../windows/types"
+
+import { entriesFor, templateById, threadFor } from "../agents/agentsData"
+import { createAgent } from "../agents/agentStore"
+import {
+  NEW_AGENT_PROMPT,
+  NEW_AGENT_ROUTES,
+  NEW_AGENT_THREAD,
+  runSummary,
+} from "../agents/agentThreads"
+import { PROFILE_PEOPLE } from "../fixtures"
+import { approveTasksByModule } from "../needsYouStore"
+import { setPeopleFocus } from "../people/peopleFocusStore"
+import { getPolicyText, updatePreferences } from "../preferences/state"
+import { refreshHome } from "../setup/homeRefresh"
 import {
   advanceSetup,
   HOME_EXPERIENCE_VERSION,
@@ -17,24 +32,7 @@ import {
   changeWidgets,
   undoWidgets,
 } from "../setup/widgetPreferences"
-
-import type { RunEntry } from "../agents/agentThreads"
-import type { WindowId } from "../windows/types"
-
-import { entriesFor, templateById, threadFor } from "../agents/agentsData"
-import { createAgent } from "../agents/agentStore"
-import {
-  NEW_AGENT_PROMPT,
-  NEW_AGENT_ROUTES,
-  NEW_AGENT_THREAD,
-  runSummary,
-} from "../agents/agentThreads"
-import { approveTasksByModule } from "../needsYouStore"
-import { setPeopleFocus } from "../people/peopleFocusStore"
-import {
-  addSurveyQuestions,
-  resetSurveyDraft,
-} from "../windows/surveyDraft"
+import { addSurveyQuestions, resetSurveyDraft } from "../windows/surveyDraft"
 import {
   INSIGHT_ANSWERS,
   type Insight,
@@ -146,6 +144,8 @@ export type RunResolution = {
 export type Conversation = {
   homeSetup?: HomeSetup
   homeBriefing?: ProfileId
+  /** Dedicated mock conversation for replacing the personal policy text. */
+  policyEditing?: boolean
   id: string
   title: string
   messages: ChatMessage[]
@@ -465,8 +465,7 @@ const INTENTS: {
   },
   {
     key: "survey",
-    match: (p) =>
-      /survey|encuesta|cuestionario|questionnaire|enps/i.test(p),
+    match: (p) => /survey|encuesta|cuestionario|questionnaire|enps/i.test(p),
     title: "Employee engagement survey",
     // Steps + reply mirror the production F0AiChat survey-creation turn.
     reasoning: [
@@ -521,8 +520,7 @@ const INTENTS: {
       if (answer === "Work-life balance") addSurveyQuestions([workLife])
       else if (answer === "Team collaboration")
         addSurveyQuestions([collaboration])
-      else if (answer === "Both")
-        addSurveyQuestions([workLife, collaboration])
+      else if (answer === "Both") addSurveyQuestions([workLife, collaboration])
     },
   },
   {
@@ -879,9 +877,7 @@ function deliverReply(
       if (isVisible(conversationId)) {
         intent?.onReply?.()
         if (intent?.opensWindow) {
-          windowListeners.forEach((listener) =>
-            listener(intent.opensWindow!)
-          )
+          windowListeners.forEach((listener) => listener(intent.opensWindow!))
         }
       }
     })
@@ -986,9 +982,7 @@ export function startConversationWithContext(
  * focus store. Give it a button and it works where Needs-you lives.
  */
 export function openInsightReading() {
-  const existing = state.conversations.find(
-    (c) => c.id === state.insightsId
-  )
+  const existing = state.conversations.find((c) => c.id === state.insightsId)
   if (existing) {
     emit({ ...state, activeId: existing.id, oneSeen: true })
     return
@@ -1215,6 +1209,22 @@ export function startNewAgentConversation(): string {
   })
 }
 
+/** Reuses the existing personal-agent panel and scripted conversation runtime. */
+export function startPolicyEditing(): string {
+  const current = getPolicyText()
+  const id = createConversation("Edit my personal agent memory", {
+    title: "Personal agent memory",
+    script: {
+      reply: [
+        `This is your personal agent’s current memory:\n\n${current}`,
+        "Write the complete text you want to use instead. In this prototype, your next message will replace the memory text exactly as written and the change will appear on the page.",
+      ],
+    },
+  })
+  patchConversation(id, (c) => ({ ...c, policyEditing: true }))
+  return id
+}
+
 /** Prompt-bar submit on the Home screen → new full-screen conversation. */
 export function startConversation(prompt: string): string {
   return createConversation(prompt)
@@ -1262,7 +1272,19 @@ export function sendMessage(prompt: string, conversationId?: string) {
       { id: `m${nextId++}`, role: "user", content: prompt },
     ],
   }))
-  deliverReply(id, prompt)
+  if (state.conversations.find((c) => c.id === id)?.policyEditing) {
+    const text = prompt.trim()
+    if (text) {
+      updatePreferences({ policyText: text })
+      deliverReply(id, prompt, {
+        reply: [
+          "Your policy text has been saved. You can see it on the page. Send the complete revised text again if you want to make another change.",
+        ],
+      })
+    }
+  } else {
+    deliverReply(id, prompt)
+  }
 }
 
 /**
@@ -1372,9 +1394,7 @@ export function answerQuestion(
   messageId: string,
   answer: string
 ) {
-  const conversation = state.conversations.find(
-    (c) => c.id === conversationId
-  )
+  const conversation = state.conversations.find((c) => c.id === conversationId)
   if (conversation?.homeSetup) {
     const pending = conversation.messages.find(
       (m) => m.id === messageId
@@ -1558,9 +1578,7 @@ export function deleteConversation(id: string) {
  */
 export function deleteConversationsForAgent(agentId: string) {
   const doomed = new Set(
-    state.conversations
-      .filter((c) => c.agentId === agentId)
-      .map((c) => c.id)
+    state.conversations.filter((c) => c.agentId === agentId).map((c) => c.id)
   )
   if (doomed.size === 0) return
   emit({
@@ -1685,8 +1703,7 @@ export function startHomeWorkflow(
     conversations: [
       {
         id,
-        title:
-          purpose === "routine" ? "Create a routine" : "Create a report",
+        title: purpose === "routine" ? "Create a routine" : "Create a report",
         thinking: false,
         lastActiveAt: Date.now(),
         homeSetup: setup,
@@ -1771,9 +1788,7 @@ function answerHomeSetup(id: string, answer: string) {
   const result = advanceSetup(
     setup,
     setup.step === "widgets" &&
-      !/remove|hide|only|undo|keep|continue|done|save/.test(
-        normalize(answer)
-      )
+      !/remove|hide|only|undo|keep|continue|done|save/.test(normalize(answer))
       ? `Only ${answer}`
       : answer,
     readWidgets(setup.profile)
@@ -1822,9 +1837,7 @@ export function enterHome(profile: ProfileId) {
       if (active.homeSetup && !active.homeSetup.paused) {
         const pending = [...active.messages]
           .reverse()
-          .find(
-            (m) => m.question && !m.question.answer && !m.question.skipped
-          )
+          .find((m) => m.question && !m.question.answer && !m.question.skipped)
         const updated = homeQuestion(active.homeSetup).question!
         if (
           pending &&

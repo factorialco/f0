@@ -77,7 +77,11 @@ export function RailPersonalMenu() {
   }
   const personal = [
     { label: "My profile", icon: Person, onClick: () => open("profile") },
-    { label: "Preferences", icon: Sliders, onClick: () => open("preferences") },
+    {
+      label: "Preferences",
+      icon: Sliders,
+      onClick: () => open("personal-preferences"),
+    },
     {
       label: "Submit a complaint",
       icon: ExternalLink,

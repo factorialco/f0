@@ -18,6 +18,7 @@ import type { PrototypeMeta } from "../types"
 import type { LeftPaneId } from "./comms/ChatsColumn"
 import type { WindowId } from "./windows/types"
 
+import { ActivityScreen } from "./activity/ActivityScreen"
 import { AgentsScreen } from "./agents/AgentsScreen"
 import { agentById } from "./agents/agentStore"
 import { AskFactorialButton } from "./AskFactorial"
@@ -51,7 +52,7 @@ import {
 } from "./hub/ImportedHubScreen"
 import { HybridHome } from "./HybridHome"
 import { ModuleScreen } from "./ModuleScreen"
-import { PreferencesScreen } from "./navigation/PreferencesScreen"
+import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import {
@@ -64,6 +65,7 @@ import { ConversationView } from "./one/ConversationView"
 import { PlayOutline } from "./one/PlayOutline"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
+import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { ClockInButton } from "./windows/ClockInButton"
@@ -1465,10 +1467,14 @@ function HomeCanvas() {
                 <CalendarScreen />
               ) : screenView === "policies" ? (
                 <PoliciesScreen />
+              ) : screenView === "activity" ? (
+                <ActivityScreen />
               ) : screenView === "agents" ? (
                 <AgentsScreen />
               ) : screenView ? (
-                screenView === "preferences" ? (
+                screenView === "personal-preferences" ? (
+                  <PersonalPreferencesScreen />
+                ) : screenView === "preferences" ? (
                   <PreferencesScreen />
                 ) : hasImportedScreen(screenView) ? (
                   <ImportedHubScreen key={screenView} view={screenView} />
