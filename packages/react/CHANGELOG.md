@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.98.0](https://github.com/factorialco/f0/compare/f0-react-v6.97.2...f0-react-v6.98.0) (2026-09-10)
+
+
+### Features
+
+* **F0AiChatTextArea:** [FCT-63305] let the host set the credit warning text and action label ([#5512](https://github.com/factorialco/f0/issues/5512)) ([9511238](https://github.com/factorialco/f0/commit/9511238a12c541bca75e97b8432fef2cc5ed5e89))
+
 ## [6.97.2](https://github.com/factorialco/f0/compare/f0-react-v6.97.1...f0-react-v6.97.2) (2026-09-10)
 
 
