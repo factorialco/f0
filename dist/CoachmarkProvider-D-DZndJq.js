@@ -40943,7 +40943,7 @@ const tue = ({
   return /* @__PURE__ */ R(Ve, { children: [
     c("addressLine1"),
     c("addressLine2"),
-    /* @__PURE__ */ m("div", { className: "@container", children: /* @__PURE__ */ R("div", { className: "grid grid-cols-1 gap-3 @sm:grid-cols-3", children: [
+    /* @__PURE__ */ m("div", { className: "@container", children: /* @__PURE__ */ R("div", { className: "grid grid-cols-1 gap-3 @xs:grid-cols-3", children: [
       c("city"),
       c("state"),
       c("postalCode")
