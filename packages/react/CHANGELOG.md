@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.95.0](https://github.com/factorialco/f0/compare/f0-react-v6.94.0...f0-react-v6.95.0) (2026-09-10)
+
+
+### Features
+
+* **F0AiChat:** add usage-limits popover and usageLimits prop on the composer ([#5434](https://github.com/factorialco/f0/issues/5434)) ([c07fd73](https://github.com/factorialco/f0/commit/c07fd733d3ad03a7287392f97bbaeb908a56e18f))
+
 ## [6.94.0](https://github.com/factorialco/f0/compare/f0-react-v6.93.1...f0-react-v6.94.0) (2026-09-10)
 
 
