@@ -401,6 +401,11 @@ export const defaultTranslations = {
     // reads badly past a couple of minutes — the consumer picks.
     thinkingElapsedSeconds: "{{seconds}}s",
     thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
+    attribution: "Suggested by One",
+    evidence: {
+      show: "See {{name}}",
+      hide: "Hide {{name}}",
+    },
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
