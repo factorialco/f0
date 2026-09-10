@@ -53,3 +53,7 @@ The previous verification was insufficient. Read [the correction and direct brow
 Read [the latest verification](memory/2026-09-10-widget-rail-loading.md) and [PR48 reuse details](windows/rail-reference.md). Selection confirmation now shows finite skeleton/bot feedback. Widgets fold into a persisted icon rail and scroll in one column. Ask Factorial moved into the original widget header actions. The sticky greeting uses the canvas background.
 
 Latest toolbar and widget-hover correction: see memory/2026-09-10-toolbar-hover-alignment.md (integrated preview on port 5181).
+
+## Consolidation — 2026-09-10
+
+Integrated original composer in Home content flow with the parallel module-slot correction: only Home reserves the composer slot. Preferences uses the existing side agent. Verified Home → Preferences → Home in isolated Chrome: no Home slot on Preferences, original composer restored on return. Frame-by-frame collapse/expand checks pass for questions and normal composer, with draft preserved. TypeScript and all 222 prototype files pass. PR #5510 targets feat/f0compose; no merge. Local generated symlink is environment-only and excluded.

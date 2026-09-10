@@ -1036,9 +1036,8 @@ function HomeCanvas() {
     screenView === "organization" ||
     screenView === "agents" ||
     (screenView !== null && hasImportedScreen(screenView))
-  // Agents owns its specialized brief composer; other screens reserve the
-  // shared agent strip below their scrolling content and fixed actions.
-  const showPromptBar = screenView !== "agents"
+  // Only Home owns an in-flow composer slot. Module chats use HybridHome’s side panel.
+  const showPromptBar = screenView === null
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
@@ -1523,8 +1522,7 @@ function HomeCanvas() {
                 </div>
               )}
             </div>
-            {/* See showPromptBar: the calendar and People frames carry no
-              composer. Every other screen keeps ONE pinned. */}
+            {/* The Home composer slot must not reserve space on module pages. */}
             {showPromptBar && (
               <div
                 data-home-promptbar
