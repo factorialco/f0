@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.97.2](https://github.com/factorialco/f0/compare/f0-react-v6.97.1...f0-react-v6.97.2) (2026-09-10)
+
+
+### Bug Fixes
+
+* **F0Select:** close the dropdown when a bottom action is clicked ([#5514](https://github.com/factorialco/f0/issues/5514)) ([1bffee6](https://github.com/factorialco/f0/commit/1bffee68dc966def96cff38474944d79ea6efec9))
+
 ## [6.97.1](https://github.com/factorialco/f0/compare/f0-react-v6.97.0...f0-react-v6.97.1) (2026-09-10)
 
 
