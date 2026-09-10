@@ -416,7 +416,7 @@ useEffect(() => {
 }, [])
 ```
 
-**Steps whose element is not there are left out.** A walkthrough is written once and runs on pages that differ: a control the reader has no permission for, a widget they removed, a block behind a flag. `start()` looks for every step's element, keeps looking for `lookForTargetsMs` (2000ms by default) while the page settles, then opens with the ones that turned up — the reader cannot tell there was ever another step, and the count is honest, because a walkthrough that says `1/3` has three steps to give. If none of them are there it does not open at all, and reports nothing: there was no walkthrough to dismiss.
+**Steps whose element is not there are left out.** A walkthrough is written once and runs on pages that differ: a control the reader has no permission for, a widget they removed, a block behind a flag. `start()` looks for every step's element, keeps looking for `lookForTargetsMs` (2000ms by default) while the page settles, then opens with the ones that turned up — the reader cannot tell there was ever another step, and the count is honest, because a walkthrough showing three dots has three steps to give. If none of them are there it does not open at all, and reports nothing: there was no walkthrough to dismiss.
 
 That waiting is not incidental. A walkthrough started on mount runs before the things it walks have arrived — a rail still measuring itself, a widget waiting on data — and opening on the first frame would drop those steps.
 
@@ -587,6 +587,7 @@ Reach for a coachmark when a feature is already on screen but users are walking 
 - **`side` is a preference.** The panel flips to the opposite side and shifts along the target when it would overflow the viewport, so the side you pass is not guaranteed.
 - **Outside clicks do not dismiss.** A coachmark stays until it is acknowledged. By default the page behind stays interactive; the panel is not modal and does not trap focus.
 - **`overlay` makes the page unpressable, not the coachmark modal.** The dim and its shield stop presses reaching the page and wiggle the panel instead, and give up after `skipAfterOutsideClicks` of them. Focus is still not trapped, and <kbd>Escape</kbd> still closes — the shield is about the pointer.
+- **A dialog takes the screen back.** Opening a dialog while a coachmark is up stands the coachmark down — the panel and the dim both — for as long as the dialog is there, and it returns on the same step once the dialog closes. It is not dismissed and `onEnd` hears nothing, because the reader ended nothing. Focus is left alone while it is stood down — a dialog that is not modal closes itself when focus leaves it — and the step is announced again when it comes back. A popover, a select or a dropdown opening inside the step being explained is not a dialog and changes nothing.
 - **Focus moves to the panel on open,** not to the close button, so a screen reader announces the message and Enter does not immediately discard it. On close, focus returns to whatever had it before.
 - **`focusTarget` moves it to the step's own element instead.** For a step whose subject is a field: the caret lands in it, so it wears its own focus state rather than being described from outside, and the reader can start typing the thing the panel is describing. The panel stays one Tab away and Escape still closes from anywhere — but the step is no longer announced, so this is per step and off by default.
 - **The target is an anchor, not a trigger.** It is never made clickable and never wrapped — clicking it does whatever it already did.
@@ -601,7 +602,7 @@ Open a single coachmark, a walkthrough, or two at once to watch the second one q
 
 **A walkthrough**
 
-Pass `steps` and the coachmark sequences itself: the indicator counts up, the action reads `Next` until the last step, and `onComplete` fires when the user reaches the end. Each step can point at a different element.
+Pass `steps` and the coachmark sequences itself: a row of dots in the centre of the footer tracks where the reader is, the action on the right reads `Next` until the last step, a `Back` button appears on the left from the second step on, and `onComplete` fires when the user reaches the end. Each step can point at a different element.
 
 ```tsx
 coachmarks.open({
@@ -616,6 +617,10 @@ coachmarks.open({
 ```
 
 <Canvas of={Stories.WithStep} />
+
+From the second step on there is somewhere to go back to, so a `Back` button appears at the bottom left. The dots keep the panel's centre line whether or not it is there:
+
+<Canvas of={Stories.WithBack} />
 
 The last step ends the walkthrough, so its action says so:
 
