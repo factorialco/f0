@@ -23,4 +23,4 @@ Home setup is a live canvas plus agent continuation and F0 follow-up, not a grow
 
 Home toolbar: Edit and the global right-panel toggle belong together in the top toolbar. Hover previews must stretch to their container, sit 8px beside their anchor, and use measured height for edge clamping. Verify pointer transfer, short-window scrolling, and toolbar access when widgets overlay the canvas.
 
-Widget layout changes: verify both the follow-up and original composer stay centered on their content destination after collapse and expansion. A fixed-width target may move without resizing; observe its layout ancestors when positioning the mounted composer.
+Widget layout changes: verify both the follow-up and original composer stay centered on their content destination after collapse and expansion. Home composer must belong to the content flow. Do not position it by chasing measured coordinates. Verify every animation frame, not only settled positions.

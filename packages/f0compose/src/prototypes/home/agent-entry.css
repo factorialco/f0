@@ -434,3 +434,9 @@ body:has([data-hybrid-root][data-view="activity"]) [data-home-panel],
     --agent-panel-width: 100%;
   }
 }
+
+/* Home owns its original composer in the content flow, not a measured overlay. */
+[data-hybrid-root][data-view="home"] [data-hybrid-target] {
+  height: auto;
+  padding-bottom: 8px;
+}

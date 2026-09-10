@@ -16,6 +16,7 @@ import {
   type KeyboardEvent,
 } from "react"
 import { type ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { useSearchParams } from "react-router-dom"
 
 import {
@@ -86,6 +87,18 @@ export function HybridHome({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null)
   const composer = useRef<HTMLDivElement>(null)
   const work = useRef<HTMLDivElement>(null)
+  const [homeSlot, setHomeSlot] = useState<HTMLElement | null>(null)
+  useLayoutEffect(() => {
+    setHomeSlot(
+      view
+        ? null
+        : (work.current?.querySelector<HTMLElement>(
+            "[data-hybrid-target]"
+          ) ?? null)
+    )
+  })
+  const placeComposer = (content: ReactNode) =>
+    !view && homeSlot ? createPortal(content, homeSlot) : content
   const previousView = useRef(view)
   const open = mode === "side" || mode === "focus"
   useEffect(() => {
@@ -119,8 +132,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
     const timer = window.setTimeout(focusField, 380)
     return () => window.clearTimeout(timer)
   }, [mode, asking])
-  // The composer stays mounted. Only its geometry follows the destination.
+  // Home uses its actual content slot. Only non-home agent modes need geometry.
   useLayoutEffect(() => {
+    if (!view) return
     const container = work.current,
       floating = composer.current
     if (
@@ -142,8 +156,6 @@ export function HybridHome({ children }: { children: ReactNode }) {
       const panelHeight = asking
         ? (followUpRef.current?.getBoundingClientRect().height ?? 0)
         : 0
-      if (!view)
-        destination.style.height = `${asking ? panelHeight + 16 : 152}px`
       const parent = container.getBoundingClientRect(),
         target = destination.getBoundingClientRect()
       const width = compact
@@ -178,16 +190,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
     const targets = container.querySelectorAll<HTMLElement>(
       "[data-hybrid-target], [data-hybrid-chat-target], [data-hybrid-dock]"
     )
-    // Fixed-width destinations can move when a surrounding pane resizes
-    // without changing their own size (for example, folding the widget rail).
-    // Observe that layout chain too so the mounted composer follows it.
-    targets.forEach((target) => {
-      let ancestor: HTMLElement | null = target
-      while (ancestor && ancestor !== container) {
-        observer.observe(ancestor)
-        ancestor = ancestor.parentElement
-      }
-    })
+    targets.forEach((target) => observer.observe(target))
     measure()
     return () => {
       observer.disconnect()
@@ -351,120 +354,135 @@ export function HybridHome({ children }: { children: ReactNode }) {
             </div>
             <div data-hybrid-chat-target />
           </div>
-          <div
-            className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
-            ref={composer}
-            data-hybrid-composer
-            hidden={compact}
-            data-compact={compact}
-            data-writing={typing || open}
-          >
-            {asking && followUp && activeConversation && (
+          {placeComposer(
+            <div
+              style={
+                !view
+                  ? {
+                      position: "relative",
+                      left: "auto",
+                      top: "auto",
+                      transform: "none",
+                      width: "100%",
+                      height: asking ? "auto" : typing || open ? 136 : 176,
+                      transition: "none",
+                    }
+                  : undefined
+              }
+              className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
+              ref={composer}
+              data-hybrid-composer
+              hidden={compact}
+              data-compact={compact}
+              data-writing={typing || open}
+            >
+              {asking && followUp && activeConversation && (
+                <div
+                  ref={followUpRef}
+                  data-home-follow-up
+                  className="max-h-[50vh] w-full overflow-y-auto"
+                >
+                  <div>
+                    {!activeConversation.homeSetup?.purpose && (
+                      <div className="px-4 pt-4 pb-2">
+                        {homeRefreshing ? (
+                          <HomeWorking />
+                        ) : (
+                          <F0Text
+                            content={
+                              [...activeConversation.messages]
+                                .reverse()
+                                .find(
+                                  (m) =>
+                                    m.role === "assistant" &&
+                                    !m.question &&
+                                    m.content
+                                )?.content ||
+                              "Let’s make your home useful for you."
+                            }
+                          />
+                        )}
+                      </div>
+                    )}
+                    <ClarifyPanel
+                      key={followUp.id}
+                      conversationId={activeConversation.id}
+                      message={followUp}
+                    />
+                  </div>
+                </div>
+              )}
               <div
-                ref={followUpRef}
-                data-home-follow-up
-                className="max-h-[50vh] w-full overflow-y-auto"
+                data-hybrid-editor
+                hidden={asking}
+                aria-hidden={compact || asking}
               >
-                <div>
-                  {!activeConversation.homeSetup?.purpose && (
-                    <div className="px-4 pt-4 pb-2">
-                      {homeRefreshing ? (
-                        <HomeWorking />
-                      ) : (
-                        <F0Text
-                          content={
-                            [...activeConversation.messages]
-                              .reverse()
-                              .find(
-                                (m) =>
-                                  m.role === "assistant" &&
-                                  !m.question &&
-                                  m.content
-                              )?.content ||
-                            "Let’s make your home useful for you."
-                          }
-                        />
-                      )}
-                    </div>
-                  )}
-                  <ClarifyPanel
-                    key={followUp.id}
-                    conversationId={activeConversation.id}
-                    message={followUp}
+                <div
+                  className="flex gap-1"
+                  data-hybrid-suggestions
+                  aria-hidden={typing || open}
+                >
+                  <HomeSuggestion
+                    label={suggestion.label}
+                    size="md"
+                    onClick={() => {
+                      send(suggestion.prompt)
+                    }}
                   />
                 </div>
-              </div>
-            )}
-            <div
-              data-hybrid-editor
-              hidden={asking}
-              aria-hidden={compact || asking}
-            >
-              <div
-                className="flex gap-1"
-                data-hybrid-suggestions
-                aria-hidden={typing || open}
-              >
-                <HomeSuggestion
-                  label={suggestion.label}
-                  size="md"
-                  onClick={() => {
-                    send(suggestion.prompt)
-                  }}
-                />
-              </div>
-              <div data-hybrid-field>
-                <F0TextAreaInput
-                  label="Message your agent"
-                  hideLabel
-                  placeholder="Let me know what I can do for you"
-                  value={draft}
-                  onChange={setDraft}
-                  rows={2}
-                  maxHeight={72}
-                />
-              </div>
-              <div
-                className="flex items-center justify-between"
-                data-hybrid-actions
-              >
-                <F0Button
-                  label="Attach a file"
-                  icon={Paperclip}
-                  hideLabel
-                  size="md"
-                  variant="outline"
-                  onClick={() =>
-                    setNotice(
-                      "Attachments are not enabled in this interaction prototype."
-                    )
-                  }
-                />
-                <div className="flex items-center gap-1">
+                <div data-hybrid-field>
+                  <F0TextAreaInput
+                    label="Message your agent"
+                    hideLabel
+                    placeholder="Let me know what I can do for you"
+                    value={draft}
+                    onChange={setDraft}
+                    rows={2}
+                    maxHeight={72}
+                  />
+                </div>
+                <div
+                  className="flex items-center justify-between"
+                  data-hybrid-actions
+                >
                   <F0Button
-                    label="Record audio"
-                    icon={Microphone}
+                    label="Attach a file"
+                    icon={Paperclip}
                     hideLabel
                     size="md"
-                    variant="ghost"
+                    variant="outline"
                     onClick={() =>
                       setNotice(
-                        "Audio recording is not enabled in this interaction prototype."
+                        "Attachments are not enabled in this interaction prototype."
                       )
                     }
                   />
-                  <F0Button
-                    label="Send message"
-                    icon={ArrowUp}
-                    hideLabel
-                    size="md"
-                    disabled={!draft.trim()}
-                    onClick={() => send()}
-                  />
+                  <div className="flex items-center gap-1">
+                    <F0Button
+                      label="Record audio"
+                      icon={Microphone}
+                      hideLabel
+                      size="md"
+                      variant="ghost"
+                      onClick={() =>
+                        setNotice(
+                          "Audio recording is not enabled in this interaction prototype."
+                        )
+                      }
+                    />
+                    <F0Button
+                      label="Send message"
+                      icon={ArrowUp}
+                      hideLabel
+                      size="md"
+                      disabled={!draft.trim()}
+                      onClick={() => send()}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
           {notice && (
             <div
               className="rounded-md border border-solid border-f1-border-secondary bg-f1-background p-2"
