@@ -1002,16 +1002,26 @@ const e = {
   locationInput: {
     country: "Country",
     address: "Address",
+    addressLine1: "Address line 1",
     addressLine2: "Address line 2",
     city: "City",
     state: "Region",
     postalCode: "Postal code",
     placeholder: "Enter an address",
+    selectCountry: "Select a country",
     searchCountry: "Search country",
     noCountryResults: "No country found",
     noResults: "No addresses found",
     searchHint: "Type an address to search",
-    searching: "Searching addresses"
+    addressLine1Placeholder: "Enter a street and number",
+    addressLine2Placeholder: "Enter a floor or unit",
+    postalCodePlaceholder: "e.g., 08001",
+    searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found"
+    }
   },
   imageUpload: {
     uploading: "Uploading...",

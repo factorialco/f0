@@ -479,6 +479,11 @@ declare type AiChatCreditWarning = {
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
     onGetCredits?: () => void;
+    /**
+     * Icon rendered to the left of the "Get Credits" label. Only used when
+     * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+     */
+    getCreditsIcon?: IconType;
 };
 
 /**
@@ -1095,7 +1100,7 @@ export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, 
  */
 export declare type BaseDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters>, FetchReturn = BaseResponse<R>> = {
     /** Indicates this adapter doesn't use pagination */
-    paginationType?: never | undefined;
+    paginationType?: undefined;
     /**
      * Function to fetch data based on filter options
      * @param options - The filter options to apply when fetching data
@@ -1461,7 +1466,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>;
     /**
      * The title of the button.
      */
@@ -2170,7 +2175,7 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
 export declare type CardSelectableValue = string | number;
 
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
+    cardProperties: readonly CardPropertyDefinition<T>[];
     title: (record: T) => string;
     description?: (record: T) => string;
     avatar?: (record: T) => CardAvatarVariant;
@@ -3560,10 +3565,10 @@ declare type DashboardCanvasActions = {
 };
 
 declare interface DashboardFetchSpec {
-    fetch: Array<{
+    fetch: {
         toolId: string;
         args: Record<string, unknown>;
-    }>;
+    }[];
     query: string | null;
     columnLabels?: Record<string, string>;
 }
@@ -3664,6 +3669,11 @@ declare interface DataCollectionSettingsContextType {
  * Extends the base data source with data collection specific elements / features
  */
 export declare type DataCollectionSource<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> = DataSource<R, Filters, Sortings, Grouping> & DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
+    /**
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
+     */
+    definition?: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>;
     setCurrentNavigationFilters: React.Dispatch<React.SetStateAction<NavigationFiltersState<NavigationFilters>>>;
     /** Current summaries data */
@@ -3680,6 +3690,12 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /**
      * Data Collection specific datasource elements / features
      */
+    /**
+     * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+     * lists everything the callbacks below close over: miss one and a row keeps
+     * calling the closure it mounted with.
+     */
+    memoizeDefinition?: boolean;
     /** Navigation filters */
     navigationFilters?: NavigationFilters;
     currentNavigationFilters?: NavigationFiltersState<NavigationFilters>;
@@ -3713,7 +3729,7 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /** Item filter that can be used to filter the items before they are displayed */
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
-    lanes?: ReadonlyArray<Lane<Filters>>;
+    lanes?: readonly Lane<Filters>[];
     /** Rich search preview shown in the shared header search (all visualizations). */
     searchPreview?: SearchPreview<R>;
 };
@@ -3750,7 +3766,7 @@ declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeature
  */
 declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search", "visualizationFilters"];
 
-declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | `${DataCollectionStorageFeature}`)[];
+declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | DataCollectionStorageFeature)[];
 
 /**
  * Represents an error that occurred during data fetching
@@ -5118,16 +5134,26 @@ declare const defaultTranslations: {
     readonly locationInput: {
         readonly country: "Country";
         readonly address: "Address";
+        readonly addressLine1: "Address line 1";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
         readonly state: "Region";
         readonly postalCode: "Postal code";
         readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
         readonly searchCountry: "Search country";
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
         readonly searchHint: "Type an address to search";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
         readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -5541,9 +5567,6 @@ declare type DescriptionPart = {
     critical?: boolean;
 };
 
-/** Recommended detailed preset. `addressLine2` is opt-in. */
-export declare const detailedLocationFields: readonly ["country", "city", "state", "postalCode"];
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -5627,7 +5650,7 @@ declare type DialogControls = {
 } | {
     kind: "back";
     label: string;
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
 };
 
 declare type DialogPosition = (typeof dialogPositions)[number];
@@ -5879,7 +5902,7 @@ declare type EditableTableOnCellChangeParams<R extends RecordType> = {
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
-    columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Called when a cell value changes. Receives an object with the full updated
      * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
@@ -7710,7 +7733,7 @@ declare type F0DialogPrimaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -7721,7 +7744,7 @@ declare type F0DialogSecondaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -7928,7 +7951,7 @@ export declare type F0FormEditableTableColumn<R extends RecordType> = Omit<Edita
  */
 export declare type F0FormEditableTableProps<R extends RecordType> = {
     /** Column definitions (see {@link F0FormEditableTableColumn}). */
-    columns: ReadonlyArray<F0FormEditableTableColumn<R>>;
+    columns: readonly F0FormEditableTableColumn<R>[];
     /**
      * Rows in display order. The table is controlled: edits, reorders and
      * removals are reported via callbacks and the parent updates `items`.
@@ -8082,7 +8105,12 @@ declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 export declare const F0LocationInput: ForwardRefExoticComponent<F0LocationInputProps_2 & RefAttributes<HTMLInputElement>>;
 
 export declare type F0LocationInputChangeMeta = {
-    /** `"picked"` right after a suggestion is chosen, `"typed"` once any part is edited */
+    /**
+     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
+     * `"typed"` in every other case, which includes a suggestion that could not
+     * be resolved, so do not read `"typed"` as "the user did not use the list".
+     * `isResolved` is what says whether the value can be trusted.
+     */
     source: "picked" | "typed";
     /** Whether the value still carries trustworthy coordinates and place id */
     isResolved: boolean;
@@ -8096,12 +8124,16 @@ export declare interface F0LocationInputProps {
     defaultValue?: F0LocationInputValue;
     onChange?: (value: F0LocationInputValue | undefined, meta: F0LocationInputChangeMeta) => void;
     /**
-     * Omit for the address field alone (simple mode). Pass the parts to render
-     * below it (detailed mode). Order is fixed by the component.
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code.
+     * Changing the country clears the other parts, since they described a
+     * place in the previous one. Without it the component is the address
+     * field alone.
+     * @default false
      */
-    fields?: readonly LocationField[];
+    manualEntry?: boolean;
     /** Overrides for the per-part labels, which default to translated copy */
-    partLabels?: Partial<Record<LocationField | "addressLine1", string>>;
+    partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
     countries?: CountryCode[];
     /** Country used to scope the search while the value has none */
@@ -8956,8 +8988,8 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
+    searchFn?: (option: F0SelectItemProps<T>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T>[];
 };
 
 declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
@@ -8978,6 +9010,14 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * Hides the trigger's dropdown arrow. For fields where the select is an
+     * implementation detail rather than the affordance: the value is a typed
+     * search result, not one of a few known options, and the arrow promises a
+     * list the user is not meant to browse.
+     * @default false
+     */
+    hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
@@ -8993,6 +9033,7 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     children?: never;
     className?: never;
     asList?: never;
+    hideArrow?: never;
     showPreview?: never;
     required?: never;
     loading?: never;
@@ -9105,7 +9146,7 @@ declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSin
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     onSelectItems?: never;
 } | {
     multiple: true;
@@ -9137,7 +9178,7 @@ declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
     onSelectItems?: never;
 };
@@ -9213,7 +9254,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T]>;
+    tags: TagTypeMapping[T][];
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -9317,7 +9358,7 @@ export declare interface F0VersionHistoryProps {
     title: string;
     versions: Version[];
     currentVersion?: CurrentVersion;
-    activeVersionId?: string | "current";
+    activeVersionId?: "current" | (string & {});
 }
 
 /**
@@ -9751,13 +9792,13 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
      * toggle to show/hide each metadata column (like configuring table columns).
      * Values are tag `column` keys (or `type` when a tag has no `column`).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    nodeTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Friendly labels per tag column, shown in the metadata visibility toggle. */
     nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
     /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Tag columns that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    pinnedTagTypes?: readonly F0GraphNodeTagColumn[];
     /**
      * Tag columns the actor is not allowed to see, mapped to the reason. Each is
      * still listed in the settings but with its toggle forced OFF and disabled,
@@ -10548,7 +10589,7 @@ declare type InFilterOptionItem<T = unknown> = {
         /** The filter key where child selections are stored in FiltersState */
         filterKey: string;
         /** Child options, which can themselves have children for infinite nesting */
-        options: Array<InFilterOptionItem<T>>;
+        options: InFilterOptionItem<T>[];
     };
 };
 
@@ -10568,7 +10609,7 @@ declare type InFilterOptions_2<T, _R extends RecordType = RecordType> = {
      */
     getLabel?: (value: unknown) => string | Promise<string>;
 } & ({
-    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
+    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<InFilterOptionItem<T>[]>);
 } | {
     source: DataSourceDefinition<any, FiltersDefinition, SortingsDefinition, GroupingDefinition<any>>;
     mapOptions: (item: any) => InFilterOptionItem<T>;
@@ -10879,12 +10920,12 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 } | null) => Promise<TRecord>;
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    lanes: ReadonlyArray<KanbanLaneDefinition>;
+    lanes: readonly KanbanLaneDefinition[];
     /** Per-group columns: when grouping is active, each group's board renders the
      * lanes this returns instead of the global `lanes` (lane ids must exist in
      * `source.lanes`). Enables the onboarding case where each policy version has
      * its own phases. NOTE: API shape pending Foundations review. */
-    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    getLanesForGroup?: (groupKey: string) => readonly KanbanLaneDefinition[];
     /** Whether each group header shows a selection checkbox when the collection is
      * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
      * keep per-card selection while hiding the group-level checkbox — e.g. when
@@ -10895,7 +10936,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
+    metadata?: (record: Record) => readonly CardMetadata[];
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -11036,7 +11077,7 @@ export declare const listMoreButtonClass: (ctx: HomeRenderCtx) => string;
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
 export declare interface ListParams<S extends ListSchema = ListSchema> {
     schema: S;
-    items: Array<ListItem<S>>;
+    items: ListItem<S>[];
 }
 
 declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting_2<R, Sortings> & PropertyDefinition_2<R>;
@@ -11044,7 +11085,7 @@ declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = Wi
 declare type ListRightData<R, Optional> = R extends "counter" ? Demanded<{
     count: number;
 }, Optional> : R extends `${infer T extends F0AvatarListProps["type"]}-list` ? Demanded<{
-    avatars: Array<AvatarData<T>>;
+    avatars: AvatarData<T>[];
 }, Optional> & {
     remainingCount?: number;
 } : R extends AvatarVariant["type"] ? Demanded<{
@@ -11136,7 +11177,7 @@ export declare interface ListSchema {
  * CHECKED against it — a `left: "person"` slot only takes person data, a
  * `clickBehavior: "link"` slot demands an `href` on every row.
  */
-export declare const listSlot: <const S extends ListSchema>(schema: S, items: Array<ListItem<S>>, options?: SlotOptions) => HomeWidgetSlot;
+export declare const listSlot: <const S extends ListSchema>(schema: S, items: ListItem<S>[], options?: SlotOptions) => HomeWidgetSlot;
 
 declare type ListTextData<S extends ListSchema> = {
     title: string;
@@ -11157,7 +11198,7 @@ declare type ListTextData<S extends ListSchema> = {
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
     itemDefinition: (record: R) => ItemDefinition;
-    fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>;
+    fields: readonly ListPropertyDefinition<R, Sortings>[];
 };
 
 declare interface LoadingStateProps {
@@ -11184,18 +11225,14 @@ declare interface LocalizedOption<T> {
     value: T;
 }
 
-export declare type LocationField = (typeof locationFields)[number];
-
-/**
- * Parts that can be shown below the address field in detailed mode. The
- * address line itself is not listed: it is always rendered, because it is the
- * autocomplete field in both modes.
- */
-export declare const locationFields: readonly ["country", "addressLine2", "city", "state", "postalCode"];
-
 export declare type LocationInputSize = (typeof locationInputSizes)[number];
 
 export declare const locationInputSizes: readonly ["sm", "md"];
+
+export declare type LocationPart = (typeof locationParts)[number];
+
+/** Every part the manual entry block renders, in the order it renders them */
+export declare const locationParts: readonly ["country", "addressLine1", "addressLine2", "city", "state", "postalCode"];
 
 declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
 
@@ -12111,7 +12148,7 @@ declare type OneDataCollectionGeneric = <R extends RecordType, Filters extends F
  */
 declare type OneDataCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
     source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
-    visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    visualizations: readonly Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>[];
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     onBulkAction?: OnBulkActionCallback<R, Filters>;
     /**
@@ -12459,10 +12496,10 @@ export declare type PageAction = {
 } | {
     onClick: () => void;
 } | {
-    actions: Array<{
+    actions: {
         label: string;
         href: string;
-    }>;
+    }[];
 });
 
 /**
@@ -12794,7 +12831,7 @@ declare type ProductUpdate = {
 declare type ProductUpdatesProp = {
     label: string;
     updatesPageUrl: string;
-    getUpdates: () => Promise<Array<ProductUpdate>>;
+    getUpdates: () => Promise<ProductUpdate[]>;
     hasUnread?: boolean;
     currentModule: string;
     onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"];
@@ -12814,7 +12851,7 @@ declare type ProductUpdatesProp = {
         isVisible: boolean;
         sectionTitle: string;
         onClose?: () => void;
-        products: Array<{
+        products: ({
             title: string;
             description: string;
             onClick: () => void;
@@ -12827,7 +12864,7 @@ declare type ProductUpdatesProp = {
         } | {
             module: ModuleId;
             type?: never;
-        })>;
+        }))[];
     };
 };
 
@@ -12975,11 +13012,11 @@ dataTestId?: string;
 declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
-    indicators: Array<{
+    indicators: {
         column: string;
         label: string;
         max?: number;
-    }>;
+    }[];
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -13341,17 +13378,17 @@ declare type SelectCellConfig<R extends RecordType> = {
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
  */
-export declare type SelectedItems<T> = ReadonlyArray<T>;
+export declare type SelectedItems<T> = readonly T[];
 
 export declare type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allSelected: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
+    selectedIds: readonly SelectionId[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -14299,7 +14336,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /**
      * The columns to display
      */
-    columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly TableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Placeholder to display in summary-row cells when no summary value is
      * rendered. This also applies to columns without a `summary` definition.
@@ -14927,7 +14964,7 @@ export declare interface UseDataCollectionItemNavigationProps<R extends RecordTy
      * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
      * same convention as `useDataCollectionSource(source, deps)`.
      */
-    deps?: ReadonlyArray<unknown>;
+    deps?: readonly unknown[];
 }
 
 export declare interface UseDataCollectionItemNavigationReturn<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> extends UseDataSourceItemNavigationReturn<R> {
@@ -14953,7 +14990,7 @@ export declare interface UseDataCollectionItemNavigationReturn<R extends RecordT
     isLoading: boolean;
 }
 
-export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: readonly unknown[]) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
  * Hook options for useData
@@ -15692,11 +15729,11 @@ export declare type WidgetEmptyStateProps = {
  */
 export declare interface WidgetHeaderSelect {
     /** What the reader can switch between. The first one is the default. */
-    options: Array<{
+    options: {
         value: string;
         label: string;
         icon?: IconType;
-    }>;
+    }[];
     /** Which one the card starts on. Defaults to the first option. */
     value?: string;
     /** The trigger names the selection, so this is what says what KIND it is. */
@@ -15782,8 +15819,17 @@ export declare interface WidgetProps {
         };
         count?: number;
     };
-    /** The card's footer button — its call to action. `neutral`/`sm` by default. */
-    action?: F0ButtonProps;
+    /**
+     * The card's footer button — its call to action. `neutral`/`sm` by default,
+     * `outline`/`md` once the card is wide.
+     *
+     * AN ARRAY draws TWO, side by side, for a card that carries both its own call
+     * to action and the way out of it ("Sign now", "Go to Documents"). A pair is
+     * drawn `outline` at every width: two buttons in a footer are a set of equals,
+     * and filling one of them nominates it as the card's answer. Two is the
+     * ceiling — a third belongs in `actions`, the overflow menu.
+     */
+    action?: F0ButtonProps | F0ButtonProps[];
     /**
      * Extra classes for the FOOTER row that `action` draws in. For content that
      * BLEEDS past the card's content box and wants the footer brought onto its
@@ -15792,12 +15838,12 @@ export declare interface WidgetProps {
      * takes no className of its own, so this is the seam for it.
      */
     footerClassName?: string;
-    summaries?: Array<{
+    summaries?: {
         label: string;
         value: string | number;
         prefixUnit?: string;
         postfixUnit?: string;
-    }>;
+    }[];
     alert?: string;
     status?: {
         text: string;
@@ -15970,7 +16016,7 @@ declare type WithDataTestIdProps = {
 };
 
 declare type WithGroupId<RecordType> = RecordType & {
-    [GROUP_ID_SYMBOL]: unknown | undefined;
+    [GROUP_ID_SYMBOL]: unknown;
 };
 
 declare type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<PropertyDefinition_2<R>, "hide"> & {
@@ -16047,17 +16093,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
@@ -16079,11 +16125,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -16091,9 +16135,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

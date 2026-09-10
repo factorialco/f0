@@ -1,5 +1,5 @@
 import { jsx as r } from "react/jsx-runtime";
-import { D as l, P as d, e as s } from "./pdfWorker-DxOvsHid.js";
+import { D as l, P as d, e as s } from "./pdfWorker-1m1LhDlB.js";
 s();
 const f = ({
   url: n,
