@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.94.0](https://github.com/factorialco/f0/compare/f0-react-v6.93.1...f0-react-v6.94.0) (2026-09-10)
+
+
+### Features
+
+* **EditableTable:** forward select actions to the cell ([#5506](https://github.com/factorialco/f0/issues/5506)) ([8107ac0](https://github.com/factorialco/f0/commit/8107ac02277cb1567c6c3c739b980dab66edb354))
+
 ## [6.93.1](https://github.com/factorialco/f0/compare/f0-react-v6.93.0...f0-react-v6.93.1) (2026-09-09)
 
 
