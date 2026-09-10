@@ -43,6 +43,9 @@ import type {
   F0FormPropsWithDefinition,
   F0FormRef,
   F0FormSchema,
+  F0FormSubmitConfig,
+  F0SectionConfig,
+  FormDefinitionItem,
   F0FormSubmitResult,
   F0PerSectionSchema,
   SectionDefinition,
@@ -552,39 +555,76 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
   )
 }
 
-function F0FormSingleSchema<TSchema extends F0FormSchema>(
-  props: F0FormPropsWithSingleSchema<TSchema>
+/**
+ * What the sections sidepanel offers, and which of them is active.
+ *
+ * A section whose `renderIf` is false is not rendered by SectionRenderer, so
+ * it must not be offered here either; when the active one goes that way the
+ * first remaining section takes over.
+ */
+function resolveVisibleSections({
+  formValues,
+  definition,
+  sectionIds,
+  sections,
+  showSectionsSidepanel,
+  activeSection,
+  onSectionClick,
+}: {
+  /** Present only while a conditional section can change visibility. */
+  formValues: Record<string, unknown> | undefined
+  definition: FormDefinitionItem[]
+  sectionIds: string[]
+  sections: Record<string, F0SectionConfig> | undefined
+  showSectionsSidepanel: boolean
+  activeSection: string | undefined
+  onSectionClick: (sectionId: string) => void
+}): { effectiveActiveSection: string | undefined; tocItems: TOCItem[] } {
+  // Sections whose renderIf currently evaluates to false are not rendered by
+  // SectionRenderer, so they must not be offered in the sidepanel either.
+  // Computed inline (not memoized) because watch() can return the same
+  // mutated object across renders.
+  const visibleSectionIds = formValues
+    ? definition
+        .filter((item): item is SectionDefinition => item.type === "section")
+        .filter(
+          (item) =>
+            !item.section.renderIf ||
+            evaluateRenderIf(item.section.renderIf, formValues)
+        )
+        .map((item) => item.id)
+    : sectionIds
+
+  // If the active section becomes hidden by renderIf, fall back to the first
+  // visible one.
+  const effectiveActiveSection =
+    activeSection && visibleSectionIds.includes(activeSection)
+      ? activeSection
+      : visibleSectionIds[0]
+
+  // Convert visible sections to TOCItems for the TableOfContent component.
+  // Built inline (not memoized) because visibleSectionIds is recomputed on
+  // every render when conditional sections exist.
+  const tocItems: TOCItem[] =
+    sections && showSectionsSidepanel
+      ? visibleSectionIds.map((sectionId) => ({
+          id: sectionId,
+          label: sections[sectionId]?.title ?? sectionId,
+          onClick: () => onSectionClick(sectionId),
+        }))
+      : []
+
+  return { effectiveActiveSection, tocItems }
+}
+
+/**
+ * Everything the submit UI reads, derived from the one `submitConfig` union.
+ * Kept together so a new submit type is answered in one place.
+ */
+function resolveSubmitConfig(
+  submitConfig: F0FormSubmitConfig | undefined,
+  forms: ReturnType<typeof useI18n>["forms"]
 ) {
-  const i18n = useI18n()
-  const { forms } = i18n
-
-  const {
-    name,
-    schema,
-    sections,
-    defaultValues,
-    onSubmit,
-    submitConfig,
-    className,
-    errorTriggerMode = "on-submit",
-    styling,
-    formRef,
-    isLoading: isFormLoading,
-    defaultValuesParamsSchema,
-    defaultValuesFn,
-    description,
-    module,
-  } = props
-
-  const { useUpload } = props
-
-  // Resolve styling configuration. The sidepanel is hidden entirely on
-  // small (mobile) viewports; sections then stack as in the regular layout.
-  const isSmallScreen = useIsSmallScreen()
-  const showSectionsSidepanel =
-    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
-  const noPadding = styling?.noPadding ?? false
-
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
   const isAutosubmit = submitConfig?.type === "autosubmit"
@@ -628,6 +668,72 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     submitConfig?.savingMessage ?? forms.actionBar.saving
 
   const successMessageDuration = submitConfig?.successMessageDuration
+
+  return {
+    isActionBar,
+    isAutosubmit,
+    submitLabel,
+    submitIcon,
+    showSubmitWhenDirty,
+    hideActionBar,
+    showSubmitButton,
+    discardableChanges,
+    discardLabel,
+    discardIcon,
+    actionBarIdleLabel,
+    actionBarSavingLabel,
+    successMessageDuration,
+  }
+}
+
+function F0FormSingleSchema<TSchema extends F0FormSchema>(
+  props: F0FormPropsWithSingleSchema<TSchema>
+) {
+  const i18n = useI18n()
+  const { forms } = i18n
+
+  const {
+    name,
+    schema,
+    sections,
+    defaultValues,
+    onSubmit,
+    submitConfig,
+    className,
+    errorTriggerMode = "on-submit",
+    styling,
+    formRef,
+    isLoading: isFormLoading,
+    defaultValuesParamsSchema,
+    defaultValuesFn,
+    description,
+    module,
+  } = props
+
+  const { useUpload } = props
+
+  // Resolve styling configuration. The sidepanel is hidden entirely on
+  // small (mobile) viewports; sections then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
+  const noPadding = styling?.noPadding ?? false
+
+  const {
+    isActionBar,
+    isAutosubmit,
+    submitLabel,
+    submitIcon,
+    showSubmitWhenDirty,
+    hideActionBar,
+    showSubmitButton,
+    discardableChanges,
+    discardLabel,
+    discardIcon,
+    actionBarIdleLabel,
+    actionBarSavingLabel,
+    successMessageDuration,
+  } = resolveSubmitConfig(submitConfig, forms)
 
   // Infer the form values type from the schema
   type TValues = z.infer<TSchema>
@@ -744,39 +850,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const formValuesForSections =
     showSectionsSidepanel && hasConditionalSections ? form.watch() : undefined
 
-  // Sections whose renderIf currently evaluates to false are not rendered by
-  // SectionRenderer, so they must not be offered in the sidepanel either.
-  // Computed inline (not memoized) because watch() can return the same
-  // mutated object across renders.
-  const visibleSectionIds = formValuesForSections
-    ? definition
-        .filter((item): item is SectionDefinition => item.type === "section")
-        .filter(
-          (item) =>
-            !item.section.renderIf ||
-            evaluateRenderIf(item.section.renderIf, formValuesForSections)
-        )
-        .map((item) => item.id)
-    : sectionIds
-
-  // If the active section becomes hidden by renderIf, fall back to the first
-  // visible one.
-  const effectiveActiveSection =
-    activeSection && visibleSectionIds.includes(activeSection)
-      ? activeSection
-      : visibleSectionIds[0]
-
-  // Convert visible sections to TOCItems for the TableOfContent component.
-  // Built inline (not memoized) because visibleSectionIds is recomputed on
-  // every render when conditional sections exist.
-  const tocItems: TOCItem[] =
-    sections && showSectionsSidepanel
-      ? visibleSectionIds.map((sectionId) => ({
-          id: sectionId,
-          label: sections[sectionId]?.title ?? sectionId,
-          onClick: () => handleSectionClick(sectionId),
-        }))
-      : []
+  const { effectiveActiveSection, tocItems } = resolveVisibleSections({
+    formValues: formValuesForSections,
+    definition,
+    sectionIds,
+    sections,
+    showSectionsSidepanel,
+    activeSection,
+    onSectionClick: handleSectionClick,
+  })
 
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState

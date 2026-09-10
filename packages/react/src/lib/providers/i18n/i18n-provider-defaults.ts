@@ -401,6 +401,11 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    // How long the turn has been thinking, shown beside the step that is
+    // running. Two keys rather than one unbounded second count, because "137s"
+    // reads badly past a couple of minutes — the consumer picks.
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -449,6 +454,13 @@ export const defaultTranslations = {
       creditsError: "Could not load credits",
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?",
+    },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage",
     },
     reportCard: {
       tableLabel: "Table",

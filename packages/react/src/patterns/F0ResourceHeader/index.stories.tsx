@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
-import { expect, fn, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { PrimaryDropdownAction } from "@/experimental/Information/utils"
 import * as Icon from "@/icons/app"
 import { Archive, Comment, Download, ExternalLink, Pencil } from "@/icons/app"
@@ -20,7 +20,8 @@ const meta: Meta<typeof F0ResourceHeader> = {
       description: "Main heading identifying the resource",
     },
     description: {
-      description: "Supporting text providing additional context",
+      description:
+        "Supporting text providing additional context. Markdown, so it can carry inline formatting such as a link",
     },
     status: {
       description: "Visual indicator of the resource's current state",
@@ -562,6 +563,34 @@ export const WithLongDescription: Story = {
   },
 }
 
+export const WithRichDescription: Story = {
+  tags: ["!dev"],
+  args: {
+    ...Default.args,
+    description:
+      "Owns the hiring bar for the design org. See the [interview rubric](https://example.com/rubric) before scheduling a loop.",
+  },
+}
+
+export const RichDescriptionFocusExpands: Story = {
+  tags: ["!dev", "!autodocs"],
+  args: {
+    ...Default.args,
+    description:
+      "Owns the hiring bar for the design org, from the first screen through to the debrief, and keeps the loop calibrated across every panel. See the [interview rubric](https://example.com/rubric) before scheduling a loop, and log the debrief the same day.",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const toggle = await canvas.findByRole("button", { name: /show/i })
+    await expect(toggle).toHaveAttribute("aria-expanded", "false")
+
+    // Tabbable while the clamp hides it, so focus has to expand (WCAG 2.4.7).
+    canvas.getByRole("link", { name: "interview rubric" }).focus()
+
+    await waitFor(() => expect(toggle).toHaveAttribute("aria-expanded", "true"))
+  },
+}
+
 export const NoDescription: Story = {
   tags: ["!dev"],
   args: {
@@ -644,6 +673,9 @@ export const Snapshot: Story = {
         <F0ResourceHeader {...(Default.args as F0ResourceHeaderProps)} />
         <F0ResourceHeader
           {...(WithLongDescription.args as F0ResourceHeaderProps)}
+        />
+        <F0ResourceHeader
+          {...(WithRichDescription.args as F0ResourceHeaderProps)}
         />
         <F0ResourceHeader
           {...(WithDropdownAction.args as F0ResourceHeaderProps)}

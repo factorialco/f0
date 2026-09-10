@@ -1,5 +1,75 @@
 # Changelog
 
+## [6.98.0](https://github.com/factorialco/f0/compare/f0-react-v6.97.2...f0-react-v6.98.0) (2026-09-10)
+
+
+### Features
+
+* **F0AiChatTextArea:** [FCT-63305] let the host set the credit warning text and action label ([#5512](https://github.com/factorialco/f0/issues/5512)) ([9511238](https://github.com/factorialco/f0/commit/9511238a12c541bca75e97b8432fef2cc5ed5e89))
+
+## [6.97.2](https://github.com/factorialco/f0/compare/f0-react-v6.97.1...f0-react-v6.97.2) (2026-09-10)
+
+
+### Bug Fixes
+
+* **F0Select:** close the dropdown when a bottom action is clicked ([#5514](https://github.com/factorialco/f0/issues/5514)) ([1bffee6](https://github.com/factorialco/f0/commit/1bffee68dc966def96cff38474944d79ea6efec9))
+
+## [6.97.1](https://github.com/factorialco/f0/compare/f0-react-v6.97.0...f0-react-v6.97.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** persist which view is selected ([#5490](https://github.com/factorialco/f0/issues/5490)) ([bef4ea2](https://github.com/factorialco/f0/commit/bef4ea23d6bcc3026fccb3f78fcbc6698e509a99))
+
+## [6.97.0](https://github.com/factorialco/f0/compare/f0-react-v6.96.0...f0-react-v6.97.0) (2026-09-10)
+
+
+### Features
+
+* **icons:** add PinOff app icon ([#5463](https://github.com/factorialco/f0/issues/5463)) ([9d83c43](https://github.com/factorialco/f0/commit/9d83c43798aa1a8cd4c664ad204a0b01ea215370))
+
+## [6.96.0](https://github.com/factorialco/f0/compare/f0-react-v6.95.0...f0-react-v6.96.0) (2026-09-10)
+
+
+### Features
+
+* **F0ResourceHeader:** accept a md as the description ([#5489](https://github.com/factorialco/f0/issues/5489)) ([de55434](https://github.com/factorialco/f0/commit/de554349643227246176b16596d0e0bd5795dc6e))
+
+## [6.95.0](https://github.com/factorialco/f0/compare/f0-react-v6.94.0...f0-react-v6.95.0) (2026-09-10)
+
+
+### Features
+
+* **F0AiChat:** add usage-limits popover and usageLimits prop on the composer ([#5434](https://github.com/factorialco/f0/issues/5434)) ([c07fd73](https://github.com/factorialco/f0/commit/c07fd733d3ad03a7287392f97bbaeb908a56e18f))
+
+## [6.94.0](https://github.com/factorialco/f0/compare/f0-react-v6.93.1...f0-react-v6.94.0) (2026-09-10)
+
+
+### Features
+
+* **EditableTable:** forward select actions to the cell ([#5506](https://github.com/factorialco/f0/issues/5506)) ([8107ac0](https://github.com/factorialco/f0/commit/8107ac02277cb1567c6c3c739b980dab66edb354))
+
+## [6.93.1](https://github.com/factorialco/f0/compare/f0-react-v6.93.0...f0-react-v6.93.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **ApplicationFrame:** serve the main content before the side panel ([#5328](https://github.com/factorialco/f0/issues/5328)) ([ef98943](https://github.com/factorialco/f0/commit/ef9894375fe5f1e0614a2c9064e9cb1da3837ac4))
+
+## [6.93.0](https://github.com/factorialco/f0/compare/f0-react-v6.92.0...f0-react-v6.93.0) (2026-09-09)
+
+
+### Features
+
+* **F0Checkbox:** stabilizing checkbox, adding description prop ([#5449](https://github.com/factorialco/f0/issues/5449)) ([0bdb512](https://github.com/factorialco/f0/commit/0bdb512d6c096c4251681e81ddb8128c24c9fe3c))
+
+## [6.92.0](https://github.com/factorialco/f0/compare/f0-react-v6.91.2...f0-react-v6.92.0) (2026-09-09)
+
+
+### Features
+
+* **NewHomeLayout:** give the Home an analytics seam ([#5488](https://github.com/factorialco/f0/issues/5488)) ([8fc49e1](https://github.com/factorialco/f0/commit/8fc49e13f9af98e33f05fd7ae64c9dd6c6f5c4ce))
+
 ## [6.91.2](https://github.com/factorialco/f0/compare/f0-react-v6.91.1...f0-react-v6.91.2) (2026-09-09)
 
 

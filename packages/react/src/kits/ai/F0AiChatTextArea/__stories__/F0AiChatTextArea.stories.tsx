@@ -31,7 +31,10 @@ import type {
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
-import type { F0AiChatTextAreaSubmitPayload } from "../types"
+import type {
+  AiChatTextAreaUsageLimits,
+  F0AiChatTextAreaSubmitPayload,
+} from "../types"
 
 const ROTATING_PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",
@@ -318,6 +321,7 @@ type WrapperProps = {
   clarifyingQuestion?: ClarifyingQuestionState | null
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
+  usageLimits?: AiChatTextAreaUsageLimits
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenSuggestionsPlacement?: "above" | "inside"
@@ -340,6 +344,7 @@ const Wrapper = ({
   clarifyingQuestion = null,
   creditWarning,
   disclaimer,
+  usageLimits,
   footer,
   welcomeScreenSuggestions,
   welcomeScreenSuggestionsPlacement,
@@ -410,6 +415,7 @@ const Wrapper = ({
         onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
+        usageLimits={usageLimits}
         footer={footer}
         welcomeScreenSuggestions={welcomeScreenSuggestions}
         welcomeScreenSuggestionsPlacement={welcomeScreenSuggestionsPlacement}
@@ -521,6 +527,21 @@ export const WithRotatingPlaceholders: Story = {
 export const WithDisclaimer: Story = {
   args: {
     disclaimer: DISCLAIMER,
+  },
+}
+
+export const WithUsageLimits: Story = {
+  args: {
+    disclaimer: DISCLAIMER,
+    usageLimits: {
+      usage: {
+        usedPercentage: 30,
+        onSeeCompany: () => console.log("see company"),
+        sections: [
+          { id: "company", label: "Company allowance", usedPercentage: 70 },
+        ],
+      },
+    },
   },
 }
 
@@ -831,6 +852,16 @@ export const InProgress: Story = {
 export const WithCreditWarning: Story = {
   args: {
     creditWarning: CREDIT_WARNING,
+  },
+}
+
+export const WithCustomCreditWarning: Story = {
+  args: {
+    creditWarning: {
+      ...CREDIT_WARNING,
+      text: "You've run out of One",
+      actionLabel: "Request",
+    },
   },
 }
 

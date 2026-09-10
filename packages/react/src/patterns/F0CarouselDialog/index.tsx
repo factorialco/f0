@@ -206,16 +206,14 @@ const F0CarouselDialogComponent = ({
   // Nowhere to step while the dialog doesn't know where it is standing: `index`
   // is 0 in that state purely so the arithmetic below has something to work
   // with, and stepping from a position you don't hold would land anywhere.
-  const previousId = waiting
-    ? undefined
-    : wraps
-      ? items[(index - 1 + loaded) % loaded]?.id
-      : items[index - 1]?.id
-  const nextId = waiting
-    ? undefined
-    : wraps
-      ? items[(index + 1) % loaded]?.id
-      : items[index + 1]?.id
+  /** The id one step away, joining the ends up when the set wraps. */
+  const stepId = (step: number) =>
+    wraps
+      ? items[(index + step + loaded) % loaded]?.id
+      : items[index + step]?.id
+
+  const previousId = waiting ? undefined : stepId(-1)
+  const nextId = waiting ? undefined : stepId(1)
 
   const goPrevious = useCallback(() => {
     if (previousId) {
@@ -395,14 +393,18 @@ const F0CarouselDialogComponent = ({
     labels?.position ??
     ((n: number, of: number) => `${n} of ${of}${openEnded ? "+" : ""}`)
 
-  const live = {
+  /** What the dialog shows right now: the item, or the placeholder standing
+   *  in for a page still on its way. */
+  const liveContent = () => ({
     title: waiting ? placeholder?.title : current?.title,
     content: waiting ? placeholder?.content : current?.content,
     status:
       !waiting && (loaded > 1 || hasMore)
         ? position(index + 1, total)
         : undefined,
-  }
+  })
+
+  const live = liveContent()
 
   /**
    * WHAT THE READER LAST SAW, held for the length of the closing animation.

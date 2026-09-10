@@ -1,5 +1,6 @@
 "use client"
 
+import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import {
   createContext,
   type FC,
@@ -8,9 +9,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
+import { useMediaQuery } from "usehooks-ts"
 import { useI18n } from "@/lib/providers/i18n"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
@@ -24,6 +27,11 @@ import {
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
+import {
+  panelBoundsFor,
+  resolvePanelWidth,
+  type PanelBounds,
+} from "../utils/panelWidth"
 import { usePersistedState } from "./usePersistedState"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
@@ -34,8 +42,7 @@ const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
 
-const CHAT_WIDTH_MIN = 300
-const CHAT_WIDTH_MAX = 712
+const { min: CHAT_WIDTH_MIN, max: CHAT_WIDTH_MAX } = panelWidths
 
 /** How long a pending panel-content restore may wait for the host before
  * falling back to the AI chat — a host that never resolves (the conversation
@@ -103,6 +110,45 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   // Not persisted: this is the live state of a pointer drag, not a preference.
   const [isResizing, setIsResizing] = useState(false)
+
+  // How much room the frame has for panel + content, published by
+  // ApplicationFrame from its measured content box. 0 means "not measured yet".
+  const [frameWidth, setFrameWidth] = useState(0)
+
+  const chatWidthBounds: PanelBounds = useMemo(
+    () => panelBoundsFor(frameWidth),
+    [frameWidth]
+  )
+
+  // `chatWidth` above is the PREFERENCE — what the user last dragged to, kept
+  // in localStorage against the absolute range. This is what the layout
+  // actually reserves. Narrowing the window must not overwrite a width chosen
+  // deliberately on a wider one, so the clamp lives here and not in the
+  // setter: widen the window again and the preference comes back untouched.
+  const effectiveChatWidth = useMemo(
+    () => resolvePanelWidth(chatWidth, frameWidth),
+    [chatWidth, frameWidth]
+  )
+
+  // Whether the panel covers the frame instead of sitting beside it.
+  //
+  // Derived once, here, because two consumers need the same answer: the frame
+  // reserves (or doesn't) against it, and the window hides its resize handle
+  // against it. They each computed their own version before, which is how you
+  // end up dragging a seam on a panel that is already full-screen.
+  //
+  // Width alone decides it for a mouse — a half-screen laptop window is a
+  // legitimate place to want two columns. Touch is judged on the viewport
+  // instead, so a tablet still gets the drawer it expects rather than two
+  // columns nobody can hit.
+  const isCoarsePointer = useMediaQuery("(pointer: coarse)", {
+    initializeWithValue: true,
+  })
+  const isCompactViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
+  const panelOverlays =
+    (isCoarsePointer && isCompactViewport) || chatWidthBounds.shouldOverlay
 
   const [open, setOpen] = usePersistedState<boolean>({
     key: CHAT_OPEN_STORAGE_KEY,
@@ -409,6 +455,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        effectiveChatWidth,
+        chatWidthBounds,
+        panelOverlays,
+        setFrameWidth,
         isResizing,
         setIsResizing,
         tracking,
@@ -507,6 +557,10 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   chatWidth: DEFAULT_CHAT_WIDTH,
+  effectiveChatWidth: DEFAULT_CHAT_WIDTH,
+  // Unmeasured, so the absolute range — same fallback the provider starts on.
+  chatWidthBounds: panelBoundsFor(0),
+  panelOverlays: false,
   panelSide: "right",
   panelContentSide: "right",
   visualizationMode: "sidepanel",

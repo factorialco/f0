@@ -221,6 +221,16 @@ export interface HomeListItemProps {
   href?: string
   /** A trailing chevron. Off — the row's link affordance is the row itself. */
   showChevron?: boolean
+  /**
+   * Called when the row is activated, ALONGSIDE the navigation its `href`
+   * performs — it neither replaces nor gates it, so a middle-click or a
+   * modified click still behaves like the link it is.
+   *
+   * The Home's analytics seam, wired by the `list` slot from the layout's
+   * `tracking` prop. NOT a click behavior: a row's only one is still its
+   * `href`, which is why this is not part of the row DATA a host writes.
+   */
+  onActivate?: () => void
 }
 
 export function HomeListItem({
@@ -237,6 +247,7 @@ export function HomeListItem({
   unread = false,
   href,
   showChevron = false,
+  onActivate,
 }: HomeListItemProps) {
   const hasActions = Boolean(actions?.length)
   // The card the row landed in — the row's controls step up with it.
@@ -353,6 +364,7 @@ export function HomeListItem({
   const row = href ? (
     <Link
       href={href}
+      onClick={onActivate}
       className={cn(className, "no-underline")}
       {...(isExternalHref(href) ? { target: "_blank", rel: "noreferrer" } : {})}
     >

@@ -428,12 +428,34 @@
         "**/*.stories.*",
         "**/__stories__/**",
         "**/*.test.*",
-        "**/__tests__/**"
+        "**/__tests__/**",
+        "**/mocks/**",
+        "**/__mocks__/**"
       ],
       "rules": {
         "no-console": "off",
         "no-await-in-loop": "off", // stories and tests step through flows one await at a time
-        "sonarjs/no-identical-functions": "off" // each story and test case reads on its own
+        "sonarjs/no-identical-functions": "off", // each story and test case reads on its own
+        "sonarjs/cognitive-complexity": "off" // fixture tables and story flows score on their size, splitting them makes them harder to read
+      }
+    },
+    {
+      // Hand-run generators (`node src/patterns/F0Map/styles/buildStyles.mjs`).
+      // Their score is the shape of a data table — one row per colour, each
+      // picking a light or dark value — and splitting that up is what would
+      // make it unreadable. Not shipped code, like `.scripts/**` above.
+      "files": ["**/*.mjs"],
+      "rules": {
+        "sonarjs/cognitive-complexity": "off"
+      }
+    },
+    {
+      // Extracted from @radix-ui/react-select and kept diffable against the
+      // upstream file it names (see the directory's README), so its functions
+      // are not ours to reshape.
+      "files": ["**/components/radix-ui/**"],
+      "rules": {
+        "sonarjs/cognitive-complexity": "off"
       }
     },
     {

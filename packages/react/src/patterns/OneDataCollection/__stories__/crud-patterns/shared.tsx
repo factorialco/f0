@@ -47,7 +47,7 @@ export const resourceFilters = {
     options: {
       options: [
         { value: "Alicia Keys", label: "Alicia Keys" },
-        { value: "Dani Moreno", label: "Dani Moreno" },
+        { value: "Jordan Avery", label: "Jordan Avery" },
         { value: "Marta Soler", label: "Marta Soler" },
         { value: "Nora Park", label: "Nora Park" },
       ],
@@ -66,7 +66,7 @@ export const initialResources: Resource[] = [
   {
     id: "resource-2",
     name: "Engineering onboarding",
-    owner: "Dani Moreno",
+    owner: "Jordan Avery",
     status: "Draft",
     summary: "Checklist for laptop, accounts, and first-week sessions.",
   },

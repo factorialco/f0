@@ -173,59 +173,70 @@ export const locateMentions = <T extends { name: string }>(
     end: number
   }
 
-  const groupsByPattern = new Map<string, CanonicalGroup>()
-  for (const entry of entries) {
-    const candidate = (() => {
-      const asWritten = `@${entry.name}`
-      return { entry, asWritten, pattern: sanitizeDisplayText(asWritten) }
-    })()
-    const group = groupsByPattern.get(candidate.pattern)
-    if (group) {
-      group.candidates.push(candidate)
-    } else {
-      groupsByPattern.set(candidate.pattern, {
-        pattern: candidate.pattern,
-        candidates: [candidate],
-      })
+  /** Entries sharing a canonical spelling become one group, longest first. */
+  const groupByPattern = (): CanonicalGroup[] => {
+    const groupsByPattern = new Map<string, CanonicalGroup>()
+    for (const entry of entries) {
+      const candidate = (() => {
+        const asWritten = `@${entry.name}`
+        return { entry, asWritten, pattern: sanitizeDisplayText(asWritten) }
+      })()
+      const group = groupsByPattern.get(candidate.pattern)
+      if (group) {
+        group.candidates.push(candidate)
+      } else {
+        groupsByPattern.set(candidate.pattern, {
+          pattern: candidate.pattern,
+          candidates: [candidate],
+        })
+      }
     }
+
+    return [...groupsByPattern.values()].sort(
+      (a, b) => b.pattern.length - a.pattern.length
+    )
   }
 
-  const groups = [...groupsByPattern.values()].sort(
-    (a, b) => b.pattern.length - a.pattern.length
-  )
-  const found: LocatedGroup[] = []
-  const foldable = NON_ASCII.test(text)
-  for (const group of groups) {
-    let from = 0
-    while (true) {
-      const at = text.indexOf("@", from)
-      if (at === -1) {
-        break
+  /** Every place a group's text occurs, in reading order, longest group first. */
+  const findOccurrences = (groups: CanonicalGroup[]): LocatedGroup[] => {
+    const found: LocatedGroup[] = []
+    const foldable = NON_ASCII.test(text)
+    for (const group of groups) {
+      let from = 0
+      while (true) {
+        const at = text.indexOf("@", from)
+        if (at === -1) {
+          break
+        }
+        const end = group.candidates.reduce(
+          (matchedEnd, { asWritten }) =>
+            Math.max(
+              matchedEnd,
+              matchEnd(text, at, {
+                pattern: group.pattern,
+                asWritten,
+                foldable,
+              })
+            ),
+          -1
+        )
+        if (end === -1) {
+          from = at + 1
+          continue
+        }
+        found.push({ group, start: at, end })
+        from = end
       }
-      const end = group.candidates.reduce(
-        (matchedEnd, { asWritten }) =>
-          Math.max(
-            matchedEnd,
-            matchEnd(text, at, {
-              pattern: group.pattern,
-              asWritten,
-              foldable,
-            })
-          ),
-        -1
-      )
-      if (end === -1) {
-        from = at + 1
-        continue
-      }
-      found.push({ group, start: at, end })
-      from = end
     }
+
+    found.sort(
+      (a, b) =>
+        a.start - b.start || b.group.pattern.length - a.group.pattern.length
+    )
+    return found
   }
-  found.sort(
-    (a, b) =>
-      a.start - b.start || b.group.pattern.length - a.group.pattern.length
-  )
+
+  const found = findOccurrences(groupByPattern())
 
   const clean: LocatedGroup[] = []
   let lastEnd = 0

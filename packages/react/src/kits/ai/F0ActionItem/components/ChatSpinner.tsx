@@ -1,3 +1,4 @@
+import { MotionGlobalConfig } from "motion"
 import type { CSSProperties, Ref } from "react"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
 import { cn } from "@/lib/utils"
@@ -97,7 +98,15 @@ const ChatSpinnerComponent = (
       typeof window !== "undefined" && window.matchMedia
         ? window.matchMedia("(prefers-reduced-motion: reduce)")
         : null
-    let reduced = motionQuery?.matches ?? false
+    // `skipAnimations` belongs on the same switch, and for the same reason:
+    // this loop rebuilds and writes 960 polygons per frame. The off-screen
+    // pause below cannot help under jsdom, where `IntersectionObserver` is an
+    // inert mock — so a test that walked a per-second counter to eight seconds
+    // was paying for ~500 of these frames, which is how three of them ended up
+    // over the 5s CI timeout.
+    const shouldRest = () =>
+      MotionGlobalConfig.skipAnimations || (motionQuery?.matches ?? false)
+    let reduced = shouldRest()
 
     const paint = (count: number) => {
       const quads = state.quads
@@ -116,6 +125,57 @@ const ChatSpinnerComponent = (
       }
     }
 
+    /** The spin has finished: pause before the next one, or come to rest. */
+    const endSpin = (now: number) => {
+      if (playingRef.current) {
+        phase = "pause"
+        pauseStart = now
+      } else {
+        phase = "rest"
+      }
+    }
+
+    /** The pause is over: spin again, or come to rest. */
+    const endPause = (now: number) => {
+      if (playingRef.current) {
+        phase = "spin"
+        start = now
+      } else {
+        phase = "rest"
+      }
+    }
+
+    /**
+     * Fraction of TOTAL_ANGLE (two whole turns) to show this frame. "pause"
+     * and "rest" both leave it at 0 — the static mark.
+     */
+    const angleProgressAt = (now: number): number => {
+      if (variant === "continuous") {
+        // Constant forward rotation, deliberately un-eased: TOTAL_ANGLE is
+        // exactly two turns, so the 1 → 0 wrap is seamless, whereas easing it
+        // would drop a stall into every wrap — and this variant exists to read
+        // as "never resting", against a `default` that pauses for PAUSE_MS.
+        return ((now - start) % SPIN_MS) / SPIN_MS
+      }
+
+      if (phase === "spin") {
+        const p = Math.min((now - start) / SPIN_MS, 1)
+        // At p === 1 the mark is back at its base orientation; hand over to the
+        // pause on 0 so the resting pose is the plain One mark.
+        if (p >= 1) {
+          endSpin(now)
+          return 0
+        }
+        return spinEase(p)
+      }
+
+      if (phase === "pause" && now - pauseStart >= PAUSE_MS) {
+        endPause(now)
+      }
+
+      return 0
+    }
+
     const tick = (now: number) => {
       if (!everTicked) {
         start = now
@@ -123,39 +183,7 @@ const ChatSpinnerComponent = (
         everTicked = true
       }
 
-      // Fraction of TOTAL_ANGLE (two whole turns) to show this frame.
-      let angleProgress = 0
-
-      if (variant === "continuous") {
-        // Constant forward rotation, deliberately un-eased: TOTAL_ANGLE is
-        // exactly two turns, so the 1 → 0 wrap is seamless, whereas easing it
-        // would drop a stall into every wrap — and this variant exists to read
-        // as "never resting", against a `default` that pauses for PAUSE_MS.
-        angleProgress = ((now - start) % SPIN_MS) / SPIN_MS
-      } else if (phase === "spin") {
-        const p = Math.min((now - start) / SPIN_MS, 1)
-        // At p === 1 the mark is back at its base orientation; hand over to the
-        // pause on 0 so the resting pose is the plain One mark.
-        angleProgress = p < 1 ? spinEase(p) : 0
-        if (p >= 1) {
-          if (playingRef.current) {
-            phase = "pause"
-            pauseStart = now
-          } else {
-            phase = "rest"
-          }
-        }
-      } else if (phase === "pause") {
-        if (now - pauseStart >= PAUSE_MS) {
-          if (playingRef.current) {
-            phase = "spin"
-            start = now
-          } else {
-            phase = "rest"
-          }
-        }
-      }
-      // "pause" and "rest" both leave angleProgress at 0 — the static mark.
+      const angleProgress = angleProgressAt(now)
 
       const axisPhase = ((now - mount) / PRECESSION_MS) % 1
       const count = buildFrameInto(state, angleProgress, size, axisPhase)
@@ -234,7 +262,7 @@ const ChatSpinnerComponent = (
     }
 
     const onMotionPref = () => {
-      reduced = motionQuery?.matches ?? false
+      reduced = shouldRest()
       if (reduced) {
         stopLoop()
         paint(buildFrameInto(state, 0, size, 0))

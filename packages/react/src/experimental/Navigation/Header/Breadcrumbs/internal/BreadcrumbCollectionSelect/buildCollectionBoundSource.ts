@@ -36,6 +36,57 @@ export interface BuildCollectionBoundSourceOptions {
 }
 
 /**
+ * The filters to seed. An explicitly persisted empty state ({}) IS seeded — it
+ * means the user cleared the filters, and the list hydrates it as cleared too.
+ * But empty BY PRUNING (every persisted key unknown — schema drift, not user
+ * intent) keeps the definition's own currentFilters.
+ */
+function seededFilters(
+  source: AnyDataSourceDefinition,
+  storage: DataCollectionStorage
+): AnyDataSourceDefinition["currentFilters"] {
+  const resolved = resolveDataCollectionFilters(storage)
+  if (resolved === undefined) {
+    return source.currentFilters
+  }
+
+  const declaredFilters = source.filters
+  const pruned: FiltersState<FiltersDefinition> = declaredFilters
+    ? Object.fromEntries(
+        Object.entries(resolved).filter(([key]) => key in declaredFilters)
+      )
+    : resolved
+
+  if (Object.keys(pruned).length > 0 || Object.keys(resolved).length === 0) {
+    return pruned
+  }
+  return source.currentFilters
+}
+
+/**
+ * The sorting to seed: the persisted one when its field is still declared.
+ * `null` is the user having cleared the sorting, and is seeded as cleared.
+ */
+function seededSortings(
+  source: AnyDataSourceDefinition,
+  storage: DataCollectionStorage
+): AnyDataSourceDefinition["currentSortings"] {
+  if (storage.sortings === undefined) {
+    return source.currentSortings
+  }
+  if (storage.sortings === null) {
+    return null
+  }
+  if (source.sortings && storage.sortings.field in source.sortings) {
+    return {
+      field: storage.sortings.field,
+      order: storage.sortings.order,
+    }
+  }
+  return source.currentSortings
+}
+
+/**
  * Builds the data source a collection-bound jump-to select fetches from:
  * the declared definition with the persisted OneDataCollection state seeded
  * in, adapted for select consumption.
@@ -69,40 +120,15 @@ export function buildCollectionBoundSource(
   const seedSortings = options?.seed?.sortings ?? true
   const showFilters = options?.showFilters ?? false
 
-  // An explicitly persisted empty state ({}) IS seeded — it means the user
-  // cleared the filters, and the list hydrates it as cleared too. But empty
-  // BY PRUNING (every persisted key unknown — schema drift, not user intent)
-  // keeps the definition's currentFilters, as before.
-  let currentFilters = source.currentFilters
-  if (seedFilters && storage) {
-    const resolved = resolveDataCollectionFilters(storage)
-    if (resolved !== undefined) {
-      const declaredFilters = source.filters
-      const pruned: FiltersState<FiltersDefinition> = declaredFilters
-        ? Object.fromEntries(
-            Object.entries(resolved).filter(([key]) => key in declaredFilters)
-          )
-        : resolved
-      if (
-        Object.keys(pruned).length > 0 ||
-        Object.keys(resolved).length === 0
-      ) {
-        currentFilters = pruned
-      }
-    }
-  }
+  const currentFilters =
+    seedFilters && storage
+      ? seededFilters(source, storage)
+      : source.currentFilters
 
-  let currentSortings = source.currentSortings
-  if (seedSortings && storage && storage.sortings !== undefined) {
-    if (storage.sortings === null) {
-      currentSortings = null
-    } else if (source.sortings && storage.sortings.field in source.sortings) {
-      currentSortings = {
-        field: storage.sortings.field,
-        order: storage.sortings.order,
-      }
-    }
-  }
+  const currentSortings =
+    seedSortings && storage
+      ? seededSortings(source, storage)
+      : source.currentSortings
 
   const {
     filters: sourceFilters,
