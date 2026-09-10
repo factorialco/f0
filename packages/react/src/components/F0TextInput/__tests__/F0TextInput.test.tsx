@@ -49,7 +49,7 @@ describe("F0TextInput", () => {
     it("renders an eye toggle that reveals the value when clicked", () => {
       render(<F0TextInput label="Password" type="password" />)
 
-      const toggle = screen.getByRole("button", { name: "Show Password" })
+      const toggle = screen.getByRole("button", { name: "Show password" })
       fireEvent.click(toggle)
 
       const input = screen.getAllByLabelText("Password")[0] as HTMLInputElement
@@ -60,10 +60,10 @@ describe("F0TextInput", () => {
       render(<F0TextInput label="Password" type="password" />)
 
       const initialToggle = screen.getByRole("button", {
-        name: "Show Password",
+        name: "Show password",
       })
       fireEvent.click(initialToggle)
-      const hideToggle = screen.getByRole("button", { name: "Hide Password" })
+      const hideToggle = screen.getByRole("button", { name: "Hide password" })
       fireEvent.click(hideToggle)
 
       const input = screen.getAllByLabelText("Password")[0] as HTMLInputElement
@@ -112,13 +112,18 @@ describe("F0TextInput", () => {
       expect(countIcons(privateRender.container)).toBeLessThan(
         countIcons(passwordRender.container)
       )
-      // Every masked field names its eye after its own label, so the two
-      // renders here get different names rather than a shared fixed string.
+      // `private` is named after its own label; `password` keeps the fixed
+      // conventional string, so the two never share a name.
       expect(
         within(privateRender.container).queryByRole("button", {
-          name: "Show Pwd",
+          name: "Show password",
         })
       ).not.toBeInTheDocument()
+      expect(
+        within(passwordRender.container).getByRole("button", {
+          name: "Show password",
+        })
+      ).toBeInTheDocument()
       expect(
         within(privateRender.container).getByRole("button", { name: /show/i })
       ).toBeInTheDocument()
@@ -238,6 +243,17 @@ describe("F0TextInput", () => {
   })
 
   describe("masked", () => {
+    it("names a bare masked field after its label, unlike password", () => {
+      render(<F0TextInput label="IBAN" value="ES91 2100" masked />)
+
+      expect(
+        screen.getByRole("button", { name: "Show IBAN" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Show password" })
+      ).not.toBeInTheDocument()
+    })
+
     it("renders one eye for type=private, not two", () => {
       render(<F0TextInput label="SSN" type="private" value="123-45-6789" />)
 

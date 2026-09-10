@@ -35,11 +35,14 @@ export const defaultTranslations = {
   },
   inputs: {
     /**
-     * The eye toggle is named after the field, for every masked field —
-     * password, private, or any input given `masked`. It used to have a fixed
-     * "Show password" string; naming it after the label tells multiple masked
-     * fields on one page apart, which the fixed string could not.
+     * `type="password"` keeps the conventional fixed string. Every other masked
+     * field, `private` and a bare `masked` included, is named after its own
+     * label, which is what tells two of them on one page apart.
      */
+    password: {
+      show: "Show password",
+      hide: "Hide password",
+    },
     private: {
       show: "Show {{label}}",
       hide: "Hide {{label}}",

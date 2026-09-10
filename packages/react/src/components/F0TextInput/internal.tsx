@@ -1,6 +1,7 @@
 import { ComponentProps, HTMLInputTypeAttribute, useMemo } from "react"
 import { InputFieldProps } from "@/components/F0InputField"
 import { LockLocked } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 
 export type InputInternalProps = Pick<
@@ -74,6 +75,7 @@ const InputInternal = ({
   masked,
   ...props
 }: InputInternalProps) => {
+  const i18n = useI18n()
   // `password` and `private` are masked by definition; the field's own eye
   // flips them back. It owns the masking, so there is one implementation of
   // the toggle rather than one per input type.
@@ -98,6 +100,14 @@ const InputInternal = ({
       // entered is what the button is for. Any other masked value loses it,
       // because the trailing controls act on a value being read.
       maskToggleAlwaysVisible={maskable}
+      // `password` keeps the conventional fixed string. Every other masked
+      // value, `private` included, is named after its own label, which is what
+      // tells two of them on one page apart.
+      maskToggleLabels={
+        type === "password"
+          ? [i18n.inputs.password.show, i18n.inputs.password.hide]
+          : undefined
+      }
       // Email addresses are case-insensitive, so normalise to lowercase as the
       // user types (lowercasing preserves length, so the caret doesn't jump).
       onChange={(value) =>

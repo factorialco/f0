@@ -257,6 +257,15 @@ export type InputFieldProps<T> = {
    */
   maskToggleAlwaysVisible?: boolean
   /**
+   * Overrides the eye's `[show, hide]` accessible names.
+   *
+   * The default names the field, which is what tells two masked values on one
+   * page apart. `F0TextInput type="password"` overrides it with the
+   * conventional fixed "Show password", the string it has always used. Not part
+   * of any public input's API.
+   */
+  maskToggleLabels?: [string, string]
+  /**
    * Puts the caret in the field as soon as it can take it, and nothing sooner.
    *
    * `autoFocus` only fires at mount, which is no use to a value that starts
@@ -313,6 +322,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       transparent,
       masked: maskable,
       maskToggleAlwaysVisible,
+      maskToggleLabels,
       focusOnEditable,
       ...props
     }: InputFieldProps<string>,
@@ -757,12 +767,16 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                       size="sm"
                       hideLabel
                       icon={revealed ? EyeVisible : EyeInvisible}
-                      label={i18n.t(
-                        revealed
-                          ? "inputs.private.hide"
-                          : "inputs.private.show",
-                        { label }
-                      )}
+                      label={
+                        maskToggleLabels
+                          ? maskToggleLabels[revealed ? 1 : 0]
+                          : i18n.t(
+                              revealed
+                                ? "inputs.private.hide"
+                                : "inputs.private.show",
+                              { label }
+                            )
+                      }
                       disabled={disabled}
                       onClick={(event) => {
                         // The content area has its own click handler

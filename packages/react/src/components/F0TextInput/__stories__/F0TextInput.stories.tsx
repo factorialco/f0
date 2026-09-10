@@ -112,16 +112,12 @@ export const Password: Story = {
 
     await expect(input).toHaveAttribute("type", "password")
 
-    // The eye is named after the field, not "password": that is what tells
-    // two masked fields on one page apart.
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Show Label text here" })
-    )
+    // `password` keeps the conventional fixed string. Every other masked
+    // field is named after its own label instead.
+    await userEvent.click(canvas.getByRole("button", { name: "Show password" }))
     await expect(input).toHaveAttribute("type", "text")
 
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Hide Label text here" })
-    )
+    await userEvent.click(canvas.getByRole("button", { name: "Hide password" }))
     await expect(input).toHaveAttribute("type", "password")
   },
 }

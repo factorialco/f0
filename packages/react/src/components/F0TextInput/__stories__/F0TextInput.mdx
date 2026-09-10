@@ -155,7 +155,7 @@ The `type` prop accepts every native HTML input type **except `"number"`**, whic
 When `type="password"`:
 
 - A lock icon replaces any `icon` prop.
-- A trailing eye-toggle button appears, named after the field ("Show Current password"), to flip between masked and visible text.
+- A trailing eye-toggle button appears, labelled "Show password", to flip between masked and visible text.
 - The `buttonToggle` prop becomes private — consumers cannot override the eye toggle while in password mode.
 
 <Canvas of={Stories.Password} />
@@ -189,7 +189,7 @@ Three keyboard props, in the order they run on every key:
 
 It never doubles up: a `password` or `private` field already sets it, so those types show one eye, not two.
 
-The two cases part company on focus. A `masked` value loses its eye while you type it, leaving the clear button alone in the trailing area, because none of a details row's trailing controls applies to a half-finished draft. `password` and `private` keep theirs, because revealing what you just typed is exactly what a credential field's eye is for.
+The two cases part company twice. On focus, a `masked` value loses its eye while you type it, leaving the clear button alone in the trailing area, because none of a details row's trailing controls applies to a half-finished draft; `password` and `private` keep theirs, because revealing what you just typed is exactly what a credential field's eye is for. And in naming: `password` says "Show password", while `private` and a bare `masked` are named after their own label, which is what tells two of them on one page apart.
 
 **Resting value**
 
