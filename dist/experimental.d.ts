@@ -8656,7 +8656,13 @@ export declare interface F0LocationInputProps {
      * consumer can restrict the provider (e.g. Places `componentRestrictions`).
      */
     searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /** Resolves a picked suggestion into a full value. */
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
     resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
     placeholder?: string;
     hideLabel?: boolean;
