@@ -9,7 +9,7 @@ type Props = {
   label: string
   value: CountryCode | undefined
   onChange: (country: CountryCode) => void
-  countries?: readonly CountryCode[]
+  allowedCountries?: readonly CountryCode[]
   size: LocationInputSize
   disabled?: boolean
   readonly?: boolean
@@ -20,7 +20,7 @@ export const CountrySelect = ({
   label,
   value,
   onChange,
-  countries,
+  allowedCountries,
   size,
   disabled,
   readonly,
@@ -28,8 +28,8 @@ export const CountrySelect = ({
 }: Props) => {
   const i18n = useI18n()
   const options = useMemo(
-    () => buildCountryOptions(i18n.countries, countries),
-    [i18n.countries, countries]
+    () => buildCountryOptions(i18n.countries, allowedCountries),
+    [i18n.countries, allowedCountries]
   )
 
   return (

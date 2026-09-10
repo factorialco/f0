@@ -189,12 +189,12 @@ export const ManualEntry: Story = {
   },
 }
 
-/** `countries` restricts the selector and, when it has one entry, scopes the search. */
+/** `allowedCountries` restricts the selector and, with one entry, scopes the search. */
 export const RestrictedCountries: Story = {
   args: {
     label: "Spanish office",
     manualEntry: true,
-    countries: ["es"],
+    allowedCountries: ["es"],
     defaultValue: { country: "es" },
   },
 }

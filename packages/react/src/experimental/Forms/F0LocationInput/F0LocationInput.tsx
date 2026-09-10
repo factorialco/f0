@@ -58,7 +58,7 @@ export const F0LocationInput = forwardRef<
     onChange,
     manualEntry = false,
     partLabels,
-    countries,
+    allowedCountries,
     defaultCountry,
     searchPlaces,
     resolvePlace,
@@ -116,7 +116,8 @@ export const F0LocationInput = forwardRef<
   // entry, where no selector shows or undoes that scope, so the first picked
   // address would silently lock every later search to its country
   const searchCountry =
-    defaultCountry ?? (countries?.length === 1 ? countries[0] : undefined)
+    defaultCountry ??
+    (allowedCountries?.length === 1 ? allowedCountries[0] : undefined)
 
   // Picking shows the suggestion right away, but nothing is emitted until the
   // place resolves: an intermediate "typed" change would make consumers
@@ -270,7 +271,7 @@ export const F0LocationInput = forwardRef<
         label={labels.country}
         value={value?.country}
         onChange={setCountry}
-        countries={countries}
+        allowedCountries={allowedCountries}
         size={size}
         disabled={disabled}
         readonly={readonly}

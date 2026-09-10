@@ -56,7 +56,7 @@ Leave `manualEntry` off when a picked suggestion is the whole job: search boxes,
       "Pass the parts you store and let the component order them. Country first, then the address, then the rest.",
     guidelines: [
       "Turn on manualEntry when the user may have to correct a part by hand",
-      "Pass countries when the product only operates in a few, so the search is scoped from the first keystroke",
+      "Pass allowedCountries when the product only operates in a few, so the search is scoped from the first keystroke",
       "Read meta.isResolved before trusting latitude and longitude",
     ],
   }}
@@ -162,7 +162,7 @@ A stored value that no suggestion covers is still displayed (the trigger reads t
 
 ### Country and search scope
 
-`searchPlaces(query, { country })` receives the value's country, else `defaultCountry`, else the single entry of `countries`. Changing the country clears the cached suggestions.
+`searchPlaces(query, { country })` receives the value's country, else `defaultCountry`, else the single entry of `allowedCountries`. Changing the country clears the cached suggestions.
 
 <Canvas of={Stories.RestrictedCountries} />
 
@@ -354,7 +354,7 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
       </tr>
       <tr>
         <td>
-          <code>countries</code>
+          <code>allowedCountries</code>
         </td>
         <td>
           <code>CountryCode[]</code>

@@ -154,7 +154,7 @@ describe("F0LocationInput", () => {
         <F0LocationInput
           label="Address"
           searchPlaces={searchPlaces}
-          countries={["es"]}
+          allowedCountries={["es"]}
         />
       )
 
@@ -688,7 +688,7 @@ describe("F0LocationInput", () => {
         <F0LocationInput
           label="Office"
           manualEntry
-          countries={["es", "fr"]}
+          allowedCountries={["es", "fr"]}
           defaultValue={resolved}
           onChange={onChange}
         />
