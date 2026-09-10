@@ -157,6 +157,13 @@ export type DetailsValueActionsProps = DetailsValueActionsInput & {
    * it. The copy tick is owned here, so the cell cannot work it out.
    */
   onConfirmingChange?: (confirming: boolean) => void
+  /**
+   * Stands the whole row down while the value is being typed. None of these
+   * acts applies to a draft: the pencil is how you got here, and copying or
+   * querying a half-finished value is not something anyone wants. The clear
+   * button, which belongs to the input, stays.
+   */
+  editing?: boolean
 }
 
 export const DetailsValueActions = ({
@@ -169,6 +176,7 @@ export const DetailsValueActions = ({
   disabled,
   visibility = "always",
   onConfirmingChange,
+  editing,
 }: DetailsValueActionsProps) => {
   const i18n = useI18n()
   const isTouchScreen = useTouchScreen()
@@ -209,6 +217,10 @@ export const DetailsValueActions = ({
   // there the controls stay put.
   const hidesUntilHover =
     visibility === "hover" && !isTouchScreen && !confirming
+
+  if (editing) {
+    return null
+  }
 
   return (
     <div

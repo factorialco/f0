@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, fn, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -321,6 +321,14 @@ export const MaskedValue: Story = {
     await expect(
       canvas.getByRole("button", { name: "Hide This is the label" })
     ).toBeInTheDocument()
+
+    // The eye stands down while the value is being typed: nothing in the
+    // trailing area applies to a draft. Only the clear button stays.
+    await userEvent.click(canvas.getByRole("textbox"))
+    await waitFor(() =>
+      expect(canvas.queryByTestId("input-field-mask-toggle")).toBeNull()
+    )
+    await expect(canvas.getByTestId("clear-button")).toBeVisible()
   },
 }
 

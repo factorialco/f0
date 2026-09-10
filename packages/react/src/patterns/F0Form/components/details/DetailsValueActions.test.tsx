@@ -93,6 +93,14 @@ describe("DetailsValueActions", () => {
       expect(row).toHaveClass("group-hover/field:pointer-events-auto")
     })
 
+    it("stands the whole row down while the value is being typed", () => {
+      renderActions({ copyable: true, onEdit: vi.fn(), editing: true })
+
+      expect(
+        screen.queryByTestId("details-value-actions")
+      ).not.toBeInTheDocument()
+    })
+
     it("holds the row open while a confirmation is showing", () => {
       renderActions({
         onEdit: vi.fn(),

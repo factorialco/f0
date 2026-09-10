@@ -93,6 +93,64 @@ describe("F0InputField masking", () => {
     expect(screen.queryByTestId("clear-button")).not.toBeInTheDocument()
   })
 
+  it("stands the eye down while the value is being typed", async () => {
+    const { container } = renderField({ masked: true })
+
+    expect(screen.getByRole("button", { name: "Show Email" })).toBeVisible()
+
+    container.querySelector("input")!.focus()
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("input-field-mask-toggle")
+      ).not.toBeInTheDocument()
+    )
+  })
+
+  it("keeps the eye through focus when revealing while typing is the point", async () => {
+    // What `F0TextInput type="password" | "private"` sets: checking what you
+    // just entered is the whole job of a credential field's eye.
+    const { container } = renderField({
+      masked: true,
+      maskToggleAlwaysVisible: true,
+    })
+
+    container.querySelector("input")!.focus()
+
+    await waitFor(() => expect(container.querySelector("input")).toHaveFocus())
+    expect(screen.getByRole("button", { name: "Show Email" })).toBeVisible()
+  })
+
+  it("brings the eye back when focus leaves", async () => {
+    const { container } = renderField({ masked: true })
+    const input = container.querySelector("input")!
+
+    input.focus()
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("input-field-mask-toggle")
+      ).not.toBeInTheDocument()
+    )
+
+    input.blur()
+    await waitFor(() =>
+      expect(screen.getByTestId("input-field-mask-toggle")).toBeInTheDocument()
+    )
+  })
+
+  it("still reports focus to the consumer's own handlers", async () => {
+    const onFocus = vi.fn()
+    const onBlur = vi.fn()
+    const { container } = renderField({ masked: true, onFocus, onBlur })
+    const input = container.querySelector("input")!
+
+    input.focus()
+    input.blur()
+
+    await waitFor(() => expect(onFocus).toHaveBeenCalledTimes(1))
+    expect(onBlur).toHaveBeenCalledTimes(1)
+  })
+
   it("disables the eye when the field is disabled", () => {
     renderField({ disabled: true, masked: true })
 

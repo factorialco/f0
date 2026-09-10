@@ -247,6 +247,8 @@ How the mask is drawn depends on the child, because there is no one way to hide 
 
 The eye is named after the field, not the type: "Show Current password", never "Show password". That is what lets a screen-reader user tell two masked fields on one page apart. It survives `readonly`, because a value you cannot type into is still one you can unmask, and `disabled` disables it.
 
+It does **not** survive focus. While the value is being typed the eye stands down and the clear button is the only thing in the trailing area, because none of the trailing controls applies to a draft. A credential field is the exception, and `F0TextInput` handles it: `type="password"` and `type="private"` keep their eye through focus, since checking what you just typed is the whole point of the button.
+
 ### The resting value
 
 `readonly` + `transparent` draws the value as plain text: no border, no secondary "disabled form" background. It is how a details row shows a value it is not currently editing, and two things follow from it being the same cell the editable field will occupy:

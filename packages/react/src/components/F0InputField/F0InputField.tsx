@@ -247,6 +247,16 @@ export type InputFieldProps<T> = {
    */
   masked?: boolean
   /**
+   * Keeps the eye up while the field has focus.
+   *
+   * The eye normally goes away while you are typing: on a details row the
+   * trailing controls act on a value you are reading, and none of them applies
+   * mid-edit. A credential field is the exception, where revealing what you
+   * just typed is the point of the button, so `F0TextInput` sets this for
+   * `type="password"` and `type="private"`. Not part of any public input's API.
+   */
+  maskToggleAlwaysVisible?: boolean
+  /**
    * Puts the caret in the field as soon as it can take it, and nothing sooner.
    *
    * `autoFocus` only fires at mount, which is no use to a value that starts
@@ -302,6 +312,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       buttonToggle,
       transparent,
       masked: maskable,
+      maskToggleAlwaysVisible,
       focusOnEditable,
       ...props
     }: InputFieldProps<string>,
@@ -320,6 +331,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const [revealed, setRevealed] = useState(false)
     const masked = !!maskable && !revealed
     const childIsInput = (children as React.ReactElement)?.type === "input"
+
+    // Tracked rather than read off `:focus-within`, because the child is not
+    // always an `<input>` and because the trailing buttons are inside the same
+    // wrapper: focusing one of them must not count as editing the value.
+    const [childFocused, setChildFocused] = useState(false)
 
     // For legacy reasons, error is a shortcut for status with type error
     if (hint) {
@@ -501,6 +517,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     // every browser swallows the mouse event instead of letting it bubble.
     const isClickableRestingValue =
       isRestingValue && !!onClickContent && !disabled
+    // Nothing in the trailing area applies to a value being typed, so the eye
+    // stands down with the rest of the controls. A credential field opts out:
+    // checking what you just typed is what its eye is for.
+    const showMaskToggle =
+      !!maskable && (!!maskToggleAlwaysVisible || !childFocused)
 
     return (
       <div
@@ -618,8 +639,14 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 // the child's own type (search, email, tel) down to text.
                 ...(masked && childIsInput ? { type: "password" } : {}),
                 onChange: handleChange,
-                onBlur: props.onBlur,
-                onFocus: props.onFocus,
+                onBlur: () => {
+                  setChildFocused(false)
+                  props.onBlur?.()
+                },
+                onFocus: () => {
+                  setChildFocused(true)
+                  props.onFocus?.()
+                },
                 onAnimationStart: handleAnimationStart,
                 disabled: noEdit,
                 readOnly: readonly,
@@ -681,7 +708,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             >
               <span className="min-w-0 truncate">{placeholder}</span>
             </div>
-            {clearable || maskable || hasAppend || loading ? (
+            {clearable || showMaskToggle || hasAppend || loading ? (
               <div
                 className={cn(
                   "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
@@ -720,7 +747,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   </AnimatePresence>
                 ) : null}
 
-                {maskable ? (
+                {showMaskToggle ? (
                   <div
                     className="flex min-h-6 items-center self-center"
                     data-testid="input-field-mask-toggle"

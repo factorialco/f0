@@ -293,14 +293,15 @@ export const InlineEditing: Story = {
   render: () => <InlineEditingDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const field = () => canvas.getAllByLabelText("Email")[0]
+    const field = () => canvas.getAllByLabelText("Email")[0] as HTMLInputElement
+    const wrapper = () => canvas.getByTestId("input-field-wrapper")
 
-    // A resting value is not typeable, and it is drawn without the field's
-    // border.
-    await expect(field()).toBeDisabled()
-    const restingBox = canvas
-      .getByTestId("input-field-wrapper")
-      .getBoundingClientRect()
+    // Read the starting value rather than assuming it. A play function that
+    // only works on a pristine mount is a flaky play function: the manager
+    // re-runs these on hot reload and on replay, without remounting.
+    await waitFor(() => expect(field()).toBeDisabled())
+    const committed = field().value
+    const restingBox = wrapper().getBoundingClientRect()
 
     // The value itself starts the edit. The pointer has to land on the cell,
     // because the disabled input swallows the mouse event rather than letting
@@ -321,9 +322,8 @@ export const InlineEditing: Story = {
     // real browser can check this. Width matters as much as height here:
     // dropping `transparent` used to collapse the field to the inner input's
     // intrinsic width, clipping the value and leaving dead space beside it.
-    const wrapper = canvas.getByTestId("input-field-wrapper")
-    await expect(wrapper).toHaveClass("border-[1px]")
-    const editingBox = wrapper.getBoundingClientRect()
+    await expect(wrapper()).toHaveClass("border-[1px]")
+    const editingBox = wrapper().getBoundingClientRect()
     await expect(Math.round(editingBox.height)).toBe(
       Math.round(restingBox.height)
     )
@@ -331,21 +331,35 @@ export const InlineEditing: Story = {
       Math.round(restingBox.width)
     )
 
+    // Enter commits. Two fixed values, picking whichever is not already
+    // showing, so the story is deterministic for Chromatic and still proves a
+    // change however it started.
+    const next =
+      committed === "grace.hopper@example.com"
+        ? "ada.lovelace@example.com"
+        : "grace.hopper@example.com"
     await userEvent.clear(field())
-    await userEvent.type(field(), "grace.hopper@example.com")
+    await userEvent.type(field(), next)
+    await expect(field()).toHaveValue(next)
     await userEvent.keyboard("{Enter}")
 
     await waitFor(() => expect(field()).toBeDisabled())
-    await expect(field()).toHaveValue("grace.hopper@example.com")
+    await expect(field()).toHaveValue(next)
 
-    // Escape reverts: the draft is thrown away and the committed value stands.
+    // Escape reverts, and the pencil is the other way in: it sits outside the
+    // field, so `focusOnEditable` is what puts the caret there.
     await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
     await waitFor(() => expect(field()).not.toBeDisabled())
+    await expect(field()).toHaveFocus()
     await userEvent.clear(field())
     await userEvent.type(field(), "discarded@example.com")
     await userEvent.keyboard("{Escape}")
 
-    await expect(field()).toHaveValue("grace.hopper@example.com")
+    await waitFor(() => expect(field()).toBeDisabled())
+    await expect(field()).toHaveValue(next)
+    // And the starting value really was replaced along the way, so the commit
+    // above proved something.
+    await expect(field()).not.toHaveValue(committed)
   },
 }
 

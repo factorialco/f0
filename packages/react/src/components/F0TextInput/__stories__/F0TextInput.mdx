@@ -189,6 +189,8 @@ Three keyboard props, in the order they run on every key:
 
 It never doubles up: a `password` or `private` field already sets it, so those types show one eye, not two.
 
+The two cases part company on focus. A `masked` value loses its eye while you type it, leaving the clear button alone in the trailing area, because none of a details row's trailing controls applies to a half-finished draft. `password` and `private` keep theirs, because revealing what you just typed is exactly what a credential field's eye is for.
+
 **Resting value**
 
 `readonly` together with `transparent` draws the value as plain text, without the field's border or the secondary "disabled form" background, but at the height and radius the editable field takes. Drop the two props and the same component is the ordinary bordered field again, at the same height, so a row does not move when it becomes editable.

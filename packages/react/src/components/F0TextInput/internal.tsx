@@ -94,6 +94,10 @@ const InputInternal = ({
       {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
       masked={maskable || masked}
+      // A credential field keeps its eye while you type: checking what you just
+      // entered is what the button is for. Any other masked value loses it,
+      // because the trailing controls act on a value being read.
+      maskToggleAlwaysVisible={maskable}
       // Email addresses are case-insensitive, so normalise to lowercase as the
       // user types (lowercasing preserves length, so the caret doesn't jump).
       onChange={(value) =>

@@ -38,6 +38,7 @@ export type InputProps = Omit<
     | "buttonToggle"
     | "transparent"
     | "masked"
+    | "maskToggleAlwaysVisible"
     | "focusOnEditable"
   >
 
@@ -79,6 +80,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       buttonToggle,
       transparent,
       masked,
+      maskToggleAlwaysVisible,
       focusOnEditable,
       // Forwarded by NAME rather than left in the spread: F0InputField clones
       // the inner input with its own aria props, and an explicit `undefined`
@@ -134,6 +136,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         buttonToggle={buttonToggle}
         transparent={transparent}
         masked={masked}
+        maskToggleAlwaysVisible={maskToggleAlwaysVisible}
         focusOnEditable={focusOnEditable}
       >
         <input
