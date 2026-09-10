@@ -855,7 +855,7 @@ export const WithCreditWarning: Story = {
   },
 }
 
-export const WithCreditWarningHostCopy: Story = {
+export const WithCustomCreditWarning: Story = {
   args: {
     creditWarning: {
       ...CREDIT_WARNING,
