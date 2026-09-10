@@ -1,4 +1,3 @@
-import { ActionType as ActionType_4 } from './types';
 import { AgentState } from '@livekit/components-react';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './f0';
@@ -42,7 +41,6 @@ import { default as default_2 } from 'react';
 import { DeltaCellValue } from './types/delta';
 import { DotTagCellValue } from './f0';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
-import { DotTagItemProps } from './items/DotTagItem';
 import type * as echarts_2 from 'echarts';
 import { EmployeeItemProps } from './types';
 import { F0AccordionSkeletonProps } from './F0AccordionSkeleton';
@@ -128,7 +126,6 @@ import { ProgressBarCellValue as ProgressBarCellValue_2 } from './types/progress
 import { ProgressSeriesCellValue } from './types/progressSeries';
 import { Props as Props_2 } from './types';
 import { RadarChartProps } from './RadarChart';
-import { RawTagItemProps } from './items/RawTagItem';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
@@ -149,9 +146,11 @@ import { TagAlertProps as TagAlertProps_2 } from './f0';
 import { TagBalanceProps as TagBalanceProps_2 } from './f0';
 import { TagCellValue } from './f0';
 import { TagCellValue as TagCellValue_2 } from './types/tag';
+import { TagDotProps as TagDotProps_2 } from './f0';
 import { TagListCellValue } from './f0';
 import { TagListCellValue as TagListCellValue_2 } from './types/tagList';
 import { TagListProps as TagListProps_2 } from './f0';
+import { TagRawProps as TagRawProps_2 } from './f0';
 import { TagStatusProps as TagStatusProps_2 } from './f0';
 import { TagType as TagType_2 } from './types';
 import { TagType as TagType_3 } from './f0';
@@ -425,8 +424,6 @@ declare type ActionType_2 = {
     tooltip?: string;
 };
 
-declare type ActionType_3 = CopyActionType | NavigateActionType | OpenLinkActionType | DrawerActionType;
-
 declare type ActionVariant = (typeof actionVariants)[number];
 
 declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
@@ -608,8 +605,15 @@ export declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -754,7 +758,8 @@ declare type AiChatProviderReturnValue = {
     }) => void;
     tracking?: AiChatTrackingOptions;
     /**
-     * Current width of the chat window (for resizable mode)
+     * The user's preferred width, persisted against the absolute range. This is
+     * NOT what the layout reserves — read `effectiveChatWidth` for that.
      */
     chatWidth: number;
     setChatWidth: React.Dispatch<React.SetStateAction<number>>;
@@ -762,6 +767,29 @@ declare type AiChatProviderReturnValue = {
      * Reset the chat width to the default value (360px)
      */
     resetChatWidth: () => void;
+    /**
+     * `chatWidth` held inside what the measured frame can actually give it. The
+     * preference survives a narrow window; only this shrinks.
+     *
+     * OPTIONAL for the same reason as `isResizing` below: the provider always
+     * supplies it, but making it required reads as a breaking public-API change.
+     */
+    effectiveChatWidth?: number;
+    /** The range the panel may be dragged to at the frame's current width. */
+    chatWidthBounds?: PanelBounds;
+    /**
+     * True when the panel covers the frame rather than sitting beside it.
+     *
+     * Read this instead of re-deriving it from a media query: the rule combines
+     * the measured frame with the pointer type, and two consumers computing it
+     * separately is how a resize handle ends up on a full-screen panel.
+     */
+    panelOverlays?: boolean;
+    /**
+     * Publishes the frame's content-box width. Called by ApplicationFrame, which
+     * is the only thing that knows how much room is left beside the navigation.
+     */
+    setFrameWidth?: (width: number) => void;
     /**
      * True while the user is dragging the chat's resize handle. Broadcast here
      * because everything laid out against the chat's edge has to follow the drag
@@ -1034,6 +1062,8 @@ export declare const aiTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -1423,12 +1453,6 @@ export declare type AutofillTimesheetShift = {
     locationType?: string | null;
 };
 
-/**
- * An item that can be passed in the `availableFormDefinitions` array.
- * Accepts either a plain {@link F0AiAvailableFormDefinition} or the result
- * of calling {@link useF0FormDefinition} (i.e. {@link F0FormDefinitionSingleSchema}
- * or {@link F0FormDefinitionPerSection}).
- */
 export declare type AvailableFormDefinitionItem = F0AiAvailableFormDefinition | F0FormDefinitionSingleSchema<any> | F0FormDefinitionPerSection<any>;
 
 declare const Avatar: React_2.ForwardRefExoticComponent<Omit<AvatarPrimitive.AvatarProps & React_2.RefAttributes<HTMLSpanElement>, "ref"> & {
@@ -2223,6 +2247,8 @@ export declare type CalendarDate = {
 
 export declare type CalendarMode = "single" | "range";
 
+export declare type CalendarSelection = Date | DateRange | null;
+
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 /**
@@ -2261,6 +2287,9 @@ declare type CanvasCardAction = {
     hideLabel?: boolean;
 };
 
+/** The card's own control: open/close, or the host's custom action. */
+declare const CanvasCardAction: ({ action, isActive, }: Pick<F0CanvasCardProps, "action" | "isActive">) => JSX_2.Element | null;
+
 declare type CanvasCardAvatar = {
     type: "module";
     module: ModuleId;
@@ -2271,6 +2300,9 @@ declare type CanvasCardAvatar = {
     type: "icon";
     icon: IconType;
 };
+
+/** Whichever avatar the card was given: a module, a file, or an icon. */
+declare const CanvasCardAvatar: ({ avatar }: Pick<F0CanvasCardProps, "avatar">) => JSX_2.Element | null;
 
 /**
  * Discriminated union for canvas panel content.
@@ -3204,6 +3236,12 @@ declare interface CheckboxProps extends DataAttributes_2 {
      */
     title?: string;
     /**
+     * A secondary line of text rendered under the title, for context the title
+     * cannot carry on its own. Hidden along with the title when `hideLabel` is
+     * set, and exposed to assistive technology as the checkbox's description.
+     */
+    description?: string;
+    /**
      * The id of the checkbox
      */
     id?: string;
@@ -3556,11 +3594,6 @@ export declare type ConfirmDialogOptions = NotificationDialogBaseOptions & {
 export declare type ContentType = (typeof contentTypes)[number];
 
 export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
-
-declare type CopyActionType = {
-    type: "copy";
-    text?: string;
-};
 
 declare type CountryCode = keyof TranslationsType["countries"];
 
@@ -4245,7 +4278,7 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
     filters?: CurrentFiltersState;
-    search?: string | undefined;
+    search?: string;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
     /** Per-visualization filter states, keyed by visualization index.
@@ -4331,15 +4364,11 @@ declare const DataList: ForwardRefExoticComponent<DataListProps & RefAttributes<
     CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttributes<HTMLLIElement>>;
     PersonItem: ForwardRefExoticComponent<EmployeeItemProps & RefAttributes<HTMLLIElement>>;
     TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<HTMLLIElement>>;
-    DotTagItem: ForwardRefExoticComponent<DotTagItemProps & RefAttributes<HTMLLIElement>>;
-    AlertTagItem: ForwardRefExoticComponent<TagAlertProps_2 & {
-    action?: ActionType_4;
-    } & RefAttributes<HTMLLIElement>>;
+    DotTagItem: ForwardRefExoticComponent<TagDotProps_2 & RefAttributes<HTMLLIElement>>;
+    AlertTagItem: ForwardRefExoticComponent<TagAlertProps_2 & RefAttributes<HTMLLIElement>>;
     BalanceTagItem: ForwardRefExoticComponent<TagBalanceProps_2 & RefAttributes<HTMLLIElement>>;
-    StatusTagItem: ForwardRefExoticComponent<TagStatusProps_2 & {
-    action?: ActionType_4;
-    } & RefAttributes<HTMLLIElement>>;
-    RawTagItem: ForwardRefExoticComponent<RawTagItemProps & RefAttributes<HTMLLIElement>>;
+    StatusTagItem: ForwardRefExoticComponent<TagStatusProps_2 & RefAttributes<HTMLLIElement>>;
+    RawTagItem: ForwardRefExoticComponent<TagRawProps_2 & RefAttributes<HTMLLIElement>>;
     RecordItem: ForwardRefExoticComponent<RecordItemProps & RefAttributes<HTMLLIElement>>;
     TagListItem: <T extends TagType_3>(props: TagListProps_2<T> & {
         ref?: Ref<HTMLLIElement>;
@@ -5385,6 +5414,8 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -5571,6 +5602,7 @@ export declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -6076,34 +6108,25 @@ export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
  */
 export declare function describeFormSchema(schema: F0FormSchema): FormFieldDescription[];
 
-/**
- * DataList's drawer action is always controlled; here the row owns the open
- * state unless `expanded` is passed, so consumers usually only declare what a
- * row reveals.
- */
-declare type DetailsItemAction = Exclude<ActionType_3, DrawerActionType> | DetailsItemDrawerAction;
-
-declare type DetailsItemContent = (WithDetailsItemAction<ComponentProps<typeof DataList.Item>> & {
+declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "item";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.PersonItem>> & {
+}) | (ComponentProps<typeof DataList.PersonItem> & {
     type: "person";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.CompanyItem>> & {
+}) | (ComponentProps<typeof DataList.CompanyItem> & {
     type: "company";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.TeamItem>> & {
+}) | (ComponentProps<typeof DataList.TeamItem> & {
     type: "team";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.RecordItem>> & {
-    type: "record";
 }) | (ComponentProps<typeof Weekdays> & {
     type: "weekdays";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.DotTagItem>> & {
+}) | (ComponentProps<typeof DataList.DotTagItem> & {
     type: "dot-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.AlertTagItem>> & {
+}) | (TagAlertProps & {
     type: "alert-tag";
 }) | (TagBalanceProps & {
     type: "balance-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.StatusTagItem>> & {
+}) | (TagStatusProps & {
     type: "status-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.RawTagItem>> & {
+}) | (TagRawProps & {
     type: "raw-tag";
 }) | {
     [T in TagType]: {
@@ -6116,38 +6139,6 @@ declare type DetailsItemContent = (WithDetailsItemAction<ComponentProps<typeof D
 } | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
-
-/**
- * Reveals more rows under this one when the item is clicked. The nested rows
- * take the layout (table or stacked) of the row that owns them.
- */
-declare type DetailsItemDrawerAction = {
-    type: "drawer";
-    details: DetailsItemType[];
-    /**
-     * Open state, when something outside the row needs to drive it (a summary
-     * card that opens the section, say). Leave it undefined and the row keeps
-     * its own state.
-     */
-    expanded?: boolean;
-    /** Called when the row is clicked. Required to close a controlled row. */
-    onToggle?: () => void;
-};
-
-declare interface DetailsItemType {
-    /** DOM id of the row, so it can be scrolled to or linked from elsewhere. */
-    id?: string;
-    title: string;
-    content: DetailsItemContent | DetailsItemContent[];
-    isHorizontal?: boolean;
-    /**
-     * When true inside a tableView, keeps the table-row padding but stacks
-     * the label above the content instead of side-by-side. Useful for
-     * long-form text fields like rich-text or textarea.
-     */
-    verticalLayout?: boolean;
-    spacingAtTheBottom?: boolean;
-}
 
 export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
     value: DialogActionValue;
@@ -6351,19 +6342,6 @@ export declare type DragPayload<T = unknown> = {
     kind: string;
     id: string;
     data?: T;
-};
-
-/**
- * Disclosure trigger. The item only flips a chevron and reports the click;
- * whatever it reveals is rendered and owned by the parent, so the state is
- * controlled.
- */
-declare type DrawerActionType = {
-    type: "drawer";
-    expanded: boolean;
-    onToggle: () => void;
-    /** `id` of the revealed element, for `aria-controls`. Pass it only while that element is in the DOM. */
-    controls?: string;
 };
 
 export declare type DrawerDefinition = {
@@ -6982,7 +6960,7 @@ export declare interface F0ActionBarRef {
     wiggle: (options?: WiggleOptions) => void;
 }
 
-export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+export declare const F0ActionItem: ({ title, suffix, status, inGroup, }: F0ActionItemProps) => JSX_2.Element;
 
 /**
  * Props for the F0ActionItem component
@@ -6992,6 +6970,14 @@ export declare interface F0ActionItemProps {
      * The title text displayed next to the status icon
      */
     title?: string;
+    /**
+     * Rendered inline after the title — used for the elapsed-time counter.
+     *
+     * A node rather than a string so that whatever ticks inside it owns its own
+     * state: passing a composed label would re-render this item, and everything
+     * above it, on every tick.
+     */
+    suffix?: ReactNode;
     /**
      * Current status of the action item
      */
@@ -7067,7 +7053,9 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
  * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
- * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ * Decoupled from CopilotKit, and prop-driven apart from one read: whether the
+ * panel is currently covering the frame, which decides if expanding means
+ * anything. Only the provider knows that, and it answers safely when absent.
  */
 export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
 
@@ -8282,7 +8270,7 @@ export declare type F0AvatarIconProps = {
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
 export declare const F0AvatarList: WithDataTestIdReturnType_4<    {
-({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll, layout, }: F0AvatarListProps_2): JSX_2.Element;
+({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll: _tooltipScroll, layout: _layout, }: F0AvatarListProps_2): JSX_2.Element;
 displayName: string;
 }>;
 
@@ -9031,7 +9019,7 @@ declare type F0CardSelectField = F0BaseField & {
 
 export declare const F0Checkbox: WithDataTestIdReturnType_3<typeof _F0Checkbox>;
 
-declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
+declare function _F0Checkbox({ title, description, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
 
 /**
  * F0 config options specific to checkbox fields
@@ -11113,112 +11101,112 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function text(config: TextConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: EmailConfig */
     export function email(config: EmailConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function email(config: EmailConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: TextareaConfig */
     export function textarea(config: TextareaConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function textarea(config: TextareaConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: NumberConfig */
     export function number(config: NumberConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function number(config: NumberConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: SwitchConfig */
     export function boolean(config: SwitchConfig & {
         optional: true;
     }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
     export function boolean(config: SwitchConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
     /* Excluded from this release type: CheckboxConfig */
     export function checkbox(config: CheckboxConfig & {
         optional: true;
     }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
     export function checkbox(config: CheckboxConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
     /* Excluded from this release type: DateConfig */
     export function date(config: DateConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function date(config: DateConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: UrlConfig */
     export function url(config: UrlConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function url(config: UrlConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MoneyConfig */
     export function money(config: MoneyConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function money(config: MoneyConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: PercentageConfig */
     export function percentage(config: PercentageConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function percentage(config: PercentageConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: CardSelectConfig */
     export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
         optional: true;
     }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
     export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     /* Excluded from this release type: FileConfig */
     export function file(config: FileConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function file(config: FileConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiFileConfig */
     export function multiFile(config: MultiFileConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
     export function multiFile(config: MultiFileConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
     /* Excluded from this release type: TimeConfig */
     export function time(config: TimeConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function time(config: TimeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: DateTimeConfig */
     export function datetime(config: DateTimeConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function datetime(config: DateTimeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: DurationConfig */
     export function duration(config: DurationConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function duration(config: DurationConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: DateRangeObjectSchema */
     /* Excluded from this release type: DateRangeConfig */
@@ -11226,7 +11214,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<DateRangeObjectSchema> & F0ZodType<z.ZodOptional<DateRangeObjectSchema>>;
     export function dateRange(config: DateRangeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
     /* Excluded from this release type: PeriodValueSchema */
     /* Excluded from this release type: DatePeriodConfig */
@@ -11234,7 +11222,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> & F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>;
     export function datePeriod(config: DatePeriodConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): PeriodValueSchema & F0ZodType<PeriodValueSchema>;
     export type PhoneObjectSchema = z.ZodEffects<z.ZodObject<{
         prefix: z.ZodOptional<z.ZodString>;
@@ -11256,7 +11244,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<PhoneObjectSchema> & F0ZodType<z.ZodOptional<PhoneObjectSchema>>;
     export function phone(config: PhoneFieldShortcutConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
@@ -11264,7 +11252,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<RichTextObjectSchema> & F0ZodType<z.ZodOptional<RichTextObjectSchema>>;
     export function richText(config: RichTextConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>;
     /* Excluded from this release type: SelectConfig */
     export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
@@ -11277,13 +11265,13 @@ export declare namespace f0FormField {
         options: ({
             value: V;
         } & Record<string, unknown>)[];
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiSelectConfig */
     export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig, "options"> & {
@@ -11296,13 +11284,13 @@ export declare namespace f0FormField {
         options: ({
             value: V;
         } & Record<string, unknown>)[];
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
     /* Excluded from this release type: EntitiesListBaseConfig */
     /* Excluded from this release type: EntitiesListSingleConfig */
@@ -11343,13 +11331,13 @@ export declare namespace f0FormField {
         optional: true;
     }): OptionalEntitiesListArray<TItem> & F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>;
     export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListSingleConfig<TItem> & {
-        optional?: false | undefined;
+        optional?: false;
     }): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>;
     export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
         optional: true;
     }): OptionalEntitiesListArray<TUpdate> & F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>;
     export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
-        optional?: false | undefined;
+        optional?: false;
     }): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>;
         {};
 }
@@ -14259,7 +14247,7 @@ export declare const getDataCollectionStorageKey: (id: string) => string;
  * @returns The pagination type of the data adapter
  */
 export declare const getDataSourcePaginationType: <D extends {
-    paginationType?: PaginationType | undefined;
+    paginationType?: PaginationType;
 }>(dataAdapter: D) => PaginationType;
 
 export declare function getEmojiLabel(emoji: string): string;
@@ -14306,9 +14294,9 @@ export declare interface GranularityDefinition {
         max?: Date;
     } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
-    toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
-    toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
+    toRangeString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
+    toRange: <T extends OptionalCalendarSelection>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
+    toString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -14317,8 +14305,8 @@ export declare interface GranularityDefinition {
     getViewDateFromDate: (date: Date) => Date;
     render: (renderProps: {
         mode: CalendarMode;
-        selected: Date | DateRange | null;
-        onSelect: (date: Date | DateRange | null) => void;
+        selected: CalendarSelection;
+        onSelect: (date: CalendarSelection) => void;
         month: Date;
         onMonthChange: (date: Date) => void;
         motionDirection: number;
@@ -15099,7 +15087,7 @@ declare type InputFieldProps<T> = {
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
     onClickContent?: () => void;
-    value?: T | undefined;
+    value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
     error?: string | boolean;
@@ -15873,11 +15861,6 @@ export declare const modules: {
     readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 };
 
-declare type NavigateActionType = {
-    type: "navigate";
-    href: string;
-};
-
 declare type NavigationFilterDefinition = DateNavigatorFilterDefinition;
 
 declare type NavigationFilterDefinitionBase<T> = {
@@ -16015,6 +15998,12 @@ export declare interface NotesTextEditorSnapshot {
 declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
     msg: string;
     type?: DialogNotificationType;
+    /**
+     * Renders a dismiss (X) control in the dialog's top-right corner. Lets a notification offer a
+     * way out without spending a button on "Cancel".
+     * @default false
+     */
+    dismissable?: boolean;
 };
 
 export declare type NotificationDialogOptions = NotificationDialogBaseOptions & {
@@ -16370,9 +16359,9 @@ export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth,
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
-    onSelect?: (date: Date | DateRange | null) => void;
+    onSelect?: (date: CalendarSelection) => void;
     defaultMonth?: Date;
-    defaultSelected?: Date | DateRange | null;
+    defaultSelected?: CalendarSelection;
     showNavigation?: boolean;
     showInput?: boolean;
     minDate?: Date;
@@ -16607,12 +16596,9 @@ export declare type OpenFormWizardResult<T extends F0FormSchema_2 | F0PerSection
     completed: false;
 };
 
-declare type OpenLinkActionType = {
-    type: "open-link";
-    href: string;
-};
-
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export declare type OptionalCalendarSelection = CalendarSelection | undefined;
 
 /** Overflow values */
 export declare type OverflowToken = "visible" | "hidden" | "auto" | "scroll";
@@ -16719,6 +16705,22 @@ export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "
  * - "no-pagination": Represents a collection that does not use pagination.
  */
 export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
+
+declare type PanelBounds = {
+    min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
+    max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
+    /** The frame is too narrow to split: the panel should cover it instead. */
+    shouldOverlay: boolean;
+};
 
 /**
  * Parses a data collection's state out of URL query params.
@@ -17372,6 +17374,14 @@ export declare type RenderableTurn = {
          * the last item is `executing` while the rest are `completed`.
          */
         isWriting?: boolean;
+        /**
+         * Epoch ms for when the turn actually started thinking, if the host knows.
+         *
+         * Optional anchor, not a requirement: turns arrive with no timestamps, so
+         * by default the elapsed counter starts when F0 first saw the signal.
+         * Supplying this makes it survive a reload mid-stream.
+         */
+        startedAt?: number;
     };
     /** Messages rendered after the thinking section (assistant replies). */
     assistantMessages: Message_2[];
@@ -18905,6 +18915,11 @@ declare interface TextProps extends Omit<default_2.HTMLAttributes<HTMLElement>, 
      * @default false
      */
     required?: boolean;
+    /**
+     * The id of the control this text labels. Only meaningful together with
+     * `as="label"`; `React.HTMLAttributes` does not carry it.
+     */
+    htmlFor?: string;
 }
 
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
@@ -18968,6 +18983,12 @@ export declare type ThinkingProps = {
      * every item renders as `completed` regardless of `inProgress`.
      */
     isWriting?: boolean;
+    /**
+     * When the turn started thinking, from `useThinkingClock`. Drives the
+     * elapsed counter on whichever step is executing. `null` means no clock is
+     * running, and nothing is rendered.
+     */
+    startedAt?: number | null;
 };
 
 export declare interface ThreadActionHandlers {
@@ -20549,10 +20570,6 @@ export declare type WithDataTestIdPropsOf<T extends default_2.ComponentType<unkn
  * which collapses callback inference.
  */
 export declare type WithDataTestIdReturnType<T extends default_2.ComponentType<any>> = default_2.ForwardRefExoticComponent<default_2.PropsWithoutRef<default_2.ComponentProps<T> & WithDataTestIdProps> & default_2.RefAttributes<T extends default_2.ForwardRefExoticComponent<infer P> ? P extends default_2.RefAttributes<infer R> ? R : unknown : unknown>> & Pick<T, Exclude<keyof T, keyof default_2.ForwardRefExoticComponent<unknown>>>;
-
-declare type WithDetailsItemAction<T> = T extends unknown ? Omit<T, "action"> & {
-    action?: DetailsItemAction;
-} : never;
 
 export declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown;

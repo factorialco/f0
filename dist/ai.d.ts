@@ -1,4 +1,3 @@
-import { ActionType as ActionType_2 } from './types';
 import { AgentState } from '@livekit/components-react';
 import { AnchorHTMLAttributes } from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
@@ -8,7 +7,6 @@ import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { ComponentType } from 'react';
 import { CSSProperties } from 'react';
-import { DotTagItemProps } from './items/DotTagItem';
 import { EmployeeItemProps } from './types';
 import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
 import { F0TagCompanyProps } from './types';
@@ -23,8 +21,7 @@ import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
 import { NamedExoticComponent } from 'react';
-import { Props as Props_2 } from './types';
-import { RawTagItemProps } from './items/RawTagItem';
+import { Props as Props_3 } from './types';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
@@ -38,7 +35,9 @@ import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { TagAlertProps } from '../../../f0';
 import { TagBalanceProps } from '../../../f0';
+import { TagDotProps } from '../../../f0';
 import { TagListProps } from '../../../f0';
+import { TagRawProps } from '../../../f0';
 import { TagStatusProps } from '../../../f0';
 import { TagType } from '../../../f0';
 import { TeamItemProps } from './types';
@@ -159,8 +158,6 @@ declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
 declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
-
-declare type ActionType = CopyActionType | NavigateActionType | OpenLinkActionType | DrawerActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
 
@@ -312,8 +309,15 @@ export declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -458,7 +462,8 @@ declare type AiChatProviderReturnValue = {
     }) => void;
     tracking?: AiChatTrackingOptions;
     /**
-     * Current width of the chat window (for resizable mode)
+     * The user's preferred width, persisted against the absolute range. This is
+     * NOT what the layout reserves — read `effectiveChatWidth` for that.
      */
     chatWidth: number;
     setChatWidth: React.Dispatch<React.SetStateAction<number>>;
@@ -466,6 +471,29 @@ declare type AiChatProviderReturnValue = {
      * Reset the chat width to the default value (360px)
      */
     resetChatWidth: () => void;
+    /**
+     * `chatWidth` held inside what the measured frame can actually give it. The
+     * preference survives a narrow window; only this shrinks.
+     *
+     * OPTIONAL for the same reason as `isResizing` below: the provider always
+     * supplies it, but making it required reads as a breaking public-API change.
+     */
+    effectiveChatWidth?: number;
+    /** The range the panel may be dragged to at the frame's current width. */
+    chatWidthBounds?: PanelBounds;
+    /**
+     * True when the panel covers the frame rather than sitting beside it.
+     *
+     * Read this instead of re-deriving it from a media query: the rule combines
+     * the measured frame with the pointer type, and two consumers computing it
+     * separately is how a resize handle ends up on a full-screen panel.
+     */
+    panelOverlays?: boolean;
+    /**
+     * Publishes the frame's content-box width. Called by ApplicationFrame, which
+     * is the only thing that knows how much room is left beside the navigation.
+     */
+    setFrameWidth?: (width: number) => void;
     /**
      * True while the user is dragging the chat's resize handle. Broadcast here
      * because everything laid out against the chat's edge has to follow the drag
@@ -738,6 +766,8 @@ export declare const aiTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -1139,6 +1169,9 @@ declare type CanvasCardAction = {
     hideLabel?: boolean;
 };
 
+/** The card's own control: open/close, or the host's custom action. */
+declare const CanvasCardAction: ({ action, isActive, }: Pick<F0CanvasCardProps, "action" | "isActive">) => JSX_2.Element | null;
+
 declare type CanvasCardAvatar = {
     type: "module";
     module: ModuleId;
@@ -1149,6 +1182,9 @@ declare type CanvasCardAvatar = {
     type: "icon";
     icon: IconType;
 };
+
+/** Whichever avatar the card was given: a module, a file, or an icon. */
+declare const CanvasCardAvatar: ({ avatar }: Pick<F0CanvasCardProps, "avatar">) => JSX_2.Element | null;
 
 /**
  * Discriminated union for canvas panel content.
@@ -1737,11 +1773,6 @@ export declare type ContentType = (typeof contentTypes)[number];
 
 export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
 
-declare type CopyActionType = {
-    type: "copy";
-    text?: string;
-};
-
 declare type CountryCode = keyof TranslationsType["countries"];
 
 /**
@@ -1894,15 +1925,11 @@ declare const DataList: ForwardRefExoticComponent<DataListProps & RefAttributes<
     CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttributes<HTMLLIElement>>;
     PersonItem: ForwardRefExoticComponent<EmployeeItemProps & RefAttributes<HTMLLIElement>>;
     TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<HTMLLIElement>>;
-    DotTagItem: ForwardRefExoticComponent<DotTagItemProps & RefAttributes<HTMLLIElement>>;
-    AlertTagItem: ForwardRefExoticComponent<TagAlertProps & {
-    action?: ActionType_2;
-    } & RefAttributes<HTMLLIElement>>;
+    DotTagItem: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLLIElement>>;
+    AlertTagItem: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLLIElement>>;
     BalanceTagItem: ForwardRefExoticComponent<TagBalanceProps & RefAttributes<HTMLLIElement>>;
-    StatusTagItem: ForwardRefExoticComponent<TagStatusProps & {
-    action?: ActionType_2;
-    } & RefAttributes<HTMLLIElement>>;
-    RawTagItem: ForwardRefExoticComponent<RawTagItemProps & RefAttributes<HTMLLIElement>>;
+    StatusTagItem: ForwardRefExoticComponent<TagStatusProps & RefAttributes<HTMLLIElement>>;
+    RawTagItem: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLLIElement>>;
     RecordItem: ForwardRefExoticComponent<RecordItemProps & RefAttributes<HTMLLIElement>>;
     TagListItem: <T extends TagType>(props: TagListProps<T> & {
         ref?: Ref<HTMLLIElement>;
@@ -2558,6 +2585,8 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -2744,6 +2773,7 @@ export declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -3205,34 +3235,25 @@ export declare const defaultTranslations: {
     };
 };
 
-/**
- * DataList's drawer action is always controlled; here the row owns the open
- * state unless `expanded` is passed, so consumers usually only declare what a
- * row reveals.
- */
-declare type DetailsItemAction = Exclude<ActionType, DrawerActionType> | DetailsItemDrawerAction;
-
-declare type DetailsItemContent = (WithDetailsItemAction<ComponentProps<typeof DataList.Item>> & {
+declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "item";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.PersonItem>> & {
+}) | (ComponentProps<typeof DataList.PersonItem> & {
     type: "person";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.CompanyItem>> & {
+}) | (ComponentProps<typeof DataList.CompanyItem> & {
     type: "company";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.TeamItem>> & {
+}) | (ComponentProps<typeof DataList.TeamItem> & {
     type: "team";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.RecordItem>> & {
-    type: "record";
 }) | (ComponentProps<typeof Weekdays> & {
     type: "weekdays";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.DotTagItem>> & {
+}) | (ComponentProps<typeof DataList.DotTagItem> & {
     type: "dot-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.AlertTagItem>> & {
+}) | (Props & {
     type: "alert-tag";
 }) | (F0TagBalanceProps & {
     type: "balance-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.StatusTagItem>> & {
+}) | (F0TagStatusProps & {
     type: "status-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.RawTagItem>> & {
+}) | (F0TagRawProps & {
     type: "raw-tag";
 }) | {
     [T in TagType_2]: {
@@ -3245,38 +3266,6 @@ declare type DetailsItemContent = (WithDetailsItemAction<ComponentProps<typeof D
 } | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
-
-/**
- * Reveals more rows under this one when the item is clicked. The nested rows
- * take the layout (table or stacked) of the row that owns them.
- */
-declare type DetailsItemDrawerAction = {
-    type: "drawer";
-    details: DetailsItemType[];
-    /**
-     * Open state, when something outside the row needs to drive it (a summary
-     * card that opens the section, say). Leave it undefined and the row keeps
-     * its own state.
-     */
-    expanded?: boolean;
-    /** Called when the row is clicked. Required to close a controlled row. */
-    onToggle?: () => void;
-};
-
-declare interface DetailsItemType {
-    /** DOM id of the row, so it can be scrolled to or linked from elsewhere. */
-    id?: string;
-    title: string;
-    content: DetailsItemContent | DetailsItemContent[];
-    isHorizontal?: boolean;
-    /**
-     * When true inside a tableView, keeps the table-row padding but stacks
-     * the label above the content instead of side-by-side. Useful for
-     * long-form text fields like rich-text or textarea.
-     */
-    verticalLayout?: boolean;
-    spacingAtTheBottom?: boolean;
-}
 
 /**
  * Remove a property from a union of objects.
@@ -3293,19 +3282,6 @@ declare interface DetailsItemType {
  * // { age: number } | { height: number }
  */
 declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
-
-/**
- * Disclosure trigger. The item only flips a chevron and reports the click;
- * whatever it reveals is rendered and owned by the parent, so the state is
- * controlled.
- */
-declare type DrawerActionType = {
-    type: "drawer";
-    expanded: boolean;
-    onToggle: () => void;
-    /** `id` of the revealed element, for `aria-controls`. Pass it only while that element is in the DOM. */
-    controls?: string;
-};
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -3416,7 +3392,7 @@ export declare type ExpenseProfile = {
     status?: string;
 };
 
-export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+export declare const F0ActionItem: ({ title, suffix, status, inGroup, }: F0ActionItemProps) => JSX_2.Element;
 
 /**
  * Props for the F0ActionItem component
@@ -3426,6 +3402,14 @@ export declare interface F0ActionItemProps {
      * The title text displayed next to the status icon
      */
     title?: string;
+    /**
+     * Rendered inline after the title — used for the elapsed-time counter.
+     *
+     * A node rather than a string so that whatever ticks inside it owns its own
+     * state: passing a composed label would re-render this item, and everything
+     * above it, on every tick.
+     */
+    suffix?: ReactNode;
     /**
      * Current status of the action item
      */
@@ -3460,7 +3444,9 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
  * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
- * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ * Decoupled from CopilotKit, and prop-driven apart from one read: whether the
+ * panel is currently covering the frame, which decides if expanding means
+ * anything. Only the provider knows that, and it answers safely when absent.
  */
 export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
 
@@ -4632,7 +4618,7 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
-declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
 
 declare const F0TagBalance: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
@@ -5080,11 +5066,6 @@ declare const modules: {
     readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 };
 
-declare type NavigateActionType = {
-    type: "navigate";
-    href: string;
-};
-
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
 } & DataAttributes_2;
@@ -5227,9 +5208,20 @@ export declare type OneIconSize = (typeof oneIconSizes)[number];
 
 export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
-declare type OpenLinkActionType = {
-    type: "open-link";
-    href: string;
+declare type PanelBounds = {
+    min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
+    max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
+    /** The frame is too narrow to split: the panel should cover it instead. */
+    shouldOverlay: boolean;
 };
 
 declare type PathsToStringProps<T> = T extends string ? [] : {
@@ -5298,7 +5290,16 @@ declare interface PongBallProps {
 
 declare const privateProps: readonly ["className"];
 
-declare type Props = {
+declare type Props<Text extends string = string> = {
+    text: Text extends "" ? never : Text;
+    level: Level;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+};
+
+declare type Props_2 = {
     text: string;
     /**
      * Info text to display an i icon and a tooltip next to the tag
@@ -5362,6 +5363,14 @@ export declare type RenderableTurn = {
          * the last item is `executing` while the rest are `completed`.
          */
         isWriting?: boolean;
+        /**
+         * Epoch ms for when the turn actually started thinking, if the host knows.
+         *
+         * Optional anchor, not a requirement: turns arrive with no timestamps, so
+         * by default the elapsed counter starts when F0 first saw the signal.
+         * Supplying this makes it survive a reload mid-stream.
+         */
+        startedAt?: number;
     };
     /** Messages rendered after the thinking section (assistant replies). */
     assistantMessages: Message[];
@@ -5481,7 +5490,7 @@ declare const tagTypes: readonly ["dot", "person", "team", "company", "alert", "
 
 declare type TagVariant = BaseTag<{
     type: "dot";
-} & Props> | BaseTag<{
+} & Props_2> | BaseTag<{
     type: "person";
 } & PersonTagProps> | BaseTag<{
     type: "team";
@@ -5520,6 +5529,12 @@ export declare type ThinkingProps = {
      * every item renders as `completed` regardless of `inProgress`.
      */
     isWriting?: boolean;
+    /**
+     * When the turn started thinking, from `useThinkingClock`. Drives the
+     * elapsed counter on whichever step is executing. `null` means no clock is
+     * running, and nothing is rendered.
+     */
+    startedAt?: number | null;
 };
 
 export declare interface ThreadActionHandlers {
@@ -5798,10 +5813,6 @@ export declare type WelcomeSuggestionClickEvent = {
 declare type WithDataTestIdProps = {
     dataTestId?: string;
 };
-
-declare type WithDetailsItemAction<T> = T extends unknown ? Omit<T, "action"> & {
-    action?: DetailsItemAction;
-} : never;
 
 declare interface WithTooltipDescription {
     /**

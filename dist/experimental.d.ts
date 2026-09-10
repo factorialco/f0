@@ -1,4 +1,3 @@
-import { ActionType as ActionType_3 } from './types';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './experimental';
@@ -33,14 +32,13 @@ import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
-import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
-import { DotTagItemProps } from './items/DotTagItem';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
+import { F0CommandPaletteProviderProps as F0CommandPaletteProviderProps_2 } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
@@ -65,7 +63,7 @@ import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { InFilterOptions } from './InFilter/types';
-import { ItemProps } from './types';
+import { ItemProps as ItemProps_2 } from './types';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
@@ -87,15 +85,14 @@ import { PopoverProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
 import { ProgressSeriesCellValue } from './types/progressSeries';
-import { Props as Props_4 } from './types';
+import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
 import { Provider } from 'react';
 import { RadarChartProps } from './RadarChart';
-import { RawTagItemProps } from './items/RawTagItem';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
-import { RecordItemProps } from './types';
+import { RecordItemProps as RecordItemProps_2 } from './types';
 import { Ref } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
@@ -103,16 +100,17 @@ import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from './experimental';
-import { StyleSpecification } from 'maplibre-gl';
 import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
 import { TagBalanceProps } from './experimental';
 import { TagCellValue } from './types/tag';
 import { TagCellValue as TagCellValue_2 } from './experimental';
+import { TagDotProps } from './experimental';
 import { TagListCellValue } from './types/tagList';
 import { TagListCellValue as TagListCellValue_2 } from './experimental';
 import { TagListProps } from './experimental';
+import { TagRawProps } from './experimental';
 import { TagStatusProps } from './experimental';
 import { TagType } from './experimental';
 import { TeamCellValue } from './types/team';
@@ -157,7 +155,7 @@ export declare type ActionBarGroup = {
     items: ActionBarItem[];
 };
 
-export declare type ActionBarItem = ActionType;
+export declare type ActionBarItem = ActionType_2;
 
 export declare type ActionBarStatus = (typeof actionBarStatuses)[number];
 
@@ -361,7 +359,17 @@ declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
-declare type ActionType = {
+export declare type ActionType = CopyActionType | NavigateActionType | OpenLinkActionType;
+
+export declare type actionType = {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+    variant: "default" | "outline" | "neutral" | undefined;
+    icon?: IconType;
+};
+
+declare type ActionType_2 = {
     label: string;
     icon?: IconType;
     onClick?: () => void;
@@ -372,16 +380,6 @@ declare type ActionType = {
     /** Shown on hover. Its reason for existing is a disabled action. */
     tooltip?: string;
 };
-
-export declare type actionType = {
-    label: string;
-    onClick: () => void;
-    disabled?: boolean;
-    variant: "default" | "outline" | "neutral" | undefined;
-    icon?: IconType;
-};
-
-declare type ActionType_2 = CopyActionType | NavigateActionType | OpenLinkActionType | DrawerActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
 
@@ -587,8 +585,15 @@ declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -1638,6 +1643,8 @@ export declare interface CalendarEventProps {
 
 export declare type CalendarMode = "single" | "range";
 
+export declare type CalendarSelection = Date | DateRange | null;
+
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 declare type CalloutAction = {
@@ -2336,7 +2343,7 @@ declare interface ChartComputation {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>>;
+export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
 
 declare interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBase {
     type: "bar";
@@ -2560,7 +2567,7 @@ declare interface ChatDashboardScatterChartConfig {
     xValueFormat?: FormatPreset;
 }
 
-export declare type ChatWidgetEmptyStateProps = Props_5;
+export declare type ChatWidgetEmptyStateProps = Props_6;
 
 declare type ChildrenPaginationInfo = {
     total: number;
@@ -3295,6 +3302,430 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+/** A flat global command: a shortcut, a jump, a thing to create. */
+export declare type CommandAction = CommandActionBase & CommandDoes<(context: CommandRunContext) => void>;
+
+/** A flat global command: a shortcut, a jump, a thing to create. */
+declare type CommandActionBase = {
+    id: string;
+    label: string;
+    icon?: IconType;
+    /** Extra terms the ranker should match on. */
+    keywords?: string;
+    /** Second line. Leave it out unless it says something the label cannot. */
+    description?: string;
+};
+
+export declare type CommandActionRisk = (typeof commandActionRisks)[number];
+
+/**
+ * Friction tier of an action.
+ *
+ * It is a claim about CONSEQUENCE, not a confirmation step — the palette never
+ * asks. `danger` keeps a row out of the default selection and stops a bare
+ * `Enter` from reaching it, so the reader has to arrive on it deliberately; the
+ * confirmation itself belongs to the dialog the consumer already owns.
+ */
+export declare const commandActionRisks: readonly ["none", "confirm", "danger"];
+
+/**
+ * The assistant escape hatch — the way out of the list when nothing in it fit.
+ *
+ * Optional by design: with no `assistant`, the bar button, the trailing row and
+ * the `mod+Enter` binding all disappear rather than degrading into dead
+ * affordances. The palette does not know or care WHICH assistant this is; it
+ * hands over a prompt and the scope it was built from.
+ */
+export declare type CommandAssistant = {
+    /** The bar button's label, e.g. "Ask One". */
+    label: string;
+    /** The assistant's own mark. Rendered as given — not tinted to a control glyph. */
+    icon?: IconType;
+    /**
+     * Receives the prompt the reader built. `ref` is the scope it was asked
+     * inside, when there was one.
+     */
+    onAsk: (prompt: string, ref?: CommandEntityRef) => void;
+};
+
+/**
+ * Whether an action can run on the current scope, and why not.
+ *
+ * A gated action is never hidden: it stays listed, sinks below the runnable
+ * ones, and shows its reason. Policy changes an action's behaviour, never its
+ * presence — a row that vanishes teaches the reader nothing.
+ */
+export declare type CommandAvailability = {
+    disabled: boolean;
+    reason?: string;
+};
+
+/**
+ * A row has to DO something, and there are exactly two things it can be: a
+ * DESTINATION or a BEHAVIOUR. `href` for the first, `run` for the second, and
+ * the union is what makes "one of them, never neither" a type error rather than
+ * a row that silently does nothing when pressed.
+ *
+ * Most rows are destinations, so most rows want a plain string and no callback:
+ * writing `run: () => navigate("/x")` to express "go to /x" buries a link inside
+ * a function, and the palette then cannot know it IS a link — which is what
+ * lets a destination row offer `Copy link` and open in a new tab.
+ *
+ * `TRun` is the callback's own shape, because a global command is handed the
+ * context while an entity action is handed its target as well.
+ */
+declare type CommandDoes<TRun, THref = string> = {
+    href: THref;
+    run?: never;
+} | {
+    run: TRun;
+    href?: never;
+};
+
+/**
+ * An action that applies to a scoped record or selection.
+ *
+ * Either a destination or a behaviour, never neither. The destination may be a
+ * plain string when it is the same wherever you came from, or a function of the
+ * target when it is not — `(ref) => \`/devices/${ref.id}/history\`` — and it
+ * receives the collected parameters too, so a step's answer can end up in the
+ * URL.
+ */
+export declare type CommandEntityAction = CommandEntityActionBase & CommandDoes<(ref: CommandEntityRef, values: CommandParamValues, context: CommandRunContext) => void, string | ((ref: CommandEntityRef, values: CommandParamValues) => string)>;
+
+/** An action that applies to a scoped record or selection. */
+declare type CommandEntityActionBase = {
+    /** Unique within its provider. */
+    key: string;
+    /** Verb-first, so scanning and search both work: "Lock screen". */
+    label: string;
+    description?: string;
+    icon: IconType;
+    /** Origin as metadata, never as navigation: "Script", "Query". */
+    badge?: string;
+    risk: CommandActionRisk;
+    /** Extra terms the ranker should match on. */
+    keywords?: string;
+    availability?: (ref: CommandEntityRef) => CommandAvailability;
+    impact?: (ref: CommandEntityRef) => CommandImpact | undefined;
+    /** Floats the action into "Suggested" while the query is empty. */
+    suggested?: (ref: CommandEntityRef) => boolean;
+    params?: CommandParamStep[];
+};
+
+/**
+ * A named set of actions on one record: "Security", "Maintenance", "Lifecycle".
+ *
+ * The heading sits HERE rather than on each action, for the same reason it sits
+ * on `CommandGroup` rather than on each command. Three maintenance actions used
+ * to write `group: "Maintenance"` three times — three chances to disagree — and
+ * because the heading was per-row the palette then had to re-sort the list so
+ * that rows of one intent came out contiguous, or a straggler re-emitted a
+ * heading that had already appeared. A group cannot be non-contiguous.
+ */
+export declare type CommandEntityActionGroup = {
+    label: string;
+    items: CommandEntityAction[];
+};
+
+/**
+ * The public surface of `F0CommandPalette` (SPEC-006 / SPEC-039).
+ *
+ * The palette has ONE grammar — `[scope] › [action] › [params]` — and every type
+ * here is a piece of it. Read them in that order: an `CommandEntityRef` is the
+ * scope, a `CommandEntityAction` is the verb, a `CommandParamStep` is a value the
+ * verb still needs.
+ */
+/** A person rendered as a real avatar instead of an icon. */
+export declare type CommandEntityAvatar = {
+    firstName: string;
+    lastName: string;
+    src?: string;
+};
+
+/**
+ * One domain's contribution to the palette: how to find its records, and what
+ * can be done to one.
+ *
+ * Declaring an action here once is what keeps a row menu, a bulk bar and the
+ * palette projections of a single list instead of N×M surfaces.
+ */
+export declare type CommandEntityProvider = {
+    /** Stable discriminator, and the value of `CommandEntityRef.type`. */
+    type: string;
+    /** Group heading in the global list, e.g. "Devices". */
+    label: string;
+    /**
+     * Record lookup. Ranking across providers is the palette's job.
+     *
+     * MAY BE ASYNC, because real entity search is remote. Return an array when the
+     * records are already in hand and a promise when they are not — the palette
+     * renders skeleton rows in this provider's group while one is outstanding, and
+     * a reason row if it rejects.
+     *
+     * The palette calls this on every query change and applies only the NEWEST
+     * response, so a slow answer to `mac` can never overwrite a fast one to
+     * `macbook`. It does not debounce: a provider that wants fewer round trips
+     * should debounce inside its own `search`, since only it knows what a
+     * round trip costs.
+     */
+    search: (query: string, limit: number) => CommandEntityRef[] | Promise<CommandEntityRef[]>;
+    /**
+     * The actions a ref can run. Omit it while a domain has not adopted the
+     * registry: its records stay findable, they are just not yet actionable —
+     * a valid state, since the palette still offers navigation.
+     */
+    actions?: (ref: CommandEntityRef) => CommandEntityActionGroup[];
+    /**
+     * The records that live INSIDE a ref, so the palette can narrow before it
+     * acts: a team's people, a project's tasks, a folder's documents.
+     *
+     * Named `inside` and not `children` on purpose: this returns REFS, and a prop
+     * called `children` on anything React-shaped reads as a `ReactNode` slot.
+     * Props here are data, strongly typed — never rendered nodes handed in.
+     *
+     * Return refs of any `type`. The palette resolves each one's actions from the
+     * provider matching that type, so a team provider hands back `person` refs and
+     * the person provider supplies what can be done to them — nothing has to know
+     * about both.
+     *
+     * `query` is what has been typed inside the scope, and `limit` caps the rows:
+     * a team of forty is a list to filter, not a list to print.
+     */
+    inside?: (ref: CommandEntityRef, query: string, limit: number) => CommandEntityRef[] | Promise<CommandEntityRef[]>;
+};
+
+/**
+ * What the palette is scoped to: one record, or a selection of them.
+ *
+ * `kind: "many"` carries an id SNAPSHOT rather than a live selection, taken when
+ * the palette opened — it is the authoritative target list for the run, so a
+ * selection changing behind the overlay cannot redirect an action mid-flight.
+ */
+export declare type CommandEntityRef = {
+    type: string;
+    kind: "one";
+    id: string;
+    /** Scope label and row title, e.g. `MacBook Pro 14"`. */
+    label: string;
+    /** Tells duplicates apart while choosing, e.g. an owner or a model. */
+    sublabel?: string;
+    icon?: IconType;
+    avatar?: CommandEntityAvatar;
+    /** Where `Enter` goes in global mode. Scoping uses `/` instead. */
+    href?: string;
+} | {
+    type: string;
+    kind: "many";
+    ids: string[];
+    /** Scope label, e.g. `12 devices`. */
+    label: string;
+    icon?: IconType;
+};
+
+/**
+ * ONE HEADING AND WHAT SITS UNDER IT.
+ *
+ * Either items the consumer wrote, or a provider that fetches records — one
+ * ordered list holds both, and the order it is written in is the order the
+ * groups appear on screen.
+ *
+ * There is no separate `navigation` prop and no built-in "Go to". A destination
+ * is a command whose `CommandDoes` picked `href`, so a group of destinations is
+ * a group like any other and the product names it. The palette used to assign
+ * those headings itself, which made "Actions" and "Go to" the only two words on
+ * screen a product could not choose — and put copy about the consumer's own
+ * content into a labels table, where it did not belong.
+ *
+ * Exactly one of `items` or `provider`, enforced by `never` on the other, so a
+ * group carrying both is a type error rather than a silent precedence rule.
+ *
+ * Give it a STABLE identity — module scope, or memoised. It keys the row memos.
+ */
+export declare type CommandGroup = {
+    label: string;
+    items: CommandAction[];
+    provider?: never;
+} | {
+    provider: CommandEntityProvider;
+    label?: never;
+    items?: never;
+};
+
+/** How a run lands on a selection — stated on the row, before the commit. */
+export declare type CommandImpact = {
+    eligible: number;
+    total: number;
+    skipped: number;
+    reason?: string;
+};
+
+/**
+ * EVERY WORD THE PALETTE PUTS ON SCREEN — all of it, and all of it required.
+ *
+ * The palette ships no copy of its own. It renders the consumer's records,
+ * their commands and their destinations, so the words wrapped around that
+ * content belong to the same product and arrive the same way: as props, rather
+ * than half here and half in a shared translation table this component would
+ * have to grow a key in every time a row learned a new state.
+ *
+ * REQUIRED, not optional with a fallback, because a fallback is exactly where
+ * an untranslated string hides. An English default renders perfectly inside a
+ * Spanish app and nothing fails — nothing is even detectably wrong until a
+ * reader sees it. A required field is a compile error instead.
+ *
+ * ANYTHING THAT INTERPOLATES IS A FUNCTION, never a template carrying
+ * `{{name}}`. A function is typed, so a missing value is a compile error rather
+ * than a literal `{{name}}` on screen; it cannot be handed the wrong
+ * interpolation dialect; and it is the only form that can reorder its parts or
+ * choose a plural, which a template cannot do in any language that inflects.
+ *
+ * Define it at MODULE SCOPE and hand over the same object every render. It is
+ * static copy, so there is nothing to recompute — and the palette keys its row
+ * memos off these values.
+ */
+export declare type CommandPaletteLabels = {
+    /** Accessible name of the overlay, for a screen reader announcing it. */
+    label: string;
+    /** The prompt in the field while nothing is typed and nothing is scoped. */
+    placeholder: string;
+    /** The short form, for a field sharing its row with the assistant on a phone. */
+    placeholderPhone: string;
+    /** The prompt once the palette is scoped and only actions remain. */
+    placeholderScoped: string;
+    /** The same, once the palette is scoped to a record. */
+    fieldLabelScoped: (name: string) => string;
+    empty: {
+        title: string;
+        description: string;
+    };
+    /**
+     * Headings over the buckets the palette COMPUTES, and only those.
+     *
+     * Every other heading arrives with its content: a `CommandGroup` names itself
+     * with `label`, and a provider names its records' group the same way. What is
+     * left here is the three rearrangements the palette performs on that content
+     * — what you did lately, what it floats first, what it had to gate. Those are
+     * facts about this component's own behaviour, so they are generic copy;
+     * "Actions" and "Go to" never were, and used to sit here by mistake.
+     */
+    groups: {
+        recent: string;
+        suggested: string;
+        unavailable: string;
+    };
+    /** The key legend's labels. The keys themselves are glyphs, not copy. */
+    footer: {
+        actions: string;
+        rowActions: string;
+        ask: string;
+        choose: string;
+        leaveScope: string;
+        goBack: string;
+    };
+    /** The chip in the field, which is a control and needs a name. */
+    scope: {
+        remove: (name: string) => string;
+    };
+    /** Visible text and tooltips on the controls a row carries. */
+    rowActions: {
+        actions: string;
+        actionsFor: (label: string) => string;
+        copyLink: string;
+        copyLinkTo: (label: string) => string;
+        linkCopied: string;
+    };
+    /**
+     * What the live region says when the palette changes under the reader.
+     *
+     * `scoped` is handed the count so it can pick its own plural — including the
+     * zero case, which is why there is no separate "no actions" string.
+     */
+    announce: {
+        scoped: (name: string, count: number) => string;
+        cleared: string;
+        unavailable: (label: string, reason: string) => string;
+        linkCopied: (url: string) => string;
+    };
+    /** What one row says, and what pressing it will do. */
+    row: {
+        open: (label: string) => string;
+        run: (label: string) => string;
+        ask: (label: string) => string;
+        /** One word each, on the tooltip of a row's own `↵`. */
+        verb: {
+            open: string;
+            run: string;
+            ask: string;
+        };
+        /** Shown on a gated row that supplied no reason of its own. */
+        unavailable: string;
+        /** Shown in a provider's group when its search could not be reached. */
+        searchFailed: string;
+    };
+    /**
+     * The blast radius, as a sentence. Three values and a conditional reason,
+     * which is more than a template can put in a sensible order.
+     */
+    impact: (impact: CommandImpact) => string;
+};
+
+/** One choice inside a parameter step. */
+export declare type CommandParamOption = {
+    value: string;
+    label: string;
+    sublabel?: string;
+    icon?: IconType;
+    avatar?: CommandEntityAvatar;
+};
+
+/**
+ * A value the action still needs, rendered as the next level of the palette
+ * rather than as a separate dialog.
+ *
+ * Covers the `select` and `multiple` shapes. An action needing free-form or
+ * multi-field input should collect nothing here and hand off to its own dialog
+ * from `run` instead.
+ */
+export declare type CommandParamStep = {
+    key: string;
+    /** Level heading and input placeholder, e.g. "Choose a version". */
+    label: string;
+    options: (ref: CommandEntityRef) => CommandParamOption[];
+    multiple?: boolean;
+};
+
+/** Values collected across the parameter levels, keyed by `CommandParamStep.key`. */
+export declare type CommandParamValues = Record<string, string[]>;
+
+export declare type CommandRowAction = {
+    key: string;
+    /**
+     * The accessible name, and it always carries the target: `Copy link to
+     * MacBook Pro 14"`. The tooltip may be shorter — see `tip`.
+     */
+    label: string;
+    icon?: IconType;
+    /**
+     * Visible text next to the icon. Give it to at most one action per row —
+     * otherwise the row turns into a row of buttons.
+     */
+    text?: string;
+    tip?: string;
+    run: () => void;
+};
+
+/**
+ * What the palette lends an action at run time, so a provider stays free of the
+ * router and of any assistant runtime. An action that has to reach a screen
+ * calls `navigate` rather than importing a router itself.
+ */
+export declare type CommandRunContext = {
+    navigate: (href: string) => void;
+    /** Hands a prompt to the assistant. A no-op when no `assistant` is configured. */
+    ask: (prompt: string) => void;
+};
+
 export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
@@ -3468,7 +3899,7 @@ declare type CompareToDef = {
 
 declare type CompareToDefKey = string;
 
-declare type CopyActionType = {
+export declare type CopyActionType = {
     type: "copy";
     text?: string;
 };
@@ -3749,7 +4180,7 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
     filters?: CurrentFiltersState;
-    search?: string | undefined;
+    search?: string;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
     /** Per-visualization filter states, keyed by visualization index.
@@ -3784,27 +4215,23 @@ declare interface DataError {
     cause?: unknown;
 }
 
-declare const DataList: ForwardRefExoticComponent<DataListProps & RefAttributes<HTMLUListElement>> & {
-    Item: ForwardRefExoticComponent<ItemProps & RefAttributes<HTMLLIElement>>;
+export declare const DataList: ForwardRefExoticComponent<DataListProps & RefAttributes<HTMLUListElement>> & {
+    Item: ForwardRefExoticComponent<ItemProps_2 & RefAttributes<HTMLLIElement>>;
     CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttributes<HTMLLIElement>>;
     PersonItem: ForwardRefExoticComponent<EmployeeItemProps & RefAttributes<HTMLLIElement>>;
     TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<HTMLLIElement>>;
-    DotTagItem: ForwardRefExoticComponent<DotTagItemProps & RefAttributes<HTMLLIElement>>;
-    AlertTagItem: ForwardRefExoticComponent<TagAlertProps & {
-    action?: ActionType_3;
-    } & RefAttributes<HTMLLIElement>>;
+    DotTagItem: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLLIElement>>;
+    AlertTagItem: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLLIElement>>;
     BalanceTagItem: ForwardRefExoticComponent<TagBalanceProps & RefAttributes<HTMLLIElement>>;
-    StatusTagItem: ForwardRefExoticComponent<TagStatusProps & {
-    action?: ActionType_3;
-    } & RefAttributes<HTMLLIElement>>;
-    RawTagItem: ForwardRefExoticComponent<RawTagItemProps & RefAttributes<HTMLLIElement>>;
-    RecordItem: ForwardRefExoticComponent<RecordItemProps & RefAttributes<HTMLLIElement>>;
+    StatusTagItem: ForwardRefExoticComponent<TagStatusProps & RefAttributes<HTMLLIElement>>;
+    RawTagItem: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLLIElement>>;
+    RecordItem: ForwardRefExoticComponent<RecordItemProps_2 & RefAttributes<HTMLLIElement>>;
     TagListItem: <T extends TagType>(props: TagListProps<T> & {
         ref?: Ref<HTMLLIElement>;
     }) => ReturnType<(<T_1 extends TagType>(props: TagListProps<T_1>, ref: ForwardedRef<HTMLLIElement>) => JSX_2.Element)>;
 };
 
-declare type DataListProps = {
+export declare type DataListProps = {
     children: ReactElement | ReactElement[];
     label?: string;
     isHorizontal?: boolean;
@@ -4811,6 +5238,8 @@ declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -4997,6 +5426,7 @@ declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -5557,34 +5987,25 @@ declare type DescriptionPart = {
  */
 export declare const DetailsItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
 
-/**
- * DataList's drawer action is always controlled; here the row owns the open
- * state unless `expanded` is passed, so consumers usually only declare what a
- * row reveals.
- */
-export declare type DetailsItemAction = Exclude<ActionType_2, DrawerActionType> | DetailsItemDrawerAction;
-
-export declare type DetailsItemContent = (WithDetailsItemAction<ComponentProps<typeof DataList.Item>> & {
+export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "item";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.PersonItem>> & {
+}) | (ComponentProps<typeof DataList.PersonItem> & {
     type: "person";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.CompanyItem>> & {
+}) | (ComponentProps<typeof DataList.CompanyItem> & {
     type: "company";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.TeamItem>> & {
+}) | (ComponentProps<typeof DataList.TeamItem> & {
     type: "team";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.RecordItem>> & {
-    type: "record";
 }) | (ComponentProps<typeof Weekdays> & {
     type: "weekdays";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.DotTagItem>> & {
+}) | (ComponentProps<typeof DataList.DotTagItem> & {
     type: "dot-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.AlertTagItem>> & {
+}) | (Props_3 & {
     type: "alert-tag";
 }) | (F0TagBalanceProps & {
     type: "balance-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.StatusTagItem>> & {
+}) | (F0TagStatusProps & {
     type: "status-tag";
-}) | (WithDetailsItemAction<ComponentProps<typeof DataList.RawTagItem>> & {
+}) | (F0TagRawProps & {
     type: "raw-tag";
 }) | {
     [T in TagType_2]: {
@@ -5597,23 +6018,6 @@ export declare type DetailsItemContent = (WithDetailsItemAction<ComponentProps<t
 } | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
-
-/**
- * Reveals more rows under this one when the item is clicked. The nested rows
- * take the layout (table or stacked) of the row that owns them.
- */
-export declare type DetailsItemDrawerAction = {
-    type: "drawer";
-    details: DetailsItemType[];
-    /**
-     * Open state, when something outside the row needs to drive it (a summary
-     * card that opens the section, say). Leave it undefined and the row keeps
-     * its own state.
-     */
-    expanded?: boolean;
-    /** Called when the row is clicked. Required to close a controlled row. */
-    onToggle?: () => void;
-};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5629,8 +6033,6 @@ declare interface DetailsItemsListProps extends WithDataTestIdProps {
 }
 
 export declare interface DetailsItemType {
-    /** DOM id of the row, so it can be scrolled to or linked from elsewhere. */
-    id?: string;
     title: string;
     content: DetailsItemContent | DetailsItemContent[];
     isHorizontal?: boolean;
@@ -5707,19 +6109,6 @@ declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Om
 export declare function downloadAsCSV<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): Promise<void>;
 
 /**
- * Disclosure trigger. The item only flips a chevron and reports the click;
- * whatever it reveals is rendered and owned by the parent, so the state is
- * controlled.
- */
-declare type DrawerActionType = {
-    type: "drawer";
-    expanded: boolean;
-    onToggle: () => void;
-    /** `id` of the revealed element, for `aria-controls`. Pass it only while that element is in the DOM. */
-    controls?: string;
-};
-
-/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const Dropdown: (props: DropdownProps) => JSX_2.Element;
@@ -5784,6 +6173,8 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
+
+declare type DropPosition = "before" | "after" | "inside";
 
 /* Excluded from this release type: EditableColumn */
 
@@ -7440,6 +7831,12 @@ export declare type F0ChatRuntime = {
      */
     maxFileSizeBytes?: number;
     /**
+     * Maximum number of characters allowed in a message. The composer keeps an
+     * oversized draft in place and shows its existing validation banner instead
+     * of calling `sendMessage`. Omit for no limit.
+     */
+    maxMessageCharacters?: number;
+    /**
      * Optional voice dictation — same signature as the AI chat (streams partials).
      * Not part of the Stream transport; a host wires it to its own speech service
      * (the Stream adapter omits it, so the mic button stays hidden there).
@@ -7610,6 +8007,62 @@ export declare type F0ChatVoiceAttachment = {
     durationSeconds?: number;
     mimeType?: string;
     name?: string;
+};
+
+/** What `useCommandPalette()` hands back. */
+export declare type F0CommandPaletteApi = {
+    open: () => void;
+    /**
+     * Open already scoped to a record or a selection — the shortcut for any
+     * surface that already knows its target (a row menu, a bulk bar, a detail
+     * header), so the only thing left to do is name the verb.
+     */
+    openScoped: (ref: CommandEntityRef) => void;
+    close: () => void;
+    isOpen: boolean;
+};
+
+/**
+ * @experimental This is an experimental API use it at your own risk
+ */
+export declare const F0CommandPaletteProvider: ({ children, groups, recent, assistant, labels, onNavigate, shortcut, open: openProp, onOpenChange, }: F0CommandPaletteProviderProps_2) => JSX_2.Element;
+
+export declare type F0CommandPaletteProviderProps = {
+    children: ReactNode;
+    /** Every word the palette puts on screen. Required: it ships none itself. */
+    labels: CommandPaletteLabels;
+    /**
+     * Everything findable, as an ordered list of groups.
+     *
+     * One prop rather than three, because `actions`, `navigation` and `providers`
+     * were the same idea three times — a heading and the rows under it. Order
+     * here is order on screen, so where records sit relative to commands is the
+     * product's call and no longer a rule buried in this component.
+     */
+    groups: CommandGroup[];
+    /**
+     * Ids of items in `groups` to lead the empty state with, most recent first.
+     *
+     * Consumer-owned on purpose: what counts as recent is a fact about the app's
+     * history, not about this overlay, and the palette must not be the thing that
+     * decides to write to storage.
+     */
+    recent?: string[];
+    assistant?: CommandAssistant;
+    /**
+     * How an `href` is followed. Defaults to a full page load, which is right for
+     * an app without a client router and wrong for one with it — pass the router's
+     * own navigate.
+     */
+    onNavigate?: (href: string) => void;
+    /**
+     * Bind `mod+K` to open the palette.
+     * @default true
+     */
+    shortcut?: boolean;
+    /** Controlled open state. Leave it out to let the palette own it. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 };
 
 /**
@@ -8179,8 +8632,13 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
 
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
-    /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-    getMap: () => default_3.Map | null;
+    /**
+     * The rendering engine's own map object, as an escape hatch. Typed `unknown`
+     * on purpose: what comes back depends on the provider, so narrowing it is a
+     * deliberate decision at the call site instead of an implicit dependency on
+     * whichever engine F0Map happens to use. `null` until the map has mounted.
+     */
+    getNativeMap: () => unknown;
     /** Center on a marker (and select it). Always animates unless reduced-motion. */
     focusMarker: (id: string) => void;
     /** Frame all markers in view. */
@@ -8335,7 +8793,7 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     /** Initial camera. Defaults to a city-level view. Read once on mount. */
     initialViewport?: F0MapViewport;
     /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
-    mapStyle?: F0MapStylePair;
+    mapStyle?: F0MapStyle;
     /**
      * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
      * the map (and resets the camera), so treat it as static.
@@ -8391,6 +8849,13 @@ export declare interface F0MapProps extends WithDataTestIdProps {
 }
 
 /**
+ * Which rendering engine a style is written for. The tag exists so a style
+ * built for one engine can never be handed to another: the shapes are not
+ * interchangeable, and without it the mismatch would only surface at runtime.
+ */
+export declare type F0MapProvider = "maplibre";
+
+/**
  * A route: a polyline drawn through the given coordinates exactly as provided.
  * `F0Map` renders the path; it does not compute routing - fetch that
  * server-side (or from a routing engine) and pass the resulting vertices.
@@ -8415,12 +8880,15 @@ export declare interface F0MapSkeletonProps extends WithDataTestIdProps {
 }
 
 /**
- * A light/dark pair of MapLibre styles. Each entry is either a hosted style
- * URL or an inline `StyleSpecification`.
+ * A light/dark style pair for one engine. `light` and `dark` are deliberately
+ * opaque - their real shape belongs to the engine (a MapLibre
+ * `StyleSpecification` or a style URL today), and F0Map's public surface must
+ * never make a consumer import an engine's types to describe a style.
  */
-export declare interface F0MapStylePair {
-    light: string | StyleSpecification;
-    dark: string | StyleSpecification;
+export declare interface F0MapStyle {
+    provider: F0MapProvider;
+    light: unknown;
+    dark: unknown;
 }
 
 /**
@@ -8431,7 +8899,7 @@ export declare interface F0MapStylePair {
  * resolved to concrete hex for the light and dark neutral ramps. Regenerate with
  * `node src/patterns/F0Map/styles/buildStyles.mjs`.
  */
-export declare const f0MapStyles: F0MapStylePair;
+export declare const f0MapStyles: F0MapStyle;
 
 /** Initial camera position for the map. */
 export declare interface F0MapViewport {
@@ -9125,7 +9593,7 @@ export declare const F0TableOfContent: WithDataTestIdReturnType_3<typeof _F0Tabl
 
 declare function _F0TableOfContent(props: TOCProps): JSX_2.Element;
 
-declare const F0TagAlert: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>>;
 
 declare const F0TagBalance: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
@@ -9629,9 +10097,9 @@ export declare interface GranularityDefinition {
         max?: Date;
     } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
-    toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
-    toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
+    toRangeString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
+    toRange: <T extends OptionalCalendarSelection>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
+    toString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -9640,8 +10108,8 @@ export declare interface GranularityDefinition {
     getViewDateFromDate: (date: Date) => Date;
     render: (renderProps: {
         mode: CalendarMode;
-        selected: Date | DateRange | null;
-        onSelect: (date: Date | DateRange | null) => void;
+        selected: CalendarSelection;
+        onSelect: (date: CalendarSelection) => void;
         month: Date;
         onMonthChange: (date: Date) => void;
         motionDirection: number;
@@ -10207,6 +10675,49 @@ export declare interface HomeSlotParamsMap {
     indicators: IndicatorsListProps;
 }
 
+export declare type HomeTrackingOptions = {
+    /** A widget's header link, footer action, or "View more" was used. */
+    onWidgetAction?: (event: HomeWidgetActionEvent) => void;
+    /**
+     * A row inside a widget was activated. Fires ALONGSIDE the navigation the
+     * row's `href` performs — it does not replace or gate it, so a middle-click
+     * or a modified click still behaves like the link it is.
+     */
+    onWidgetItemActivate?: (event: HomeWidgetItemActivateEvent) => void;
+};
+
+/**
+ * Payload for `tracking.onWidgetAction`. The widget is named by the id the host
+ * gave it, which is the key to everything else the host already knows about it.
+ */
+export declare type HomeWidgetActionEvent = {
+    widgetId: string;
+    action: HomeWidgetActionKind;
+};
+
+/**
+ * TRACKING FOR THE HOME — the same shape the AI kit uses (`AiChatTrackingOptions`):
+ * the host passes callbacks, the components fire them, and nothing about a
+ * widget's data changes to make it measurable.
+ *
+ * This exists because a Home widget is DECLARATIVE. Its rows carry an `href`
+ * and never an `onClick` (that is the one click behavior a `list` slot has, and
+ * a type test holds the line), so a host had no seam to observe an interaction
+ * from — its analytics simply could not see the Home. These callbacks are that
+ * seam, and they leave the row data alone: navigation is still the anchor's.
+ *
+ * BEHAVIOUR ONLY, deliberately. The payloads carry what the reader DID and say
+ * nothing about which column a widget sits in or where in it — that is the
+ * host's own persisted layout, and duplicating it into an analytics event
+ * would make two sources for one fact, the stale one being the event.
+ */
+/**
+ * WHICH AFFORDANCE was used. A widget has three ways out of it and they mean
+ * different things to whoever reads the numbers: the header's own link, the
+ * footer's call to action, and the "View more" a capped list grows.
+ */
+export declare type HomeWidgetActionKind = "header-link" | "footer-action" | "view-more";
+
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
  * through to the frame.
@@ -10313,6 +10824,19 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/** Payload for `tracking.onWidgetItemActivate`. */
+export declare type HomeWidgetItemActivateEvent = {
+    widgetId: string;
+    /** The row's own id, as the slot was given it. */
+    itemId: string | number;
+    /**
+     * 1-based place of the row within its slot, AS DRAWN. Not layout state: it
+     * is where the reader's attention landed in a list ordered by its own data,
+     * which is the one position worth reporting.
+     */
+    itemPosition: number;
 };
 
 /**
@@ -10621,7 +11145,7 @@ declare type InputFieldProps<T> = {
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
     onClickContent?: () => void;
-    value?: T | undefined;
+    value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
     error?: string | boolean;
@@ -10803,6 +11327,12 @@ export declare type ItemNeighborsResponse<R> = {
     total?: number;
 };
 
+export declare type ItemProps = {
+    text: string;
+    icon?: IconType;
+    action?: ActionType;
+};
+
 export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, canDropInside, onDragOver, onDragLeave, onDrop, currentParentId, draggedItemId, }: TOCItemSectionHeaderProps): JSX_2.Element;
 
 /**
@@ -10872,6 +11402,10 @@ export declare type lastIntentType = {
 
 /** Sentinel for {@link F0ChatRuntime.loadMessageContext} meaning "the live tail". */
 export declare const LATEST: "latest";
+
+declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare const LineChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
@@ -11425,7 +11959,7 @@ export declare const modules: {
     readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 };
 
-declare type NavigateActionType = {
+export declare type NavigateActionType = {
     type: "navigate";
     href: string;
 };
@@ -11672,6 +12206,17 @@ export declare interface NewHomeLayoutProps {
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
+    /**
+     * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+     * shape the AI kit takes (`ai.tracking`).
+     *
+     * A widget is declarative: its rows carry an `href` and never an `onClick`,
+     * so a host had no seam to observe a row from and its analytics could not see
+     * the Home at all. These fire for EVERY widget in the column, so a newly
+     * added one is measured without remembering anything. Nothing here changes
+     * behaviour — a row still navigates through its own anchor.
+     */
+    tracking?: HomeTrackingOptions;
     /** The daytime gradient period for the page surface. */
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
@@ -12006,9 +12551,9 @@ export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth,
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
-    onSelect?: (date: Date | DateRange | null) => void;
+    onSelect?: (date: CalendarSelection) => void;
     defaultMonth?: Date;
-    defaultSelected?: Date | DateRange | null;
+    defaultSelected?: CalendarSelection;
     showNavigation?: boolean;
     showInput?: boolean;
     minDate?: Date;
@@ -12312,7 +12857,7 @@ export declare type OnePersonListItemProps = {
     };
     description?: string;
     bottomTags: Omit<F0TagRawProps, "noBorder">[];
-    rightTag?: Props_3;
+    rightTag?: Props_4;
     actions?: {
         primary?: {
             icon?: IconType;
@@ -12345,7 +12890,7 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>;
 }, clearSelectedItems: () => void, handleSelectAll?: (checked: boolean) => void) => void;
 
-declare type OpenLinkActionType = {
+export declare type OpenLinkActionType = {
     type: "open-link";
     href: string;
 };
@@ -12357,6 +12902,8 @@ declare interface Option_2 {
     target?: string;
     onClick?: (event: any) => unknown;
 }
+
+export declare type OptionalCalendarSelection = CalendarSelection | undefined;
 
 declare interface OverflowListProps<T> {
     items: T[];
@@ -12833,6 +13380,14 @@ declare type PropertyDefinition_2<T> = {
 
 declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder" | "onClose">;
 
+declare type Props_10<Id extends string | number = string | number> = {
+    items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
+    minSize?: number;
+    gap?: number;
+    onClickItem?: (id: Id) => void;
+    showAllItems?: boolean;
+};
+
 declare type Props_2 = {
     /** Main heading text */
     title: string;
@@ -12852,7 +13407,16 @@ declare type Props_2 = {
     separator?: "top" | "bottom";
 };
 
-declare type Props_3 = {
+declare type Props_3<Text extends string = string> = {
+    text: Text extends "" ? never : Text;
+    level: Level;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+};
+
+declare type Props_4 = {
     text: string;
     /**
      * Info text to display an i icon and a tooltip next to the tag
@@ -12864,7 +13428,7 @@ declare type Props_3 = {
     customColor: string;
 });
 
-declare interface Props_5 {
+declare interface Props_6 {
     title: string;
     content: string;
     buttonLabel?: string;
@@ -12873,7 +13437,7 @@ declare interface Props_5 {
     type: Type;
 }
 
-declare type Props_6 = {
+declare type Props_7 = {
     label: string;
     icon: IconType;
     iconClassName?: string;
@@ -12881,7 +13445,7 @@ declare type Props_6 = {
     onClick?: () => void;
 };
 
-declare type Props_7<Id extends string | number = string | number> = {
+declare type Props_8<Id extends string | number = string | number> = {
     id: Id;
     module?: ModuleId;
     title: string;
@@ -12889,20 +13453,12 @@ declare type Props_7<Id extends string | number = string | number> = {
     onClick?: (id: Id) => void;
 };
 
-declare type Props_8<Id extends string | number = string | number> = {
+declare type Props_9<Id extends string | number = string | number> = {
     items: Omit<WidgetInboxListItemProps<Id>, "onClick">[];
     minSize?: number;
     onClickItem?: (id: Id) => void;
     showAllItems?: boolean;
 } & Pick<ComponentProps<typeof VerticalOverflowList>, "onVisibleItemsChange">;
-
-declare type Props_9<Id extends string | number = string | number> = {
-    items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
-    minSize?: number;
-    gap?: number;
-    onClickItem?: (id: Id) => void;
-    showAllItems?: boolean;
-};
 
 declare type Pulse = (typeof pulses)[number];
 
@@ -12964,6 +13520,35 @@ export declare interface ReactionsProps {
         onClick: () => void;
     };
 }
+
+/**
+ * The tag a record shows beside its title. Same shapes and `type` names as
+ * the tag entries of DetailsItem's content union, so a status reads the same
+ * wherever it sits.
+ */
+export declare type RecordDetail = ({
+    type: "status-tag";
+} & F0TagStatusProps) | ({
+    type: "alert-tag";
+} & Props_3) | ({
+    type: "dot-tag";
+} & Props_4) | ({
+    type: "raw-tag";
+} & F0TagRawProps) | ({
+    type: "balance-tag";
+} & F0TagBalanceProps);
+
+/**
+ * A row for an entry that is a thing (a review, an absence, a meeting) rather
+ * than a plain fact: a title, an optional secondary line, an optional tag on
+ * the right, and the usual item action.
+ */
+export declare type RecordItemProps = {
+    title: string;
+    description?: string;
+    detail?: RecordDetail;
+    action?: ActionType;
+};
 
 /**
  * Utility type to get all possible paths through an object using dot notation
@@ -14406,7 +14991,7 @@ declare const tagTypes: readonly ["dot", "person", "team", "company", "alert", "
 
 declare type TagVariant = BaseTag<{
     type: "dot";
-} & Props_3> | BaseTag<{
+} & Props_4> | BaseTag<{
     type: "person";
 } & PersonTagProps> | BaseTag<{
     type: "team";
@@ -14547,9 +15132,9 @@ declare interface TOCItemProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     children?: ReactNode;
-    onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDragOver?: (itemId: string, position: DropPosition) => void;
     onDragLeave?: () => void;
-    onDrop?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDrop?: (itemId: string, position: DropPosition) => void;
     canDropInside?: boolean;
     currentParentId?: string | null;
     draggedItemId?: string | null;
@@ -14753,6 +15338,15 @@ export declare type UpsellActionDefinition = {
 export declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
+
+/**
+ * Open the palette from anywhere below the provider.
+ *
+ * `openScoped(ref)` is the one every surface that already knows its target
+ * should reach for — a row menu, a bulk bar, a detail header. The UI supplies
+ * the scope, the reader supplies the intent.
+ */
+export declare const useCommandPalette: () => F0CommandPaletteApi;
 
 export declare type UseDataCollectionData<R extends RecordType> = UseDataCollectionDataReturn<R> & {
     summaries?: R;
@@ -15645,15 +16239,15 @@ export declare interface WidgetHeaderSelect {
     onChange?: (value: string) => void;
 }
 
-export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_6): JSX_2.Element;
+export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_7): JSX_2.Element;
 
-export declare function WidgetInboxList({ items, minSize, onClickItem, showAllItems, onVisibleItemsChange, }: Props_8): JSX_2.Element;
+export declare function WidgetInboxList({ items, minSize, onClickItem, showAllItems, onVisibleItemsChange, }: Props_9): JSX_2.Element;
 
-export declare function WidgetInboxListItem({ id, title, subtitle, onClick, module, }: Props_7): JSX_2.Element;
+export declare function WidgetInboxListItem({ id, title, subtitle, onClick, module, }: Props_8): JSX_2.Element;
 
-export declare type WidgetInboxListItemProps<Id extends string | number = string | number> = Props_7<Id>;
+export declare type WidgetInboxListItemProps<Id extends string | number = string | number> = Props_8<Id>;
 
-export declare type WidgetInboxListProps = Props_8;
+export declare type WidgetInboxListProps = Props_9;
 
 /**
  * What a user has CONFIGURED about a widget — the values of the fields its
@@ -15796,7 +16390,7 @@ children?: ReactNode | undefined;
 title?: string;
 } & RefAttributes<HTMLDivElement>>>;
 
-export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_9): JSX_2.Element;
+export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_10): JSX_2.Element;
 
 export declare function WidgetSimpleListItem({ id, title, alert, rawTag, count, icon, rightIcon, iconClassName, rightIconClassName, onClick, }: WidgetSimpleListItemProps): JSX_2.Element;
 
@@ -15813,7 +16407,7 @@ export declare type WidgetSimpleListItemProps<Id extends string | number = strin
     onClick?: (id: Id) => void;
 };
 
-export declare type WidgetSimpleListProps = Props_9;
+export declare type WidgetSimpleListProps = Props_10;
 
 export declare type WidgetSkeletonProps = {
     header?: {
@@ -15917,10 +16511,6 @@ declare type WithBivariantCallbacks<T> = {
 declare type WithDataTestIdProps = {
     dataTestId?: string;
 };
-
-declare type WithDetailsItemAction<T> = T extends unknown ? Omit<T, "action"> & {
-    action?: DetailsItemAction;
-} : never;
 
 declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown;
