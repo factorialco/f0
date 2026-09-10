@@ -280,22 +280,17 @@ export declare const defaultTranslations: {
     };
     readonly inputs: {
         /**
-         * The eye toggle is named after the field, for every masked field —
-         * password, private, or any input given `masked`. It used to have a fixed
-         * "Show password" string; naming it after the label tells multiple masked
-         * fields on one page apart, which the fixed string could not.
+         * `type="password"` keeps the conventional fixed string. Every other masked
+         * field, `private` and a bare `masked` included, is named after its own
+         * label, which is what tells two of them on one page apart.
          */
+        readonly password: {
+            readonly show: "Show password";
+            readonly hide: "Hide password";
+        };
         readonly private: {
             readonly show: "Show {{label}}";
             readonly hide: "Hide {{label}}";
-        };
-        readonly actions: {
-            readonly copy: "Copy {{label}}";
-            readonly copied: "Copied";
-            readonly copyFailed: "Could not copy";
-            readonly edit: "Edit {{label}}";
-            readonly saved: "{{label}} saved";
-            readonly requestChange: "Request a change to {{label}}";
         };
     };
     readonly link: {
@@ -649,6 +644,8 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -697,6 +694,13 @@ export declare const defaultTranslations: {
             readonly creditsError: "Could not load credits";
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
+        };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
         };
         readonly reportCard: {
             readonly tableLabel: "Table";
@@ -1131,6 +1135,15 @@ export declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        /** The trailing controls on a details row. */
+        readonly details: {
+            readonly copy: "Copy {{label}}";
+            readonly copied: "Copied";
+            readonly copyFailed: "Could not copy";
+            readonly edit: "Edit {{label}}";
+            readonly saved: "{{label}} saved";
+            readonly requestChange: "Request a change to {{label}}";
+        };
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";

@@ -280,22 +280,17 @@ const e = {
   },
   inputs: {
     /**
-     * The eye toggle is named after the field, for every masked field —
-     * password, private, or any input given `masked`. It used to have a fixed
-     * "Show password" string; naming it after the label tells multiple masked
-     * fields on one page apart, which the fixed string could not.
+     * `type="password"` keeps the conventional fixed string. Every other masked
+     * field, `private` and a bare `masked` included, is named after its own
+     * label, which is what tells two of them on one page apart.
      */
+    password: {
+      show: "Show password",
+      hide: "Hide password"
+    },
     private: {
       show: "Show {{label}}",
       hide: "Hide {{label}}"
-    },
-    actions: {
-      copy: "Copy {{label}}",
-      copied: "Copied",
-      copyFailed: "Could not copy",
-      edit: "Edit {{label}}",
-      saved: "{{label}} saved",
-      requestChange: "Request a change to {{label}}"
     }
   },
   link: {
@@ -649,6 +644,11 @@ const e = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    // How long the turn has been thinking, shown beside the step that is
+    // running. Two keys rather than one unbounded second count, because "137s"
+    // reads badly past a couple of minutes — the consumer picks.
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -697,6 +697,13 @@ const e = {
       creditsError: "Could not load credits",
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?"
+    },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage"
     },
     reportCard: {
       tableLabel: "Table",
@@ -1158,6 +1165,15 @@ const e = {
     }
   },
   forms: {
+    /** The trailing controls on a details row. */
+    details: {
+      copy: "Copy {{label}}",
+      copied: "Copied",
+      copyFailed: "Could not copy",
+      edit: "Edit {{label}}",
+      saved: "{{label}} saved",
+      requestChange: "Request a change to {{label}}"
+    },
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",

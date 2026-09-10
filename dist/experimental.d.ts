@@ -473,6 +473,10 @@ declare type AiChatCredits = {
 declare type AiChatCreditWarning = {
     /** The severity level of the warning. */
     level: "soft";
+    /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+    text?: string;
+    /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+    actionLabel?: string;
     /** Called when the user dismisses the credit warning banner. */
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
@@ -582,8 +586,15 @@ declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -1159,6 +1170,11 @@ declare interface BaseHeaderProps_2 {
         name: string;
         src?: string;
     } | AvatarVariant;
+    /**
+     * Markdown. Inline formatting only — a link out to the resource's source of
+     * truth is the case this exists for. Clamped to two lines behind a "show all"
+     * toggle.
+     */
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -4173,6 +4189,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     visualizationFilters?: Record<string, CurrentFiltersState>;
     /** User-created custom presets persisted alongside the rest of the state. */
     customPresets?: PresetsDefinition<FiltersDefinition>;
+    /** The active view's id, so a revisit restores which view is selected and not
+     *  just the views themselves. */
+    selectedPresetId?: string;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
@@ -4863,22 +4882,17 @@ declare const defaultTranslations: {
     };
     readonly inputs: {
         /**
-         * The eye toggle is named after the field, for every masked field —
-         * password, private, or any input given `masked`. It used to have a fixed
-         * "Show password" string; naming it after the label tells multiple masked
-         * fields on one page apart, which the fixed string could not.
+         * `type="password"` keeps the conventional fixed string. Every other masked
+         * field, `private` and a bare `masked` included, is named after its own
+         * label, which is what tells two of them on one page apart.
          */
+        readonly password: {
+            readonly show: "Show password";
+            readonly hide: "Hide password";
+        };
         readonly private: {
             readonly show: "Show {{label}}";
             readonly hide: "Hide {{label}}";
-        };
-        readonly actions: {
-            readonly copy: "Copy {{label}}";
-            readonly copied: "Copied";
-            readonly copyFailed: "Could not copy";
-            readonly edit: "Edit {{label}}";
-            readonly saved: "{{label}} saved";
-            readonly requestChange: "Request a change to {{label}}";
         };
     };
     readonly link: {
@@ -5232,6 +5246,8 @@ declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -5280,6 +5296,13 @@ declare const defaultTranslations: {
             readonly creditsError: "Could not load credits";
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
+        };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
         };
         readonly reportCard: {
             readonly tableLabel: "Table";
@@ -5714,6 +5737,15 @@ declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        /** The trailing controls on a details row. */
+        readonly details: {
+            readonly copy: "Copy {{label}}";
+            readonly copied: "Copied";
+            readonly copyFailed: "Could not copy";
+            readonly edit: "Edit {{label}}";
+            readonly saved: "{{label}} saved";
+            readonly requestChange: "Request a change to {{label}}";
+        };
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -9695,7 +9727,7 @@ declare const F0TagTeam: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0
  */
 export declare const F0TextAreaInput: React.FC<F0TextAreaInputProps>;
 
-export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight" | "readonly" | "transparent" | "onClickContent" | "copyable" | "masked" | "onEdit" | "onRequestChange" | "actionsVisibility" | "confirmed">;
+export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
 /**
  * F0TextInput is the writable text field for forms — a box where the user
@@ -10667,6 +10699,49 @@ export declare interface HomeSlotParamsMap {
     indicators: IndicatorsListProps;
 }
 
+export declare type HomeTrackingOptions = {
+    /** A widget's header link, footer action, or "View more" was used. */
+    onWidgetAction?: (event: HomeWidgetActionEvent) => void;
+    /**
+     * A row inside a widget was activated. Fires ALONGSIDE the navigation the
+     * row's `href` performs — it does not replace or gate it, so a middle-click
+     * or a modified click still behaves like the link it is.
+     */
+    onWidgetItemActivate?: (event: HomeWidgetItemActivateEvent) => void;
+};
+
+/**
+ * Payload for `tracking.onWidgetAction`. The widget is named by the id the host
+ * gave it, which is the key to everything else the host already knows about it.
+ */
+export declare type HomeWidgetActionEvent = {
+    widgetId: string;
+    action: HomeWidgetActionKind;
+};
+
+/**
+ * TRACKING FOR THE HOME — the same shape the AI kit uses (`AiChatTrackingOptions`):
+ * the host passes callbacks, the components fire them, and nothing about a
+ * widget's data changes to make it measurable.
+ *
+ * This exists because a Home widget is DECLARATIVE. Its rows carry an `href`
+ * and never an `onClick` (that is the one click behavior a `list` slot has, and
+ * a type test holds the line), so a host had no seam to observe an interaction
+ * from — its analytics simply could not see the Home. These callbacks are that
+ * seam, and they leave the row data alone: navigation is still the anchor's.
+ *
+ * BEHAVIOUR ONLY, deliberately. The payloads carry what the reader DID and say
+ * nothing about which column a widget sits in or where in it — that is the
+ * host's own persisted layout, and duplicating it into an analytics event
+ * would make two sources for one fact, the stale one being the event.
+ */
+/**
+ * WHICH AFFORDANCE was used. A widget has three ways out of it and they mean
+ * different things to whoever reads the numbers: the header's own link, the
+ * footer's call to action, and the "View more" a capped list grows.
+ */
+export declare type HomeWidgetActionKind = "header-link" | "footer-action" | "view-more";
+
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
  * through to the frame.
@@ -10773,6 +10848,19 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/** Payload for `tracking.onWidgetItemActivate`. */
+export declare type HomeWidgetItemActivateEvent = {
+    widgetId: string;
+    /** The row's own id, as the slot was given it. */
+    itemId: string | number;
+    /**
+     * 1-based place of the row within its slot, AS DRAWN. Not layout state: it
+     * is where the reader's attention landed in a list ordered by its own data,
+     * which is the one position worth reporting.
+     */
+    itemPosition: number;
 };
 
 /**
@@ -11051,13 +11139,9 @@ declare type InfoHintContent = {
  */
 export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "readonly" | "copyable" | "masked" | "onEdit" | "onRequestChange" | "confirmed" | "actionsVisibility" | "labelIcon" | "onClickContent" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle" | "masked" | "maskToggleAlwaysVisible" | "maskToggleLabels" | "focusOnEditable"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
-
-declare type InputFieldActionsVisibility = (typeof inputFieldActionsVisibility)[number];
-
-declare const inputFieldActionsVisibility: readonly ["always", "hover"];
 
 /**
  * Design system primitive. Do NOT use in product code.
@@ -11150,7 +11234,47 @@ declare type InputFieldProps<T> = {
         onChange: (selected: boolean) => void;
     };
     transparent?: boolean;
-} & InputFieldValueActions;
+    /**
+     * Renders the value masked, with an eye button to reveal it.
+     *
+     * One implementation for every masked field. On a real `<input>` the mask is
+     * a password field, so the browser's own protections apply; any other
+     * editable child (`F0Select`'s `<button>` trigger, a `<textarea>`) has its
+     * displayed value replaced with dots, because `type="password"` on a button
+     * is silently treated as `submit` and on a textarea is not an attribute.
+     */
+    masked?: boolean;
+    /**
+     * Keeps the eye up while the field has focus.
+     *
+     * The eye normally goes away while you are typing: on a details row the
+     * trailing controls act on a value you are reading, and none of them applies
+     * mid-edit. A credential field is the exception, where revealing what you
+     * just typed is the point of the button, so `F0TextInput` sets this for
+     * `type="password"` and `type="private"`. Not part of any public input's API.
+     */
+    maskToggleAlwaysVisible?: boolean;
+    /**
+     * Overrides the eye's `[show, hide]` accessible names.
+     *
+     * The default names the field, which is what tells two masked values on one
+     * page apart. `F0TextInput type="password"` overrides it with the
+     * conventional fixed "Show password", the string it has always used. Not part
+     * of any public input's API.
+     */
+    maskToggleLabels?: [string, string];
+    /**
+     * Puts the caret in the field as soon as it can take it, and nothing sooner.
+     *
+     * `autoFocus` only fires at mount, which is no use to a value that starts
+     * `readonly` and becomes editable later: while `readonly` the inner input is
+     * disabled, so `focus()` is a no-op. Set this alongside the flag that makes
+     * the field editable and the caret lands once the input can accept it, with
+     * no remount. Clicking the value does this on its own; this is for an edit
+     * control that sits outside the field.
+     */
+    focusOnEditable?: boolean;
+};
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
 
@@ -11166,60 +11290,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-/**
- * The trailing controls a value can carry, drawn by the design system.
- *
- * Deliberately a closed set of flags and callbacks rather than a list of
- * actions: the glyph, the order, the accessible name and the confirmation for
- * each job belong to the design system, so the same job looks and reads the
- * same in every input. There is no slot for an arbitrary icon.
- *
- * Every writable F0 input accepts these, whatever it edits. Order is fixed:
- * `[edit | confirmed tick] [eye] [comment] [copy]`.
- */
-declare type InputFieldValueActions = {
-    /**
-     * A copy button. Copies the field's current value and confirms with a
-     * positive tick, but only once the clipboard write actually succeeded.
-     */
-    copyable?: boolean;
-    /**
-     * Renders the value masked, with an eye to reveal it. On an `<input>` the
-     * mask is a real password field; on any other editable child the displayed
-     * value is replaced with dots.
-     */
-    masked?: boolean;
-    /**
-     * A pencil. Present means the button shows; the field does not become
-     * editable on its own — the consumer flips `readonly` off in response.
-     *
-     * Always a pencil, because it always means "you are about to type here". A
-     * value chosen from a list or a calendar is a different act, and it belongs
-     * to the component that owns that act.
-     */
-    onEdit?: () => void;
-    /**
-     * A comment glyph, for a value the viewer may read but not change: they say
-     * something about it and somebody else decides. Never a pencil — a pencil
-     * promises the click will let you type. Mutually exclusive with `onEdit`.
-     */
-    onRequestChange?: () => void;
-    /**
-     * `"hover"` fades the controls in on hover or focus-within, and holds them
-     * while one has focus or is confirming. Touch screens, where hover never
-     * fires, always get `"always"`.
-     * @default "always"
-     */
-    actionsVisibility?: InputFieldActionsVisibility;
-    /**
-     * Flashes the field positive and turns the pencil into a tick, to confirm a
-     * value just committed. The consumer holds it true for the length of the
-     * confirmation; the copy button confirms itself and needs nothing here.
-     */
-    confirmed?: boolean;
-};
-
-declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "onKeyDown" | "readonly" | "onClickContent" | "copyable" | "masked" | "onEdit" | "onRequestChange" | "actionsVisibility" | "confirmed"> & {
+declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "onKeyDown" | "readonly" | "onClickContent" | "masked" | "focusOnEditable"> & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
      * masked like a password but with no lock icon and with password managers
@@ -12194,6 +12265,17 @@ export declare interface NewHomeLayoutProps {
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
+    /**
+     * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+     * shape the AI kit takes (`ai.tracking`).
+     *
+     * A widget is declarative: its rows carry an `href` and never an `onClick`,
+     * so a host had no seam to observe a row from and its analytics could not see
+     * the Home at all. These fire for EVERY widget in the column, so a newly
+     * added one is measured without remembering anything. Nothing here changes
+     * behaviour — a row still navigates through its own anchor.
+     */
+    tracking?: HomeTrackingOptions;
     /** The daytime gradient period for the page surface. */
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
@@ -12329,7 +12411,7 @@ declare type NumberFilterValue = {
  */
 export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "masked"> & {
     locale: string;
     value?: number | null;
     step?: number;
@@ -12348,7 +12430,7 @@ declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "re
     extraContent?: ReactNode;
     inputWidth?: string;
     popover?: NumberInputPopoverConfig;
-} & InputFieldValueActions;
+};
 
 export declare interface NumberInputPopoverConfig {
     icon?: IconType;
@@ -13795,6 +13877,11 @@ declare type SelectCellConfig<R extends RecordType> = {
     clearable?: boolean;
     showSearchBox?: boolean;
     defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined;
+    /**
+     * Buttons rendered below the options, for what a value cannot express —
+     * dropping a scheduled change, say. Pass a function to decide them per row.
+     */
+    actions?: Action[] | ((item: R) => Action[] | undefined);
 } & ({
     options: F0SelectItemProps<string>[] | ((item: R) => F0SelectItemProps<string>[]);
     source?: never;
@@ -15001,7 +15088,7 @@ declare const Textarea_2: ForwardRefExoticComponent<Omit<TextareaHTMLAttributes<
 value?: string;
 /** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
 maxHeight?: number;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "transparent" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "readonly" | "copyable" | "masked" | "onEdit" | "onRequestChange" | "confirmed" | "actionsVisibility" | "labelIcon" | "onClickContent" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
 
 /**
  * @deprecated Renamed to `F0TextAreaInputProps`. See the `Textarea`
