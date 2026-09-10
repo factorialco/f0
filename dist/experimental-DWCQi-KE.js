@@ -30011,7 +30011,7 @@ const Z2 = ({
   return /* @__PURE__ */ te(Ii, { children: [
     P("addressLine1"),
     P("addressLine2"),
-    /* @__PURE__ */ m("div", { className: "@container", children: /* @__PURE__ */ te("div", { className: "grid grid-cols-1 gap-3 @sm:grid-cols-3", children: [
+    /* @__PURE__ */ m("div", { className: "@container", children: /* @__PURE__ */ te("div", { className: "grid grid-cols-1 gap-3 @xs:grid-cols-3", children: [
       P("city"),
       P("state"),
       P("postalCode")
@@ -36113,7 +36113,7 @@ const Rd = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Md = "w-[24rem] max-w-full", YP = "w-[32rem] max-w-full", zP = "gap-0.5", HP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", OP = "bg-[hsl(222_31%_11%)]", JP = "bg-[hsl(220_39%_6%/0.72)]", jP = "bg-[hsl(220_39%_6%/0.6)]", LP = "bg-[hsl(220_39%_6%/0.55)]", XP = () => import("./LocationMap-Cs0LQuDr.js"), qP = ks(XP), $P = 3 / 2, eV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, SU = ({
+}, Md = "w-[24rem] max-w-full", YP = "w-[32rem] max-w-full", zP = "gap-0.5", HP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", OP = "bg-[hsl(222_31%_11%)]", JP = "bg-[hsl(220_39%_6%/0.72)]", jP = "bg-[hsl(220_39%_6%/0.6)]", LP = "bg-[hsl(220_39%_6%/0.55)]", XP = () => import("./LocationMap-CmnwvZ0q.js"), qP = ks(XP), $P = 3 / 2, eV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, SU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
