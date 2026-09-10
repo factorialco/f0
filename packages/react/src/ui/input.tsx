@@ -37,12 +37,7 @@ export type InputProps = Omit<
     | "autocomplete"
     | "buttonToggle"
     | "transparent"
-    | "copyable"
     | "masked"
-    | "onEdit"
-    | "onRequestChange"
-    | "actionsVisibility"
-    | "confirmed"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -82,12 +77,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       readonly,
       buttonToggle,
       transparent,
-      copyable,
       masked,
-      onEdit,
-      onRequestChange,
-      actionsVisibility,
-      confirmed,
       // Forwarded by NAME rather than left in the spread: F0InputField clones
       // the inner input with its own aria props, and an explicit `undefined`
       // there overwrites whatever the spread had already set. `aria-controls`
@@ -141,12 +131,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         readonly={readonly}
         buttonToggle={buttonToggle}
         transparent={transparent}
-        copyable={copyable}
         masked={masked}
-        onEdit={onEdit}
-        onRequestChange={onRequestChange}
-        actionsVisibility={actionsVisibility}
-        confirmed={confirmed}
       >
         <input
           type={type}

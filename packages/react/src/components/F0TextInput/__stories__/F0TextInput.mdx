@@ -183,94 +183,18 @@ Three keyboard props, in the order they run on every key:
 
 `onPressEnter` + `onPressEscape` is the inline-editing pair: Enter commits, Escape reverts.
 
-**Trailing value controls**
+**Masking without a type**
 
-Icon-only controls at the right edge of the field, after the clear button and before `append`. They are a closed set of flags and callbacks rather than a list you compose, so the same job draws the same glyph in every F0 input — there is no slot for an arbitrary icon.
+`masked` renders any field's value hidden behind dots, with the same eye toggle `type="password"` and `type="private"` render on their own. Use it for a governed value that is not a credential and has no masked type of its own, such as an IBAN in a text field or a date of birth in a date picker.
 
-<Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
-    <thead>
-      <tr>
-        <th className="text-left">Prop</th>
-        <th className="text-left">Glyph</th>
-        <th className="text-left">What it does</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <code>onEdit</code>
-        </td>
-        <td>Pencil</td>
-        <td>
-          Puts the caret in the field, then calls back. The field does not
-          become editable by itself: the consumer flips <code>readonly</code>{" "}
-          off in response.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>masked</code>
-        </td>
-        <td>Eye</td>
-        <td>
-          Masks the value and toggles it back. The same control{" "}
-          <code>type="password"</code> and <code>type="private"</code> render on
-          their own, so those types need nothing here — and never show two eyes.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>onRequestChange</code>
-        </td>
-        <td>Comment</td>
-        <td>
-          For a value the viewer may read but not set. A pencil promises the
-          click lets you type; a comment promises somebody else decides. Passing
-          both on one field warns in development.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>copyable</code>
-        </td>
-        <td>Layers</td>
-        <td>
-          Copies the field's value. The positive tick appears only once the
-          write actually succeeded — a rejected clipboard says so instead.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>confirmed</code>
-        </td>
-        <td>Tick</td>
-        <td>
-          Turns the pencil into a positive tick and flashes the field, to
-          confirm a value just committed. Stays pressable throughout.
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
+It never doubles up: a `password` or `private` field already sets it, so those types show one eye, not two.
 
-Unlike `clearable`, these survive `readonly`: a value the user cannot type into is still one they can copy, unmask, or ask to have changed.
+**Resting value**
 
-<Canvas of={Stories.WithActions} />
+`readonly` together with `transparent` draws the value as plain text, without the field's border or the secondary "disabled form" background, but at the height and radius the editable field takes. Drop the two props and the same component is the ordinary bordered field again, at the same height, so a row does not move when it becomes editable.
 
-`actionsVisibility="hover"` fades them in on hover or focus-within and holds them open while one has focus or is showing a confirmation. On a touch screen, where hover never fires, they stay put.
-
-<Canvas of={Stories.ReadonlyValueWithActions} />
-
-**Inline editing**
-
-One component, four states, which is what the redesigned Employee profile › Details tab needs of a value cell:
-
-1. **Rest** — `readonly` + `transparent`: the value as plain text, no field chrome, at the height the editable field will take. The whole cell is the click target, with a text cursor.
-2. **Hover** — `actionsVisibility="hover"` tints the cell and fades the controls in inside the tint.
-3. **Editing** — drop `readonly` and `transparent` and the same component is the ordinary bordered field. `onPressEnter` commits, `onPressEscape` reverts, `onBlur` commits.
-4. **Confirmed** — `confirmed` for the length of the confirmation. The pencil _becomes_ the tick and the cell goes positive around it, instead of a tick appearing next to a pencil.
-
-The consumer owns two things: the `readonly` flip with its draft, and the confirmation timer. It does **not** own focus — clicking the value or the pencil puts the caret in the field, and the field waits for `readonly` to lift before doing it, so neither `autoFocus` nor a remount is needed.
+That plus the keyboard pair is inline editing: the consumer owns the `readonly` flip and the draft, and the input owns the keys and both presentations.
 
 <Canvas of={Stories.InlineEditing} />
+
+The trailing buttons a details row also wants (copy, pencil, comment, and the tick that confirms a commit) are not here. They belong to the pattern that draws the row. A row is one cell for every kind of value: a select row and a date row show text at rest and mount `F0Select` or `F0DatePicker` only for editing, so the buttons cannot live inside any one input.

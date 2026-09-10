@@ -35,13 +35,7 @@ export type InputInternalProps = Pick<
     | "onKeyDown"
     | "readonly"
     | "onClickContent"
-    // The value controls every writable F0 input inherits.
-    | "copyable"
     | "masked"
-    | "onEdit"
-    | "onRequestChange"
-    | "actionsVisibility"
-    | "confirmed"
   > & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:

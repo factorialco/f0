@@ -44,14 +44,6 @@ export const defaultTranslations = {
       show: "Show {{label}}",
       hide: "Hide {{label}}",
     },
-    actions: {
-      copy: "Copy {{label}}",
-      copied: "Copied",
-      copyFailed: "Could not copy",
-      edit: "Edit {{label}}",
-      saved: "{{label}} saved",
-      requestChange: "Request a change to {{label}}",
-    },
   },
   link: {
     opensInNewTab: "opens in new tab",
@@ -921,6 +913,15 @@ export const defaultTranslations = {
     },
   },
   forms: {
+    /** The trailing controls on a details row. */
+    details: {
+      copy: "Copy {{label}}",
+      copied: "Copied",
+      copyFailed: "Could not copy",
+      edit: "Edit {{label}}",
+      saved: "{{label}} saved",
+      requestChange: "Request a change to {{label}}",
+    },
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",

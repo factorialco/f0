@@ -202,7 +202,7 @@ The `F0InputField` is composed of several parts:
 **F0InputField does NOT**
 
 - Render its own `<input>`. Without `children` it renders empty chrome.
-- Manage focus in general. Forward `ref` from the consumer to the editable element. The one exception is the click-to-edit path: clicking the value or the pencil puts the caret in the field, waiting for `readonly` to lift first if it has to. See [Clicking the value](#clicking-the-value).
+- Manage focus in general. Forward `ref` from the consumer to the editable element. The one exception is the click-to-edit path: clicking the value puts the caret in the field, waiting for `readonly` to lift first if it has to. See [Clicking a resting value](#clicking-a-resting-value).
 - Parse, validate or format values.
 - Set `aria-*` attributes on the editable element manually — the wrapper injects them via `cloneElement`.
 
@@ -234,51 +234,35 @@ The example below sets `maxLength={10}` and a `value` of `"long text should be t
 
 Browsers do not fire `change` events on autofill, which would leave the floating placeholder visible on top of the autofilled value. `F0InputField` listens to the WebKit `animationstart` event and polls `:-webkit-autofill` / `:autofill` to hide the placeholder until the autofill state clears.
 
-### Trailing value controls
+### Masking
 
-A closed set of flags and callbacks, not a list of actions. The glyph, the order, the accessible name and the confirmation for each job belong to the design system, so the same job looks and reads the same in every input built on `F0InputField` — and there is deliberately **no slot for an arbitrary icon**. A trailing button that means something new is a change to this table, not a prop a consumer can improvise.
+`masked` renders the value hidden behind a run of dots, with an eye button in the trailing area to reveal it. One implementation serves every masked field: `F0TextInput type="password"` and `type="private"` both set it rather than building their own toggle.
 
-They render after the clear button and before `append`, `appendTag` and `buttonToggle`, in the order below whatever order the props arrive in.
+<Canvas of={Stories.MaskedValue} />
 
-<Canvas of={Stories.WithActions} />
+How the mask is drawn depends on the child, because there is no one way to hide a value:
 
-| Prop              | Glyph   | Behaviour                                                                                                                                                               |
-| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `onEdit`          | Pencil  | Puts the caret in the field, then calls back. The field does not flip `readonly` itself. Always a pencil — a value chosen from a list or a calendar is a different act. |
-| `masked`          | Eye     | On an `<input>`, masks as a real password field and restores the child's own type when revealed. On any other child the displayed value is replaced with dots.          |
-| `onRequestChange` | Comment | For a value the viewer may read but not set. Mutually exclusive with `onEdit`; both together warn in development.                                                       |
-| `copyable`        | Layers  | Writes the field's value to the clipboard. The positive tick is gated on the write succeeding, and a failure announces "Could not copy" instead.                        |
-| `confirmed`       | Tick    | Turns the pencil into a positive tick and flashes the field, to confirm a value just committed. Stays pressable throughout. The consumer owns only the timer.           |
+- **A real `<input>`** gets `type="password"` while hidden, so the browser's own protections apply, and its own type back (`email`, `tel`, `search`) when revealed.
+- **Any other editable child**, such as `F0Select`'s `<button>` trigger or a `<textarea>`, has its displayed value replaced with dots instead. `type="password"` on a `<button>` is silently treated as `submit`, and on a `<textarea>` it is not an attribute at all.
 
-Three rules that differ from the rest of the trailing area:
+The eye is named after the field, not the type: "Show Current password", never "Show password". That is what lets a screen-reader user tell two masked fields on one page apart. It survives `readonly`, because a value you cannot type into is still one you can unmask, and `disabled` disables it.
 
-- **`readonly` keeps the controls and drops the clear button.** A value that cannot be typed into is still one that can be copied, unmasked or queried. `disabled`, in contrast, disables every control.
-- **Copy and the eye stop the click.** Neither `onClickContent` nor the focus-on-click below fires alongside them — they act on the value without pulling the caret into the field.
-- **A confirmation tints the whole field** `bg-f1-background-positive` and holds the controls open for as long as it lasts. One event, two expressions: the glyph becomes a tick and the cell confirms around it, so a successful copy and a committed edit read the same way. `copyable` gets this for free; a commit asks for it with `confirmed`.
+### The resting value
 
-The confirmation lives in a single `aria-live="polite"` region inside the row, not on the button: an icon-only button carries its name in `aria-label`, and screen readers do not reliably announce an `aria-label` that changes underneath them.
+`readonly` + `transparent` draws the value as plain text: no border, no secondary "disabled form" background. It is how a details row shows a value it is not currently editing, and two things follow from it being the same cell the editable field will occupy:
 
-### Clicking the value
+- **It keeps the field's height and radius.** A row that changes height when you click it moves the record under the reader, so the resting cell is the same box the editable field will take.
+- **The whole cell is the click target**, not just the text inside it.
 
-Clicking anywhere in the field except copy and the eye puts the caret in the input — the pencil included. For an already-editable field that is immediate. For a resting value it cannot be: while `readonly` the inner input is disabled, so `focus()` is a no-op, and the caret has to land _after_ the consumer flips `readonly` off. The field waits for that transition and then focuses, which is why a consumer needs neither `autoFocus` nor a remount to move the caret.
+<Canvas of={Stories.RestingValue} />
 
-`onClickContent` handles the click when it is given; otherwise a resting value falls back to `onEdit`, so a cell with a pencil opens its editor when the value itself is clicked.
+### Clicking a resting value
 
-### Hover-revealed actions and the resting value
+Clicking anywhere in the content area puts the caret in the input. For an already-editable field that is immediate. For a resting value it cannot be: while `readonly` the inner input is disabled, so `focus()` is a no-op, and the caret has to land _after_ the consumer flips `readonly` off. The field waits for that transition and then focuses, which is why a consumer needs neither `autoFocus` nor a remount to move the caret.
 
-`actionsVisibility="hover"` fades the row in on hover or focus-within of the whole field, and holds it open while one of its buttons has focus or is showing a confirmation. While hidden the row is also `pointer-events-none`, so a fading button cannot be clicked blind. Touch screens — where hover never fires and the row would otherwise be permanently unreachable — always get `"always"`.
+The click also has to reach the cell. A disabled control swallows the mouse event rather than letting it bubble, so the inner input becomes `pointer-events-none` once a resting value has an `onClickContent`. The same condition adds the text cursor and the `bg-f1-background-secondary` hover tint: a tint with nothing behind it is a lie.
 
-<Canvas of={Stories.HoverActions} />
-
-`readonly` + `transparent` is the resting value cell: no border, no secondary "disabled form" background, just the value as text. Three things follow from it being the same cell the editable field will occupy:
-
-- **It keeps the field's height and radius.** A row that changes height when you click it moves the record under the reader, so the resting cell is the size box the editable field will take.
-- **It tints `bg-f1-background-secondary` on hover**, but only when there are hover-revealed controls to find — a tint with nothing behind it is a lie.
-- **The whole cell is the click target**, with a text cursor: the value is what the reader is pointing at, not the pencil. This needs the pointer to reach the cell, and `readonly` disables the inner input, which in every browser swallows the mouse event rather than letting it bubble — so the input becomes `pointer-events-none` once a resting value has an `onClickContent` or an `onEdit`.
-
-<Canvas of={Stories.ReadonlyTransparentValue} />
-
-<Canvas of={Stories.ReadonlyWithRequestChange} />
+`onClickContent` is not part of `F0TextInput`'s public API. It only makes sense for a pattern that swaps a resting value for an editor, so it reaches the input through `InputInternal`. Buttons in the trailing area stop the click, so they never drag the caret into the field.
 
 ---
 
@@ -655,11 +639,7 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
   </table>
 </Unstyled>
 
-### Value controls
-
-Every writable F0 input inherits these. See{" "}
-
-<a href="#trailing-value-controls">Trailing value controls</a>.
+### Masking
 
 <Unstyled>
   <table>
@@ -674,21 +654,6 @@ Every writable F0 input inherits these. See{" "}
     <tbody>
       <tr>
         <td>
-          <code>copyable</code>
-        </td>
-        <td>
-          <code>boolean</code>
-        </td>
-        <td>
-          Copy button. Confirms with a positive tick, but only once the
-          clipboard write succeeded.
-        </td>
-        <td>
-          <code>false</code>
-        </td>
-      </tr>
-      <tr>
-        <td>
           <code>masked</code>
         </td>
         <td>
@@ -696,70 +661,11 @@ Every writable F0 input inherits these. See{" "}
         </td>
         <td>
           Renders the value masked, with an eye to reveal it. Set for you by{" "}
-          <code>F0TextInput type="password" | "private"</code>.
+          <code>F0TextInput type="password" | "private"</code>. See{" "}
+          <a href="#masking">Masking</a>.
         </td>
         <td>
           <code>false</code>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>onEdit</code>
-        </td>
-        <td>
-          <code>() =&gt; void</code>
-        </td>
-        <td>
-          Pencil. Puts the caret in the field, then calls back. The field does
-          not flip <code>readonly</code> itself.
-        </td>
-        <td>
-          <code>undefined</code>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>onRequestChange</code>
-        </td>
-        <td>
-          <code>() =&gt; void</code>
-        </td>
-        <td>
-          Comment glyph, for a value the viewer may read but not set. Mutually
-          exclusive with <code>onEdit</code>.
-        </td>
-        <td>
-          <code>undefined</code>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>confirmed</code>
-        </td>
-        <td>
-          <code>boolean</code>
-        </td>
-        <td>
-          Turns the pencil into a tick and flashes the field positive, to
-          confirm a value just committed.
-        </td>
-        <td>
-          <code>false</code>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>actionsVisibility</code>
-        </td>
-        <td>
-          <code>'always' | 'hover'</code>
-        </td>
-        <td>
-          <code>'hover'</code> fades the controls in on hover or focus-within.
-          Touch screens always get <code>'always'</code>.
-        </td>
-        <td>
-          <code>'always'</code>
         </td>
       </tr>
     </tbody>

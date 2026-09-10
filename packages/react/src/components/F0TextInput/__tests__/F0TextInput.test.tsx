@@ -237,25 +237,11 @@ describe("F0TextInput", () => {
     })
   })
 
-  describe("value actions", () => {
-    it("renders one eye for type=private, not two, alongside the other controls", () => {
-      render(
-        <F0TextInput
-          label="SSN"
-          type="private"
-          value="123-45-6789"
-          onEdit={vi.fn()}
-          copyable
-        />
-      )
+  describe("masked", () => {
+    it("renders one eye for type=private, not two", () => {
+      render(<F0TextInput label="SSN" type="private" value="123-45-6789" />)
 
       expect(screen.getAllByRole("button", { name: /^show/i })).toHaveLength(1)
-      expect(
-        screen.getByRole("button", { name: "Edit SSN" })
-      ).toBeInTheDocument()
-      expect(
-        screen.getByRole("button", { name: "Copy SSN" })
-      ).toBeInTheDocument()
     })
 
     it("masks a plain text field when `masked` is set on its own", () => {
@@ -268,21 +254,38 @@ describe("F0TextInput", () => {
       expect(input.type).toBe("text")
     })
 
-    it("keeps a readonly field's controls while dropping its clear button", () => {
+    it("keeps the eye on a readonly field while dropping its clear button", () => {
+      render(
+        <F0TextInput
+          label="Email"
+          value="ada@example.com"
+          masked
+          readonly
+          clearable
+        />
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Show Email" })
+      ).toBeInTheDocument()
+      expect(screen.queryByTestId("clear-button")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("resting value", () => {
+    it("drops the field chrome but keeps its height with readonly + transparent", () => {
       render(
         <F0TextInput
           label="Email"
           value="ada@example.com"
           readonly
-          clearable
-          onEdit={vi.fn()}
+          transparent
         />
       )
 
-      expect(
-        screen.getByRole("button", { name: "Edit Email" })
-      ).toBeInTheDocument()
-      expect(screen.queryByTestId("clear-button")).not.toBeInTheDocument()
+      const wrapper = screen.getByTestId("input-field-wrapper")
+      expect(wrapper).not.toHaveClass("border-[1px]")
+      expect(wrapper).toHaveClass("h-[32px]")
     })
   })
 })

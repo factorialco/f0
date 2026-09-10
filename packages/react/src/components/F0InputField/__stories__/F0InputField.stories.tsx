@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, fn, userEvent, waitFor, within } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -305,13 +305,12 @@ export const WithAppendTag: Story = {
   },
 }
 
-export const WithActions: Story = {
+export const MaskedValue: Story = {
   args: {
     ...Default.args,
     value: "ada@example.com",
     clearable: true,
     masked: true,
-    copyable: true,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -325,28 +324,7 @@ export const WithActions: Story = {
   },
 }
 
-export const HoverActions: Story = {
-  args: {
-    ...Default.args,
-    value: "ada@example.com",
-    onEdit: () => {},
-    copyable: true,
-    actionsVisibility: "hover",
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const row = canvas.getByTestId("input-field-actions")
-
-    await expect(row).toHaveClass("opacity-0")
-
-    // Focus is the keyboard path into a hover reveal: tabbing to the copy
-    // button has to make it visible, or it can be activated unseen.
-    await userEvent.click(canvas.getByRole("textbox"))
-    await waitFor(() => expect(getComputedStyle(row).opacity).toBe("1"))
-  },
-}
-
-export const ReadonlyTransparentValue: Story = {
+export const RestingValue: Story = {
   args: {
     ...Default.args,
     label: "Email",
@@ -354,66 +332,47 @@ export const ReadonlyTransparentValue: Story = {
     readonly: true,
     transparent: true,
     hideLabel: true,
-    onEdit: () => {},
-    copyable: true,
-    actionsVisibility: "hover",
-    // The value itself is the click target, not just the pencil.
     onClickContent: fn(),
   },
-  decorators: [
-    (Story) => (
-      <div className="w-80 rounded-md border border-solid border-f1-border p-1">
-        <Story />
-      </div>
-    ),
-  ],
+  // The editable field below is the reference the play function measures the
+  // resting cell against.
+  render: (args) => (
+    <div className="flex w-80 flex-col gap-1 rounded-md border border-solid border-f1-border p-1">
+      <F0InputField {...args}>
+        <input type="text" className="w-full" />
+      </F0InputField>
+      <F0InputField {...args} readonly={false} transparent={false}>
+        <input type="text" className="w-full" />
+      </F0InputField>
+    </div>
+  ),
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement)
-    const input = canvas.getAllByLabelText("Email")[0]
+    const [resting] = canvas.getAllByLabelText("Email")
 
     // Real hit-testing, which jsdom cannot do: `readonly` disables the inner
     // input, and a disabled control swallows the mouse event rather than
     // letting it bubble. So the pointer must land on the cell instead.
-    await expect(input).toBeDisabled()
-    const box = input.getBoundingClientRect()
+    await expect(resting).toBeDisabled()
+    const box = resting.getBoundingClientRect()
     const underPointer = document.elementFromPoint(
       box.left + box.width / 2,
       box.top + box.height / 2
     )
-    await expect(underPointer).not.toBe(input)
+    await expect(underPointer).not.toBe(resting)
 
     await userEvent.click(underPointer as HTMLElement)
     await expect(args.onClickContent).toHaveBeenCalled()
-  },
-}
 
-export const ReadonlyWithRequestChange: Story = {
-  args: {
-    ...Default.args,
-    label: "Salary",
-    value: "€48,000",
-    readonly: true,
-    transparent: true,
-    hideLabel: true,
-    onRequestChange: () => {},
-    copyable: true,
-    actionsVisibility: "hover",
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-80 rounded-md border border-solid border-f1-border p-1">
-        <Story />
-      </div>
-    ),
-  ],
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // A comment, never a pencil: the viewer may read the value but not set it.
-    await expect(
-      canvas.getByRole("button", { name: "Request a change to Salary" })
-    ).toBeInTheDocument()
-    await expect(canvas.queryByRole("button", { name: /^Edit/ })).toBeNull()
+    // A resting value keeps the height the editable field has, so clicking a
+    // row does not move the record under the reader. `getBoundingClientRect`
+    // reports all zeros in jsdom, so only a real browser can check this.
+    const [restingCell, editableCell] = canvas.getAllByTestId(
+      "input-field-wrapper"
+    )
+    await expect(restingCell.getBoundingClientRect().height).toBe(
+      editableCell.getBoundingClientRect().height
+    )
   },
 }
 
@@ -481,17 +440,7 @@ export const Snapshot: Story = {
         ...base,
         clearable: false,
         value: "ada@example.com",
-        onEdit: () => {},
         masked: true,
-        copyable: true,
-      },
-      {
-        ...base,
-        clearable: false,
-        value: "ada@example.com",
-        onEdit: () => {},
-        confirmed: true,
-        copyable: true,
       },
       {
         ...base,
@@ -502,8 +451,6 @@ export const Snapshot: Story = {
         readonly: true,
         transparent: true,
         value: "ada@example.com",
-        onRequestChange: () => {},
-        copyable: true,
       },
       { ...base },
     ]

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
+import { F0Button } from "@/components/F0Button"
 import { inputFieldStatus } from "@/components/F0InputField"
 import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
@@ -221,44 +222,24 @@ export const Clearable: Story = {
   },
 }
 
-/** How long the commit confirmation holds, matching the design prototype. */
-const SAVED_SHOWN_MS = 1600
-
 /**
- * The details-row value cell, as the redesigned Employee profile › Details tab
- * draws it. Four states, all on one component:
+ * A details-row value cell built on the public component: the value as plain
+ * text at rest, the ordinary bordered field while editing, Enter to commit and
+ * Escape to revert.
  *
- * 1. **Rest** — the value as plain text, no field chrome, at the same height
- *    the editable field will take.
- * 2. **Hover** — the cell tints and its actions fade in inside the tint.
- * 3. **Editing** — the same component with `readonly` and `transparent` off, so
- *    it becomes the ordinary bordered field. Enter or blur commits, Escape
- *    reverts.
- * 4. **Confirmed** — the cell goes positive and the pencil *becomes* the tick
- *    for a beat, rather than a tick appearing next to it.
- *
- * The consumer owns the readonly flip, the draft and the confirmation timer.
- * The input owns the keys, the trailing actions and the positive tint.
+ * The consumer owns the readonly flip and the draft. The input owns the keys
+ * and the resting presentation, including the height, so the row does not move
+ * when it becomes editable. The trailing buttons a details row also wants
+ * (copy, pencil, comment) belong to the pattern that draws the row, not here.
  */
 const InlineEditingDemo = () => {
   const [value, setValue] = useState("ada.lovelace@example.com")
   const [draft, setDraft] = useState(value)
   const [editing, setEditing] = useState(false)
-  const [justSaved, setJustSaved] = useState(false)
-
-  const startEditing = () => {
-    setDraft(value)
-    setEditing(true)
-  }
 
   const commit = (committed: string) => {
     setEditing(false)
-    if (committed === value) {
-      return
-    }
     setValue(committed)
-    setJustSaved(true)
-    setTimeout(() => setJustSaved(false), SAVED_SHOWN_MS)
   }
 
   const revert = () => {
@@ -267,7 +248,7 @@ const InlineEditingDemo = () => {
   }
 
   return (
-    <div className="w-80 rounded-md border border-solid border-f1-border p-1">
+    <div className="flex w-80 items-center gap-1 rounded-md border border-solid border-f1-border p-1">
       <F0TextInput
         label="Email"
         hideLabel
@@ -282,14 +263,17 @@ const InlineEditingDemo = () => {
         // Clicking away is a commit, not a cancel: the only way to throw a
         // draft away is to say so with Escape.
         onBlur={editing ? () => commit(draft) : undefined}
-        actionsVisibility="hover"
-        // While editing there is nothing to copy or unmask yet, so the
-        // trailing controls stand down and the field is just a field.
-        onEdit={editing ? undefined : startEditing}
-        copyable={!editing}
-        // The pencil becomes a tick and the cell goes positive. The field owns
-        // both; the consumer owns only the timer.
-        confirmed={justSaved}
+      />
+      <F0Button
+        variant="ghost"
+        size="sm"
+        hideLabel
+        icon={Icons.Pencil}
+        label="Edit Email"
+        onClick={() => {
+          setDraft(value)
+          setEditing(true)
+        }}
       />
     </div>
   )
@@ -300,87 +284,42 @@ export const InlineEditing: Story = {
   render: () => <InlineEditingDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const cell = () => canvas.getAllByLabelText("Email")[0]
+    const field = () => canvas.getAllByLabelText("Email")[0]
 
-    // The value itself opens the editor: the pointer lands on the resting
-    // cell, not on the disabled input, which would swallow the click.
-    const restingBox = cell().getBoundingClientRect()
-    const underPointer = document.elementFromPoint(
-      restingBox.left + restingBox.width / 2,
-      restingBox.top + restingBox.height / 2
+    // A resting value is not typeable, and it is drawn without the field's
+    // border.
+    await expect(field()).toBeDisabled()
+    const restingBox = canvas
+      .getByTestId("input-field-wrapper")
+      .getBoundingClientRect()
+
+    await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
+    await waitFor(() => expect(field()).not.toBeDisabled())
+
+    // The editor is the ordinary bordered field, at the height the resting
+    // cell already had. `getBoundingClientRect` is all zeros in jsdom, so only
+    // a real browser can check this.
+    const wrapper = canvas.getByTestId("input-field-wrapper")
+    await expect(wrapper).toHaveClass("border-[1px]")
+    await expect(Math.round(wrapper.getBoundingClientRect().height)).toBe(
+      Math.round(restingBox.height)
     )
-    await expect(underPointer).not.toBe(cell())
-    await userEvent.click(underPointer as HTMLElement)
-    await waitFor(() => expect(cell()).not.toBeDisabled())
 
-    // And the editor is the ordinary bordered field, at the height the
-    // resting cell already had.
-    await expect(canvas.getByTestId("input-field-wrapper")).toHaveClass(
-      "border-[1px]"
-    )
-    await expect(
-      Math.round(cell().getBoundingClientRect().height)
-    ).toBeLessThanOrEqual(Math.round(restingBox.height) + 1)
-
-    await userEvent.clear(cell())
-    await userEvent.type(cell(), "grace.hopper@example.com")
+    await userEvent.clear(field())
+    await userEvent.type(field(), "grace.hopper@example.com")
     await userEvent.keyboard("{Enter}")
 
-    // Enter commits, the pencil becomes the tick, and the cell goes positive.
-    await waitFor(() =>
-      expect(
-        canvas.getByRole("button", { name: "Email saved" })
-      ).toBeInTheDocument()
-    )
-    await expect(canvas.getByTestId("input-field-wrapper")).toHaveClass(
-      "bg-f1-background-positive"
-    )
-    await expect(cell()).toHaveValue("grace.hopper@example.com")
+    await waitFor(() => expect(field()).toBeDisabled())
+    await expect(field()).toHaveValue("grace.hopper@example.com")
 
     // Escape reverts: the draft is thrown away and the committed value stands.
-    await waitFor(
-      () =>
-        expect(
-          canvas.getByRole("button", { name: "Edit Email" })
-        ).toBeInTheDocument(),
-      { timeout: SAVED_SHOWN_MS + 1000 }
-    )
     await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
-    await userEvent.clear(cell())
-    await userEvent.type(cell(), "discarded@example.com")
+    await userEvent.clear(field())
+    await userEvent.type(field(), "discarded@example.com")
     await userEvent.keyboard("{Escape}")
 
-    await expect(cell()).toHaveValue("grace.hopper@example.com")
+    await expect(field()).toHaveValue("grace.hopper@example.com")
   },
-}
-
-export const WithActions: Story = {
-  args: {
-    label: "Email",
-    value: "ada@example.com",
-    onEdit: () => {},
-    copyable: true,
-  },
-}
-
-export const ReadonlyValueWithActions: Story = {
-  args: {
-    label: "Salary",
-    hideLabel: true,
-    value: "€48,000",
-    readonly: true,
-    transparent: true,
-    onRequestChange: () => {},
-    copyable: true,
-    actionsVisibility: "hover",
-  },
-  decorators: [
-    (Story) => (
-      <div className="rounded-md border border-solid border-f1-border p-1">
-        <Story />
-      </div>
-    ),
-  ],
 }
 
 export const Snapshot: Story = {
@@ -410,21 +349,12 @@ export const Snapshot: Story = {
       {
         ...base,
         clearable: false,
-        value: "ada@example.com",
-        onEdit: () => {},
-        copyable: true,
-      },
-      {
-        ...base,
-        clearable: false,
         icon: undefined,
         labelIcon: undefined,
         hideLabel: true,
         readonly: true,
         transparent: true,
         value: "ada@example.com",
-        onRequestChange: () => {},
-        copyable: true,
       },
       { ...base, status: { type: "error" as const, message: "Error message" } },
       {

@@ -26,15 +26,6 @@ export type F0TextAreaInputProps = Pick<
   | "loading"
   | "required"
   | "maxHeight"
-  | "readonly"
-  | "transparent"
-  | "onClickContent"
-  | "copyable"
-  | "masked"
-  | "onEdit"
-  | "onRequestChange"
-  | "actionsVisibility"
-  | "confirmed"
 >
 
 /**

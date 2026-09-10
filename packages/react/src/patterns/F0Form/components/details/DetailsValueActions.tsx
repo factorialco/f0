@@ -1,23 +1,19 @@
 import { useEffect, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import {
-  CheckCircle,
-  Comment,
-  EyeInvisible,
-  EyeVisible,
-  LayersFront,
-  Pencil,
-} from "@/icons/app"
+import { CheckCircle, Comment, LayersFront, Pencil } from "@/icons/app"
 import { copyToClipboard } from "@/lib/clipboard"
 import { useI18n } from "@/lib/providers/i18n"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn } from "@/lib/utils"
-import type { InputFieldValueActions } from "../types"
 
 /** How long the copy tick stays up. Matches `ButtonCopy`. */
 const COPY_FEEDBACK_MS = 1000
+
+export const detailsValueActionsVisibility = ["always", "hover"] as const
+export type DetailsValueActionsVisibility =
+  (typeof detailsValueActionsVisibility)[number]
 
 type ResolvedAction = {
   key: string
@@ -42,15 +38,50 @@ const useTransientFlag = (ms: number) => {
   return [raised, setRaised] as const
 }
 
-type BuildActionsInput = Pick<
-  InputFieldValueActions,
-  "copyable" | "masked" | "onEdit" | "onRequestChange" | "confirmed"
-> & {
-  revealed: boolean
+/**
+ * The acts a details row offers on the value it shows.
+ *
+ * A closed set rather than a list of actions: the glyph, the order, the
+ * accessible name and the confirmation for each job belong to the design
+ * system, so the same job looks and reads the same in every row. There is no
+ * slot for an arbitrary icon.
+ *
+ * The eye is not here. Masking is the input's own business, so it renders
+ * inside the input's trailing area, to the left of this row.
+ */
+export type DetailsValueActionsInput = {
+  /**
+   * A copy button. Copies the row's current value and confirms with a positive
+   * tick, but only once the clipboard write actually succeeded.
+   */
+  copyable?: boolean
+  /**
+   * A pencil. Present means the button shows; the row does not become editable
+   * on its own — the cell flips `readonly` off in response.
+   *
+   * Always a pencil, because it always means "you are about to type here". A
+   * value chosen from a list or a calendar is a different act, and it belongs
+   * to the component that owns that act.
+   */
+  onEdit?: () => void
+  /**
+   * A comment glyph, for a value the viewer may read but not change: they say
+   * something about it and somebody else decides. Never a pencil — a pencil
+   * promises the click will let you type. Mutually exclusive with `onEdit`.
+   */
+  onRequestChange?: () => void
+  /**
+   * Turns the pencil into a tick, to confirm a value just committed. The cell
+   * holds it true for the length of the confirmation; the copy button confirms
+   * itself and needs nothing here.
+   */
+  confirmed?: boolean
+}
+
+type BuildActionsInput = DetailsValueActionsInput & {
   copied: boolean
-  /** Resolves a translation key against the field's label. */
+  /** Resolves a translation key against the row's label. */
   name: (key: TranslationKey) => string
-  onToggleReveal: () => void
   onCopy: () => void
 }
 
@@ -67,20 +98,9 @@ const editAction = (
 ): ResolvedAction => ({
   key: "edit",
   icon: confirmed ? CheckCircle : Pencil,
-  label: name(confirmed ? "inputs.actions.saved" : "inputs.actions.edit"),
+  label: name(confirmed ? "forms.details.saved" : "forms.details.edit"),
   positive: confirmed,
   onClick,
-})
-
-const visibilityAction = ({
-  revealed,
-  name,
-  onToggleReveal,
-}: BuildActionsInput): ResolvedAction => ({
-  key: "visibility",
-  icon: revealed ? EyeVisible : EyeInvisible,
-  label: name(revealed ? "inputs.private.hide" : "inputs.private.show"),
-  onClick: onToggleReveal,
 })
 
 const requestChangeAction = (
@@ -89,7 +109,7 @@ const requestChangeAction = (
 ): ResolvedAction => ({
   key: "request-change",
   icon: Comment,
-  label: name("inputs.actions.requestChange"),
+  label: name("forms.details.requestChange"),
   onClick,
 })
 
@@ -100,7 +120,7 @@ const copyAction = ({
 }: BuildActionsInput): ResolvedAction => ({
   key: "copy",
   icon: copied ? CheckCircle : LayersFront,
-  label: name(copied ? "inputs.actions.copied" : "inputs.actions.copy"),
+  label: name(copied ? "forms.details.copied" : "forms.details.copy"),
   positive: copied,
   onClick: onCopy,
 })
@@ -112,49 +132,44 @@ const copyAction = ({
 const buildActions = (input: BuildActionsInput): ResolvedAction[] =>
   [
     input.onEdit ? editAction(input, input.onEdit) : null,
-    input.masked ? visibilityAction(input) : null,
     input.onRequestChange
       ? requestChangeAction(input, input.onRequestChange)
       : null,
     input.copyable ? copyAction(input) : null,
   ].filter((action): action is ResolvedAction => action !== null)
 
-export type InputFieldActionsProps = Required<
-  Pick<InputFieldValueActions, "actionsVisibility">
-> &
-  Pick<
-    InputFieldValueActions,
-    "copyable" | "masked" | "onEdit" | "onRequestChange" | "confirmed"
-  > & {
-    /** The field's label. Feeds every accessible name. */
-    label: string
-    /** The field's current value. The copy payload. */
-    value?: string
-    /** The field's own `disabled` — disables every control. */
-    disabled?: boolean
-    revealed: boolean
-    onRevealedChange: (revealed: boolean) => void
-    /**
-     * Reports whether a confirmation is showing, so the field can go positive
-     * with it. The copy tick is owned here, so the field cannot work it out.
-     */
-    onConfirmingChange: (confirming: boolean) => void
-  }
+export type DetailsValueActionsProps = DetailsValueActionsInput & {
+  /** The row's label. Feeds every accessible name. */
+  label: string
+  /** The row's current value. The copy payload. */
+  value?: string
+  /** Disables every control. */
+  disabled?: boolean
+  /**
+   * `"hover"` fades the controls in on hover or focus-within, and holds them
+   * while one has focus or is confirming. Touch screens, where hover never
+   * fires, always get `"always"`.
+   * @default "always"
+   */
+  visibility?: DetailsValueActionsVisibility
+  /**
+   * Reports whether a confirmation is showing, so the cell can go positive with
+   * it. The copy tick is owned here, so the cell cannot work it out.
+   */
+  onConfirmingChange?: (confirming: boolean) => void
+}
 
-export const InputFieldActions = ({
+export const DetailsValueActions = ({
   copyable,
-  masked,
   onEdit,
   onRequestChange,
-  actionsVisibility,
   confirmed,
   label,
   value,
   disabled,
-  revealed,
-  onRevealedChange,
+  visibility = "always",
   onConfirmingChange,
-}: InputFieldActionsProps) => {
+}: DetailsValueActionsProps) => {
   const i18n = useI18n()
   const isTouchScreen = useTouchScreen()
   const [copied, setCopied] = useTransientFlag(COPY_FEEDBACK_MS)
@@ -163,7 +178,7 @@ export const InputFieldActions = ({
   useEffect(() => {
     if (onEdit && onRequestChange) {
       console.warn(
-        "F0InputField: `onEdit` and `onRequestChange` are mutually exclusive. A pencil promises the click lets you type; a comment promises somebody else decides. Pick the one that is true."
+        "DetailsValueActions: `onEdit` and `onRequestChange` are mutually exclusive. A pencil promises the click lets you type; a comment promises somebody else decides. Pick the one that is true."
       )
     }
   }, [!!onEdit, !!onRequestChange]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -176,27 +191,24 @@ export const InputFieldActions = ({
 
   const actions = buildActions({
     copyable,
-    masked,
     onEdit,
     onRequestChange,
     confirmed,
-    revealed,
     copied,
     name: (key) => i18n.t(key, { label }),
-    onToggleReveal: () => onRevealedChange(!revealed),
     onCopy: () => void handleCopy(),
   })
 
   const confirming = !!confirmed || copied
 
   useEffect(() => {
-    onConfirmingChange(confirming)
+    onConfirmingChange?.(confirming)
   }, [confirming, onConfirmingChange])
 
   // A hover reveal has no way in on a touch screen, where hover never fires:
   // there the controls stay put.
   const hidesUntilHover =
-    actionsVisibility === "hover" && !isTouchScreen && !confirming
+    visibility === "hover" && !isTouchScreen && !confirming
 
   return (
     <div
@@ -208,7 +220,7 @@ export const InputFieldActions = ({
           "group-focus-within/field:pointer-events-auto group-focus-within/field:opacity-100",
         ]
       )}
-      data-testid="input-field-actions"
+      data-testid="details-value-actions"
     >
       {actions.map((action) => (
         <span
@@ -226,8 +238,8 @@ export const InputFieldActions = ({
             label={action.label}
             disabled={disabled}
             onClick={(event) => {
-              // The field's content area has its own click handler
-              // (`onClickContent`), which would otherwise fire alongside.
+              // The row's value area has its own click handler, which would
+              // otherwise fire alongside.
               event.stopPropagation()
               action.onClick()
             }}
@@ -241,7 +253,7 @@ export const InputFieldActions = ({
       */}
       <span className="sr-only" aria-live="polite">
         {copyFailed
-          ? i18n.inputs.actions.copyFailed
+          ? i18n.forms.details.copyFailed
           : actions.find((action) => action.positive)?.label}
       </span>
     </div>
