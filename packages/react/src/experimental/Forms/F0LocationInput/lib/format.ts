@@ -1,7 +1,7 @@
 import type { EditableLocationPart } from "../internal-types"
 import type { F0LocationInputValue } from "../types"
 
-export const editableLocationParts = [
+const editableLocationParts = [
   "addressLine1",
   "addressLine2",
   "city",
