@@ -275,6 +275,10 @@ const e = {
         placeholder: "Select a company"
       }
     },
+    sidePanel: {
+      resize: "Resize side panel",
+      width: "{{width}} pixels"
+    },
     previous: "Previous",
     next: "Next"
   },

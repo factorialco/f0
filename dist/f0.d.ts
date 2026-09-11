@@ -5095,6 +5095,10 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -18268,10 +18272,10 @@ export declare const setDataCollectionUrlParams: <CurrentFiltersState extends Fi
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
  */
 export declare type SidePanelContent = {
     id: string;
@@ -19710,10 +19714,13 @@ export declare type UsageLimitsPopoverSide = (typeof usageLimitsPopoverSides)[nu
 export declare const usageLimitsPopoverSides: readonly ["top", "bottom"];
 
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
@@ -20958,17 +20965,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
@@ -20981,6 +20977,17 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

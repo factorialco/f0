@@ -820,14 +820,36 @@ declare const ANCHOR_ATTRIBUTE = "data-f0-coachmark";
  */
 export declare const ApplicationFrame: typeof _ApplicationFrame;
 
-declare function _ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, }: ApplicationFrameProps): JSX_2.Element;
+declare function _ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, sidePanel, }: ApplicationFrameProps): JSX_2.Element;
 
 export declare interface ApplicationFrameProps {
     ai?: Omit<AiChatProviderProps, "children">;
     aiPromotion?: Omit<AiPromotionChatProviderProps, "children">;
+    /**
+     * The side panel, independently of the AI chat. Omit it and the panel
+     * behaves exactly as before: present when `ai.enabled`, absent otherwise.
+     */
+    sidePanel?: ApplicationFrameSidePanelProps;
     banner?: React.ReactNode;
     sidebar: React.ReactNode;
     children: React.ReactNode;
+}
+
+export declare interface ApplicationFrameSidePanelProps {
+    /**
+     * What may occupy the side panel. The AI chat adds itself when `ai.enabled`;
+     * anything else — a conversation list, an inspector — declares itself here.
+     *
+     * When nothing is available the panel does not exist: no chrome, no reserved
+     * width, no DOM. That is what keeps a product with no assistant from getting
+     * an empty column, and a product with an assistant it cannot use from
+     * getting no column at all.
+     */
+    views?: SidePanelViewDefinition[];
+    /** Edge the panel docks to. @default "right" */
+    side?: "left" | "right";
+    /** Whether the panel may be resized. */
+    resizable?: boolean;
 }
 
 /**
@@ -4905,6 +4927,10 @@ declare const defaultTranslations: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
             };
+        };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
         };
         readonly previous: "Previous";
         readonly next: "Next";
@@ -13782,6 +13808,22 @@ export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "
  */
 export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
 
+declare type PanelBounds = {
+    min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
+    max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
+    /** The frame is too narrow to split: the panel should cover it instead. */
+    shouldOverlay: boolean;
+};
+
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
@@ -14714,6 +14756,14 @@ export declare type SidebarChatGroup = {
     title: string;
     /** Initial open state of the collapsible group. @default true */
     isOpen?: boolean;
+    /**
+     * One action on the group's own header, revealed on hover like a row's pin
+     * — "new channel" beside Channels, "new community" beside Communities.
+     *
+     * Distinct from the panel's top-of-list `actions`: those belong to the whole
+     * tab, this one belongs to the group it sits on, and says so by being there.
+     */
+    action?: SidebarSectionAction;
     chats: SidebarChat[];
 };
 
@@ -14833,7 +14883,7 @@ export declare type SidebarChatStore = {
  * Collapsible titled section used across the Sidebar (navigation categories,
  * chat groups). Title + rotating chevron + animated height.
  */
-export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, collapsedBadge, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
+export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, collapsedBadge, action, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
 
 export declare interface SidebarCollapsibleSectionProps {
     title: string;
@@ -14853,6 +14903,8 @@ export declare interface SidebarCollapsibleSectionProps {
      * unread badge) — surfaces what's hidden inside without expanding.
      */
     collapsedBadge?: ReactNode;
+    /** Shown on hover at the end of the header — see {@link SidebarSectionAction}. */
+    action?: SidebarSectionAction;
     /** Drag-aware guards used by the sortable Menu; safe to omit elsewhere. */
     isDragging?: boolean;
     wasDragging?: RefObject<boolean>;
@@ -14889,6 +14941,18 @@ declare interface SidebarProps {
     footer?: ReactNode;
     onFooterDropdownClick?: () => void;
 }
+
+/**
+ * One action on a section's own header — "new channel" beside Channels, "new
+ * community" beside Communities. Icon-only, and revealed on hover like the
+ * row's pin, so the header stays a title until somebody reaches for it.
+ */
+export declare type SidebarSectionAction = {
+    /** Names the button for a screen reader, and shows as its tooltip. */
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+};
 
 declare type SidebarState = "locked" | "unlocked" | "hidden";
 
@@ -14944,6 +15008,8 @@ export declare type SidebarTabPanelGroup = {
     highlightWhenCollapsed?: boolean;
     /** Content shown at the end of the header only while collapsed. */
     collapsedBadge?: ReactNode;
+    /** Hover-revealed action on the group's own header. */
+    action?: SidebarSectionAction;
     items: SidebarTabPanelItem[];
 };
 
@@ -15007,6 +15073,103 @@ export declare type SidebarTabsProps = {
      * (e.g. a tab that no longer ships) are ignored. Omit for session-only tabs.
      */
     persistKey?: string;
+};
+
+/**
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
+ */
+export declare type SidePanelContent = {
+    id: string;
+    content: React.ReactNode;
+};
+
+declare type SidePanelContextValue = {
+    /** Every view declared for this frame, in declaration order. */
+    views: SidePanelViewDefinition[];
+    /**
+     * Whether anything can occupy the panel. False means the panel does not
+     * exist: no chrome, no reserved width, no DOM.
+     */
+    hasAvailableView: boolean;
+    /** Whether the panel is showing at all. Persisted. */
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    /** Docked beside the page, or covering it. Persisted. */
+    layout: SidePanelLayout;
+    setLayout: React.Dispatch<React.SetStateAction<SidePanelLayout>>;
+    /** Edge the panel docks to. @default "right" */
+    side: "left" | "right";
+    setSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /**
+     * Edge hosted content docks to. Defaults to `side`; when the two differ the
+     * frame renders a window on each edge and keeps them mutually exclusive.
+     */
+    contentSide: "left" | "right";
+    setContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /** Content currently hosted in the panel, or `null`. */
+    activeContent: SidePanelContent | null;
+    /** Mount content (replacing whatever was there) and open the panel. */
+    present: (content: SidePanelContent | null) => void;
+    /** Remove the hosted content without closing the panel. */
+    clear: () => void;
+    /**
+     * Id persisted from the last session, waiting for its host to re-mount it.
+     * The panel holds a placeholder until the host calls `present`, calls
+     * `cancelRestore` (the content is gone), or a safety timeout fires.
+     */
+    restoringViewId: string | null;
+    cancelRestore: () => void;
+    /** The user's width PREFERENCE, against the absolute range. Persisted. */
+    width: number;
+    setWidth: React.Dispatch<React.SetStateAction<number>>;
+    resetWidth: () => void;
+    /** `width` held inside what the measured frame can actually give it. */
+    effectiveWidth: number;
+    /** The range the panel may be dragged to at the frame's current width. */
+    widthBounds: PanelBounds;
+    /** True when the panel covers the frame rather than sitting beside it. */
+    panelOverlays: boolean;
+    /** Published by the frame from its measured content box. */
+    setFrameWidth: React.Dispatch<React.SetStateAction<number>>;
+    /** Live state of a pointer drag, not a preference. */
+    isResizing: boolean;
+    setIsResizing: React.Dispatch<React.SetStateAction<boolean>>;
+    /** Whether the panel may be resized at all. */
+    resizable: boolean;
+    shouldPlayEntranceAnimation: boolean;
+    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+/**
+ * How the panel is laid out. Deliberately two values: the AI chat's `canvas`
+ * is a third thing the AI kit derives on top of this, not a panel concern.
+ */
+export declare type SidePanelLayout = "sidepanel" | "fullscreen";
+
+/**
+ * A product's claim on the panel.
+ *
+ * Declaring this is what lets the frame answer "is there anything at all to
+ * show?" without the host computing it. The distinction that matters is
+ * between a view that COULD open and one that is not installed at all — with
+ * only `present()` those look identical (no content either way), which is why
+ * the panel used to need a global `enabled` flag and why a customer with
+ * communications and no assistant got no panel.
+ */
+export declare type SidePanelViewDefinition = {
+    id: string;
+    /** Can this view occupy the panel at all? @default true */
+    available?: boolean;
+    /** Edge this view docks to. Falls back to the panel's `side`. */
+    side?: "left" | "right";
+    /**
+     * Static renderer, for views that own their whole surface (the AI chat).
+     * Omit for views whose content is pushed at runtime via `present()`.
+     */
+    render?: () => React.ReactNode;
 };
 
 /**
@@ -16371,6 +16534,14 @@ export declare const useSidebarChatActions: () => SidebarChatActions;
 /** Read the chat state (groups, active chat) and the imperative store API. */
 export declare const useSidebarChats: () => SidebarChatStore;
 
+/**
+ * Read and control the frame's side panel.
+ *
+ * Returns an inert value when no panel is mounted, so a component can be used
+ * both inside and outside a frame without guarding.
+ */
+export declare function useSidePanel(): SidePanelContextValue;
+
 export declare const useWidgetIsWide: () => boolean;
 
 /**
@@ -17323,17 +17494,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
@@ -17346,6 +17506,17 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
