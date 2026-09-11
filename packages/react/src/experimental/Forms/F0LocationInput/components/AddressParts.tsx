@@ -8,6 +8,8 @@ import type {
 } from "../types"
 
 type Props = {
+  /** Marks address line 1, which is the part the group cannot do without */
+  required?: boolean
   value: F0LocationInputValue | undefined
   labels: Record<LocationPart, string>
   onChangePart: (part: EditableLocationPart, text: string) => void
@@ -17,10 +19,6 @@ type Props = {
   name?: string
 }
 
-/**
- * Every part typed by hand. The two address lines take the full width; city,
- * region and postal code share one row.
- */
 /**
  * The HTML autofill tokens for a postal address, so the browser can offer the
  * address it already has instead of making the user type six fields. The
@@ -35,7 +33,12 @@ const autofillTokens = {
   postalCode: "postal-code",
 } as const satisfies Record<EditableLocationPart, string>
 
+/**
+ * Every part typed by hand. The two address lines take the full width; city,
+ * region and postal code share one row.
+ */
 export const AddressParts = ({
+  required,
   value,
   labels,
   onChangePart,
@@ -59,6 +62,9 @@ export const AddressParts = ({
       label={labels[key]}
       autocomplete={autofillTokens[key]}
       placeholder={placeholders[key]}
+      // The group cannot do without a street, and marking every part would
+      // claim a floor number is mandatory
+      required={required && key === "addressLine1"}
       value={value?.[key] ?? ""}
       onChange={(text) => onChangePart(key, text)}
       size={size}

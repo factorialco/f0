@@ -127,7 +127,6 @@ export interface F0LocationInputProps {
   clearable?: boolean
   size?: LocationInputSize
   name?: string
-  id?: string
   autoFocus?: boolean
   onBlur?: () => void
   onFocus?: () => void

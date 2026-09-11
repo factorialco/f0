@@ -20,6 +20,11 @@ import type {
  */
 const UNLISTED_ADDRESS = "__unlisted_address__"
 
+// The provider already ranked and matched the query; the built-in comparison
+// is accent-sensitive, so "Colon" would drop "Carrer de Colón". Hoisted so its
+// identity does not invalidate F0Select's data-source memo on every keystroke
+const MATCH_ALL = () => true
+
 type Props = {
   label: string
   hideLabel?: boolean
@@ -91,9 +96,11 @@ export const AddressSelect = ({
   )
 
   const selectedValue = text ? (placeId ?? UNLISTED_ADDRESS) : undefined
-  const selectedItem = text
-    ? { value: selectedValue as string, label: text }
-    : undefined
+  // A fresh object here re-runs six of F0Select's memos on every keystroke
+  const selectedItem = useMemo(
+    () => (selectedValue ? { value: selectedValue, label: text } : undefined),
+    [selectedValue, text]
+  )
 
   const emptyMessage =
     status === "error"
@@ -124,9 +131,7 @@ export const AddressSelect = ({
     labelIcon,
     placeholder: placeholder ?? i18n.locationInput.placeholder,
     options,
-    // The provider already ranked and matched the query; the built-in
-    // comparison is accent-sensitive, so "Colon" would drop "Carrer de Colón"
-    searchFn: () => true,
+    searchFn: MATCH_ALL,
     value: selectedValue,
     defaultItem: selectedItem,
     onChange: (value: string) => {
@@ -178,8 +183,11 @@ export const AddressSelect = ({
         <F0Select
           {...shared}
           clearable
-          onChangeSelectedOption={(option) => {
-            if (!option) {
+          onChangeSelectedOption={(option, checked) => {
+            // The trigger's clear button sends no option; clicking the
+            // selected suggestion in the open list sends it back unchecked.
+            // Both empty the select, so both have to empty the value
+            if (!option || !checked) {
               onClear()
             }
           }}

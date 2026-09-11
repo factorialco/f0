@@ -1,5 +1,4 @@
-import { useControllableState } from "@radix-ui/react-use-controllable-state"
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, useState } from "react"
 import type { CountryCode } from "@/lib/countries"
 import type { EditableLocationPart } from "../internal-types"
 import {
@@ -32,12 +31,22 @@ export const useLocationValue = ({
   onChange,
   getCountryName,
 }: Options) => {
-  const [value, setValue] = useControllableState<
-    F0LocationInputValue | undefined
-  >({
-    prop: valueProp,
-    defaultProp: defaultValue,
-  })
+  // Controlled-ness is frozen on the first render rather than re-read from
+  // `valueProp !== undefined` each time, because this component emits
+  // `undefined` for an empty value: a controlled parent handing that back
+  // would otherwise flip the field to uncontrolled, where the last internal
+  // value it held reappears and the field can never be cleared.
+  const isControlled = useRef(valueProp !== undefined).current
+  const [internalValue, setInternalValue] = useState(defaultValue)
+  const value = isControlled ? valueProp : internalValue
+  const setValue = useCallback(
+    (next: F0LocationInputValue | undefined) => {
+      if (!isControlled) {
+        setInternalValue(next)
+      }
+    },
+    [isControlled]
+  )
   // Lets the callbacks below stay referentially stable while still reading the
   // current value. Deliberately only written on render: writing the emitted
   // value here too would leave the ref describing something a controlled
@@ -87,6 +96,19 @@ export const useLocationValue = ({
   // A new country moves the pin further than any street edit, so the parts
   // describing the old place go with the resolution: keeping them would emit
   // an address such as "Carrer de Colón 12, Barcelona, France"
+  /**
+   * A picked suggestion the provider could not resolve. It still describes a
+   * whole address, so it replaces the value instead of patching the address
+   * line: patching would leave the previous city, region and postal code
+   * sitting under a street they do not belong to.
+   */
+  const setUnlistedAddress = useCallback(
+    (text: string) => {
+      edited({ addressLine1: text }, false)
+    },
+    [edited]
+  )
+
   const setCountry = useCallback(
     (country: CountryCode | undefined) => {
       edited({ country })
@@ -111,5 +133,12 @@ export const useLocationValue = ({
 
   const clear = useCallback(() => emit(undefined, "typed"), [emit])
 
-  return { value, setPart, setCountry, applyResolved, clear }
+  return {
+    value,
+    setPart,
+    setUnlistedAddress,
+    setCountry,
+    applyResolved,
+    clear,
+  }
 }

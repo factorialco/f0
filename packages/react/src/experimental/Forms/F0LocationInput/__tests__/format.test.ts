@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  editKeepsResolution,
   formatLocationValue,
   invalidateResolution,
   isLocationValueEmpty,
@@ -34,6 +35,17 @@ describe("formatLocationValue", () => {
 
   it("returns undefined when nothing is set", () => {
     expect(formatLocationValue({})).toBeUndefined()
+  })
+})
+
+describe("editKeepsResolution", () => {
+  it("keeps the pin only for the part that stays inside the building", () => {
+    expect(editKeepsResolution("addressLine2")).toBe(true)
+    // Everything else describes where the pin is
+    expect(editKeepsResolution("addressLine1")).toBe(false)
+    expect(editKeepsResolution("city")).toBe(false)
+    expect(editKeepsResolution("state")).toBe(false)
+    expect(editKeepsResolution("postalCode")).toBe(false)
   })
 })
 

@@ -280,11 +280,6 @@ export const Sizes: Story = {
 }
 
 /**
- * Every state, in both shapes: the address field alone and the manual entry
- * block. The status message sits under the field in the first and under the
- * group in the second.
- */
-/**
  * Every state, first for the address field on its own and then for manual
  * entry. The status message sits under the field in the first and under the
  * group in the second.

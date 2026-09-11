@@ -1,4 +1,5 @@
 import userEvent from "@testing-library/user-event"
+import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   fireEvent,
@@ -279,6 +280,31 @@ describe("F0LocationInput", () => {
       )
     })
 
+    it("replaces the whole address when a pick cannot be resolved", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          resolvePlace={vi.fn(async () => undefined)}
+          defaultValue={resolved}
+          onChange={onChange}
+        />
+      )
+
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+      await user.click(screen.getAllByRole("option")[1])
+
+      const [value] = onChange.mock.lastCall as [F0LocationInputValue, unknown]
+      // The old city and postal code described the old street
+      expect(value.addressLine1).toBe("Calle Colón 3")
+      expect(value.city).toBeUndefined()
+      expect(value.postalCode).toBeUndefined()
+      expect(value.placeId).toBeUndefined()
+    })
+
     it("offers no way to invent an address that is not a suggestion", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
@@ -523,6 +549,37 @@ describe("F0LocationInput", () => {
       )
 
       expect(getAddressTrigger()).toHaveTextContent("Calle Falsa 123")
+    })
+  })
+
+  describe("controlled by a parent", () => {
+    const Controlled = ({ onChange }: { onChange?: () => void }) => {
+      const [value, setValue] = useState<F0LocationInputValue | undefined>()
+      return (
+        <F0LocationInput
+          label="Office"
+          manualEntry
+          value={value}
+          onChange={(next) => {
+            setValue(next)
+            onChange?.()
+          }}
+        />
+      )
+    }
+
+    it("clears when the parent hands back undefined", async () => {
+      const user = userEvent.setup()
+      render(<Controlled />)
+
+      const city = screen.getByRole("textbox", { name: "City" })
+      await user.type(city, "Barcelona")
+      expect(city).toHaveValue("Barcelona")
+
+      // An empty value is emitted as undefined, which used to flip the field
+      // back to uncontrolled and resurrect the address it held before
+      await user.clear(city)
+      expect(city).toHaveValue("")
     })
   })
 

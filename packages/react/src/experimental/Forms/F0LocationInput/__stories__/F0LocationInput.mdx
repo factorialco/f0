@@ -162,7 +162,7 @@ A stored value that no suggestion covers is still displayed (the trigger reads t
 
 ### Country and search scope
 
-`searchPlaces(query, { country })` receives the value's country, else `defaultCountry`, else the single entry of `allowedCountries`. Changing the country clears the cached suggestions.
+`searchPlaces(query, { country })` receives `defaultCountry`, else the single entry of `allowedCountries`. The value's own country is deliberately never used: the search exists only in the shape that has no country selector, so the first picked address would silently lock every later search to its country. Changing the country clears the cached suggestions.
 
 <Canvas of={Stories.RestrictedCountries} />
 
@@ -349,7 +349,8 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         </td>
         <td>
           Overrides for the per-part labels, which default to translated copy
-          ("Country", "Address", "City", "Region", "Postal code").
+          ("Country", "Address line 1", "Address line 2", "City", "Region",
+          "Postal code").
         </td>
       </tr>
       <tr>
@@ -486,7 +487,10 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
           <code>boolean</code>
         </td>
         <td>
-          Keeps the value visible and focusable but blocks edits and search.
+          Blocks edits and search. In the shapes backed by <code>F0Select</code>{" "}
+          (the address field, and the country selector under{" "}
+          <code>manualEntry</code>) it renders as a disabled control, because{" "}
+          <code>F0Select</code> has no readonly state of its own.
         </td>
       </tr>
       <tr>
@@ -498,7 +502,8 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         </td>
         <td>
           Shows the spinner in the address field. The component also shows it on
-          its own while a pick resolves.
+          its own while a pick resolves. Ignored under <code>manualEntry</code>,
+          which has no single field to spin.
         </td>
       </tr>
       <tr>
@@ -510,7 +515,8 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         </td>
         <td>
           Renders the select's clear action; clearing empties every part and
-          emits <code>undefined</code>.
+          emits <code>undefined</code>. Ignored under <code>manualEntry</code>,
+          where each part clears on its own.
         </td>
       </tr>
       <tr>
@@ -520,7 +526,10 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         <td>
           <code>boolean</code>
         </td>
-        <td>Renders the required marker next to the address label.</td>
+        <td>
+          Renders the required marker next to the address label, and next to
+          address line 1 under <code>manualEntry</code>.
+        </td>
       </tr>
     </tbody>
   </table>

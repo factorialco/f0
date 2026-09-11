@@ -86,17 +86,22 @@ export const F0LocationInput = forwardRef<
   const getCountryName = useCallback(
     (country: CountryCode | undefined) =>
       country ? i18n.countries[country] : undefined,
-    [i18n]
+    [i18n.countries]
   )
 
-  const { value, setPart, setCountry, applyResolved, clear } = useLocationValue(
-    {
-      value: valueProp,
-      defaultValue,
-      onChange,
-      getCountryName,
-    }
-  )
+  const {
+    value,
+    setPart,
+    setUnlistedAddress,
+    setCountry,
+    applyResolved,
+    clear,
+  } = useLocationValue({
+    value: valueProp,
+    defaultValue,
+    onChange,
+    getCountryName,
+  })
 
   const labels = useMemo<Record<LocationPart, string>>(
     () => ({
@@ -109,7 +114,7 @@ export const F0LocationInput = forwardRef<
       postalCode: partLabels?.postalCode ?? i18n.locationInput.postalCode,
       country: partLabels?.country ?? i18n.locationInput.country,
     }),
-    [partLabels, manualEntry, label, i18n]
+    [partLabels, manualEntry, label, i18n.locationInput]
   )
 
   // Never the value's own country: the search only exists without manual
@@ -142,7 +147,7 @@ export const F0LocationInput = forwardRef<
   const handlePick = (suggestion: F0LocationSuggestion) => {
     const pickId = ++pickIdRef.current
     if (!resolvePlace) {
-      setPart("addressLine1", suggestion.label)
+      setUnlistedAddress(suggestion.label)
       return
     }
     setPendingLabel(suggestion.label)
@@ -160,7 +165,7 @@ export const F0LocationInput = forwardRef<
             placeId: resolved.placeId ?? suggestion.id,
           })
         } else {
-          setPart("addressLine1", suggestion.label)
+          setUnlistedAddress(suggestion.label)
         }
       })
       .catch((reason: unknown) => {
@@ -170,7 +175,7 @@ export const F0LocationInput = forwardRef<
         if (process.env.NODE_ENV !== "production") {
           console.warn("F0LocationInput: resolvePlace rejected", reason)
         }
-        setPart("addressLine1", suggestion.label)
+        setUnlistedAddress(suggestion.label)
       })
       .finally(() => {
         if (pickId !== pickIdRef.current) {
@@ -264,6 +269,7 @@ export const F0LocationInput = forwardRef<
       // visible label, and a heading above them reads as a second form title
       aria-label={label}
       aria-busy={resolving || undefined}
+      aria-required={required || undefined}
       aria-describedby={effectiveStatus?.message ? messagesId : undefined}
       aria-invalid={effectiveStatus?.type === "error" || undefined}
     >
@@ -278,6 +284,7 @@ export const F0LocationInput = forwardRef<
         name={name ? `${name}.country` : undefined}
       />
       <AddressParts
+        required={required}
         value={value}
         labels={labels}
         onChangePart={(part, text) => {
