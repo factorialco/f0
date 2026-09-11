@@ -1,6 +1,7 @@
 import { cva } from "cva"
 import { FC, useCallback, useMemo, useState } from "react"
 
+import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
@@ -66,6 +67,10 @@ const dialogContentClassName = cva({
 })
 
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
+  embedded = false,
+  compactInset = false,
+  headerAction,
+  closeDisabled = false,
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
@@ -97,7 +102,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   }, [])
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && !closeDisabled) {
       onClose()
     }
   }
@@ -107,7 +112,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   const isSidePosition = position === "left" || position === "right"
 
   const variant = useMemo(() => {
-    if (isSmallScreen && asBottomSheetInMobile) {
+    if (isSmallScreen && asBottomSheetInMobile && !embedded) {
       return "bottomSheet"
     }
     if (position === "fullscreen") {
@@ -117,7 +122,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
       return "sidePosition"
     }
     return "center"
-  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position])
+  }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position, embedded])
 
   // Side panel positions (left/right) accept width variants
   const localWidth = useMemo(() => {
@@ -140,6 +145,8 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
 
   const headerProps = {
     title,
+    headerAction,
+    closeDisabled,
     description,
     module,
     otherActions,
@@ -148,7 +155,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     setActiveTabId,
   }
 
-  if (isSmallScreen && asBottomSheetInMobile) {
+  if (isSmallScreen && asBottomSheetInMobile && !embedded) {
     return (
       <F0DialogProvider
         isOpen={isOpen}
@@ -184,16 +191,24 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
       <Dialog
         open={isOpen}
         onOpenChange={handleOpenChange}
-        modal={position === "center" || position === "fullscreen"}
+        modal={
+          !embedded && (position === "center" || position === "fullscreen")
+        }
       >
         <DialogContent
           ref={setContentRef}
-          withTranslateAnimation={!isSidePosition}
-          wrapperClassName={dialogWrapperClassName({
-            variant,
-            position,
-          })}
-          className={contentClassName}
+          withTranslateAnimation={!isSidePosition && !embedded}
+          showOverlay={!embedded}
+          onInteractOutside={
+            embedded ? (event) => event.preventDefault() : undefined
+          }
+          wrapperClassName={cn(
+            dialogWrapperClassName({ variant, position }),
+            embedded && "absolute",
+            position === "fullscreen" && compactInset && "inset-1",
+            embedded && "left-0"
+          )}
+          className={cn(contentClassName, embedded && "overflow-hidden")}
           onOpenAutoFocus={(e) => e.preventDefault()}
           container={containerProp}
         >

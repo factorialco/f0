@@ -357,13 +357,16 @@
   border-radius: 0 !important;
 }
 
-/* Match the original navigation floor. */
+/* Shared F0 secondary surface for navigation, canvas and One. */
 [data-home-nav],
 [data-home-rail],
 [data-home-panel],
 [data-hybrid-root],
-[data-hybrid-work] {
-  background: #fcfcfc !important;
+[data-hybrid-work],
+[data-hybrid-chat] {
+  background:
+    linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))),
+    hsl(var(--neutral-0)) !important;
 }
 [data-home-panel],
 .dark [data-home-panel] {
@@ -374,7 +377,8 @@
 .dark [data-home-rail],
 .dark [data-home-panel],
 .dark [data-hybrid-root],
-.dark [data-hybrid-work] {
+.dark [data-hybrid-work],
+.dark [data-hybrid-chat] {
   background:
     linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
 }
@@ -439,4 +443,25 @@ body:has([data-hybrid-root][data-view="activity"]) [data-home-panel],
 [data-hybrid-root][data-view="home"] [data-hybrid-target] {
   height: auto;
   padding-bottom: 8px;
+}
+
+/* Let the native dialog cast its shadow across the surrounding chrome.
+   Scrolling remains inside the catalog and preview, not these wrappers. */
+body:has([data-widget-editor]) main#content,
+body:has([data-widget-editor]) main#content > div,
+[data-hybrid-root][data-view="widgets"],
+[data-hybrid-root][data-view="widgets"] [data-hybrid-work],
+[data-hybrid-root][data-view="widgets"] [data-hybrid-canvas] {
+  overflow: visible;
+}
+body:has([data-widget-editor]) main#content {
+  border-left: 0;
+  box-shadow: none;
+}
+[data-hybrid-root][data-view="widgets"] [data-hybrid-canvas] {
+  background: transparent;
+}
+[data-widget-editor] [role="dialog"] > div {
+  border: 1px solid hsl(var(--neutral-10));
+  @apply shadow-md;
 }

@@ -1,8 +1,7 @@
 import { createRef } from "react"
-import { act } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { act, zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0ActionBar, F0ActionBarRef } from "."
 
@@ -306,6 +305,41 @@ describe("F0ActionBar auto-centering in #content", () => {
     expect(observeSpy).toHaveBeenCalledWith(contentEl)
 
     globalThis.ResizeObserver = OriginalResizeObserver
+  })
+
+  it("portals inside an explicit anchor with local absolute positioning", () => {
+    const anchor = document.createElement("section")
+    contentEl.appendChild(anchor)
+    const { container } = render(
+      <F0ActionBar {...defaultProps} anchor={anchor} />
+    )
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(anchor).toContainElement(bar)
+    expect(container).not.toContainElement(bar)
+    expect(bar).toHaveStyle({ position: "absolute", left: "0px", right: "0px" })
+    expect(bar).toHaveClass("sm:mx-auto")
+  })
+
+  it("moves into the new anchor and returns to default content centering when cleared", () => {
+    const firstAnchor = document.createElement("section")
+    const secondAnchor = document.createElement("section")
+    contentEl.append(firstAnchor, secondAnchor)
+    const { container, rerender } = render(
+      <F0ActionBar {...defaultProps} anchor={firstAnchor} />
+    )
+    expect(firstAnchor).toContainElement(screen.getByText("Unsaved changes"))
+
+    rerender(<F0ActionBar {...defaultProps} anchor={secondAnchor} />)
+    expect(secondAnchor).toContainElement(screen.getByText("Unsaved changes"))
+    expect(firstAnchor).not.toContainElement(
+      screen.getByText("Unsaved changes")
+    )
+
+    rerender(<F0ActionBar {...defaultProps} anchor={null} />)
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(container).toContainElement(bar)
+    expect(bar).toHaveStyle({ left: "240px", right: "240px" })
   })
 
   it("disconnects the ResizeObserver on unmount", () => {

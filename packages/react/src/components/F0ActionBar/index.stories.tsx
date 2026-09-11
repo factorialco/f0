@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useEffect, useRef, useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
+import { F0Button } from "@/components/F0Button"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Reset, Save } from "@/icons/app"
 
 import {
@@ -12,7 +14,7 @@ import {
   actionBarStatuses,
 } from "."
 
-const meta: Meta<typeof F0ActionBar> = {
+const meta = {
   title: "ActionBar",
   component: F0ActionBar,
   parameters: {
@@ -24,8 +26,12 @@ const meta: Meta<typeof F0ActionBar> = {
       skipCi: true,
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   argTypes: {
+    anchor: {
+      control: false,
+      description: "Element whose horizontal bounds center the bar",
+    },
     isOpen: {
       control: "boolean",
       description: "Controls the visibility of the action bar",
@@ -48,7 +54,7 @@ const meta: Meta<typeof F0ActionBar> = {
       description: "The current status of the action bar",
     },
   },
-}
+} satisfies Meta<typeof F0ActionBar>
 
 export default meta
 type Story = StoryObj<typeof F0ActionBar>
@@ -304,4 +310,49 @@ export const ErrorStatusFlow: Story = {
       },
     },
   },
+}
+
+/** The action bar follows the preview column as its neighboring catalog changes width. */
+export const Anchored: Story = {
+  args: { ...Default.args, isOpen: true, variant: "light", label: "1 change" },
+  render: function AnchoredExample(args) {
+    const [anchor, setAnchor] = useState<HTMLDivElement | null>(null)
+    const [catalogOpen, setCatalogOpen] = useState(true)
+    return (
+      <div className="flex h-screen bg-f1-background-secondary">
+        <aside className="flex flex-col gap-4 bg-f1-background p-4">
+          <F0Button
+            label="Toggle catalog"
+            variant="outline"
+            onClick={() => setCatalogOpen(!catalogOpen)}
+          />
+          {catalogOpen && <p>Available widgets</p>}
+        </aside>
+        <div
+          ref={setAnchor}
+          className="relative flex min-w-0 flex-1 justify-center p-6"
+        >
+          <p>Widget preview</p>
+        </div>
+        {anchor && <F0ActionBar {...args} anchor={anchor} />}
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Toggle catalog" })
+    )
+    await expect(
+      canvas.queryByText("Available widgets")
+    ).not.toBeInTheDocument()
+    const page = within(canvasElement.ownerDocument.body)
+    await expect(page.getAllByText("1 change").length).toBeGreaterThan(0)
+  },
+}
+
+export const Snapshot: Story = {
+  ...Anchored,
+  play: undefined,
+  parameters: withSnapshot({}),
 }

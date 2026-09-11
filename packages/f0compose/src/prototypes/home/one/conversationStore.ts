@@ -32,6 +32,13 @@ import {
   changeWidgets,
   undoWidgets,
 } from "../setup/widgetPreferences"
+import {
+  widgetQuestion,
+  completeWidget,
+  creationSteps,
+  type WidgetCreation,
+} from "../widget-editor/creation"
+import { addCustomWidget } from "../widget-editor/model"
 import { addSurveyQuestions, resetSurveyDraft } from "../windows/surveyDraft"
 import {
   INSIGHT_ANSWERS,
@@ -142,6 +149,7 @@ export type RunResolution = {
 }
 
 export type Conversation = {
+  widgetCreation?: WidgetCreation
   homeSetup?: HomeSetup
   homeBriefing?: ProfileId
   /** Dedicated mock conversation for replacing the personal policy text. */
@@ -1225,6 +1233,118 @@ export function startPolicyEditing(): string {
   return id
 }
 
+export function resumeWidgetCreation(profile: ProfileId): string | undefined {
+  const pending = state.conversations.find(
+    (c) =>
+      c.widgetCreation?.profile === profile &&
+      !c.widgetCreation.completed &&
+      !c.widgetCreation.cancelled
+  )
+  if (!pending) return
+  if (
+    !pending.thinking &&
+    !pending.messages.some(
+      (m) => m.question && !m.question.answer && !m.question.skipped
+    )
+  ) {
+    patchConversation(pending.id, (c) => ({
+      ...c,
+      messages: [
+        ...c.messages,
+        {
+          id: `m${nextId++}`,
+          role: "assistant",
+          content: "",
+          question: widgetQuestion(c.widgetCreation!),
+        },
+      ],
+    }))
+  }
+  openConversation(pending.id)
+  window.dispatchEvent(new Event("home-agent:open"))
+  return pending.id
+}
+
+/** Widget creation uses the same persisted One conversation and F0 questions. */
+export function startWidgetCreation(profile: ProfileId): string {
+  const pending = resumeWidgetCreation(profile)
+  if (pending) return pending
+  const flow: WidgetCreation = { profile, step: 0, answers: [] }
+  const question = widgetQuestion(flow)
+  const id = createConversation("I want to create a custom widget", {
+    title: "New widget",
+    script: {
+      reply: [
+        "Let's define a widget for your home. I'll ask about its content, scope and layout.",
+      ],
+      question: {
+        key: question.intentKey,
+        text: question.text,
+        options: question.options,
+      },
+    },
+  })
+  patchConversation(id, (c) => ({ ...c, widgetCreation: flow }))
+  window.dispatchEvent(new Event("home-agent:open"))
+  return id
+}
+function answerWidgetCreation(id: string, answer: string) {
+  const c = state.conversations.find((item) => item.id === id)
+  const flow = c?.widgetCreation
+  if (
+    !c ||
+    !flow ||
+    flow.completed ||
+    flow.cancelled ||
+    c.thinking ||
+    !answer.trim()
+  )
+    return
+  const next = {
+    ...flow,
+    step: flow.step + 1,
+    answers: [...flow.answers, answer.trim()],
+  }
+  const finished = next.step >= creationSteps.length
+  const widgetId = `custom-${id}`
+  const widget = finished ? completeWidget(next, widgetId) : undefined
+  if (widget) addCustomWidget(flow.profile, widget)
+  patchConversation(id, (current) => ({
+    ...current,
+    thinking: false,
+    lastActiveAt: Date.now(),
+    widgetCreation: {
+      ...next,
+      completed: finished,
+      ...(finished ? { widgetId } : {}),
+    },
+    messages: [
+      ...current.messages.map((m) =>
+        m.question && !m.question.answer && !m.question.skipped
+          ? { ...m, question: { ...m.question, answer } }
+          : m
+      ),
+      { id: `m${nextId++}`, role: "user", content: answer.trim() },
+      ...(finished
+        ? [
+            {
+              id: `m${nextId++}`,
+              role: "assistant" as const,
+              content: `“${widget!.title}” is ready and added to your preview. Save your changes to keep it on your home. You can remove it and add it again later.`,
+            },
+          ]
+        : [
+            {
+              id: `m${nextId++}`,
+              role: "assistant" as const,
+              content: "",
+              question: widgetQuestion(next),
+            },
+          ]),
+    ],
+  }))
+}
+
 /** Prompt-bar submit on the Home screen → new full-screen conversation. */
 export function startConversation(prompt: string): string {
   return createConversation(prompt)
@@ -1252,6 +1372,14 @@ export function sendMessage(prompt: string, conversationId?: string) {
   if (!id) return
   const current = state.conversations.find((c) => c.id === id)
   if (current?.thinking || current?.streaming) return
+  if (
+    current?.widgetCreation &&
+    !current.widgetCreation.completed &&
+    !current.widgetCreation.cancelled
+  ) {
+    answerWidgetCreation(id, prompt)
+    return
+  }
   if (
     current?.homeBriefing ||
     (current?.homeSetup && !current.homeSetup.purpose)
@@ -1395,6 +1523,14 @@ export function answerQuestion(
   answer: string
 ) {
   const conversation = state.conversations.find((c) => c.id === conversationId)
+  if (conversation?.widgetCreation) {
+    const question = conversation.messages.find(
+      (m) => m.id === messageId
+    )?.question
+    if (question && !question.answer && !question.skipped)
+      answerWidgetCreation(conversationId, answer)
+    return
+  }
   if (conversation?.homeSetup) {
     const pending = conversation.messages.find(
       (m) => m.id === messageId
@@ -1514,6 +1650,9 @@ export function skipQuestion(conversationId: string, messageId: string) {
   patchConversation(conversationId, (c) => ({
     ...c,
     ...(c.homeSetup ? { homeSetup: { ...c.homeSetup, paused: true } } : {}),
+    ...(c.widgetCreation
+      ? { widgetCreation: { ...c.widgetCreation, cancelled: true } }
+      : {}),
     messages: c.messages.map((m) =>
       m.id === messageId && m.question && !m.question.answer
         ? { ...m, question: { ...m.question, skipped: true } }
@@ -1734,6 +1873,25 @@ function answerHomeSetup(id: string, answer: string) {
   const conversation = state.conversations.find((c) => c.id === id)
   const setup = conversation?.homeSetup
   if (!setup || conversation.thinking || conversation.streaming) return
+  if (
+    !setup.purpose &&
+    (setup.step === "widgets" || /widget/.test(normalize(answer)))
+  ) {
+    patchConversation(id, (c) => ({
+      ...skipOpenQuestions(c),
+      homeSetup: { ...setup, step: "complete", paused: true },
+      messages: [
+        ...skipOpenQuestions(c).messages,
+        {
+          id: `m${nextId++}`,
+          role: "assistant",
+          content:
+            "Use Edit widgets below your widgets to manage your personal layout and employee defaults.",
+        },
+      ],
+    }))
+    return
+  }
   if (
     /^(exit|save and exit|pause|stop|salir|guardar y salir|lo dejamos|mas tarde)$/.test(
       normalize(answer)

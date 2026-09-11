@@ -1,0 +1,42 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import * as Stories from "./index.stories"
+
+<Meta of={Stories} />
+
+# Action bar
+
+F0ActionBar keeps contextual actions visible while users edit or select content. Use a dialog footer when the actions belong to a blocking modal decision.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Variants and states
+
+The `dark` variant is the default; `light` provides a light surface. The `idle`, `loading`, `success`, and `error` statuses communicate progress. Loading and success disable the actions.
+
+<Canvas of={Stories.StatusFlow} />
+
+### Anchored positioning
+
+<Canvas of={Stories.Anchored} />
+
+| Prop     | Behavior                                                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `anchor` | Optional positioned, non-scrolling `HTMLElement` that contains and centers the bar. Omit it, or pass `null`, to retain application-content positioning |
+
+## Guidelines
+
+### Design best practices
+
+Anchor actions to the region they affect, such as a preview beside a widget catalog. Keep the label brief and supply clear primary and secondary actions.
+
+### Behavior
+
+Pass an element from a callback ref so the component updates when the anchor becomes available. Give the anchor `position: relative` and an explicit available height, and keep it non-scrolling. Place scrollable content in a separate child. The bar renders through a portal inside the anchor and stays centered near its bottom as the layout changes. Keeping it inside the affected region also preserves its keyboard reading order. Without an anchor, existing positioning against the application element with ID `content` is preserved.
+
+## Accessibility
+
+Keep actions reachable by keyboard and ensure their labels describe the result. Avoid covering important content with the floating bar; reserve space below editable content for its visible height.

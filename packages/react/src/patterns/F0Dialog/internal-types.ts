@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { F0ButtonProps } from "@/components/F0Button"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { TabsProps } from "@/patterns/Navigation/Tabs"
 
@@ -14,6 +15,11 @@ import {
 } from "./types"
 
 export type F0DialogHeaderProps = {
+  /** A labeled primary header action, alongside the close control. */
+  headerAction?: F0ButtonProps
+  /** Prevent closing while the caller has unsaved changes. */
+  closeDisabled?: boolean
+
   title?: string
   description?: string
   module?: {
@@ -47,6 +53,13 @@ export type F0DialogProviderProps = {
 }
 
 export type F0DialogInternalProps = {
+  /** Render fullscreen within a positioned container, leaving neighboring panels interactive. */
+  embedded?: boolean
+  /** Use a 4px fullscreen inset (no left inset when embedded). */
+  compactInset?: boolean
+  headerAction?: F0DialogHeaderProps["headerAction"]
+  closeDisabled?: boolean
+
   // Whether the dialog is open
   isOpen: boolean
   // Callback when dialog is closed

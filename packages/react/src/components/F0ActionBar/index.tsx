@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { createPortal } from "react-dom"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -91,6 +92,9 @@ const wiggleClassName = "f0-action-bar-wiggle"
 const WIGGLE_DURATION_MS = 600
 
 interface F0ActionBarProps {
+  /** Portal and center within a positioned, non-scrolling element instead of the application content. */
+  anchor?: HTMLElement | null
+
   /**
    * Whether the action bar is open
    */
@@ -183,6 +187,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
   (
     {
       isOpen,
+      anchor,
       secondaryActions = [],
       label,
       variant = "dark",
@@ -200,6 +205,10 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     } | null>(null)
 
     useEffect(() => {
+      if (anchor) {
+        setContentRect(null)
+        return
+      }
       const el = document.getElementById("content")
       if (!el) return
 
@@ -223,7 +232,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
       observer.observe(el)
 
       return () => observer.disconnect()
-    }, [])
+    }, [anchor])
 
     useEffect(() => {
       return () => {
@@ -355,13 +364,17 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
             exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
             transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
             style={
-              contentRect
-                ? {
-                    left: contentRect.left,
-                    right:
-                      window.innerWidth - contentRect.left - contentRect.width,
-                  }
-                : undefined
+              anchor
+                ? { position: "absolute", left: 0, right: 0 }
+                : contentRect
+                  ? {
+                      left: contentRect.left,
+                      right:
+                        window.innerWidth -
+                        contentRect.left -
+                        contentRect.width,
+                    }
+                  : undefined
             }
             className={cn(
               "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-5 sm:justify-between",
@@ -484,7 +497,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
       </AnimatePresence>
     )
 
-    return actionBarContent
+    return anchor ? createPortal(actionBarContent, anchor) : actionBarContent
   }
 )
 

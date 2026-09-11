@@ -1,13 +1,14 @@
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
-import { Tabs } from "@/patterns/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
@@ -17,6 +18,8 @@ import { useF0Dialog } from "./F0DialogProvider"
 
 export const F0DialogHeader = ({
   title,
+  headerAction,
+  closeDisabled,
   description,
   module,
   otherActions,
@@ -107,11 +110,13 @@ export const F0DialogHeader = ({
           )}
         </div>
         <div className="flex flex-row gap-2">
+          {headerAction && <F0Button {...headerAction} />}
           <Actions />
           {otherActions && <Divider />}
           <ButtonInternal
             variant="outline"
             icon={CrossIcon}
+            disabled={closeDisabled}
             onClick={onClose}
             label={translations.actions.close}
             hideLabel

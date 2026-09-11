@@ -10,6 +10,7 @@ import { DialogPortal } from "./DialogPortal"
 export const DialogContent = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    showOverlay?: boolean
     wrapperClassName?: string
     withTranslateAnimation?: boolean
     container?: HTMLElement | null
@@ -18,6 +19,7 @@ export const DialogContent = forwardRef<
   (
     {
       wrapperClassName,
+      showOverlay = true,
       className,
       children,
       withTranslateAnimation = true,
@@ -40,7 +42,7 @@ export const DialogContent = forwardRef<
 
     return (
       <DialogPortal container={container}>
-        <DialogOverlay />
+        {showOverlay && <DialogOverlay />}
         <DialogPrimitive.Content
           ref={ref}
           className={cn(

@@ -29,13 +29,13 @@ import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
 import { FactorialAgentIcon } from "./FactorialAgentIcon"
 import { HomeSuggestion } from "./HomeSuggestion"
+import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   goHome,
   startConversation,
   sendMessage,
   useConversations,
 } from "./one/conversationStore"
-import { ClarifyPanel } from "./one/ClarifyPanel"
 import { ConversationView } from "./one/ConversationView"
 import "./agent-entry.css"
 import { useProfile } from "./profileStore"
@@ -45,12 +45,16 @@ export function HybridHome({ children }: { children: ReactNode }) {
   const { conversations, activeId } = useConversations()
   const activeConversation = conversations.find((c) => c.id === activeId)
   const followUp =
-    activeConversation?.homeSetup && !activeConversation.homeSetup.paused
+    (activeConversation?.homeSetup && !activeConversation.homeSetup.paused) ||
+    (activeConversation?.widgetCreation &&
+      !activeConversation.widgetCreation.completed &&
+      !activeConversation.widgetCreation.cancelled)
       ? [...activeConversation.messages]
           .reverse()
           .find(
             (m) =>
-              m.question?.intentKey.startsWith("home:") &&
+              (m.question?.intentKey.startsWith("home:") ||
+                m.question?.intentKey.startsWith("widget:")) &&
               !m.question.answer &&
               !m.question.skipped
           )
@@ -77,8 +81,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer)
   }, [activeConversation?.id, profile])
 
-  const view =
-    params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
+  const view = params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
   const suggestion = suggestionFor(view, profile)
   const emptyState = emptyStateFor(view)
   const [mode, setMode] = useState<Presentation>("idle")
@@ -92,9 +95,8 @@ export function HybridHome({ children }: { children: ReactNode }) {
     setHomeSlot(
       view
         ? null
-        : (work.current?.querySelector<HTMLElement>(
-            "[data-hybrid-target]"
-          ) ?? null)
+        : (work.current?.querySelector<HTMLElement>("[data-hybrid-target]") ??
+            null)
     )
   })
   const placeComposer = (content: ReactNode) =>
@@ -102,6 +104,8 @@ export function HybridHome({ children }: { children: ReactNode }) {
   const previousView = useRef(view)
   const open = mode === "side" || mode === "focus"
   useEffect(() => {
+    // Widget editing opens One only through the explicit New widget action.
+    if (view === "widgets") return
     if (activeId) setMode(view ? "side" : "focus")
     else setMode("idle")
   }, [activeId])
@@ -111,14 +115,16 @@ export function HybridHome({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("home-agent:open", openEntry)
   }, [view])
   const compact = !!view && mode === "idle"
-  const asking = !view && questionReady && !!followUp
+  const asking =
+    questionReady &&
+    !!followUp &&
+    (!view ||
+      (view === "widgets" && open && !!activeConversation?.widgetCreation))
   const typing = draft.length > 0
   function focusField() {
     if (asking) return
     root.current
-      ?.querySelector<HTMLTextAreaElement>(
-        "[data-hybrid-composer] textarea"
-      )
+      ?.querySelector<HTMLTextAreaElement>("[data-hybrid-composer] textarea")
       ?.focus()
   }
   useEffect(() => {
@@ -196,16 +202,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
       observer.disconnect()
       cancelAnimationFrame(frame)
     }
-  }, [
-    view,
-    mode,
-    compact,
-    typing,
-    open,
-    followUp?.id,
-    questionReady,
-    asking,
-  ])
+  }, [view, mode, compact, typing, open, followUp?.id, questionReady, asking])
   function close() {
     if (!view) goHome()
     setMode("idle")
@@ -213,9 +210,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
     window.setTimeout(() => {
       if (view)
         root.current
-          ?.querySelector<HTMLButtonElement>(
-            '[data-testid="ask-factorial"]'
-          )
+          ?.querySelector<HTMLButtonElement>('[data-testid="ask-factorial"]')
           ?.focus()
       else focusField()
     }, 420)
@@ -260,7 +255,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
       }}
     >
       <div
-        className="flex h-full min-h-0 w-full bg-f1-background"
+        className="flex h-full min-h-0 w-full bg-f1-background-secondary"
         ref={root}
         data-hybrid-root
         data-mode={view ? mode : "idle"}
@@ -274,7 +269,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
           </div>
           <div data-hybrid-dock aria-hidden="true" />
           <div
-            className="bg-f1-background"
+            className="bg-f1-background-secondary"
             data-hybrid-chat
             data-open={open && !!view}
             role={open && view ? "region" : undefined}
@@ -282,7 +277,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
             aria-hidden={!open || !view}
           >
             <div className="flex items-center justify-between gap-2 p-4">
-              <F0Heading content="Ask Factorial" variant="heading" />
+              <F0Heading
+                content={view === "widgets" ? "New widget" : "Ask Factorial"}
+                variant="heading"
+              />
               <div className="flex gap-1">
                 {open && view && (
                   <F0Button
@@ -295,9 +293,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
                     hideLabel
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      setMode(mode === "side" ? "focus" : "side")
-                    }
+                    onClick={() => setMode(mode === "side" ? "focus" : "side")}
                   />
                 )}
                 <F0Button
@@ -325,11 +321,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
                 ) : (
                   <div className="mt-auto flex flex-col gap-4">
                     {open && (
-                      <FactorialAgentIcon
-                        key={view}
-                        width={40}
-                        height={40}
-                      />
+                      <FactorialAgentIcon key={view} width={40} height={40} />
                     )}
                     <div className="flex flex-col gap-3">
                       <F0Heading
@@ -357,17 +349,19 @@ export function HybridHome({ children }: { children: ReactNode }) {
           {placeComposer(
             <div
               style={
-                !view
-                  ? {
-                      position: "relative",
-                      left: "auto",
-                      top: "auto",
-                      transform: "none",
-                      width: "100%",
-                      height: asking ? "auto" : typing || open ? 136 : 176,
-                      transition: "none",
-                    }
-                  : undefined
+                view === "widgets" && asking
+                  ? { height: "auto", maxHeight: "65vh", overflowY: "auto" }
+                  : !view
+                    ? {
+                        position: "relative",
+                        left: "auto",
+                        top: "auto",
+                        transform: "none",
+                        width: "100%",
+                        height: asking ? "auto" : typing || open ? 136 : 176,
+                        transition: "none",
+                      }
+                    : undefined
               }
               className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
               ref={composer}
@@ -383,27 +377,28 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   className="max-h-[50vh] w-full overflow-y-auto"
                 >
                   <div>
-                    {!activeConversation.homeSetup?.purpose && (
-                      <div className="px-4 pt-4 pb-2">
-                        {homeRefreshing ? (
-                          <HomeWorking />
-                        ) : (
-                          <F0Text
-                            content={
-                              [...activeConversation.messages]
-                                .reverse()
-                                .find(
-                                  (m) =>
-                                    m.role === "assistant" &&
-                                    !m.question &&
-                                    m.content
-                                )?.content ||
-                              "Let’s make your home useful for you."
-                            }
-                          />
-                        )}
-                      </div>
-                    )}
+                    {!activeConversation.widgetCreation &&
+                      !activeConversation.homeSetup?.purpose && (
+                        <div className="px-4 pb-2 pt-4">
+                          {homeRefreshing ? (
+                            <HomeWorking />
+                          ) : (
+                            <F0Text
+                              content={
+                                [...activeConversation.messages]
+                                  .reverse()
+                                  .find(
+                                    (m) =>
+                                      m.role === "assistant" &&
+                                      !m.question &&
+                                      m.content
+                                  )?.content ||
+                                "Let’s make your home useful for you."
+                              }
+                            />
+                          )}
+                        </div>
+                      )}
                     <ClarifyPanel
                       key={followUp.id}
                       conversationId={activeConversation.id}

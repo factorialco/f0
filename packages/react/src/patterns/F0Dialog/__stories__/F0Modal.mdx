@@ -1,0 +1,48 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Modal.stories"
+
+<Meta of={Stories} />
+
+# Dialog
+
+F0Dialog presents focused content with a title, optional tabs, and actions. Use an embedded fullscreen dialog for an editor that shares the application with navigation or a neighboring assistant panel.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Modes
+
+| Position        | Behavior                                             |
+| --------------- | ---------------------------------------------------- |
+| `center`        | A modal dialog with a constrained width              |
+| `left`, `right` | A side panel with a selectable width                 |
+| `fullscreen`    | A dialog that fills the available area with an inset |
+
+### Embedded editor
+
+<Canvas of={Stories.Embedded} />
+
+| Prop            | Behavior                                                                                                                                                                                                                    |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `embedded`      | Defaults to `false`. Removes the overlay and focus trap, retains neighboring panel interaction, and prevents outside interactions from dismissing the dialog. Use with `position="fullscreen"` and a positioned `container` |
+| `compactInset`  | Defaults to `false`. Uses a 4px fullscreen inset; the left inset is zero when embedded                                                                                                                                      |
+| `container`     | Portal destination. For an embedded editor, supply a positioned element with an explicit height. Render after its element reference is available                                                                            |
+| `headerAction`  | Optional labeled F0Button configuration displayed beside the close control, independent of `otherActions`                                                                                                                   |
+| `closeDisabled` | Defaults to `false`. Disables the close button and ignores dismissal requests while changes need a decision                                                                                                                 |
+
+## Guidelines
+
+### Design best practices
+
+Use the default modal behavior for blocking decisions. Use an embedded dialog when users need to keep interacting with navigation or an assistant beside the editor. Keep an explicit Save or Discard path visible whenever closing is disabled.
+
+### Behavior
+
+Embedded dialogs do not switch to a bottom sheet on narrow screens. The caller owns `isOpen`; `onClose` requests a state change. Existing dialogs retain their default overlay, positioning, and responsive behavior when the new props are omitted.
+
+## Accessibility
+
+Give every dialog a descriptive title. Embedded dialogs allow keyboard focus to leave the editor; their contents and neighboring panels must follow a logical reading order. Disabled dismissal is appropriate only while a visible action lets the user resolve the pending state.

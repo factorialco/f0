@@ -3,11 +3,7 @@ import { useEffect, useRef } from "react"
 import type { WindowId } from "./types"
 
 import { useProfile } from "../profileStore"
-import {
-  readWidgets,
-  persistWidgets,
-  WIDGET_CHANGE_EVENT,
-} from "../setup/widgetPreferences"
+import { readWidgets, WIDGET_CHANGE_EVENT } from "../setup/widgetPreferences"
 import { useWindowStack } from "./stack"
 
 export { MAX_COLUMN_WIDTH, MIN_COLUMN_WIDTH } from "./stack"
@@ -25,7 +21,6 @@ export function useWindows() {
       readWidgets(profile).forEach(stack.open)
       return
     }
-    persistWidgets(profile, stack.state.open)
   }, [profile, stack.state.open, stack.closeAll, stack.open])
   useEffect(() => {
     const apply = (event: Event) => {

@@ -1,4 +1,3 @@
-import { HomeToolbarActions } from "./windows/HomeToolbarActions"
 import {
   F0AvatarPerson,
   F0Button,
@@ -43,23 +42,17 @@ import {
   type NeedsYouTask,
   type ProfilePerson,
 } from "./fixtures"
-import { enterHome } from "./one/conversationStore"
-import { HomeSessionBar, GuidedHome } from "./setup/HomeArtifacts"
-import { useWidgetCollapse } from "./windows/widgetCollapse"
 import { HomeNav } from "./HomeNav"
-import {
-  ImportedHubScreen,
-  hasImportedScreen,
-} from "./hub/ImportedHubScreen"
+import { ImportedHubScreen, hasImportedScreen } from "./hub/ImportedHubScreen"
 import { HybridHome } from "./HybridHome"
 import { ModuleScreen } from "./ModuleScreen"
 import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
+import { enterHome } from "./one/conversationStore"
 import {
   goHome,
   onWindowRequest,
-  onWindowsCollapseRequest,
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
@@ -69,17 +62,17 @@ import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
+import { HomeSessionBar, GuidedHome } from "./setup/HomeArtifacts"
+import { StaticWidgets } from "./widget-editor/StaticWidgets"
+import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
 import { useWindows } from "./windows/useWindows"
 import {
   animateWindowClose,
   CANVAS_MIN_WIDTH,
-  FloatingWidgets,
   MaximizedWindow,
-  WindowsColumn,
 } from "./windows/WindowsColumn"
-import { WindowsMenu } from "./windows/WindowsMenu"
 import "./icon-motion.css"
 
 /**
@@ -98,7 +91,7 @@ import "./icon-motion.css"
  *                          stack vertically, resizable both ways.
  *
  * Deliberately does NOT use the canonical Page/PageHeader chrome — Home
- * isn't a module page. The design is a seamless full-bleed #FCFCFC canvas
+ * isn't a module page. The design is a seamless full-bleed hsl(var(--neutral-10)) canvas
  * (like Claude Code): no rounded card frame, no ring border, no gutter
  * around the content, and the sidebar pushes the canvas when it opens.
  */
@@ -123,21 +116,17 @@ export const meta: PrototypeMeta = {
 // This concept needs a seamless canvas edge-to-edge, so we override both
 // while Home is mounted and restore them on unmount.
 const FULL_BLEED_CSS = `
-  main#content { padding: 0 !important; background: #FCFCFC; }
+  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
      stable selector; :has() on the nav root is the only hook. */
   div:has(> [data-home-nav]) { width: auto !important; padding-left: 0 !important; }
-  /* Rail, panel and canvas are ONE flat surface (#FCFCFC, verified pixel
-     by pixel against the Figma render, per Oskar) — the nav carries no
-     colour of its own; only a hairline separates the columns. The divider
-     is an inset shadow, not a border: a border would shrink the fixed
-     content boxes and force 1px horizontal scrollbars in their bodies.
-     rgba(5,38,87,0.06) over #FCFCFC resolves to the design's #EDEFF2. */
+  /* Navigation and canvas share F0's secondary background. Inset shadows
+     separate columns without changing their content dimensions. */
   [data-home-rail],
   [data-home-panel] {
-    background: #FCFCFC;
+    background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0));
     box-shadow: inset -1px 0 0 rgba(5, 38, 87, 0.06);
   }
   /* The split conversation panel is another column of the same surface,
@@ -146,7 +135,7 @@ const FULL_BLEED_CSS = `
      canvas; an inset shadow here keeps the fixed content boxes from
      shrinking, the same reason the nav columns use one). */
   [data-one-panel] {
-    background: #FCFCFC;
+    background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0));
     box-shadow: inset 1px 0 0 rgba(5, 38, 87, 0.06);
   }
   /* Dark: the light values above are experimental customs with no dark
@@ -372,7 +361,7 @@ const FULL_BLEED_CSS = `
     }
   }
   /* The overlaying column carries NO ground and NO shadow of its own
-     (Oskar, 2026-09-04). It used to paint #FCFCFC plus a -12px edge
+     (Oskar, 2026-09-04). It used to paint hsl(var(--neutral-10)) plus a -12px edge
      shadow, on the theory that the p-2 gutters between panels would
      otherwise let content show through — but that is precisely what
      should happen: over a conversation the opaque slab clipped the rows
@@ -386,26 +375,26 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: #FCFCFC; }
+  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
   /* The People table's header is STICKY, so it needs an opaque ground or
      rows scroll through it — but f0 paints it bg-f1-background, i.e.
-     white, and this canvas is #FCFCFC (Oskar: it should not read as a
+     white, and this canvas uses the secondary F0 background (it should not read as a
      white band). Same problem and same answer as the calendar's sticky
      day header above: paint it the CANVAS surface, so it is opaque
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: #FCFCFC; }
+  main#content thead th { background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
   /* INSIDE A WINDOW THE GROUND IS THE CARD, NOT THE CANVAS.
-     The two rules above paint sticky headers #FCFCFC because the People
+     The two rules above paint sticky headers hsl(var(--neutral-10)) because the People
      table and the calendar's day row used to sit directly on the page.
-     They are in a WHITE card now, where #FCFCFC reads as a grey band with
+     They are in a WHITE card now, where hsl(var(--neutral-10)) reads as a grey band with
      a seam where it meets the card — Oskar, comparing People against a
      maximized chat: "es como que en People se ve la linea de separacion".
      Same token the card itself uses (bg-f1-background compiles to
@@ -843,7 +832,7 @@ function HomeNavbar({
               </span>
             )}
             <span className="truncate text-base font-medium text-f1-foreground">
-              {homeSession ? "Home" : conversationTitle}
+              {homeSession ? "" : conversationTitle}
             </span>
           </span>
         ) : screenTitle ? (
@@ -863,11 +852,6 @@ function HomeNavbar({
       <div className="flex shrink-0 items-center gap-2">
         {conversationTitle ? (
           <div className="flex items-center">
-            {homeSession ? (
-              <HomeToolbarActions openWindows={openWindows} />
-            ) : (
-              <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
-            )}
             {/* An agent's brief has nothing to preview — the frame shows
               only the ⋮ there. */}
             {!conversationEmoji && !homeSession && (
@@ -920,7 +904,6 @@ function HomeNavbar({
               open={openWindows.includes("clockin")}
               onToggle={() => onToggleWindow("clockin")}
             />
-            <HomeToolbarActions openWindows={openWindows} />
           </div>
         )}
         <AskFactorialButton />
@@ -1068,8 +1051,7 @@ function HomeCanvas() {
         }
         // A maximized CHAT hides the widgets stack just as thoroughly, so
         // it has to give way too or the new widget lands behind it.
-        if (chats.state.maximized)
-          chats.toggleMaximized(chats.state.maximized)
+        if (chats.state.maximized) chats.toggleMaximized(chats.state.maximized)
         windows.open(id)
       }),
     [
@@ -1079,33 +1061,6 @@ function HomeCanvas() {
       chats.toggleMaximized,
       chats.state.maximized,
     ]
-  )
-
-  // Clicking a conversation in the nav's Comms section toggles it in the
-  // "New" in the nav asks for a clean canvas (per Oskar): the widgets
-  // collapse EVERY time it is clicked. The state a session opens with is
-  // untouched — DEFAULT_OPEN_WINDOWS is still the first-paint answer, so
-  // this is an action, not a new default.
-  //
-  // Each widget plays the normal exit and the stack empties in ONE update
-  // once the last one lands, so the remaining rows never reflow between
-  // two closes. A widget with no element on screen (the stack is hidden
-  // on a module screen, or a takeover is up) calls back synchronously,
-  // which is why the counter starts at the full length instead of being
-  // incremented as they finish.
-  useEffect(
-    () =>
-      onWindowsCollapseRequest(() => {
-        const open = windows.state.open
-        if (open.length === 0) return
-        let pending = open.length
-        const settle = () => {
-          pending -= 1
-          if (pending === 0) windows.closeAll()
-        }
-        open.forEach((id) => animateWindowClose(id, settle))
-      }),
-    [windows.state.open, windows.closeAll]
   )
 
   // LEFT-hand stack. Same channel shape as onWindowRequest, and for the
@@ -1140,9 +1095,7 @@ function HomeCanvas() {
         const sameKind = (open: LeftPaneId) =>
           leftPaneKind(open) === leftPaneKind(id)
         // Read BEFORE the update — this asks what was ALREADY there.
-        const stacksWithSomething = chats.state.open.some(
-          (w) => !sameKind(w)
-        )
+        const stacksWithSomething = chats.state.open.some((w) => !sameKind(w))
         chats.openReplacing(id, sameKind)
         // A ticket takes the whole canvas only when it lands ALONE
         // (Figma 2725:444787); with a conversation beside it there is a
@@ -1209,24 +1162,14 @@ function HomeCanvas() {
   // PAIR overflows — when it is the wider of the two. The narrower one
   // keeps pushing, so the canvas always has one side to rest against.
 
-  const { collapsed: collapsedWidgets } = useWidgetCollapse(profile)
-  const dockedWidgets = windows.state.open.filter(
-    (id) => !windows.state.floating.includes(id)
-  )
-  const rightWidth = hideWidgets
-    ? 0
-    : (dockedWidgets.some((id) => !collapsedWidgets.includes(id))
-        ? windows.state.columnWidth
-        : 0) +
-      (dockedWidgets.some((id) => collapsedWidgets.includes(id)) ? 56 : 0)
+  const rightWidth = hideWidgets ? 0 : 384
   const leftWidth = stackWidth(chats.state)
   const room = shellWidth - CANVAS_MIN_WIDTH
   const soloOverflows = (width: number) => shellWidth > 0 && width > room
   const pairOverflows = shellWidth > 0 && leftWidth + rightWidth > room
   const overlayColumns =
     rightWidth > 0 &&
-    (soloOverflows(rightWidth) ||
-      (pairOverflows && rightWidth >= leftWidth))
+    (soloOverflows(rightWidth) || (pairOverflows && rightWidth >= leftWidth))
   const overlayChats =
     leftWidth > 0 &&
     (soloOverflows(leftWidth) || (pairOverflows && leftWidth > rightWidth))
@@ -1292,6 +1235,8 @@ function HomeCanvas() {
 
   // A maximized window takes over the whole canvas (Figma 1365:12972) —
   // navbar, content, and prompt bar give way until it's restored.
+  if (view === "widgets") return <WidgetEditor key={profile} />
+
   if (windows.state.maximized) {
     return (
       <div
@@ -1301,9 +1246,7 @@ function HomeCanvas() {
       >
         <MaximizedWindow
           id={windows.state.maximized}
-          onRestore={() =>
-            windows.toggleMaximized(windows.state.maximized!)
-          }
+          onRestore={() => windows.toggleMaximized(windows.state.maximized!)}
           onClose={() => closeWindow(windows.state.maximized!)}
         />
       </div>
@@ -1328,10 +1271,7 @@ function HomeCanvas() {
   }
 
   return (
-    <div
-      data-hybrid-source
-      className="flex min-h-full w-full overflow-hidden"
-    >
+    <div data-hybrid-source className="flex min-h-full w-full overflow-hidden">
       {/* The pane the window stacks measure themselves against. The split
           conversation panel sits OUTSIDE it, so an overlaying stack
           (`absolute right-0`) pins to the panel's edge instead of covering
@@ -1394,9 +1334,7 @@ function HomeCanvas() {
                     !activeConversation.homeSetup.purpose)
                 )
               }
-              conversationEmoji={
-                agentById(activeConversation?.agentId)?.emoji
-              }
+              conversationEmoji={agentById(activeConversation?.agentId)?.emoji}
               screenTitle={screenTitle}
             />
           </div>
@@ -1445,7 +1383,7 @@ function HomeCanvas() {
                       />
                     </div>
                   )}
-                  <div className="sticky top-0 z-10 mx-auto w-[712px] max-w-full f0c-canvas-surface">
+                  <div className="f0c-canvas-surface sticky top-0 z-10 mx-auto w-[712px] max-w-full">
                     <HomeSessionBar conversation={activeConversation} />
                   </div>
                   {activeConversation.homeBriefing ||
@@ -1489,11 +1427,7 @@ function HomeCanvas() {
                 <div className="flex w-[712px] max-w-full flex-col gap-8">
                   <div className="flex items-center gap-3">
                     <PulseGreetingAvatar person={person} />
-                    <F0Heading
-                      content={greeting}
-                      variant="heading"
-                      as="h1"
-                    />
+                    <F0Heading content={greeting} variant="heading" as="h1" />
                   </div>
                   {profile === "employee" ? (
                     <EmployeeCanvas />
@@ -1538,27 +1472,7 @@ function HomeCanvas() {
         {/* Clock in is the one widget that floats instead of maximizing
           (per Oskar) — its card lives outside the column, over the
           canvas, hanging from the navbar button that opened it. */}
-        {!hideWidgets && (
-          <>
-            <FloatingWidgets
-              state={windows.state}
-              onToggleFloat={windows.toggleFloating}
-              onClose={closeWindow}
-            />
-
-            <WindowsColumn
-              state={windows.state}
-              overlay={overlayColumns}
-              onToggleFloat={windows.toggleFloating}
-              maxWidth={overlayCap}
-              onClose={closeWindow}
-              onToggleMaximized={windows.toggleMaximized}
-              onSetColumnWidth={windows.setColumnWidth}
-              onResizeBetween={windows.resizeBetween}
-              onResizeColumnsBetween={windows.resizeColumnsBetween}
-            />
-          </>
-        )}
+        {!hideWidgets && <StaticWidgets />}
       </div>
     </div>
   )

@@ -119,17 +119,13 @@ export function questionFor(setup: HomeSetup): {
     case "edit":
       return {
         text: "What would you like to change?",
-        options: ["My updates", "My widgets", "My routines", "My reports"],
+        options: ["My updates", "My routines", "My reports"],
       }
     case "priorities":
       return {
         text: "What matters most to you at work?",
         multi: true,
-        options: [
-          "My team and their requests",
-          "Hiring",
-          "My personal tasks",
-        ],
+        options: ["My team and their requests", "Hiring", "My personal tasks"],
       }
     case "briefing":
       return {
@@ -171,11 +167,7 @@ export function questionFor(setup: HomeSetup): {
     case "report-review":
       return {
         text: "How should we adjust this report? You can change its threshold or frequency.",
-        options: [
-          "Save simulated report",
-          "Change threshold to 10",
-          "Later",
-        ],
+        options: ["Save simulated report", "Change threshold to 10", "Later"],
       }
     case "complete":
       if (setup.purpose)
@@ -188,13 +180,7 @@ export function questionFor(setup: HomeSetup): {
         }
       return {
         text: "Your home is saved. What would you like to do next?",
-        options: [
-          "Back to my home",
-          "My widgets",
-          "Undo widget change",
-          "My routines",
-          "My reports",
-        ],
+        options: ["Back to my home", "My routines", "My reports"],
       }
   }
 }
@@ -217,7 +203,7 @@ export function advanceSetup(
     profile: setup.profile,
   })
   if (/^(my |edit |adjust |configure )?widgets$/.test(t)) {
-    setup.step = "widgets"
+    setup.step = "complete"
     return turn(
       "Your fixed widgets keep everyday information handy. Your updates highlight what matters right now."
     )
@@ -242,7 +228,7 @@ export function advanceSetup(
         /add|remove|pin|hide|show/.test(t) &&
         WIDGET_CHOICES.some((w) => w.pattern.test(t))
       ) {
-        setup.step = "widgets"
+        setup.step = "complete"
         return advanceSetup(setup, answer, openWidgets)
       }
       if (/update|priorit|brief/.test(t)) {
@@ -262,25 +248,24 @@ export function advanceSetup(
         ...setup,
         priority: answer,
         focus: focusFor(answer, setup.focus),
-        focuses: (["team", "recruitment", "personal"] as Focus[]).filter(
-          (f) =>
-            f === "team"
-              ? /team|request/.test(t)
-              : f === "recruitment"
-                ? /hiring|recruit|candidat/.test(t)
-                : /personal|my work/.test(t)
+        focuses: (["team", "recruitment", "personal"] as Focus[]).filter((f) =>
+          f === "team"
+            ? /team|request/.test(t)
+            : f === "recruitment"
+              ? /hiring|recruit|candidat/.test(t)
+              : /personal|my work/.test(t)
         ),
-        step: "widgets",
+        step: "complete",
       }
       return turn(
-        `Your updates now focus on ${answer.toLowerCase()}. Let’s choose what you want to keep handy.`,
+        `Your updates now focus on ${answer.toLowerCase()}. You can manage your fixed widgets separately from Edit widgets.`,
         brief()
       )
     case "briefing": {
       if (/looks good|perfect|continue|^yes$|keep it/.test(t)) {
-        setup.step = "widgets"
+        setup.step = "complete"
         return turn(
-          "I'll keep this focus for future visits. Let's choose what stays on the right."
+          "I'll keep this focus for future visits. You can manage your fixed widgets separately from Edit widgets."
         )
       }
       const focus = focusFor(answer, setup.focus)
@@ -339,9 +324,7 @@ export function advanceSetup(
       )) {
         const remove = /remove|hide|without|unpin/.test(clause)
         if (/only/.test(clause) && !remove) widgets = []
-        for (const w of WIDGET_CHOICES.filter((w) =>
-          w.pattern.test(clause)
-        ))
+        for (const w of WIDGET_CHOICES.filter((w) => w.pattern.test(clause)))
           widgets = remove
             ? widgets.filter((id) => id !== w.id)
             : [...new Set([...widgets, w.id])]
@@ -361,9 +344,7 @@ export function advanceSetup(
     case "routines": {
       if (/later|skip/.test(t)) {
         setup.step = "reports"
-        return turn(
-          "We can return to routines later. Let's look at reports."
-        )
+        return turn("We can return to routines later. Let's look at reports.")
       }
       if (!/request|summary|monthly|weekly/.test(t))
         return turn(
@@ -436,9 +417,7 @@ export function advanceSetup(
     case "reports": {
       if (/later|skip/.test(t)) {
         setup.step = "complete"
-        return turn(
-          "Your home is saved. Reports can be added later from Edit."
-        )
+        return turn("Your home is saved. Reports can be added later from Edit.")
       }
       if (!/recruit|hiring|candidat|expense|spend/.test(t))
         return turn(
@@ -447,9 +426,7 @@ export function advanceSetup(
       const metric = /expense|spend/.test(t) ? "expenses" : "recruitment"
       setup.report = {
         title:
-          metric === "expenses"
-            ? "Expense variance"
-            : "Recruitment progress",
+          metric === "expenses" ? "Expense variance" : "Recruitment progress",
         metric,
         threshold: metric === "expenses" ? 15 : 7,
         cadence: "On each visit",
@@ -482,13 +459,9 @@ export function advanceSetup(
       }
       const threshold = t.match(/\d+/)
       if (threshold || /week|visit|return/.test(t)) {
-        const value = threshold
-          ? Number(threshold[0])
-          : setup.report.threshold
+        const value = threshold ? Number(threshold[0]) : setup.report.threshold
         if (value < 1 || value > 100)
-          return turn(
-            "Choose a threshold between 1 and 100 for this example."
-          )
+          return turn("Choose a threshold between 1 and 100 for this example.")
         setup.report = {
           ...setup.report,
           threshold: value,

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
-import { expect, within } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
@@ -20,6 +20,7 @@ import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
@@ -27,7 +28,7 @@ import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/Activit
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
 
-const meta: Meta<typeof F0Dialog> = {
+const meta = {
   title: "Dialog",
   component: F0Dialog,
   parameters: {
@@ -36,7 +37,7 @@ const meta: Meta<typeof F0Dialog> = {
       story: { inline: false, height: "720px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   argTypes: {
     position: {
       description: "The position of the dialog",
@@ -57,10 +58,14 @@ const meta: Meta<typeof F0Dialog> = {
         defaultValue: { summary: "md" },
       },
     },
+    embedded: { control: "boolean" },
+    compactInset: { control: "boolean" },
+    closeDisabled: { control: "boolean" },
+    headerAction: { control: false },
     ...dataTestIdArgs,
   },
   decorators: [
-    (Story, { args: { isOpen, ...rest } }) => {
+    (Story, { args: { isOpen, ...rest }, parameters }) => {
       const [open, setOpen] = useState(isOpen)
 
       const handleClose = () => {
@@ -69,6 +74,8 @@ const meta: Meta<typeof F0Dialog> = {
       const handleOpen = () => {
         setOpen(true)
       }
+
+      if (parameters.embeddedExample) return <Story />
 
       return (
         <ApplicationFrame
@@ -84,7 +91,7 @@ const meta: Meta<typeof F0Dialog> = {
       )
     },
   ],
-}
+} satisfies Meta<typeof F0Dialog>
 
 export default meta
 type Story = StoryObj<typeof F0Dialog>
@@ -432,4 +439,69 @@ export const WithFewItems: Story = {
     },
     children: <ExamplePersonList numberOfItems={3} />,
   },
+}
+
+/** Keeps navigation interactive while editing within a bounded application panel. */
+export const Embedded: Story = {
+  parameters: { embeddedExample: true },
+  args: {
+    isOpen: true,
+    onClose: fn(),
+    title: "Edit widgets",
+    position: "fullscreen",
+    embedded: true,
+    compactInset: true,
+    closeDisabled: true,
+    headerAction: { label: "New widget", variant: "outline", onClick: fn() },
+    children: <ExampleList itemsCount={2} />,
+  },
+  render: function EmbeddedExample(args) {
+    const [container, setContainer] = useState<HTMLDivElement | null>(null)
+    const [navigationOpen, setNavigationOpen] = useState(true)
+    return (
+      <div className="flex h-screen bg-f1-background-secondary">
+        <aside className="flex flex-col gap-4 p-4">
+          <F0Button
+            label="Toggle navigation"
+            variant="outline"
+            onClick={() => setNavigationOpen(!navigationOpen)}
+          />
+          {navigationOpen && <p>Application navigation</p>}
+        </aside>
+        <div ref={setContainer} className="relative min-w-0 flex-1">
+          {container && <F0Dialog {...args} container={container} />}
+        </div>
+      </div>
+    )
+  },
+  play: async ({ canvasElement, args, step }) => {
+    const canvas = within(canvasElement)
+    await step("Keep adjacent navigation interactive", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: "Toggle navigation" })
+      )
+      await expect(
+        canvas.queryByText("Application navigation")
+      ).not.toBeInTheDocument()
+      await expect(canvas.getByRole("dialog")).toBeInTheDocument()
+    })
+    await step(
+      "Expose the header action and protect unsaved changes",
+      async () => {
+        await userEvent.click(
+          canvas.getByRole("button", { name: "New widget" })
+        )
+        await expect(args.headerAction?.onClick).toHaveBeenCalled()
+        await expect(
+          canvas.getByRole("button", { name: "Close" })
+        ).toBeDisabled()
+      }
+    )
+  },
+}
+
+export const Snapshot: Story = {
+  ...Embedded,
+  play: undefined,
+  parameters: withSnapshot({ embeddedExample: true }),
 }
