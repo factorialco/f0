@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, userEvent, within } from "storybook/test"
+import { MapProvider } from "@/lib/providers/map"
 import { F0Map } from "../F0Map"
 import type { F0MapPoint } from "../types"
 
@@ -411,4 +412,34 @@ export const SelectionFromList: Story = {
     await userEvent.click(item)
     await expect(item).toHaveAttribute("aria-current", "true")
   },
+}
+
+/**
+ * The same map on the Google engine. Needs a Maps JavaScript API key, which no
+ * story can carry: set `VITE_F0_GOOGLE_MAPS_API_KEY` before `pnpm dev`, or
+ * paste one into the control. Without it the story explains itself rather than
+ * rendering Google's error overlay, so CI and Chromatic stay green.
+ *
+ * Expect a different map, not the same one: Google's styling model has no
+ * zoom-dependent or data-driven rules and no landuse categories, so 11 of the
+ * 25 cartographic roles keep its own colours.
+ */
+export const GoogleProvider: StoryObj<{ apiKey: string }> = {
+  argTypes: { apiKey: { control: "text", name: "Maps JavaScript API key" } },
+  args: {
+    apiKey: (import.meta.env.VITE_F0_GOOGLE_MAPS_API_KEY as string) ?? "",
+  },
+  render: ({ apiKey }) =>
+    apiKey ? (
+      <MapProvider provider="google" config={{ apiKey }}>
+        <div className="h-[520px] w-full">
+          <F0Map markers={BARCELONA} showCurrentLocation />
+        </div>
+      </MapProvider>
+    ) : (
+      <div className="p-4 text-f1-foreground-secondary">
+        Set <code>VITE_F0_GOOGLE_MAPS_API_KEY</code> or paste a key into the
+        control above to render this story.
+      </div>
+    ),
 }
