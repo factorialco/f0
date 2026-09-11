@@ -1,4 +1,4 @@
-import { F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
+import { F0Box, F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
 import { Textarea as F0TextAreaInput } from "@factorialco/f0-react/dist/experimental"
 import {
   ArrowUp,
@@ -19,11 +19,7 @@ import { type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { useSearchParams } from "react-router-dom"
 
-import {
-  emptyStateFor,
-  suggestionFor,
-  type Presentation,
-} from "./agentEntryData"
+import { emptyStateFor, type Presentation } from "./agentEntryData"
 import { AgentEntryContext } from "./AskFactorial"
 import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
@@ -38,6 +34,7 @@ import {
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import "./agent-entry.css"
+import { PermissionsNote } from "./one/PermissionsNote"
 import { useProfile } from "./profileStore"
 import { HomeWorking, useHomeRefreshing } from "./setup/homeRefresh"
 
@@ -82,7 +79,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
   }, [activeConversation?.id, profile])
 
   const view = params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
-  const suggestion = suggestionFor(view, profile)
+
   const emptyState = emptyStateFor(view)
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
@@ -170,13 +167,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
             open && mode === "side" ? target.width - 28 : 780,
             target.width - (view ? 24 : 0)
           )
-      const height = asking
-        ? panelHeight
-        : compact
-          ? 40
-          : typing || open
-            ? 136
-            : 176
+      const height = asking ? panelHeight : compact ? 40 : 168
       const x = target.left - parent.left + (target.width - width) / 2
       const y = target.bottom - parent.top - height - (compact ? 4 : 8)
       floating.style.setProperty("--composer-x", `${x}px`)
@@ -225,7 +216,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
   function keys(event: KeyboardEvent<HTMLElement>) {
     if (
       event.target instanceof HTMLElement &&
-      event.target.closest("[data-home-follow-up]")
+      event.target.closest('[data-home-follow-up], [role="dialog"]')
     )
       return
     if (event.key === "Escape") {
@@ -278,7 +269,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
           >
             <div className="flex items-center justify-between gap-2 p-4">
               <F0Heading
-                content={view === "widgets" ? "New widget" : "Ask Factorial"}
+                content={view === "widgets" ? "New widget" : "One"}
                 variant="heading"
               />
               <div className="flex gap-1">
@@ -358,12 +349,16 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking ? "auto" : typing || open ? 136 : 176,
+                        height: asking ? "auto" : 168,
                         transition: "none",
                       }
                     : undefined
               }
-              className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
+              className={
+                asking
+                  ? "rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
+                  : undefined
+              }
               ref={composer}
               data-hybrid-composer
               hidden={compact}
@@ -407,74 +402,67 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   </div>
                 </div>
               )}
-              <div
-                data-hybrid-editor
-                hidden={asking}
-                aria-hidden={compact || asking}
-              >
-                <div
-                  className="flex gap-1"
-                  data-hybrid-suggestions
-                  aria-hidden={typing || open}
+              <div hidden={asking} aria-hidden={compact || asking}>
+                <F0Box
+                  position="relative"
+                  height="32"
+                  background="primary"
+                  border="default"
+                  borderColor="secondary"
+                  borderRadius="xl"
                 >
-                  <HomeSuggestion
-                    label={suggestion.label}
-                    size="md"
-                    onClick={() => {
-                      send(suggestion.prompt)
-                    }}
-                  />
-                </div>
-                <div data-hybrid-field>
-                  <F0TextAreaInput
-                    label="Message your agent"
-                    hideLabel
-                    placeholder="Let me know what I can do for you"
-                    value={draft}
-                    onChange={setDraft}
-                    rows={2}
-                    maxHeight={72}
-                  />
-                </div>
-                <div
-                  className="flex items-center justify-between"
-                  data-hybrid-actions
-                >
-                  <F0Button
-                    label="Attach a file"
-                    icon={Paperclip}
-                    hideLabel
-                    size="md"
-                    variant="outline"
-                    onClick={() =>
-                      setNotice(
-                        "Attachments are not enabled in this interaction prototype."
-                      )
-                    }
-                  />
-                  <div className="flex items-center gap-1">
+                  <div data-hybrid-field>
+                    <F0TextAreaInput
+                      label="Message One"
+                      hideLabel
+                      placeholder="How can I help you today?"
+                      value={draft}
+                      onChange={setDraft}
+                      rows={2}
+                      maxHeight={72}
+                    />
+                  </div>
+                  <div
+                    className="flex items-center justify-between"
+                    data-hybrid-actions
+                  >
                     <F0Button
-                      label="Record audio"
-                      icon={Microphone}
+                      label="Attach a file"
+                      icon={Paperclip}
                       hideLabel
                       size="md"
-                      variant="ghost"
+                      variant="outline"
                       onClick={() =>
                         setNotice(
-                          "Audio recording is not enabled in this interaction prototype."
+                          "Attachments are not enabled in this interaction prototype."
                         )
                       }
                     />
-                    <F0Button
-                      label="Send message"
-                      icon={ArrowUp}
-                      hideLabel
-                      size="md"
-                      disabled={!draft.trim()}
-                      onClick={() => send()}
-                    />
+                    <div className="flex items-center gap-1">
+                      <F0Button
+                        label="Record audio"
+                        icon={Microphone}
+                        hideLabel
+                        size="md"
+                        variant="ghost"
+                        onClick={() =>
+                          setNotice(
+                            "Audio recording is not enabled in this interaction prototype."
+                          )
+                        }
+                      />
+                      <F0Button
+                        label="Send message"
+                        icon={ArrowUp}
+                        hideLabel
+                        size="md"
+                        disabled={!draft.trim()}
+                        onClick={() => send()}
+                      />
+                    </div>
                   </div>
-                </div>
+                </F0Box>
+                <PermissionsNote />
               </div>
             </div>
           )}

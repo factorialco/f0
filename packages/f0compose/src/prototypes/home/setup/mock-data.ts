@@ -1,3 +1,5 @@
+import { Comment } from "@factorialco/f0-react/icons/app"
+
 import { needsYouTasks, type NeedsYouTask } from "../fixtures"
 
 // Additional simulated measurements for the report, not production records.
@@ -19,9 +21,32 @@ export const BIRTHDAY_SAMPLE = {
 export const PERSONAL_TASKS: NeedsYouTask[] = [
   {
     ...needsYouTasks[2],
-    id: "personal-document",
-    title: "Review your updated employment document",
-    subtitle: "One document awaiting your review · sample data",
-    ctaLabel: "Review document",
+    id: "personal-modelo-145",
+    title: "Complete Modelo 145 for 2026",
+    subtitle: "Due tomorrow",
+    ctaLabel: "Complete document",
+  },
+  {
+    ...needsYouTasks[0],
+    id: "personal-ai-survey",
+    icon: Comment,
+    title: "Complete the AI Adoption survey",
+    subtitle: "Due this week",
+    ctaLabel: "Complete survey",
+  },
+  {
+    ...needsYouTasks[0],
+    id: "personal-forms",
+    icon: Comment,
+    title: "Review your pending forms",
+    subtitle: "3 forms to complete",
+    ctaLabel: "Review forms",
   },
 ]
+
+export const HOME_FOCUS_LABELS = {
+  personal: "Personal tasks",
+  team: "Team updates",
+  recruitment: "Hiring",
+}
+export const ONE_USAGE = { plan: "Pro", used: 250, total: 1000 }

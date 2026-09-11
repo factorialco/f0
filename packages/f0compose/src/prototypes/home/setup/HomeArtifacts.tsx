@@ -1,37 +1,34 @@
 import {
-  F0AvatarCompany,
   F0Box,
   F0Button,
   F0Card,
+  F0Dialog,
   F0Heading,
-  F0Icon,
   F0TagStatus,
   F0Text,
 } from "@factorialco/f0-react"
-import { Celebration } from "@factorialco/f0-react/dist/experimental"
-import { Spinner } from "@factorialco/f0-react/icons/app"
-import { useEffect, useRef, useState } from "react"
+import { Pencil } from "@factorialco/f0-react/icons/app"
+import { useEffect, useState } from "react"
+
 import { avatarFor } from "@/fixtures/helpers"
+
 import type { HomeArtifact } from "./homeSetup"
-import { useFixedWidgets } from "./widgetPreferences"
+
 import { FactorialAgentIcon } from "../FactorialAgentIcon"
-import { PROFILE_PEOPLE, factorialLogo, needsYouTasks } from "../fixtures"
+import { PROFILE_PEOPLE, needsYouTasks } from "../fixtures"
 import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets"
 import { candidates } from "../home-widgets/recruitment"
-import { NeedsYouItem } from "../NeedsYouItem"
-import { SectionHeader } from "../SectionHeader"
 import {
-  requestWindow,
+  resumeHomeSetup,
   startConversationWithContext,
   type ChatMessage,
   type Conversation,
 } from "../one/conversationStore"
-import { COMMUNITY_POSTS } from "../windows/communityPosts"
 import { Post } from "../windows/CommunitiesWindow"
-import { BIRTHDAY_SAMPLE, REPORT_SAMPLE, PERSONAL_TASKS } from "./mock-data"
-import googleLogo from "./assets/google.svg"
-import notionLogo from "./assets/notion.svg"
+import { COMMUNITY_POSTS } from "../windows/communityPosts"
 import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh"
+import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data"
+import { useFixedWidgets } from "./widgetPreferences"
 
 // Pending questions replace the original composer in its existing slot; completed questions stay in the transcript.
 export function HomeQuestion({
@@ -52,6 +49,7 @@ function Briefing({
   artifact: Extract<HomeArtifact, { kind: "briefing" }>
   entrance: boolean
 }) {
+  const [communityOpen, setCommunityOpen] = useState(false)
   const fixedWidgets = useFixedWidgets(artifact.profile)
   const key = `f0compose:home:generated-v1:${artifact.profile}`
   const [stage, setStage] = useState(() => {
@@ -65,7 +63,6 @@ function Briefing({
       return 3
     }
   })
-  const animate = useRef(stage < 3)
   useEffect(() => {
     if (stage === 3) return
     const timers = [450, 1000, 1550].map((delay, index) =>
@@ -85,84 +82,120 @@ function Briefing({
   }, [key])
   const focuses = artifact.focuses?.length
     ? artifact.focuses
-    : [artifact.focus]
+    : ["personal", "team"]
   const tasks = [
-    ...(focuses.includes("team") ? needsYouTasks.slice(0, 1) : []),
-    ...(focuses.includes("recruitment") ||
-    (!artifact.focuses && artifact.focus === "team")
+    ...(artifact.focuses?.includes("team") ? needsYouTasks.slice(0, 1) : []),
+    ...(focuses.includes("recruitment")
       ? needsYouTasks.filter((t) => t.module === "ats")
       : []),
     ...(focuses.includes("personal") ? PERSONAL_TASKS : []),
   ]
+  const post = COMMUNITY_POSTS[0]
+  const focusedOn = focuses
+    .map((focus) =>
+      HOME_FOCUS_LABELS[focus as keyof typeof HOME_FOCUS_LABELS].toLowerCase()
+    )
+    .join(" and ")
+  const openTask = (task: (typeof tasks)[number]) =>
+    startConversationWithContext(
+      {
+        kind: "metric",
+        title: task.title,
+        stats: [{ label: "Status", value: task.subtitle }],
+      },
+      `Help me review: ${task.title}`,
+      {
+        reply: [
+          `${task.title}. ${task.subtitle}.`,
+          "This is a sample task. Nothing has been approved or sent.",
+        ],
+      }
+    )
   return (
-    <F0Box display="flex" flexDirection="column" gap="lg">
+    <F0Box display="flex" flexDirection="column" gap="xl">
+      <F0Text content={`I’ve focused your briefing on ${focusedOn}.`} />
       {stage === 0 && (
         <F0Text content="Preparing your home…" variant="description" />
       )}
-      {stage >= 1 && (
-        <div
-          className={`${animate.current ? "f0c-card-in " : ""}flex w-full flex-col gap-2`}
+      {stage >= 1 && tasks.length > 0 && (
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="md"
           data-home-generated-section="attention"
         >
-          <SectionHeader title="Needs your attention" />
-          <div className="flex w-full flex-col">
-            {tasks.map((task, index) => (
-              <NeedsYouItem
+          <F0Text
+            variant="label"
+            content={
+              focuses.includes("personal")
+                ? "Your Modelo 145 is due tomorrow. You also have a survey due this week and 3 forms to complete."
+                : `You have ${tasks.length} ${tasks.length === 1 ? "item" : "items"} to review. Here’s where you can help.`
+            }
+          />
+          <F0Box
+            background="primary"
+            borderRadius="xl"
+            overflow="hidden"
+            padding="xs"
+          >
+            {tasks.map((task) => (
+              <F0Box
                 key={task.id}
-                task={task}
-                index={index}
-                onOpen={() =>
-                  startConversationWithContext(
-                    {
-                      kind: "metric",
-                      title: task.title,
-                      stats: [{ label: "Status", value: task.subtitle }],
-                    },
-                    `Help me review: ${task.title}`,
-                    {
-                      reply: [
-                        `${task.title}. ${task.subtitle}.`,
-                        "This is a sample task. Nothing has been approved or sent.",
-                      ],
-                    }
-                  )
-                }
-              />
+                display="flex"
+                alignItems="center"
+                flexWrap="wrap"
+                gap="sm"
+                padding="sm"
+              >
+                <F0Button
+                  label={task.title}
+                  icon={task.icon}
+                  variant="ghost"
+                  onClick={() => openTask(task)}
+                />
+                <F0Text content={task.subtitle} variant="description" />
+              </F0Box>
             ))}
-          </div>
-        </div>
+          </F0Box>
+        </F0Box>
       )}
       {stage >= 2 && !fixedWidgets.includes("communities") && (
-        <div
-          className={`${animate.current ? "f0c-card-in " : ""}flex flex-col gap-3`}
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="md"
           data-home-generated-section="news"
         >
-          <F0Heading
-            content="Latest from your communities"
-            variant="heading"
+          <F0Text
+            content="From your communities, you’ve been invited to a Taco party:"
+            variant="label"
           />
-          <Post post={COMMUNITY_POSTS[1]} />
-        </div>
+          <F0Card
+            compact
+            title={post.title}
+            description={`${post.author} in ${post.community} · ${post.posted}`}
+            avatar={{
+              type: "person",
+              firstName: "Eleanor",
+              lastName: "Pena",
+              src: avatarFor(post.seed),
+            }}
+            onClick={() => setCommunityOpen(true)}
+          />
+        </F0Box>
       )}
-      {stage >= 3 && !fixedWidgets.includes("celebrations") && (
-        <div
-          className={`${animate.current ? "f0c-card-in " : ""}flex flex-col gap-3`}
-          data-home-generated-section="celebrations"
-        >
-          <F0Heading content="Worth celebrating" variant="heading" />
-          <div className="w-48 max-w-full">
-            <Celebration
-              link="#"
-              firstName={BIRTHDAY_SAMPLE.firstName}
-              lastName={BIRTHDAY_SAMPLE.lastName}
-              src={avatarFor(BIRTHDAY_SAMPLE.seed)}
-              type="birthday"
-              typeLabel="Birthday today"
-              date={BIRTHDAY_SAMPLE.date}
-              onClick={() => requestWindow("celebrations")}
-            />
-          </div>
-        </div>
+      <F0Dialog
+        isOpen={communityOpen}
+        onClose={() => setCommunityOpen(false)}
+        title="Company updates"
+        width="md"
+      >
+        <F0Box padding="lg">
+          <Post post={post} />
+        </F0Box>
+      </F0Dialog>
+      {stage >= 3 && (
+        <F0Text content="Let me know if you are missing anything, so we can adjust." />
       )}
     </F0Box>
   )
@@ -200,15 +233,11 @@ export function HomeArtifactView({
   const actual = recruitment
     ? REPORT_SAMPLE.daysWithoutProgress
     : Math.round(
-        (REPORT_SAMPLE.expenseActual / REPORT_SAMPLE.expenseBudget - 1) *
-          100
+        (REPORT_SAMPLE.expenseActual / REPORT_SAMPLE.expenseBudget - 1) * 100
       )
   const alert = actual > d.threshold
   return (
-    <F0Card
-      title={d.title}
-      description={`Report · ${d.cadence} · sample data`}
-    >
+    <F0Card title={d.title} description={`Report · ${d.cadence} · sample data`}>
       <F0Box display="flex" flexDirection="column" gap="md">
         <F0TagStatus
           text={
@@ -230,9 +259,7 @@ export function HomeArtifactView({
           content={`Flag when ${recruitment ? "a candidate has not progressed for more than" : "spending exceeds the budget by more than"} ${d.threshold}${recruitment ? " days" : "%"}.`}
         />
         <F0TagStatus
-          text={
-            alert ? "Change detected in this example" : "Within threshold"
-          }
+          text={alert ? "Change detected in this example" : "Within threshold"}
           variant={alert ? "warning" : "positive"}
         />
         <F0Text
@@ -250,20 +277,14 @@ export function HomeArtifactView({
           }
         />
         {recruitment && (
-          <RecruitmentWindow
-            candidateId={REPORT_SAMPLE.stalledCandidateId}
-          />
+          <RecruitmentWindow candidateId={REPORT_SAMPLE.stalledCandidateId} />
         )}
       </F0Box>
     </F0Card>
   )
 }
 
-export function GuidedHome({
-  conversation,
-}: {
-  conversation: Conversation
-}) {
+export function GuidedHome({ conversation }: { conversation: Conversation }) {
   const loading = useHomeRefreshing(
     conversation.homeSetup?.profile ?? conversation.homeBriefing ?? "admin"
   )
@@ -284,7 +305,7 @@ export function GuidedHome({
         profile: conversation.homeBriefing!,
       })
   return (
-    <div className="mx-auto w-[712px] max-w-full px-3 pb-6">
+    <div className="mx-auto w-[712px] max-w-full pb-6">
       {loading ? (
         <>
           <HomeLoadingSkeleton />
@@ -302,85 +323,39 @@ export function HomeSessionBar({
 }: {
   conversation: Conversation
 }) {
-  const profile =
-    conversation.homeSetup?.profile ?? conversation.homeBriefing
-  const updating = useHomeRefreshing(profile ?? "admin")
-  const [reviewing, setReviewing] = useState(true)
-  const [sources, setSources] = useState(false)
-  useEffect(() => {
-    setReviewing(true)
-    const timer = window.setTimeout(() => setReviewing(false), 1900)
-    return () => window.clearTimeout(timer)
-  }, [conversation.id])
+  const profile = conversation.homeSetup?.profile ?? conversation.homeBriefing
   if (!profile || conversation.homeSetup?.purpose) return null
+  const saved = [...conversation.messages]
+    .reverse()
+    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact
+  const focuses = conversation.homeSetup?.focuses ??
+    (saved?.kind === "briefing" ? saved.focuses : undefined) ?? [
+      "personal",
+      "team",
+    ]
   return (
-    <F0Box display="flex" flexDirection="column" gap="md" paddingY="lg">
-      <F0Box
-        display="flex"
-        alignItems="start"
-        justifyContent="between"
-        gap="md"
-      >
-        <F0Box display="flex" alignItems="center" gap="xl">
-          <span className="flex size-12 shrink-0">
-            <FactorialAgentIcon width={48} height={48} />
-          </span>
-          <F0Box display="flex" flexDirection="column" gap="xs">
-            <F0Heading
-              content={`Welcome back, ${PROFILE_PEOPLE[profile].firstName}`}
-              variant="heading"
-            />
-            <F0Box display="flex" alignItems="center" gap="sm">
-              {reviewing && (
-                <span className="animate-spin">
-                  <F0Icon icon={Spinner} size="xs" />
-                </span>
-              )}
-              <span role="status">
-                <F0Text
-                  content={
-                    updating
-                      ? "Updating your home…"
-                      : reviewing
-                        ? "Checking in"
-                        : "Up to date · Checked now"
-                  }
-                  variant="description"
-                />
-              </span>
-              <F0AvatarCompany
-                name="Factorial"
-                src={factorialLogo}
-                size="xs"
-              />
-              <F0AvatarCompany
-                name="Google Calendar"
-                src={googleLogo}
-                size="xs"
-              />
-              <F0AvatarCompany name="Notion" src={notionLogo} size="xs" />
-              <F0Button
-                label={sources ? "Hide sources" : "Sources"}
-                size="sm"
-                variant="ghost"
-                onClick={() => setSources(!sources)}
-              />
-            </F0Box>
-          </F0Box>
-        </F0Box>
-      </F0Box>
-      {sources && (
-        <F0Box display="flex" flexDirection="column" gap="sm" padding="md">
-          <F0Text content="Sources for your updates" variant="label" />
-          <F0Text content="Factorial · sample requests, people and community posts" />
-          <F0Text content="Google Calendar · sample events" />
-          <F0Text content="Notion · sample team updates" />
+    <F0Box display="flex" flexDirection="column" gap="md" paddingY="xl">
+      <FactorialAgentIcon width={40} height={40} />
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Heading
+          content={`Welcome to your new Home, ${PROFILE_PEOPLE[profile].firstName}`}
+          variant="heading"
+        />
+        <F0Box display="flex" alignItems="center" gap="sm" flexWrap="wrap">
           <F0Text
-            content="Simulated review. No external accounts are connected."
+            content={`Your focus: ${focuses.map((f) => HOME_FOCUS_LABELS[f as keyof typeof HOME_FOCUS_LABELS]).join(" · ")}`}
             variant="description"
           />
+          <F0Button
+            label="Edit focus"
+            icon={Pencil}
+            hideLabel
+            size="sm"
+            variant="ghost"
+            onClick={() => resumeHomeSetup(profile, "focus")}
+          />
         </F0Box>
-      )}
+      </F0Box>
     </F0Box>
   )
 }

@@ -1770,13 +1770,16 @@ export function homeSetupFor(profile: ProfileId): Conversation | undefined {
     (c) => c.homeSetup?.profile === profile && !c.homeSetup.purpose
   )
 }
-export function resumeHomeSetup(profile: ProfileId) {
+export function resumeHomeSetup(
+  profile: ProfileId,
+  section: "focus" | "all" = "all"
+) {
   const existing = homeSetupFor(profile)
   if (existing) {
     const setup: HomeSetup = {
       ...existing.homeSetup!,
       experienceVersion: HOME_EXPERIENCE_VERSION,
-      step: "edit",
+      step: section === "focus" ? "priorities" : "edit",
       paused: false,
     }
     patchConversation(existing.id, (c) => ({

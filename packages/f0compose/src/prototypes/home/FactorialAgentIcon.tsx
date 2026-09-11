@@ -1,49 +1,15 @@
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  type SVGProps,
-} from "react"
+import { F0OneIcon } from "@factorialco/f0-react"
+import { forwardRef, type SVGProps } from "react"
 
-import {
-  approvedAgentArtwork,
-  mountApprovedAgentMotion,
-} from "./approvedAgentMotion.js"
-
-/** The approved artwork supplied as an F0Button icon, without rebuilding its animation. */
+/** Compatibility adapter: every existing One entry now uses F0's One identity. */
 export const FactorialAgentIcon = forwardRef<
   SVGSVGElement,
   SVGProps<SVGSVGElement> & { animate?: "normal" | "animate"; once?: boolean }
 >(function FactorialAgentIcon(
-  { animate: _animate, once = false, className, ...props },
-  forwardedRef
+  { animate: _animate, once: _once, width, height: _height, ...props },
+  ref
 ) {
-  const scene = useRef<SVGSVGElement>(null)
-  useImperativeHandle(forwardedRef, () => scene.current!, [])
-  useEffect(
-    () =>
-      scene.current
-        ? mountApprovedAgentMotion(scene.current, { once })
-        : undefined,
-    [once]
-  )
-  // F0's standard icon wrapper forces thin path strokes; the approved eyes own their stroke weight.
-  const motionClassName = className
-    ?.split(" ")
-    .filter((token) => !token.includes("]:stroke-"))
-    .join(" ")
   return (
-    <svg
-      {...props}
-      className={motionClassName}
-      ref={scene}
-      viewBox="100 0 400 400"
-      overflow="hidden"
-      aria-hidden="true"
-      focusable="false"
-      data-factorial-agent-icon
-      dangerouslySetInnerHTML={{ __html: approvedAgentArtwork }}
-    />
+    <F0OneIcon {...props} ref={ref} size={Number(width) >= 40 ? "lg" : "sm"} />
   )
 })

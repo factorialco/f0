@@ -630,6 +630,12 @@ function HomePanelBody() {
             visual-only like Agents and Routines until a Reports surface
             is designed. */}
           {profile === "admin" && <NavRow icon={Graph} label="Reports" />}
+          <NavRow
+            icon={HardDrive}
+            label="Files"
+            active={activeId === null && view === "policies"}
+            onClick={() => openScreen("policies")}
+          />
         </div>
         {/* Pinned carries a different example per profile, straight from the
           frame: a manager pins their triage queue, an employee pins their
@@ -668,26 +674,6 @@ function HomePanelBody() {
             ))}
           </SidebarGroup>
         )}
-      </div>
-      <div className="mt-3 flex shrink-0 flex-col gap-0.5 border-0 border-t border-solid border-f1-border-secondary pt-3">
-        <NavRow
-          icon={HardDrive}
-          label="Files"
-          active={activeId === null && view === "policies"}
-          onClick={() => openScreen("policies")}
-        />
-        <NavRow
-          icon={ChartLine}
-          label="Activity"
-          active={activeId === null && view === "activity"}
-          onClick={() => openScreen("activity")}
-        />
-        <NavRow
-          icon={Sliders}
-          label="Preferences"
-          active={activeId === null && view === "preferences"}
-          onClick={() => openScreen("preferences")}
-        />
       </div>
     </div>
   )
@@ -1464,6 +1450,32 @@ export function HomeNav() {
                 against each other. The 60px header is unchanged: 14 + 32
                 + 14 is exactly what it was built for. */}
             <div className="flex shrink-0 items-center gap-1">
+              {section === "home" && (
+                <>
+                  <F0Button
+                    label="Activity"
+                    icon={ChartLine}
+                    hideLabel
+                    variant="ghost"
+                    size="md"
+                    onClick={() => {
+                      goHome()
+                      setSearchParams({ view: "activity" })
+                    }}
+                  />
+                  <F0Button
+                    label="Preferences"
+                    icon={Settings}
+                    hideLabel
+                    variant="ghost"
+                    size="md"
+                    onClick={() => {
+                      goHome()
+                      setSearchParams({ view: "preferences" })
+                    }}
+                  />
+                </>
+              )}
               {/* The Inbox header carries TWO controls beside the collapse
                   button now — a funnel added on Oskar's word (Figma
                   2945:794858: three 32px buttons where there were two).

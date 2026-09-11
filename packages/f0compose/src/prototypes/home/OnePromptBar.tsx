@@ -1,10 +1,6 @@
 import { F0Button, F0Icon } from "@factorialco/f0-react"
 import { F0AiChatTextArea } from "@factorialco/f0-react/dist/ai"
-import {
-  Microphone,
-  Paperclip,
-  Settings,
-} from "@factorialco/f0-react/icons/app"
+import { Microphone, Paperclip } from "@factorialco/f0-react/icons/app"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
@@ -19,8 +15,6 @@ import { PermissionsNote } from "./one/PermissionsNote"
 import {
   buildSuggestions,
   categorySuggestions,
-  CHIP_ACTIONS,
-  EMPLOYEE_CHIP_ACTIONS,
   type OneActionId,
   type OneSuggestion,
 } from "./one/suggestions"
@@ -74,7 +68,7 @@ const ONE_INPUT_NAME = "one-ai-input"
 export function OnePromptBar({
   placeholder,
   onSubmit,
-  showChips = true,
+  showChips: _showChips = true,
 }: {
   placeholder?: string
   /** Replaces "start a conversation / next turn" with the caller's flow. */
@@ -84,8 +78,6 @@ export function OnePromptBar({
   // Employee swaps the analyst chip for Find (Figma 2694:55469), and the
   // suggestion catalog itself is role-gated (see ROLE_PROMPTS).
   const profile = useProfile()
-  const chipActions =
-    profile === "employee" ? EMPLOYEE_CHIP_ACTIONS : CHIP_ACTIONS
   const { conversations, activeId } = useConversations()
   const inConversation = activeId !== null
   const activeConversation = conversations.find((c) => c.id === activeId)
@@ -293,13 +285,6 @@ export function OnePromptBar({
     return () => observer.disconnect()
   }, [])
 
-  const toggleChip = (id: OneActionId) => {
-    setActiveChip((current) => (current === id ? null : id))
-    setSelectedIndex(-1)
-    setDismissed(false)
-    textarea()?.focus()
-  }
-
   if (pendingQuestionMessage && activeConversation) {
     return (
       <ClarifyPanel
@@ -410,49 +395,7 @@ export function OnePromptBar({
           )}
       </div>
 
-      {/* Below the input, and it is EITHER/OR (per Oskar, 2026-09-02):
-          once a conversation is under way the suggestion chips have
-          nothing left to offer — you are already talking — so the row
-          becomes the permissions note (Figma 2745:468340). This also
-          retires a long-standing pending item: the chips used to show in
-          conversation too.
-
-          Order matters here: the note wins over `showChips`, because a
-          caller that hides the chips (the Agents brief) is saying "no
-          chips on my screen", not "never show the note". */}
-      {inConversation ? (
-        <PermissionsNote />
-      ) : (
-        <div
-          className={`w-full items-center justify-between py-2 ${
-            showChips ? "flex" : "hidden"
-          }`}
-        >
-          <div className="flex items-center gap-1">
-            {chipActions.map((action) => (
-              <button
-                key={action.id}
-                onClick={() => toggleChip(action.id)}
-                className={`f0c-pressable flex cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-1 text-base font-medium ${
-                  activeChip === action.id
-                    ? "bg-f1-background-secondary text-f1-foreground"
-                    : "text-f1-foreground hover:bg-f1-background-secondary"
-                }`}
-              >
-                <F0Icon icon={action.icon} size="sm" color="default" />
-                {action.label}
-              </button>
-            ))}
-          </div>
-          <F0Button
-            variant="ghost"
-            size="sm"
-            icon={Settings}
-            hideLabel
-            label="ONE settings"
-          />
-        </div>
-      )}
+      <PermissionsNote />
     </div>
   )
 }
