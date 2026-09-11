@@ -7,6 +7,7 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 import { F0Map, type F0MapHandle } from "../F0Map"
+import { f0MapStyles } from "../styles"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 
 // maplibre-gl needs WebGL (absent in jsdom). Stub the classes F0Map touches,
@@ -465,8 +466,9 @@ describe("F0Map", () => {
       const map = await engine()
 
       // Handing an engine another engine's style renders nothing and explains
-      // nothing, so the tag is enforced rather than merely carried.
-      expect(map.opts.style).toBeUndefined()
+      // nothing, so the tag is enforced rather than merely carried - and the
+      // fallback is this engine's own look, not no look at all.
+      expect(map.opts.style).toBe(f0MapStyles.light)
       expect(warn).toHaveBeenCalledWith(
         expect.stringContaining('ignoring a "google" mapStyle')
       )
