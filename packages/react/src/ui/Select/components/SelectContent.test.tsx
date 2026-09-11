@@ -16,18 +16,16 @@ import { SelectTrigger } from "./SelectTrigger"
 function DeferredSelectItem({
   value,
   label,
-  delay = 20,
 }: {
   value: string
   label: string
-  delay?: number
 }) {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const timeout = setTimeout(() => setIsVisible(true), delay)
+    const timeout = setTimeout(() => setIsVisible(true), 20)
     return () => clearTimeout(timeout)
-  }, [delay])
+  }, [])
 
   return isVisible ? <SelectItem value={value}>{label}</SelectItem> : null
 }
@@ -50,18 +48,35 @@ describe("SelectContent", () => {
   })
 
   it("moves focus from its fallback to a selected option that mounts after the grace period", async () => {
-    render(
-      <Select open value="first" onValueChange={vi.fn()}>
-        <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
-        <SelectContent>
-          <DeferredSelectItem value="first" label="First" delay={120} />
-          <SelectItem value="second">Second</SelectItem>
-        </SelectContent>
-      </Select>
+    // The selected option mounts on an explicit rerender, not a timer: the
+    // fallback focus asserted below only holds while that option is absent, and
+    // a timer racing the assertions loses that window on a loaded runner.
+    function SelectWithLateSelectedOption({
+      selectedMounted,
+    }: {
+      selectedMounted: boolean
+    }) {
+      return (
+        <Select open value="first" onValueChange={vi.fn()}>
+          <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+          <SelectContent>
+            {selectedMounted ? (
+              <SelectItem value="first">First</SelectItem>
+            ) : null}
+            <SelectItem value="second">Second</SelectItem>
+          </SelectContent>
+        </Select>
+      )
+    }
+
+    const { rerender } = render(
+      <SelectWithLateSelectedOption selectedMounted={false} />
     )
 
     const fallbackOption = screen.getByRole("option", { name: "Second" })
     await waitFor(() => expect(fallbackOption).toHaveFocus())
+
+    rerender(<SelectWithLateSelectedOption selectedMounted />)
 
     const selectedOption = await screen.findByRole("option", { name: "First" })
     await waitFor(() => expect(selectedOption).toHaveFocus())
