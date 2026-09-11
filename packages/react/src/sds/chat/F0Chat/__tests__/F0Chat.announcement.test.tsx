@@ -108,11 +108,28 @@ describe("announcement channel", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("says who can post, where the composer would be", () => {
+  it("says who can post, at the end of the transcript", () => {
     renderChat(makeRuntime())
     expect(screen.getByTestId("chat-read-only-notice")).toHaveTextContent(
       "Only Factorial can send messages"
     )
+  })
+
+  it("puts the notice INSIDE the scroll, so it scrolls away", () => {
+    // It used to be a fixed strip under the transcript, charging every screen
+    // for a sentence worth reading once. As the transcript's footer it is
+    // there when you arrive at the bottom, and gone as soon as you scroll up.
+    renderChat(makeRuntime())
+
+    const notice = screen.getByTestId("chat-read-only-notice")
+    const scroller = screen.getByTestId("chat-message-viewport")
+    expect(scroller.contains(notice)).toBe(true)
+    // Last, after the messages — not floating over them.
+    expect(
+      notice.compareDocumentPosition(
+        screen.getByText("👋 Hi Jordan! Welcome to your company's chat.")
+      ) & Node.DOCUMENT_POSITION_PRECEDING
+    ).toBeTruthy()
   })
 
   // The whole hover affordance, not just its contents: an ellipsis that opens

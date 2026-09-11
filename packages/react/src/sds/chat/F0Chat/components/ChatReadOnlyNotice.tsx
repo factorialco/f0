@@ -20,10 +20,15 @@ export const ChatReadOnlyNotice = ({
 
   return (
     <p
-      className="shrink-0 px-4 pb-4 pt-2 text-center text-sm text-f1-foreground-tertiary font-medium"
+      className="shrink-0 px-4 pb-4 pt-10 text-center text-sm text-f1-foreground-tertiary font-medium"
       data-testid="chat-read-only-notice"
     >
-      {channel.readOnlyNotice ?? i18n.chat.readOnly}
+      {channel.readOnlyNotice ??
+        (channel.type === "community"
+          ? // The generic line talks about MESSAGES, which is not what you
+            // can't do here.
+            i18n.chat.community.readOnly
+          : i18n.chat.readOnly)}
     </p>
   )
 }

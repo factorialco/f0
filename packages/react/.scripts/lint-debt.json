@@ -113,9 +113,6 @@
     "src/kits/F0DataChart/components/BarChart/useBarChartOptions.ts": {
       "sonarjs/cognitive-complexity": 1
     },
-    "src/kits/ai/F0AiChat/components/layout/ChatWindow.tsx": {
-      "sonarjs/cognitive-complexity": 1
-    },
     "src/kits/ai/F0AiChatTextArea/F0AiChatTextArea.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
@@ -150,6 +147,9 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/lib/providers/datacollection/dataCollectionUrlParams.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/ApplicationFrame/SidePanel/SidePanelWindow.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/ApplicationFrame/index.tsx": {

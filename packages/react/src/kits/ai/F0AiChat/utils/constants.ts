@@ -1,9 +1,10 @@
-import { panelWidths } from "@factorialco/f0-core"
-
 /**
- * The panel's absolute range. What it is allowed to be *right now* also
- * depends on the room the frame has — see `panelWidth.ts`.
+ * Moved to `@/patterns/ApplicationFrame/SidePanel` once the panel stopped
+ * belonging to the AI chat. Re-exported so the kit's own imports (and anything
+ * pointing at this path) keep working.
  */
-export const MIN_CHAT_WIDTH = panelWidths.min
-export const MAX_CHAT_WIDTH = panelWidths.max
-export const DEFAULT_CHAT_WIDTH = panelWidths.default
+export {
+  DEFAULT_CHAT_WIDTH,
+  MAX_CHAT_WIDTH,
+  MIN_CHAT_WIDTH,
+} from "@/patterns/ApplicationFrame/SidePanel/constants"

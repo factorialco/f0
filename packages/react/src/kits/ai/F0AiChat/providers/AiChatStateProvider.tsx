@@ -1,6 +1,5 @@
 "use client"
 
-import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import {
   createContext,
   type FC,
@@ -13,8 +12,14 @@ import {
   useRef,
   useState,
 } from "react"
-import { useMediaQuery } from "usehooks-ts"
+import { useLinkContext } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
+import {
+  SidePanelProvider,
+  useHasSidePanel,
+  useSidePanel,
+} from "@/patterns/ApplicationFrame/SidePanel/SidePanelProvider"
+import type { SidePanelContextValue } from "@/patterns/ApplicationFrame/SidePanel/types"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
@@ -26,45 +31,106 @@ import {
   F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
 } from "../types"
-import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
-import {
-  panelBoundsFor,
-  resolvePanelWidth,
-  type PanelBounds,
-} from "../utils/panelWidth"
-import { usePersistedState } from "./usePersistedState"
 
-const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
+/**
+ * What this provider actually owns: the chat's half of the contract. The
+ * panel's half comes from `SidePanelProvider` and is merged back on in
+ * `useAiChat`, so the public shape is unchanged.
+ */
+type AiChatOwnValue = Omit<
+  AiChatProviderReturnValue,
+  keyof ReturnType<typeof aliasSidePanel>
+>
 
-const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
-const CHAT_WIDTH_PERSIST_DEBOUNCE_MS = 150
-const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
-const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
-const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
-
-const { min: CHAT_WIDTH_MIN, max: CHAT_WIDTH_MAX } = panelWidths
-
-/** How long a pending panel-content restore may wait for the host before
- * falling back to the AI chat — a host that never resolves (the conversation
- * is gone, or it isn't restore-aware) must not block the panel forever. */
-const PANEL_RESTORE_TIMEOUT_MS = 5000
-
-const isPersistableVisualizationMode = (value: VisualizationMode): boolean =>
-  value === "sidepanel" || value === "fullscreen"
+const AiChatStateContext = createContext<AiChatOwnValue | null>(null)
 
 const noop = () => {}
+
+/**
+ * The views a standalone chat declares for the panel it brings with it.
+ *
+ * `available` is deliberately not tied to `enabled`: a disabled chat can still
+ * be handed hosted content (that is exactly the communications-without-One
+ * case), and the panel decides on its own whether anything is in it.
+ */
+const AI_ONLY_VIEWS = [{ id: "ai" }]
+
+/**
+ * The panel half of the chat's contract, under the names the AI kit has always
+ * used for it. The state itself lives in `SidePanelProvider` — the chat is one
+ * of the things that can occupy the panel, not its owner.
+ */
+const aliasSidePanel = (panel: SidePanelContextValue) =>
+  ({
+    open: panel.open,
+    setOpen: panel.setOpen,
+    resizable: panel.resizable,
+    chatWidth: panel.width,
+    setChatWidth: panel.setWidth,
+    resetChatWidth: panel.resetWidth,
+    effectiveChatWidth: panel.effectiveWidth,
+    chatWidthBounds: panel.widthBounds,
+    panelOverlays: panel.panelOverlays,
+    setFrameWidth: panel.setFrameWidth,
+    isResizing: panel.isResizing,
+    setIsResizing: panel.setIsResizing,
+    panelContent: panel.activeContent,
+    clearPanelContent: panel.clear,
+    restoringPanelContentId: panel.restoringViewId,
+    cancelPanelContentRestore: panel.cancelRestore,
+    panelSide: panel.side,
+    setPanelSide: panel.setSide,
+    panelContentSide: panel.contentSide,
+    setPanelContentSide: panel.setContentSide,
+    shouldPlayEntranceAnimation: panel.shouldPlayEntranceAnimation,
+    setShouldPlayEntranceAnimation: panel.setShouldPlayEntranceAnimation,
+  }) satisfies Partial<AiChatProviderReturnValue>
 
 /**
  * Provider for the f0 AI chat UI state. Pure UI — message-runtime concerns
  * (sendMessage, threads, streaming, persistence) live in a separate adapter
  * (see `MockAiChatRuntime` in stories, factorial's `FactorialChatRuntime`
  * in production).
+ *
+ * The panel the chat lives in is NOT this provider's state — see
+ * `SidePanelProvider`. `ApplicationFrame` mounts that one itself; when the chat
+ * is used standalone (stories, tests, a chat outside a frame) this supplies one
+ * so the contract stays whole either way.
  */
-export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
+export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = (
+  props
+) => {
+  const hasSidePanel = useHasSidePanel()
+  if (hasSidePanel) {
+    return <AiChatStateProviderInner {...props} />
+  }
+  return (
+    <SidePanelProvider
+      // Standalone, the chat IS the panel's occupant — it has to say so, or
+      // the panel would consider itself empty and refuse to open.
+      views={AI_ONLY_VIEWS}
+      side={props.side}
+      contentSide={props.panelContentSide}
+      resizable={props.resizable}
+      defaultLayout={
+        props.defaultVisualizationMode === "fullscreen"
+          ? "fullscreen"
+          : "sidepanel"
+      }
+    >
+      <AiChatStateProviderInner {...props} />
+    </SidePanelProvider>
+  )
+}
+
+/**
+ * `side`, `panelContentSide`, `resizable` and `defaultVisualizationMode` are
+ * deliberately absent here: they configure the PANEL, and are consumed by the
+ * `SidePanelProvider` above this component.
+ */
+const AiChatStateProviderInner: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
-  side = "right",
-  panelContentSide: initialPanelContentSide,
   agent: initialAgent,
   initialMessage: initialInitialMessage,
   chatHeader,
@@ -74,8 +140,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   welcomeScreenCards: initialWelcomeScreenCards = [],
   disclaimer,
-  resizable = false,
-  defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
   historyEnabled = false,
   footer: initialFooter,
@@ -95,83 +159,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
 
-  const [chatWidth, setChatWidth] = usePersistedState<number>({
-    key: CHAT_WIDTH_STORAGE_KEY,
-    fallback: DEFAULT_CHAT_WIDTH,
-    validate: (v): v is number =>
-      typeof v === "number" &&
-      !isNaN(v) &&
-      v >= CHAT_WIDTH_MIN &&
-      v <= CHAT_WIDTH_MAX,
-    // The only continuously-changing persisted value: a drag would otherwise
-    // mean one synchronous localStorage write per animation frame.
-    debounceMs: CHAT_WIDTH_PERSIST_DEBOUNCE_MS,
-  })
-
-  // Not persisted: this is the live state of a pointer drag, not a preference.
-  const [isResizing, setIsResizing] = useState(false)
-
-  // How much room the frame has for panel + content, published by
-  // ApplicationFrame from its measured content box. 0 means "not measured yet".
-  const [frameWidth, setFrameWidth] = useState(0)
-
-  const chatWidthBounds: PanelBounds = useMemo(
-    () => panelBoundsFor(frameWidth),
-    [frameWidth]
-  )
-
-  // `chatWidth` above is the PREFERENCE — what the user last dragged to, kept
-  // in localStorage against the absolute range. This is what the layout
-  // actually reserves. Narrowing the window must not overwrite a width chosen
-  // deliberately on a wider one, so the clamp lives here and not in the
-  // setter: widen the window again and the preference comes back untouched.
-  const effectiveChatWidth = useMemo(
-    () => resolvePanelWidth(chatWidth, frameWidth),
-    [chatWidth, frameWidth]
-  )
-
-  // Whether the panel covers the frame instead of sitting beside it.
-  //
-  // Derived once, here, because two consumers need the same answer: the frame
-  // reserves (or doesn't) against it, and the window hides its resize handle
-  // against it. They each computed their own version before, which is how you
-  // end up dragging a seam on a panel that is already full-screen.
-  //
-  // Width alone decides it for a mouse — a half-screen laptop window is a
-  // legitimate place to want two columns. Touch is judged on the viewport
-  // instead, so a tablet still gets the drawer it expects rather than two
-  // columns nobody can hit.
-  const isCoarsePointer = useMediaQuery("(pointer: coarse)", {
-    initializeWithValue: true,
-  })
-  const isCompactViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
-  const panelOverlays =
-    (isCoarsePointer && isCompactViewport) || chatWidthBounds.shouldOverlay
-
-  const [open, setOpen] = usePersistedState<boolean>({
-    key: CHAT_OPEN_STORAGE_KEY,
-    fallback: defaultVisualizationMode === "fullscreen",
-    validate: (v): v is boolean => typeof v === "boolean",
-  })
-
-  const fallbackVisualizationMode: VisualizationMode =
-    defaultVisualizationMode === "canvas"
-      ? "sidepanel"
-      : defaultVisualizationMode
-  const [visualizationMode, setVisualizationModeRaw] =
-    usePersistedState<VisualizationMode>({
-      key: CHAT_VISUALIZATION_MODE_STORAGE_KEY,
-      fallback: fallbackVisualizationMode,
-      validate: (v): v is VisualizationMode =>
-        v === "sidepanel" || v === "fullscreen",
-      shouldWrite: isPersistableVisualizationMode,
-    })
+  const panel = useSidePanel()
+  const { open, setOpen, layout, setLayout } = panel
 
   const [mode, setMode] = useState<AiChatMode>("chat")
-  const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
-    useState(() => visualizationMode !== "fullscreen")
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
@@ -180,6 +171,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     F0AiChatWelcomeCard[]
   >(initialWelcomeScreenCards)
   const i18n = useI18n()
+  // The host's current route, when it provides one. See the navigation effect
+  // below — this is the only thing here that knows the page has changed.
+  const { currentPath } = useLinkContext()
   const [placeholders, setPlaceholders] = useState<string[]>([
     i18n.t("ai.inputPlaceholder"),
   ])
@@ -187,38 +181,73 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     string | string[] | undefined
   >(initialInitialMessage)
 
-  useEffect(() => {
-    if (open) {
-      tracking?.onVisibility?.()
-    }
-  }, [open])
-
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
+
+  /**
+   * DERIVED, not stored. The panel knows two layouts (docked / covering); the
+   * canvas is a third thing the AI kit lays over them. Deriving it is what
+   * makes `closeCanvas` free: the panel's own layout was never overwritten, so
+   * dropping the canvas content lands back on exactly what was underneath.
+   */
+  const visualizationMode: VisualizationMode = canvasContent ? "canvas" : layout
+
+  // Read through refs so the setter keeps a stable identity — it is in the
+  // dependency array of the navigation effect below and of host callbacks.
+  const canvasContentRef = useRef(canvasContent)
+  canvasContentRef.current = canvasContent
+  const layoutRef = useRef(layout)
+  layoutRef.current = layout
 
   const setVisualizationMode = useCallback<
     React.Dispatch<React.SetStateAction<VisualizationMode>>
   >(
     (next) => {
-      setVisualizationModeRaw((prev) => {
-        const resolved = typeof next === "function" ? next(prev) : next
-        if (prev === "canvas" && resolved !== "canvas") {
-          setCanvasContent(null)
-        }
-        // Fullscreen implies the panel is open. Open here, on the mode change
-        // itself, rather than via an effect on `open`: a reactive effect would
-        // also fire when the panel is *closing* (open → false while the mode is
-        // still "fullscreen"), reopening it as the bare AI chat. Closing must
-        // always close the panel fully, regardless of its content.
-        if (resolved === "fullscreen") {
-          setOpen(true)
-        }
-        return resolved
-      })
+      const resolved =
+        typeof next === "function"
+          ? next(canvasContentRef.current ? "canvas" : layoutRef.current)
+          : next
+      // "canvas" is not something a caller can switch INTO — it needs content,
+      // which is what `openCanvas` is for. Nothing in the codebase passes it.
+      if (resolved === "canvas") {
+        return
+      }
+      // Leaving canvas means dropping what was in it.
+      setCanvasContent(null)
+      setLayout(resolved)
     },
-    [setVisualizationModeRaw, setOpen]
+    [setLayout]
   )
 
-  const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
+  /**
+   * NAVIGATING LEAVES FULLSCREEN.
+   *
+   * A fullscreen panel covers the page it is supposed to be beside, so every
+   * link in it lands the reader somewhere they cannot see: they arrive, see the
+   * same chat they were already looking at, and have to collapse it by hand
+   * before finding out where they went. Docking on the way keeps the panel open
+   * — nothing is lost — and hands the page back.
+   *
+   * Only on a CHANGE, never on the first render: arriving on a route with the
+   * panel already fullscreen (a reload, a deep link) is not navigation, and
+   * collapsing it there would quietly undo what the reader last chose.
+   *
+   * `currentPath` is `undefined` without a `LinkProvider`, and this then never
+   * fires — a standalone chat has no routes to follow.
+   */
+  const previousPathRef = useRef(currentPath)
+  useEffect(() => {
+    const previous = previousPathRef.current
+    previousPathRef.current = currentPath
+    if (currentPath === undefined || previous === undefined) {
+      return
+    }
+    if (previous === currentPath) {
+      return
+    }
+    // `canvas` is left alone: it is a workspace the reader opened ON PURPOSE
+    // for the thing they are doing, not a way of reading the chat.
+    setVisualizationMode((mode) => (mode === "fullscreen" ? "sidepanel" : mode))
+  }, [currentPath, setVisualizationMode])
 
   const [isClarifying, setIsClarifying] = useState(false)
 
@@ -280,10 +309,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [])
 
-  const resetChatWidth = () => {
-    setChatWidth(DEFAULT_CHAT_WIDTH)
-  }
-
   useEffect(() => {
     setEnabledInternal(enabled)
   }, [enabled])
@@ -295,125 +320,66 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       // focus from whatever the user moved on to.
       pendingChatInputFocusRef.current = false
       setCanvasContent(null)
-      setVisualizationMode("sidepanel")
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches
-      setShouldPlayEntranceAnimation(!prefersReducedMotion)
+      // Resetting the layout and the entrance animation is the panel's own
+      // job — see SidePanelProvider's matching effect.
     }
   }, [open])
 
   const openCanvas = useCallback(
     (content: CanvasContent) => {
-      if (visualizationMode !== "canvas") {
-        previousVisualizationModeRef.current = visualizationMode
-      }
       setCanvasContent(content)
-      setVisualizationMode("canvas")
       if (!open) {
-        setOpen(true)
-      }
-    },
-    [visualizationMode, open]
-  )
-
-  const closeCanvas = useCallback(() => {
-    setCanvasContent(null)
-    if (visualizationMode === "canvas") {
-      setVisualizationMode(previousVisualizationModeRef.current)
-    }
-  }, [visualizationMode])
-
-  const [activeGame, setActiveGame] = useState<"pong" | null>(null)
-  const openGame = useCallback((game: "pong") => setActiveGame(game), [])
-  const closeGame = useCallback(() => setActiveGame(null), [])
-
-  // Generic side-panel content. When set, `<F0AiChat />` renders it inside the
-  // same SidebarWindow shell instead of the chat — so any view (a conversation,
-  // …) inherits resize + fullscreen. Setting content opens the panel, mirroring
-  // `openCanvas`. Only one content at a time: a single state slot.
-  const [panelContent, setPanelContentState] =
-    useState<SidePanelContent | null>(null)
-
-  // The content itself is a host-provided ReactNode and can't be serialized —
-  // persist only its id so a reload can reopen WHAT was showing, not just that
-  // the panel was open. The host re-mounts the content when it's loaded.
-  const [persistedPanelContentId, setPersistedPanelContentId] =
-    usePersistedState<string | null>({
-      key: CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
-      fallback: null,
-      validate: (v): v is string | null => v === null || typeof v === "string",
-    })
-
-  // Pending restore: the panel reopened (persisted `open`) while hosted
-  // content was up on the last session. Until the host re-mounts it (via
-  // `setPanelContent`) the panel shows a skeleton instead of flashing the AI
-  // chat. Cleared by the host (restore or cancel), by opening the AI chat
-  // (`clearPanelContent`), by closing the panel, or by the safety timeout.
-  const [restoringPanelContentId, setRestoringPanelContentId] = useState<
-    string | null
-  >(() => (open ? persistedPanelContentId : null))
-
-  const setPanelContent = useCallback(
-    (content: SidePanelContent | null) => {
-      setPanelContentState(content)
-      setRestoringPanelContentId(null)
-      if (content && !open) {
         setOpen(true)
       }
     },
     [open, setOpen]
   )
-  const clearPanelContent = useCallback(() => {
-    setPanelContentState(null)
-    setRestoringPanelContentId(null)
+
+  // No "restore the previous mode" bookkeeping: the panel's layout was never
+  // overwritten by the canvas, so dropping the content lands back on it.
+  const closeCanvas = useCallback(() => {
+    setCanvasContent(null)
   }, [])
-  const cancelPanelContentRestore = useCallback(
-    () => setRestoringPanelContentId(null),
-    []
-  )
 
-  // Keep the persisted id in sync with what's actually showing. Skipped while
-  // a restore is pending — panelContent is still null then and writing would
-  // wipe the very id being restored (breaking a reload mid-restore).
+  const [activeGame, setActiveGame] = useState<"pong" | null>(null)
+  const openGame = useCallback((game: "pong") => setActiveGame(game), [])
+  const closeGame = useCallback(() => setActiveGame(null), [])
+
+  // Hosted content lives in the panel, not here — the chat is simply what the
+  // panel falls back to when nothing else has claimed it.
+  const {
+    activeContent: panelContent,
+    restoringViewId: restoringPanelContentId,
+  } = panel
+
+  // An impression of the AI CHAT, not of the panel. Keyed on the chat actually
+  // being the thing on screen: the panel also opens for hosted content, and
+  // reporting that as a chat impression would count one per conversation
+  // opened. Edge-triggered, so a re-render with the same state reports nothing.
+  const wasAiChatVisibleRef = useRef(false)
   useEffect(() => {
-    if (restoringPanelContentId) {
-      return
+    const isAiChatVisible =
+      enabledInternal &&
+      open &&
+      panelContent === null &&
+      restoringPanelContentId === null
+    if (isAiChatVisible && !wasAiChatVisibleRef.current) {
+      tracking?.onVisibility?.()
     }
-    setPersistedPanelContentId(panelContent?.id ?? null)
-  }, [panelContent, restoringPanelContentId, setPersistedPanelContentId])
+    wasAiChatVisibleRef.current = isAiChatVisible
+  }, [enabledInternal, open, panelContent, restoringPanelContentId, tracking])
 
-  // A restore only makes sense while the panel is open; closing it drops the
-  // pending id (the AI chat comes back normally on the next open).
-  useEffect(() => {
-    if (!open) {
-      setRestoringPanelContentId(null)
-    }
-  }, [open])
-
-  // Safety net: a host that never resolves the restore must not block the
-  // panel — fall back to the AI chat.
-  useEffect(() => {
-    if (!restoringPanelContentId) {
-      return
-    }
-    const timer = setTimeout(
-      () => setRestoringPanelContentId(null),
-      PANEL_RESTORE_TIMEOUT_MS
-    )
-    return () => clearTimeout(timer)
-  }, [restoringPanelContentId])
-
-  // Which edge the whole panel docks to (AI chat, hosted content and canvas).
-  // Initialised from the `side` prop ("right" by default); hosts can also flip
-  // it at runtime via `setPanelSide` for a chat-first experience.
-  const [panelSide, setPanelSide] = useState<"left" | "right">(side)
-
-  // Edge hosted panel content docks to. Defaults to the chat's side (single
-  // panel); when it differs, ApplicationFrame renders it in its own window on
-  // that edge, still exclusive with the AI chat.
-  const [panelContentSide, setPanelContentSide] = useState<"left" | "right">(
-    initialPanelContentSide ?? side
+  // Mounting hosted content is the panel's own operation; the one thing the AI
+  // kit adds is that entering a hosted view leaves canvas mode — the two are
+  // laid out in the same space, and the canvas would paint over the content.
+  const setPanelContent = useCallback(
+    (content: SidePanelContent | null) => {
+      if (content) {
+        setCanvasContent(null)
+      }
+      panel.present(content)
+    },
+    [panel]
   )
 
   return (
@@ -421,8 +387,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       value={{
         enabled: enabledInternal,
         setEnabled: setEnabledInternal,
-        open,
-        setOpen,
         mode,
         setMode,
         visualizationMode,
@@ -432,8 +396,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         footer,
         VoiceMode,
         setFooter,
-        shouldPlayEntranceAnimation,
-        setShouldPlayEntranceAnimation,
         agent,
         setAgent,
         initialMessage,
@@ -451,16 +413,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         placeholders,
         setPlaceholders,
         disclaimer,
-        resizable,
-        chatWidth,
-        setChatWidth,
-        resetChatWidth,
-        effectiveChatWidth,
-        chatWidthBounds,
-        panelOverlays,
-        setFrameWidth,
-        isResizing,
-        setIsResizing,
         tracking,
         entityRefs,
         canvasActions,
@@ -488,15 +440,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPendingContext,
         pendingQuote,
         setPendingQuote,
-        panelContent,
         setPanelContent,
-        clearPanelContent,
-        restoringPanelContentId,
-        cancelPanelContentRestore,
-        panelSide,
-        setPanelSide,
-        panelContentSide,
-        setPanelContentSide,
       }}
     >
       {children}
@@ -515,11 +459,9 @@ type ProviderKey = keyof AiChatProviderReturnValue
 
 const FALSE_KEYS = new Set<ProviderKey>([
   "enabled",
-  "open",
   "fileDragOver",
   "lockVisualizationMode",
   "historyEnabled",
-  "resizable",
   "isClarifying",
 ])
 
@@ -528,8 +470,6 @@ const NULL_KEYS = new Set<ProviderKey>([
   "pendingContext",
   "pendingQuote",
   "activeGame",
-  "panelContent",
-  "restoringPanelContentId",
 ])
 
 const UNDEFINED_KEYS = new Set<ProviderKey>([
@@ -556,50 +496,67 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 ])
 
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
-  chatWidth: DEFAULT_CHAT_WIDTH,
-  effectiveChatWidth: DEFAULT_CHAT_WIDTH,
-  // Unmeasured, so the absolute range — same fallback the provider starts on.
-  chatWidthBounds: panelBoundsFor(0),
-  panelOverlays: false,
-  panelSide: "right",
-  panelContentSide: "right",
   visualizationMode: "sidepanel",
   mode: "chat",
-  shouldPlayEntranceAnimation: true,
   placeholders: [],
   welcomeScreenSuggestions: [],
   welcomeScreenCards: [],
   focusChatInput: () => false,
 }
 
-const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {
-  get(_, prop) {
-    if (typeof prop !== "string") {
-      return undefined
-    }
-    const key = prop as ProviderKey
-    if (key in REAL_VALUES) {
-      return REAL_VALUES[key]
-    }
-    if (NULL_KEYS.has(key)) {
-      return null
-    }
-    if (UNDEFINED_KEYS.has(key)) {
-      return undefined
-    }
-    if (FALSE_KEYS.has(key)) {
-      return false
-    }
-    return noop
-  },
-})
+/**
+ * Fallback for the CHAT half only. The panel half always resolves — either to
+ * a live panel or to `useSidePanel`'s own inert value — so a chat with no
+ * provider still reports the real panel state around it.
+ */
+const noAiProviderValue = (prop: string) => {
+  const key = prop as ProviderKey
+  if (key in REAL_VALUES) {
+    return REAL_VALUES[key]
+  }
+  if (NULL_KEYS.has(key)) {
+    return null
+  }
+  if (UNDEFINED_KEYS.has(key)) {
+    return undefined
+  }
+  if (FALSE_KEYS.has(key)) {
+    return false
+  }
+  return noop
+}
 
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export function useAiChat(): AiChatProviderReturnValue {
-  return useContext(AiChatStateContext) ?? NO_PROVIDER_CONTEXT
+  const ai = useContext(AiChatStateContext)
+  const panel = useSidePanel()
+
+  return useMemo(() => {
+    const sidePanel = aliasSidePanel(panel)
+    if (ai) {
+      return { ...ai, ...sidePanel } as AiChatProviderReturnValue
+    }
+    // No chat provider. Kept as a Proxy rather than a filled-in object so the
+    // inert shape stays exhaustive without enumerating every key — the same
+    // trade-off this fallback has always made.
+    return new Proxy({} as AiChatProviderReturnValue, {
+      get(_, prop) {
+        if (typeof prop !== "string") {
+          return undefined
+        }
+        if (prop in sidePanel) {
+          return sidePanel[prop as keyof typeof sidePanel]
+        }
+        return noAiProviderValue(prop)
+      },
+    })
+  }, [ai, panel])
 }

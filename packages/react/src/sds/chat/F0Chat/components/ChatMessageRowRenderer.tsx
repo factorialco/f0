@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils"
 import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { rowEntryTransition } from "../utils/chat-motion"
-import { type ChatRow } from "../utils/grouping"
+import { rowItem, type ChatRow } from "../utils/grouping"
 import { ChatMessageItem } from "./ChatMessageItem"
+import { ChatPostRow } from "./ChatPostRow"
 import { ChatSystemMessage } from "./ChatSystemMessage"
 import { ChatTypingBubble, type TypingEntryState } from "./ChatTypingBubble"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
@@ -37,6 +38,12 @@ const topSpacing = (row: ChatRow): string => {
   }
   // The status footer hugs its message (MessageStatus brings its own pt-1).
   if (row.type === "footer") {
+    return "pt-0"
+  }
+  // NO GAP between posts. A feed is one column of them, divided by a hairline
+  // and nothing else (see `ChatPostRow`) — the gap that separates message
+  // stacks would turn each post back into a floating card.
+  if (row.type === "post") {
     return "pt-0"
   }
   return "pt-3"
@@ -89,9 +96,12 @@ const ChatMessageRowRendererComponent = ({
     if (!enterAnimation) {
       return null
     }
-    if (row.type === "message" || row.type === "system") {
-      const order = freshIds.get(row.message.id)
-      if (order === undefined || animatedIds.has(row.message.id)) {
+    // `rowItem` rather than a type check: a post is an appended item too, so it
+    // gates on the same fresh-arrival rule as a message or a system row.
+    const item = rowItem(row)
+    if (item) {
+      const order = freshIds.get(item.id)
+      if (order === undefined || animatedIds.has(item.id)) {
         return null
       }
       return { order }
@@ -111,12 +121,32 @@ const ChatMessageRowRendererComponent = ({
   // Mark as "seen" after commit (not during render) so render stays pure and a
   // Strict-Mode double render can't wrongly flag a fresh arrival as already shown.
   useEffect(() => {
-    if (row.type === "message" || row.type === "system") {
-      animatedIds.add(row.message.id)
+    const item = rowItem(row)
+    if (item) {
+      animatedIds.add(item.id)
     } else if (row.type === "separator") {
       animatedIds.add(row.key)
     }
   }, [row, animatedIds])
+
+  if (row.type === "post") {
+    // FULL WIDTH, no gutter and no bubble: the card IS the row. The messages'
+    // `flex flex-col gap-1` exists to stack a bubble over its meta line, and a
+    // post has neither.
+    const card = <ChatPostRow post={row.post} last={row.isLast} />
+    return animate ? (
+      <motion.div
+        className={spacing}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={rowEntryTransition(entry?.order ?? 0)}
+      >
+        {card}
+      </motion.div>
+    ) : (
+      <div className={spacing}>{card}</div>
+    )
+  }
 
   if (row.type === "separator" || row.type === "system") {
     return (

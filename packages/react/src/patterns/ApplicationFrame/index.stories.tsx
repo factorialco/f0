@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
 import { F0Button } from "@/components/F0Button"
@@ -85,8 +86,10 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { MockCommunitySurface } from "@/sds/chat/F0Chat/mocks/MockCommunitySurface"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { ApplicationFrame } from "."
 
@@ -797,6 +800,40 @@ const communicationsPageHeader = (
   />
 )
 
+/** The home page every communications story falls back to. */
+const HomePage = (): ReactNode => (
+  <DaytimePage
+    period="morning"
+    header={{
+      employeeFirstName: "Jordan",
+      employeeLastName: "Avery",
+      title: "Good morning, Jordan!",
+      employeeAvatar: "/avatars/person05.jpg",
+    }}
+  >
+    <MotionQaControls />
+    <HomeLayout {...HomeLayoutStories.Default.args} />
+  </DaytimePage>
+)
+
+/**
+ * The main content of EVERY story with a conversations sidebar: the open post
+ * or composer when there is one, the ordinary page when there isn't. Clicking
+ * a post in the feed REPLACES the page, exactly as navigating to it would —
+ * the chat stays on its edge throughout.
+ *
+ * It wraps every one of them because a community is reachable from the sidebar
+ * of every one of them. A story that renders its page bare instead gets a feed
+ * whose cards swallow each press in silence: the store records the open post
+ * and nothing is mounted to show it.
+ */
+const CommunityMain = ({
+  children,
+}: {
+  /** The page when no post is open. Defaults to the home page. */
+  children?: ReactNode
+}): ReactNode => <MockCommunitySurface fallback={children ?? <HomePage />} />
+
 export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider pace={5}>
@@ -823,18 +860,7 @@ export const Default: Story = {
           {/* Real-world main content: the home "daytime" page. The One switch
               stays visible — it's how the AI chat opens (the sidebar only has
               Home + Chat tabs here). */}
-          <DaytimePage
-            period="morning"
-            header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
-            }}
-          >
-            <MotionQaControls />
-            <HomeLayout {...HomeLayoutStories.Default.args} />
-          </DaytimePage>
+          <CommunityMain />
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
@@ -879,18 +905,7 @@ export const EverythingChannel: Story = {
             />
           }
         >
-          <DaytimePage
-            period="morning"
-            header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
-            }}
-          >
-            <MotionQaControls />
-            <HomeLayout {...HomeLayoutStories.Default.args} />
-          </DaytimePage>
+          <CommunityMain />
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
@@ -934,18 +949,135 @@ export const AnnouncementChannel: Story = {
             />
           }
         >
-          <DaytimePage
-            period="morning"
-            header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
-            }}
-          >
-            <MotionQaControls />
-            <HomeLayout {...HomeLayoutStories.Default.args} />
-          </DaytimePage>
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * A COMMUNITY — a channel whose contents are posts, not messages.
+ *
+ * What it demonstrates, top to bottom:
+ * - the "Communities" group LAST in the sidebar, under Direct messages and
+ *   Groups: a community is not a conversation of yours, it is a place you go to
+ *   read;
+ * - rows with no presence dot, no pin on hover and no "Writing…" — none of
+ *   which mean anything for a place rather than a person;
+ * - a badge that reads "3 new posts", not "3 unread";
+ * - full-width post cards inside: title, formatted body, cover, counters and
+ *   reactions, with no bubble and no avatar gutter;
+ * - the "New posts" divider, frozen for the whole visit;
+ * - the read-only notice naming who *can* post, where the composer would be.
+ *
+ * What to exercise: collapse the group (its total appears in the header),
+ * scroll slowly and watch the badge come down POST BY POST rather than all at
+ * once at the bottom, and leave and re-enter to confirm the divider doesn't
+ * move.
+ */
+export const CommunityChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="com-company-news"
+              tabsPersistKey="communications-communities"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The same panel for someone who may publish: the message composer is replaced
+ * by a bar that opens a post composer (title + rich text + an explicit
+ * Publish). Enter never publishes, and dismissing a written draft asks first.
+ *
+ * What to exercise: publish a post and watch it land at the foot of the feed
+ * already read — your own post never adds to your own badge.
+ */
+export const CommunityPosting: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="com-barcelona-office"
+              tabsPersistKey="communications-posting"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * THE AGGREGATED FEED — "All posts", every community you belong to in one
+ * channel. The first row of the Communities group, and the one a reader who
+ * follows six communities actually opens.
+ *
+ * What only this story demonstrates:
+ * - every card names WHERE it came from — "Marcus in Company news", "Nadia in
+ *   People Ops" — as a link to that community. It is the one place F0 is told
+ *   the community name instead of deriving it from the channel title, because
+ *   here the channel title cannot answer the question;
+ * - a pinned shelf that spans communities, which is how you find the post you
+ *   half-remember without remembering where it was published;
+ * - a composer that publishes into a community you pick, rather than the one
+ *   you happen to be reading;
+ * - no unread badge and no "New posts" divider. Deliberate: there is no
+ *   per-post read state to derive them from, so a count here would be a number
+ *   nobody could explain — and a feed is exactly where a reader expects one.
+ *
+ * What to exercise: click a community name and land in that community's own
+ * channel (the origin label is the shortest path from "this is interesting" to
+ * "show me more of it"); open a post and confirm the card stays selected while
+ * its page is open beside the feed; then compare against `CommunityChannel` —
+ * a single community must NOT repeat its name on every card, because its
+ * header already said it an inch above.
+ */
+export const GeneralFeed: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="feed"
+              tabsPersistKey="communications-feed"
+            />
+          }
+        >
+          <CommunityMain />
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
@@ -964,6 +1096,8 @@ const MockChatPanel = ({
   convId: string
   receiptPreview?: "partial"
 }) => {
+  // The community post surfaces are wired inside `useConversationRuntime`
+  // itself, against the shared mock store — nothing to pass in here.
   const runtime = useConversationRuntime(convId)
   const previewMessageId = useRef<string | null>(null)
   if (receiptPreview === "partial" && previewMessageId.current == null) {
@@ -1374,6 +1508,14 @@ const ConversationsSidebarInner = ({
     [receiptPreview, setPanelContent]
   )
 
+  // The aggregated feed's cards link to the community each post came from, and
+  // following one means switching CHANNEL — which only this component can do,
+  // since `setPanelContent` lives here. The store just forwards the request.
+  const { setConversationOpener } = useMockChatApp()
+  useEffect(() => {
+    setConversationOpener(onSelect)
+  }, [setConversationOpener, onSelect])
+
   // Demo convenience: open a conversation straight away (e.g. the mentions story
   // lands inside the group so the chat + composer are visible without a click).
   const autoOpened = useRef(false)
@@ -1593,9 +1735,14 @@ export const Snapshot: Story = {
             />
           }
         >
-          <Page {...PageStories.Default.args} header={communicationsPageHeader}>
-            <ReceiptStatusComparison />
-          </Page>
+          <CommunityMain>
+            <Page
+              {...PageStories.Default.args}
+              header={communicationsPageHeader}
+            >
+              <ReceiptStatusComparison />
+            </Page>
+          </CommunityMain>
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
@@ -1639,4 +1786,55 @@ export const Snapshot: Story = {
     })
   },
   parameters: withSnapshot({}),
+}
+
+/**
+ * Communications with no assistant — the case the panel could not serve.
+ *
+ * `ai` is absent entirely. The panel is declared on its own through
+ * `sidePanel.views`, so clicking a conversation opens it, resizes it and takes
+ * it fullscreen exactly as it does beside an AI chat. There is no One switch,
+ * because there is no One.
+ */
+export const SidePanelWithoutAi: Story = {
+  render: () => (
+    <MockChatAppProvider>
+      <ApplicationFrame
+        sidePanel={{
+          views: [{ id: "communications", side: "left" }],
+          resizable: true,
+        }}
+        sidebar={
+          <ConversationsSidebar
+            withOneTab={false}
+            tabsPersistKey="communications-without-ai"
+          />
+        }
+      >
+        <CommunityMain />
+      </ApplicationFrame>
+    </MockChatAppProvider>
+  ),
+}
+
+/**
+ * Nothing can occupy the panel, so there is no panel.
+ *
+ * Not an empty column — no container, no reserved width, no chrome. This is
+ * what a customer with neither an assistant nor communications sees.
+ */
+export const EmptySidePanel: Story = {
+  render: () => (
+    <ApplicationFrame
+      sidePanel={{ views: [{ id: "communications", available: false }] }}
+      sidebar={
+        <ConversationsSidebar
+          withOneTab={false}
+          tabsPersistKey="empty-side-panel"
+        />
+      }
+    >
+      <CommunityMain />
+    </ApplicationFrame>
+  ),
 }

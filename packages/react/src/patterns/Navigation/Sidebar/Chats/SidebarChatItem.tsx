@@ -120,14 +120,33 @@ export const SidebarChatItem = ({
               // shrunk inside the bordered avatar box.
               <span
                 aria-hidden={showGroupFallback || undefined}
-                className="flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary"
+                className={cn(
+                  "flex size-5 items-center justify-center text-lg font-medium",
+                  // The muted colour belongs to the ＃ ALONE — it is type, and
+                  // it sits at the same weight as the name beside it. An emoji
+                  // in here keeps its own (see `EmojiImage`).
+                  showGroupFallback && "text-f1-foreground-secondary"
+                )}
                 data-testid={
                   showGroupFallback
                     ? "sidebar-group-avatar-fallback"
                     : undefined
                 }
               >
-                <EmojiImage emoji={identityEmoji} size="sm" />
+                {showGroupFallback ? (
+                  // ＃ IS NOT AN EMOJI — it is the typographic stand-in for a
+                  // community, which has no emoji to give (`PostsGroup` has no
+                  // field for one). So it must not go through the emoji font:
+                  // that stack ends in `sans-serif`, and U+FF03 has no glyph in
+                  // any of the emoji fonts before it, so the ＃ would fall
+                  // through to the browser's generic sans while the name beside
+                  // it stays Inter.
+                  identityEmoji
+                ) : (
+                  // NATIVE, not a twemoji image: at 20px the sprite reads soft
+                  // next to Inter, and it costs a network image per row.
+                  <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+                )}
               </span>
             ) : (
               <F0Avatar size="xs" avatar={chat.avatar} />
@@ -186,6 +205,7 @@ export const SidebarChatItem = ({
               <UnreadBadge
                 count={chat.unreadCount}
                 hasMention={!!chat.mentionCount}
+                kind={chat.kind}
               />
             ) : null}
           </div>

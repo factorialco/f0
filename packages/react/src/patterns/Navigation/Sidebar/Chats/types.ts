@@ -1,7 +1,19 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { IconType } from "@/components/F0Icon"
+import type { SidebarSectionAction } from "../CollapsibleSection"
 
 export type SidebarChatPresence = "online" | "offline"
+
+/**
+ * What a row stands for. `community` is a channel whose contents are POSTS
+ * rather than messages: its badge counts posts and says so, and the row never
+ * carries presence, typing or a mention prefix — none of which mean anything
+ * for a place rather than a person.
+ *
+ * Purely semantic. The layout is identical, so a host can set it without
+ * redesigning anything.
+ */
+export type SidebarChatKind = "conversation" | "community"
 
 /**
  * Status shown as a small icon to the right of a conversation name. The
@@ -26,6 +38,11 @@ export type SidebarChatAction = {
 export type SidebarChat = {
   id: string
   label: string
+  /**
+   * What the row stands for — see {@link SidebarChatKind}.
+   * @default "conversation"
+   */
+  kind?: SidebarChatKind
   /**
    * Person / team / company avatar (F0Avatar variant). Optional: omit it for
    * avatar-less rows (e.g. an AI chat history that shows titles only).
@@ -77,6 +94,14 @@ export type SidebarChatGroup = {
   title: string
   /** Initial open state of the collapsible group. @default true */
   isOpen?: boolean
+  /**
+   * One action on the group's own header, revealed on hover like a row's pin
+   * — "new channel" beside Channels, "new community" beside Communities.
+   *
+   * Distinct from the panel's top-of-list `actions`: those belong to the whole
+   * tab, this one belongs to the group it sits on, and says so by being there.
+   */
+  action?: SidebarSectionAction
   chats: SidebarChat[]
 }
 

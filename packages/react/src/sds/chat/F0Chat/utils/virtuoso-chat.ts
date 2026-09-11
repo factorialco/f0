@@ -6,6 +6,7 @@
 
 import { documentPreviewKind, isVideoFileAttachment } from "./attachments"
 import { type ChatRow } from "./grouping"
+import { stripHtml } from "./posts"
 
 /**
  * Base for `firstItemIndex`. Virtuoso retains the viewport position on a
@@ -376,6 +377,36 @@ const ESTIMATE_DOCUMENT_CARD = 96
 const ESTIMATE_CARD = 120
 const ESTIMATE_FILE_CHIP = 56
 
+/**
+ * Post rows. A post is the one row whose height is genuinely PREDICTABLE: its
+ * media sits in a reserved `aspect-video` box, and the transcript column is
+ * `max-w-content` (712px), which never trips `CommunityPost`'s `@[744px]`
+ * container query — so the media is always the full column and its height is
+ * exactly `width · 9/16`.
+ *
+ * ⚠️ `ESTIMATE_POST_MEDIA` is CALIBRATED TO THAT 712px COLUMN. Widen the
+ * transcript and this drifts, taking the entry position with it.
+ */
+/** The row's own 1px divider. Posts have no gap between them — see
+ * `topSpacing` in the row renderer. */
+const ESTIMATE_POST_SPACING = 1
+/** The card's `p-4`, top and bottom. */
+const ESTIMATE_POST_PADDING = 32
+/** 32px avatar next to two lines of author/community. */
+const ESTIMATE_POST_HEADER = 44
+/** `text-xl`, one line (the card clamps the title to two). */
+const ESTIMATE_POST_TITLE = 28
+const ESTIMATE_POST_MEDIA = 400
+const ESTIMATE_POST_EVENT = 180
+const ESTIMATE_POST_COUNTERS = 24
+const ESTIMATE_POST_REACTIONS = 40
+/**
+ * A collapsed `PostDescription` is `line-clamp-5`: the body CANNOT exceed five
+ * lines however long the HTML is, so the estimate caps there instead of growing
+ * with a page-long post.
+ */
+const ESTIMATE_POST_DESCRIPTION_MAX_LINES = 5
+
 const ESTIMATE_SEPARATOR = 28 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_DIVIDER = 28 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_SYSTEM = 24 + ESTIMATE_STANDALONE_SPACING
@@ -411,6 +442,29 @@ export function chatRowHeightEstimate(row: ChatRow): number {
       return ESTIMATE_TYPING
     case "footer":
       return ESTIMATE_FOOTER
+    case "post": {
+      const { post } = row
+      let height =
+        ESTIMATE_POST_SPACING +
+        ESTIMATE_POST_PADDING +
+        ESTIMATE_POST_HEADER +
+        ESTIMATE_POST_TITLE +
+        ESTIMATE_POST_COUNTERS +
+        ESTIMATE_POST_REACTIONS
+      // The event REPLACES the cover rather than stacking under it.
+      if (post.event) {
+        height += ESTIMATE_POST_EVENT
+      } else if (post.mediaUrl) {
+        height += ESTIMATE_POST_MEDIA
+      }
+      if (post.description) {
+        height += Math.min(
+          estimateTextHeight(stripHtml(post.description)),
+          ESTIMATE_POST_DESCRIPTION_MAX_LINES * ESTIMATE_LINE_HEIGHT
+        )
+      }
+      return height
+    }
     case "message":
       break
   }

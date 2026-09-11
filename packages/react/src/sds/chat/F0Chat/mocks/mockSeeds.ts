@@ -2,6 +2,7 @@ import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { BellOff, People } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
 import {
+  isPost,
   isUserMessage,
   type F0ChatAttachment,
   type F0ChatChannelStatus,
@@ -10,6 +11,8 @@ import {
   type F0ChatLinkPreview,
   type F0ChatMessageStatus,
   type F0ChatMention,
+  type F0ChatPost,
+  type F0ChatPostCommunity,
   type F0ChatReaction,
   type F0ChatSenderColor,
   type F0ChatSystemEvent,
@@ -278,9 +281,48 @@ type SystemLine = {
   min: number
 }
 
-type Line = MessageLine | SystemLine
+/**
+ * A post in a community's feed. Deliberately NOT a `MessageLine`: a post has a
+ * title, a body and counters, and never has a reply, a delivery status or a
+ * read receipt.
+ */
+type PostLine = {
+  /**
+   * Who signed it. `"company"` ⇒ nobody: the organisation published it, which
+   * F0 draws with no author line at all. Policy and legal notices are posted
+   * that way in practice — they are not one person's opinion.
+   */
+  from: MockPerson | "company"
+  min: number
+  title: string
+  body: string
+  mediaUrl?: string
+  event?: { title: string; date: string; place?: string; mediaUrl?: string }
+  reactions?: F0ChatReaction[]
+  commentCount?: number
+  viewCount?: number
+  /** Demo: starts pinned to the top of its community. Marked on the LINE
+   * because ids are minted at build time — a seed cannot name one. */
+  pinned?: boolean
+  /** Files hanging off the post — only ever shown in the detail view. */
+  attachments?: { filename: string; url: string }[]
+  /**
+   * Demo: the post asks to be acknowledged, and whether I already have.
+   * "Read and confirm" is the whole reason a comms tool is used for policy.
+   */
+  acknowledge?: "pending" | "done"
+  /**
+   * Demo: comments and reactions are OFF for this post. Both go together —
+   * half a discussion block is worse than none — and a legal notice is the
+   * case that wants it.
+   */
+  commentsOff?: boolean
+}
+
+type Line = MessageLine | SystemLine | PostLine
 
 const isSystemLine = (line: Line): line is SystemLine => "system" in line
+const isPostLine = (line: Line): line is PostLine => "title" in line
 
 export type Seed = {
   id: string
@@ -315,6 +357,43 @@ export type Seed = {
    * "guest" → nothing beyond the built-in search.
    */
   myRole?: "admin" | "member" | "guest"
+  /**
+   * Demo (communities): the current user MAY publish here. Turns `canSend` back
+   * on over the `community` type's defaults, which are "read and react".
+   * Without it the community is read-only and shows its `readOnlyNotice` where
+   * the composer would be.
+   */
+  canPost?: boolean
+  /**
+   * Demo (communities): an AGGREGATED feed — the ids of the communities whose
+   * posts it gathers. Its own `lines` are ignored.
+   *
+   * Derived rather than written out, so the feed cannot drift from the
+   * communities it claims to aggregate: add a post to People Ops and it shows
+   * up here, which is the only behaviour worth demoing. Every post it yields
+   * carries `community`, which is what makes the card say "Ana in Barcelona"
+   * instead of leaving the reader to guess.
+   */
+  aggregates?: string[]
+  /**
+   * Demo (communities): posts written but not yet visible. `at: null` is a
+   * draft. They are NOT in `lines` — nobody can read them yet.
+   */
+  scheduledPosts?: {
+    id: string
+    title: string
+    description?: string
+    event?: { title: string; date: string; place?: string }
+    /** Its cover — already uploaded when it was written, so the shelf can
+     * show a thumbnail of a post nobody has seen yet. */
+    coverUrl?: string
+    /** ISO ⇒ scheduled for then; `null` ⇒ a DRAFT, which has no date at all
+     * and lands on the shelf's third chip rather than among the scheduled. */
+    at: string | null
+    /** ISO — when it was last written to. Only drafts show it; defaults to an
+     * hour ago. */
+    savedAt?: string
+  }[]
 }
 
 /** Group avatar data: an explicit emoji when one is given; otherwise a
@@ -377,6 +456,35 @@ const manyGroupLines = (people: MockPerson[], count: number): Line[] =>
     // Newest last (smallest `min`); ~12 min apart so it spans a few hours.
     min: Math.max(1 * MIN, (count - i) * 12 * MIN),
   }))
+
+/** Short People Ops posts. The point of this fixture is the COUNT, not the
+ * richness — no covers, no events, so a dozen unread rows stay scannable. */
+const PEOPLE_OPS_POSTS: [string, string][] = [
+  ["Health insurance renewal is open", "Same provider, one extra dental tier."],
+  [
+    "New parental leave policy",
+    "Sixteen weeks, non-transferable, for every parent.",
+  ],
+  ["Referral bonus doubles this quarter", "For engineering and design roles."],
+  ["Payroll moves to the 25th", "One-off: December is paid on the 20th."],
+  ["Desk booking opens two weeks ahead", "Instead of one. Same tool."],
+  ["Company offsite dates are locked", "12–14 March, details next month."],
+  ["Learning budget resets in January", "This year's doesn't roll over."],
+]
+
+const manyCommunityPosts = (people: MockPerson[], count: number): Line[] =>
+  Array.from({ length: count }, (_, i) => {
+    const [title, body] = PEOPLE_OPS_POSTS[i % PEOPLE_OPS_POSTS.length]
+    return {
+      from: people[i % people.length],
+      title,
+      body: `<p>${body}</p>`,
+      // Newest last (smallest `min`), ~6h apart so the feed spans a few days.
+      min: Math.max(1 * MIN, (count - i) * 6 * HOUR),
+      viewCount: 20 + i * 7,
+      commentCount: i % 4,
+    }
+  })
 
 const EVERYTHING_STRESS_PARTICIPANTS = [
   ELEANOR,
@@ -508,9 +616,37 @@ const everythingStressLines = (): Line[] => {
         kind: "image",
         url: mockImage("card", 5),
         name: "tower-portrait.webp",
-        // 1:10 — the ratio clamp is what keeps this from eating the transcript.
+        // 1:10 — past what the box can represent, so it letterboxes rather than
+        // eating the transcript or showing a slice of itself.
         width: 200,
         height: 2000,
+      },
+    ],
+  })
+  add({
+    from: ELEANOR,
+    body: "",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 2),
+        name: "panorama.webp",
+        // 5:1 — the other end of the same rule.
+        width: 2000,
+        height: 400,
+      },
+    ],
+  })
+  add({
+    from: ELEANOR,
+    body: "A small screenshot keeps its own size instead of being blown up",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 1),
+        name: "small-screenshot.webp",
+        width: 250,
+        height: 180,
       },
     ],
   })
@@ -1707,6 +1843,491 @@ export const SEEDS: Seed[] = [
       },
     ],
   },
+  // ─────────────────────────────────────────────────────────────────────────
+  // COMMUNITIES — channels whose contents are POSTS, not messages. Reading and
+  // reacting by default; publishing only where `canPost` grants it.
+  //
+  // They live at the END of SEEDS, and the sidebar puts their group last too:
+  // a community is not a conversation of yours, it is a place you go to read.
+  //
+  // NONE OF THEM CARRIES AN EMOJI, and that is production parity rather than a
+  // gap in the fixtures: `PostsGroup` has a title, a description and an
+  // identifier, and no field for one. So every community draws the ＃ fallback,
+  // and these seeds are what proves the fallback holds up as a whole COLUMN of
+  // ＃ rather than as the one odd row out. The synthetic feed below is the
+  // exception, and the reason is in its own comment.
+  // ─────────────────────────────────────────────────────────────────────────
+  // EVERYTHING, IN ONE PLACE — the aggregated feed, and the first row of the
+  // group. It reads from the four communities below rather than carrying posts
+  // of its own, so it cannot fall out of step with them.
+  //
+  // Two things only this channel demos: every card names the community it came
+  // from (`community` on the post — the reason the field exists at all), and
+  // the pinned shelf spans communities, which is how you find something you
+  // half-remember without knowing where it was posted.
+  //
+  // THE ONE WITH AN EMOJI, and the only one entitled to it: it is not a
+  // `PostsGroup` at all — no row in any table, nothing for a customer to name —
+  // so nothing constrains it to the ＃ its neighbours must draw. Which is also
+  // what makes it findable: one 📣 at the head of a column of ＃.
+  {
+    id: "feed",
+    type: "community",
+    title: "All posts",
+    avatar: { type: "emoji", emoji: "📣" },
+    aggregates: [
+      "com-company-news",
+      "com-barcelona-office",
+      "com-kudos",
+      "com-people-ops",
+    ],
+    // Publishing from here is real: the composer offers the communities you may
+    // post in, rather than assuming the one you are reading.
+    canPost: true,
+    // No unread: there is no per-post read state to derive one from, so a badge
+    // here would be a number nobody could explain. Said out loud because a feed
+    // is exactly where a reader expects one.
+    participants: [MARCUS, ELEANOR, GRACE, NADIA, HARPER],
+    myRole: "member",
+    lines: [],
+  },
+  // The common case: a company-wide feed most people can only read. Three
+  // unread posts, so the divider, the badge and the jump pill all have
+  // something to say.
+  {
+    id: "com-company-news",
+    type: "community",
+    title: "Company news",
+    avatar: groupAvatar("Company news"),
+    readOnlyNotice: "Only the Communications team can post here",
+    participants: [MARCUS, ELEANOR, GRACE, ISLA, OWEN],
+    myRole: "guest",
+    unread: 3,
+    lines: [
+      {
+        from: MARCUS,
+        min: 9 * DAY,
+        title: "Q3 results are in — and we beat the plan",
+        body: [
+          "<p>Revenue closed <strong>12% above target</strong> and churn is at its lowest since we started measuring it. The short version: the enterprise motion is working, and it is working sooner than the plan assumed.</p>",
+          "<h3>The three numbers that matter</h3>",
+          "<ul><li><strong>€4.1M ARR</strong>, up from €3.6M at the end of Q2</li><li><strong>1.8% monthly churn</strong>, down from 2.9% a year ago</li><li><strong>61 net new enterprise seats</strong>, more than the two previous quarters together</li></ul>",
+          "<p>The full deck is attached, and Owen is running an open Q&A on Thursday for anything the numbers don't answer.</p>",
+        ].join(""),
+        mediaUrl: mockImage("card", 1),
+        attachments: [
+          {
+            filename: "q3-results-full-deck.pdf",
+            url: "/f0-pdf-viewer-sample.pdf",
+          },
+          {
+            filename: "q3-metrics-by-region.xlsx",
+            url: "/f0-document-sample.xlsx",
+          },
+        ],
+        reactions: [
+          {
+            emoji: "🎉",
+            count: 24,
+            reactedByMe: true,
+            users: [ELEANOR, MARCUS, GRACE],
+          },
+          { emoji: "👏", count: 11, reactedByMe: false },
+          { emoji: "📈", count: 6, reactedByMe: false },
+        ],
+        commentCount: 8,
+        viewCount: 214,
+        // One of the two pins in a channel I cannot post in: the shelf is how
+        // you FIND things here, and nothing more.
+        pinned: true,
+      },
+      {
+        from: "company",
+        min: 7 * DAY,
+        title: "Updated information security policy — please read and confirm",
+        body: [
+          "<p>The policy has been rewritten around how people actually work: laptops off the office network, phones with company mail, and third-party AI tools.</p>",
+          "<h3>What changes for you</h3>",
+          "<ul><li>Disk encryption is now required on every device with company data</li><li>Password managers are provided — shared credentials in documents are not allowed</li><li>Customer data may not be pasted into AI tools that are not on the approved list</li></ul>",
+          "<p>Confirming below records that you have read it. The deadline is the end of the month, and IT can help with any of the above.</p>",
+        ].join(""),
+        attachments: [
+          {
+            filename: "information-security-policy-v4.pdf",
+            url: "/f0-pdf-viewer-sample.pdf",
+          },
+          {
+            filename: "approved-tools-list.csv",
+            url: "/f0-document-sample.csv",
+          },
+        ],
+        // Still pending for me: the detail view ASKS instead of confirming.
+        acknowledge: "pending",
+        commentCount: 5,
+        viewCount: 198,
+        pinned: true,
+      },
+      {
+        from: ISLA,
+        min: 5 * DAY,
+        title: "Our new brand, in about five minutes",
+        body: [
+          "<p>Same company, clearer voice. The logo is the least of it — what changes day to day is how we write.</p>",
+          "<h3>Say the thing</h3>",
+          "<p>Shorter sentences. The subject before the caveat. Nobody has ever asked us to sound more corporate.</p>",
+          "<h3>Where to get the assets</h3>",
+          '<p>Slides, docs and email signatures are in the brand kit, and the guidelines live in the <a href="https://factorialhr.com" rel="noreferrer">handbook</a>. Isla is around all week for anything that needs a second pair of eyes.</p>',
+        ].join(""),
+        mediaUrl: mockImage("card", 2),
+        reactions: [
+          { emoji: "🔥", count: 19, reactedByMe: false },
+          { emoji: "❤️", count: 8, reactedByMe: true, users: [ISLA, ELEANOR] },
+        ],
+        commentCount: 17,
+        viewCount: 176,
+      },
+      {
+        from: ELEANOR,
+        min: 3 * DAY,
+        title: "The new expenses flow ships on Monday",
+        body: [
+          "<p>Receipts are scanned on upload and matched to the card transaction automatically. Nothing to do on your side — the old form stays available for two more weeks.</p>",
+          "<ul><li>Photograph the receipt, the amount and the merchant fill themselves in</li><li>Anything over €200 still needs your manager, as before</li><li>Reimbursements keep going out with payroll</li></ul>",
+        ].join(""),
+        commentCount: 3,
+        viewCount: 96,
+      },
+      {
+        from: OWEN,
+        min: 2 * DAY,
+        title: "Q4 kick-off: everyone, one room, one hour",
+        body: "<p>Results, what we learned, and what the next quarter looks like. Remote joins on the usual link and the recording goes up the same afternoon.</p>",
+        event: {
+          title: "Q4 kick-off all-hands",
+          date: new Date(Date.now() + 6 * DAY * 60_000).toISOString(),
+          place: "Auditorium, ground floor · and streamed",
+        },
+        reactions: [{ emoji: "🙌", count: 14, reactedByMe: false }],
+        commentCount: 4,
+        viewCount: 132,
+      },
+      {
+        from: "company",
+        min: 30 * HOUR,
+        title: "Legal notice: updated terms for the employee share plan",
+        body: [
+          "<p>The vesting schedule and the exercise window are unchanged. The amendment covers what happens to unvested options in an acquisition, and it applies to every grant from January.</p>",
+          "<p>Questions go to People Ops rather than here — this notice is not the place to discuss anyone's individual grant.</p>",
+        ].join(""),
+        attachments: [
+          {
+            filename: "share-plan-amendment.docx",
+            url: "/f0-document-sample.docx",
+          },
+        ],
+        // Comments AND reactions off: the one case where a feed post is a
+        // notice board and not a conversation.
+        commentsOff: true,
+        viewCount: 87,
+      },
+      // ── the three below start unread ──
+      {
+        from: "company",
+        min: 20 * HOUR,
+        title: "Office closure: 15 August",
+        body: "<p>Both offices are closed for the local holiday. Remote work is unaffected, and the on-call rota stays as published.</p>",
+        commentCount: 0,
+        viewCount: 41,
+      },
+      {
+        from: MARCUS,
+        min: 5 * HOUR,
+        title: "Welcome to the eleven people joining this month 👋",
+        body: [
+          "<p>Engineering, Sales and People Ops all grew. Say hello in your team channel — and if you're one of them, this feed is where company-wide news lands.</p>",
+          "<p>Their first week is the same for everyone: laptop and accounts on day one, a buddy on day two, and no meetings anyone can't skip.</p>",
+        ].join(""),
+        mediaUrl: mockImage("card", 3),
+        reactions: [
+          { emoji: "👋", count: 31, reactedByMe: false },
+          { emoji: "🎊", count: 9, reactedByMe: false },
+        ],
+        commentCount: 12,
+        viewCount: 158,
+      },
+      {
+        from: ELEANOR,
+        min: 40 * MIN,
+        title: "Reminder: performance reviews close on Friday",
+        body: "<p>Self-reviews take about twenty minutes. Your manager's review opens as soon as yours is submitted, and nothing you write is visible to them before that.</p>",
+        commentCount: 1,
+        viewCount: 22,
+      },
+    ],
+  },
+  // The community you can publish in: the post composer instead of the
+  // read-only notice. Also the event fixture — a post whose event card takes
+  // the cover's place.
+  {
+    id: "com-barcelona-office",
+    type: "community",
+    title: "Barcelona office",
+    avatar: groupAvatar("Barcelona office"),
+    participants: [ELEANOR, PRIYA, THEO, NADIA],
+    canPost: true,
+    unread: 1,
+    // Four waiting to go out, from within the hour to next week, one of them an
+    // event. None are in `lines`: nobody can read them yet.
+    //
+    // All DATED. `at: null` (a draft) is a state the store supports, but the
+    // shelf has only one date to print, so a draft would show today's time —
+    // and a demo that lies about when something goes out is worse than a
+    // branch left uncovered.
+    scheduledPosts: [
+      {
+        id: "sched-padel",
+        title: "Padel tournament — sign-ups open",
+        description:
+          "<p>Pairs or solo, we'll match you. Bring shoes that aren't running shoes.</p>",
+        coverUrl: mockImage("card", 3),
+        at: new Date(Date.now() + 1 * DAY * 60_000).toISOString(),
+      },
+      {
+        id: "sched-allhands",
+        title: "Q2 all-hands",
+        description: "<p>The usual room, the usual slides, better coffee.</p>",
+        event: {
+          title: "Q2 all-hands",
+          date: new Date(Date.now() + 12 * DAY * 60_000).toISOString(),
+          place: "Auditorium, ground floor",
+        },
+        at: new Date(Date.now() + 4 * DAY * 60_000).toISOString(),
+      },
+      {
+        id: "sched-fire-drill",
+        title: "Fire drill on Thursday at 11:00",
+        description:
+          "<p>Ten minutes, both floors. Take the stairs by the kitchen and wait at the meeting point across the square. If you are on a call, say you are leaving and go.</p>",
+        at: new Date(Date.now() + 45 * MIN * 60_000).toISOString(),
+      },
+      {
+        id: "sched-terrace",
+        title: "The terrace is closed on Friday for cleaning",
+        description:
+          "<p>All day. The eighth floor is open as usual if you were counting on the view for lunch.</p>",
+        coverUrl: mockImage("card", 1),
+        at: new Date(Date.now() + 8 * DAY * 60_000).toISOString(),
+      },
+      // ── and two you never finished (`at: null`) ──
+      {
+        id: "draft-parking",
+        title: "Bike parking — the new plan",
+        description:
+          "<p>Waiting on the drawing from the building manager. Once it arrives this needs the level, the number of spaces and whether the old key still works.</p>",
+        at: null,
+        savedAt: new Date(Date.now() - 2 * DAY * 60_000).toISOString(),
+      },
+      {
+        // No title at all: the case a drafts list has to survive, and the one
+        // that has nothing to be found by.
+        id: "draft-untitled",
+        title: "",
+        description:
+          "<p>Something about the coffee supplier changing next month. Ask Nadia for the name.</p>",
+        at: null,
+        savedAt: new Date(Date.now() - 20 * MIN * 60_000).toISOString(),
+      },
+    ],
+    lines: [
+      {
+        from: NADIA,
+        min: 12 * DAY,
+        title: "Everything you need for your first week in Barcelona",
+        body: [
+          "<p>Badge, desk, coffee, and who to ask when something is missing. Bookmark this one — it is pinned for a reason.</p>",
+          "<ul><li><strong>Badge</strong>: reception, ground floor, bring an ID</li><li><strong>Desks</strong>: booked in the app, two weeks ahead</li><li><strong>Deliveries</strong>: reception signs for them and messages you</li></ul>",
+        ].join(""),
+        attachments: [
+          {
+            filename: "office-floor-plan.pdf",
+            url: "/f0-pdf-viewer-sample.pdf",
+          },
+        ],
+        commentCount: 3,
+        viewCount: 214,
+      },
+      {
+        from: ME,
+        min: 3 * DAY,
+        title: "The coffee machine is fixed",
+        body: "<p>It was the grinder. Please stop hitting it.</p>",
+        reactions: [{ emoji: "☕", count: 9, reactedByMe: true }],
+        commentCount: 4,
+        viewCount: 63,
+        // Starts pinned, so the shelf is on screen the moment the story loads.
+        pinned: true,
+      },
+      {
+        from: THEO,
+        min: 2 * DAY,
+        title: "Bike parking moves to level -2 next week",
+        body: "<p>The ramp on level -1 is being resurfaced. Same spaces, same key, one floor further down — and the lift takes bikes.</p>",
+        mediaUrl: mockImage("card", 0),
+        reactions: [{ emoji: "🚲", count: 12, reactedByMe: false }],
+        commentCount: 7,
+        viewCount: 88,
+      },
+      {
+        from: ME,
+        min: 26 * HOUR,
+        title: "Desk moves: engineering to the north wing on Friday",
+        body: "<p>Boxes arrive Thursday afternoon. Label yours with your name, not your team — half of you are changing teams next quarter anyway.</p>",
+        attachments: [
+          {
+            filename: "desk-map-after-the-move.pdf",
+            url: "/f0-pdf-viewer-sample.pdf",
+          },
+        ],
+        commentCount: 9,
+        viewCount: 74,
+      },
+      {
+        from: PRIYA,
+        min: 90 * MIN,
+        title: "Rooftop summer party — 12 July",
+        body: "<p>Food, music and a terrible karaoke machine. Bring whoever you like.</p>",
+        event: {
+          title: "Rooftop summer party",
+          date: new Date(Date.now() + 9 * DAY * 60_000).toISOString(),
+          place: "Rooftop, 8th floor",
+        },
+        reactions: [{ emoji: "🎉", count: 18, reactedByMe: false }],
+        commentCount: 6,
+        viewCount: 121,
+      },
+    ],
+  },
+  // Fully read: no badge, no divider. The reaction-heavy fixture.
+  {
+    id: "com-kudos",
+    type: "community",
+    title: "Kudos",
+    avatar: groupAvatar("Kudos"),
+    participants: [ELEANOR, MARCUS, PRIYA, THEO, GRACE, SAM],
+    canPost: true,
+    lines: [
+      {
+        from: THEO,
+        min: 2 * DAY,
+        title: "Kudos to Grace for the migration weekend",
+        body: "<p>Two days of her own time so nobody else had to lose theirs. The cutover was invisible to customers.</p>",
+        reactions: [
+          {
+            emoji: "🙌",
+            count: 42,
+            reactedByMe: true,
+            users: [ELEANOR, MARCUS, PRIYA],
+          },
+          { emoji: "❤️", count: 17, reactedByMe: false },
+          { emoji: "🚀", count: 5, reactedByMe: false },
+        ],
+        commentCount: 14,
+        viewCount: 302,
+      },
+      {
+        from: GRACE,
+        min: 26 * HOUR,
+        title: "…and kudos back to Theo, who reviewed all of it",
+        body: "<p>At midnight. Twice.</p>",
+        reactions: [{ emoji: "😂", count: 23, reactedByMe: true }],
+        commentCount: 2,
+        viewCount: 88,
+      },
+      {
+        from: ME,
+        min: 4 * HOUR,
+        title: "Support handled 300 tickets in a week without blinking",
+        body: "<p>Harper reorganised the queue on Monday and the median first reply went from four hours to forty minutes. Nobody worked a weekend for it.</p>",
+        mediaUrl: mockImage("card", 2),
+        reactions: [
+          {
+            emoji: "🙌",
+            count: 37,
+            reactedByMe: false,
+            users: [ELEANOR, MARCUS, PRIYA, THEO, GRACE, SAM],
+          },
+          { emoji: "💪", count: 12, reactedByMe: true },
+        ],
+        commentCount: 5,
+        viewCount: 141,
+      },
+    ],
+  },
+  // Volume: a two-figure badge, a big collapsed-group total, and enough rows
+  // for the sidebar's offscreen-unread buttons to have something to point at.
+  {
+    id: "com-people-ops",
+    type: "community",
+    title: "People Ops",
+    avatar: groupAvatar("People Ops"),
+    readOnlyNotice: "Only People Ops can post here",
+    participants: [NADIA, HARPER, ELEANOR],
+    myRole: "guest",
+    unread: 12,
+    lines: [
+      // Three handwritten ones at the top — the policy work a People Ops feed
+      // is actually for — and then the volume that makes the badge two-figure.
+      {
+        from: HARPER,
+        min: 40 * DAY,
+        title: "How to book time off (and what happens next)",
+        body: [
+          "<p>Request it in the app, your manager sees it the same day, and the calendar updates itself. That is the whole process.</p>",
+          "<ul><li>Anything under three days: approved by your manager alone</li><li>Three days or more: your manager, plus cover agreed with your team</li><li>Public holidays follow the office you are contracted to, not the one you are sitting in</li></ul>",
+        ].join(""),
+        attachments: [
+          { filename: "time-off-policy.pdf", url: "/f0-pdf-viewer-sample.pdf" },
+        ],
+        commentCount: 6,
+        viewCount: 428,
+        // Pinned in a channel I cannot post in: I can find it and open it, and
+        // that is all — no ⋯ offering to unpin someone else's evergreen post.
+        pinned: true,
+      },
+      {
+        from: "company",
+        min: 32 * DAY,
+        title: "Code of conduct — annual confirmation",
+        body: [
+          "<p>Nothing has changed this year. The annual confirmation exists so that everyone has read it recently rather than once, on their first day, years ago.</p>",
+          "<p>If something in it does not match what you see happening, that is exactly what the People Ops channel is for.</p>",
+        ].join(""),
+        attachments: [
+          { filename: "code-of-conduct.pdf", url: "/f0-pdf-viewer-sample.pdf" },
+        ],
+        // Already confirmed: the bar CONFIRMS instead of asking, which is the
+        // other half of the acknowledgement fixture.
+        acknowledge: "done",
+        commentCount: 2,
+        viewCount: 391,
+      },
+      {
+        from: NADIA,
+        min: 25 * DAY,
+        title: "Benefits fair — every provider in one room",
+        body: "<p>Health, pension, gym and the meal card, all with someone who can answer the awkward questions. Drop in whenever, no sign-up.</p>",
+        event: {
+          title: "Benefits fair",
+          date: new Date(Date.now() + 15 * DAY * 60_000).toISOString(),
+          place: "Cafeteria, first floor",
+        },
+        reactions: [{ emoji: "🌱", count: 21, reactedByMe: false }],
+        commentCount: 4,
+        viewCount: 267,
+      },
+      ...manyCommunityPosts([NADIA, HARPER], 14),
+    ],
+  },
 ]
 
 export const SEED_BY_ID = new Map(SEEDS.map((s) => [s.id, s]))
@@ -1751,7 +2372,76 @@ export const groupReadersFor = (
   return [...uniqueParticipants.values()]
 }
 
+/**
+ * One {@link PostLine} → one {@link F0ChatPost}.
+ *
+ * `community` is passed only by the aggregated feed: in a single community's
+ * channel the header already names it, so the card leaves it off.
+ */
+const postFrom = (
+  line: PostLine,
+  community?: F0ChatPostCommunity
+): F0ChatPost => {
+  const sentMs = Date.now() - line.min * 60_000
+  const author = line.from === "company" ? undefined : line.from
+  return {
+    type: "post",
+    id: nextId(),
+    createdAt: new Date(sentMs).toISOString(),
+    author,
+    isMine: author?.id === ME.id,
+    title: line.title,
+    description: line.body,
+    mediaUrl: line.mediaUrl,
+    event: line.event,
+    reactions: line.commentsOff ? undefined : line.reactions,
+    commentCount: line.commentsOff ? 0 : (line.commentCount ?? 0),
+    viewCount: line.viewCount,
+    allowCommentsAndReactions: line.commentsOff ? false : undefined,
+    attachments: line.attachments?.map((file, index) => ({
+      id: `${line.title}-f${index}`,
+      filename: file.filename,
+      url: file.url,
+    })),
+    requiredAction: line.acknowledge
+      ? {
+          type: "acknowledge",
+          completedAt:
+            line.acknowledge === "done"
+              ? new Date(sentMs + 3 * 3_600_000).toISOString()
+              : undefined,
+        }
+      : undefined,
+    pinnedAt: line.pinned ? new Date(sentMs + 60_000).toISOString() : undefined,
+    community,
+  }
+}
+
+/**
+ * An aggregated feed's transcript: every post of every community it gathers,
+ * oldest first, each tagged with where it came from.
+ *
+ * Only posts — a community's `lines` are all posts anyway, and a system row
+ * from one community would make no sense in a feed of several.
+ */
+const buildAggregatedPosts = (communityIds: string[]): F0ChatItem[] =>
+  communityIds
+    .flatMap((id) => {
+      const source = SEED_BY_ID.get(id)
+      if (!source) {
+        return []
+      }
+      const community = { id: source.id, name: source.title }
+      return source.lines
+        .filter(isPostLine)
+        .map((line) => postFrom(line, community))
+    })
+    .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
+
 export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
+  if (seed.aggregates) {
+    return buildAggregatedPosts(seed.aggregates)
+  }
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
     if (isSystemLine(line)) {
@@ -1761,6 +2451,9 @@ export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
         createdAt: new Date(sentMs).toISOString(),
         system: line.system,
       }
+    }
+    if (isPostLine(line)) {
+      return postFrom(line)
     }
     const isMine = line.from.id === ME.id
     return {
@@ -1791,7 +2484,7 @@ export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   })
   // Second pass: resolve reply references now that every message has an id.
   seed.lines.forEach((line, i) => {
-    if (isSystemLine(line) || line.replyToIndex == null) {
+    if (isSystemLine(line) || isPostLine(line) || line.replyToIndex == null) {
       return
     }
     const target = built[line.replyToIndex]
@@ -1832,13 +2525,16 @@ export const initialConvState = (seed: Seed): ConvState => {
   return { messages, lastReadId, typingIds: restingTypingIds(seed) }
 }
 
+/** Anything a reader CONSUMES: someone else's message, or a post. System rows
+ * never count as unread — nobody is waiting for you to read "Ana joined". */
+const isUnreadable = (item: F0ChatItem): boolean =>
+  (isUserMessage(item) || isPost(item)) && !item.isMine
+
 export const unreadCountOf = (state: ConvState): number => {
   const idx = state.lastReadId
     ? state.messages.findIndex((m) => m.id === state.lastReadId)
     : -1
-  return state.messages
-    .slice(idx + 1)
-    .filter((m) => isUserMessage(m) && !m.isMine).length
+  return state.messages.slice(idx + 1).filter(isUnreadable).length
 }
 
 /** Unread messages that mention me (directly or via `@here`) — drives the

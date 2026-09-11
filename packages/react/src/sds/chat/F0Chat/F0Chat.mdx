@@ -6,7 +6,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 # F0Chat
 
-F0Chat renders a transport-agnostic direct or group conversation. The host provides messages, membership, receipts, reactions, and mutations through `F0ChatRuntime`.
+F0Chat renders a transport-agnostic direct, group, announcement or **community** conversation. The host provides messages, membership, receipts, reactions, and mutations through `F0ChatRuntime`.
 
 ## Anatomy
 
@@ -83,6 +83,99 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
     </tbody>
   </table>
 </Unstyled>
+
+### Community channels
+
+A `community` is a **feed**: its items are `F0ChatPost`s — a title, a body with
+formatting, an optional cover or event, counters and reactions — instead of chat
+bubbles, and what sits at the bottom **publishes** rather than sends.
+
+<Canvas of={Stories.Community} />
+
+Permission defaults per channel type. An explicit `capabilities` value always
+wins, so a host with a poster passes `{ canSend: true }` and gets exactly that.
+
+<Unstyled>
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+    <thead>
+      <tr>
+        <th align="left">Channel type</th>
+        <th align="left">canSend</th>
+        <th align="left">canReply</th>
+        <th align="left">canReact</th>
+        <th align="left">canCopy / canViewInfo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>dm</code> / <code>group</code>
+        </td>
+        <td>yes</td>
+        <td>yes</td>
+        <td>yes</td>
+        <td>yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>announcement</code>
+        </td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+      </tr>
+      <tr>
+        <td>
+          <code>community</code>
+        </td>
+        <td>no</td>
+        <td>
+          no <em>(follows canSend)</em>
+        </td>
+        <td>
+          <strong>yes</strong>
+        </td>
+        <td>yes</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+A community inverts only the **writing** verb, unlike an announcement, which
+inverts them all: reacting is what most people came for.
+
+Four runtime actions carry the rest. `createPost` publishes and is **awaited**;
+`openPost` navigates to a post's own page or dialog; `postActions` builds each
+post's overflow menu; and `composePost` is the escape hatch for a host that
+already owns a post-creation flow — provide it and F0 does not mount its dialog.
+
+Navigation is one-way, so the feed cannot know where `openPost` landed: tell it
+with **`activePostId`**, and that post's card is drawn selected while its page
+is open beside the feed. It is the host's answer because only the host knows
+whether the reader is still there — they may have followed a link out, or
+arrived on that post without ever touching this feed.
+
+#### Aggregated feeds
+
+A community channel usually shows one community, and its header names it an inch
+above every card — so the cards say nothing about where the post came from.
+
+A channel that gathers **several** communities is the exception, and the only one:
+there the reader's real question is "which of my communities is this?", and the
+channel title cannot answer it. Give each post a **`community`** (`{ id, name }`)
+and the card reads "Ana in Barcelona", linked through **`openCommunity`**. Omit
+the handler and the name is still drawn, just not as a link — where a post came
+from is information first.
+
+This is the single field the host tells F0 that F0 would otherwise derive from
+`channel.title`. Sending it in a single community's channel prints the same word
+twice on every card, so don't.
+
+Seen whole in **ApplicationFrame → GeneralFeed**, which is where an aggregated
+feed makes sense: in the panel, beside the page, with the sidebar's Communities
+group behind it. Note what it does NOT have — no unread badge and no "New posts"
+divider, because there is no per-post read state to derive either from.
 
 ### Participant, receipt, reaction, message, and upload contracts
 
@@ -345,8 +438,96 @@ memoization is required of the host.
   }}
 />
 
+**Communities**
+
+A community is a place most people read and a few write in, and both halves of
+that need saying in the UI.
+
+<DoDonts
+  do={{
+    description:
+      "Count unread POSTS, and clear them as each one is actually read.",
+    guidelines: [
+      "The sidebar badge, the collapsed group total and the jump pill all say “new posts”",
+      "The read pointer advances post by post, so skimming half the feed clears half the badge",
+    ],
+  }}
+  dont={{
+    description:
+      "Reuse the message rule and clear the whole community the moment the reader reaches the bottom.",
+    guidelines: [
+      "A post is a screenful — arriving at the end is not reading the twelve on the way",
+      "It also never clears at all for a reader on a keyboard or a touch screen",
+    ],
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Hide the composer where the reader cannot post, and name who can in `channel.readOnlyNotice`.",
+    guidelines: [
+      "“Only the Communications team can post here” is something the reader can act on",
+    ],
+  }}
+  dont={{
+    description:
+      "Show everyone a disabled post composer, or a notice that only says no.",
+    guidelines: [
+      "It promises an affordance most readers will never have",
+      "“You don’t have permission” tells them nothing about who does",
+    ],
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Publish from a composer with its own title and body, behind an explicit Publish action.",
+  }}
+  dont={{
+    description:
+      "Publish from the one-line message composer with the Enter key. A post reaches the whole community; a mistyped Enter should not.",
+  }}
+/>
+
 ### Behavior
 
+- WHEN a channel is `type: "community"` → THEN it is a FEED: its items are posts
+  with a title, a formatted body and their own counters, not chat bubbles. A post
+  takes the full width — no avatar gutter, no bubble, no delivery footer, because
+  a post is published rather than delivered.
+- WHEN the host grants `{ canSend: true }` on a community → THEN the message
+  composer is replaced by a POST composer: a title and a body, published with an
+  explicit action. Enter never publishes.
+- WHEN the composer is dismissed with text in it → THEN it asks before
+  discarding, and a failed publish keeps the dialog open with the draft intact.
+  Losing a page of writing is a different order of loss from losing a line.
+- WHEN the current user cannot post in a community → THEN `channel.readOnlyNotice`
+  takes the composer's place, exactly as on an announcement. Never render a
+  disabled post composer.
+- WHEN a community has unread posts → THEN `unreadCount` counts POSTS, and every
+  surface says so: the sidebar badge, the collapsed group total and the
+  jump-to-bottom pill all read "N new posts".
+- WHEN `firstUnreadId` is known → THEN the transcript places a "New posts"
+  divider above it, frozen for the whole visit. Reading past it does not move it:
+  a post you are still on must not slide above the line while you read it.
+- WHEN a post has been at least half past the fold for a moment → THEN F0 calls
+  `markRead(postId)`, so a reader who skims half the feed clears half the badge.
+- WHEN the transcript is not ready or the tab is hidden → THEN nothing is marked
+  read. Opening a panel in the background is not reading.
+- WHEN `openPost` is absent → THEN the card is not clickable, and it drops its
+  pointer cursor, hover tint and focus ring accordingly. A cursor over something
+  that does nothing reads as a bug.
+- WHEN a post is rendered in the feed → THEN its body is clamped and has no "See
+  more". The whole body lives behind `openPost`; an expandable one would grow a
+  row the virtualizer has already measured, mid-scroll.
+- WHEN a community row is rendered in the sidebar → THEN it shows no presence
+  dot, no pin affordance, no "Writing…" and no `@` mention prefix. None of them
+  mean anything for a place rather than a person.
+- WHEN the sidebar groups are built → THEN Communities comes LAST, under Direct
+  messages and Groups. The order is the host's: `SidebarChatList` renders the
+  array as given and never sorts.
 - WHEN consecutive messages from the same author form a run → THEN the tail-side
   corners chain: the top corner tucks in while the run continues above, the
   bottom corner tucks in while another message follows, and the **last** message
@@ -431,6 +612,7 @@ memoization is required of the host.
 - WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
 - WHEN a bubble attachment has an inline or document preview → THEN F0 omits the redundant download action from the bubble; download remains available inside the document viewer or video-player controls, while files without a preview and failed previews keep their downloadable file chip.
 - WHEN an attachment's row is rendered — including rows the transcript mounts ahead of the viewport → THEN F0 mounts the real attachment and starts fetching it, rather than holding a placeholder until it is seen. Every attachment's box is reserved by its own layout (aspect ratio or fixed height), so this never re-measures a row.
+- WHEN a message carries a single photo with intrinsic dimensions → THEN F0 draws it whole at its own proportions, inside a box of 128–384px wide and 128–512px tall: never wider than the shared media width, never enlarged past the source. A ratio that box cannot hold — a 1:10 tower, a 5:1 panorama — is letterboxed against the sender's surface (or the blurred `blurUrl`) rather than cropped, and a photo with no dimensions keeps the full-width square. Two or more photos keep the mosaic and its crops.
 - WHEN a photo has not arrived yet → THEN its cell shows the sender's surface, or the low-resolution `blurUrl` blurred beneath it when the host supplies one; F0 never covers a photo with a loading placeholder.
 - WHEN a row scrolls near the viewport → THEN F0 decodes the images of the rows just beyond the rendered window, biased in the direction of travel, and remembers each URL for the life of the conversation — so scrolling back over history already read shows those photos immediately even though their rows were destroyed in between.
 - WHEN a map attachment is rendered ahead of the viewport → THEN it stays unmounted until it first intersects, because each map holds a live WebGL context and browsers cap how many may exist at once. Every other attachment mounts with its row.
@@ -451,6 +633,20 @@ memoization is required of the host.
 Use a group runtime to provide member mentions, read receipts, and reaction membership.
 
 <Canvas of={Stories.Group} />
+
+**A community feed**
+
+Posts instead of bubbles, the "New posts" divider above the first unread one,
+and the read-only notice naming who can post.
+
+<Canvas of={Stories.Community} />
+
+**Publishing in a community**
+
+The same surface for someone the host granted `{ canSend: true }`: the composer
+opens a title-and-body dialog rather than being a line you press Enter on.
+
+<Canvas of={Stories.CommunityCanPost} />
 
 **Emoji autocomplete**
 
@@ -505,6 +701,21 @@ player-region name; its optional download remains keyboard-accessible inside
 the player controls. Prerecorded videos should provide both
 `videoContent.captions` and audio descriptions where the visuals convey
 meaning; use `videoSilent` only when the source genuinely has no audio.
+
+A community feed is not traversed with Tab: its posts are virtualized, so only
+the mounted window is ever in the tab order. Scrolling and the jump-to-bottom
+control are the navigation path, and each post is an `article` named by its
+title, so screen readers can move between them by region. The post title stays a
+paragraph rather than a heading — a virtualized feed that starts at the 47th post
+would otherwise produce a heading level with no parent. The post composer opens
+from an explicit control and returns focus to it when dismissed.
+
+New posts are not announced through a live region: a feed item is a screenful,
+and reading one aloud on arrival interrupts whatever the reader was on. The count
+travels on the jump-to-bottom control's accessible name ("3 new posts") and on
+the sidebar badge, which is a status region with the same wording. The unread
+divider is an ordinary text row, reached in reading order rather than announced
+out of turn.
 
 Voice notes expose their waveform as a seek slider. Use the arrow keys to move
 through the recording and Home or End to jump to either edge. The playback

@@ -87,8 +87,8 @@ describe("useAiChatToggle", () => {
 
   it("reads unchecked during a pending restore and turning it on cancels it", () => {
     // A reload with a conversation showing: open persisted + its id pending.
-    localStorage.setItem("ONE-ai-chat-open", "true")
-    localStorage.setItem("ONE-ai-chat-panel-content-id", '"conv"')
+    localStorage.setItem("f0-side-panel-open", "true")
+    localStorage.setItem("f0-side-panel-view-id", '"conv"')
     const { result } = renderHook(useToggleAndChat, { wrapper })
 
     expect(result.current.chat.restoringPanelContentId).toBe("conv")
