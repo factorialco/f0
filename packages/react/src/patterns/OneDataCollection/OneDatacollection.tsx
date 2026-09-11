@@ -294,6 +294,7 @@ const OneDataCollectionComp = <
     setCurrentFilters,
     presets,
     presetsLoading,
+    defaultPresetId,
     // Navigation filter
     currentNavigationFilters,
     navigationFilters,
@@ -1152,6 +1153,23 @@ const OneDataCollectionComp = <
       getPresetCapturedState,
     ]
   )
+
+  // Opens on the preset the consumer named, exactly as clicking it would: the chip reads as
+  // selected and the preset's captured state is applied. Once only — by the time anything else
+  // changes, the user may have moved off it — but deferred until the preset exists, since custom
+  // presets arrive from storage after mount.
+  const appliedDefaultPresetRef = useRef(false)
+  useEffect(() => {
+    if (appliedDefaultPresetRef.current || !defaultPresetId) {
+      return
+    }
+    if (!mergedPresets.some((preset) => preset.id === defaultPresetId)) {
+      return
+    }
+
+    appliedDefaultPresetRef.current = true
+    applyPreset(defaultPresetId)
+  }, [defaultPresetId, mergedPresets, applyPreset])
 
   // Tracks the selected developer preset's applied snapshot and whether the view
   // has *settled* onto it. Auto-deselect only fires after settling, so applying a

@@ -41,6 +41,12 @@ export type DataSourceDefinition<
   currentFilters?: FiltersState<Filters>
   /** Predefined filter configurations that can be applied */
   presets?: PresetsDefinition<Filters>
+  /**
+   * Id of the preset the collection opens on, selected as if the user had clicked it. Matched
+   * against `presets[].id`, so the preset has to declare one. Applied once on mount: a later change
+   * is ignored, since the user may have moved off it since.
+   */
+  defaultPresetId?: string
   /** Whether presets are currently loading */
   presetsLoading?: boolean
   /*******************************************************/
