@@ -128575,9 +128575,6 @@ const K23 = N(function({
     ...c2,
     onItemCheckChange: Et,
     disabled: f,
-    // Destructured for the label above, so it has to be handed back for the
-    // trigger to carry aria-required
-    required: q,
     open: P2,
     onOpenChange: D2
   }, pr = K ? {
@@ -133976,25 +133973,25 @@ function mW(e, t) {
       latitude: L7().optional(),
       longitude: L7().optional(),
       timezone: N3().optional()
-    }).superRefine((J, q) => {
-      if (O13(J)) {
+    }).optional().superRefine((G, J) => {
+      if (O13(G)) {
         if (V)
           return;
-        q.addIssue({
+        J.addIssue({
           code: q2.custom,
           params: { type: "location", reason: "empty" },
           ...T ? { message: T } : {}
         });
         return;
       }
-      O && !Z13(J) && q.addIssue({
+      O && !Z13(G) && J.addIssue({
         code: q2.custom,
         params: { type: "location", reason: "unresolved" },
         ...j ? { message: j } : {}
       });
-    }), G = V ? Y.optional() : Y;
+    });
     return e(
-      G,
+      Y,
       { ...W, fieldType: "location" }
     );
   }

@@ -5797,7 +5797,6 @@ export declare const defaultTranslations: {
     };
     readonly locationInput: {
         readonly country: "Country";
-        readonly address: "Address";
         readonly addressLine1: "Address line 1";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
@@ -11362,7 +11361,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<LocationObjectSchema> & F0ZodType<z.ZodOptional<LocationObjectSchema>>;
     export function location(config: LocationFieldShortcutConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): LocationObjectSchema & F0ZodType<LocationObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
@@ -12099,7 +12098,7 @@ export declare interface F0LocationConfig {
     /** Overrides for the per-part labels, which default to translated copy */
     partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
-    countries?: CountryCode[];
+    allowedCountries?: CountryCode[];
     /** Scopes the search. Never read from the value's own country */
     defaultCountry?: CountryCode;
     /**
@@ -20934,16 +20933,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -20956,10 +20945,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -20969,6 +20957,17 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

@@ -1014,7 +1014,6 @@ const e = {
   },
   locationInput: {
     country: "Country",
-    address: "Address",
     addressLine1: "Address line 1",
     addressLine2: "Address line 2",
     city: "City",

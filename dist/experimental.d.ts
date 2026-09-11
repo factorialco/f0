@@ -5580,7 +5580,6 @@ declare const defaultTranslations: {
     };
     readonly locationInput: {
         readonly country: "Country";
-        readonly address: "Address";
         readonly addressLine1: "Address line 1";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
@@ -8646,7 +8645,7 @@ export declare interface F0LocationInputProps {
     /** Overrides for the per-part labels, which default to translated copy */
     partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
-    countries?: CountryCode[];
+    allowedCountries?: CountryCode[];
     /**
      * Country the search is scoped to. The value's own country is never used
      * for this: the search only exists without manual entry, where nothing on
@@ -8660,7 +8659,13 @@ export declare interface F0LocationInputProps {
      * consumer can restrict the provider (e.g. Places `componentRestrictions`).
      */
     searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /** Resolves a picked suggestion into a full value. */
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
     resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
     placeholder?: string;
     hideLabel?: boolean;
@@ -8675,7 +8680,6 @@ export declare interface F0LocationInputProps {
     clearable?: boolean;
     size?: LocationInputSize;
     name?: string;
-    id?: string;
     autoFocus?: boolean;
     onBlur?: () => void;
     onFocus?: () => void;
@@ -16739,16 +16743,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number, options?: {
                 placeholder?: string;
@@ -16761,10 +16755,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -16774,6 +16767,17 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
