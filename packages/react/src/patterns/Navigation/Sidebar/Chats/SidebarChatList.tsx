@@ -104,6 +104,7 @@ export const SidebarChatList = ({
             totalUnread > 0 ? (
               <UnreadBadge count={totalUnread} kind={groupKind} />
             ) : undefined,
+          action: group.action,
           items: group.chats.map((chat) => ({
             id: chat.id,
             searchText: chat.label,

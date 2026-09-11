@@ -616,9 +616,37 @@ const everythingStressLines = (): Line[] => {
         kind: "image",
         url: mockImage("card", 5),
         name: "tower-portrait.webp",
-        // 1:10 — the ratio clamp is what keeps this from eating the transcript.
+        // 1:10 — past what the box can represent, so it letterboxes rather than
+        // eating the transcript or showing a slice of itself.
         width: 200,
         height: 2000,
+      },
+    ],
+  })
+  add({
+    from: ELEANOR,
+    body: "",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 2),
+        name: "panorama.webp",
+        // 5:1 — the other end of the same rule.
+        width: 2000,
+        height: 400,
+      },
+    ],
+  })
+  add({
+    from: ELEANOR,
+    body: "A small screenshot keeps its own size instead of being blown up",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 1),
+        name: "small-screenshot.webp",
+        width: 250,
+        height: 180,
       },
     ],
   })

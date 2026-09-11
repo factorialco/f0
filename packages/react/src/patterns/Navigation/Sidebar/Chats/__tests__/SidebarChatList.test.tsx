@@ -1,6 +1,6 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { BellOff, Clock, PalmTree } from "@/icons/app"
+import { BellOff, Clock, PalmTree, Plus } from "@/icons/app"
 import {
   act,
   waitFor,
@@ -1230,5 +1230,49 @@ describe("SidebarChatList unread navigation", () => {
     })
 
     expect(search).toHaveFocus()
+  })
+})
+
+describe("SidebarChatList group actions", () => {
+  const withAction = (onClick: () => void): SidebarChatGroup[] => [
+    groups[0]!,
+    { ...groups[1]!, action: { label: "New channel", icon: Plus, onClick } },
+  ]
+
+  const renderWithAction = (onClick: () => void) =>
+    render(
+      <SidebarChatProvider initialGroups={withAction(onClick)}>
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+
+  it("puts the action on the group it belongs to, and nowhere else", () => {
+    renderWithAction(vi.fn())
+
+    // One button, not one per group: creating a channel belongs to Channels,
+    // not to the whole panel and not to Direct messages.
+    expect(screen.getAllByRole("button", { name: "New channel" })).toHaveLength(
+      1
+    )
+  })
+
+  it("runs the action without collapsing the group it sits on", async () => {
+    // The header IS the collapse toggle, so the click has to stop there.
+    const onClick = vi.fn()
+    renderWithAction(onClick)
+
+    const header = screen.getByRole("button", { name: /Groups/ })
+    expect(header).toHaveAttribute("aria-expanded", "true")
+
+    await userEvent.click(screen.getByRole("button", { name: "New channel" }))
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(header).toHaveAttribute("aria-expanded", "true")
+  })
+
+  it("draws no action on a group that was given none", () => {
+    renderList()
+
+    expect(screen.queryByRole("button", { name: "New channel" })).toBeNull()
   })
 })

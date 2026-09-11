@@ -1787,3 +1787,54 @@ export const Snapshot: Story = {
   },
   parameters: withSnapshot({}),
 }
+
+/**
+ * Communications with no assistant — the case the panel could not serve.
+ *
+ * `ai` is absent entirely. The panel is declared on its own through
+ * `sidePanel.views`, so clicking a conversation opens it, resizes it and takes
+ * it fullscreen exactly as it does beside an AI chat. There is no One switch,
+ * because there is no One.
+ */
+export const SidePanelWithoutAi: Story = {
+  render: () => (
+    <MockChatAppProvider>
+      <ApplicationFrame
+        sidePanel={{
+          views: [{ id: "communications", side: "left" }],
+          resizable: true,
+        }}
+        sidebar={
+          <ConversationsSidebar
+            withOneTab={false}
+            tabsPersistKey="communications-without-ai"
+          />
+        }
+      >
+        <CommunityMain />
+      </ApplicationFrame>
+    </MockChatAppProvider>
+  ),
+}
+
+/**
+ * Nothing can occupy the panel, so there is no panel.
+ *
+ * Not an empty column — no container, no reserved width, no chrome. This is
+ * what a customer with neither an assistant nor communications sees.
+ */
+export const EmptySidePanel: Story = {
+  render: () => (
+    <ApplicationFrame
+      sidePanel={{ views: [{ id: "communications", available: false }] }}
+      sidebar={
+        <ConversationsSidebar
+          withOneTab={false}
+          tabsPersistKey="empty-side-panel"
+        />
+      }
+    >
+      <CommunityMain />
+    </ApplicationFrame>
+  ),
+}

@@ -5,7 +5,7 @@ import {
   motion,
   MotionConfig,
 } from "motion/react"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 import {
   AiPromotionChat,
@@ -18,7 +18,6 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/kits/ai/F0AiChat"
-import { HostedPanelWindow } from "@/kits/ai/F0AiChat/components/layout/HostedPanelWindow"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
@@ -32,6 +31,9 @@ import {
   resolvePanelTransition,
   resolvePanelWidthTarget,
 } from "./layoutTransition"
+import { SidePanelContentWindow } from "./SidePanel/SidePanelContentWindow"
+import { SidePanelProvider, useSidePanel } from "./SidePanel/SidePanelProvider"
+import type { SidePanelViewDefinition } from "./SidePanel/types"
 import { useWindowResizing } from "./useWindowResizing"
 
 /**
@@ -54,9 +56,34 @@ const FULLSCREEN_TRANSITION_MS = motionTokens.duration.reveal * 1000
 /** The panel leaving altogether — a fade, on the frame's own duration. */
 const CLOSE_TRANSITION_MS = motionTokens.duration.base * 1000
 
+/** The AI chat's own claim on the panel, when it is enabled. */
+const AI_VIEW_ID = "ai"
+
+export interface ApplicationFrameSidePanelProps {
+  /**
+   * What may occupy the side panel. The AI chat adds itself when `ai.enabled`;
+   * anything else — a conversation list, an inspector — declares itself here.
+   *
+   * When nothing is available the panel does not exist: no chrome, no reserved
+   * width, no DOM. That is what keeps a product with no assistant from getting
+   * an empty column, and a product with an assistant it cannot use from
+   * getting no column at all.
+   */
+  views?: SidePanelViewDefinition[]
+  /** Edge the panel docks to. @default "right" */
+  side?: "left" | "right"
+  /** Whether the panel may be resized. */
+  resizable?: boolean
+}
+
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
   aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
+  /**
+   * The side panel, independently of the AI chat. Omit it and the panel
+   * behaves exactly as before: present when `ai.enabled`, absent otherwise.
+   */
+  sidePanel?: ApplicationFrameSidePanelProps
   banner?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
@@ -68,17 +95,60 @@ function _ApplicationFrame({
   banner,
   ai,
   aiPromotion,
+  sidePanel,
 }: ApplicationFrameProps) {
+  // `ai` is normalised into a view like anything else, rather than being the
+  // special case that decides whether the panel exists at all.
+  const views = useMemo<SidePanelViewDefinition[]>(
+    () => [
+      ...(ai?.enabled
+        ? [
+            {
+              id: AI_VIEW_ID,
+              side: ai.side ?? sidePanel?.side ?? "right",
+              render: () => <F0AiChat />,
+            },
+          ]
+        : []),
+      ...(sidePanel?.views ?? []),
+    ],
+    [ai?.enabled, ai?.side, sidePanel?.side, sidePanel?.views]
+  )
+
+  // Where host-presented content docks. `ai.panelContentSide` is the older way
+  // of saying it and still wins, so nothing that already sets it moves; after
+  // that, the first non-AI view that declares a side answers for all of them —
+  // one hosted window means one edge.
+  const hostedSide = sidePanel?.views?.find(
+    (view) => view.available !== false && view.side
+  )?.side
+
   return (
     <FrameProvider>
-      <ApplicationFrameWithProvider
-        ai={ai}
-        aiPromotion={aiPromotion}
-        sidebar={sidebar}
-        banner={banner}
+      {/* Above whichever AI provider gets mounted, and unconditional: the
+          panel is the frame's own space, and the chat is one of the things
+          that can occupy it. Costs nothing when nobody does — it renders no
+          DOM of its own. */}
+      <SidePanelProvider
+        views={views}
+        side={ai?.side ?? sidePanel?.side}
+        contentSide={ai?.panelContentSide ?? hostedSide}
+        resizable={sidePanel?.resizable ?? ai?.resizable}
+        defaultLayout={
+          ai?.defaultVisualizationMode === "fullscreen"
+            ? "fullscreen"
+            : "sidepanel"
+        }
       >
-        {children}
-      </ApplicationFrameWithProvider>
+        <ApplicationFrameWithProvider
+          ai={ai}
+          aiPromotion={aiPromotion}
+          sidebar={sidebar}
+          banner={banner}
+        >
+          {children}
+        </ApplicationFrameWithProvider>
+      </SidePanelProvider>
     </FrameProvider>
   )
 }
@@ -203,25 +273,27 @@ function ApplicationFrameContent({
   const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
+  // The panel, read from the panel — not through the chat. This is what lets a
+  // frame with no assistant still open, size and fullscreen its panel.
   const {
+    hasAvailableView,
     open: isAiChatOpen,
-    visualizationMode,
-    canvasContent,
-    canvasEntities,
-    closeCanvas,
-    effectiveChatWidth,
-    chatWidthBounds,
+    layout,
+    effectiveWidth: effectiveChatWidth,
+    widthBounds: chatWidthBounds,
     panelOverlays,
     setFrameWidth,
     resizable,
-    panelSide,
-    panelContent,
-    panelContentSide,
-    restoringPanelContentId,
+    side: panelSide,
+    activeContent: panelContent,
+    contentSide: panelContentSide,
+    restoringViewId: restoringPanelContentId,
     isResizing,
-  } = useAiChat()
-  const isAiChatFullscreen = visualizationMode === "fullscreen"
-  const isCanvasMode = visualizationMode === "canvas"
+  } = useSidePanel()
+  // The canvas is the one panel-adjacent thing that IS the chat's.
+  const { canvasContent, canvasEntities, closeCanvas } = useAiChat()
+  const isAiChatFullscreen = layout === "fullscreen"
+  const isCanvasMode = canvasContent !== null
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   // A fixed-width panel is clamped too: 360px is just as capable of crushing
   // the content on a narrow frame as a dragged one.
@@ -704,7 +776,7 @@ function ApplicationFrameContent({
                 </motion.div>
               ) : null}
 
-              {ai?.enabled
+              {hasAvailableView
                 ? (() => {
                     // One absolutely-positioned container per docked window. A
                     // single side (the default) keeps today's lone container;
@@ -719,6 +791,11 @@ function ApplicationFrameContent({
                     ) => (
                       <motion.div
                         key={`panel-${side}`}
+                        // A stable hook for "is there a panel, and on which
+                        // edge" — the alternative is asserting on Tailwind
+                        // classes, which say nothing and break on a restyle.
+                        data-side-panel-container=""
+                        data-side-panel-side={side}
                         className={cn(
                           "pointer-events-none",
                           "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
@@ -768,18 +845,26 @@ function ApplicationFrameContent({
 
                     return (
                       <>
-                        {panelContainer(
-                          panelSide,
-                          !isSplitPanel || !hasPanelContent,
-                          prevAiWindowShowingRef.current,
-                          <F0AiChat />
-                        )}
-                        {isSplitPanel
+                        {/* The AI chat's own window, when it is one of the
+                            views. It is the panel's fallback occupant: what
+                            shows when nothing else has claimed the space. */}
+                        {ai?.enabled
+                          ? panelContainer(
+                              panelSide,
+                              !isSplitPanel || !hasPanelContent,
+                              prevAiWindowShowingRef.current,
+                              <F0AiChat />
+                            )
+                          : null}
+                        {/* The window for host-presented content. In split
+                            mode it is the second one; with no AI chat it is
+                            the only one, and the panel is entirely its. */}
+                        {!ai?.enabled || isSplitPanel
                           ? panelContainer(
                               panelContentSide,
-                              hasPanelContent,
+                              hasPanelContent || !ai?.enabled,
                               prevHostedWindowShowingRef.current,
-                              <HostedPanelWindow />
+                              <SidePanelContentWindow />
                             )
                           : null}
                       </>

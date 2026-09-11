@@ -403,3 +403,38 @@ describe("a feed reads as one column, not a stack of cards", () => {
     expect(screen.getByText(/ago|less than/i)).toBeVisible()
   })
 })
+
+describe("community channel — first load", () => {
+  it("promises posts, not a conversation", () => {
+    // The bubble skeleton drew alternating sides and an avatar gutter, then
+    // handed over to a column of full-width cards with neither.
+    renderChat(makeRuntime({ status: "connecting", messages: [] }))
+
+    expect(screen.getByTestId("chat-post-skeleton")).toBeInTheDocument()
+    expect(screen.queryByTestId("chat-message-skeleton")).toBeNull()
+  })
+
+  it("leaves a conversation with the bubble skeleton", () => {
+    renderChat(makeRuntime({ status: "connecting", messages: [] }, "group"))
+
+    expect(screen.getByTestId("chat-message-skeleton")).toBeInTheDocument()
+    expect(screen.queryByTestId("chat-post-skeleton")).toBeNull()
+  })
+
+  it("keeps the post shape when the transport drops with nothing loaded", () => {
+    // `reconnecting` with an empty transcript cannot tell "empty" from "not
+    // loaded", so it shows the skeleton too — and it has to be the right one.
+    renderChat(makeRuntime({ status: "reconnecting", messages: [] }))
+
+    expect(screen.getByTestId("chat-post-skeleton")).toBeInTheDocument()
+  })
+
+  it("is out of the accessibility tree, being decoration", () => {
+    renderChat(makeRuntime({ status: "connecting", messages: [] }))
+
+    expect(screen.getByTestId("chat-post-skeleton")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    )
+  })
+})

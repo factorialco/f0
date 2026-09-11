@@ -3,11 +3,16 @@ import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { usePhotoIntrinsicSize } from "../hooks/usePhotoIntrinsicSize"
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
-import { albumCells } from "../utils/album-layout"
-import { attachedKindOf, partitionChatAttachments } from "../utils/attachments"
+import { albumCells, singlePhotoBox } from "../utils/album-layout"
+import {
+  attachedKindOf,
+  partitionChatAttachments,
+  soleImageOf,
+} from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
 import {
   CHAT_ALBUM_GAP_CLASS,
@@ -53,6 +58,10 @@ export const ChatMessageAttachments = ({
   const { openImagePreview } = useChatImagePreview()
   const emit = useF0ChatEmit()
   const attachments = message.attachments
+  // Above the early return, where hooks have to live: a lone photo's
+  // proportions, measured from the file itself when the host declares none.
+  const soloImage = soleImageOf(attachments)
+  const soloSize = usePhotoIntrinsicSize(soloImage)
   if (!attachments || attachments.length === 0) {
     return null
   }
@@ -68,6 +77,12 @@ export const ChatMessageAttachments = ({
     cards,
   } = partitionChatAttachments(attachments)
   const nonVideoFileCount = documentFiles.length + plainFiles.length
+
+  // A lone photo is the message, so it gets its own box rather than the shared
+  // media width — see singlePhotoBox. An album of two or more keeps it.
+  const soloBox = soloImage
+    ? singlePhotoBox(soloSize?.width, soloSize?.height)
+    : null
 
   // With no caption below, the message's own time has to live on the media.
   // Rendering order is images → videos → locations → voices → documents →
@@ -192,52 +207,58 @@ export const ChatMessageAttachments = ({
         // container for the same reason mobile puts it there: a mostly-white
         // photo would otherwise dissolve into the transcript background.
         <div
+          style={soloBox ? { width: soloBox.width } : undefined}
           className={cn(
             "grid grid-cols-2 overflow-hidden border border-solid border-f1-border-secondary",
-            CHAT_MEDIA_WIDTH_CLASS,
+            soloBox ? "max-w-full" : CHAT_MEDIA_WIDTH_CLASS,
             CHAT_ALBUM_GAP_CLASS,
             imageCorners
           )}
           data-testid="chat-image-album"
         >
-          {albumCells(images).map((cell, cellIndex, cells) => {
-            const image = images[cell.index]
-            if (!image) {
-              return null
+          {/* The measured size stands in for the lone photo's own, so a host
+              that declares nothing still gets its proportions. */}
+          {albumCells(soloSize ? [soloSize] : images).map(
+            (cell, cellIndex, cells) => {
+              const image = images[cell.index]
+              if (!image) {
+                return null
+              }
+              const hostsMeta =
+                metaHost === "image" && cellIndex === cells.length - 1
+              return (
+                <ChatImageTile
+                  key={`${image.url}-${cell.index}`}
+                  image={image}
+                  aspectRatio={cell.aspectRatio}
+                  spanFull={cell.span === 2}
+                  inset={cell.inset}
+                  surfaceClassName={surfaceClassName}
+                  label={i18n.chat.openImage}
+                  onOpen={() => {
+                    openImagePreview(images, cell.index)
+                    emit.onImageOpened({ count: images.length })
+                  }}
+                  overlay={
+                    cell.hiddenCount > 0 ? (
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "absolute inset-0 flex items-center justify-center text-2xl font-semibold text-f1-foreground-inverse",
+                          CHAT_ALBUM_MORE_CLASS
+                        )}
+                        data-testid="chat-image-album-more"
+                      >
+                        {`+${cell.hiddenCount}`}
+                      </span>
+                    ) : hostsMeta ? (
+                      <ChatMessageMeta message={message} placement="overlay" />
+                    ) : undefined
+                  }
+                />
+              )
             }
-            const hostsMeta =
-              metaHost === "image" && cellIndex === cells.length - 1
-            return (
-              <ChatImageTile
-                key={`${image.url}-${cell.index}`}
-                image={image}
-                aspectRatio={cell.aspectRatio}
-                spanFull={cell.span === 2}
-                surfaceClassName={surfaceClassName}
-                label={i18n.chat.openImage}
-                onOpen={() => {
-                  openImagePreview(images, cell.index)
-                  emit.onImageOpened({ count: images.length })
-                }}
-                overlay={
-                  cell.hiddenCount > 0 ? (
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "absolute inset-0 flex items-center justify-center text-2xl font-semibold text-f1-foreground-inverse",
-                        CHAT_ALBUM_MORE_CLASS
-                      )}
-                      data-testid="chat-image-album-more"
-                    >
-                      {`+${cell.hiddenCount}`}
-                    </span>
-                  ) : hostsMeta ? (
-                    <ChatMessageMeta message={message} placement="overlay" />
-                  ) : undefined
-                }
-              />
-            )
-          })}
+          )}
         </div>
       ) : null}
       {videoFiles.map((file, i) => (

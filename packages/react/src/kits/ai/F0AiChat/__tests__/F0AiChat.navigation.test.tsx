@@ -91,11 +91,8 @@ describe("navigating out of a fullscreen panel", () => {
     //
     // Both keys: a closed panel is reset to "sidepanel" on mount by design
     // (see the `!open` effect), so restoring only the mode would prove nothing.
-    localStorage.setItem("ONE-ai-chat-open", JSON.stringify(true))
-    localStorage.setItem(
-      "ONE-ai-chat-visualization-mode",
-      JSON.stringify("fullscreen")
-    )
+    localStorage.setItem("f0-side-panel-open", JSON.stringify(true))
+    localStorage.setItem("f0-side-panel-layout", JSON.stringify("fullscreen"))
 
     render(<Host initialPath="/time-off" />)
 

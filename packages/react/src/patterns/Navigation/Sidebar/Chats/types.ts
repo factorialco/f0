@@ -1,5 +1,6 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { IconType } from "@/components/F0Icon"
+import type { SidebarSectionAction } from "../CollapsibleSection"
 
 export type SidebarChatPresence = "online" | "offline"
 
@@ -93,6 +94,14 @@ export type SidebarChatGroup = {
   title: string
   /** Initial open state of the collapsible group. @default true */
   isOpen?: boolean
+  /**
+   * One action on the group's own header, revealed on hover like a row's pin
+   * — "new channel" beside Channels, "new community" beside Communities.
+   *
+   * Distinct from the panel's top-of-list `actions`: those belong to the whole
+   * tab, this one belongs to the group it sits on, and says so by being there.
+   */
+  action?: SidebarSectionAction
   chats: SidebarChat[]
 }
 

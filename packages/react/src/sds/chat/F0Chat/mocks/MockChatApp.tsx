@@ -1,6 +1,12 @@
 "use client"
 
-import { useCallback, useMemo, type ReactNode } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react"
 import {
   BellOff,
   Delete,
@@ -9,6 +15,7 @@ import {
   PushPin,
   PushPinSolid,
   Megaphone,
+  Plus,
 } from "@/icons/app"
 import { LinkProvider } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
@@ -43,6 +50,7 @@ import {
   unreadCountOf,
   unreadMentionCountOf,
 } from "./mockSeeds"
+import { uploadedAttachmentFromFile } from "./uploads"
 import {
   MockChatAppContext,
   useMockChatApp,
@@ -121,6 +129,60 @@ export const resolveMockReactionUsers = (
 }
 
 /**
+ * A community answers slower than a conversation, and in two parts: the feed is
+ * one request and the community's own name is another. In the real host they
+ * land separately often enough that the header sat blank beside a transcript
+ * that was already drawing itself — so the demo reproduces the gap rather than
+ * pretending both arrive at once.
+ *
+ * Conversations keep answering instantly: their title travels with the channel
+ * list that is already in memory.
+ */
+const COMMUNITY_FEED_MS = 1400
+const COMMUNITY_TITLE_MS = 2100
+
+const useSimulatedCommunityLoad = (
+  convId: string,
+  isCommunity: boolean
+): { feedLoading: boolean; titleLoading: boolean } => {
+  const [phase, setPhase] = useState({
+    convId,
+    feed: isCommunity,
+    title: isCommunity,
+  })
+
+  // Adjusted during render, not from an effect: opening another community has
+  // to show its placeholder on the FIRST frame, and an effect would paint one
+  // frame of the previous conversation's settled state first.
+  if (phase.convId !== convId) {
+    setPhase({ convId, feed: isCommunity, title: isCommunity })
+  }
+
+  useEffect(() => {
+    if (!isCommunity) {
+      return
+    }
+    const feed = setTimeout(
+      () => setPhase((p) => ({ ...p, feed: false })),
+      COMMUNITY_FEED_MS
+    )
+    const title = setTimeout(
+      () => setPhase((p) => ({ ...p, title: false })),
+      COMMUNITY_TITLE_MS
+    )
+    return () => {
+      clearTimeout(feed)
+      clearTimeout(title)
+    }
+  }, [convId, isCommunity])
+
+  return {
+    feedLoading: phase.convId === convId && phase.feed,
+    titleLoading: phase.convId === convId && phase.title,
+  }
+}
+
+/**
  * F0ChatRuntime for one conversation, backed by the shared store.
  *
  * A community's post surfaces are wired straight to that store rather than
@@ -134,6 +196,11 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const i18n = useI18n()
   const seed = SEED_BY_ID.get(convId)
   const state = app.states[convId]
+  const { feedLoading, titleLoading } = useSimulatedCommunityLoad(
+    convId,
+    seed?.type === "community"
+  )
+  const loadStatus = app.loadState[convId] ?? "ready"
 
   const sendMessage = useCallback(
     (input: F0ChatSendInput) => app.send(convId, input),
@@ -188,24 +255,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
       // Simulate a real upload so the composer's uploading skeleton is visible.
       new Promise((resolve) =>
         setTimeout(
-          () =>
-            resolve(
-              files.map((file): F0ChatComposableAttachment => {
-                const url = URL.createObjectURL(file)
-                return file.type.startsWith("image/")
-                  ? { kind: "image", url, name: file.name, mimeType: file.type }
-                  : {
-                      kind: "file",
-                      url,
-                      name: file.name,
-                      size: file.size,
-                      mimeType: file.type,
-                      thumbnailUrl: file.type.startsWith("video/")
-                        ? "/video-poster.webp"
-                        : undefined,
-                    }
-              })
-            ),
+          () => resolve(Promise.all(files.map(uploadedAttachmentFromFile))),
           1200
         )
       ),
@@ -473,7 +523,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     channel: {
       id: convId,
       type: seed?.type ?? "dm",
-      title: seed?.title ?? convId,
+      // Empty until it lands, which is how the header knows to hold a skeleton
+      // in its place instead of sitting blank.
+      title: titleLoading ? "" : (seed?.title ?? convId),
       avatar: seed?.avatar ?? {
         type: "person",
         firstName: convId,
@@ -507,7 +559,15 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
       // Yours alone — and only where you may publish at all.
       draftPosts: isCommunity && seed?.canPost ? draftPosts : undefined,
     },
-    status: app.loadState[convId] ?? "ready",
+    // A seeded failure wins outright: `failsToLoad` is a load that never
+    // succeeds, and a delay in front of it would only postpone the retry the
+    // story exists to demonstrate.
+    status:
+      loadStatus === "error"
+        ? "error"
+        : feedLoading
+          ? "connecting"
+          : loadStatus,
     messages,
     typingUsers,
     hasMoreOlder: app.hasMoreOlder(convId),
@@ -676,17 +736,57 @@ export const useMockChatGroups = (
       ...(pinnedChats.length > 0
         ? [{ id: "pinned", title: "Pinned", chats: pinnedChats }]
         : []),
+      // Every group that can be ADDED TO carries its own action; Pinned does
+      // not, which is the point of it being per group — you start a
+      // conversation, a channel or a community, you do not create a "pinned".
+      //
+      // No-ops on purpose: in the product each opens the dialog the host
+      // already has. The demo only has to show WHERE the affordance lives and
+      // how it behaves.
       ...(dms.length > 0
-        ? [{ id: "direct-messages", title: "Direct messages", chats: dms }]
+        ? [
+            {
+              id: "direct-messages",
+              title: "Direct messages",
+              chats: dms,
+              action: {
+                label: "New direct message",
+                icon: Plus,
+                onClick: () => {},
+              },
+            },
+          ]
         : []),
       ...(groups.length > 0
-        ? [{ id: "groups", title: "Groups", chats: groups }]
+        ? [
+            {
+              id: "groups",
+              title: "Groups",
+              chats: groups,
+              action: {
+                label: "New channel",
+                icon: Plus,
+                onClick: () => {},
+              },
+            },
+          ]
         : []),
       // LAST, under the conversations. A community is not a conversation of
       // yours — it is a place you go to read. The order is simply the array's:
       // `SidebarChatList` renders what it's given and never sorts.
       ...(communities.length > 0
-        ? [{ id: "communities", title: "Communities", chats: communities }]
+        ? [
+            {
+              id: "communities",
+              title: "Communities",
+              chats: communities,
+              action: {
+                label: "New community",
+                icon: Plus,
+                onClick: () => {},
+              },
+            },
+          ]
         : []),
     ]
   }, [states, pinned, togglePin, muted, onSelect])

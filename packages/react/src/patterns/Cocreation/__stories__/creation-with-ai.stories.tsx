@@ -142,10 +142,7 @@ type Phase = "collection" | "chat"
 // `AiChatStateProvider` persists the chat's open/visualization-mode state to
 // localStorage. We reset those keys once on mount so the chat always starts
 // CLOSED in the collection view, regardless of a previous session.
-const AI_CHAT_STORAGE_KEYS = [
-  "ONE-ai-chat-open",
-  "ONE-ai-chat-visualization-mode",
-]
+const AI_CHAT_STORAGE_KEYS = ["f0-side-panel-open", "f0-side-panel-layout"]
 const resetAiChatPersistence = () => {
   try {
     AI_CHAT_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key))

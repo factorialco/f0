@@ -1049,6 +1049,77 @@ const ColdStartVideoConversation = (): ReactNode => {
   )
 }
 
+/** A photo of an exact size, so the sizing rule can be seen rather than
+ * described: a white frame that is only whole when the photo is. */
+const sizedPhoto = (width: number, height: number, hue: number): string =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+      `<rect width="${width}" height="${height}" fill="hsl(${hue} 70% 62%)"/>` +
+      `<rect x="4" y="4" width="${width - 8}" height="${height - 8}" fill="none" stroke="white" stroke-width="6"/>` +
+      `<text x="50%" y="50%" fill="white" font-family="system-ui" font-size="${Math.max(12, Math.min(width, height) / 6)}" font-weight="700" text-anchor="middle" dominant-baseline="middle">${width}×${height}</text>` +
+      `</svg>`
+  )}`
+
+const SINGLE_PHOTO_CASES: { body: string; width: number; height: number }[] = [
+  {
+    body: "3:2 — its own proportions, the common case",
+    width: 1200,
+    height: 800,
+  },
+  {
+    body: "2:3 — narrowed by the height cap, still whole",
+    width: 800,
+    height: 1200,
+  },
+  {
+    body: "1:10 — letterboxed instead of cropped to a slice",
+    width: 200,
+    height: 2000,
+  },
+  { body: "5:1 — the same rule at the other end", width: 2000, height: 400 },
+  { body: "250×180 — small, so it stays small", width: 250, height: 180 },
+  {
+    body: "64×64 — centred in the floor box at its own size",
+    width: 64,
+    height: 64,
+  },
+]
+
+const SinglePhotoConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: SINGLE_PHOTO_CASES.map(({ body, width, height }, index) => ({
+      id: `single-photo-${index}`,
+      author: ana,
+      body,
+      createdAt: new Date().toISOString(),
+      isMine: false,
+      attachments: [
+        {
+          kind: "image" as const,
+          url: sizedPhoto(width, height, index * 47),
+          name: `${width}x${height}.svg`,
+          width,
+          height,
+        },
+      ],
+    })),
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 const meta = {
   title: "F0Chat",
   component: F0Chat,
@@ -1666,6 +1737,44 @@ export const WithDocumentAttachments: Story = {
   render: () => <DocumentConversation />,
 }
 
+/** A photo on its own is the message, so it keeps its own proportions and is
+ * shown whole — within 128–384 wide and 128–512 tall. Ratios past what that box
+ * can hold letterbox rather than crop; photos smaller than the media width are
+ * never blown up. Two or more photos keep the mosaic (see the rich-media seed in
+ * Default). */
+export const SinglePhotoSizing: Story = {
+  name: "Single photo sizing",
+  render: () => <SinglePhotoConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Size each lone photo from its own dimensions", async () => {
+      // Only the rows the virtualizer has mounted, keyed by the photo's name —
+      // which is its intrinsic size, so the expectation travels with the row.
+      const expected: Record<string, { width: string; footprint?: string }> = {
+        "1200x800.svg": { width: "384px" },
+        "800x1200.svg": { width: "341px" },
+        "200x2000.svg": { width: "128px", footprint: "40%" },
+        "2000x400.svg": { width: "384px", footprint: "100%" },
+        "250x180.svg": { width: "250px" },
+        "64x64.svg": { width: "128px", footprint: "50%" },
+      }
+
+      const albums = await canvas.findAllByTestId("chat-image-album")
+      for (const album of albums) {
+        const photo = within(album).getByRole("img")
+        const name = photo.getAttribute("alt") ?? ""
+        await expect(album).toHaveStyle({ width: expected[name]?.width })
+        // Letterboxed photos give up one side rather than being cropped; the
+        // rest fill their box.
+        await expect(photo).toHaveStyle({
+          width: expected[name]?.footprint ?? "100%",
+        })
+      }
+    })
+  },
+}
+
 /** Inline video attachments: each F0VideoPlayer stays wide, multiple videos
  * stack vertically, and the player itself provides playback, download and
  * fullscreen. */
@@ -1807,6 +1916,47 @@ export const FirstLoadSkeleton: Story = {
     const runtime: F0ChatRuntime = {
       currentUserId: "me",
       channel: dmChannel,
+      status: "connecting",
+      messages: [],
+      typingUsers: [],
+      hasMoreOlder: false,
+      loadingOlder: false,
+      unreadCount: 0,
+      firstUnreadId: null,
+      sendMessage: () => {},
+      retryMessage: () => {},
+      loadOlder: () => {},
+      toggleReaction: () => {},
+      deleteMessage: () => {},
+      onInputActivity: () => {},
+    }
+    return (
+      <Frame>
+        <F0ChatProvider runtime={runtime}>
+          <F0Chat />
+        </F0ChatProvider>
+      </Frame>
+    )
+  },
+}
+
+/**
+ * The same first load in a COMMUNITY, where the transcript is a column of
+ * full-width posts rather than a conversation. The placeholder follows the
+ * channel, so what arrives is the shape that was already on screen — compare it
+ * with the bubble skeleton above.
+ */
+export const FirstLoadSkeletonCommunity: Story = {
+  name: "First load skeleton (community)",
+  render: () => {
+    const runtime: F0ChatRuntime = {
+      currentUserId: "me",
+      channel: {
+        id: "com-company-news",
+        type: "community",
+        title: "Company news",
+        avatar: { type: "emoji", emoji: "📣" },
+      },
       status: "connecting",
       messages: [],
       typingUsers: [],

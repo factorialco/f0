@@ -131,6 +131,23 @@ export const attachedKindOf = (
   return documentPreviewKind(attachment) ? "document" : "file"
 }
 
+/**
+ * The one photo in a message, or nothing when it has none or several.
+ *
+ * A lone photo is sized from its own proportions while an album is a mosaic, so
+ * the renderer has to know which it is before it can measure anything — and it
+ * has to know it above its early return, where hooks live.
+ */
+export const soleImageOf = (
+  attachments?: readonly F0ChatAttachment[]
+): F0ChatImageAttachment | undefined => {
+  const images = (attachments ?? []).filter(
+    (attachment): attachment is F0ChatImageAttachment =>
+      attachment.kind === "image"
+  )
+  return images.length === 1 ? images[0] : undefined
+}
+
 export type PartitionedChatAttachments = {
   images: F0ChatImageAttachment[]
   videos: F0ChatFileAttachment[]

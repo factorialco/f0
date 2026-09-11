@@ -15,6 +15,7 @@ import {
   type F0ChatUser,
 } from "../types"
 import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
+import { uploadedAttachmentFromFile } from "./uploads"
 
 /** Seed describing a fake conversation the mock runtime should simulate. */
 export type MockChatSeed = {
@@ -521,23 +522,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
 
   const uploadFiles = useCallback(
     (files: File[]): Promise<F0ChatComposableAttachment[]> =>
-      Promise.resolve(
-        files.map((file): F0ChatComposableAttachment => {
-          const url = URL.createObjectURL(file)
-          return file.type.startsWith("image/")
-            ? { kind: "image", url, name: file.name }
-            : {
-                kind: "file",
-                url,
-                name: file.name,
-                size: file.size,
-                mimeType: file.type,
-                thumbnailUrl: file.type.startsWith("video/")
-                  ? "/video-poster.webp"
-                  : undefined,
-              }
-        })
-      ),
+      Promise.all(files.map(uploadedAttachmentFromFile)),
     []
   )
 

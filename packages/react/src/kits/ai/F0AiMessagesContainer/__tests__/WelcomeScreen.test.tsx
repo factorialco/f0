@@ -9,8 +9,8 @@ vi.mock("@/lib/a11y", () => ({
 
 import { WelcomeScreen } from "../components/WelcomeScreen"
 
-// The visible span types progressively, so the stable way to grab the phrase
-// paragraph is through the sr-only span that always holds the full text.
+// The painted span types progressively, so the stable way to grab the phrase
+// paragraph is through the sizing span, which always holds the full text.
 const getPhrase = (text: string) => {
   const phrase = screen.getByText(text).closest("p")
   expect(phrase).not.toBeNull()
@@ -28,7 +28,7 @@ describe("WelcomeScreen", () => {
     expect(p).toBeInTheDocument()
     expect(p).not.toHaveAttribute("role", "button")
     expect(p).not.toHaveAttribute("tabIndex")
-    // aria-label is prohibited on a paragraph role; the sr-only span names it.
+    // aria-label is prohibited on a paragraph role; the sizing span names it.
     expect(p).not.toHaveAttribute("aria-label")
   })
 
@@ -72,7 +72,7 @@ describe("WelcomeScreen", () => {
     try {
       const { rerender } = zeroRender(<WelcomeScreen messages={["Hi"]} />)
       typeFor(400 + "Hi".length * 35 + 100)
-      // Fully typed: visible (aria-hidden) span now matches the sr-only span.
+      // Fully typed: the painted span now matches the sizing span.
       expect(screen.getAllByText("Hi")).toHaveLength(2)
 
       rerender(
@@ -81,7 +81,7 @@ describe("WelcomeScreen", () => {
         />
       )
 
-      // The swap resets the typewriter: only the sr-only span holds the NEW
+      // The swap resets the typewriter: only the sizing span holds the NEW
       // first phrase; nothing is typed yet (no leftover index/chars). It also
       // types IMMEDIATELY — the budget below has no room for the 400ms
       // first-mount settle delay.
@@ -94,12 +94,53 @@ describe("WelcomeScreen", () => {
     }
   })
 
+  // THE TYPEWRITER MUST NOT RESIZE THE PARAGRAPH.
+  //
+  // The welcome block is vertically centred (bottom-anchored in fullscreen),
+  // so a paragraph that grows a line as it types steps the composer and the
+  // cards below it by a whole line. It showed up as a jump "when the
+  // fullscreen animation ends", because the chat blanks its body across that
+  // change while this keeps typing underneath.
+  //
+  // jsdom has no layout, so what is pinned here is the cause: the element that
+  // occupies the space holds the COMPLETE phrase at every point in the
+  // animation, so the line breaks never move.
+  it("reserves the full phrase's space from the first character", () => {
+    vi.useFakeTimers()
+    const typeFor = (ms: number) => {
+      for (let elapsed = 0; elapsed < ms; elapsed += 10) {
+        act(() => {
+          vi.advanceTimersByTime(10)
+        })
+      }
+    }
+    const phrase = "Turn months of data into a one-line answer"
+    try {
+      zeroRender(<WelcomeScreen messages={[phrase]} />)
+
+      // Nothing typed yet, and the space is already reserved.
+      const sizing = screen.getByText(phrase)
+      expect(sizing).toBeInTheDocument()
+      expect(sizing).not.toHaveTextContent(/^$/)
+
+      // Mid-phrase — the moment the panel would reveal — and still reserved.
+      typeFor(400 + 12 * 35)
+      expect(screen.getByText(phrase)).toBe(sizing)
+
+      // And once it has finished typing, still exactly one copy in the layout.
+      typeFor(phrase.length * 35 + 100)
+      expect(screen.getAllByText(phrase)).toHaveLength(2)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it("renders the full phrase statically when reduced motion is preferred", () => {
     mockReducedMotion = true
     zeroRender(<WelcomeScreen messages={["Ask anything", "Second phrase"]} />)
 
-    // Visible (aria-hidden) span and sr-only span both carry the full text
-    // immediately — no typewriter.
+    // Painted span and sizing span both carry the full text immediately —
+    // no typewriter.
     expect(screen.getAllByText("Ask anything")).toHaveLength(2)
   })
 

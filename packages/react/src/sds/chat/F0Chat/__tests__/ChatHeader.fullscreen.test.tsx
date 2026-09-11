@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
-import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
+import { SidePanelProvider } from "@/patterns/ApplicationFrame/SidePanel/SidePanelProvider"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
@@ -77,11 +77,11 @@ describe("F0Chat fullscreen toggle", () => {
     // so expanding would toggle nothing.
     setSmallScreen(true)
     render(
-      <F0AiChatProvider enabled>
+      <SidePanelProvider views={[{ id: "communications" }]}>
         <F0ChatProvider runtime={makeRuntime()}>
           <F0Chat onToggleFullscreen={vi.fn()} />
         </F0ChatProvider>
-      </F0AiChatProvider>
+      </SidePanelProvider>
     )
     expect(
       screen.queryByRole("button", { name: /expand/i })
@@ -94,11 +94,11 @@ describe("F0Chat fullscreen toggle", () => {
     // panel sitting beside content, with somewhere real to expand into.
     setSmallScreen(false)
     render(
-      <F0AiChatProvider enabled>
+      <SidePanelProvider views={[{ id: "communications" }]}>
         <F0ChatProvider runtime={makeRuntime()}>
           <F0Chat onToggleFullscreen={vi.fn()} />
         </F0ChatProvider>
-      </F0AiChatProvider>
+      </SidePanelProvider>
     )
     expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument()
   })

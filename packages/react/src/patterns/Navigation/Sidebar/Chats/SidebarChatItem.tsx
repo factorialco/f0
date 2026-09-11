@@ -120,7 +120,13 @@ export const SidebarChatItem = ({
               // shrunk inside the bordered avatar box.
               <span
                 aria-hidden={showGroupFallback || undefined}
-                className="flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary"
+                className={cn(
+                  "flex size-5 items-center justify-center text-lg font-medium",
+                  // The muted colour belongs to the ＃ ALONE — it is type, and
+                  // it sits at the same weight as the name beside it. An emoji
+                  // in here keeps its own (see `EmojiImage`).
+                  showGroupFallback && "text-f1-foreground-secondary"
+                )}
                 data-testid={
                   showGroupFallback
                     ? "sidebar-group-avatar-fallback"
