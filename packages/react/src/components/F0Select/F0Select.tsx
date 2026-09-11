@@ -196,6 +196,7 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
+    hideArrow = false,
     preserveSelectionOnDatasetChange = true,
     fitContentWidth,
     dataTestId,
@@ -1417,11 +1418,13 @@ const F0SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={effectiveSize}
-                />
+                hideArrow ? undefined : (
+                  <Arrow
+                    open={openLocal}
+                    disabled={disabled}
+                    size={effectiveSize}
+                  />
+                )
               }
             >
               <button
