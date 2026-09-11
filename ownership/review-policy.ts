@@ -8,11 +8,13 @@
  *      or any file inside a __stories__/ folder)
  *      -> 1 approval from @factorialco/f0-general.
  *   3. Feature (conventional `feat:` title) -> 1 approval from
- *      @factorialco/f0-devs AND 1 from @factorialco/f0-designers.
+ *      @factorialco/f0-devs AND 1 from @factorialco/product-designers.
  *   4. Anything else -> 1 approval from @factorialco/f0-devs.
  *
- * The `needs-design-review` label adds @factorialco/f0-designers to the
- * requirements of any PR (opt-in by any reviewer or the author).
+ * The `needs-design-review` label adds @factorialco/f0-designers — the F0
+ * design team, not product-designers — to the requirements of any PR (opt-in
+ * by any reviewer or the author). It stacks on top of rule 3, so a labelled
+ * `feat:` needs an approval from both design teams.
  *
  * Creating a new sds module (a PR that adds a package.yml under sds/)
  * additionally requires 1 approval from @factorialco/f0-general, on top of
@@ -34,6 +36,10 @@ const DOCS_PATTERN = /(\.mdx?|\.stories\.tsx?)$/
 const isDoc = (file: string) => DOCS_PATTERN.test(file) || file.includes("/__stories__/")
 const FEAT_PATTERN = /^feat(\([^)]*\))?!?:/
 const DESIGN_LABEL = "needs-design-review"
+/** F0 design team — required by the `needs-design-review` label */
+const F0_DESIGN_TEAM = "f0-designers"
+/** Product design team — required by features (rule 3) */
+const PRODUCT_DESIGN_TEAM = "product-designers"
 const COMMENT_MARKER = "<!-- comment-type: review-policy -->"
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, DRY_RUN } = process.env
@@ -131,10 +137,10 @@ function classify(params: {
     name = "Feature"
     description =
       "The PR title starts with `feat`, so this is a feature: it needs one " +
-      "approval from f0-devs AND one from f0-designers (rule 3)."
+      `approval from f0-devs AND one from ${PRODUCT_DESIGN_TEAM} (rule 3).`
     requirements.push(
       { team: "f0-devs", reason: "Features need a dev approval" },
-      { team: "f0-designers", reason: "Features need a design approval" }
+      { team: PRODUCT_DESIGN_TEAM, reason: "Features need a product design approval" }
     )
   } else {
     name = "Code change"
@@ -142,10 +148,10 @@ function classify(params: {
     requirements.push({ team: "f0-devs", reason: "Every code change needs a dev approval" })
   }
 
-  if (params.labels.includes(DESIGN_LABEL) && !requirements.some((r) => r.team === "f0-designers")) {
+  if (params.labels.includes(DESIGN_LABEL) && !requirements.some((r) => r.team === F0_DESIGN_TEAM)) {
     requirements.push({
-      team: "f0-designers",
-      reason: `The \`${DESIGN_LABEL}\` label explicitly requests a design approval`,
+      team: F0_DESIGN_TEAM,
+      reason: `The \`${DESIGN_LABEL}\` label explicitly requests an ${F0_DESIGN_TEAM} approval`,
     })
   }
 
@@ -246,9 +252,9 @@ lines.push(
   "",
   "- PRs touching only `sds/` modules require their owners and nothing else.",
   "- Otherwise, docs-only changes (`*.md`, `*.mdx`, `*.stories.tsx`, anything in `__stories__/`) → one f0-general approval.",
-  "- Otherwise, `feat:` titles → one f0-devs **and** one f0-designers approval. Not a feature? Fix the title prefix.",
+  `- Otherwise, \`feat:\` titles → one f0-devs **and** one ${PRODUCT_DESIGN_TEAM} approval. Not a feature? Fix the title prefix.`,
   "- Anything else → one f0-devs approval.",
-  `- Add the \`${DESIGN_LABEL}\` label to also request a design approval on any PR.`,
+  `- Add the \`${DESIGN_LABEL}\` label to also request an ${F0_DESIGN_TEAM} approval on any PR.`,
   "- Creating a new `sds/` module (new `package.yml`) additionally requires an f0-general approval.",
   "",
   `Policy source: [\`ownership/review-policy.ts\`](https://github.com/${GITHUB_REPOSITORY}/blob/main/ownership/review-policy.ts) · Team members: [\`ownership/teams.yml\`](https://github.com/${GITHUB_REPOSITORY}/blob/main/ownership/teams.yml)`,

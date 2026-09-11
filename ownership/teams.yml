@@ -5,6 +5,7 @@ teams:
   - "@factorialco/f0"
   - "@factorialco/f0-devs"
   - "@factorialco/f0-designers"
+  - "@factorialco/product-designers"
   - "@factorialco/f0-general"
   - "@factorialco/mobile"
   - "@factorialco/foundations"
@@ -16,6 +17,8 @@ teams:
   - "@factorialco/talent-spaces"
 
 # Members of the teams used by the PR review policy (review-policy.ts).
+# Note f0-designers (the F0 design team, required by the `needs-design-review`
+# label) and product-designers (required by `feat:` PRs) are different teams.
 # The default Actions token cannot read org team membership, so we mirror it
 # here (same pattern as ownership/teams/*.yml in factorialco/factorial).
 # Keep in sync with https://github.com/orgs/factorialco/teams
@@ -34,6 +37,22 @@ policy_teams:
     members:
       - desiree-np
       - oskar-hernandez
+      - warcos-fact
+  product-designers:
+    members:
+      - albyduarte
+      - amadeu-thomson
+      - AngelMsaa
+      - cristinahernandez-bit
+      - daviz-fct
+      - desiree-np
+      - igorsafonov-gif
+      - irene-mallafre
+      - olegm-factorial
+      - oskar-hernandez
+      - pedroramos-cmyk
+      - Pili-gimenez
+      - smalonso
       - warcos-fact
   f0-general:
     members:
