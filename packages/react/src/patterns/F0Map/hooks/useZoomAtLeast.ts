@@ -1,5 +1,5 @@
-import type maplibregl from "maplibre-gl"
 import { useEffect, useState } from "react"
+import type { MapAdapter } from "../providers/types"
 
 /**
  * Whether the map's zoom is at/above `threshold`. Listens to every `zoom`
@@ -9,25 +9,22 @@ import { useEffect, useState } from "react"
  * setState bailout on every frame.)
  */
 export const useZoomAtLeast = (
-  map: maplibregl.Map | null,
+  adapter: MapAdapter | null,
   threshold: number
 ): boolean => {
   const [atLeast, setAtLeast] = useState(() =>
-    map ? map.getZoom() >= threshold : false
+    adapter ? adapter.getZoom() >= threshold : false
   )
 
   useEffect(() => {
-    if (!map) {
+    if (!adapter) {
       setAtLeast(false)
       return
     }
-    const update = () => setAtLeast(map.getZoom() >= threshold)
+    const update = () => setAtLeast(adapter.getZoom() >= threshold)
     update()
-    map.on("zoom", update)
-    return () => {
-      map.off("zoom", update)
-    }
-  }, [map, threshold])
+    return adapter.on("zoom", update)
+  }, [adapter, threshold])
 
   return atLeast
 }
