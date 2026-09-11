@@ -5580,7 +5580,6 @@ declare const defaultTranslations: {
     };
     readonly locationInput: {
         readonly country: "Country";
-        readonly address: "Address";
         readonly addressLine1: "Address line 1";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
@@ -8677,7 +8676,6 @@ export declare interface F0LocationInputProps {
     clearable?: boolean;
     size?: LocationInputSize;
     name?: string;
-    id?: string;
     autoFocus?: boolean;
     onBlur?: () => void;
     onFocus?: () => void;

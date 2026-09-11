@@ -128575,9 +128575,6 @@ const Y23 = N(function({
     ...c2,
     onItemCheckChange: Et,
     disabled: f,
-    // Destructured for the label above, so it has to be handed back for the
-    // trigger to carry aria-required
-    required: X,
     open: P2,
     onOpenChange: D2
   }, mr = K ? {
