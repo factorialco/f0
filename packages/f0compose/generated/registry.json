@@ -1,0 +1,1020 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-17T09:51:09.564Z",
+  "components": [
+    {
+      "name": "ApplicationFrame",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "The product shell. Wraps a page with a collapsible sidebar and main content area.",
+      "filePath": "packages/react/src/patterns/ApplicationFrame/index.tsx",
+      "props": [
+        {
+          "name": "ai",
+          "optional": true
+        },
+        {
+          "name": "aiPromotion",
+          "optional": true
+        },
+        {
+          "name": "banner",
+          "optional": true
+        },
+        {
+          "name": "sidebar",
+          "optional": false
+        },
+        {
+          "name": "children",
+          "optional": false
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "isClient": false
+    },
+    {
+      "name": "F0Accordion",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Accordion/F0Accordion.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Accordion\n  items={baseItems.map((item, index) => ({\n      ...item,\n      defaultOpen: index === 0,\n    }))}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0ActionBar",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0ActionBar/index.tsx",
+      "props": [
+        {
+          "name": "isOpen",
+          "optional": false,
+          "description": "Whether the action bar is open"
+        },
+        {
+          "name": "primaryActions",
+          "optional": true,
+          "description": "The primary action"
+        },
+        {
+          "name": "secondaryActions",
+          "optional": true,
+          "description": "The secondary actions"
+        },
+        {
+          "name": "label",
+          "optional": true,
+          "description": "The label of the action bar"
+        },
+        {
+          "name": "variant",
+          "optional": true,
+          "description": "Visual variant of the action bar - \"dark\": Dark background with light text (default) - \"light\": Light background with dark text"
+        },
+        {
+          "name": "leftContent",
+          "optional": true,
+          "description": "Custom content to render on the left side (e.g., error navigation)"
+        },
+        {
+          "name": "status",
+          "optional": true,
+          "description": "The current status of the action bar. - \"idle\": Default state, shows an alert icon (pending changes) - \"loading\": Shows a spinner and disables all actions - \"success\": Shows a checkmark icon and disab"
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "isClient": false
+    },
+    {
+      "name": "F0Alert",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Inline alert/banner for status messages. Variants: info, warning, critical, positive. Required: `title` and `description` (both strings — no children).",
+      "filePath": "packages/react/src/components/F0Alert/F0Alert.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Alert\n  variant=\"warning\"\n  title=\"Period locked\"\n  description=\"This payroll period is closed and cannot be edited.\"\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0AnalyticsDashboard",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "isClient": false
+    },
+    {
+      "name": "F0BigNumber",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "KPI card with a large numeric value, optional label, trend indicator and unit. Use in dashboard headers.",
+      "filePath": "packages/react/src/components/F0BigNumber/F0BigNumber.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0BigNumber label=\"Active employees\" value={148} />",
+      "isClient": false
+    },
+    {
+      "name": "F0Button",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Action button. Variants for hierarchy (default, outline, neutral, critical), optional icon/emoji, async onClick with built-in loading state.",
+      "filePath": "packages/react/src/components/F0Button/F0Button.tsx",
+      "props": [
+        {
+          "name": "variant",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Button label=\"Save changes\" variant=\"default\" onClick={() => save()} />",
+      "isClient": false,
+      "notes": "Required: `label` (always — used as accessible name even when `hideLabel`). For icon-only buttons set `hideLabel`."
+    },
+    {
+      "name": "F0ButtonDropdown",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0ButtonDropdown/F0ButtonDropdown.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0ButtonDropdown\n  variant=\"default\"\n  items={[\n      {\n        value: \"save\",\n        label: \"Save changes\",\n        icon: Save,\n      },\n      {\n        value: \"save-close\",\n        label: \"Save and close\",\n        icon: Save,\n      },\n      {\n        value: \"discard\",\n        label: \"Discard changes\",\n        icon: Delete,\n        critical: true,\n      },\n    ]}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0ButtonToggle",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0ButtonToggle/F0ButtonToggle.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0ButtonToggle\n  label=\"Default Toggle\"\n  icon={[MicrophoneNegative, Microphone]}\n  selected={undefined}\n  onSelectedChange={undefined}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0ButtonToggleGroup",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0ButtonToggleGroup/F0ButtonToggleGroup.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0ButtonToggleGroup\n  multiple={false}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Card",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Container card with optional title, description, icon and footer actions. Use for grouping related content.",
+      "filePath": "packages/react/src/components/F0Card/F0Card.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Card title=\"Team settings\" description=\"Manage members and permissions\">\n  <p>Card body</p>\n</F0Card>",
+      "isClient": false
+    },
+    {
+      "name": "F0Checkbox",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Checkbox/F0Checkbox.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />",
+      "isClient": false
+    },
+    {
+      "name": "F0ChipList",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0ChipList/index.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "isClient": false
+    },
+    {
+      "name": "F0DataChart",
+      "section": "Kits",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Generic chart wrapper supporting line, bar, area, pie. Pass series + labels; f0 handles legend, tooltip, axis, theme.",
+      "filePath": "packages/react/src/kits/F0DataChart/F0DataChart.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0DataChart\n  type=\"line\"\n  data={{\n    labels: [\"Jan\", \"Feb\", \"Mar\"],\n    series: [{ name: \"Headcount\", values: [120, 124, 130] }],\n  }}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0DatePicker",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0DatePicker/F0DatePicker.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0DatePicker\n  label=\"Date\"\n  placeholder=\"Select a date\"\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Dialog",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0Dialog/F0Dialog.tsx",
+      "props": [
+        {
+          "name": "title",
+          "optional": true
+        },
+        {
+          "name": "description",
+          "optional": true
+        },
+        {
+          "name": "module",
+          "optional": true
+        },
+        {
+          "name": "otherActions",
+          "optional": true
+        },
+        {
+          "name": "navigation",
+          "optional": true
+        },
+        {
+          "name": "resourceHeader",
+          "optional": true
+        },
+        {
+          "name": "controls",
+          "optional": true
+        },
+        {
+          "name": "isOpen",
+          "optional": false
+        },
+        {
+          "name": "onClose",
+          "optional": false
+        },
+        {
+          "name": "shownBottomSheet",
+          "optional": true
+        },
+        {
+          "name": "position",
+          "optional": false
+        },
+        {
+          "name": "children",
+          "optional": false
+        },
+        {
+          "name": "portalContainer",
+          "optional": false
+        },
+        {
+          "name": "asBottomSheetInMobile",
+          "optional": true
+        },
+        {
+          "name": "width",
+          "optional": true
+        },
+        {
+          "name": "primaryAction",
+          "optional": true
+        },
+        {
+          "name": "secondaryAction",
+          "optional": true
+        },
+        {
+          "name": "disableContentPadding",
+          "optional": true
+        },
+        {
+          "name": "container",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": true,
+      "isClient": false
+    },
+    {
+      "name": "F0DurationInput",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0DurationInput/F0DurationInput.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0DurationInput\n        {...restArgs}\n        label={labelArg ?? \"Duration\"}\n        value={value}\n        onChange={handleChange}\n      />",
+      "isClient": false
+    },
+    {
+      "name": "F0FileItem",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0FileItem/F0FileItem.tsx",
+      "props": [
+        {
+          "name": "file",
+          "optional": false
+        },
+        {
+          "name": "actions",
+          "optional": true
+        },
+        {
+          "name": "disabled",
+          "optional": true
+        },
+        {
+          "name": "size",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "canonicalExample": "<F0FileItem\n  size=\"lg\"\n  file={new File([\"test\"], \"test.txt\", { type: \"text/plain\" })}\n  actions={[\n      {\n        label: \"Delete file\",\n        onClick: fn(),\n      },\n    ]}\n  disabled={false}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0FilterPickerContent",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0FilterPickerContent/F0FilterPickerContent.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<DefaultComponent />",
+      "isClient": true
+    },
+    {
+      "name": "F0Form",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0Form/F0Form.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "isClient": false
+    },
+    {
+      "name": "F0FormField",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0FormField/F0FormField.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "isClient": false
+    },
+    {
+      "name": "F0Graph",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0Graph/F0Graph.tsx",
+      "props": [
+        {
+          "name": "nodes",
+          "optional": true
+        },
+        {
+          "name": "edges",
+          "optional": true
+        },
+        {
+          "name": "rootNodes",
+          "optional": true
+        },
+        {
+          "name": "loadChildren",
+          "optional": true,
+          "description": "Async callback to lazily load children when a node is expanded. Used with `rootNodes` for on-demand tree loading instead of providing the full `nodes` array upfront."
+        },
+        {
+          "name": "deferredNodes",
+          "optional": true,
+          "description": "A second batch of nodes (and optional edges) loaded after the initial paint. Pass a Promise that resolves with additional nodes, or a thunk that returns one (invoked after first paint). Only applies t"
+        },
+        {
+          "name": "onDeferredLoadComplete",
+          "optional": true,
+          "description": "Fired once when the deferred batch merges successfully."
+        },
+        {
+          "name": "onDeferredLoadError",
+          "optional": true,
+          "description": "Fired if the deferred promise rejects."
+        },
+        {
+          "name": "renderNode",
+          "optional": false,
+          "description": "Required callback to render each node. Receives the node data and a context object describing how F0Graph wants the node to behave (zoom variant, selection state, expand callbacks, etc.). For the defa"
+        },
+        {
+          "name": "renderEdge",
+          "optional": true,
+          "description": "Optional callback to render custom edges. Receives the edge and its variant (`\"default\" | \"highlighted\" | \"dimmed\"`). Falls back to default edge rendering when omitted."
+        },
+        {
+          "name": "zoomPreset",
+          "optional": true
+        },
+        {
+          "name": "zoomThresholds",
+          "optional": true
+        },
+        {
+          "name": "defaultZoom",
+          "optional": true,
+          "description": "Initial zoom level. `1` = 100%. Defaults to `1`."
+        },
+        {
+          "name": "minZoom",
+          "optional": true,
+          "description": "Smallest zoom level the user can pan to (the \"zoom-out\" limit). `1` = 100%, `0.05` = 5% (graph appears tiny / dot view). Defaults to `0.05`. Lower values allow extreme zoom-out where nodes collapse in"
+        },
+        {
+          "name": "maxZoom",
+          "optional": true,
+          "description": "Largest zoom level the user can pan to (the \"zoom-in\" limit). `1` = 100%, `2` = 200%. Defaults to `2`."
+        },
+        {
+          "name": "expandedNodes",
+          "optional": true
+        },
+        {
+          "name": "defaultExpandedNodes",
+          "optional": true
+        },
+        {
+          "name": "defaultExpandDepth",
+          "optional": true
+        },
+        {
+          "name": "onExpandToggle",
+          "optional": true
+        },
+        {
+          "name": "onExpandedNodesChange",
+          "optional": true,
+          "description": "Fired with the complete new Set on every expand/collapse, in both controlled and uncontrolled mode."
+        },
+        {
+          "name": "selectionMode",
+          "optional": true
+        },
+        {
+          "name": "selectedNodes",
+          "optional": true
+        },
+        {
+          "name": "onNodeSelect",
+          "optional": true
+        },
+        {
+          "name": "onSelectedNodesChange",
+          "optional": true,
+          "description": "Fired with the complete new Set on every selection change, in both controlled and uncontrolled mode."
+        },
+        {
+          "name": "focusedNode",
+          "optional": true
+        },
+        {
+          "name": "highlightedNodes",
+          "optional": true
+        },
+        {
+          "name": "fullScreen",
+          "optional": true
+        },
+        {
+          "name": "nodeWidth",
+          "optional": true,
+          "description": "Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows)."
+        },
+        {
+          "name": "nodeHeight",
+          "optional": true,
+          "description": "Layout sizing hint passed to the built-in layout engine. Defaults to 56. Override for compact nodes (icons, file rows)."
+        },
+        {
+          "name": "layoutEngine",
+          "optional": true,
+          "description": "Optional custom layout engine. When provided, overrides the built-in tree layout."
+        },
+        {
+          "name": "searchValue",
+          "optional": true,
+          "description": "Raw controlled search input. Renders the bare expandable search pill with no popover. Mutually exclusive with `searchable`."
+        },
+        {
+          "name": "onSearchChange",
+          "optional": true
+        },
+        {
+          "name": "searchLoading",
+          "optional": true
+        },
+        {
+          "name": "searchable",
+          "optional": true,
+          "description": "Declarative search-with-popover. F0Graph builds the index from the source `nodes`/`rootNodes`, filters/sorts results, and on select: (1) auto-expands collapsed ancestors, (2) selects the node, (3) fly"
+        },
+        {
+          "name": "onSearchResultSelect",
+          "optional": true,
+          "description": "Optional observability callback when a search result is picked."
+        },
+        {
+          "name": "canvasActions",
+          "optional": true,
+          "description": "Optional action buttons rendered below the search input, aligned to the left edge of the canvas. Consumers provide their own `<F0Button>` elements (use `size=\"md\"` to match the navigation controls)."
+        },
+        {
+          "name": "detailPanel",
+          "optional": true,
+          "description": "When provided, clicking a node opens a right-side detail panel and centers the node in the remaining canvas space (offset by the panel width). Returns the full panel configuration for the given node —"
+        },
+        {
+          "name": "detailPanelAriaLabel",
+          "optional": true,
+          "description": "Optional aria-label for the panel landmark."
+        },
+        {
+          "name": "detailPanelWidth",
+          "optional": true,
+          "description": "Initial width of the detail panel in pixels. Defaults to 384 (matches F0 spec). If the user has resized the panel, the persisted width takes precedence."
+        },
+        {
+          "name": "graphId",
+          "optional": true,
+          "description": "Stable identifier used to scope persisted detail-panel width in localStorage. Defaults to `\"default\"`."
+        },
+        {
+          "name": "showControls",
+          "optional": true
+        },
+        {
+          "name": "currentUserNodeId",
+          "optional": true,
+          "description": "Optional id of the node that represents the current user. When provided, a \"Find me\" button is rendered as the first control and clicking it centers the viewport on that node. When omitted, the button"
+        },
+        {
+          "name": "controlLabels",
+          "optional": true,
+          "description": "Override default English labels for interactive controls."
+        },
+        {
+          "name": "nodeTagTypes",
+          "optional": true,
+          "description": "Tag types present on the rendered nodes. When provided, a Sliders popover toggle is added to the controls bar that lets the user toggle each type's visibility individually. When omitted, no toggle is "
+        },
+        {
+          "name": "visibleTagTypes",
+          "optional": true,
+          "description": "Controlled set of currently visible tag types. When omitted, falls back to `defaultVisibleTagTypes`."
+        },
+        {
+          "name": "defaultVisibleTagTypes",
+          "optional": true,
+          "description": "Initial visible tag types for uncontrolled usage. Defaults to all of `nodeTagTypes`."
+        },
+        {
+          "name": "onVisibleTagTypesChange",
+          "optional": true,
+          "description": "Fired when the visible tag types change (in either mode)."
+        },
+        {
+          "name": "nodeTagTypeLabels",
+          "optional": true,
+          "description": "Optional friendly labels per tag type, used in the popover toggles."
+        },
+        {
+          "name": "reserveTagRow",
+          "optional": true,
+          "description": "Whether the layout should reserve vertical room for one tag row beneath each node so the source handle (and outgoing edges) anchors below the tags rather than between the pill and the tags. Defaults: "
+        },
+        {
+          "name": "onZoomLevelChange",
+          "optional": true
+        },
+        {
+          "name": "onViewportChange",
+          "optional": true
+        },
+        {
+          "name": "onVisibleNodesChange",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "canonicalExample": "<F0Graph\n  nodes={BASIC_NODES}\n  renderNode={renderEmployee}\n  defaultExpandDepth={2}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Heading",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Typographic heading. Pass text via `content` (NOT children). `variant`: \"heading\" | \"heading-large\". `as`: \"h1\"...\"h4\" for the rendered HTML element.",
+      "filePath": "packages/react/src/components/F0Heading/F0Heading.tsx",
+      "props": [
+        {
+          "name": "variant",
+          "optional": true
+        },
+        {
+          "name": "as",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Heading content=\"Payroll periods\" variant=\"heading-large\" as=\"h1\" />",
+      "isClient": false,
+      "notes": "F0Heading and F0Text are content-prop based, not children-based. Always: `<F0Heading content=\"...\" />` — never `<F0Heading>...</F0Heading>`."
+    },
+    {
+      "name": "F0Icon",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Icon/F0Icon.tsx",
+      "props": [
+        {
+          "name": "icon",
+          "optional": false
+        },
+        {
+          "name": "size",
+          "optional": true
+        },
+        {
+          "name": "state",
+          "optional": true
+        },
+        {
+          "name": "color",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "canonicalExample": "<F0Icon\n  size=\"lg\"\n  icon={Icons.ChartLine}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0InputField",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0InputField/F0InputField.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0InputField\n  label=\"This is the label\"\n  value=\"\"\n  placeholder=\"This is the placeholder\"\n  onChange={() => {}}\n  children={<input type=\"text\" className=\"w-full\" />}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Link",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Link/F0Link.tsx",
+      "props": [
+        {
+          "name": "variant",
+          "optional": true
+        },
+        {
+          "name": "stopPropagation",
+          "optional": true
+        },
+        {
+          "name": "href",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<p>\n      Do not click this <F0Link {...args} /> because it goes nowhere.\n    </p>",
+      "isClient": false
+    },
+    {
+      "name": "F0NumberInput",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0NumberInput/F0NumberInput.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0NumberInput {...props} value={value} onChange={setValue} />",
+      "isClient": false
+    },
+    {
+      "name": "F0SearchInput",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0SearchInput/F0SearchInput.tsx",
+      "props": [
+        {
+          "name": "value",
+          "optional": true
+        },
+        {
+          "name": "threshold",
+          "optional": true
+        },
+        {
+          "name": "debounceTime",
+          "optional": true
+        },
+        {
+          "name": "autoFocus",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0SearchInput\n  placeholder=\"Search...\"\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Select",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Select/F0Select.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Select\n  label=\"Select a theme\"\n  value={undefined}\n  placeholder={undefined}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Slider",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Slider/F0Slider.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<div className=\"w-80\">\n        <F0Slider\n          {...restArgs}\n          label=\"Brightness\"\n          min={0}\n          max={100}\n          value={value}\n          onChange={(next) => {\n            setValue(next)\n            onChangeArg?.(next)\n          }}\n        />\n      </div>",
+      "isClient": false
+    },
+    {
+      "name": "F0TableOfContentPopover",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0TableOfContentPopover/F0TableOfContentPopover.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0TableOfContentPopover />",
+      "isClient": true
+    },
+    {
+      "name": "F0Text",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Body text. Pass text via `content` (NOT children). `variant`: \"body\" | \"small\" | \"label\" | \"description\" | \"code\" | \"inverse\". Markdown enabled by default.",
+      "filePath": "packages/react/src/components/F0Text/F0Text.tsx",
+      "props": [
+        {
+          "name": "variant",
+          "optional": true
+        },
+        {
+          "name": "as",
+          "optional": true
+        },
+        {
+          "name": "markdown",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Text content=\"Manage your team's payroll concepts.\" variant=\"body\" />\n<F0Text content=\"Helper text\" variant=\"small\" />",
+      "isClient": false,
+      "notes": "F0Text uses the `content` prop, never children. Always: `<F0Text content=\"...\" />`."
+    },
+    {
+      "name": "F0TextAreaInput",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0TextAreaInput/F0TextAreaInput.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0TextAreaInput\n  label=\"Label text here\"\n  placeholder=\"Placeholder text here\"\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0TextInput",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0TextInput/F0TextInput.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0TextInput\n  label=\"Label text here\"\n  placeholder=\"Placeholder text here\"\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0Widget",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/F0Widget/F0Widget.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<F0Widget\n  title=\"Regular, non-interactive widget\"\n  children={<Slot />}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "F0WizardForm",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/F0WizardForm/F0WizardForm.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<SingleSchemaStory />",
+      "isClient": false
+    },
+    {
+      "name": "OneCalendar",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/components/OneCalendar/OneCalendar.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<div className=\"mx-auto max-w-80\">\n        <OneCalendar\n          {...args}\n          defaultSelected={selectedRange}\n          onSelect={handleSelect}\n        />\n        {selectedRange && <SelectedDateDisplay range={selectedRange} />}\n      </div>",
+      "isClient": false
+    },
+    {
+      "name": "OneChip",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Compact chip/tag — exported as `Chip`. Variants are limited to \"default\" | \"selected\" only. For semantic status badges (positive, warning, critical), prefer a Tailwind span with `bg-f1-background-{positive,warning,critical}` + `text-f1-foreground-{positive,warning,critical}` classes.",
+      "filePath": "packages/react/src/components/OneChip/index.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "import { Chip } from \"@factorialco/f0-react\"\n\n<Chip label=\"Pending\" variant=\"default\" />\n<Chip label=\"Selected\" variant=\"selected\" onClick={() => {}} />\n\n// For semantic status (paid/pending/etc):\n<span className=\"rounded-full bg-f1-background-positive px-2 py-0.5 text-xs text-f1-foreground-positive\">\n  Paid\n</span>",
+      "isClient": false
+    },
+    {
+      "name": "OneDataCollection",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "The flagship collection pattern: tables, lists, kanbans and grids over a typed data source. Supports filters, sorting, pagination, item actions, bulk actions, search, visualization toggles, empty states.",
+      "filePath": "packages/react/src/patterns/OneDataCollection/OneDataCollection.tsx",
+      "props": [
+        {
+          "name": "source",
+          "optional": false
+        },
+        {
+          "name": "visualizations",
+          "optional": false
+        },
+        {
+          "name": "onSelectItems",
+          "optional": true
+        },
+        {
+          "name": "onBulkAction",
+          "optional": true
+        },
+        {
+          "name": "autoManageBulkActionStatus",
+          "optional": true,
+          "description": "Opt-in to auto-managed bulk-action status. When `true`, a `Promise` returned from `onBulkAction` drives the ActionBar through `loading → success → idle` (or `loading → error`) automatically. Opt-in is"
+        },
+        {
+          "name": "bulkActionStatus",
+          "optional": true,
+          "description": "Controlled status for the bulk-action ActionBar. Designed for multi-step flows (confirmation modals, server polling) where the component can't derive status from a single promise. - **`\"idle\"`** — tra"
+        },
+        {
+          "name": "emptyStates",
+          "optional": true
+        },
+        {
+          "name": "onTotalItemsChange",
+          "optional": true
+        },
+        {
+          "name": "fullHeight",
+          "optional": true
+        },
+        {
+          "name": "onStateChange",
+          "optional": true,
+          "description": "Function to handle state change"
+        },
+        {
+          "name": "id",
+          "optional": true,
+          "description": "Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. \"employees/v1\""
+        },
+        {
+          "name": "storage",
+          "optional": true,
+          "description": "Storage for the data collection settings and state: use false to disable the storage"
+        },
+        {
+          "name": "disableUrlParams",
+          "optional": true,
+          "description": "By default the data collection reads its filters/search/sortings/ visualization/page from the URL query params on mount and reflects any later changes back into them (see `dataCollectionUrlParams`). T"
+        },
+        {
+          "name": "tmpFullWidth",
+          "optional": true
+        },
+        {
+          "name": "csvExport",
+          "optional": true,
+          "description": "Enable CSV export action in the collection actions menu. - `true` enables export with default settings - An object allows customizing the export filename - `false` or `undefined` disables the export a"
+        },
+        {
+          "name": "initialVisualization",
+          "optional": true,
+          "description": "Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0."
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "isClient": false,
+      "notes": "For full filter/sort/pagination behavior, read `packages/react/src/patterns/OneDataCollection/` and the stories under `__stories__/`. For prototypes, prefer the canonical \"table with simple columns + ItemActions\" shape."
+    },
+    {
+      "name": "OneDateNavigator",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/OneDateNavigator/OneDateNavigator.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<OneDateNavigator\n  defaultValue={{\n      granularity: \"day\",\n    } as DatePickerValue}\n  weekStartsOn={WeekStartDay.Monday}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "OneEmptyState",
+      "section": "Components",
+      "importFrom": "@factorialco/f0-react",
+      "description": "Empty state with optional emoji, title, description and action buttons. Use when a list/page has no content.",
+      "filePath": "packages/react/src/components/OneEmptyState/OneEmptyState.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<OneEmptyState\n  emoji=\"📭\"\n  title=\"No requests yet\"\n  description=\"When teammates request time off, they'll appear here.\"\n  actions={[{ label: \"Request time off\", onClick: () => {} }]}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "OneFilterPicker",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/OneFilterPicker/OneFilterPicker.tsx",
+      "props": [],
+      "propsExtractionIncomplete": true,
+      "canonicalExample": "<OneFilterPicker\n  filters={filterDefinition}\n  value={{\n      name: \"John\",\n      department: [\"engineering\"],\n    }}\n/>",
+      "isClient": false
+    },
+    {
+      "name": "Page",
+      "section": "Patterns",
+      "importFrom": "@factorialco/f0-react",
+      "description": "",
+      "filePath": "packages/react/src/patterns/Navigation/Page/index.tsx",
+      "props": [
+        {
+          "name": "children",
+          "optional": true
+        },
+        {
+          "name": "header",
+          "optional": true
+        },
+        {
+          "name": "embedded",
+          "optional": true
+        }
+      ],
+      "propsExtractionIncomplete": false,
+      "isClient": false
+    }
+  ]
+}

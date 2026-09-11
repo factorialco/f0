@@ -38,6 +38,7 @@ const mock = vi.hoisted(() => {
     // GL source/layer registry, so the vector-line layer is observable.
     sources: Record<string, { data: unknown; setData(d: unknown): void }> = {}
     layers = new Set<string>()
+    layerInsertions: [string, string | undefined][] = []
     // A live map exposes its Style instance; the GL layers use its presence as
     // the "map not yet destroyed" guard, so the mock must carry one.
     style = {}
@@ -142,8 +143,9 @@ const mock = vi.hoisted(() => {
       const { [id]: _removed, ...rest } = this.sources
       this.sources = rest
     }
-    addLayer(spec: { id: string }) {
+    addLayer(spec: { id: string }, before?: string) {
       this.layers.add(spec.id)
+      this.layerInsertions.push([spec.id, before])
     }
     getLayer(id: string) {
       return this.layers.has(id) ? { id } : undefined
@@ -363,6 +365,41 @@ describe("F0Map", () => {
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("current location", () => {
+    const grantLocation = () => {
+      Object.defineProperty(navigator, "geolocation", {
+        configurable: true,
+        value: {
+          getCurrentPosition: (success: PositionCallback) =>
+            success({
+              coords: { longitude: 2.16, latitude: 41.4 },
+            } as GeolocationPosition),
+        },
+      })
+      Object.defineProperty(navigator, "permissions", {
+        configurable: true,
+        value: {
+          query: async () => ({ state: "granted" }) as PermissionStatus,
+        },
+      })
+    }
+
+    it("draws the dot beneath the lines once located", async () => {
+      grantLocation()
+      render(<F0Map markers={POINTS} routes={ROUTES} showCurrentLocation />)
+      const map = mock.instances[0]
+      await waitFor(() =>
+        expect(map.layers.has("f0-current-location")).toBe(true)
+      )
+      expect(map.sources["f0-current-location"]).toBeDefined()
+      // Inserted below the bottom line layer, so lines and pins stay above it.
+      expect(map.layerInsertions.at(-1)).toEqual([
+        "f0-current-location",
+        "f0-map-lines-solid",
+      ])
     })
   })
 
