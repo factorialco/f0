@@ -42,3 +42,17 @@ Read local source, types and stories for F0OneIcon, F0Box, F0Button, F0Text, F0L
 ## Limits
 
 The reference is adapted to existing F0 public APIs; task icons are standard F0 button icons rather than new colored icon tiles. Widgets from the parallel iteration remain visible. Mobile widths, all widget creation branches, and other modules were not re-tested. Existing Preferences onPressEnter and Files collection key warnings were observed in unchanged code; no claim of a warning-free entire app. AI responses, permissions and usage remain simulated.
+
+## Reference and typography correction — 2026-09-12
+
+Jonathan requested reuse of list elements from PR #4085, 12px focus/permissions/community metadata, and a non-interactive Pro label plus circular usage indicator (no percentage). This supersedes the pending usage choice above.
+
+Queried PR #4085: head `26410e3ab0f85ccf699b29fe50d80c7f739f139a`, branch `feat/f0compose`. Read its NeedsYouItem directly with git show; verified our existing NeedsYouItem has no diff from that head. Briefing now renders that existing row, not custom button/text rows.
+
+F0Text `small` maps to core `sm`, 0.75rem (12px). Applied to focus and footer; See more uses the same F0 small token. F0Card gains opt-in `descriptionSize="small"`, with base as unchanged default and a Storybook example. This retains the native card/avatar/header rather than recreating its layout.
+
+Re-exported the existing RadialProgressChart as F0RadialProgressChart; no new chart implementation. Pro is ordinary F0Text, followed by the existing chart in a 16px F0Box, with the F0 categorical-2 blue token and round end caps. Accessible meter conveys 250/1000; no visible percent, link, button or usage dialog remains.
+
+Environment: f0compose's local dependencies now resolve f0-react to this isolated checkout, with independent built dist; icons and Tailwind CSS were generated here. Original parallel checkout not modified. Vite/dts required NODE_OPTIONS=--max-old-space-size=8192 after the default heap was exhausted. Successful library build, icons build, CSS build, app typecheck, prototype check (230 files) and diff check.
+
+Browser measured exact 12px for focus, Eleanor metadata, permission text, See more and Pro. Ring measured 16×16px with blue rgb(85,150,246), round arc caps and zero interactive descendants. Confirmed the same footer in the side panel and task opening through the PR's original row. No onboarding answers entered in the user origin.

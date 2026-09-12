@@ -675,3 +675,13 @@ export const Snapshot: Story = {
     </div>
   ),
 }
+
+export const SmallDescription: Story = {
+  args: {
+    ...Default.args,
+    compact: true,
+    descriptionSize: "small",
+    title: "Taco Tuesday party!",
+    description: "Eleanor Pena in Company updates · 2 days ago",
+  },
+}

@@ -18,6 +18,7 @@ import { FactorialAgentIcon } from "../FactorialAgentIcon"
 import { PROFILE_PEOPLE, needsYouTasks } from "../fixtures"
 import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets"
 import { candidates } from "../home-widgets/recruitment"
+import { NeedsYouItem } from "../NeedsYouItem"
 import {
   resumeHomeSetup,
   startConversationWithContext,
@@ -132,29 +133,14 @@ function Briefing({
                 : `You have ${tasks.length} ${tasks.length === 1 ? "item" : "items"} to review. Here’s where you can help.`
             }
           />
-          <F0Box
-            background="primary"
-            borderRadius="xl"
-            overflow="hidden"
-            padding="xs"
-          >
-            {tasks.map((task) => (
-              <F0Box
+          <F0Box display="flex" flexDirection="column">
+            {tasks.map((task, index) => (
+              <NeedsYouItem
                 key={task.id}
-                display="flex"
-                alignItems="center"
-                flexWrap="wrap"
-                gap="sm"
-                padding="sm"
-              >
-                <F0Button
-                  label={task.title}
-                  icon={task.icon}
-                  variant="ghost"
-                  onClick={() => openTask(task)}
-                />
-                <F0Text content={task.subtitle} variant="description" />
-              </F0Box>
+                task={task}
+                index={index}
+                onOpen={openTask}
+              />
             ))}
           </F0Box>
         </F0Box>
@@ -173,6 +159,7 @@ function Briefing({
           <F0Card
             compact
             title={post.title}
+            descriptionSize="small"
             description={`${post.author} in ${post.community} · ${post.posted}`}
             avatar={{
               type: "person",
@@ -344,7 +331,7 @@ export function HomeSessionBar({
         <F0Box display="flex" alignItems="center" gap="sm" flexWrap="wrap">
           <F0Text
             content={`Your focus: ${focuses.map((f) => HOME_FOCUS_LABELS[f as keyof typeof HOME_FOCUS_LABELS]).join(" · ")}`}
-            variant="description"
+            variant="small"
           />
           <F0Button
             label="Edit focus"

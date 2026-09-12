@@ -48,3 +48,5 @@ export const ComboChart = withDataTestId(
 )
 
 export * from "./RadarChart"
+
+export { RadialProgressChart as F0RadialProgressChart } from "./RadialProgressChart"

@@ -3,6 +3,7 @@ import { type ReactNode, forwardRef, useRef } from "react"
 import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 import {
   Card,
@@ -13,7 +14,6 @@ import {
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import {
   CardActions,
   type CardPrimaryAction,
@@ -101,6 +101,9 @@ export interface CardInternalProps {
    * The description of the card
    */
   description?: string
+
+  /** Text scale for the description; small uses the 12px F0 token. */
+  descriptionSize?: "base" | "small"
 
   /**
    * Metadata items to display in the card
@@ -197,6 +200,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       blurredBackground = true,
       title,
       description,
+      descriptionSize = "base",
       metadata,
       children,
       link,
@@ -345,7 +349,10 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 </CardTitle>
                 {description && (
                   <CardSubtitle
-                    className={cn("text-base text-f1-foreground-secondary")}
+                    className={cn(
+                      "text-f1-foreground-secondary",
+                      descriptionSize === "small" ? "text-sm" : "text-base"
+                    )}
                   >
                     <OneEllipsis lines={compact ? 2 : 3}>
                       {description}
@@ -366,7 +373,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           </div>
           {(metadata || children) && (
             <CardContent
-              className="pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_[role='button']]:pointer-events-auto [&_[tabindex]]:pointer-events-auto"
+              className="pointer-events-none relative z-10 [&_[role='button']]:pointer-events-auto [&_[tabindex]]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {metadata && (
