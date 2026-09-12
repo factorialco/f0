@@ -7,7 +7,7 @@ import { useFixedWidgets } from "../setup/widgetPreferences"
 import { HomeToolbarActions } from "../windows/HomeToolbarActions"
 import { WidgetRail } from "../windows/WidgetRail"
 import { windowRegistry } from "../windows/WindowsColumn"
-import { isBuiltin, useWidgetCatalog } from "./model"
+import { isBuiltin, readSelection, useWidgetCatalog } from "./model"
 import { WidgetCard } from "./WidgetCard"
 
 export function StaticWidgets({
@@ -16,12 +16,10 @@ export function StaticWidgets({
   onCloseConversation?: () => void
 }) {
   const profile = useProfile()
-  const builtin = useFixedWidgets(profile)
+  useFixedWidgets(profile)
   const catalog = useWidgetCatalog(profile)
   const [, setParams] = useSearchParams()
-  const ids = [
-    ...new Set([...builtin, ...catalog.selectedCustom, ...catalog.employees]),
-  ]
+  const ids = readSelection(profile).personal
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
       <div className="flex shrink-0 items-start pt-3">

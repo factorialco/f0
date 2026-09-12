@@ -89,3 +89,14 @@ Applied on codex/home-unified, /private/tmp/f0-home-unified, serving localhost:5
 - Activity starts with Needs you; removed redundant heading. Preferences uses native primary Tabs for Connections, Memory, Settings. Both screens have native Breadcrumbs with a working Home link.
 
 Verification: QA only in 127.0.0.1 origin; user localhost onboarding untouched. Observed 216→168px composer shrink on field focus; report suggestion opens its existing follow-up directly, ordinary suggestion sends exact prompt directly. Preferences tabs all changed contents. Ask One generated contextual reply; Preferences→Activity and Calendar→Tools preserved visible conversation, Home closed it. Needs you checked with two items and no Activity heading. Edit widgets measured 119.65px inside 352px container. Personal had Required labels and no removal actions for Clock in/Events/Communities; Employees retained removal actions. Actual pointer hover (CUA drag-to) verified task and widget background rgba(15,46,87,.1), box-shadow none. Typecheck, 235-file prototype check, widget model regressions and diff check passed. No push/merge/publication.
+
+## Six interaction refinements — 2026-09-12
+
+- Animated the existing composer and suggestion slot; outside clicks restore suggestions while retaining drafts. Respect reduced motion for resizing.
+- Employee widgets lead Personal and remain immovable/non-removable. Personal ordering now persists across built-in/custom widgets.
+- Existing WidgetCard supports title-based pointer drag and Alt+arrow keyboard reordering, with no new visual component. Saving recognizes order-only changes.
+- Restored opaque white widget surfaces with no hover shadow/darkening. Conversation hover styles remain scoped to conversation cards.
+- Preferences now uses the canonical Page + PageHeader + primary Tabs + StandardLayout composition from F0 stories. PageHeader supplies the Home breadcrumb and Ask One action; its separate live-runtime switch is locally hidden to avoid duplicate entry points in this simulated prototype.
+- Ask One starts a normal text message through the existing conversation renderer; removed the fabricated page metric context card. Replies still use mocked page data.
+
+Verified in isolated 127.0.0.1 browser origin: input surface animates between 176/128px; suggestion hides on focus and reappears outside with the draft intact. Actual pointer drag moved Recruitment before My payslip, Save enabled, and reloading retained the order; employee cards remained first with dragging disabled. Widget pointer hover stayed rgb(255,255,255), shadow none. Preferences screenshot checked against F0 layout, all tabs navigated, breadcrumb returned Home, and Ask One produced the standard prompt/reply conversation. Typecheck, 235-file prototype check, widget ordering/storage regression tests and diff check passed. Other task's HomeNav/onboarding changes left untouched. No publication or push.

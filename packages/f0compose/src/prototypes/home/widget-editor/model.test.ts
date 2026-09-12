@@ -4,6 +4,7 @@ import {
   countChanges,
   readCatalog,
   readSelection,
+  reorderPersonal,
   saveSelection,
 } from "./model"
 
@@ -86,7 +87,47 @@ assert(
 console.log("Widget catalog and scope regressions passed")
 
 saveSelection("admin", { personal: [], employees: ["clockin", "events"] })
-assert(readSelection("admin").personal.includes("clockin"), "Employee widgets remain in Personal even when omitted from its saved selection")
-assert(readSelection("admin").personal.includes("events"), "All employee defaults are inherited")
+assert(
+  readSelection("admin").personal.includes("clockin"),
+  "Employee widgets remain in Personal even when omitted from its saved selection"
+)
+assert(
+  readSelection("admin").personal.includes("events"),
+  "All employee defaults are inherited"
+)
 saveSelection("admin", { personal: [], employees: ["events"] })
-assert(!readSelection("admin").personal.includes("clockin"), "An inherited-only widget disappears when removed from employee defaults")
+assert(
+  !readSelection("admin").personal.includes("clockin"),
+  "An inherited-only widget disappears when removed from employee defaults"
+)
+
+const ordered = {
+  personal: ["clockin", "events", "payslip", widget.id, "recruitment"],
+  employees: ["clockin", "events"],
+}
+const moved = reorderPersonal(ordered, "recruitment", "payslip")
+assert(
+  moved.personal.join() ===
+    ["clockin", "events", "recruitment", "payslip", widget.id].join(),
+  "Personal widgets reorder after the fixed employee widgets"
+)
+assert(
+  reorderPersonal(ordered, "clockin", "payslip") === ordered,
+  "Employee widgets cannot move"
+)
+assert(
+  reorderPersonal(ordered, "payslip", "clockin") === ordered,
+  "Personal widgets cannot move ahead of employee widgets"
+)
+assert(countChanges(ordered, moved) > 0, "Reordering alone enables saving")
+saveSelection("admin", moved)
+assert(
+  readSelection("admin").personal.join() === moved.personal.join(),
+  "Mixed built-in and custom order survives reload"
+)
+saveSelection("admin", { ...moved, personal: [...moved.personal].reverse() })
+assert(
+  readSelection("admin").personal.slice(0, 2).join() === "clockin,events",
+  "Employee widgets always load first"
+)
+console.log("Widget ordering regressions passed")

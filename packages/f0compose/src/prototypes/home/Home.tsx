@@ -117,8 +117,15 @@ export const meta: PrototypeMeta = {
 // while Home is mounted and restore them on unmount.
 const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
-  [data-static-widgets] [role="article"] { box-shadow: none; }
-  [data-static-widgets] [role="article"]:hover,
+  /* The native header keeps its F0 layout; only the separate live-runtime switch is hidden because this prototype uses Ask One. */
+  [data-home-preferences-header] [role="switch"] { display: none; }
+  [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); box-shadow: none; }
+  [data-widget-draggable="true"] h3 { cursor: grab; user-select: none; }
+  [data-widget-draggable="true"] h3:active { cursor: grabbing; }
+  [data-home-input-surface] { transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-hybrid-composer], [data-home-input-surface] { transition: none !important; }
+  }
   [aria-label="Conversation"] [data-testid="card"]:hover,
   [data-home-generated-section] .f0c-ease-hover:hover { background: hsl(var(--neutral-20)); box-shadow: none; }
   [aria-label="Conversation"] [data-testid="card"]:focus-within { box-shadow: none; }
@@ -1013,6 +1020,7 @@ function HomeCanvas() {
   // them inside the canvas gutters plus its scroller would give them a
   // second scrollbar inside the first.
   const fullWidthView =
+    screenView === "preferences" ||
     screenView === "calendar" ||
     screenView === "people" ||
     screenView === "organization" ||
@@ -1330,7 +1338,7 @@ function HomeCanvas() {
               : { flex: "1 1 0%", minWidth: 0 }
           }
         >
-          <div className="flex flex-col">
+          {screenView !== "preferences" && <div className="flex flex-col">
             <HomeNavbar
               openWindows={windows.state.open}
               onToggleWindow={toggleWindow}
@@ -1345,7 +1353,7 @@ function HomeCanvas() {
               conversationEmoji={agentById(activeConversation?.agentId)?.emoji}
               screenTitle={screenTitle}
             />
-          </div>
+          </div>}
           {/* Figma 975:11536 — content column: pt-24px, centered 712px column,
             welcome block pinned top, ONE bar pinned bottom (pb-12px).
             A submitted prompt replaces the greeting + Needs-you canvas

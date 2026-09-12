@@ -19,11 +19,7 @@ import { type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { useSearchParams } from "react-router-dom"
 
-import {
-  suggestionFor,
-  pageReading,
-  type Presentation,
-} from "./agentEntryData"
+import { suggestionFor, pageReading, type Presentation } from "./agentEntryData"
 import { AgentEntryContext } from "./AskFactorial"
 import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
@@ -33,7 +29,7 @@ import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   goHome,
   startConversation,
-  startConversationWithContext,
+  startPageConversation,
   startHomeWorkflow,
   sendMessage,
   useConversations,
@@ -47,8 +43,7 @@ import { HomeWorking, useHomeRefreshing } from "./setup/homeRefresh"
 export function HybridHome({ children }: { children: ReactNode }) {
   const [params] = useSearchParams()
   const openChats = useOpenChats()
-  const view =
-    params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
+  const view = params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
   const [sideConversationId, setSideConversationId] = useState<string | null>(
     null
   )
@@ -96,11 +91,22 @@ export function HybridHome({ children }: { children: ReactNode }) {
   const suggestion = suggestionFor(null, profile)
   const [writing, setWriting] = useState(false)
   const homeLanding = !activeConversation || !!activeConversation.homeBriefing
-  const expandedComposer =
-    !view && !writing && (suggestReport || homeLanding)
+  useEffect(() => {
+    if (!writing) return
+    const outside = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !composer.current?.contains(event.target)
+      )
+        setWriting(false)
+    }
+    document.addEventListener("pointerdown", outside)
+    return () => document.removeEventListener("pointerdown", outside)
+  }, [writing])
+  const expandedComposer = !view && !writing && (suggestReport || homeLanding)
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
-  const showSuggestions = !view && homeLanding && !writing && !draft
+  const showSuggestions = !view && homeLanding && !writing
   const [notice, setNotice] = useState("")
   const root = useRef<HTMLDivElement>(null)
   const composer = useRef<HTMLDivElement>(null)
@@ -277,15 +283,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
                 "[data-hybrid-canvas] main"
               )?.innerText ?? ""
             )
-            const id = startConversationWithContext(
-              {
-                kind: "metric",
-                title: reading.title,
-                stats: [{ label: "Page", value: reading.title }],
-              },
-              reading.prompt,
-              { reply: reading.reply }
-            )
+            const id = startPageConversation(reading.title, reading.prompt, {
+              reply: reading.reply,
+            })
             setSideConversationId(id)
           }
         },
@@ -330,9 +330,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
                     hideLabel
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      setMode(mode === "side" ? "focus" : "side")
-                    }
+                    onClick={() => setMode(mode === "side" ? "focus" : "side")}
                   />
                 )}
                 <F0Button
@@ -373,12 +371,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking
-                          ? "auto"
-                          : expandedComposer
-                            ? 216
-                            : 168,
-                        transition: "none",
+                        height: asking ? "auto" : expandedComposer ? 216 : 168,
+                        transition:
+                          "height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
                       }
                     : undefined
               }
@@ -391,7 +386,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
               data-hybrid-composer
               hidden={compact}
               data-compact={compact}
-              data-writing={typing || open || writing}
+              data-writing={
+                !view && homeLanding ? writing : typing || open || writing
+              }
             >
               {asking && followUp && activeConversation && (
                 <div
@@ -438,13 +435,20 @@ export function HybridHome({ children }: { children: ReactNode }) {
                 <F0Box
                   position="relative"
                   height={expandedComposer ? "44" : "32"}
+                  data-home-input-surface
                   background="primary"
                   border="default"
                   borderColor="secondary"
                   borderRadius="xl"
                 >
-                  {(showSuggestions || (suggestReport && !writing)) && (
-                    <div className="flex gap-1" data-hybrid-suggestions>
+                  {!view && questionReady && (homeLanding || suggestReport) && (
+                    <div
+                      className="flex gap-1"
+                      data-hybrid-suggestions
+                      aria-hidden={
+                        !showSuggestions && !(suggestReport && !writing)
+                      }
+                    >
                       <HomeSuggestion
                         label={
                           suggestReport

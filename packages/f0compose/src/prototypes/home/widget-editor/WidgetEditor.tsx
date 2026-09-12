@@ -35,6 +35,7 @@ import { windowRegistry } from "../windows/WindowsColumn"
 import { customWidgetIconKey } from "./creation"
 import {
   countChanges,
+  reorderPersonal,
   readSelection,
   saveSelection,
   useWidgetCatalog,
@@ -58,8 +59,9 @@ const widgetIcons: Record<string, IconType> = {
 
 export function WidgetEditor() {
   const profile = useProfile()
-  const [dialogContainer, setDialogContainer] =
-    useState<HTMLDivElement | null>(null)
+  const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(
+    null
+  )
   const [previewContainer, setPreviewContainer] =
     useState<HTMLDivElement | null>(null)
   const dialogRef = useCallback(
@@ -100,8 +102,7 @@ export function WidgetEditor() {
           widget.getBoundingClientRect().top -
           container.getBoundingClientRect().top -
           16,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-          .matches
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "instant"
           : "smooth",
       })
@@ -120,14 +121,12 @@ export function WidgetEditor() {
     if (!added.length) return
     setDraft((current) => ({
       ...current,
-      [scope]: [
-        ...new Set([...current[scope], ...added.map(({ id }) => id)]),
-      ],
+      [scope]: [...new Set([...current[scope], ...added.map(({ id }) => id)])],
     }))
   }, [JSON.stringify(catalog.custom), scope])
   const selection =
     scope === "personal"
-      ? [...new Set([...draft.personal, ...draft.employees])]
+      ? [...new Set([...draft.employees, ...draft.personal])]
       : draft.employees
   const inherited = (id: string) =>
     scope === "personal" && draft.employees.includes(id)
@@ -273,8 +272,9 @@ export function WidgetEditor() {
                     )
                     .sort(
                       (a, b) =>
+                        Number(inherited(b.id)) - Number(inherited(a.id)) ||
                         Number(selection.includes(b.id)) -
-                        Number(selection.includes(a.id))
+                          Number(selection.includes(a.id))
                     )
                     .map((row) => (
                       <F0Box
@@ -330,8 +330,7 @@ export function WidgetEditor() {
                         >
                           {inherited(row.id) ? (
                             <F0Text content="Required" variant="small" />
-                          ) : hoveredRow === row.id ||
-                            focusedRow === row.id ? (
+                          ) : hoveredRow === row.id || focusedRow === row.id ? (
                             <F0Button
                               label={
                                 selection.includes(row.id) ? "Remove" : "Add"
@@ -356,10 +355,7 @@ export function WidgetEditor() {
                       !search ||
                       row.title.toLowerCase().includes(search.toLowerCase())
                   ) && (
-                    <F0Text
-                      content="No widgets found"
-                      variant="description"
-                    />
+                    <F0Text content="No widgets found" variant="description" />
                   )}
                 </F0Box>
               </F0Box>
@@ -410,8 +406,14 @@ export function WidgetEditor() {
                         key={id}
                         id={id}
                         custom={catalog.custom}
-                        onRemove={
-                          inherited(id) ? undefined : () => toggle(id)
+                        onRemove={inherited(id) ? undefined : () => toggle(id)}
+                        onReorder={
+                          scope === "personal" && !inherited(id)
+                            ? (active, target) =>
+                                setDraft((current) =>
+                                  reorderPersonal(current, active, target)
+                                )
+                            : undefined
                         }
                       />
                     ))}

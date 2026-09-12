@@ -1346,6 +1346,14 @@ function answerWidgetCreation(id: string, answer: string) {
 }
 
 /** Prompt-bar submit on the Home screen → new full-screen conversation. */
+export function startPageConversation(
+  title: string,
+  prompt: string,
+  script: ReplyScript
+): string {
+  return createConversation(prompt, { title, script })
+}
+
 export function startConversation(prompt: string): string {
   return createConversation(prompt)
 }

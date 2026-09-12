@@ -17,6 +17,7 @@ export type WidgetSelection = Record<WidgetScope, string[]>
 type WidgetCatalog = {
   custom: CustomWidget[]
   selectedCustom: string[]
+  personalOrder?: string[]
   employees: string[]
 }
 function isCustomWidget(value: unknown): value is CustomWidget {
@@ -43,7 +44,11 @@ function parseCatalog(value: unknown): WidgetCatalog {
     !employees.every((id) => typeof id === "string")
   )
     throw new Error("Invalid widget catalog")
-  return { custom, selectedCustom, employees }
+  const order: unknown = Reflect.get(value, "personalOrder")
+  const personalOrder = Array.isArray(order)
+    ? order.filter((id): id is string => typeof id === "string")
+    : undefined
+  return { custom, selectedCustom, employees, personalOrder }
 }
 const eventName = "home:widget-catalog-changed"
 const key = (profile: ProfileId) => `f0compose:home:widget-catalog:${profile}`
@@ -95,8 +100,13 @@ export function useWidgetCatalog(profile: ProfileId) {
 }
 export function readSelection(profile: ProfileId): WidgetSelection {
   const data = readCatalog(profile)
+  const chosen = [...readWidgets(profile), ...data.selectedCustom]
+  const ordered = [
+    ...(data.personalOrder ?? []).filter((id) => chosen.includes(id)),
+    ...chosen,
+  ]
   return {
-    personal: [...new Set([...readWidgets(profile), ...data.selectedCustom, ...data.employees])],
+    personal: [...new Set([...data.employees, ...ordered])],
     employees: data.employees,
   }
 }
@@ -108,6 +118,7 @@ export function saveSelection(profile: ProfileId, selection: WidgetSelection) {
   write(profile, {
     ...data,
     selectedCustom: personal.filter((id) => !isBuiltin(id)),
+    personalOrder: personal,
     employees: [...new Set(selection.employees.filter(valid))],
   })
   changeWidgets(profile, personal.filter(isBuiltin))
@@ -126,7 +137,34 @@ export function countChanges(saved: WidgetSelection, draft: WidgetSelection) {
     (total, scope) =>
       total +
       saved[scope].filter((id) => !draft[scope].includes(id)).length +
-      draft[scope].filter((id) => !saved[scope].includes(id)).length,
+      draft[scope].filter((id) => !saved[scope].includes(id)).length +
+      (saved[scope].length === draft[scope].length &&
+      saved[scope].every((id) => draft[scope].includes(id)) &&
+      saved[scope].some((id, index) => draft[scope][index] !== id)
+        ? 1
+        : 0),
     0
   )
+}
+
+/** Employee defaults keep their leading positions; only personal extras move. */
+export function reorderPersonal(
+  selection: WidgetSelection,
+  active: string,
+  target: string
+): WidgetSelection {
+  if (
+    selection.employees.includes(active) ||
+    selection.employees.includes(target)
+  )
+    return selection
+  const extras = selection.personal.filter(
+    (id) => !selection.employees.includes(id)
+  )
+  const from = extras.indexOf(active),
+    to = extras.indexOf(target)
+  if (from < 0 || to < 0 || from === to) return selection
+  extras.splice(from, 1)
+  extras.splice(to, 0, active)
+  return { ...selection, personal: [...selection.employees, ...extras] }
 }

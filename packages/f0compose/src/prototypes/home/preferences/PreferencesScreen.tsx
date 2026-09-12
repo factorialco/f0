@@ -4,17 +4,21 @@ import {
   F0Button,
   F0Heading,
   F0Text,
+  StandardLayout,
 } from "@factorialco/f0-react"
 import {
   CardSelectableContainer,
   Input,
   Tabs,
+  Page,
+  PageHeader,
 } from "@factorialco/f0-react/dist/experimental"
-import { Pencil } from "@factorialco/f0-react/icons/app"
+import { Comment, Pencil } from "@factorialco/f0-react/icons/app"
 /** Ported from irene-mallafre/factorial-ai, f7405eb; see IMPORT.md.
  * Original sections and state operations retained; controls use real F0. */
-import { useState } from "react"
+import { useContext, useState } from "react"
 
+import { AgentEntryContext } from "../AskFactorial"
 import { startPolicyEditing } from "../one/conversationStore"
 import {
   BUILT_IN_CONNECTORS,
@@ -109,11 +113,7 @@ function ConnectorRow({
   )
 }
 
-export function Connections({
-  onboarding = false,
-}: {
-  onboarding?: boolean
-}) {
+export function Connections({ onboarding = false }: { onboarding?: boolean }) {
   const prefs = usePreferences()
   const [url, setUrl] = useState("")
   const all = onboarding
@@ -247,28 +247,47 @@ function Behaviour() {
 
 export function PreferencesScreen() {
   const [tab, setTab] = useState("connections")
+  const one = useContext(AgentEntryContext)
   return (
-    <div className="mx-auto flex w-[712px] max-w-full flex-col gap-8 px-4 pb-8 pt-2">
-      <Tabs
-        secondary={false}
-        activeTabId={tab}
-        tabs={[
-          {
-            id: "connections",
-            label: "Connections",
-            onClick: () => setTab("connections"),
-          },
-          { id: "memory", label: "Memory", onClick: () => setTab("memory") },
-          {
-            id: "settings",
-            label: "Settings",
-            onClick: () => setTab("settings"),
-          },
-        ]}
-      />
-      {tab === "connections" && <Connections />}
-      {tab === "memory" && <Behaviour />}
-      {tab === "settings" && <SaveLocation />}
-    </div>
+    <Page
+      header={
+        <>
+          <div data-home-preferences-header>
+            <PageHeader
+              module={{ id: "home", name: "Home", href: "/p/home" }}
+              breadcrumbs={[{ id: "preferences", label: "Preferences" }]}
+              actions={[{ label: "Ask One", icon: Comment, onClick: one.open }]}
+            />
+          </div>
+          <Tabs
+            secondary={false}
+            activeTabId={tab}
+            tabs={[
+              {
+                id: "connections",
+                label: "Connections",
+                onClick: () => setTab("connections"),
+              },
+              {
+                id: "memory",
+                label: "Memory",
+                onClick: () => setTab("memory"),
+              },
+              {
+                id: "settings",
+                label: "Settings",
+                onClick: () => setTab("settings"),
+              },
+            ]}
+          />
+        </>
+      }
+    >
+      <StandardLayout variant="narrow">
+        {tab === "connections" && <Connections />}
+        {tab === "memory" && <Behaviour />}
+        {tab === "settings" && <SaveLocation />}
+      </StandardLayout>
+    </Page>
   )
 }
