@@ -139,6 +139,7 @@ function load(): Preferences {
 const store = createStore<Preferences>(load())
 
 export const usePreferences = () => store.use()
+export const readPreferences = () => store.get()
 
 export function updatePreferences(patch: Partial<Preferences>) {
   const next = { ...store.get(), ...patch }

@@ -16,11 +16,13 @@ import { useActivitySource } from "./useActivitySource"
 function ActivityList({
   rows,
   open,
+  needsYou = false,
 }: {
   rows: ActivityRecord[]
+  needsYou?: boolean
   open: (row: ActivityRecord) => void
 }) {
-  const source = useActivitySource(rows, open)
+  const source = useActivitySource(rows, open, needsYou)
   return (
     <OneDataCollection
       source={source}
@@ -59,7 +61,6 @@ export function ActivityScreen() {
       width="full"
       minWidth="0"
     >
-      <F0Heading content="Activity" variant="heading-large" />
       {confirmation && (
         <F0Box
           display="flex"
@@ -80,7 +81,7 @@ export function ActivityScreen() {
           />
         </F0Box>
       )}
-      <ActivityList rows={rows} open={open} />
+      <ActivityList rows={rows} open={open} needsYou />
       <F0Dialog
         isOpen={Boolean(selected)}
         onClose={() => setSelectedId(null)}

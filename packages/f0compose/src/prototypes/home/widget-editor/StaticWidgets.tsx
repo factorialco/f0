@@ -1,4 +1,4 @@
-import { F0Button } from "@factorialco/f0-react"
+import { F0Box, F0Button } from "@factorialco/f0-react"
 import { Cross, Pencil } from "@factorialco/f0-react/icons/app"
 import { useSearchParams } from "react-router-dom"
 
@@ -19,7 +19,9 @@ export function StaticWidgets({
   const builtin = useFixedWidgets(profile)
   const catalog = useWidgetCatalog(profile)
   const [, setParams] = useSearchParams()
-  const ids = [...builtin, ...catalog.selectedCustom]
+  const ids = [
+    ...new Set([...builtin, ...catalog.selectedCustom, ...catalog.employees]),
+  ]
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
       <div className="flex shrink-0 items-start pt-3">
@@ -45,14 +47,16 @@ export function StaticWidgets({
         }
         renderWidget={(id) => <WidgetCard id={id} custom={catalog.custom} />}
         footer={(collapsed) => (
-          <F0Button
-            label="Edit widgets"
-            icon={Pencil}
-            hideLabel={collapsed}
-            size={collapsed ? "sm" : "md"}
-            variant={collapsed ? "ghost" : "outline"}
-            onClick={() => setParams({ view: "widgets" })}
-          />
+          <F0Box display="flex" justifyContent="center">
+            <F0Button
+              label="Edit widgets"
+              icon={Pencil}
+              hideLabel={collapsed}
+              size={collapsed ? "sm" : "md"}
+              variant={collapsed ? "ghost" : "outline"}
+              onClick={() => setParams({ view: "widgets" })}
+            />
+          </F0Box>
         )}
       />
     </div>

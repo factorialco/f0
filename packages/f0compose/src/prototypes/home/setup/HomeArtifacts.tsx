@@ -30,6 +30,7 @@ import { COMMUNITY_POSTS } from "../windows/communityPosts";
 import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh";
 import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data";
 import { useFixedWidgets } from "./widgetPreferences";
+import { useWidgetCatalog } from "../widget-editor/model";
 
 // Pending questions replace the original composer in its existing slot; completed questions stay in the transcript.
 export function HomeQuestion({
@@ -51,7 +52,9 @@ function Briefing({
   entrance: boolean;
 }) {
   const [communityOpen, setCommunityOpen] = useState(false);
-  const fixedWidgets = useFixedWidgets(artifact.profile);
+  const personalWidgets = useFixedWidgets(artifact.profile);
+  const widgetCatalog = useWidgetCatalog(artifact.profile);
+  const fixedWidgets = [...personalWidgets, ...widgetCatalog.employees];
   const key = `f0compose:home:generated-v1:${artifact.profile}`;
   const [stage, setStage] = useState(() => {
     try {

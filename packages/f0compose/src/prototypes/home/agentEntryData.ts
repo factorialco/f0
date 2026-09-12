@@ -1,3 +1,13 @@
+import { CALENDAR_EVENTS, WEEK_DAYS } from "./calendar/calendarFixtures"
+import { peopleRows, ACCESS_LABEL } from "./people/peopleData"
+import { policies } from "./policies/policiesData"
+import { readActivity } from "./activity/state"
+import {
+  readPreferences,
+  BUILT_IN_CONNECTORS,
+  policyTextFor,
+} from "./preferences/state"
+
 import {
   Calendar,
   Clock,
@@ -101,5 +111,93 @@ export function emptyStateFor(view: string | null) {
       { label: "Find what needs my attention", icon: Search },
       { label: "Help me plan my next steps", icon: List },
     ],
+  }
+}
+
+/** Uses the same simulated records displayed by each page. */
+export function pageReading(view: string, visibleText = "") {
+  const title =
+    view === "policies"
+      ? "Files"
+      : view.charAt(0).toUpperCase() + view.slice(1).replaceAll("-", " ")
+  let reply: string[]
+  if (view === "activity" || view === "inbox") {
+    const rows = readActivity()
+    const pending = rows.filter((row) => row.status === "needs-you")
+    reply = [
+      `${pending.length} items need your attention. ${rows.filter((row) => row.status === "in-progress").length} are in progress.`,
+      ...pending.slice(0, 4).map((row) => `${row.title}: ${row.detail}`),
+    ]
+  } else if (view === "preferences") {
+    const prefs = readPreferences()
+    const connected = [
+      ...BUILT_IN_CONNECTORS,
+      ...prefs.customConnectors,
+    ].filter((c) => prefs.connected.includes(c.id))
+    reply = [
+      `${connected.length} ${connected.length === 1 ? "tool is" : "tools are"} connected${connected.length ? `: ${connected.map((c) => c.name).join(", ")}` : ". You can connect a tool in Connections"}.`,
+      `Your memory: ${policyTextFor(prefs)}`,
+      `Files are saved to ${prefs.saveLocations.join(", ")}. You can review these destinations in Settings.`,
+    ]
+  } else if (view === "calendar") {
+    const conflicts = CALENDAR_EVENTS.reduce(
+      (count, a, i) =>
+        count +
+        CALENDAR_EVENTS.filter(
+          (b, j) =>
+            j > i && a.day === b.day && a.start < b.end && b.start < a.end
+        ).length,
+      0
+    )
+    reply = [
+      `Your displayed week has ${CALENDAR_EVENTS.length} events and ${conflicts} overlapping event pairs.`,
+      ...CALENDAR_EVENTS.slice(0, 5).map(
+        (event) => `${WEEK_DAYS[event.day]}: ${event.title}.`
+      ),
+      "Review the busiest days before adding another meeting.",
+    ]
+  } else if (view === "people" || view === "organization") {
+    const pending = peopleRows.filter((person) => person.access !== "active")
+    reply = [
+      `${pending.length} of ${peopleRows.length} people have pending account access.`,
+      ...pending
+        .slice(0, 5)
+        .map(
+          (person) =>
+            `${person.firstName} ${person.lastName}: ${ACCESS_LABEL[person.access]}.`
+        ),
+      "Start with pending invitations before checking onboarding progress.",
+    ]
+  } else if (view === "policies") {
+    const attention = policies.filter(
+      (policy) => policy.status !== "published"
+    )
+    reply = [
+      `${attention.length} of ${policies.length} files need a review before publication.`,
+      ...attention.map(
+        (policy) =>
+          `${policy.name}: ${policy.status}. Last updated ${policy.lastUpdate}.`
+      ),
+    ]
+  } else {
+    const lines = [
+      ...new Set(
+        visibleText
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.length > 20 && !line.includes("Ask One"))
+      ),
+    ].slice(0, 6)
+    reply = lines.length
+      ? [
+          `Here are the relevant details currently shown in ${title}:`,
+          ...lines,
+        ]
+      : [`There are no records shown in ${title} to summarize yet.`]
+  }
+  return {
+    title,
+    prompt: `Review ${title} and summarize the relevant data, pending items and next steps.`,
+    reply,
   }
 }

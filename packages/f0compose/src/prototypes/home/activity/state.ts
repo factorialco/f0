@@ -12,6 +12,7 @@ const subscribe = (listener: () => void) => {
   }
 }
 const getSnapshot = () => records
+export const readActivity = getSnapshot
 function publish(next: ActivityRecord[]) {
   records = next
   listeners.forEach((listener) => listener())

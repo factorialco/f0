@@ -6,7 +6,7 @@ import {
   F0Heading,
   type ModuleId,
 } from "@factorialco/f0-react"
-import { F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
+import { Breadcrumbs, F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
 import {
   Ellipsis,
   Reaction,
@@ -117,6 +117,11 @@ export const meta: PrototypeMeta = {
 // while Home is mounted and restore them on unmount.
 const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
+  [data-static-widgets] [role="article"] { box-shadow: none; }
+  [data-static-widgets] [role="article"]:hover,
+  [aria-label="Conversation"] [data-testid="card"]:hover,
+  [data-home-generated-section] .f0c-ease-hover:hover { background: hsl(var(--neutral-20)); box-shadow: none; }
+  [aria-label="Conversation"] [data-testid="card"]:focus-within { box-shadow: none; }
   main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
@@ -819,6 +824,7 @@ function HomeNavbar({
    */
   /** The section's own glyph, so the button says where it goes back to. */
 }) {
+  const [, setParams] = useSearchParams()
   return (
     <div className="flex w-full items-center justify-between p-[14px]">
       <div className="flex min-w-0 items-center gap-2">
@@ -836,6 +842,11 @@ function HomeNavbar({
               {homeSession ? "" : conversationTitle}
             </span>
           </span>
+        ) : screenTitle === "Activity" || screenTitle === "Preferences" ? (
+          <Breadcrumbs breadcrumbs={[
+            { id: "home", label: "Home", href: "/p/home", onClick: () => { goHome(); setParams({}) } },
+            { id: screenTitle.toLowerCase(), label: screenTitle },
+          ]} />
         ) : screenTitle ? (
           <span className="flex min-w-0 items-center gap-2">
             {/* No "policies" module in f0 — company_documents is the

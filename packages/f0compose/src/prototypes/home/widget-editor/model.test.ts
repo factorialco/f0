@@ -84,3 +84,9 @@ assert(
   "Personal catalogs are isolated by profile"
 )
 console.log("Widget catalog and scope regressions passed")
+
+saveSelection("admin", { personal: [], employees: ["clockin", "events"] })
+assert(readSelection("admin").personal.includes("clockin"), "Employee widgets remain in Personal even when omitted from its saved selection")
+assert(readSelection("admin").personal.includes("events"), "All employee defaults are inherited")
+saveSelection("admin", { personal: [], employees: ["events"] })
+assert(!readSelection("admin").personal.includes("clockin"), "An inherited-only widget disappears when removed from employee defaults")

@@ -5,10 +5,12 @@ import { activityViews, periodLabels, type ActivityRecord } from "./model"
 
 export function useActivitySource(
   rows: ActivityRecord[],
-  open: (row: ActivityRecord) => void
+  open: (row: ActivityRecord) => void,
+  needsYou = false
 ) {
   const source = useDataCollectionSource(
     {
+      defaultFilters: needsYou ? { status: ["needs-you"] } : {},
       filters: {
         status: {
           type: "in" as const,
@@ -57,7 +59,8 @@ export function useActivitySource(
               (row) =>
                 (!filters.status?.length ||
                   filters.status.includes(row.status)) &&
-                (!filters.owner?.length || filters.owner.includes(row.owner)) &&
+                (!filters.owner?.length ||
+                  filters.owner.includes(row.owner)) &&
                 (!search ||
                   `${row.title} ${row.detail} ${row.owner}`
                     .toLowerCase()

@@ -98,7 +98,6 @@ import {
   type Conversation,
 } from "./one/conversationStore"
 import { PanelCollapse } from "./PanelCollapse"
-import { type PinnedItem, removePinned, usePinned } from "./pinnedStore"
 import { useProfile } from "./profileStore"
 import { COMMUNITIES } from "./windows/communityPosts"
 
@@ -131,7 +130,7 @@ const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] = [
   { id: "comms", label: "Comms", icon: Messages },
   { id: "inbox", label: "Inbox", icon: InboxIcon },
   { id: "cal", label: "Cal", icon: Calendar },
-  { id: "hub", label: "Hub", icon: HubIcon },
+  { id: "hub", label: "Tools", icon: HubIcon },
 ]
 
 const PANEL_TITLES: Record<NavSectionId, string> = {
@@ -139,7 +138,7 @@ const PANEL_TITLES: Record<NavSectionId, string> = {
   comms: "Comms",
   inbox: "Inbox",
   cal: "Calendar",
-  hub: "Hub",
+  hub: "Tools",
 }
 
 function readSection(): NavSectionId {
@@ -335,29 +334,6 @@ function RowOptions({
  * there is nothing to rename a pin to. Not clickable, like the NavRow it
  * replaces: Pinned is still visual-only, it just stopped being permanent.
  */
-function PinnedRow({ item }: { item: PinnedItem }) {
-  return (
-    <div className="group flex w-full items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-1 hover:bg-f1-background-secondary">
-      <F0Icon icon={item.icon} size="md" color="default" />
-      <span className="flex-1 truncate text-base font-medium text-f1-foreground">
-        {item.label}
-      </span>
-      <RowOptions
-        label={item.label}
-        items={(close) => (
-          <MenuRow
-            icon={<F0Icon icon={Delete} size="md" color="critical" />}
-            label="Delete"
-            onClick={() => {
-              close()
-              removePinned(item.id)
-            }}
-          />
-        )}
-      />
-    </div>
-  )
-}
 
 /**
  * A Recents conversation row: NavRow's look plus a hover "⋮" menu with
@@ -563,7 +539,6 @@ function RecentsControl({
 function HomePanelBody() {
   const profile = useProfile()
   const { conversations, activeId } = useConversations()
-  const pinned = usePinned(profile)
   // Sub-screens live in the URL (?view=policies) so back/forward and
   // deep links behave; an open conversation always wins the canvas.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -638,20 +613,6 @@ function HomePanelBody() {
             onClick={() => openScreen("policies")}
           />
         </div>
-        {/* Pinned carries a different example per profile, straight from the
-          frame: a manager pins their triage queue, an employee pins their
-          own holidays. Both are DELETABLE now (Oskar, 2026-09-09), so the
-          group is gated on having a row left — the same rule Recents
-          follows, or you get a header standing over nothing. */}
-        {pinned.length > 0 && (
-          <SidebarGroup label="Pinned">
-            {pinned.map((item) => (
-              <PinnedRow key={item.id} item={item} />
-            ))}
-          </SidebarGroup>
-        )}
-        {/* Recents is admin-only — the employee panel in the frame stops at
-          Pinned. Conversations still work, they just aren't listed here. */}
         {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}
@@ -1362,8 +1323,6 @@ export function HomeNav() {
       // rather than be a no-op.
       goHome()
       setSearchParams({ view: "calendar" })
-    } else if (view === "calendar" || utilityView) {
-      setSearchParams({})
     }
   }
 

@@ -13,10 +13,10 @@ import {
 
 const steps = [
   {
-    target: "Hub",
+    target: "Tools",
     title: "All your tools, in one place",
     description:
-      "Open Hub to find your tools, grouped by category. Your personal sections live inside each category.",
+      "Open Tools to find your tools, grouped by category. Your personal sections live inside each category.",
   },
   {
     target: "Inbox",

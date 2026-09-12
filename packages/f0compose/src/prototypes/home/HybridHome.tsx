@@ -19,17 +19,21 @@ import { type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { useSearchParams } from "react-router-dom"
 
-import { emptyStateFor, type Presentation } from "./agentEntryData"
+import {
+  suggestionFor,
+  pageReading,
+  type Presentation,
+} from "./agentEntryData"
 import { AgentEntryContext } from "./AskFactorial"
 import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
-import { FactorialAgentIcon } from "./FactorialAgentIcon"
 import { HomeSuggestion } from "./HomeSuggestion"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   goHome,
   startConversation,
+  startConversationWithContext,
   startHomeWorkflow,
   sendMessage,
   useConversations,
@@ -41,8 +45,17 @@ import { useProfile } from "./profileStore"
 import { HomeWorking, useHomeRefreshing } from "./setup/homeRefresh"
 
 export function HybridHome({ children }: { children: ReactNode }) {
+  const [params] = useSearchParams()
+  const openChats = useOpenChats()
+  const view =
+    params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
+  const [sideConversationId, setSideConversationId] = useState<string | null>(
+    null
+  )
   const { conversations, activeId } = useConversations()
-  const activeConversation = conversations.find((c) => c.id === activeId)
+  const activeConversation = conversations.find(
+    (c) => c.id === (view ? (activeId ?? sideConversationId) : activeId)
+  )
   const followUp =
     (activeConversation?.homeSetup && !activeConversation.homeSetup.paused) ||
     (activeConversation?.widgetCreation &&
@@ -59,8 +72,6 @@ export function HybridHome({ children }: { children: ReactNode }) {
           )
       : undefined
   const followUpRef = useRef<HTMLDivElement>(null)
-  const [params] = useSearchParams()
-  const openChats = useOpenChats()
   const profile = useProfile()
   const homeRefreshing = useHomeRefreshing(profile)
   const [questionReady, setQuestionReady] = useState(true)
@@ -80,12 +91,16 @@ export function HybridHome({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer)
   }, [activeConversation?.id, profile])
 
-  const view = params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
   const onboarding = useOnboarding(profile)
   const suggestReport = !view && onboarding.suggestReport
-  const emptyState = emptyStateFor(view)
+  const suggestion = suggestionFor(null, profile)
+  const [writing, setWriting] = useState(false)
+  const homeLanding = !activeConversation || !!activeConversation.homeBriefing
+  const expandedComposer =
+    !view && !writing && (suggestReport || homeLanding)
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
+  const showSuggestions = !view && homeLanding && !writing && !draft
   const [notice, setNotice] = useState("")
   const root = useRef<HTMLDivElement>(null)
   const composer = useRef<HTMLDivElement>(null)
@@ -105,6 +120,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
   const open = mode === "side" || mode === "focus"
   useEffect(() => {
     // Widget editing opens One only through the explicit New widget action.
+    if (activeId && view) setSideConversationId(activeId)
     if (view === "widgets") return
     if (activeId)
       setMode(
@@ -114,7 +130,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
             ? "side"
             : "focus"
       )
-    else setMode("idle")
+    else if (!view) setMode("idle")
   }, [activeId])
   useEffect(() => {
     const openEntry = () => setMode(view ? "side" : "expanded")
@@ -136,8 +152,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
   }
   useEffect(() => {
     if (previousView.current !== view) {
+      const cameFromHome = !previousView.current
       previousView.current = view
-      setMode("idle")
+      if (!view || cameFromHome) setMode("idle")
+      if (!view) setSideConversationId(null)
     }
   }, [view])
   useEffect(() => {
@@ -218,7 +236,8 @@ export function HybridHome({ children }: { children: ReactNode }) {
   }
   function send(text = draft) {
     if (!text.trim()) return
-    if (activeId) sendMessage(text.trim(), activeId)
+    setWriting(true)
+    if (activeConversation) sendMessage(text.trim(), activeConversation.id)
     else startConversation(text.trim())
     setMode(view ? "side" : "focus")
     setDraft("")
@@ -251,7 +270,24 @@ export function HybridHome({ children }: { children: ReactNode }) {
         open: () => {
           setMode("side")
           setNotice("")
-          if (mode === "side") focusField()
+          if (view) {
+            const reading = pageReading(
+              view,
+              work.current?.querySelector<HTMLElement>(
+                "[data-hybrid-canvas] main"
+              )?.innerText ?? ""
+            )
+            const id = startConversationWithContext(
+              {
+                kind: "metric",
+                title: reading.title,
+                stats: [{ label: "Page", value: reading.title }],
+              },
+              reading.prompt,
+              { reply: reading.reply }
+            )
+            setSideConversationId(id)
+          }
         },
       }}
     >
@@ -294,7 +330,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
                     hideLabel
                     variant="ghost"
                     size="sm"
-                    onClick={() => setMode(mode === "side" ? "focus" : "side")}
+                    onClick={() =>
+                      setMode(mode === "side" ? "focus" : "side")
+                    }
                   />
                 )}
                 <F0Button
@@ -319,31 +357,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
               {view &&
                 (activeConversation ? (
                   <ConversationView conversation={activeConversation} />
-                ) : (
-                  <div className="mt-auto flex flex-col gap-4">
-                    {open && (
-                      <FactorialAgentIcon key={view} width={40} height={40} />
-                    )}
-                    <div className="flex flex-col gap-3">
-                      <F0Heading
-                        content={emptyState.question}
-                        variant="heading"
-                      />
-                      <div className="flex flex-col items-start gap-2">
-                        {emptyState.suggestions.map(({ label, icon }) => (
-                          <HomeSuggestion
-                            key={label}
-                            label={label}
-                            icon={icon}
-                            size="md"
-                            variant="outline"
-                            onClick={() => send(label)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                ) : null)}
             </div>
             <div data-hybrid-chat-target />
           </div>
@@ -359,7 +373,11 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking ? "auto" : suggestReport ? 208 : 168,
+                        height: asking
+                          ? "auto"
+                          : expandedComposer
+                            ? 216
+                            : 168,
                         transition: "none",
                       }
                     : undefined
@@ -373,7 +391,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
               data-hybrid-composer
               hidden={compact}
               data-compact={compact}
-              data-writing={typing || open}
+              data-writing={typing || open || writing}
             >
               {asking && followUp && activeConversation && (
                 <div
@@ -417,28 +435,39 @@ export function HybridHome({ children }: { children: ReactNode }) {
                 hidden={asking}
                 aria-hidden={compact || asking}
               >
-                {suggestReport && (
-                  <F0Box paddingBottom="sm">
-                    <HomeSuggestion
-                      label="Create a report for One to monitor and share insights"
-                      size="md"
-                      onClick={() => {
-                        updateOnboarding(profile, { suggestReport: false })
-                        startHomeWorkflow(profile, "report")
-                        setMode("side")
-                      }}
-                    />
-                  </F0Box>
-                )}
                 <F0Box
                   position="relative"
-                  height="32"
+                  height={expandedComposer ? "44" : "32"}
                   background="primary"
                   border="default"
                   borderColor="secondary"
                   borderRadius="xl"
                 >
-                  <div data-hybrid-field>
+                  {(showSuggestions || (suggestReport && !writing)) && (
+                    <div className="flex gap-1" data-hybrid-suggestions>
+                      <HomeSuggestion
+                        label={
+                          suggestReport
+                            ? "Create a report for One to monitor and share insights"
+                            : suggestion.label
+                        }
+                        size="md"
+                        onClick={() => {
+                          if (suggestReport) {
+                            updateOnboarding(profile, {
+                              suggestReport: false,
+                            })
+                            startHomeWorkflow(profile, "report")
+                            setWriting(true)
+                          } else send(suggestion.prompt)
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div
+                    data-hybrid-field
+                    onFocusCapture={() => setWriting(true)}
+                  >
                     <F0TextAreaInput
                       label="Message One"
                       hideLabel

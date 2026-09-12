@@ -8,6 +8,7 @@ import {
 import {
   CardSelectableContainer,
   Input,
+  Tabs,
 } from "@factorialco/f0-react/dist/experimental"
 import { Pencil } from "@factorialco/f0-react/icons/app"
 /** Ported from irene-mallafre/factorial-ai, f7405eb; see IMPORT.md.
@@ -108,7 +109,11 @@ function ConnectorRow({
   )
 }
 
-export function Connections({ onboarding = false }: { onboarding?: boolean }) {
+export function Connections({
+  onboarding = false,
+}: {
+  onboarding?: boolean
+}) {
   const prefs = usePreferences()
   const [url, setUrl] = useState("")
   const all = onboarding
@@ -241,11 +246,29 @@ function Behaviour() {
 }
 
 export function PreferencesScreen() {
+  const [tab, setTab] = useState("connections")
   return (
     <div className="mx-auto flex w-[712px] max-w-full flex-col gap-8 px-4 pb-8 pt-2">
-      <Connections />
-      <SaveLocation />
-      <Behaviour />
+      <Tabs
+        secondary={false}
+        activeTabId={tab}
+        tabs={[
+          {
+            id: "connections",
+            label: "Connections",
+            onClick: () => setTab("connections"),
+          },
+          { id: "memory", label: "Memory", onClick: () => setTab("memory") },
+          {
+            id: "settings",
+            label: "Settings",
+            onClick: () => setTab("settings"),
+          },
+        ]}
+      />
+      {tab === "connections" && <Connections />}
+      {tab === "memory" && <Behaviour />}
+      {tab === "settings" && <SaveLocation />}
     </div>
   )
 }

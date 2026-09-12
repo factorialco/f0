@@ -58,9 +58,8 @@ const widgetIcons: Record<string, IconType> = {
 
 export function WidgetEditor() {
   const profile = useProfile()
-  const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(
-    null
-  )
+  const [dialogContainer, setDialogContainer] =
+    useState<HTMLDivElement | null>(null)
   const [previewContainer, setPreviewContainer] =
     useState<HTMLDivElement | null>(null)
   const dialogRef = useCallback(
@@ -101,7 +100,8 @@ export function WidgetEditor() {
           widget.getBoundingClientRect().top -
           container.getBoundingClientRect().top -
           16,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches
           ? "instant"
           : "smooth",
       })
@@ -120,9 +120,17 @@ export function WidgetEditor() {
     if (!added.length) return
     setDraft((current) => ({
       ...current,
-      [scope]: [...new Set([...current[scope], ...added.map(({ id }) => id)])],
+      [scope]: [
+        ...new Set([...current[scope], ...added.map(({ id }) => id)]),
+      ],
     }))
   }, [JSON.stringify(catalog.custom), scope])
+  const selection =
+    scope === "personal"
+      ? [...new Set([...draft.personal, ...draft.employees])]
+      : draft.employees
+  const inherited = (id: string) =>
+    scope === "personal" && draft.employees.includes(id)
   const changes = countChanges(saved, draft)
   const rows = useMemo(
     () => [
@@ -143,6 +151,7 @@ export function WidgetEditor() {
   )
   const toggle = useCallback(
     (id: string) => {
+      if (scope === "personal" && draft.employees.includes(id)) return
       // Selection reorders rows: discard the pointer position from the old layout.
       setHoveredRow(null)
       setDraft((current) => ({
@@ -152,7 +161,7 @@ export function WidgetEditor() {
           : [...current[scope], id],
       }))
     },
-    [scope]
+    [scope, draft.employees]
   )
   const discard = () => {
     setDraft(saved)
@@ -264,8 +273,8 @@ export function WidgetEditor() {
                     )
                     .sort(
                       (a, b) =>
-                        Number(draft[scope].includes(b.id)) -
-                        Number(draft[scope].includes(a.id))
+                        Number(selection.includes(b.id)) -
+                        Number(selection.includes(a.id))
                     )
                     .map((row) => (
                       <F0Box
@@ -319,16 +328,19 @@ export function WidgetEditor() {
                           justifyContent="end"
                           alignItems="center"
                         >
-                          {hoveredRow === row.id || focusedRow === row.id ? (
+                          {inherited(row.id) ? (
+                            <F0Text content="Required" variant="small" />
+                          ) : hoveredRow === row.id ||
+                            focusedRow === row.id ? (
                             <F0Button
                               label={
-                                draft[scope].includes(row.id) ? "Remove" : "Add"
+                                selection.includes(row.id) ? "Remove" : "Add"
                               }
                               variant="outline"
                               size="sm"
                               onClick={() => toggle(row.id)}
                             />
-                          ) : draft[scope].includes(row.id) ? (
+                          ) : selection.includes(row.id) ? (
                             <F0Icon
                               icon={Check}
                               size="md"
@@ -344,7 +356,10 @@ export function WidgetEditor() {
                       !search ||
                       row.title.toLowerCase().includes(search.toLowerCase())
                   ) && (
-                    <F0Text content="No widgets found" variant="description" />
+                    <F0Text
+                      content="No widgets found"
+                      variant="description"
+                    />
                   )}
                 </F0Box>
               </F0Box>
@@ -380,19 +395,27 @@ export function WidgetEditor() {
                   >
                     {scope === "employees" && (
                       <F0Text
-                        content="Default widgets for employees. Your personal selection stays separate."
+                        content="Default widgets for employees. These also appear in Personal and cannot be removed there."
                         variant="description"
                       />
                     )}
-                    {draft[scope].map((id) => (
+                    {scope === "personal" && draft.employees.length > 0 && (
+                      <F0Text
+                        content="Employee widgets are included and cannot be removed from Personal."
+                        variant="description"
+                      />
+                    )}
+                    {selection.map((id) => (
                       <WidgetCard
                         key={id}
                         id={id}
                         custom={catalog.custom}
-                        onRemove={() => toggle(id)}
+                        onRemove={
+                          inherited(id) ? undefined : () => toggle(id)
+                        }
                       />
                     ))}
-                    {!draft[scope].length && (
+                    {!selection.length && (
                       <WidgetEmptyState
                         title="No widgets yet"
                         description="Add a widget from the list to preview it here."

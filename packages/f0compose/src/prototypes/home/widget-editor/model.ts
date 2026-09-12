@@ -96,7 +96,7 @@ export function useWidgetCatalog(profile: ProfileId) {
 export function readSelection(profile: ProfileId): WidgetSelection {
   const data = readCatalog(profile)
   return {
-    personal: [...readWidgets(profile), ...data.selectedCustom],
+    personal: [...new Set([...readWidgets(profile), ...data.selectedCustom, ...data.employees])],
     employees: data.employees,
   }
 }

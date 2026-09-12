@@ -74,3 +74,18 @@ Compared WidgetRail against PR 5510 head again. Restored its exact F0Button size
 Removed Play and conversation ellipsis from HomeNavbar. Moved the inline conversation close action into the controls immediately to the left of widget collapse. Existing side chat controls remain adjacent. Applied F0 border-secondary (neutral-10) to F0 cards within Conversation regions, including side chat, and upper task rows; custom conversation cards already use border-secondary.
 
 Browser: opened a task, observed close x1160–1192 and collapse x1192–1224, both y12/32px; Play/options count zero. Closed it and verified Home greeting returned. Four briefing card borders measured 1px rgba(5,38,87,.06), matching secondary. Typecheck and 230-file prototype check passed.
+
+## Eleven unified refinements — 2026-09-12
+
+Applied on codex/home-unified, /private/tmp/f0-home-unified, serving localhost:5174.
+
+- Removed Home Pinned section; renamed Hub to Tools, including its navigation tour copy.
+- Reused HybridHome's 6a4dac7e1 suggestion slot/HomeSuggestion/data-writing behavior. Both report onboarding and ordinary landing suggestions live inside the input surface, send directly, and collapse on field focus. Retained permissions footer. Home briefing counts as a landing, including saved state.
+- Native Edit widgets button now hugs content in a centered F0Box.
+- Ask One starts a page-related prompt through existing startConversationWithContext and ReplyScript. Calendar, People, Files, Activity/Inbox and Preferences read the same mocked source records as the UI; remaining screens summarize available rendered page text. No model or external data integration added.
+- Side conversation identity survives goHome's activeId clearing during module navigation. Keep One visible across module routes and sidebar category changes; Home closes it. Leaving Home does not accidentally open a blank panel.
+- Common dark F0 secondary-hover background with no shadow for briefing cards and widget cards.
+- Personal widget selection inherits Employees. Required rows have no Remove action; underlying readSelection includes inherited IDs even if omitted on save. Employee defaults remain editable in Employees. Inherited Communities suppresses duplicated central post.
+- Activity starts with Needs you; removed redundant heading. Preferences uses native primary Tabs for Connections, Memory, Settings. Both screens have native Breadcrumbs with a working Home link.
+
+Verification: QA only in 127.0.0.1 origin; user localhost onboarding untouched. Observed 216→168px composer shrink on field focus; report suggestion opens its existing follow-up directly, ordinary suggestion sends exact prompt directly. Preferences tabs all changed contents. Ask One generated contextual reply; Preferences→Activity and Calendar→Tools preserved visible conversation, Home closed it. Needs you checked with two items and no Activity heading. Edit widgets measured 119.65px inside 352px container. Personal had Required labels and no removal actions for Clock in/Events/Communities; Employees retained removal actions. Actual pointer hover (CUA drag-to) verified task and widget background rgba(15,46,87,.1), box-shadow none. Typecheck, 235-file prototype check, widget model regressions and diff check passed. No push/merge/publication.
