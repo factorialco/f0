@@ -1,5 +1,4 @@
 import { F0Box, F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
-import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import { Textarea as F0TextAreaInput } from "@factorialco/f0-react/dist/experimental"
 import {
   ArrowUp,
@@ -26,6 +25,7 @@ import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
 import { FactorialAgentIcon } from "./FactorialAgentIcon"
 import { HomeSuggestion } from "./HomeSuggestion"
+import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   goHome,
@@ -359,7 +359,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking ? "auto" : 168,
+                        height: asking ? "auto" : suggestReport ? 208 : 168,
                         transition: "none",
                       }
                     : undefined
@@ -412,7 +412,11 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   </div>
                 </div>
               )}
-              <div data-hybrid-editor hidden={asking} aria-hidden={compact || asking}>
+              <div
+                data-hybrid-editor
+                hidden={asking}
+                aria-hidden={compact || asking}
+              >
                 {suggestReport && (
                   <F0Box paddingBottom="sm">
                     <HomeSuggestion
