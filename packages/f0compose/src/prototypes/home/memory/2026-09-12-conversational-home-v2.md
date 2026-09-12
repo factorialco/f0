@@ -56,3 +56,11 @@ Re-exported the existing RadialProgressChart as F0RadialProgressChart; no new ch
 Environment: f0compose's local dependencies now resolve f0-react to this isolated checkout, with independent built dist; icons and Tailwind CSS were generated here. Original parallel checkout not modified. Vite/dts required NODE_OPTIONS=--max-old-space-size=8192 after the default heap was exhausted. Successful library build, icons build, CSS build, app typecheck, prototype check (230 files) and diff check.
 
 Browser measured exact 12px for focus, Eleanor metadata, permission text, See more and Pro. Ring measured 16×16px with blue rgb(85,150,246), round arc caps and zero interactive descendants. Confirmed the same footer in the side panel and task opening through the PR's original row. No onboarding answers entered in the user origin.
+
+## White tasks and original widget rail correction
+
+Upper briefing rows now opt into the F0 primary white surface; other NeedsYouItem usages retain their default. Your focus label is 12px/600 and Edit focus uses Neutral. Browser measurements verified all three.
+
+User explicitly requested PR 5510's original folding, and the global toggle to the LEFT of widgets. Read PR head 1fe586b153549bde6f88fb6106135a017408cf98; existing WidgetRail matches that implementation. Removed the duplicated rail adaptation from StaticWidgets. StaticWidgets now delegates to original WidgetRail, adding a rendering adapter for current WidgetCard/custom catalog and preserving original window-stack callers. Shared collapse persistence accepts custom widget IDs. Existing hover timers, measured edge clamping and preview handling remain in WidgetRail. The toggle sits in the adjacent left column.
+
+Verified in isolated browser origin: expand/collapse, collapsed state survives reload, toggle right edge x896 equals widget column left edge x896. Screenshot inspected expanded layout. Typecheck, prototype static check and diff whitespace checks pass. Browser API has no hover action; pointer transfer and hover visual behavior were not exercised this turn. User origin onboarding state untouched. No push or merge.

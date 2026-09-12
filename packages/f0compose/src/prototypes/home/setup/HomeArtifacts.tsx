@@ -6,97 +6,97 @@ import {
   F0Heading,
   F0TagStatus,
   F0Text,
-} from "@factorialco/f0-react"
-import { Pencil } from "@factorialco/f0-react/icons/app"
-import { useEffect, useState } from "react"
+} from "@factorialco/f0-react";
+import { Pencil } from "@factorialco/f0-react/icons/app";
+import { useEffect, useState } from "react";
 
-import { avatarFor } from "@/fixtures/helpers"
+import { avatarFor } from "@/fixtures/helpers";
 
-import type { HomeArtifact } from "./homeSetup"
+import type { HomeArtifact } from "./homeSetup";
 
-import { FactorialAgentIcon } from "../FactorialAgentIcon"
-import { PROFILE_PEOPLE, needsYouTasks } from "../fixtures"
-import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets"
-import { candidates } from "../home-widgets/recruitment"
-import { NeedsYouItem } from "../NeedsYouItem"
+import { FactorialAgentIcon } from "../FactorialAgentIcon";
+import { PROFILE_PEOPLE, needsYouTasks } from "../fixtures";
+import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets";
+import { candidates } from "../home-widgets/recruitment";
+import { NeedsYouItem } from "../NeedsYouItem";
 import {
   resumeHomeSetup,
   startConversationWithContext,
   type ChatMessage,
   type Conversation,
-} from "../one/conversationStore"
-import { Post } from "../windows/CommunitiesWindow"
-import { COMMUNITY_POSTS } from "../windows/communityPosts"
-import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh"
-import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data"
-import { useFixedWidgets } from "./widgetPreferences"
+} from "../one/conversationStore";
+import { Post } from "../windows/CommunitiesWindow";
+import { COMMUNITY_POSTS } from "../windows/communityPosts";
+import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh";
+import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data";
+import { useFixedWidgets } from "./widgetPreferences";
 
 // Pending questions replace the original composer in its existing slot; completed questions stay in the transcript.
 export function HomeQuestion({
   message,
 }: {
-  conversation: Conversation
-  message: ChatMessage
+  conversation: Conversation;
+  message: ChatMessage;
 }) {
-  const q = message.question!
-  if (!q.answer && !q.skipped) return null
-  return <F0Text content={q.text} variant="body" />
+  const q = message.question!;
+  if (!q.answer && !q.skipped) return null;
+  return <F0Text content={q.text} variant="body" />;
 }
 
 function Briefing({
   artifact,
   entrance,
 }: {
-  artifact: Extract<HomeArtifact, { kind: "briefing" }>
-  entrance: boolean
+  artifact: Extract<HomeArtifact, { kind: "briefing" }>;
+  entrance: boolean;
 }) {
-  const [communityOpen, setCommunityOpen] = useState(false)
-  const fixedWidgets = useFixedWidgets(artifact.profile)
-  const key = `f0compose:home:generated-v1:${artifact.profile}`
+  const [communityOpen, setCommunityOpen] = useState(false);
+  const fixedWidgets = useFixedWidgets(artifact.profile);
+  const key = `f0compose:home:generated-v1:${artifact.profile}`;
   const [stage, setStage] = useState(() => {
     try {
       return !entrance ||
         localStorage.getItem(key) ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? 3
-        : 0
+        : 0;
     } catch {
-      return 3
+      return 3;
     }
-  })
+  });
   useEffect(() => {
-    if (stage === 3) return
+    if (stage === 3) return;
     const timers = [450, 1000, 1550].map((delay, index) =>
       window.setTimeout(() => {
-        setStage(index + 1)
+        setStage(index + 1);
         if (index === 2) {
           try {
-            localStorage.setItem(key, "true")
+            localStorage.setItem(key, "true");
           } catch {
             /* A restricted browser still shows the home. */
           }
         }
-      }, delay)
-    )
-    return () => timers.forEach(window.clearTimeout)
+      }, delay),
+    );
+    return () => timers.forEach(window.clearTimeout);
     // One sequence per mounted landing, never on a conversation preview.
-  }, [key])
+  }, [key]);
   const focuses = artifact.focuses?.length
     ? artifact.focuses
-    : ["personal", "team"]
+    : ["personal", "team"];
   const tasks = [
     ...(artifact.focuses?.includes("team") ? needsYouTasks.slice(0, 1) : []),
     ...(focuses.includes("recruitment")
       ? needsYouTasks.filter((t) => t.module === "ats")
       : []),
     ...(focuses.includes("personal") ? PERSONAL_TASKS : []),
-  ]
-  const post = COMMUNITY_POSTS[0]
+  ];
+  const post = COMMUNITY_POSTS[0];
   const focusedOn = focuses
     .map((focus) =>
-      HOME_FOCUS_LABELS[focus as keyof typeof HOME_FOCUS_LABELS].toLowerCase()
+      HOME_FOCUS_LABELS[focus as keyof typeof HOME_FOCUS_LABELS].toLowerCase(),
     )
-    .join(" and ")
+    .join(" and ");
   const openTask = (task: (typeof tasks)[number]) =>
     startConversationWithContext(
       {
@@ -110,8 +110,8 @@ function Briefing({
           `${task.title}. ${task.subtitle}.`,
           "This is a sample task. Nothing has been approved or sent.",
         ],
-      }
-    )
+      },
+    );
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
       <F0Text content={`I’ve focused your briefing on ${focusedOn}.`} />
@@ -138,6 +138,7 @@ function Briefing({
               <NeedsYouItem
                 key={task.id}
                 task={task}
+                surface="primary"
                 index={index}
                 onOpen={openTask}
               />
@@ -185,20 +186,20 @@ function Briefing({
         <F0Text content="Let me know if you are missing anything, so we can adjust." />
       )}
     </F0Box>
-  )
+  );
 }
 
 export function HomeArtifactView({
   artifact,
   entrance = false,
 }: {
-  artifact: HomeArtifact
-  entrance?: boolean
+  artifact: HomeArtifact;
+  entrance?: boolean;
 }) {
   if (artifact.kind === "briefing")
-    return <Briefing artifact={artifact} entrance={entrance} />
+    return <Briefing artifact={artifact} entrance={entrance} />;
   if (artifact.kind === "routine") {
-    const d = artifact.draft
+    const d = artifact.draft;
     return (
       <F0Card title={d.title} description="Routine · local simulation">
         <F0Box display="flex" flexDirection="column" gap="md">
@@ -213,16 +214,16 @@ export function HomeArtifactView({
           <F0Text content={`Outcome: ${d.action}`} />
         </F0Box>
       </F0Card>
-    )
+    );
   }
-  const d = artifact.draft
-  const recruitment = d.metric === "recruitment"
+  const d = artifact.draft;
+  const recruitment = d.metric === "recruitment";
   const actual = recruitment
     ? REPORT_SAMPLE.daysWithoutProgress
     : Math.round(
-        (REPORT_SAMPLE.expenseActual / REPORT_SAMPLE.expenseBudget - 1) * 100
-      )
-  const alert = actual > d.threshold
+        (REPORT_SAMPLE.expenseActual / REPORT_SAMPLE.expenseBudget - 1) * 100,
+      );
+  const alert = actual > d.threshold;
   return (
     <F0Card title={d.title} description={`Report · ${d.cadence} · sample data`}>
       <F0Box display="flex" flexDirection="column" gap="md">
@@ -268,17 +269,17 @@ export function HomeArtifactView({
         )}
       </F0Box>
     </F0Card>
-  )
+  );
 }
 
 export function GuidedHome({ conversation }: { conversation: Conversation }) {
   const loading = useHomeRefreshing(
-    conversation.homeSetup?.profile ?? conversation.homeBriefing ?? "admin"
-  )
-  const setup = conversation.homeSetup
+    conversation.homeSetup?.profile ?? conversation.homeBriefing ?? "admin",
+  );
+  const setup = conversation.homeSetup;
   const saved = [...conversation.messages]
     .reverse()
-    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact
+    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact;
   const artifact: HomeArtifact = setup
     ? {
         kind: "briefing",
@@ -290,7 +291,7 @@ export function GuidedHome({ conversation }: { conversation: Conversation }) {
         kind: "briefing",
         focus: "team",
         profile: conversation.homeBriefing!,
-      })
+      });
   return (
     <div className="mx-auto w-[712px] max-w-full pb-6">
       {loading ? (
@@ -302,24 +303,24 @@ export function GuidedHome({ conversation }: { conversation: Conversation }) {
         <HomeArtifactView artifact={artifact} entrance />
       )}
     </div>
-  )
+  );
 }
 
 export function HomeSessionBar({
   conversation,
 }: {
-  conversation: Conversation
+  conversation: Conversation;
 }) {
-  const profile = conversation.homeSetup?.profile ?? conversation.homeBriefing
-  if (!profile || conversation.homeSetup?.purpose) return null
+  const profile = conversation.homeSetup?.profile ?? conversation.homeBriefing;
+  if (!profile || conversation.homeSetup?.purpose) return null;
   const saved = [...conversation.messages]
     .reverse()
-    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact
+    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact;
   const focuses = conversation.homeSetup?.focuses ??
     (saved?.kind === "briefing" ? saved.focuses : undefined) ?? [
       "personal",
       "team",
-    ]
+    ];
   return (
     <F0Box display="flex" flexDirection="column" gap="md" paddingY="xl">
       <FactorialAgentIcon width={40} height={40} />
@@ -329,8 +330,11 @@ export function HomeSessionBar({
           variant="heading"
         />
         <F0Box display="flex" alignItems="center" gap="sm" flexWrap="wrap">
+          <div className="[&_p]:font-semibold">
+            <F0Text content="Your focus:" variant="small" />
+          </div>
           <F0Text
-            content={`Your focus: ${focuses.map((f) => HOME_FOCUS_LABELS[f as keyof typeof HOME_FOCUS_LABELS]).join(" · ")}`}
+            content={`${focuses.map((f) => HOME_FOCUS_LABELS[f as keyof typeof HOME_FOCUS_LABELS]).join(" · ")}`}
             variant="small"
           />
           <F0Button
@@ -338,11 +342,11 @@ export function HomeSessionBar({
             icon={Pencil}
             hideLabel
             size="sm"
-            variant="ghost"
+            variant="neutral"
             onClick={() => resumeHomeSetup(profile, "focus")}
           />
         </F0Box>
       </F0Box>
     </F0Box>
-  )
+  );
 }
