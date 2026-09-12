@@ -159,7 +159,7 @@ export function WidgetRail(
                 label={`Expand ${staticCards ? props.titleFor(id) : props.specFor(id as WindowId).title}`}
                 icon={widgetGlyph(id)}
                 hideLabel
-                size="sm"
+                size="lg"
                 variant="outline"
                 onClick={() => {
                   toggleCollapsed(id);
@@ -168,14 +168,13 @@ export function WidgetRail(
               />
             </div>
           ))}
-          {staticCards && props.footer(true)}
         </div>
       )}
       {peek && folded.includes(peek.id) && (
         <div
           ref={previewRef}
           data-widget-preview
-          className="absolute right-16 z-30 flex flex-col overflow-y-auto [&>section]:!shrink"
+          className="absolute right-14 z-30 flex flex-col [&>section]:!shrink"
           style={{
             top: railPanelTop({
               anchorOffsetTop: peek.top,
