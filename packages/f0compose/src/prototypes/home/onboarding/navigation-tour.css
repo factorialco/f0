@@ -1,0 +1,20 @@
+/* The approved Driver.js spotlight stays on the whole menu while One points
+   at the next rail item. Driver normally disables everything outside its target. */
+body[data-home-navigation-tour] [data-home-rail],
+body[data-home-navigation-tour] [data-home-tour-controls] {
+  position: relative;
+  z-index: 1000000001;
+}
+body[data-home-navigation-tour] [data-home-rail],
+body[data-home-navigation-tour] [data-home-rail] *,
+body[data-home-navigation-tour] [data-home-tour-controls],
+body[data-home-navigation-tour] [data-home-tour-controls] * {
+  pointer-events: auto;
+}
+.home-menu-tour-popover .driver-popover-footer { flex-wrap: wrap; }
+/* Driver sets pointer-events:auto inline on its SVG path. Keep the dimming
+   visual, but let pointer hit-testing reach the explicitly enabled rail. */
+body[data-home-navigation-tour] .driver-overlay,
+body[data-home-navigation-tour] .driver-overlay * {
+  pointer-events: none !important;
+}

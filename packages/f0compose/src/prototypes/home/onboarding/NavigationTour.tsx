@@ -2,14 +2,12 @@ import { useEffect, useState } from "react"
 import { F0Box, F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
 import { F0OneIcon } from "@factorialco/f0-react/dist/ai"
 import type { ProfileId } from "../profileStore"
-import { updateOnboarding, useOnboarding } from "./state"
-import {
-  animateCursorMove,
-  pinCursorToElement,
-  removeCursor,
-  showCursor,
-  showTooltipOnCursor,
-} from "./cursor/cursor"
+import { getOnboarding, updateOnboarding, useOnboarding } from "./state"
+import { driver, type Driver } from "./driver/driver.mjs"
+import "./driver/driver.css"
+import "./driver/tourStyles.css"
+import "./navigation-tour.css"
+import { animateCursorMove, pinCursorToElement, removeCursor, showCursor, showTooltipOnCursor } from "./cursor/cursor"
 
 const steps = [
   {
@@ -40,170 +38,142 @@ const steps = [
 
 export function NavigationTour({ profile }: { profile: ProfileId }) {
   const state = useOnboarding(profile)
-  const index = Math.min(state.tourStep, steps.length - 1)
-  const step = steps[index]
-  const [visited, setVisited] = useState(false)
   const [missing, setMissing] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const finish = () => updateOnboarding(profile, { screen: "preferences", tourStep: 0, tourPaused: false, hidden: false })
   useEffect(() => {
-    const pause = (event: KeyboardEvent) => {
-      if (event.key === "Escape")
-        updateOnboarding(profile, { tourPaused: true })
-    }
-    document.addEventListener("keydown", pause)
-    return () => document.removeEventListener("keydown", pause)
-  }, [profile])
-  useEffect(() => {
-    setVisited(false)
-    setMissing(false)
     if (state.tourPaused) return
     const abort = new AbortController()
+    let current = Math.min(getOnboarding(profile).tourStep, steps.length - 1)
     let target: HTMLElement | null = null
     let stopPin: (() => void) | undefined
+    let spotlight: Driver | undefined
     let timer = 0
-    let watcher = 0
-    let polls = 0
-    const click = (event: MouseEvent) => {
-      if (event.target instanceof Node && target?.contains(event.target)) {
-        abort.abort()
-        clearInterval(watcher)
-        setVisited(true)
-        stopPin?.()
-        removeCursor()
-      }
-    }
-    document.addEventListener("click", click)
-    const locate = async () => {
-      if (abort.signal.aborted) return
-      target = document.querySelector<HTMLElement>(
-        `[data-home-rail] button[aria-label="${step.target}"]`
-      )
+    let frame = 0
+    let waiting = false
+    setMissing(false)
+    document.body.setAttribute("data-home-navigation-tour", "")
+    const point = async (tries = 0) => {
+      if (abort.signal.aborted || current >= steps.length) return
+      target = document.querySelector<HTMLElement>(`[data-home-rail] button[aria-label="${steps[current].target}"]`)
       if (!target || !target.getClientRects().length) {
-        if (++polls < 20) timer = window.setTimeout(locate, 150)
+        if (tries < 20) timer = window.setTimeout(() => void point(tries + 1), 150)
         else setMissing(true)
         return
       }
-      target.scrollIntoView({ block: "nearest" })
+      // Orient the user before the first click; later steps retain the open
+      // menu spotlight while the cursor points to the next destination.
+      if (!spotlight) {
+        spotlight = driver({
+          animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+          allowClose: false, allowKeyboardControl: false,
+          disableActiveInteraction: false,
+          overlayColor: "rgba(0, 0, 0, 0.5)", stagePadding: 4, stageRadius: 8,
+        })
+        spotlight.highlight({ element: document.querySelector<HTMLElement>("[data-home-rail]") ?? target })
+      }
       showCursor()
-      const reduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches
-      await animateCursorMove(target, "right-outside", reduced ? Infinity : 10)
-      if (abort.signal.aborted) return
-      showTooltipOnCursor(`Click ${step.target}`, "right")
+      await animateCursorMove(target, "right-outside", window.matchMedia("(prefers-reduced-motion: reduce)").matches ? Infinity : 10)
+      if (abort.signal.aborted || waiting) return
+      showTooltipOnCursor(`Click ${steps[current].target}`, "right")
       stopPin = pinCursorToElement(target, "right-outside", abort.signal)
-      watcher = window.setInterval(() => {
+    }
+    const explain = (clicked: number, tries = 0) => {
+      if (abort.signal.aborted) return
+      const panel = document.querySelector<HTMLElement>("[data-home-panel]")
+      if (!panel || panel.getBoundingClientRect().width < 20 || panel.hasAttribute("inert")) {
+        if (tries < 20) timer = window.setTimeout(() => explain(clicked, tries + 1), 150)
+        else { waiting = false; setMissing(true) }
+        return
+      }
+      spotlight?.destroy()
+      const last = clicked === steps.length - 1
+      spotlight = driver({
+        animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        allowClose: false, allowKeyboardControl: false, disableActiveInteraction: false,
+        overlayColor: "rgba(0, 0, 0, 0.5)", stagePadding: 4, stageRadius: 8,
+        popoverClass: "demo-tour-popover home-menu-tour-popover",
+        onPopoverRender: (popover) => {
+          const skip = document.createElement("button")
+          skip.className = "demo-tour-quit-btn"
+          skip.textContent = "Skip tour and set up Home"
+          skip.onclick = finish
+          popover.footer.prepend(skip)
+          popover.footer.style.display = "flex"
+          popover.previousButton.style.display = "none"
+          popover.nextButton.style.display = last ? "block" : "none"
+          popover.progress.style.display = "none"
+        },
+      })
+      spotlight.highlight({ element: panel, popover: {
+        title: steps[clicked].title,
+        description: steps[clicked].description.replace(/^Open (Tools|Inbox|Comms) to /, "Here you can "),
+        side: "right", align: "center", showButtons: last ? ["next"] : [],
+        nextBtnText: "Set up Home", onNextClick: finish,
+      } })
+      current = clicked + 1
+      waiting = false
+      if (!last) {
+        updateOnboarding(profile, { tourStep: current })
+        void point()
+      }
+    }
+    const waitForMenu = (clicked: number) => {
+      let stableFrames = 0
+      let previous = ""
+      const started = performance.now()
+      const inspect = () => {
         if (abort.signal.aborted) return
-        if (!target?.isConnected || !target.getClientRects().length) {
-          abort.abort()
-          removeCursor()
-          setMissing(true)
-        }
-      }, 250)
+        const panel = document.querySelector<HTMLElement>("[data-home-panel]")
+        const rect = panel?.getBoundingClientRect()
+        const expected = ["hub", "inbox", "comms", "home"][clicked]
+        const ready = panel && rect && rect.width > 20 && !panel.hasAttribute("inert") && panel.dataset.navSection === expected
+        const geometry = rect ? [rect.x, rect.y, rect.width, rect.height].map(n => n.toFixed(2)).join(":") : ""
+        const moving = panel?.getAnimations().some(animation => animation.playState === "running")
+        stableFrames = ready && !moving && geometry === previous ? stableFrames + 1 : 0
+        previous = geometry
+        if (stableFrames >= 4) { explain(clicked); return }
+        if (performance.now() - started > 5000) { waiting = false; setMissing(true); return }
+        frame = requestAnimationFrame(inspect)
+      }
+      frame = requestAnimationFrame(inspect)
     }
-    void locate()
+    const click = (event: MouseEvent) => {
+      if (waiting || current >= steps.length || !(event.target instanceof Node) || !target?.contains(event.target)) return
+      waiting = true
+      stopPin?.(); removeCursor(); target = null
+      const clicked = current
+      // Remove the previous spotlight BEFORE React changes the menu geometry.
+      spotlight?.destroy()
+      spotlight = undefined
+      waitForMenu(clicked)
+    }
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") updateOnboarding(profile, { tourPaused: true })
+    }
+    document.addEventListener("click", click, true)
+    document.addEventListener("keydown", key)
+    void point()
     return () => {
-      abort.abort()
-      clearTimeout(timer)
-      clearInterval(watcher)
-      stopPin?.()
-      removeCursor()
-      document.removeEventListener("click", click)
+      abort.abort(); clearTimeout(timer); cancelAnimationFrame(frame); stopPin?.(); removeCursor(); spotlight?.destroy()
+      document.body.removeAttribute("data-home-navigation-tour")
+      document.removeEventListener("click", click, true)
+      document.removeEventListener("keydown", key)
     }
-  }, [index, state.tourPaused, attempt, step.target])
-  const update = (patch: Parameters<typeof updateOnboarding>[1]) =>
-    updateOnboarding(profile, patch)
-  const finish = () =>
-    update({
-      screen: "preferences",
-      tourStep: 0,
-      tourPaused: false,
-      hidden: false,
-    })
-  const next = () => {
-    if (!visited) return
-    if (index === steps.length - 1) finish()
-    else update({ tourStep: index + 1 })
-  }
+  }, [profile, state.tourPaused, attempt])
   return (
-    <F0Box
-      width="full"
-      height="full"
-      overflowY="auto"
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      padding="3xl"
-    >
-      <F0Box
-        data-home-onboarding
-        maxWidth="full"
-        marginTop="5xl"
-        display="flex"
-        flexDirection="column"
-        gap="2xl"
-        paddingBottom="2xl"
-      >
+    <F0Box width="full" height="full" overflowY="auto" display="flex" flexDirection="column" alignItems="center" padding="3xl">
+      <F0Box data-home-onboarding maxWidth="full" marginTop="5xl" display="flex" flexDirection="column" gap="2xl" paddingBottom="2xl">
         <F0OneIcon size="lg" className="home-onboarding-logo" />
-        <F0Text
-          content={`Navigation tour · ${index + 1} of ${steps.length}`}
-          variant="label"
-        />
-        <F0Heading content={step.title} variant="heading-large" />
-        <F0Text content={step.description} variant="label" />
-        <F0Box role="status" aria-live="polite">
-          <F0Text
-            content={
-              state.tourPaused
-                ? "Tour paused. You can resume whenever you’re ready."
-                : missing
-                  ? "This section isn’t available right now. Retry, or continue to your Home setup."
-                  : visited
-                    ? "Take a look around, then continue when you’re ready."
-                    : `Click ${step.target} in the navigation to continue.`
-            }
-          />
+        <F0Box data-onboarding-headline display="flex" flexDirection="column" gap="none">
+          <F0Heading data-onboarding-muted content="Welcome to your new Factorial" variant="heading-large" />
+          <F0Heading content="I’m One, your personal assistant" variant="heading-large" />
         </F0Box>
-        <F0Box display="flex" flexWrap="wrap" gap="md">
-          {state.tourPaused ? (
-            <F0Button
-              label="Resume tour"
-              onClick={() => update({ tourPaused: false })}
-            />
-          ) : missing ? (
-            <F0Button
-              label="Retry"
-              onClick={() => setAttempt((value) => value + 1)}
-            />
-          ) : (
-            <F0Button
-              label={
-                index === steps.length - 1 ? "Prepare my Home" : "Continue"
-              }
-              disabled={!visited}
-              onClick={next}
-            />
-          )}
-          {!state.tourPaused && (
-            <F0Button
-              label="Pause tour"
-              variant="outline"
-              onClick={() => update({ tourPaused: true })}
-            />
-          )}
-          <F0Button
-            label="Start again"
-            variant="ghost"
-            onClick={() => {
-              update({ tourStep: 0, tourPaused: false })
-              setAttempt((value) => value + 1)
-            }}
-          />
-          <F0Button
-            label="Set up my Home"
-            variant="ghost"
-            onClick={() => update({ screen: "preferences", tourPaused: true })}
-          />
+        <F0Text content="Before we start, let me show you what’s new and where to find everything." variant="label" />
+        <F0Box data-home-tour-controls display="flex" flexWrap="wrap" gap="md">
+          <F0Button label="Skip tour and set up Home" variant="outline" onClick={finish} />
+          <F0Button label={state.tourPaused ? "Resume tour" : "Pause tour"} variant="ghost" onClick={() => updateOnboarding(profile, {tourPaused: !state.tourPaused})} />
+          {missing && <F0Button label="Retry" onClick={() => setAttempt(value => value + 1)} />}
         </F0Box>
       </F0Box>
     </F0Box>

@@ -32,7 +32,7 @@ export type HomeSetup = {
   experienceVersion?: number
   step: SetupStep
   focus: Focus
-  purpose?: "routine" | "report"
+  purpose?: "routine" | "report" | "focus"
   focuses?: Focus[]
   priority: string
   pendingFocus?: Focus
@@ -170,6 +170,8 @@ export function questionFor(setup: HomeSetup): {
         options: ["Save simulated report", "Change threshold to 10", "Later"],
       }
     case "complete":
+      if (setup.purpose === "focus")
+        return { text: "Your Home focus is saved.", options: ["Back to my home"] }
       if (setup.purpose)
         return {
           text: "What would you like to do next?",

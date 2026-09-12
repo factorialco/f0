@@ -1,0 +1,13 @@
+.home-streaming-text { display: grid; }
+.home-streaming-text > div { grid-area: 1 / 1; }
+.home-text-measure { visibility: hidden; pointer-events: none; }
+.home-preparation-status { min-height: 20px; color: hsl(var(--neutral-60)); font-size: 14px; }
+.home-generation-region { position: relative; }
+.home-generation-region > :first-child { transition: opacity 180ms ease-out; }
+.home-generation-region[data-preparing] > :first-child { opacity: 0; visibility: hidden; pointer-events: none; }
+.home-generation-skeleton { position: absolute; inset: 0; display: grid; align-content: start; gap: 8px; }
+@media (prefers-reduced-motion: reduce) {
+  .home-generation-region > :first-child { transition: none; }
+}
+
+.home-widget-skeleton { position: absolute; inset: 0; }

@@ -1265,6 +1265,15 @@ export function HomeNav() {
       onboarding.hidden)
   const activeSection = utilityView ?? section
 
+  // Welcome hides the secondary menu. Keep its underlying state closed too,
+  // so Show me around only reveals it after the visitor clicks a rail item.
+  useEffect(() => {
+    if (onboarding.screen === "welcome" && !onboarding.hidden) {
+      setPanelOpen(false)
+      window.localStorage.setItem(NAV_OPEN_KEY, "closed")
+    }
+  }, [onboarding.screen, onboarding.hidden])
+
   // Browser back to Calendar restores its rail selection as well as its page.
   useEffect(() => {
     if (view === "calendar") setSection("cal")

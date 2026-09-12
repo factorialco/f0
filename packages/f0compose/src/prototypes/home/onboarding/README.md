@@ -57,3 +57,23 @@ Latest visual iteration: all onboarding actions, including welcome, use F0Button
 Introductory descriptions under headings use 14/20px. Main blocks use F0Box gap 2xl (24px); this F0 version has no 20px gap token. Option labels and footer hints remain unchanged.
 
 The selection guidance is included in the introductory description above the question, not in the footer.
+
+## Superseding tour behavior — 2026-09-12
+
+On home-unified the user approved Driver.js with the original monorepo demo-tour styles. The welcome content remains fixed throughout the tour. One first points to the actual rail control (Tools, formerly Hub). After the visitor clicks, Driver highlights the whole opened `[data-home-panel]` and explains it. The cursor automatically moves to the next rail destination while the explanation remains visible. There is no central Continue action or timed dismissal of the text. Steps: Tools → Inbox → Comms → Home. The final popover and Skip action lead to preferences. Pause removes both overlays; resume points at the stored next destination.
+
+Verified in the isolated 127.0.0.1:5184 browser origin: all four real rail clicks, full-panel spotlight, clicking the next rail destination with the overlay active, unchanged central welcome, final setup handoff and skip before the first step. TypeScript and the onboarding static check pass. Reduced-motion and narrow viewport were not re-tested for this new Driver integration. Other parallel changes in the shared branch were preserved. No publication.
+
+### Mouse interception correction
+
+Driver's SVG overlay path sets pointer-events:auto inline, intercepting clicks even though the overlay root is pointer-events:none. Scoped override now disables hit-testing on the overlay and all its children; the rail and tour controls retain explicit pointer-events:auto. Verified the actual failure with elementFromPoint at Inbox returning the SVG path; after correction it returns Inbox. Coordinate mouse clicks Tools → Inbox → Comms successfully opened each menu and advanced the spotlight. Prior accessibility actions did not exercise this pointer interception and were insufficient evidence.
+
+### Transition sequencing correction
+
+The previous spotlight remained mounted until the next 260ms timeout, while the same menu element changed width/content. Tour clicks now remove the old spotlight in capture phase, before the navigation handler renders the next section. The next spotlight waits for the expected section, no running panel transition and four stable geometry frames, with abort/cleanup and a bounded timeout. Browser temporary frame instrumentation observed 21 moving frames on Inbox → Comms and zero overlap with a Driver overlay; instrumentation was removed. First opening and Tools → Inbox also completed successfully. No fixed-duration guess remains in the menu handoff.
+
+### Initial Home generation — 2026-09-12
+
+Replaced the 450/1000/1550ms section insertion with 750ms preparation and simultaneous reserved card regions. F0Card.Skeleton compact supplies placeholders; its optional-looking body is suppressed by a scoped presentation rule for task-row height. Text reserves its full dimensions and streams at the existing One cadence (10 characters / 24ms); cards fade over 180ms. Completion at 1250ms persists the existing generated marker and signals the composer to reveal its report suggestion. Repeat visits and reduced-motion skip initial preparation. The refresh flow is unchanged.
+
+Browser verified initial setup→generation: preparation label and skeleton present, report suggestion absent during preparation, existing widgets remain available. TypeScript passes. Test origin localhost:5184 is separate from the user's 127.0.0.1:5184 state.

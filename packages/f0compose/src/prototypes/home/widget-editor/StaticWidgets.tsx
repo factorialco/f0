@@ -1,9 +1,12 @@
 import { F0Box, F0Button } from "@factorialco/f0-react"
+import { Widget } from "@factorialco/f0-react/dist/experimental"
 import { Cross, Pencil } from "@factorialco/f0-react/icons/app"
 
+import "../setup/home-generation.css"
 import { useSearchParams } from "react-router-dom"
 
 import { useProfile } from "../profileStore"
+import { useHomePreparing } from "../setup/homeGeneration"
 import { useFixedWidgets } from "../setup/widgetPreferences"
 import { HomeToolbarActions } from "../windows/HomeToolbarActions"
 import { useWidgetCollapse } from "../windows/widgetCollapse"
@@ -18,6 +21,7 @@ export function StaticWidgets({
   onCloseConversation?: () => void
 }) {
   const profile = useProfile()
+  const preparing = useHomePreparing(profile)
   useFixedWidgets(profile)
   const catalog = useWidgetCatalog(profile)
   const [, setParams] = useSearchParams()
@@ -59,7 +63,22 @@ export function StaticWidgets({
                 : (catalog.custom.find((widget) => widget.id === id)?.title ??
                   "Widget")
             }
-            renderWidget={(id) => <WidgetCard id={id} custom={catalog.custom} />}
+            renderWidget={(id) => (
+              <div
+                className="home-generation-region"
+                data-preparing={preparing || undefined}
+                aria-busy={preparing}
+              >
+                <div aria-hidden={preparing || undefined}>
+                  <WidgetCard id={id} custom={catalog.custom} />
+                </div>
+                {preparing && (
+                  <div className="home-widget-skeleton">
+                    <Widget.Skeleton height="full" />
+                  </div>
+                )}
+              </div>
+            )}
             footer={(collapsed) => (
               <F0Box display="flex" justifyContent="center">
                 <F0Button

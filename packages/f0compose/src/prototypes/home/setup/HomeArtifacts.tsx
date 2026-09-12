@@ -6,8 +6,11 @@ import {
   F0TagStatus,
   F0Text,
 } from "@factorialco/f0-react";
+import "./home-generation.css";
 import { Pencil } from "@factorialco/f0-react/icons/app";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { OnePersonListItem } from "@factorialco/f0-react/dist/experimental";
+import { setHomePreparing } from "./homeGeneration";
 
 import { avatarFor } from "@/fixtures/helpers";
 
@@ -19,7 +22,7 @@ import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets";
 import { candidates } from "../home-widgets/recruitment";
 import { NeedsYouItem } from "../NeedsYouItem";
 import {
-  resumeHomeSetup,
+  startHomeFocusEdit,
   type ChatMessage,
   type Conversation,
 } from "../one/conversationStore";
@@ -39,6 +42,24 @@ export function HomeQuestion({
   const q = message.question!;
   if (!q.answer && !q.skipped) return null;
   return <F0Text content={q.text} variant="body" />;
+}
+
+// Same 10 characters / 24ms cadence as the original One conversation store.
+function HomeStreamingText({ content, animate, preparing }: { content: string; animate: boolean; preparing: boolean }) {
+  const [chars, setChars] = useState(0);
+  useEffect(() => {
+    if (!animate) return;
+    setChars(0);
+    const timer = window.setInterval(() => setChars(value => {
+      if (value + 10 >= content.length) window.clearInterval(timer);
+      return value + 10;
+    }), 24);
+    return () => window.clearInterval(timer);
+  }, [animate, content]);
+  return <div className="home-streaming-text">
+    <div aria-hidden="true" className="home-text-measure"><F0Text content={content} /></div>
+    <div><F0Text content={preparing ? "" : animate ? content.slice(0, chars) : content} /></div>
+  </div>;
 }
 
 function Briefing({
@@ -63,22 +84,19 @@ function Briefing({
       return 3;
     }
   });
+  useLayoutEffect(() => {
+    setHomePreparing(artifact.profile, stage === 0);
+    return () => setHomePreparing(artifact.profile, false);
+  }, [artifact.profile, stage]);
   useEffect(() => {
     if (stage === 3) return;
-    const timers = [450, 1000, 1550].map((delay, index) =>
-      window.setTimeout(() => {
-        setStage(index + 1);
-        if (index === 2) {
-          try {
-            localStorage.setItem(key, "true");
-          } catch {
-            /* A restricted browser still shows the home. */
-          }
-        }
-      }, delay),
-    );
-    return () => timers.forEach(window.clearTimeout);
-    // One sequence per mounted landing, never on a conversation preview.
+    const prepare = window.setTimeout(() => setStage(1), 750);
+    const complete = window.setTimeout(() => {
+      setStage(3);
+      try { localStorage.setItem(key, "true"); } catch { /* Session remains usable. */ }
+      window.dispatchEvent(new Event("home-generation-complete"));
+    }, 1250);
+    return () => { clearTimeout(prepare); clearTimeout(complete); };
   }, [key]);
   const focuses = artifact.focuses?.length
     ? artifact.focuses
@@ -98,26 +116,25 @@ function Briefing({
     .join(" and ");
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
-      <F0Text content={`I’ve focused your briefing on ${focusedOn}.`} />
-      {stage === 0 && (
-        <F0Text content="Preparing your home…" variant="description" />
-      )}
-      {stage >= 1 && tasks.length > 0 && (
+      <HomeStreamingText content={`I’ve focused your briefing on ${focusedOn}.`} animate={stage === 1} preparing={stage === 0} />
+      {stage === 0 && <div className="home-preparation-status" role="status">Preparing your Home…</div>}
+      {tasks.length > 0 && (
         <F0Box
           display="flex"
           flexDirection="column"
           gap="md"
           data-home-generated-section="attention"
         >
-          <F0Text
-            variant="label"
+          <HomeStreamingText
+            animate={stage === 1} preparing={stage === 0}
             content={
               focuses.includes("personal")
                 ? "Your Modelo 145 is due tomorrow. You also have a survey due this week and 3 forms to complete."
                 : `You have ${tasks.length} ${tasks.length === 1 ? "item" : "items"} to review. Here’s where you can help.`
             }
           />
-          <F0Box display="flex" flexDirection="column">
+          <div className="home-generation-region" data-preparing={stage === 0 || undefined}>
+          <F0Box display="flex" flexDirection="column" aria-hidden={stage === 0 || undefined}>
             {tasks.map((task, index) => (
               <NeedsYouItem
                 key={task.id}
@@ -127,9 +144,11 @@ function Briefing({
               />
             ))}
           </F0Box>
+          {stage === 0 && <div className="home-generation-skeleton" aria-label="Preparing your tasks">{tasks.map(task => <OnePersonListItem.Skeleton key={task.id} />)}</div>}
+          </div>
         </F0Box>
       )}
-      {stage >= 2 && !fixedWidgets.includes("communities") && (
+      {!fixedWidgets.includes("communities") && (
         <F0Box
           display="flex"
           flexDirection="column"
@@ -140,6 +159,7 @@ function Briefing({
             content="From your communities, you’ve been invited to a Taco party:"
             variant="label"
           />
+          <div className="home-generation-region" data-preparing={stage === 0 || undefined}>
           <F0Card
             compact
             title={post.title}
@@ -152,11 +172,11 @@ function Briefing({
               src: avatarFor(post.seed),
             }}
           />
+          {stage === 0 && <div className="home-generation-skeleton"><OnePersonListItem.Skeleton /></div>}
+          </div>
         </F0Box>
       )}
-      {stage >= 3 && (
-        <F0Text content="Let me know if you are missing anything, so we can adjust." />
-      )}
+      <HomeStreamingText content="Let me know if you are missing anything, so we can adjust." animate={stage === 1} preparing={stage === 0} />
     </F0Box>
   );
 }
@@ -315,7 +335,7 @@ export function HomeSessionBar({
             hideLabel
             size="sm"
             variant="neutral"
-            onClick={() => resumeHomeSetup(profile, "focus")}
+            onClick={() => startHomeFocusEdit(profile)}
           />
         </F0Box>
       </F0Box>
