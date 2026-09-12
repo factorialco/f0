@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { F0Box, F0Heading, F0Text } from "@factorialco/f0-react"
+import { F0Box, F0Heading, F0Text, F0Icon } from "@factorialco/f0-react"
 import { Widget } from "@factorialco/f0-react/dist/experimental"
-import { Delete } from "@factorialco/f0-react/icons/app"
+import { Delete, Handle } from "@factorialco/f0-react/icons/app"
 
 import { Post } from "../windows/CommunitiesWindow"
 import { COMMUNITY_POSTS } from "../windows/communityPosts"
@@ -16,12 +16,14 @@ export function WidgetCard({
   onRemove,
   sortable = false,
   overlay = false,
+  defaultWidget = false,
 }: {
   id: string
   custom: CustomWidget[]
   onRemove?: () => void
   sortable?: boolean
   overlay?: boolean
+  defaultWidget?: boolean
 }) {
   const {
     attributes,
@@ -43,7 +45,7 @@ export function WidgetCard({
   return (
     <div
       ref={setNodeRef}
-      className="w-full shrink-0"
+      className="relative w-full shrink-0"
       data-static-widget={id}
       data-widget-draggable={sortable && !overlay}
       data-widget-dragging={isDragging}
@@ -63,13 +65,27 @@ export function WidgetCard({
         if (
           sortable &&
           event.target instanceof Element &&
-          event.target.closest("h3") === event.currentTarget.querySelector("h3")
+          !event.target.closest("button, a, input") &&
+          event.currentTarget
+            .querySelector('[role="article"]')
+            ?.firstElementChild?.contains(event.target)
         ) {
           listeners?.onPointerDown?.(event)
         }
       }}
     >
+      {(sortable || overlay) && (
+        <div
+          className="pointer-events-none absolute left-4 top-6 z-10"
+          aria-hidden
+        >
+          <F0Icon icon={Handle} size="sm" color="secondary" />
+        </div>
+      )}
       <Widget
+        status={
+          defaultWidget ? { text: "Default", variant: "neutral" } : undefined
+        }
         header={{
           title,
           ...(onRemove

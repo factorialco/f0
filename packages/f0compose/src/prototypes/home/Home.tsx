@@ -120,9 +120,10 @@ const FULL_BLEED_CSS = `
   /* The native header keeps its F0 layout; only the separate live-runtime switch is hidden because this prototype uses Ask One. */
   [data-home-page-header] [role="switch"] { display: none; }
   [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); box-shadow: none; }
-  [data-widget-draggable="true"] h3 { cursor: grab; user-select: none; }
-  [data-widget-draggable="true"] h3:active { cursor: grabbing; }
-  [data-widget-draggable="true"] h3 { touch-action: none; }
+  [data-widget-overlay="true"] [role="article"] > :first-child,
+  [data-widget-draggable="true"] [role="article"] > :first-child { cursor: grab; user-select: none; touch-action: none; padding-left: 24px; min-height: 40px; }
+  [data-widget-draggable="true"] [role="article"] > :first-child:active { cursor: grabbing; }
+  [data-widget-draggable="true"] [role="article"] > :first-child button { cursor: pointer; }
   [data-widget-overlay="true"] { cursor: grabbing; transform: scale(1.02); }
   [data-widget-overlay="true"] [role="article"] { box-shadow: 0 8px 24px hsl(var(--neutral-20)); }
   [data-home-input-surface] { transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1); }

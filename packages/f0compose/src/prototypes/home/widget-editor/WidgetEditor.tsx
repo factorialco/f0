@@ -22,6 +22,7 @@ import {
   F0Icon,
   type IconType,
   F0Text,
+  F0TagStatus,
 } from "@factorialco/f0-react"
 import {
   F1SearchBox,
@@ -222,7 +223,7 @@ export function WidgetEditor() {
             setParams({})
           }}
           headerAction={{
-            label: "New widget",
+            label: "Add custom widget",
             icon: Comment,
             variant: "outline",
             onClick: () => {
@@ -351,7 +352,11 @@ export function WidgetEditor() {
                           alignItems="center"
                         >
                           {inherited(row.id) ? (
-                            <F0Text content="Required" variant="small" />
+                            <F0TagStatus
+                              text="Default"
+                              variant="neutral"
+                              additionalAccessibleText="Provided for employees and cannot be removed from Personal"
+                            />
                           ) : hoveredRow === row.id || focusedRow === row.id ? (
                             <F0Button
                               label={
@@ -419,7 +424,7 @@ export function WidgetEditor() {
                     )}
                     {scope === "personal" && draft.employees.length > 0 && (
                       <F0Text
-                        content="Employee widgets are included and cannot be removed from Personal."
+                        content="Default widgets cannot be removed or moved. Drag the header of another widget to reorder it."
                         variant="description"
                       />
                     )}
@@ -459,6 +464,7 @@ export function WidgetEditor() {
                               inherited(id) ? undefined : () => toggle(id)
                             }
                             sortable={scope === "personal" && !inherited(id)}
+                            defaultWidget={inherited(id)}
                           />
                         ))}
                       </SortableContext>

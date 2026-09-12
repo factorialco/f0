@@ -1,10 +1,12 @@
-import { F0Box, F0Button } from "@factorialco/f0-react"
+import { F0Button } from "@factorialco/f0-react"
 import { Cross, Pencil } from "@factorialco/f0-react/icons/app"
+
 import { useSearchParams } from "react-router-dom"
 
 import { useProfile } from "../profileStore"
 import { useFixedWidgets } from "../setup/widgetPreferences"
 import { HomeToolbarActions } from "../windows/HomeToolbarActions"
+import { useWidgetCollapse } from "../windows/widgetCollapse"
 import { WidgetRail } from "../windows/WidgetRail"
 import { windowRegistry } from "../windows/WindowsColumn"
 import { isBuiltin, readSelection, useWidgetCatalog } from "./model"
@@ -20,6 +22,8 @@ export function StaticWidgets({
   const catalog = useWidgetCatalog(profile)
   const [, setParams] = useSearchParams()
   const ids = readSelection(profile).personal
+  const { collapsed } = useWidgetCollapse(profile)
+  const hasExpanded = ids.some((id) => !collapsed.includes(id))
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
       <div className="flex shrink-0 items-start pt-3">
@@ -35,28 +39,31 @@ export function StaticWidgets({
         )}
         <HomeToolbarActions openWindows={ids} showEdit={false} />
       </div>
-      <WidgetRail
-        items={ids}
-        titleFor={(id) =>
-          isBuiltin(id)
-            ? windowRegistry[id].title
-            : (catalog.custom.find((widget) => widget.id === id)?.title ??
-              "Widget")
-        }
-        renderWidget={(id) => <WidgetCard id={id} custom={catalog.custom} />}
-        footer={(collapsed) => (
-          <F0Box display="flex" justifyContent="center">
-            <F0Button
-              label="Edit widgets"
-              icon={Pencil}
-              hideLabel={collapsed}
-              size={collapsed ? "sm" : "md"}
-              variant={collapsed ? "ghost" : "outline"}
-              onClick={() => setParams({ view: "widgets" })}
-            />
-          </F0Box>
-        )}
-      />
+      <div className="flex min-h-0 flex-col">
+        <div className="flex items-center px-2 pt-3">
+          <F0Button
+            label="Edit widgets"
+            icon={Pencil}
+            hideLabel={!hasExpanded && ids.length > 0}
+            variant="outline"
+            size="md"
+            onClick={() => setParams({ view: "widgets" })}
+          />
+        </div>
+        <div className="min-h-0 flex-1">
+          <WidgetRail
+            items={ids}
+            titleFor={(id) =>
+              isBuiltin(id)
+                ? windowRegistry[id].title
+                : (catalog.custom.find((widget) => widget.id === id)?.title ??
+                  "Widget")
+            }
+            renderWidget={(id) => <WidgetCard id={id} custom={catalog.custom} />}
+            footer={() => null}
+          />
+        </div>
+      </div>
     </div>
   )
 }
