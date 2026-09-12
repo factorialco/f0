@@ -26,26 +26,28 @@ export function StaticWidgets({
   const hasExpanded = ids.some((id) => !collapsed.includes(id))
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
-      <div className="flex shrink-0 items-start pt-3">
-        <F0Button
-          label="Edit widgets"
-          icon={Pencil}
-          hideLabel={!hasExpanded && ids.length > 0}
-          variant="ghost"
-          size="md"
-          onClick={() => setParams({ view: "widgets" })}
-        />
-        {onCloseConversation && (
+      <div className="relative w-8 shrink-0">
+        <div className="absolute right-0 top-3 z-10 flex items-start whitespace-nowrap">
           <F0Button
-            label="Close conversation"
-            icon={Cross}
-            hideLabel
+            label="Edit widgets"
+            icon={Pencil}
+            hideLabel={!hasExpanded && ids.length > 0}
             variant="ghost"
             size="md"
-            onClick={onCloseConversation}
+            onClick={() => setParams({ view: "widgets" })}
           />
-        )}
-        <HomeToolbarActions openWindows={ids} showEdit={false} />
+          {onCloseConversation && (
+            <F0Button
+              label="Close conversation"
+              icon={Cross}
+              hideLabel
+              variant="ghost"
+              size="md"
+              onClick={onCloseConversation}
+            />
+          )}
+          <HomeToolbarActions openWindows={ids} showEdit={false} />
+        </div>
       </div>
       <div className="flex min-h-0 flex-col">
         <div className="min-h-0 flex-1">
