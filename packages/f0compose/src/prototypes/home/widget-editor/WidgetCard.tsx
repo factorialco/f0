@@ -79,7 +79,7 @@ export function WidgetCard({
           className="pointer-events-none absolute left-4 top-6 z-10"
           aria-hidden
         >
-          <F0Icon icon={Handle} size="sm" color="secondary" />
+          <F0Icon icon={Handle} size="xs" color="secondary" />
         </div>
       )}
       <Widget

@@ -168,6 +168,7 @@ export function WidgetRail(
               />
             </div>
           ))}
+          {staticCards && expanded.length === 0 && props.footer(true)}
         </div>
       )}
       {peek && folded.includes(peek.id) && (
