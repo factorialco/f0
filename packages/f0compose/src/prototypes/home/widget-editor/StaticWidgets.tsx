@@ -58,13 +58,13 @@ export function StaticWidgets({
                   "Widget")
             }
             renderWidget={(id) => <WidgetCard id={id} custom={catalog.custom} />}
-            footer={() => (
+            footer={(collapsed) => (
               <F0Box display="flex" justifyContent="center">
                 <F0Button
                   label="Edit widgets"
                   icon={Pencil}
-                  hideLabel
-                  variant="ghost"
+                  hideLabel={collapsed}
+                  variant="outline"
                   size="md"
                   onClick={() => setParams({ view: "widgets" })}
                 />
