@@ -61,14 +61,14 @@ export function suggestionFor(
     }
   return profile === "employee"
     ? {
-        label: "Help me plan my day",
+        label: "Help me get these tasks done",
         prompt:
-          "Help me plan my day around upcoming commitments and pending tasks.",
+          "Help me get these tasks done. Guide me through the personal tasks shown in my Home and prepare what I need to complete them.",
       }
     : {
-        label: "What needs my attention today?",
+        label: "Help me get these tasks done",
         prompt:
-          "Review pending HR approvals, upcoming onboardings and employee incidents. Prioritize what needs my attention today and prepare next steps for my approval.",
+          "Help me get these tasks done. Help me work through the tasks shown in my Home, prepare the next actions and ask for my confirmation before sending, approving or changing anything.",
       }
 }
 
