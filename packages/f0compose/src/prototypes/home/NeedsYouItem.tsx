@@ -77,7 +77,7 @@ export function NeedsYouItem({
           // Explicit duration/easing: a bare `transition-colors` falls back to
           // tailwind's 150ms ease-in-out, which withholds the first third of a
           // hover the pointer is already sitting on. Hover -> plain ease, short.
-          className={`f0c-ease-hover flex min-h-12 w-full items-center gap-2 overflow-hidden rounded-[10px] ${surface === "primary" ? "bg-f1-background" : "bg-f1-background-tertiary"} p-3 transition-colors duration-150 ${
+          className={`f0c-ease-hover flex min-h-12 w-full items-center gap-2 overflow-hidden rounded-[10px] ${surface === "primary" ? "border border-solid border-f1-border-secondary bg-f1-background" : "bg-f1-background-tertiary"} p-3 transition-colors duration-150 ${
             busy
               ? "cursor-default"
               : "cursor-pointer hover:bg-f1-background-secondary"

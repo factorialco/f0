@@ -1,5 +1,5 @@
 import { F0Button } from "@factorialco/f0-react";
-import { Pencil } from "@factorialco/f0-react/icons/app";
+import { Cross, Pencil } from "@factorialco/f0-react/icons/app";
 import { useSearchParams } from "react-router-dom";
 import { useProfile } from "../profileStore";
 import { useFixedWidgets } from "../setup/widgetPreferences";
@@ -9,7 +9,7 @@ import { windowRegistry } from "../windows/WindowsColumn";
 import { isBuiltin, useWidgetCatalog } from "./model";
 import { WidgetCard } from "./WidgetCard";
 
-export function StaticWidgets() {
+export function StaticWidgets({ onCloseConversation }: { onCloseConversation?: () => void }) {
   const profile = useProfile();
   const builtin = useFixedWidgets(profile);
   const catalog = useWidgetCatalog(profile);
@@ -17,7 +17,8 @@ export function StaticWidgets() {
   const ids = [...builtin, ...catalog.selectedCustom];
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
-      <div className="shrink-0 pt-3">
+      <div className="flex shrink-0 items-start pt-3">
+        {onCloseConversation && <F0Button label="Close conversation" icon={Cross} hideLabel variant="ghost" size="md" onClick={onCloseConversation} />}
         <HomeToolbarActions openWindows={ids} showEdit={false} />
       </div>
       <WidgetRail

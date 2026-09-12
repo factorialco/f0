@@ -68,3 +68,9 @@ Verified in isolated browser origin: expand/collapse, collapsed state survives r
 ## Folded icon styling correction
 
 Compared WidgetRail against PR 5510 head again. Restored its exact F0Button size lg / outline, original 56px rail with 8px gaps and padding, and right-14 preview offset. Removed the additional Edit icon from the folded strip. The previously requested global toggle remains on the left. Inspected browser screenshot of the folded two-widget rail; original large outlined buttons are visible. Typecheck and prototype checks pass. Hover preview renderer remains the current WidgetCard adapter; hover styling not browser-verified.
+
+## Conversation controls and card strokes
+
+Removed Play and conversation ellipsis from HomeNavbar. Moved the inline conversation close action into the controls immediately to the left of widget collapse. Existing side chat controls remain adjacent. Applied F0 border-secondary (neutral-10) to F0 cards within Conversation regions, including side chat, and upper task rows; custom conversation cards already use border-secondary.
+
+Browser: opened a task, observed close x1160–1192 and collapse x1192–1224, both y12/32px; Play/options count zero. Closed it and verified Home greeting returned. Four briefing card borders measured 1px rgba(5,38,87,.06), matching secondary. Typecheck and 230-file prototype check passed.

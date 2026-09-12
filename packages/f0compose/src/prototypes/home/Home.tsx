@@ -6,7 +6,6 @@ import {
 } from "@factorialco/f0-react"
 import { F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
 import {
-  Cross,
   Ellipsis,
   Reaction,
   Settings,
@@ -56,7 +55,6 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
-import { PlayOutline } from "./one/PlayOutline"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { PreferencesScreen } from "./preferences/PreferencesScreen"
@@ -116,6 +114,7 @@ export const meta: PrototypeMeta = {
 // This concept needs a seamless canvas edge-to-edge, so we override both
 // while Home is mounted and restore them on unmount.
 const FULL_BLEED_CSS = `
+  [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
   main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
@@ -851,29 +850,7 @@ function HomeNavbar({
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {conversationTitle ? (
-          <div className="flex items-center">
-            {/* An agent's brief has nothing to preview — the frame shows
-              only the ⋮ there. */}
-            {!conversationEmoji && !homeSession && (
-              <F0Button
-                variant="ghost"
-                size="md"
-                icon={PlayOutline}
-                hideLabel
-                label="Open creation preview"
-                onClick={() => onToggleWindow("preview")}
-              />
-            )}
-            {!homeSession && (
-              <F0Button
-                variant="ghost"
-                size="md"
-                icon={Ellipsis}
-                hideLabel
-                label="Conversation options"
-              />
-            )}
-          </div>
+          null
         ) : screenTitle ? (
           <div className="flex items-center">
             {screenActions ?? (
@@ -1371,18 +1348,6 @@ function HomeCanvas() {
                   role="region"
                   aria-label="Conversation"
                 >
-                  {!activeConversation.homeBriefing && (
-                    <div className="flex justify-end">
-                      <F0Button
-                        label="Close conversation"
-                        icon={Cross}
-                        hideLabel
-                        variant="ghost"
-                        size="md"
-                        onClick={goHome}
-                      />
-                    </div>
-                  )}
                   <div className="f0c-canvas-surface sticky top-0 z-10 mx-auto w-[712px] max-w-full">
                     <HomeSessionBar conversation={activeConversation} />
                   </div>
@@ -1472,7 +1437,7 @@ function HomeCanvas() {
         {/* Clock in is the one widget that floats instead of maximizing
           (per Oskar) — its card lives outside the column, over the
           canvas, hanging from the navbar button that opened it. */}
-        {!hideWidgets && <StaticWidgets />}
+        {!hideWidgets && <StaticWidgets onCloseConversation={activeConversation && !activeConversation.homeBriefing ? goHome : undefined} />}
       </div>
     </div>
   )
