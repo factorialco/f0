@@ -1,0 +1,35 @@
+/* User-approved, scoped overrides for the exact onboarding reference.
+   F0 heading-large exposes 22/28; F0's 3xl token is 26/32.
+   F0Box does not expose a 600px width and F0Text has no color prop. */
+[data-home-onboarding] {
+  width: 600px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+[data-home-onboarding] h1 {
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: -0.26px;
+}
+[data-home-onboarding] [data-onboarding-muted],
+[data-home-onboarding] > p,
+[data-home-onboarding] > div:last-child > p {
+  color: var(--Foreground-Default-tertiary, rgba(1, 27, 75, 0.45));
+}
+[data-home-onboarding] > p,
+[data-home-onboarding] > div:last-child > p {
+  font-family: var(--Font-Family-Inter, Inter), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  text-align: left;
+}
+
+[data-home-onboarding] .home-onboarding-logo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+

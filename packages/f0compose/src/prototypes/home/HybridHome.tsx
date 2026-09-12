@@ -1,4 +1,5 @@
 import { F0Box, F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
+import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import { Textarea as F0TextAreaInput } from "@factorialco/f0-react/dist/experimental"
 import {
   ArrowUp,
@@ -29,6 +30,7 @@ import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   goHome,
   startConversation,
+  startHomeWorkflow,
   sendMessage,
   useConversations,
 } from "./one/conversationStore"
@@ -79,7 +81,8 @@ export function HybridHome({ children }: { children: ReactNode }) {
   }, [activeConversation?.id, profile])
 
   const view = params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
-
+  const onboarding = useOnboarding(profile)
+  const suggestReport = !view && onboarding.suggestReport
   const emptyState = emptyStateFor(view)
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
@@ -103,7 +106,14 @@ export function HybridHome({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Widget editing opens One only through the explicit New widget action.
     if (view === "widgets") return
-    if (activeId) setMode(view ? "side" : "focus")
+    if (activeId)
+      setMode(
+        !view && activeConversation?.homeBriefing
+          ? "idle"
+          : view
+            ? "side"
+            : "focus"
+      )
     else setMode("idle")
   }, [activeId])
   useEffect(() => {
@@ -402,7 +412,20 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   </div>
                 </div>
               )}
-              <div hidden={asking} aria-hidden={compact || asking}>
+              <div data-hybrid-editor hidden={asking} aria-hidden={compact || asking}>
+                {suggestReport && (
+                  <F0Box paddingBottom="sm">
+                    <HomeSuggestion
+                      label="Create a report for One to monitor and share insights"
+                      size="md"
+                      onClick={() => {
+                        updateOnboarding(profile, { suggestReport: false })
+                        startHomeWorkflow(profile, "report")
+                        setMode("side")
+                      }}
+                    />
+                  </F0Box>
+                )}
                 <F0Box
                   position="relative"
                   height="32"

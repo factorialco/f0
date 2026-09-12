@@ -2083,3 +2083,56 @@ export function enterHome(profile: ProfileId) {
     conversations: [conversation, ...state.conversations],
   })
 }
+
+/** Handoff from the standalone onboarding into the existing mocked Home. */
+export function completeOnboardingHome(
+  profile: ProfileId,
+  selected: string[],
+  custom: string
+) {
+  const base = initialSetup(profile)
+  const focuses: HomeSetup["focus"][] = selected.flatMap((value) =>
+    value === "personal"
+      ? ["personal" as const]
+      : value === "team"
+        ? ["team" as const]
+        : []
+  )
+  const setup: HomeSetup = {
+    ...base,
+    step: "complete",
+    paused: true,
+    experienceVersion: HOME_EXPERIENCE_VERSION,
+    focus: focuses[0] ?? base.focus,
+    focuses: focuses.length ? focuses : [base.focus],
+  }
+  const id = `c${nextId++}`
+  const conversation: Conversation = {
+    id,
+    title: "Your personalised Home",
+    homeBriefing: profile,
+    homeSetup: setup,
+    thinking: false,
+    lastActiveAt: Date.now(),
+    messages: [
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: "",
+        homeArtifact: {
+          kind: "briefing",
+          profile,
+          focus: setup.focus,
+          focuses: setup.focuses,
+        },
+      },
+    ],
+  }
+  // Exact selections (including custom text) live in onboarding/state for the new Home.
+  void custom
+  emit({
+    ...state,
+    activeId: id,
+    conversations: [conversation, ...state.conversations],
+  })
+}

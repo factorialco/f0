@@ -20,7 +20,13 @@ export type HelpRow =
   | { kind: "header"; text: string }
   | { kind: "footer"; text: string }
   | { kind: "separator" }
-  | { kind: "item"; label: string; icon: IconType; href?: string }
+  | {
+      kind: "item"
+      label: string
+      icon: IconType
+      href?: string
+      onClick?: () => void
+    }
 export function ProfileMenu({
   accountEmail,
   entities,
@@ -451,7 +457,10 @@ export function HelpMenu({ label, rows }: { label: string; rows: HelpRow[] }) {
                         border: "none",
                         cursor: "pointer",
                       }}
-                      onClick={() => setOpen(false)}
+                      onClick={() => {
+                        setOpen(false)
+                        row.onClick?.()
+                      }}
                     >
                       {content}
                     </button>

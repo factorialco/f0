@@ -3,9 +3,11 @@ import { F0Button } from "@factorialco/f0-react"
 import { useI18n } from "@factorialco/f0-react/dist/ai"
 
 interface ConfirmFooterProps {
+  actionSize?: "sm" | "md" | "lg"
   canProceed: boolean
   /** Disables both submit actions (confirm and skip), e.g. while the assistant is still responding */
   submitDisabled?: boolean
+  skipLabel?: string
   label: string
   onConfirm: () => void
   onSkip?: () => void
@@ -15,8 +17,10 @@ interface ConfirmFooterProps {
 
 export const ConfirmFooter = ({
   canProceed,
+  actionSize,
   submitDisabled,
   label,
+  skipLabel,
   onConfirm,
   onSkip,
   showSkip,
@@ -28,14 +32,16 @@ export const ConfirmFooter = ({
       <div className="flex items-center">
         {showSkip && onSkip && (
           <F0Button
+            size={actionSize}
             variant="outline"
-            label={translation.ai.clarifyingQuestion.skip}
+            label={skipLabel ?? translation.ai.clarifyingQuestion.skip}
             onClick={onSkip}
             disabled={submitDisabled}
           />
         )}
       </div>
       <F0Button
+        size={actionSize}
         disabled={!canProceed || submitDisabled}
         variant={"default"}
         label={label}

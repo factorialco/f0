@@ -1,3 +1,4 @@
+import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import {
   F0AvatarPerson,
   F0Checkbox,
@@ -1282,6 +1283,7 @@ function RailIconButton({
 }
 
 export function HomeNav() {
+  const profile = useProfile()
   // setSearchParams, NOT navigate("/"): the prototype is mounted at
   // /p/home, so navigating to the root leaves it altogether.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -1293,7 +1295,13 @@ export function HomeNav() {
     view === "marketplace" || view === "settings" || view === "notifications"
       ? view
       : null
-  const panelVisible = panelOpen && !utilityView
+  const onboarding = useOnboarding(profile)
+  const panelVisible =
+    panelOpen &&
+    !utilityView &&
+    (onboarding.screen === "complete" ||
+      onboarding.screen === "tour" ||
+      onboarding.hidden)
   const activeSection = utilityView ?? section
 
   // Browser back to Calendar restores its rail selection as well as its page.
@@ -1327,9 +1335,16 @@ export function HomeNav() {
   }
 
   const pickSection = (id: NavSectionId) => {
+    if (onboarding.screen !== "complete" && onboarding.screen !== "tour")
+      updateOnboarding(profile, { hidden: true })
     // Re-clicking the active section toggles the panel; anything else
     // switches (and reopens if collapsed).
-    const nextOpen = !utilityView && id === section ? !panelOpen : true
+    const nextOpen =
+      onboarding.screen === "tour"
+        ? true
+        : !utilityView && id === section
+          ? !panelOpen
+          : true
     setSection(id)
     setPanelOpen(nextOpen)
     persist(id, nextOpen)

@@ -18,6 +18,11 @@ interface F0ClarifyingPanelProps {
    * answer input, and Skip) — e.g. while the assistant is still streaming a
    * response. Step navigation and option selection stay interactive.
    */
+  actionSize?: "sm" | "md" | "lg"
+  hideCancel?: boolean
+  confirmLabel?: string
+  skipLabel?: string
+  alwaysShowSkip?: boolean
   isSubmitDisabled?: boolean
 }
 
@@ -34,11 +39,21 @@ interface F0ClarifyingPanelProps {
 export const F0ClarifyingPanel = ({
   clarifyingQuestion,
   isSubmitDisabled,
+  confirmLabel,
+  skipLabel,
+  alwaysShowSkip,
+  hideCancel,
+  actionSize,
 }: F0ClarifyingPanelProps) => {
   return (
     <F0ClarifyingPanelContent
       clarifyingQuestion={clarifyingQuestion}
       isSubmitDisabled={isSubmitDisabled}
+      confirmLabel={confirmLabel}
+      skipLabel={skipLabel}
+      alwaysShowSkip={alwaysShowSkip}
+      hideCancel={hideCancel}
+      actionSize={actionSize}
     />
   )
 }
@@ -46,6 +61,11 @@ export const F0ClarifyingPanel = ({
 const F0ClarifyingPanelContent = ({
   clarifyingQuestion,
   isSubmitDisabled,
+  confirmLabel,
+  skipLabel,
+  alwaysShowSkip,
+  hideCancel,
+  actionSize,
 }: F0ClarifyingPanelProps) => {
   const translation = useI18n()
   const {
@@ -89,9 +109,7 @@ const F0ClarifyingPanelContent = ({
   const hasSelection = selectedOptionIds.length > 0
   const hasCustomText = (customAnswerText ?? "").trim().length > 0
   const canProceed =
-    hasSelection ||
-    (isCustomAnswerActive && hasCustomText) ||
-    optional === true
+    hasSelection || (isCustomAnswerActive && hasCustomText) || optional === true
 
   // Only the final step submits (sends a message back to the assistant) —
   // navigating between steps stays allowed while submission is disabled.
@@ -161,6 +179,7 @@ const F0ClarifyingPanelContent = ({
             onBack={back}
             onNext={confirm}
             onCancel={cancel}
+            hideCancel={hideCancel}
           />
 
           <OptionsList
@@ -187,11 +206,13 @@ const F0ClarifyingPanelContent = ({
 
       <ConfirmFooter
         canProceed={canProceed}
+        actionSize={actionSize}
         submitDisabled={isSubmitBlocked}
-        label={confirmButtonLabel}
+        label={confirmLabel ?? confirmButtonLabel}
+        skipLabel={skipLabel}
         onConfirm={handleConfirm}
         onSkip={handleSkip}
-        showSkip={showSkip}
+        showSkip={alwaysShowSkip || showSkip}
       />
     </div>
   )

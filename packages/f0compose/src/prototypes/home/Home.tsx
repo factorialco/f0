@@ -1,3 +1,5 @@
+import { Onboarding } from "./onboarding/Onboarding"
+import { getOnboarding, useOnboarding } from "./onboarding/state"
 import {
   F0AvatarPerson,
   F0Button,
@@ -48,7 +50,7 @@ import { ModuleScreen } from "./ModuleScreen"
 import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
-import { enterHome } from "./one/conversationStore"
+import { completeOnboardingHome, enterHome } from "./one/conversationStore"
 import {
   goHome,
   onWindowRequest,
@@ -948,6 +950,16 @@ const GREETINGS = [
 ]
 
 export default function Home() {
+  useFullBleedChrome()
+  const profile = useProfile()
+  const onboarding = useOnboarding(profile)
+  const [params] = useSearchParams()
+  if (
+    onboarding.screen !== "complete" &&
+    !onboarding.hidden &&
+    !params.get("view")
+  )
+    return <Onboarding profile={profile} />
   return (
     <HybridHome>
       <HomeCanvas />
@@ -957,7 +969,6 @@ export default function Home() {
 
 function HomeCanvas() {
   useTransientScrollbars()
-  useFullBleedChrome()
   useSingleTooltip()
   // Needs-you rows One has cleared. Read here rather than inside the row
   // so both the list AND its ordering come from one snapshot.
@@ -1102,7 +1113,16 @@ function HomeCanvas() {
   // click would appear dead behind the takeover.
   const profile = useProfile()
   useEffect(() => {
-    if (!view && !chats.state.open.length) enterHome(profile)
+    if (!view && !chats.state.open.length) {
+      const onboarding = getOnboarding(profile)
+      if (onboarding.screen !== "complete" && !activeId)
+        completeOnboardingHome(
+          profile,
+          onboarding.selected,
+          onboarding.customActive ? onboarding.custom : ""
+        )
+      else enterHome(profile)
+    }
   }, [view, activeId, profile, chats.state.open.length])
   const person = PROFILE_PEOPLE[profile]
   const greeting = greetingTemplate.replace("%s", person.firstName)

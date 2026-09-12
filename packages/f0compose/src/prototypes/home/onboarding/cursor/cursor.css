@@ -1,0 +1,242 @@
+.tour-cursor {
+  --tour-cursor-move-duration: 0s;
+  --tour-cursor-hide-delay: 0ms;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  z-index: 2147483647;
+  /* New cursor SVG: already drawn at the correct down-right pointing angle
+     and carries its own drop-shadow filter — no CSS rotation or extra
+     drop-shadow needed. The translate offsets the box so the painted tip
+     (≈ (10, 13) inside a 53×53 viewBox → ≈ (8, 11) at 44px) lands at the
+     engine's target coordinates. */
+  transform: translate(-8px, -11px);
+  opacity: 1;
+  transition:
+    left var(--tour-cursor-move-duration) cubic-bezier(0.25, 1, 0.5, 1),
+    top var(--tour-cursor-move-duration) cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 160ms ease-out var(--tour-cursor-hide-delay);
+}
+
+/* Arrow art lives on a pseudo-element so it can be mirrored independently of
+   the cursor box (which also hosts the tooltip child — mirroring the whole
+   box would reverse the tooltip text). */
+.tour-cursor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url(./ai-pointer.svg) no-repeat center;
+  background-size: contain;
+}
+
+.tour-cursor-idle {
+  animation: tour-cursor-float 2s ease-in-out 2s infinite;
+}
+
+/* Left-pointing variant: used when the cursor parks LEFT-outside the target
+   (tooltipSide:'left', e.g. far-right One-panel controls). The arrow is
+   mirrored so its tip points toward the element on its right, and the box is
+   shifted so the mirrored tip (now at x≈36 in the 44px box, vs 8) still lands
+   on the engine's target coordinate. */
+.tour-cursor-point-left {
+  transform: translate(-36px, -11px);
+}
+.tour-cursor-point-left::before {
+  transform: scaleX(-1);
+}
+.tour-cursor-point-left.tour-cursor-idle {
+  animation: tour-cursor-float-left 2s ease-in-out 2s infinite;
+}
+
+.tour-cursor-hidden {
+  --tour-cursor-hide-delay: 800ms;
+  opacity: 0;
+}
+
+/* ─── Tooltip attached to cursor ─── */
+
+.tour-cursor-tooltip {
+  position: absolute;
+  top: 14px;
+  left: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #1f2937;
+  color: #ffffff;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  width: max-content;
+  max-width: 320px;
+  pointer-events: none;
+  /* Cursor is no longer rotated; tooltip can render upright. */
+  transform: none;
+  opacity: 0;
+  animation: tour-tooltip-appear 200ms ease-out forwards;
+}
+
+/* Flipped placements — applied by cursor.ts when the default below-right
+   tooltip would overflow the viewport (e.g. a sticky-footer Save button at
+   the bottom edge). */
+.tour-cursor-tooltip-above .tour-cursor-tooltip {
+  top: auto;
+  bottom: 40px;
+}
+
+.tour-cursor-tooltip-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tour-cursor-tooltip-desc {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Button row — keeps multiple actions (e.g. "Copy prompt" + "Finish tour") on one
+   line. `align-self: flex-start` so the row hugs its buttons instead of stretching
+   across the tooltip's width. */
+.tour-cursor-tooltip-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+
+/* The one interactive piece inside an otherwise pointer-transparent cursor:
+   `pointer-events: auto` re-enables clicks on the button even though the
+   cursor + tooltip set `pointer-events: none`. Styled as a dark outlined pill
+   that reads on the dark tooltip surface.
+
+   Sized to F0's `xs` button (24px box, 8px inline padding, 13px label): the
+   tooltip is a small floating surface and the control should sit under the copy
+   without competing with it. */
+.tour-cursor-tooltip-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 2px;
+  min-height: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  padding: 1px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+}
+
+/* Secondary action in a two-button row (see cursor.ts: every button after the
+   first). No border or fill — it's the alternative, not the expected next move,
+   so it only gains a surface on hover. */
+.tour-cursor-tooltip-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.tour-cursor-tooltip-btn--ghost:hover {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tour-cursor-tooltip-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.tour-cursor-tooltip-btn:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* Brief acknowledgement after a copy/download click (the button no longer
+   advances the step, so it needs its own feedback). */
+.tour-cursor-tooltip-btn--done {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.tour-cursor-tooltip-btn svg {
+  width: 13px;
+  height: 12px;
+  flex: none;
+}
+
+/* Flip the tooltip to the LEFT of the cursor when the target sits near the right
+   edge of the viewport (toggled from cursor.ts), so it never renders off-screen
+   — e.g. controls inside the right-hand One chat panel. */
+.tour-cursor-flip-left .tour-cursor-tooltip {
+  left: auto;
+  right: 48px;
+}
+
+/* Render the tooltip ABOVE the cursor (TourStep.tooltipVerticalSide: 'top'),
+   for targets near the bottom edge where the default below-cursor tooltip would
+   be clipped. Anchored by its bottom edge so it grows upward regardless of
+   height. */
+.tour-cursor-tooltip-top .tour-cursor-tooltip {
+  top: auto;
+  bottom: 30px;
+}
+
+@keyframes tour-tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tour-cursor-hidden .tour-cursor-tooltip {
+  opacity: 0;
+}
+
+@keyframes tour-cursor-float {
+  0%,
+  100% {
+    transform: translate(-8px, -11px);
+  }
+  50% {
+    transform: translate(-8px, -15px);
+  }
+}
+
+/* Same vertical bob as tour-cursor-float, but keeping the left-pointing box
+   offset (the arrow mirror lives on ::before, so it isn't animated here). */
+@keyframes tour-cursor-float-left {
+  0%,
+  100% {
+    transform: translate(-36px, -11px);
+  }
+  50% {
+    transform: translate(-36px, -15px);
+  }
+}
+
+/* Host accessibility adaptation: honour the visitor’s motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  .tour-cursor, .tour-cursor *, .tour-cursor::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}

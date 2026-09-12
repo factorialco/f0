@@ -27,6 +27,22 @@ import {
   type Connector,
 } from "./state"
 
+import googleLogo from "../onboarding/assets/google-drive.png"
+import slackLogo from "../onboarding/assets/slack.svg"
+import notionLogo from "../onboarding/assets/notion.svg"
+import jiraLogo from "../onboarding/assets/jira.svg"
+import githubLogo from "../onboarding/assets/github.svg"
+import figmaLogo from "../onboarding/assets/figma.svg"
+
+const connectorLogos: Record<string, string> = {
+  "google-drive": googleLogo,
+  slack: slackLogo,
+  notion: notionLogo,
+  jira: jiraLogo,
+  github: githubLogo,
+  figma: figmaLogo,
+}
+
 function SectionHeader({
   title,
   description,
@@ -60,16 +76,14 @@ function ConnectorRow({
       borderTop={first ? "none" : "default"}
       borderColor="secondary"
     >
-      <F0AvatarCompany name={connector.name} size="sm" />
+      <F0AvatarCompany
+        name={connector.name}
+        src={connectorLogos[connector.id]}
+        size="sm"
+      />
       <F0Box display="flex" flexDirection="column" grow minWidth="0">
         <F0Text content={connector.name} variant="label" />
         <F0Text content={connector.description} variant="description" />
-      </F0Box>
-      <F0Box shrink={false}>
-        <F0Text
-          content={connected ? "Connected" : "Not connected"}
-          variant="description"
-        />
       </F0Box>
       {connector.custom ? (
         <F0Button
@@ -83,27 +97,35 @@ function ConnectorRow({
           variant={connected ? "ghost" : "outline"}
           size="sm"
           label={connected ? "Disconnect" : "Connect"}
-          onClick={() => toggleConnection(connector.id)}
+          onClick={async () => {
+            if (!connected)
+              await new Promise<void>((resolve) => setTimeout(resolve, 1200))
+            toggleConnection(connector.id)
+          }}
         />
       )}
     </F0Box>
   )
 }
 
-function Connections() {
+export function Connections({ onboarding = false }: { onboarding?: boolean }) {
   const prefs = usePreferences()
   const [url, setUrl] = useState("")
-  const all = [...BUILT_IN_CONNECTORS, ...prefs.customConnectors]
+  const all = onboarding
+    ? BUILT_IN_CONNECTORS.filter((connector) => connector.id !== "figma")
+    : [...BUILT_IN_CONNECTORS, ...prefs.customConnectors]
   const submit = () => {
     addCustomConnector(url)
     setUrl("")
   }
   return (
     <F0Box display="flex" flexDirection="column" gap="lg" width="full">
-      <SectionHeader
-        title="Connections"
-        description="MCP servers your work buddy can use to read from and act on other tools. Each one asks for your permission before its first action."
-      />
+      {!onboarding && (
+        <SectionHeader
+          title="Connections"
+          description="MCP servers your work buddy can use to read from and act on other tools. Each one asks for your permission before its first action."
+        />
+      )}
       <F0Box
         border="default"
         borderColor="secondary"
@@ -119,32 +141,34 @@ function Connections() {
             first={i === 0}
           />
         ))}
-        <F0Box
-          display="flex"
-          alignItems="center"
-          gap="lg"
-          padding="md"
-          borderTop="default"
-          borderColor="secondary"
-        >
-          <F0Box grow minWidth="0">
-            <Input
-              value={url}
-              onChange={setUrl}
-              label="MCP server URL"
-              hideLabel
-              placeholder="Add a custom MCP server, e.g. https://mcp.example.com/sse"
-              onPressEnter={submit}
+        {!onboarding && (
+          <F0Box
+            display="flex"
+            alignItems="center"
+            gap="lg"
+            padding="md"
+            borderTop="default"
+            borderColor="secondary"
+          >
+            <F0Box grow minWidth="0">
+              <Input
+                value={url}
+                onChange={setUrl}
+                label="MCP server URL"
+                hideLabel
+                placeholder="Add a custom MCP server, e.g. https://mcp.example.com/sse"
+                onPressEnter={submit}
+              />
+            </F0Box>
+            <F0Button
+              variant="outline"
+              size="sm"
+              label="Add"
+              disabled={url.trim().length === 0}
+              onClick={submit}
             />
           </F0Box>
-          <F0Button
-            variant="outline"
-            size="sm"
-            label="Add"
-            disabled={url.trim().length === 0}
-            onClick={submit}
-          />
-        </F0Box>
+        )}
       </F0Box>
     </F0Box>
   )

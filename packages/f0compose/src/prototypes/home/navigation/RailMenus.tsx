@@ -1,3 +1,4 @@
+import { reopenOnboarding, startNavigationTour } from "../onboarding/state"
 import { F0AvatarCompany, F0AvatarPerson } from "@factorialco/f0-react"
 import {
   AlertCircleLine,
@@ -51,7 +52,36 @@ export function CompanyLogo() {
   return <F0AvatarCompany name="Factorial" src={factorial} size="sm" />
 }
 export function RailHelpMenu() {
-  return <HelpMenu label="Help" rows={helpRows} />
+  const profile = useProfile()
+  const [, setParams] = useSearchParams()
+  const resume = (screen: "welcome" | "preferences") => {
+    setParams({})
+    reopenOnboarding(profile, screen)
+  }
+  return (
+    <HelpMenu
+      label="Help"
+      rows={[
+        {
+          kind: "item",
+          label: "Explore the new navigation",
+          icon: BookOpen,
+          onClick: () => {
+            setParams({})
+            startNavigationTour(profile)
+          },
+        },
+        {
+          kind: "item",
+          label: "Personalise my Home",
+          icon: Sliders,
+          onClick: () => resume("preferences"),
+        },
+        { kind: "separator" },
+        ...helpRows,
+      ]}
+    />
+  )
 }
 export function RailPersonalMenu() {
   const [selected, setSelected] = useState(() => {

@@ -16,6 +16,7 @@ interface StepHeaderProps {
   canProceed: boolean
   onBack: () => void
   onNext: () => void
+  hideCancel?: boolean
   onCancel: () => void
 }
 
@@ -28,6 +29,7 @@ export const StepHeader = ({
   onBack,
   onNext,
   onCancel,
+  hideCancel,
 }: StepHeaderProps) => {
   const translation = useI18n()
 
@@ -65,14 +67,16 @@ export const StepHeader = ({
           />
         </div>
       )}
-      <F0Button
-        variant="ghost"
-        size="sm"
-        onClick={onCancel}
-        label={translation.actions.cancel}
-        hideLabel
-        icon={Cross}
-      />
+      {!hideCancel && (
+        <F0Button
+          variant="ghost"
+          size="sm"
+          onClick={onCancel}
+          label={translation.actions.cancel}
+          hideLabel
+          icon={Cross}
+        />
+      )}
     </div>
   )
 }
