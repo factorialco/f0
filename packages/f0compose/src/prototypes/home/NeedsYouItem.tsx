@@ -72,13 +72,13 @@ export function NeedsYouItem({
     >
       <div className="overflow-hidden pb-2">
         <div
-          onClick={busy ? undefined : () => onOpen?.(task)}
+          onClick={busy || !onOpen ? undefined : () => onOpen(task)}
           aria-busy={phase?.kind === "thinking" || undefined}
           // Explicit duration/easing: a bare `transition-colors` falls back to
           // tailwind's 150ms ease-in-out, which withholds the first third of a
           // hover the pointer is already sitting on. Hover -> plain ease, short.
           className={`f0c-ease-hover flex min-h-12 w-full items-center gap-2 overflow-hidden rounded-[10px] ${surface === "primary" ? "border border-solid border-f1-border-secondary bg-f1-background" : "bg-f1-background-tertiary"} p-3 transition-colors duration-150 ${
-            busy
+            busy || !onOpen
               ? "cursor-default"
               : "cursor-pointer hover:bg-f1-background-secondary"
           } ${animate ? "f0c-card-in" : ""}`}
@@ -136,7 +136,7 @@ export function NeedsYouItem({
           {/* No chevron while One is on it, and none once it is done: there is
           nothing to open, and leaving it invites a click that goes
           nowhere. */}
-          {!busy && (
+          {!busy && onOpen && (
             <F0Button
               variant="ghost"
               size="sm"

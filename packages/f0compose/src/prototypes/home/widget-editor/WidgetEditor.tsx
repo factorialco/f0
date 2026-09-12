@@ -52,6 +52,7 @@ import { customWidgetIconKey } from "./creation"
 import {
   countChanges,
   reorderPersonal,
+  reorderEmployees,
   readSelection,
   saveSelection,
   useWidgetCatalog,
@@ -424,7 +425,7 @@ export function WidgetEditor() {
                     )}
                     {scope === "personal" && draft.employees.length > 0 && (
                       <F0Text
-                        content="Default widgets cannot be removed or moved. Drag the header of another widget to reorder it."
+                        content="Default widgets cannot be removed or moved."
                         variant="description"
                       />
                     )}
@@ -437,9 +438,14 @@ export function WidgetEditor() {
                       onDragCancel={() => setDraggedId(null)}
                       onDragEnd={({ active, over }) => {
                         setDraggedId(null)
-                        if (over)
+                        if (
+                          over &&
+                          (scope !== "employees" || profile === "admin")
+                        )
                           setDraft((current) =>
-                            reorderPersonal(
+                            (scope === "employees"
+                              ? reorderEmployees
+                              : reorderPersonal)(
                               current,
                               String(active.id),
                               String(over.id)
@@ -451,7 +457,9 @@ export function WidgetEditor() {
                         items={
                           scope === "personal"
                             ? selection.filter((id) => !inherited(id))
-                            : []
+                            : profile === "admin"
+                              ? selection
+                              : []
                         }
                         strategy={verticalListSortingStrategy}
                       >
@@ -463,7 +471,11 @@ export function WidgetEditor() {
                             onRemove={
                               inherited(id) ? undefined : () => toggle(id)
                             }
-                            sortable={scope === "personal" && !inherited(id)}
+                            sortable={
+                              scope === "employees"
+                                ? profile === "admin"
+                                : !inherited(id)
+                            }
                             defaultWidget={inherited(id)}
                           />
                         ))}

@@ -5,6 +5,7 @@ import {
   readCatalog,
   readSelection,
   reorderPersonal,
+  reorderEmployees,
   saveSelection,
 } from "./model"
 
@@ -131,3 +132,22 @@ assert(
   "Employee widgets always load first"
 )
 console.log("Widget ordering regressions passed")
+
+const employeeOrder = reorderEmployees(ordered, "events", "clockin")
+assert(
+  employeeOrder.employees.join() === "events,clockin",
+  "Employee scope supports reordering defaults"
+)
+assert(
+  countChanges(ordered, employeeOrder) > 0,
+  "Default ordering enables saving"
+)
+saveSelection("admin", employeeOrder)
+assert(
+  readSelection("admin").personal.slice(0, 2).join() === "events,clockin",
+  "Saved employee order leads Personal"
+)
+assert(
+  reorderPersonal(employeeOrder, "events", "payslip") === employeeOrder,
+  "Defaults remain fixed in Personal after reordering"
+)

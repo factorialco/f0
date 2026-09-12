@@ -2,7 +2,6 @@ import {
   F0Box,
   F0Button,
   F0Card,
-  F0Dialog,
   F0Heading,
   F0TagStatus,
   F0Text,
@@ -21,11 +20,9 @@ import { candidates } from "../home-widgets/recruitment";
 import { NeedsYouItem } from "../NeedsYouItem";
 import {
   resumeHomeSetup,
-  startConversationWithContext,
   type ChatMessage,
   type Conversation,
 } from "../one/conversationStore";
-import { Post } from "../windows/CommunitiesWindow";
 import { COMMUNITY_POSTS } from "../windows/communityPosts";
 import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh";
 import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data";
@@ -51,7 +48,6 @@ function Briefing({
   artifact: Extract<HomeArtifact, { kind: "briefing" }>;
   entrance: boolean;
 }) {
-  const [communityOpen, setCommunityOpen] = useState(false);
   const personalWidgets = useFixedWidgets(artifact.profile);
   const widgetCatalog = useWidgetCatalog(artifact.profile);
   const fixedWidgets = [...personalWidgets, ...widgetCatalog.employees];
@@ -100,21 +96,6 @@ function Briefing({
       HOME_FOCUS_LABELS[focus as keyof typeof HOME_FOCUS_LABELS].toLowerCase(),
     )
     .join(" and ");
-  const openTask = (task: (typeof tasks)[number]) =>
-    startConversationWithContext(
-      {
-        kind: "metric",
-        title: task.title,
-        stats: [{ label: "Status", value: task.subtitle }],
-      },
-      `Help me review: ${task.title}`,
-      {
-        reply: [
-          `${task.title}. ${task.subtitle}.`,
-          "This is a sample task. Nothing has been approved or sent.",
-        ],
-      },
-    );
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
       <F0Text content={`I’ve focused your briefing on ${focusedOn}.`} />
@@ -143,7 +124,6 @@ function Briefing({
                 task={task}
                 surface="primary"
                 index={index}
-                onOpen={openTask}
               />
             ))}
           </F0Box>
@@ -171,20 +151,9 @@ function Briefing({
               lastName: "Pena",
               src: avatarFor(post.seed),
             }}
-            onClick={() => setCommunityOpen(true)}
           />
         </F0Box>
       )}
-      <F0Dialog
-        isOpen={communityOpen}
-        onClose={() => setCommunityOpen(false)}
-        title="Company updates"
-        width="md"
-      >
-        <F0Box padding="lg">
-          <Post post={post} />
-        </F0Box>
-      </F0Dialog>
       {stage >= 3 && (
         <F0Text content="Let me know if you are missing anything, so we can adjust." />
       )}

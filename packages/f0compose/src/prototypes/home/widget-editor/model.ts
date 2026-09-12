@@ -168,3 +168,18 @@ export function reorderPersonal(
   extras.splice(to, 0, active)
   return { ...selection, personal: [...selection.employees, ...extras] }
 }
+
+/** Admins can order the employee defaults in their own scope. */
+export function reorderEmployees(
+  selection: WidgetSelection,
+  active: string,
+  target: string
+): WidgetSelection {
+  const employees = [...selection.employees]
+  const from = employees.indexOf(active),
+    to = employees.indexOf(target)
+  if (from < 0 || to < 0 || from === to) return selection
+  employees.splice(from, 1)
+  employees.splice(to, 0, active)
+  return { ...selection, employees }
+}
