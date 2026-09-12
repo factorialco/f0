@@ -245,6 +245,21 @@ let nextId =
     return ids.reduce((m, id) => Math.max(m, Number(id.slice(1)) || 0), max)
   }, 0)
 
+// Reloading during the first simulated reply must still leave the workflow answerable.
+state.conversations = state.conversations.map((conversation) =>
+  conversation.homeSetup?.purpose &&
+  conversation.messages.length === 1 &&
+  conversation.messages[0].role === "user"
+    ? {
+        ...conversation,
+        messages: [
+          ...conversation.messages,
+          homeQuestion(conversation.homeSetup),
+        ],
+      }
+    : conversation
+)
+
 /**
  * `persist: false` for the transient frames of a turn — the reasoning
  * reveal and the reply stream tick many times a second, and serialising
@@ -1839,7 +1854,8 @@ export function resumeHomeSetup(
 }
 export function startHomeWorkflow(
   profile: ProfileId,
-  purpose: "routine" | "report"
+  purpose: "routine" | "report",
+  prompt = purpose === "routine" ? "Create a routine" : "Create a report"
 ) {
   const setup: HomeSetup = {
     ...initialSetup(profile),
@@ -1854,24 +1870,32 @@ export function startHomeWorkflow(
       {
         id,
         title: purpose === "routine" ? "Create a routine" : "Create a report",
-        thinking: false,
+        thinking: true,
         lastActiveAt: Date.now(),
         homeSetup: setup,
-        messages: [
-          {
-            id: `m${nextId++}`,
-            role: "assistant",
-            content:
-              purpose === "routine"
-                ? "Let's draft a routine together. You'll review its conditions before saving. Nothing will run in this prototype."
-                : "Let's build a report together. We'll review its data and alert rule before saving.",
-          },
-          homeQuestion(setup),
-        ],
+        messages: [{ id: `m${nextId++}`, role: "user", content: prompt }],
       },
       ...state.conversations,
     ],
   })
+  setTimeout(() => {
+    streamTurn(
+      id,
+      [
+        {
+          id: `m${nextId++}`,
+          role: "assistant",
+          content:
+            purpose === "routine"
+              ? "Let's draft a routine together. You'll review its conditions before saving. Nothing will run in this prototype."
+              : "Let's build a report together. We'll review its data and alert rule before saving.",
+        },
+        homeQuestion(setup),
+      ],
+      () => {}
+    )
+  }, THINK_MS)
+  return id
 }
 export function pauseHomeSetup(id: string) {
   patchConversation(id, (c) => ({

@@ -1,3 +1,18 @@
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable"
+
 import "./f0-utilities"
 import {
   F0ActionBar,
@@ -59,6 +74,11 @@ const widgetIcons: Record<string, IconType> = {
 
 export function WidgetEditor() {
   const profile = useProfile()
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
   const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(
     null
   )
@@ -192,6 +212,8 @@ export function WidgetEditor() {
           disableContentPadding
           title="Edit widgets"
           onClose={() => {
+            // Escape cancels the drag before it can dismiss the editor.
+            if (draggedId) return
             if (changes > 0) {
               setConfirmClose(true)
               return
@@ -401,22 +423,57 @@ export function WidgetEditor() {
                         variant="description"
                       />
                     )}
-                    {selection.map((id) => (
-                      <WidgetCard
-                        key={id}
-                        id={id}
-                        custom={catalog.custom}
-                        onRemove={inherited(id) ? undefined : () => toggle(id)}
-                        onReorder={
-                          scope === "personal" && !inherited(id)
-                            ? (active, target) =>
-                                setDraft((current) =>
-                                  reorderPersonal(current, active, target)
-                                )
-                            : undefined
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragStart={({ active }) =>
+                        setDraggedId(String(active.id))
+                      }
+                      onDragCancel={() => setDraggedId(null)}
+                      onDragEnd={({ active, over }) => {
+                        setDraggedId(null)
+                        if (over)
+                          setDraft((current) =>
+                            reorderPersonal(
+                              current,
+                              String(active.id),
+                              String(over.id)
+                            )
+                          )
+                      }}
+                    >
+                      <SortableContext
+                        items={
+                          scope === "personal"
+                            ? selection.filter((id) => !inherited(id))
+                            : []
                         }
-                      />
-                    ))}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {selection.map((id) => (
+                          <WidgetCard
+                            key={id}
+                            id={id}
+                            custom={catalog.custom}
+                            onRemove={
+                              inherited(id) ? undefined : () => toggle(id)
+                            }
+                            sortable={scope === "personal" && !inherited(id)}
+                          />
+                        ))}
+                      </SortableContext>
+                      <DragOverlay
+                        dropAnimation={{ duration: 220, easing: "ease-out" }}
+                      >
+                        {draggedId ? (
+                          <WidgetCard
+                            id={draggedId}
+                            custom={catalog.custom}
+                            overlay
+                          />
+                        ) : null}
+                      </DragOverlay>
+                    </DndContext>
                     {!selection.length && (
                       <WidgetEmptyState
                         title="No widgets yet"

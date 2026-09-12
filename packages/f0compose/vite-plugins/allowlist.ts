@@ -24,6 +24,10 @@ const ALLOWED_BARE = new Set([
   // Zod is the schema language used by F0Form (`f0FormField` wraps a Zod
   // schema). Prototypes that build co-created forms need it directly.
   "zod",
+  // Approved widget reordering, using the same packages as F0 layouts.
+  "@dnd-kit/core",
+  "@dnd-kit/sortable",
+  "@dnd-kit/utilities",
 ])
 
 export function allowlistPlugin(): Plugin {

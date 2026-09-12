@@ -13,12 +13,18 @@ import {
   Page,
   PageHeader,
 } from "@factorialco/f0-react/dist/experimental"
-import { Comment, Pencil } from "@factorialco/f0-react/icons/app"
+import { Pencil } from "@factorialco/f0-react/icons/app"
 /** Ported from irene-mallafre/factorial-ai, f7405eb; see IMPORT.md.
  * Original sections and state operations retained; controls use real F0. */
 import { useContext, useState } from "react"
 
-import { AgentEntryContext } from "../AskFactorial"
+import { AgentEntryContext, AskFactorialAction } from "../AskFactorial"
+import figmaLogo from "../onboarding/assets/figma.svg"
+import githubLogo from "../onboarding/assets/github.svg"
+import googleLogo from "../onboarding/assets/google-drive.png"
+import jiraLogo from "../onboarding/assets/jira.svg"
+import notionLogo from "../onboarding/assets/notion.svg"
+import slackLogo from "../onboarding/assets/slack.svg"
 import { startPolicyEditing } from "../one/conversationStore"
 import {
   BUILT_IN_CONNECTORS,
@@ -31,13 +37,6 @@ import {
   policyTextFor,
   type Connector,
 } from "./state"
-
-import googleLogo from "../onboarding/assets/google-drive.png"
-import slackLogo from "../onboarding/assets/slack.svg"
-import notionLogo from "../onboarding/assets/notion.svg"
-import jiraLogo from "../onboarding/assets/jira.svg"
-import githubLogo from "../onboarding/assets/github.svg"
-import figmaLogo from "../onboarding/assets/figma.svg"
 
 const connectorLogos: Record<string, string> = {
   "google-drive": googleLogo,
@@ -252,13 +251,20 @@ export function PreferencesScreen() {
     <Page
       header={
         <>
-          <div data-home-preferences-header>
-            <PageHeader
-              module={{ id: "home", name: "Home", href: "/p/home" }}
-              breadcrumbs={[{ id: "preferences", label: "Preferences" }]}
-              actions={[{ label: "Ask One", icon: Comment, onClick: one.open }]}
-            />
-          </div>
+          <F0Box
+            display="flex"
+            alignItems="center"
+            paddingRight="xl"
+            data-home-page-header
+          >
+            <F0Box grow minWidth="0">
+              <PageHeader
+                module={{ id: "home", name: "Home", href: "/p/home" }}
+                breadcrumbs={[{ id: "preferences", label: "Preferences" }]}
+              />
+            </F0Box>
+            <AskFactorialAction onClick={one.open} />
+          </F0Box>
           <Tabs
             secondary={false}
             activeTabId={tab}

@@ -1,13 +1,3 @@
-import { CALENDAR_EVENTS, WEEK_DAYS } from "./calendar/calendarFixtures"
-import { peopleRows, ACCESS_LABEL } from "./people/peopleData"
-import { policies } from "./policies/policiesData"
-import { readActivity } from "./activity/state"
-import {
-  readPreferences,
-  BUILT_IN_CONNECTORS,
-  policyTextFor,
-} from "./preferences/state"
-
 import {
   Calendar,
   Clock,
@@ -22,6 +12,16 @@ import {
   Search,
   List,
 } from "@factorialco/f0-react/icons/app"
+
+import { readActivity } from "./activity/state"
+import { CALENDAR_EVENTS, WEEK_DAYS } from "./calendar/calendarFixtures"
+import { peopleRows, ACCESS_LABEL } from "./people/peopleData"
+import { policies } from "./policies/policiesData"
+import {
+  readPreferences,
+  BUILT_IN_CONNECTORS,
+  policyTextFor,
+} from "./preferences/state"
 
 export type Presentation = "idle" | "expanded" | "side" | "focus"
 /** One relevant starting point, using the existing profile and current page. */
@@ -169,9 +169,7 @@ export function pageReading(view: string, visibleText = "") {
       "Start with pending invitations before checking onboarding progress.",
     ]
   } else if (view === "policies") {
-    const attention = policies.filter(
-      (policy) => policy.status !== "published"
-    )
+    const attention = policies.filter((policy) => policy.status !== "published")
     reply = [
       `${attention.length} of ${policies.length} files need a review before publication.`,
       ...attention.map(
@@ -189,14 +187,20 @@ export function pageReading(view: string, visibleText = "") {
       ),
     ].slice(0, 6)
     reply = lines.length
-      ? [
-          `Here are the relevant details currently shown in ${title}:`,
-          ...lines,
-        ]
+      ? [`Here are the relevant details currently shown in ${title}:`, ...lines]
       : [`There are no records shown in ${title} to summarize yet.`]
   }
   return {
-    title,
+    title:
+      view === "preferences"
+        ? "Review connections and preferences"
+        : view === "calendar"
+          ? "Plan the week"
+          : view === "people" || view === "organization"
+            ? "Review pending onboarding"
+            : view === "activity" || view === "inbox"
+              ? "Review pending activity"
+              : `Review ${title.toLowerCase()}`,
     prompt: `Review ${title} and summarize the relevant data, pending items and next steps.`,
     reply,
   }

@@ -27,6 +27,10 @@ const ALLOWED_BARE = [
   "react/jsx-runtime",
   "react/jsx-dev-runtime",
   "react-router-dom",
+  // Same approved reorder primitives as F0 layouts.
+  "@dnd-kit/core",
+  "@dnd-kit/sortable",
+  "@dnd-kit/utilities",
   "@factorialco/f0-react",
   "@factorialco/f0-core",
 ] as const

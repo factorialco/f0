@@ -315,7 +315,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
           >
             <div className="flex items-center justify-between gap-2 p-4">
               <F0Heading
-                content={view === "widgets" ? "New widget" : "Ask One"}
+                content={
+                  activeConversation?.title ??
+                  (view === "widgets" ? "New widget" : "Conversation")
+                }
                 variant="heading"
               />
               <div className="flex gap-1">
@@ -461,7 +464,11 @@ export function HybridHome({ children }: { children: ReactNode }) {
                             updateOnboarding(profile, {
                               suggestReport: false,
                             })
-                            startHomeWorkflow(profile, "report")
+                            startHomeWorkflow(
+                              profile,
+                              "report",
+                              "Create a report for One to monitor and share insights"
+                            )
                             setWriting(true)
                           } else send(suggestion.prompt)
                         }}

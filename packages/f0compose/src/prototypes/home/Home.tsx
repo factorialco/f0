@@ -118,10 +118,13 @@ export const meta: PrototypeMeta = {
 const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
   /* The native header keeps its F0 layout; only the separate live-runtime switch is hidden because this prototype uses Ask One. */
-  [data-home-preferences-header] [role="switch"] { display: none; }
+  [data-home-page-header] [role="switch"] { display: none; }
   [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); box-shadow: none; }
   [data-widget-draggable="true"] h3 { cursor: grab; user-select: none; }
   [data-widget-draggable="true"] h3:active { cursor: grabbing; }
+  [data-widget-draggable="true"] h3 { touch-action: none; }
+  [data-widget-overlay="true"] { cursor: grabbing; transform: scale(1.02); }
+  [data-widget-overlay="true"] [role="article"] { box-shadow: 0 8px 24px hsl(var(--neutral-20)); }
   [data-home-input-surface] { transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1); }
   @media (prefers-reduced-motion: reduce) {
     [data-hybrid-composer], [data-home-input-surface] { transition: none !important; }
@@ -1021,6 +1024,7 @@ function HomeCanvas() {
   // second scrollbar inside the first.
   const fullWidthView =
     screenView === "preferences" ||
+    screenView === "activity" ||
     screenView === "calendar" ||
     screenView === "people" ||
     screenView === "organization" ||
@@ -1338,7 +1342,7 @@ function HomeCanvas() {
               : { flex: "1 1 0%", minWidth: 0 }
           }
         >
-          {screenView !== "preferences" && <div className="flex flex-col">
+          {screenView !== "preferences" && screenView !== "activity" && <div className="flex flex-col">
             <HomeNavbar
               openWindows={windows.state.open}
               onToggleWindow={toggleWindow}

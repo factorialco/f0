@@ -4,10 +4,16 @@ import {
   F0Dialog,
   F0Heading,
   F0Text,
+  StandardLayout,
 } from "@factorialco/f0-react"
-import { OneDataCollection } from "@factorialco/f0-react/dist/experimental"
-import { useCallback, useEffect, useState } from "react"
+import {
+  OneDataCollection,
+  Page,
+  PageHeader,
+} from "@factorialco/f0-react/dist/experimental"
+import { useCallback, useContext, useEffect, useState } from "react"
 
+import { AgentEntryContext, AskFactorialAction } from "../AskFactorial"
 import { activityListOptions } from "./activityListOptions"
 import { type ActivityRecord } from "./model"
 import { advanceReview, resolveActivity, useActivity } from "./state"
@@ -32,6 +38,7 @@ function ActivityList({
 }
 
 export function ActivityScreen() {
+  const one = useContext(AgentEntryContext)
   const rows = useActivity()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
@@ -54,86 +61,115 @@ export function ActivityScreen() {
     setSelectedId(null)
   }
   return (
-    <F0Box
-      display="flex"
-      flexDirection="column"
-      gap="xl"
-      width="full"
-      minWidth="0"
-    >
-      {confirmation && (
+    <Page
+      header={
         <F0Box
           display="flex"
           alignItems="center"
-          justifyContent="between"
-          gap="lg"
-          padding="lg"
-          background="secondary"
+          paddingRight="xl"
+          data-home-page-header
         >
-          <F0Text content={confirmation} />
-          <F0Button
-            label="Dismiss"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setConfirmation(null)
-            }}
-          />
-        </F0Box>
-      )}
-      <ActivityList rows={rows} open={open} needsYou />
-      <F0Dialog
-        isOpen={Boolean(selected)}
-        onClose={() => setSelectedId(null)}
-        title={selected?.title ?? "Activity details"}
-        position="right"
-        width="md"
-        primaryAction={
-          selected?.decision
-            ? {
-                label:
-                  selected.decision === "expenses"
-                    ? "Approve 2 expenses"
-                    : "Assign Marta",
-                onClick: resolve,
-              }
-            : undefined
-        }
-        secondaryAction={{ label: "Close", onClick: () => setSelectedId(null) }}
-      >
-        {selected && (
-          <F0Box display="flex" flexDirection="column" gap="xl" padding="xl">
-            <F0Text
-              content={`${selected.owner} · ${selected.when}`}
-              variant="description"
+          <F0Box grow minWidth="0">
+            <PageHeader
+              module={{ id: "home", name: "Home", href: "/p/home" }}
+              breadcrumbs={[{ id: "activity", label: "Activity" }]}
             />
-            <F0Text content={selected.detail} variant="label" />
-            {selected.children && (
-              <F0Box display="flex" flexDirection="column" gap="lg">
-                <F0Heading
-                  content={selected.breakdownLabel ?? "Tasks"}
-                  variant="heading"
+          </F0Box>
+          <AskFactorialAction onClick={one.open} />
+        </F0Box>
+      }
+    >
+      <StandardLayout>
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="xl"
+          width="full"
+          minWidth="0"
+        >
+          {confirmation && (
+            <F0Box
+              display="flex"
+              alignItems="center"
+              justifyContent="between"
+              gap="lg"
+              padding="lg"
+              background="secondary"
+            >
+              <F0Text content={confirmation} />
+              <F0Button
+                label="Dismiss"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setConfirmation(null)
+                }}
+              />
+            </F0Box>
+          )}
+          <ActivityList rows={rows} open={open} needsYou />
+          <F0Dialog
+            isOpen={Boolean(selected)}
+            onClose={() => setSelectedId(null)}
+            title={selected?.title ?? "Activity details"}
+            position="right"
+            width="md"
+            primaryAction={
+              selected?.decision
+                ? {
+                    label:
+                      selected.decision === "expenses"
+                        ? "Approve 2 expenses"
+                        : "Assign Marta",
+                    onClick: resolve,
+                  }
+                : undefined
+            }
+            secondaryAction={{
+              label: "Close",
+              onClick: () => setSelectedId(null),
+            }}
+          >
+            {selected && (
+              <F0Box
+                display="flex"
+                flexDirection="column"
+                gap="xl"
+                padding="xl"
+              >
+                <F0Text
+                  content={`${selected.owner} · ${selected.when}`}
+                  variant="description"
                 />
-                <ActivityList
-                  key={selected.id}
-                  rows={selected.children}
-                  open={open}
-                />
+                <F0Text content={selected.detail} variant="label" />
+                {selected.children && (
+                  <F0Box display="flex" flexDirection="column" gap="lg">
+                    <F0Heading
+                      content={selected.breakdownLabel ?? "Tasks"}
+                      variant="heading"
+                    />
+                    <ActivityList
+                      key={selected.id}
+                      rows={selected.children}
+                      open={open}
+                    />
+                  </F0Box>
+                )}
+                {selected.steps.map((step, index) => (
+                  <F0Box
+                    key={step}
+                    padding="lg"
+                    borderBottom="default"
+                    borderColor="secondary"
+                  >
+                    <F0Text content={`${index + 1}. ${step}`} />
+                  </F0Box>
+                ))}
               </F0Box>
             )}
-            {selected.steps.map((step, index) => (
-              <F0Box
-                key={step}
-                padding="lg"
-                borderBottom="default"
-                borderColor="secondary"
-              >
-                <F0Text content={`${index + 1}. ${step}`} />
-              </F0Box>
-            ))}
-          </F0Box>
-        )}
-      </F0Dialog>
-    </F0Box>
+          </F0Dialog>
+        </F0Box>
+      </StandardLayout>
+    </Page>
   )
 }

@@ -26,6 +26,9 @@
   },
   "dependencies": {
     "@copilotkit/react-core": "^1.54.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@factorialco/f0-core": "workspace:*",
     "@factorialco/f0-react": "workspace:*",
     "react": "18.3.1",
