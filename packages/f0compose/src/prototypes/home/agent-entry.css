@@ -465,3 +465,30 @@ body:has([data-widget-editor]) main#content {
   border: 1px solid hsl(var(--neutral-10));
   @apply shadow-md;
 }
+
+/* Module pages share the widget editor's F0 surface. Keep the shadow
+   outside the scrolling canvas, with one border around the entire page. */
+body:has([data-hybrid-root]:not([data-view="home"])) main#content,
+body:has([data-hybrid-root]:not([data-view="home"])) main#content > div,
+[data-hybrid-root]:not([data-view="home"]),
+[data-hybrid-root]:not([data-view="home"]) [data-hybrid-work] {
+  overflow: visible;
+}
+body:has([data-hybrid-root]:not([data-view="home"])) main#content {
+  border-left: 0;
+  box-shadow: none;
+}
+body:has([data-hybrid-root]:not([data-view="home"])) [data-home-panel] {
+  box-shadow: none !important;
+}
+[data-hybrid-root]:not([data-view="home"]):not([data-view="widgets"])
+  [data-hybrid-work] {
+  padding: 4px 4px 4px 0;
+  box-sizing: border-box;
+}
+[data-hybrid-root]:not([data-view="home"]):not([data-view="widgets"])
+  [data-hybrid-canvas] {
+  border: 1px solid hsl(var(--neutral-10));
+  border-radius: 16px;
+  @apply shadow-md;
+}

@@ -71,7 +71,7 @@ export function CatalogWidget({
             onClick={() => setExpanded(!expanded)}
           />
           <F0Button
-            label="Ask Factorial"
+            label="Ask One"
             icon={FactorialAgentIcon}
             variant="outline"
             size="sm"

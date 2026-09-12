@@ -79,6 +79,35 @@ export function WidgetEditor() {
     params.get("scope") === "employees" ? "employees" : "personal"
   const [saved] = useState(() => readSelection(profile))
   const [draft, setDraft] = useState(saved)
+  const [confirmClose, setConfirmClose] = useState(false)
+  const scrollContainer = useRef<HTMLElement | null>(null)
+  const previousSelection = useRef(draft)
+  useEffect(() => {
+    const added = draft[scope].filter(
+      (id) => !previousSelection.current[scope].includes(id)
+    )
+    previousSelection.current = draft
+    const id = added.at(-1)
+    const container = scrollContainer.current
+    if (!id || !container) return
+    const frame = requestAnimationFrame(() => {
+      const widget = Array.from(
+        container.querySelectorAll<HTMLElement>("[data-static-widget]")
+      ).find((element) => element.dataset.staticWidget === id)
+      if (!widget) return
+      container.scrollTo({
+        top:
+          container.scrollTop +
+          widget.getBoundingClientRect().top -
+          container.getBoundingClientRect().top -
+          16,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [draft, scope])
   const [search, setSearch] = useState("")
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [focusedRow, setFocusedRow] = useState<string | null>(null)
@@ -154,9 +183,11 @@ export function WidgetEditor() {
           asBottomSheetInMobile={false}
           disableContentPadding
           title="Edit widgets"
-          closeDisabled={changes > 0}
           onClose={() => {
-            if (changes > 0) return
+            if (changes > 0) {
+              setConfirmClose(true)
+              return
+            }
             goHome()
             setParams({})
           }}
@@ -330,6 +361,11 @@ export function WidgetEditor() {
                   grow
                   minHeight="0"
                   overflowY="auto"
+                  ref={(node) => {
+                    scrollContainer.current =
+                      node instanceof HTMLElement ? node : null
+                  }}
+                  data-widget-preview-scroll
                   padding="lg"
                   xl={{ padding: "2xl" }}
                   paddingBottom="5xl"
@@ -377,6 +413,22 @@ export function WidgetEditor() {
           </F0Box>
         </F0Dialog>
       )}
+      <F0Dialog
+        isOpen={confirmClose}
+        onClose={() => setConfirmClose(false)}
+        title="Unsaved changes"
+        position="center"
+        width="sm"
+        primaryAction={{
+          label: "Keep editing",
+          onClick: () => setConfirmClose(false),
+        }}
+        secondaryAction={{ label: "Discard changes", onClick: discard }}
+      >
+        <F0Box padding="lg">
+          <F0Text content="You have unsaved changes to your widgets. If you leave now, your layout changes will be lost." />
+        </F0Box>
+      </F0Dialog>
     </F0Box>
   )
 }

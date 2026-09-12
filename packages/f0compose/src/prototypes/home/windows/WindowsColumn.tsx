@@ -119,7 +119,7 @@ export function widgetSpec(
       "shifts",
     ].includes(id) ? (
       <F0Button
-        label={`Ask Factorial about ${title}`}
+        label={`Ask One about ${title}`}
         icon={Comment}
         hideLabel
         size="md"

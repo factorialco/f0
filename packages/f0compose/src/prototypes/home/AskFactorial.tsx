@@ -16,7 +16,7 @@ export function AskFactorialButton() {
 export function AskFactorialAction({ onClick }: { onClick: () => void }) {
   return (
     <F0Button
-      label="Ask Factorial"
+      label="Ask One"
       icon={Comment}
       variant="outline"
       size="md"

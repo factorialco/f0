@@ -279,7 +279,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
           >
             <div className="flex items-center justify-between gap-2 p-4">
               <F0Heading
-                content={view === "widgets" ? "New widget" : "One"}
+                content={view === "widgets" ? "New widget" : "Ask One"}
                 variant="heading"
               />
               <div className="flex gap-1">
