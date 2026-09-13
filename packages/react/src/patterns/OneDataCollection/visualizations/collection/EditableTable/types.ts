@@ -56,6 +56,10 @@ export type DateCellConfig = {
   minDate?: Date
   /** Latest selectable date. Dates after this are disabled in the picker. */
   maxDate?: Date
+  /** Show the leading calendar icon in the cell. Defaults to `true`. */
+  showIcon?: boolean
+  /** Show a clear button to empty the cell's date. Defaults to `false`. */
+  clearable?: boolean
 }
 
 /** The HTML-ish input type of a text cell. Drives a default leading icon. */
@@ -190,7 +194,8 @@ export type EditableTableColumnDefinition<
 
   /**
    * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
-   * restrict the selectable date range in the picker.
+   * restrict the selectable date range in the picker, `showIcon` to hide
+   * the leading calendar icon, and `clearable` for a clear button.
    *
    * Can be a static object or a function that receives the current row item
    * to return a per-row range (e.g. bound one date field by another field's

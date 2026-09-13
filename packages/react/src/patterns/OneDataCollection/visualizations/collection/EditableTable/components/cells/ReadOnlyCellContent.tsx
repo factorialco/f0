@@ -32,13 +32,19 @@ type ReadOnlyCellContentProps<R extends RecordType> = Pick<
 
 /**
  * A date column shows the shared calendar icon (same as the editable date cell
- * and the F0Form date field); otherwise a text cell's url/email icon.
+ * and the F0Form date field) unless `dateConfig.showIcon` opts out; otherwise
+ * a text cell's url/email icon.
  */
 function readOnlyLeadingIcon<R extends RecordType>(
-  editableColumn: ReadOnlyCellContentProps<R>["editableColumn"]
+  editableColumn: ReadOnlyCellContentProps<R>["editableColumn"],
+  item: R
 ) {
-  if (editableColumn.dateConfig) {
-    return getFieldInputIcon("date")
+  const dateConfig =
+    typeof editableColumn.dateConfig === "function"
+      ? editableColumn.dateConfig(item)
+      : editableColumn.dateConfig
+  if (dateConfig) {
+    return dateConfig.showIcon === false ? undefined : getFieldInputIcon("date")
   }
   return resolveTextCellIcon(editableColumn.textConfig)
 }
@@ -106,7 +112,7 @@ export function ReadOnlyCellContent<R extends RecordType>({
   const locale = useDateFnsLocale()
 
   const leadingIcon = showFieldAffordances
-    ? readOnlyLeadingIcon(editableColumn)
+    ? readOnlyLeadingIcon(editableColumn, item)
     : undefined
   const isSelect =
     showFieldAffordances &&
