@@ -372,13 +372,7 @@
 [data-hybrid-chat] {
   background: #fafafa !important;
 }
-/* Home's canvas is the ground itself, with no sheet over it, so there the
-   content side matches the sidebars (Angel, 2026-09-14). */
-[data-hybrid-root][data-view="home"],
-[data-hybrid-root][data-view="home"] [data-hybrid-work],
-[data-hybrid-root][data-view="home"] [data-hybrid-chat] {
-  background: #f5f5f5 !important;
-}
+
 [data-home-panel],
 .dark [data-home-panel] {
   box-shadow: none !important;
@@ -388,11 +382,7 @@
 .dark [data-home-nav],
 .dark [data-home-rail],
 .dark [data-home-panel],
-.dark [data-hybrid-root][data-view="home"],
-.dark [data-hybrid-root][data-view="home"] [data-hybrid-work],
-.dark [data-hybrid-root][data-view="home"] [data-hybrid-chat] {
-  background: hsl(var(--neutral-0)) !important;
-}
+
 .dark [data-hybrid-root],
 .dark [data-hybrid-work],
 .dark [data-hybrid-chat] {
@@ -494,16 +484,27 @@ body:has([data-hybrid-root]:not([data-view="home"])) main#content {
 body:has([data-hybrid-root]:not([data-view="home"])) [data-home-panel] {
   box-shadow: none !important;
 }
-[data-hybrid-root]:not([data-view="home"]):not([data-view="widgets"])
-  [data-hybrid-work] {
+[data-hybrid-root]:not([data-view="widgets"]) [data-hybrid-work] {
   padding: 4px 4px 4px 0;
   box-sizing: border-box;
 }
-[data-hybrid-root]:not([data-view="home"]):not([data-view="widgets"])
-  [data-hybrid-canvas] {
+[data-hybrid-root]:not([data-view="widgets"]) [data-hybrid-canvas] {
   border: 1px solid hsl(var(--neutral-10));
   border-radius: 16px;
   @apply shadow-md;
+}
+/* Home sits in the same white sheet as Inbox, Calendar and the modules
+   (Angel, 2026-09-14: "ahora está flotando free"). Its canvas keeps its
+   own scroller and its in-flow composer, so only the surface changes. */
+[data-hybrid-root][data-view="home"] [data-hybrid-canvas] {
+  background: hsl(var(--neutral-0));
+  overflow: hidden;
+}
+body:has([data-hybrid-root][data-view="home"]) main#content,
+body:has([data-hybrid-root][data-view="home"]) main#content > div,
+[data-hybrid-root][data-view="home"],
+[data-hybrid-root][data-view="home"] [data-hybrid-work] {
+  overflow: visible;
 }
 
 /* One frame with no motion at all, set by the nav while it swaps

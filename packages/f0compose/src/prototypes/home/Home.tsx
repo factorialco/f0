@@ -172,15 +172,7 @@ const FULL_BLEED_CSS = `
   [data-home-rail] {
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
   }
-  /* Home has no white sheet — its canvas IS the ground — so the content
-     side takes the sidebar tone there and the shell reads as one surface
-     with the conversation on it. Module screens keep the page tier under
-     their sheet. */
-  body:has([data-hybrid-root][data-view="home"]) main#content,
-  [data-hybrid-root][data-view="home"],
-  [data-hybrid-root][data-view="home"] [data-hybrid-work] {
-    background: #f5f5f5;
-  }
+
   /* The split conversation panel is CONTENT, so it takes the page tier. */
   [data-one-panel] {
     background: #fafafa;
@@ -199,10 +191,8 @@ const FULL_BLEED_CSS = `
   .dark [data-one-panel] {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
-  .dark body:has([data-hybrid-root][data-view="home"]) main#content,
-  .dark [data-hybrid-root][data-view="home"],
-  .dark [data-hybrid-root][data-view="home"] [data-hybrid-work] {
-    background: hsl(var(--neutral-0));
+  .dark [data-home-rail] {
+    box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
   }
   .dark [data-one-panel] {
     box-shadow: inset 1px 0 0 hsl(var(--neutral-10));
@@ -428,17 +418,14 @@ const FULL_BLEED_CSS = `
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
   .f0c-canvas-surface { background: #fafafa; }
-  /* On Home the ground is the sidebar tone, so the sticky greeting bar
-     takes it too — otherwise it reads as a lighter band behind "Welcome
-     to your new Home" (Angel, 2026-09-14). Still opaque, because it is
-     sticky and the conversation scrolls under it. */
-  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: #f5f5f5; }
+  /* Home is a white sheet now like every other view, so its sticky
+     greeting bar takes the sheet rather than the page tone — otherwise it
+     reads as a grey band behind "Welcome to your new Home". */
+  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: hsl(var(--neutral-0)); }
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
-  .dark [data-hybrid-root][data-view="home"] .f0c-canvas-surface {
-    background: hsl(var(--neutral-0));
-  }
+
   /* The People table's header is STICKY, so it needs an opaque ground or
      rows scroll through it — but f0 paints it bg-f1-background, i.e.
      white, and this canvas uses the secondary F0 background (it should not read as a
