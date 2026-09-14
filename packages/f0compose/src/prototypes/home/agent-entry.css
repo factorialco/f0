@@ -239,7 +239,7 @@
    these — this stays in step with it so the fallback is not a lie. */
 [data-hybrid-root],
 [data-hybrid-work] {
-  background: #fafafa;
+  background: #f5f5f5;
 }
 [data-hybrid-canvas] {
   transition:
@@ -359,9 +359,9 @@
   border-radius: 0 !important;
 }
 
-/* The AppShell's three backgrounds, Angel's values — sidebars #F5F5F5,
-   page #FAFAFA, floating white (that one is f0's own `bg-f1-background`
-   on the sheets themselves). See FULL_BLEED_CSS in Home.tsx. */
+/* The AppShell's ground, Angel's value: #F5F5F5 for the sidebars AND for
+   the page behind the content, with white sheets floating on it. See
+   FULL_BLEED_CSS in Home.tsx. */
 [data-home-nav],
 [data-home-rail],
 [data-home-panel] {
@@ -370,7 +370,7 @@
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
-  background: #fafafa !important;
+  background: #f5f5f5 !important;
 }
 
 [data-home-panel],
@@ -517,4 +517,11 @@ body[data-nav-instant] [data-hybrid-work],
 body[data-nav-instant] [data-hybrid-target],
 body[data-nav-instant] [data-hybrid-composer] {
   transition: none !important;
+}
+
+/* Dark keeps the ramp the light hexes describe: the ground is f0's dark
+   base and the sheets are lifted off it by --page. */
+.dark [data-hybrid-canvas] {
+  background:
+    linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
 }
