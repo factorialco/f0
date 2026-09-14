@@ -23,6 +23,7 @@ import {
   BaseResponse,
   FiltersDefinition,
   getDataSourcePaginationType,
+  GroupRecord,
   PaginatedDataAdapter,
   PromiseOrObservable,
   SelectedItemsState,
@@ -198,6 +199,7 @@ const F0SelectComponent = forwardRef(function Select<
     showPreview = false,
     preserveSelectionOnDatasetChange = true,
     fitContentWidth,
+    getSelectedLabel,
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
@@ -543,8 +545,16 @@ const F0SelectComponent = forwardRef(function Select<
       }
     }
 
-    return result
-  }, [localValue, itemsByValue, defaultItems])
+    // Formatting happens on the way OUT, so the cache above keeps the option
+    // as the data produced it — a formatter swapped at runtime then re-labels
+    // selections made before it arrived, instead of leaving them stale.
+    return getSelectedLabel
+      ? result.map((option) => ({
+          ...option,
+          selectedLabel: getSelectedLabel({ option, item: option.item }),
+        }))
+      : result
+  }, [localValue, itemsByValue, defaultItems, getSelectedLabel])
 
   /**
    * Status tags render as pills, which need more vertical room than the "sm"
@@ -1042,56 +1052,95 @@ const F0SelectComponent = forwardRef(function Select<
     [optionMapper]
   )
 
-  const items: VirtualItem[] = useMemo(() => {
-    const seenTagTypes = new Set<string>()
+  /**
+   * One step of indent per grouping level. The list is virtualized — every row
+   * is a sibling of every other row in one flat scroller — so depth can only be
+   * shown as padding on the row itself, not as nesting in the DOM.
+   */
+  const indentClass = useCallback((steps: number) => {
+    return ["", "pl-5", "pl-10", "pl-16", "pl-20"][Math.min(steps, 4)]
+  }, [])
 
-    if (data.type === "grouped") {
+  const buildGroupItems = useCallback(
+    (
+      groups: GroupRecord<ActualRecordType>[],
+      depth: number,
+      seenTagTypes: Set<string>
+    ): VirtualItem[] => {
       const items: VirtualItem[] = []
-      data.groups.map((group) => {
+
+      for (const group of groups) {
+        const header = (
+          <GroupHeader
+            label={group.label}
+            itemCount={group.itemCount}
+            showOpenChange={collapsible}
+            onOpenChange={(open) => setGroupOpen(group.key, open)}
+            open={openGroups[group.key]}
+            chevronPosition="leading"
+            closedRotation={-90}
+            openRotation={0}
+            className="relative cursor-pointer rounded px-3 py-2 outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:z-0 after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] hover:after:opacity-100 [&_*]:z-10"
+          />
+        )
+
         items.push({
           height: 36,
           key: `group-header-${group.key}`,
           type: "group-header",
-          item: (
-            <GroupHeader
-              label={group.label}
-              itemCount={group.itemCount}
-              showOpenChange={collapsible}
-              onOpenChange={(open) => setGroupOpen(group.key, open)}
-              open={openGroups[group.key]}
-              chevronPosition="leading"
-              closedRotation={-90}
-              openRotation={0}
-              className="relative cursor-pointer rounded px-3 py-2 outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:z-0 after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] hover:after:opacity-100 [&_*]:z-10"
-            />
-          ),
+          item:
+            depth > 0 ? (
+              <div className={indentClass(depth)}>{header}</div>
+            ) : (
+              header
+            ),
         })
-        if (!collapsible || openGroups[group.key]) {
-          items.push(
-            ...getItems(group.records, seenTagTypes).map((vi) => ({
-              ...vi,
-              key: `${group.key}:${vi.key}`,
-              item: collapsible ? (
-                <div className="pl-5">{vi.item}</div>
-              ) : (
-                vi.item
-              ),
-            }))
-          )
+
+        if (collapsible && !openGroups[group.key]) {
+          continue
         }
-      })
+
+        /**
+         * A group with sub-groups shows those instead of its records: its
+         * `records` are the union of theirs, so rendering both would list every
+         * option twice.
+         */
+        if (group.subGroups?.length) {
+          items.push(
+            ...buildGroupItems(group.subGroups, depth + 1, seenTagTypes)
+          )
+          continue
+        }
+
+        // Collapsible rows clear their own group's chevron, so they sit one
+        // step further in than the header they belong to.
+        const rowIndent = indentClass(collapsible ? depth + 1 : depth)
+        items.push(
+          ...getItems(group.records, seenTagTypes).map((vi) => ({
+            ...vi,
+            key: `${group.key}:${vi.key}`,
+            item: rowIndent ? (
+              <div className={rowIndent}>{vi.item}</div>
+            ) : (
+              vi.item
+            ),
+          }))
+        )
+      }
+
       return items
+    },
+    [collapsible, getItems, indentClass, openGroups, setGroupOpen]
+  )
+
+  const items: VirtualItem[] = useMemo(() => {
+    const seenTagTypes = new Set<string>()
+
+    if (data.type === "grouped") {
+      return buildGroupItems(data.groups, 0, seenTagTypes)
     }
     return getItems(data.records, seenTagTypes)
-  }, [
-    data.records,
-    data.type,
-    data.groups,
-    getItems,
-    openGroups,
-    setGroupOpen,
-    collapsible,
-  ])
+  }, [data.records, data.type, data.groups, getItems, buildGroupItems])
 
   const handleScrollBottom = () => {
     loadMore()
