@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.100.0](https://github.com/factorialco/f0/compare/f0-react-v6.99.0...f0-react-v6.100.0) (2026-09-14)
+
+
+### Features
+
+* **F0Map:** put the rendering engine behind a MapAdapter port ([#5440](https://github.com/factorialco/f0/issues/5440)) ([0d58c04](https://github.com/factorialco/f0/commit/0d58c04f72de59ce0ac29c2aef9217c50007d078))
+
 ## [6.99.0](https://github.com/factorialco/f0/compare/f0-react-v6.98.0...f0-react-v6.99.0) (2026-09-10)
 
 
