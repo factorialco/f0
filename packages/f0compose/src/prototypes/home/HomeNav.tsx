@@ -1432,18 +1432,14 @@ export function HomeNav() {
   const pickSection = (id: NavSectionId) => {
     if (onboarding.screen !== "complete" && onboarding.screen !== "tour")
       updateOnboarding(profile, { hidden: true })
-    // Re-clicking the active section toggles the panel; anything else
-    // switches (and reopens if collapsed).
-    const nextOpen =
-      onboarding.screen === "tour"
-        ? true
-        : !utilityView && id === section && CAN_COLLAPSE[id]
-          ? !panelOpen
-          : true
-    // Re-clicking the same item is a collapse, which animates; moving to
-    // another section is a swap, which does not.
-    setAnimateWidth(id === section)
-    if (id !== section) jumpLayout()
+    // Re-clicking the active section does NOT collapse the panel (Angel,
+    // 2026-09-14): a first-level item means "take me here", and hiding
+    // the second level on a second click made the rail feel like a
+    // toggle. Collapse is the header button's job, and only where that
+    // button exists.
+    const nextOpen = true
+    setAnimateWidth(false)
+    jumpLayout()
     setSection(id)
     setPanelOpen(nextOpen)
     persist(id, nextOpen)
@@ -1490,12 +1486,17 @@ export function HomeNav() {
    */
   const jumpLayout = () => {
     document.body.setAttribute("data-nav-instant", "")
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() =>
-        document.body.removeAttribute("data-nav-instant")
-      )
+    // Long enough to outlast the shell's own 420ms transitions: the
+    // canvas, the composer and the widget rail all re-measure AFTER the
+    // commit (ResizeObserver), so a two-frame flag let the late ones
+    // ease into place — which is the spring he kept seeing.
+    window.clearTimeout(instantTimer.current)
+    instantTimer.current = window.setTimeout(
+      () => document.body.removeAttribute("data-nav-instant"),
+      480
     )
   }
+  const instantTimer = useRef(0)
   const lastSection = useRef(section)
   useEffect(() => {
     if (lastSection.current !== section) {
@@ -1511,6 +1512,8 @@ export function HomeNav() {
   const presetCounts = inboxPresetCounts(profile, needsYou.cleared)
 
   const collapse = () => {
+    window.clearTimeout(instantTimer.current)
+    document.body.removeAttribute("data-nav-instant")
     setAnimateWidth(true)
     setPanelOpen(false)
     persist(section, false)

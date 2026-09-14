@@ -511,12 +511,11 @@ body:has([data-hybrid-root][data-view="home"]) main#content > div,
    sections: the second level must change size instantly (Angel,
    2026-09-14), and the canvas's own width transition was animating the
    space the panel gave back. */
-body[data-nav-instant] [data-home-panel],
-body[data-nav-instant] [data-hybrid-canvas],
-body[data-nav-instant] [data-hybrid-work],
-body[data-nav-instant] [data-hybrid-target],
-body[data-nav-instant] [data-hybrid-composer] {
+body[data-nav-instant] *,
+body[data-nav-instant] *::before,
+body[data-nav-instant] *::after {
   transition: none !important;
+  animation: none !important;
 }
 
 /* Dark keeps the ramp the light hexes describe: the ground is f0's dark
