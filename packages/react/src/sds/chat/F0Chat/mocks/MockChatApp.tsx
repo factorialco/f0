@@ -41,6 +41,7 @@ import {
 } from "../types"
 import { stripHtml } from "../utils/posts"
 import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
+import { demoDelay } from "./demoTiming"
 import {
   type Seed,
   ME,
@@ -138,16 +139,12 @@ export const resolveMockReactionUsers = (
  * Conversations keep answering instantly: their title travels with the channel
  * list that is already in memory.
  *
- * Under test the gap is dead time: jsdom has no skeleton to look at, and every
- * community test spent 1.4s of a 5s budget waiting it out — which is why CI
- * timed out a different handful of them on each run. Zero still renders the
- * loading phase for a tick, so the branch is exercised; the tests that assert
- * the skeletons build their own `connecting` runtime and never come through
- * here.
+ * Zero under test (see `demoTiming`) — the loading phase still paints for a
+ * tick, so the branch stays covered, and the tests that assert the skeletons
+ * build their own `connecting` runtime and never come through here.
  */
-const SIMULATE_COMMUNITY_LOAD = import.meta.env.MODE !== "test"
-const COMMUNITY_FEED_MS = SIMULATE_COMMUNITY_LOAD ? 1400 : 0
-const COMMUNITY_TITLE_MS = SIMULATE_COMMUNITY_LOAD ? 2100 : 0
+const COMMUNITY_FEED_MS = demoDelay(1400)
+const COMMUNITY_TITLE_MS = demoDelay(2100)
 
 const useSimulatedCommunityLoad = (
   convId: string,

@@ -26,6 +26,7 @@ import {
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
+import { demoChance, demoDelay } from "./demoTiming"
 import {
   type ConvState,
   ME,
@@ -446,7 +447,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       // the red "Not sent" indicator with its Retry/Delete menu (the tooltip
       // carries `failureReason`). The rest settle fast, so the clock never
       // shows on them.
-      const flaky = Math.random() < 0.25
+      const flaky = demoChance(0.25)
       if (flaky) {
         after(3000, () =>
           patch(convId, (s) => ({
@@ -1155,14 +1156,14 @@ export const useMockChatStore = (): MockChatAppValue => {
             },
           ],
         }))
-        return new Promise((resolve) => after(600, resolve))
+        return new Promise((resolve) => after(demoDelay(600), resolve))
       }
       patch(convId, (s) => {
         const post = postFrom(id, input, coverUrl)
         // Your own post is read the moment you publish it.
         return { ...s, messages: [...s.messages, post], lastReadId: id }
       })
-      return new Promise((resolve) => after(600, resolve))
+      return new Promise((resolve) => after(demoDelay(600), resolve))
     },
     [after, patch, objectUrl]
   )

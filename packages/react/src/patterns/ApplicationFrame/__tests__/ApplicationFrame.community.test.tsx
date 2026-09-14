@@ -397,6 +397,10 @@ describe.each([
   ["AnnouncementChannel", AnnouncementChannel],
   ["Snapshot", Snapshot],
 ])("reaching a community from the %s story's sidebar", (_name, Story) => {
+  // `EverythingChannel` auto-opens the stress conversation — 40 unread, ten
+  // pages of history, everyone typing — before this ever reaches a community,
+  // so it runs ~4x the others and blew the default ceiling on CI. The ceiling
+  // is not part of what these assert, so it moves; nothing else does.
   it("opens the post in the main content", async () => {
     render(<Story />)
     await openBarcelonaFromSidebar()
@@ -406,7 +410,7 @@ describe.each([
     await waitFor(() =>
       expect(screen.getByTestId("community-post-detail")).toBeVisible()
     )
-  })
+  }, 15000)
 
   it("opens the full post form from the composer bar", async () => {
     render(<Story />)
@@ -417,5 +421,5 @@ describe.each([
     await waitFor(() =>
       expect(screen.getByTestId("community-post-composer")).toBeVisible()
     )
-  })
+  }, 15000)
 })
