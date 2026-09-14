@@ -449,6 +449,7 @@ export const ChatMessagesContainer = (): ReactNode => {
     scrolledUp,
     stickyIndex,
     scrollToBottom,
+    teleporting,
     scrollToMessage,
     pendBottom,
     reassertEntry,
@@ -630,7 +631,12 @@ export const ChatMessagesContainer = (): ReactNode => {
         className={cn(
           "size-full",
           !reducedMotion && "transition-opacity duration-100",
-          ready ? "visible opacity-100" : "invisible opacity-0"
+          // Visibility is the entry gate; opacity also carries a far jump's
+          // fade. A teleport keeps the list VISIBLE and only drops its opacity,
+          // because `visibility` does not transition — snapping it would show
+          // the reposition as a flicker, which is the thing being hidden.
+          ready ? "visible" : "invisible",
+          ready && !teleporting ? "opacity-100" : "opacity-0"
         )}
       />
 

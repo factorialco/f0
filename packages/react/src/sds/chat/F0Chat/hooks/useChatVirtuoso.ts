@@ -24,6 +24,7 @@ import {
   shouldPrefetchOlder,
   shouldRepinOnGrowth,
 } from "../utils/virtuoso-chat"
+import { useChatTeleport } from "./useChatTeleport"
 import { useTranscriptResizeAnchor } from "./useTranscriptResizeAnchor"
 
 type ScrollMessage = { id: string; isMine?: boolean }
@@ -82,6 +83,9 @@ type UseChatVirtuosoReturn = {
   /** Local index of the top-most visible row (sticky date), or null. */
   stickyIndex: number | null
   scrollToBottom: () => void
+  /** True while a far jump is repositioning behind a fade. The transcript must
+   * be hidden for it: the whole point is that the reposition is not seen. */
+  teleporting: boolean
   /** Jump to a loaded message, or park the id until its window loads. */
   scrollToMessage: (id: string) => void
   /** Park a jump-to-latest until the live tail window replaces the current one. */
@@ -310,7 +314,15 @@ export function useChatVirtuoso({
   // deliberately frozen while the width moves — that's what gets restored.
   const anchorRef = useRef<ChatScrollAnchor | null>(null)
 
+  // Written once the teleport hook exists, below. A jump owns the scroll
+  // position outright: restoring the reader's pre-jump anchor in the middle of
+  // one drags it straight back where it started.
+  const teleportingRef = useRef(false)
+
   const restoreAnchor = useCallback(() => {
+    if (teleportingRef.current) {
+      return
+    }
     const anchor = anchorRef.current
     const virtuoso = virtuosoRef.current
     if (!anchor || !virtuoso) {
@@ -780,17 +792,52 @@ export function useChatVirtuoso({
 
   const indexByIdRef = useRef(indexById)
   indexByIdRef.current = indexById
-  const scrollToMessage = useCallback((id: string) => {
-    const index = indexByIdRef.current.get(id)
-    if (index != null) {
-      virtuosoRef.current?.scrollToIndex({ index, align: "center" })
-    } else {
-      // Not loaded yet (a far-back search hit) — resolved when its window
-      // lands: a REPLACED window re-enters centered on it (see entryRef), a
-      // page that merely grows to include it scrolls below.
-      pendingRef.current = { kind: "id", id }
+  const resolveIndex = useCallback(
+    (id: string) => indexByIdRef.current.get(id) ?? null,
+    []
+  )
+  // Read at the moment it is asked for, straight off the scroller: a teleport
+  // decides on the reader's position NOW, and the cached metrics are a frame
+  // behind whenever the list is still settling — which is exactly when a jump
+  // is in progress.
+  const measureFrom = useCallback(() => {
+    const scrollTop = scrollerElRef.current?.scrollTop ?? 0
+    return {
+      index: topVisibleRowIndex(
+        renderedItemsRef.current,
+        scrollTop,
+        firstItemIndexRef.current
+      ),
+      scrollTop,
     }
   }, [])
+  const rowCount = useCallback(() => rowsRef.current.length, [])
+  const teleport = useChatTeleport({
+    virtuosoRef,
+    reducedMotion,
+    resolveIndex,
+    measureFrom,
+    rowCount,
+    epoch: listKey,
+  })
+  const { jumpTo: teleportTo, cancel: cancelTeleport } = teleport
+  teleportingRef.current = teleport.hidden
+
+  const scrollToMessage = useCallback(
+    (id: string) => {
+      const index = resolveIndex(id)
+      if (index !== null) {
+        teleportTo(id, index)
+      } else {
+        // Not loaded yet (a far-back search hit) — resolved when its window
+        // lands: a REPLACED window re-enters centered on it (see entryRef), a
+        // page that merely grows to include it scrolls below.
+        cancelTeleport()
+        pendingRef.current = { kind: "id", id }
+      }
+    },
+    [cancelTeleport, resolveIndex, teleportTo]
+  )
 
   const pendBottom = useCallback(() => {
     pendingRef.current = { kind: "bottom" }
@@ -826,9 +873,11 @@ export function useChatVirtuoso({
     const index = indexById.get(pending.id)
     if (index != null) {
       pendingRef.current = null
-      virtuosoRef.current?.scrollToIndex({ index, align: "center" })
+      // Same decision as a direct jump: a page that grew to include the target
+      // can leave it just as far from the reader as a search hit does.
+      teleportTo(pending.id, index)
     }
-  }, [indexById])
+  }, [indexById, teleportTo])
 
   // Own message sent while scrolled up: glide home (at the bottom, follow
   // already owns the motion). Post-commit so the new row exists to target.
@@ -882,6 +931,7 @@ export function useChatVirtuoso({
     scrolledUp: stateResetPending ? false : scrolledUp,
     stickyIndex: stateResetPending ? null : stickyIndex,
     scrollToBottom,
+    teleporting: teleport.hidden,
     scrollToMessage,
     pendBottom,
     reassertEntry,
