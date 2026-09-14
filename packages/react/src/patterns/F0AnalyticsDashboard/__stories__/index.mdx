@@ -125,6 +125,48 @@ so the new affordance can be compared with the unchanged header.
 - WHEN the widget is in an error state → THEN the information trigger remains available to explain what the failed widget was meant to measure.
 - WHEN the title is long → THEN it truncates around the fixed-size trigger instead of pushing the trigger out of the header.
 
+### Text items
+
+A `text` item is a frameless block of copy that introduces or summarizes the
+widgets beside it. Its `title` is a headline, larger than a widget label but
+well below a metric's KPI number, and it wraps instead of truncating ("Headcount +5%" or a section name
+such as "Churn + Retention across all plans"); `content` is a short markdown
+body; `actions` are up to three follow-up questions rendered as stacked ghost
+buttons that follow the copy. It is one slot wide, the same as a metric, so it
+sits in the row next to the widgets it describes, and when it shares a row it
+never takes more than 30% of the width; the widgets beside it absorb the rest.
+
+The item has no data fetcher. Whoever composes the dashboard, the host or the
+agent, resolves the copy before rendering, so every number in the text is
+already a string. When the copy is a snapshot, set `useDashboardFilters: false`
+and name the period it covers in the body. There is no subheader: a text item
+does not take `description`. `useDashboardFilters` is a signal for the host
+that composes the copy; the renderer itself has nothing to refetch.
+
+<Canvas of={Stories.TextItems} />
+
+At the KPIs' default compact height (144px) the block holds one line of copy
+and one question, and does not stretch its neighbours. Here two KPIs state a
+peer median under the value, with an ⓘ after it that says where the figure
+comes from, and the block reads the row:
+
+<Canvas of={Stories.TextItemWithCompactKpis} />
+
+In **MixedDashboard** above, a summary block opens the KPI row and three more
+sit beside the charts they describe: the office-activity heatmap, the salary
+versus tenure scatter and the hiring funnel.
+
+- WHEN a text item is rendered → THEN it has no card border, no subheader and no fullscreen toggle; its title uses the display size and wraps; the header still offers the menu and edit-mode delete like any other widget.
+- WHEN a text item sits next to or above bordered widgets → THEN its copy starts on the column edge, in line with their frames, because a frameless block has no inner horizontal padding.
+- WHEN a text item shares a row with other widgets → THEN it is capped at 30% of the row width; alone in a row it takes the full width.
+- WHEN `actions` has more than three entries → THEN only the first three are shown.
+- WHEN an action has no `icon` → THEN it shows the One mark, since every question opens the assistant.
+- WHEN an action button is clicked → THEN its `onClick` fires; the host decides what happens, typically opening the assistant with the question and the related widgets as context.
+- WHEN `actions` is empty or omitted → THEN the body ends after the markdown.
+
+Button labels do not wrap. Keep each question short enough to fit one line at
+metric width, roughly forty characters.
+
 ### Ask One from a widget
 
 When an enabled AI chat is mounted, each titled widget adds **Ask One** to its

@@ -105,7 +105,16 @@ export const DragWidgetToQuote: Story = {
       return card!
     })
     const originalFirstCardId = firstCard.dataset.cardId
-    const grip = (await canvas.findAllByLabelText("Drag to reorder"))[0]
+    // The mixed dashboard now opens with a text block; this story quotes the
+    // metric beside it, so take that card's grip rather than the first one.
+    const metricCard = await waitFor(() => {
+      const card = canvasElement.querySelector<HTMLElement>(
+        '[data-card-id="total-headcount"]'
+      )
+      expect(card).toBeInTheDocument()
+      return card!
+    })
+    const grip = await within(metricCard).findByLabelText("Drag to reorder")
     const gripRect = grip.getBoundingClientRect()
     const dragStartX = gripRect.left + gripRect.width / 2
     const dragStartY = gripRect.top + gripRect.height / 2

@@ -19,6 +19,7 @@ import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
 import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricItem } from "../MetricItem/MetricItem"
+import { TextItem } from "../TextItem/TextItem"
 
 const GAP = 12
 const MAX_PER_ROW = 4
@@ -30,6 +31,7 @@ const ROW_HEIGHTS: Record<string, number> = {
   chart: 336,
   metric: 144,
   collection: 480,
+  text: 240,
 }
 const DEFAULT_ROW_HEIGHT = 336
 
@@ -38,8 +40,17 @@ const MIN_ROW_HEIGHTS: Record<string, number> = {
   chart: 240,
   metric: 120,
   collection: 300,
+  text: 120,
 }
 const DEFAULT_MIN_ROW_HEIGHT = 120
+
+/**
+ * Widest a text block may grow when it shares a row. Cards otherwise split a
+ * row evenly, which would hand a two-sentence summary half the width beside a
+ * lone chart; capping it keeps the copy at reading width and gives the rest
+ * to the widgets it describes. A text block alone in its row is not capped.
+ */
+const TEXT_ITEM_MAX_WIDTH = "30%"
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -666,6 +677,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                   dropTarget.position === row.ids.length &&
                   ci === row.ids.length - 1
 
+                // Narrow layouts already give every card its own row, so
+                // the cap only ever applies where a text block has neighbours.
+                const maxWidth =
+                  item.type === "text" && row.ids.length > 1
+                    ? TEXT_ITEM_MAX_WIDTH
+                    : undefined
+
                 return (
                   <RowItem
                     key={id}
@@ -674,6 +692,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     showIndicatorBefore={!!showIndicatorBefore}
                     showIndicatorAfter={!!showIndicatorAfter}
                     draggable={canDrag}
+                    maxWidth={maxWidth}
+                    frameless={item.type === "text"}
                     onGripPointerDown={handleGripPointerDown}
                     onContentHeightChange={handleItemContentHeightChange}
                   >
@@ -764,6 +784,8 @@ function RowItem({
   showIndicatorBefore,
   showIndicatorAfter,
   draggable: canDrag,
+  maxWidth,
+  frameless = false,
   onGripPointerDown,
   onContentHeightChange,
   children,
@@ -773,6 +795,13 @@ function RowItem({
   showIndicatorBefore: boolean
   showIndicatorAfter: boolean
   draggable: boolean
+  /** CSS max-width for the card; the row's other cards absorb the rest. */
+  maxWidth?: string
+  /**
+   * The card has no border and its text sits on the column edge, so the drag
+   * grip moves further out to stop covering the first letters on hover.
+   */
+  frameless?: boolean
   onGripPointerDown: (id: string, e: React.PointerEvent) => void
   onContentHeightChange: (id: string, height: number) => void
   children: React.ReactNode
@@ -851,6 +880,7 @@ function RowItem({
           "group/rowitem relative min-w-0 flex-1 transition-opacity duration-150",
           isDragging && "opacity-40 scale-[0.97]"
         )}
+        style={maxWidth ? { maxWidth } : undefined}
       >
         {canDrag ? (
           // Pointer-based drag (not native HTML5 DnD): a `pointerdown` on the
@@ -861,7 +891,10 @@ function RowItem({
           // `touch-none` stops touch scrolling from stealing the gesture.
           <div
             onPointerDown={(e) => onGripPointerDown(id, e)}
-            className="shadow-sm absolute -left-3 top-2.5 z-20 flex cursor-grab touch-none items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100"
+            className={cn(
+              "shadow-sm absolute top-2.5 z-20 flex cursor-grab touch-none items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100",
+              frameless ? "-left-7" : "-left-3"
+            )}
             aria-label="Drag to reorder"
           >
             <F0Icon icon={Handle} size="xs" />
@@ -1123,7 +1156,9 @@ function getRowContentMinHeight(
 function getSlotWeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
-  if (item.type === "metric") {
+  // A text block is a metric-width column of copy, so it sits beside the
+  // widgets it summarizes instead of pushing them to the next row.
+  if (item.type === "metric" || item.type === "text") {
     return 1
   }
   if (item.type === "chart") {
@@ -1233,6 +1268,19 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           onAskAiTarget={onAskAiTarget}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
+        />
+      )
+    case "text":
+      // No filters, downloads, per-widget filters or fullscreen: the copy is
+      // static and already resolved, so there is nothing to refetch, export
+      // or expand.
+      return (
+        <TextItem
+          item={item}
+          editMode={editMode}
+          handleDelete={onDelete}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
         />
       )
     default: {

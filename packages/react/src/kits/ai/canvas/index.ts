@@ -24,6 +24,8 @@ export type {
   ChatDashboardChartItem,
   ChatDashboardMetricItem,
   ChatDashboardCollectionItem,
+  ChatDashboardTextItem,
+  ChatDashboardTextItemAction,
   ChatDashboardChartConfig,
   ChatDashboardBarChartConfig,
   ChatDashboardLineChartConfig,

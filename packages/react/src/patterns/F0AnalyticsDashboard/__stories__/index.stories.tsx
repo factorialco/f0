@@ -13,7 +13,9 @@ import {
   dashboardFilters,
   dashboardPresets,
   type DashboardFiltersType,
+  compactKpiItems,
   mixedItems,
+  textItems,
 } from "./mockDataMixed"
 import {
   salaryDynamicsDescription,
@@ -65,7 +67,11 @@ const supportedReportFilterValues = {
   ...rangeAndMultipleReportFilterValues,
 } satisfies FiltersState<DashboardFiltersType>
 
-const reportFilterItems = mixedItems.slice(0, 1)
+// The report-filter stories need one item that actually refetches on filter
+// changes; the text block that now opens the mixed dashboard does not.
+const reportFilterItems = mixedItems.filter(
+  (item) => item.id === "total-headcount"
+)
 
 const ReportFilterState = ({
   value,
@@ -176,6 +182,72 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
  */
 export const MixedDashboard: Story = {
   render: () => <InteractiveDashboard editMode />,
+}
+
+/**
+ * The `text` item: a frameless block with a display-size headline, a markdown
+ * body and up to three follow-up questions as ghost buttons. Meant to be
+ * authored beside the widgets it summarizes — **MixedDashboard** shows one
+ * next to the KPIs and three more beside the heatmap, the scatter and the
+ * funnel. Here the variants sit on their own: no buttons, one button, three
+ * buttons with a custom icon on the last, a peer-benchmark block, a body with
+ * a link, and a headline long enough to wrap, each row ending in a bordered
+ * metric for comparison.
+ */
+export const TextItems: Story = {
+  render: () => <F0AnalyticsDashboard items={textItems} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(
+      canvas.getByRole("heading", { name: "Headcount +5%", level: 3 })
+    ).toBeInTheDocument()
+    await expect(canvas.getByText("ten people").tagName).toBe("STRONG")
+    await expect(
+      canvas.getByRole("button", { name: "Who are those people?" })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole("button", { name: "Break down by plan and segment" })
+    ).toBeInTheDocument()
+
+    // The variant without questions ends after the copy: no chat, no
+    // explanation, no edit mode and no fullscreen means no buttons at all.
+    const note = canvasElement.querySelector<HTMLElement>(
+      '[data-card-id="text-note"]'
+    )
+    await expect(note).not.toBeNull()
+    await expect(within(note!).queryByRole("button")).toBeNull()
+  },
+}
+
+/**
+ * The text block beside benchmark KPIs at their default compact height
+ * (144px). Each KPI states its peer median under the value; the block reads
+ * the row. One line of copy and one question fit the row, and the block does
+ * not force the KPIs taller, unlike the first row of **MixedDashboard**.
+ */
+export const TextItemWithCompactKpis: Story = {
+  render: () => <F0AnalyticsDashboard items={compactKpiItems} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(
+      canvas.getByRole("heading", { name: "Attrition above peers", level: 3 })
+    ).toBeInTheDocument()
+    await expect(
+      canvas.getByRole("button", { name: "Who left this quarter?" })
+    ).toBeInTheDocument()
+    await expect(
+      (await canvas.findAllByText("Peer median 13.5%")).length
+    ).toBeGreaterThan(0)
+
+    // The row keeps the metrics' 144px default: the block fits, it does not
+    // stretch its neighbours.
+    const card = canvasElement.querySelector<HTMLElement>(
+      '[data-card-id="compact-summary"]'
+    )
+    await expect(card?.parentElement?.style.height).toBe("144px")
+  },
 }
 
 /**
@@ -557,6 +629,8 @@ export const Snapshot: Story = {
         filters={dashboardFilters}
         items={metricHeightItems}
       />
+      <F0AnalyticsDashboard items={textItems} />
+      <F0AnalyticsDashboard items={compactKpiItems} />
       <ItemFiltersDemo
         items={mixedItems}
         initialValues={{

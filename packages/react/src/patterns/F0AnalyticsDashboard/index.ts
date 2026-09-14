@@ -1,6 +1,8 @@
 import { experimentalComponent } from "@/lib/experimental"
 import { F0AnalyticsDashboard as _F0AnalyticsDashboard } from "./F0AnalyticsDashboard"
 
+export { DASHBOARD_TEXT_ITEM_MAX_ACTIONS } from "./types"
+
 export type {
   BarChartConfig,
   DashboardChartConfig,
@@ -14,6 +16,8 @@ export type {
   DashboardItemFiltersState,
   DashboardMetricData,
   DashboardMetricItem,
+  DashboardTextItem,
+  DashboardTextItemAction,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,

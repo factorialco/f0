@@ -110,6 +110,18 @@ interface DashboardItemProps {
   fitContent?: boolean
   /** Called when the user toggles fullscreen from the dropdown */
   onFullscreenChange?: (fullscreen: boolean) => void
+  /**
+   * Drop the card border. A text item uses this to read as a block of copy
+   * on the page beside bordered widgets, rather than as another card.
+   */
+  frameless?: boolean
+  /**
+   * `"display"` renders the title as a headline — larger, and wrapping instead
+   * of truncating — for items whose title is the content (a summary such as
+   * "Headcount +5%") rather than a label for the content below it.
+   * @default "default"
+   */
+  titleVariant?: "default" | "display"
 }
 
 /**
@@ -142,7 +154,25 @@ export function DashboardItem({
   descriptionAction,
   fitContent = false,
   onFullscreenChange,
+  frameless = false,
+  titleVariant = "default",
 }: DashboardItemProps) {
+  const frameClassName = cn(
+    "rounded-lg",
+    !frameless && "border border-solid border-f1-border-secondary"
+  )
+  // The display title is a headline, not a KPI: well below the metric number
+  // so a sentence-length title still fits a one-slot column, and
+  // `leading-tight` rather than `leading-none` so descenders survive the
+  // ellipsis wrapper's overflow clipping.
+  const titleClassName =
+    titleVariant === "display"
+      ? "text-xl font-semibold leading-tight tracking-tight text-f1-foreground"
+      : "text-base font-semibold text-f1-foreground"
+  const errorTitleClassName =
+    titleVariant === "display"
+      ? titleClassName
+      : "text-base font-medium text-f1-foreground"
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const shouldFocusChatAfterMenuRef = useRef(false)
@@ -246,8 +276,18 @@ export function DashboardItem({
 
   if (error) {
     return (
-      <div className="group/dashitem flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
-        <div className="flex shrink-0 items-start gap-2 p-4">
+      <div
+        className={cn(
+          "group/dashitem flex h-full flex-col overflow-hidden",
+          frameClassName
+        )}
+      >
+        <div
+          className={cn(
+            "flex shrink-0 items-start gap-2 py-4",
+            frameless ? "px-0" : "px-4"
+          )}
+        >
           {/* The help copy survives the failure: a reader looking at an error
               is exactly the one asking what the widget was meant to show.
               `items-start`, not `items-center`: this heading doesn't truncate,
@@ -255,9 +295,7 @@ export function DashboardItem({
               middle of the block instead of its first line. */}
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex min-w-0 items-start gap-1">
-              <h3 className="text-base font-medium text-f1-foreground">
-                {title}
-              </h3>
+              <h3 className={errorTitleClassName}>{title}</h3>
               {info ? (
                 <div className="flex shrink-0 items-center text-f1-foreground-secondary">
                   <InfoHint info={info} />
@@ -334,7 +372,8 @@ export function DashboardItem({
   return (
     <div
       className={cn(
-        "group/dashitem flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
+        "group/dashitem flex flex-col bg-f1-background",
+        frameClassName,
         // `min-h-full` still fills the space when the content is shorter, but
         // lets a taller intrinsic height win instead of being clipped to it.
         // `shrink-0` is what makes that stick: as a flex item this card would
@@ -347,17 +386,37 @@ export function DashboardItem({
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
-      <div className="flex items-start px-4 py-3">
+      {/* A display title is followed by copy, not by a chart with its own
+          breathing room, so the header hands over sooner. A frameless item
+          has no border to inset from, so its text sits on the column edge,
+          in line with the frames of the cards around it. */}
+      <div
+        className={cn(
+          "flex items-start pt-3",
+          frameless ? "px-0" : "px-4",
+          titleVariant === "display" ? "pb-1" : "pb-3"
+        )}
+      >
         <div className="flex min-w-0 flex-1 flex-col">
           {/* The icon never shrinks, so a long title truncates around it rather
               than squeezing it out of the row. */}
-          <div className="flex min-w-0 items-center gap-1">
-            <OneEllipsis
-              tag="h3"
-              className="text-base font-semibold text-f1-foreground"
-            >
-              {title}
-            </OneEllipsis>
+          <div
+            className={cn(
+              "flex min-w-0 gap-1",
+              titleVariant === "display" ? "items-start" : "items-center"
+            )}
+          >
+            {titleVariant === "display" ? (
+              // The headline is the content, so it wraps to as many lines as
+              // it needs instead of truncating behind a tooltip.
+              <h3 className={cn(titleClassName, "min-w-0 break-words")}>
+                {title}
+              </h3>
+            ) : (
+              <OneEllipsis tag="h3" className={titleClassName}>
+                {title}
+              </OneEllipsis>
+            )}
             {info ? (
               <div className="flex shrink-0 items-center text-f1-foreground-secondary">
                 <InfoHint info={info} />

@@ -490,3 +490,60 @@ describe("DashboardItem — header info", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("DashboardItem display variant", () => {
+  it("drops the border and enlarges the title when asked", () => {
+    const { container } = render(
+      <DashboardItem
+        title="Headcount +5%"
+        isLoading={false}
+        frameless
+        titleVariant="display"
+      >
+        <div>Body</div>
+      </DashboardItem>
+    )
+
+    const root = container.firstElementChild
+    expect(root).toHaveClass("bg-f1-background")
+    expect(root).not.toHaveClass("border-f1-border-secondary")
+    expect(
+      screen.getByRole("heading", { name: "Headcount +5%", level: 3 })
+    ).toHaveClass("text-xl")
+  })
+
+  it("keeps frameless and the display title in the error state", () => {
+    const { container } = render(
+      <DashboardItem
+        title="Headcount +5%"
+        isLoading={false}
+        error={new Error("Failed")}
+        frameless
+        titleVariant="display"
+      >
+        <div>Body</div>
+      </DashboardItem>
+    )
+
+    const root = container.firstElementChild
+    expect(root).not.toHaveClass("border-f1-border-secondary")
+    expect(
+      screen.getByRole("heading", { name: "Headcount +5%", level: 3 })
+    ).toHaveClass("text-xl")
+  })
+
+  it("keeps the card border and label-size title by default", () => {
+    const { container } = render(
+      <DashboardItem title="Revenue" isLoading={false}>
+        <div>Body</div>
+      </DashboardItem>
+    )
+
+    expect(container.firstElementChild).toHaveClass(
+      "border-f1-border-secondary"
+    )
+    expect(screen.getByRole("heading", { name: "Revenue" })).toHaveClass(
+      "text-base"
+    )
+  })
+})

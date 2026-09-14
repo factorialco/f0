@@ -1,5 +1,6 @@
 import type { RecordType } from "@/hooks/datasource"
 import type { PageBasedPaginatedResponse } from "@/hooks/datasource/types"
+import { ChartVerticalBars } from "@/icons/app"
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
@@ -11,6 +12,7 @@ import type {
   DashboardItem,
   DashboardMetricData,
   DashboardMetricItem,
+  DashboardTextItem,
 } from "../types"
 
 // ---------------------------------------------------------------------------
@@ -805,13 +807,33 @@ const employeeTableVisualization = {
 // Pre-built metric items
 // ---------------------------------------------------------------------------
 
+// A summary block the agent would author beside the KPIs it describes: the
+// headline reads at KPI size, the body is one sentence of markdown, and each
+// button is a question the reader might ask next. The copy is a snapshot, so
+// it opts out of dashboard filters and names the period it covers in the body.
+const summaryItem: DashboardTextItem = {
+  id: "people-summary",
+  type: "text",
+  title: "Headcount +5%",
+  content:
+    "Engineering hired **ten people** and Product two this week. Attrition stayed flat at 3.2%.",
+  useDashboardFilters: false,
+  x: 0,
+  y: 0,
+  rowSpan: 5,
+  actions: [
+    { label: "Who are those people?", onClick: () => {} },
+    { label: "Which teams are still hiring?", onClick: () => {} },
+  ],
+}
+
 const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
   {
     id: "total-headcount",
     title: "Total Headcount",
     type: "metric",
     colSpan: 4,
-    x: 0,
+    x: 4,
     y: 0,
     rowSpan: 3,
     explanation:
@@ -823,7 +845,7 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     title: "Avg. Salary",
     type: "metric",
     colSpan: 4,
-    x: 4,
+    x: 8,
     y: 0,
     rowSpan: 3,
     format: { type: "currency", currency: "EUR" },
@@ -845,7 +867,7 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     title: "Attrition Rate",
     type: "metric",
     colSpan: 4,
-    x: 8,
+    x: 12,
     y: 0,
     rowSpan: 3,
     format: { type: "percent" },
@@ -875,8 +897,176 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
 // Mixed items — full dashboard with all types and filter reactivity
 // ---------------------------------------------------------------------------
 
+/**
+ * Text items on their own, for the dedicated story. Row 0: no buttons, one
+ * button, and three buttons, one of them with a custom icon instead of the
+ * default One mark. Row 1: a peer-benchmark block, a body with a link, and a
+ * headline long enough to wrap. A bordered metric ends each row so the
+ * frameless treatment can be judged against a card.
+ */
+export const textItems: DashboardItem<DashboardFiltersType>[] = [
+  {
+    id: "text-note",
+    type: "text",
+    // Long enough to wrap in a one-slot column: the headline must break onto
+    // a second line rather than truncate.
+    title: "Churn + Retention across all plans",
+    content:
+      "Have a high level view on which areas to focus by looking at the key metrics.",
+    useDashboardFilters: false,
+    x: 0,
+    y: 0,
+    rowSpan: 5,
+  },
+  {
+    ...summaryItem,
+    id: "text-one-question",
+    x: 4,
+    actions: [{ label: "Who are those people?", onClick: () => {} }],
+  },
+  {
+    id: "text-three-questions",
+    type: "text",
+    title: "Churn + Retention",
+    content:
+      "In Q3 2026 net revenue retention is **96.7%**, gross retention **88.4%**, and 0.55% of logos churned.",
+    useDashboardFilters: false,
+    x: 8,
+    y: 0,
+    rowSpan: 5,
+    actions: [
+      { label: "Is NRR above 100%?", onClick: () => {} },
+      { label: "Is GRR healthy, above 80%?", onClick: () => {} },
+      {
+        label: "Break down by plan and segment",
+        icon: ChartVerticalBars,
+        onClick: () => {},
+      },
+    ],
+  },
+  { ...metricItems[0], x: 12, y: 0 },
+  // Row 1 — a peer-benchmark block, a body with a link, and a headline long
+  // enough to wrap, beside a second bordered metric.
+  {
+    id: "text-benchmark",
+    type: "text",
+    title: "Attrition 16.4%",
+    content:
+      "Worse than the median for Spanish companies with 51 to 200 employees (**13.5%**). Illustrative peer data, 2025.",
+    useDashboardFilters: false,
+    x: 0,
+    y: 1,
+    rowSpan: 5,
+    actions: [
+      { label: "Who left this quarter?", onClick: () => {} },
+      { label: "How do peers compare?", onClick: () => {} },
+    ],
+  },
+  {
+    id: "text-link",
+    type: "text",
+    title: "Hiring plan",
+    content:
+      "Engineering is **12 hires** behind the [Q3 plan](#). Product and Design are on track.",
+    useDashboardFilters: false,
+    x: 4,
+    y: 1,
+    rowSpan: 5,
+    actions: [{ label: "Which roles are still open?", onClick: () => {} }],
+  },
+  {
+    id: "text-long-headline",
+    type: "text",
+    title: "Attendance is back to pre-summer levels",
+    content: "Average office days per employee rose to **2.4** a week.",
+    useDashboardFilters: false,
+    x: 8,
+    y: 1,
+    rowSpan: 5,
+    actions: [{ label: "Which offices lead?", onClick: () => {} }],
+  },
+  { ...metricItems[1], x: 12, y: 1 },
+]
+
+/**
+ * A summary block beside benchmark KPIs at their default compact height
+ * (144px). Two KPIs state the peer median under their value through
+ * `DashboardMetricData.comparison`, the third has none; the block reads the
+ * row for the user.
+ * At that height the block holds one line of copy and one question; longer
+ * copy would scroll. Compare with `mixedItems`, where the block's taller row
+ * stretches the KPIs to 240px.
+ */
+/** Explains the reference figure; revealed by the ⓘ after "Peer median". */
+const PEER_MEDIAN_INFO =
+  "The median of this measure across all companies on Factorial."
+
+export const compactKpiItems: DashboardItem<DashboardFiltersType>[] = [
+  {
+    id: "compact-summary",
+    type: "text",
+    title: "Attrition above peers",
+    content: "**16.4%** against a 13.5% peer median.",
+    useDashboardFilters: false,
+    x: 0,
+    y: 0,
+    rowSpan: 3,
+    actions: [{ label: "Who left this quarter?", onClick: () => {} }],
+  },
+  {
+    id: "compact-attrition",
+    title: "Attrition Rate",
+    type: "metric",
+    x: 4,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 16.4,
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "compact-absenteeism",
+    title: "Absenteeism Rate",
+    type: "metric",
+    x: 8,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 3.2,
+      comparison: {
+        value: 2.8,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "compact-punctuality",
+    title: "Punctuality Rate",
+    type: "metric",
+    x: 12,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "percent" },
+    decimals: 1,
+    // No benchmark for this measure: the row shows what a KPI without a
+    // comparison looks like next to two that have one.
+    fetchData: async () => ({ value: 94.1 }),
+  },
+]
+
 export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
-  // Row 0 — KPI metrics (3×1×1)
+  // Row 0 — summary block + KPI metrics (1 + 3 slots)
+  summaryItem,
   ...metricItems,
   // Row 1 — bar (4col) + line (8col)
   {
@@ -996,12 +1186,27 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   },
   // Row 4 — heatmap (full width)
   {
+    id: "office-activity-summary",
+    type: "text",
+    title: "Tuesdays are the busiest",
+    content:
+      "Office attendance peaks on **Tuesday mornings** and drops to a third of that on Fridays. Late afternoons stay quiet all week.",
+    useDashboardFilters: false,
+    x: 0,
+    y: 24,
+    rowSpan: 7,
+    actions: [
+      { label: "Which teams come in on Fridays?", onClick: () => {} },
+      { label: "Is this the same in every office?", onClick: () => {} },
+    ],
+  },
+  {
     id: "office-activity",
     title: "Office Activity",
     description: "Hourly activity heatmap across the week",
     type: "chart",
     colSpan: 12,
-    x: 0,
+    x: 4,
     y: 24,
     rowSpan: 7,
     chart: { type: "heatmap" },
@@ -1009,12 +1214,27 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   },
   // Row 5 — salary vs tenure scatter (full width)
   {
+    id: "salary-vs-tenure-summary",
+    type: "text",
+    title: "Pay follows tenure until year six",
+    content:
+      "Salary rises steadily for the first six years, then flattens. **Design** sits below the trend at every tenure.",
+    useDashboardFilters: false,
+    x: 0,
+    y: 31,
+    rowSpan: 7,
+    actions: [
+      { label: "Who is below the trend line?", onClick: () => {} },
+      { label: "How does Design compare to Product?", onClick: () => {} },
+    ],
+  },
+  {
     id: "salary-vs-tenure",
     title: "Salary vs Tenure",
     description: "One point per employee, split by department",
     type: "chart",
     colSpan: 12,
-    x: 0,
+    x: 4,
     y: 31,
     rowSpan: 7,
     chart: {
@@ -1032,12 +1252,27 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   collectionItem,
   // Row 6 — hiring funnel (full width)
   {
+    id: "hiring-funnel-summary",
+    type: "text",
+    title: "Offers convert at 61%",
+    content:
+      "Most candidates drop between screening and interview. Offer acceptance is **61%**, down from 74% last quarter.",
+    useDashboardFilters: false,
+    x: 0,
+    y: 48,
+    rowSpan: 7,
+    actions: [
+      { label: "Which roles lose the most candidates?", onClick: () => {} },
+      { label: "Why did offer acceptance fall?", onClick: () => {} },
+    ],
+  },
+  {
     id: "hiring-funnel",
     title: "Hiring Funnel",
     description: "Conversion through hiring stages",
     type: "chart",
     colSpan: 12,
-    x: 0,
+    x: 4,
     y: 48,
     rowSpan: 7,
     chart: {

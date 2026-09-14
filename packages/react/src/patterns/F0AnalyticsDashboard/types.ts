@@ -1,3 +1,4 @@
+import type { IconType } from "@/components/F0Icon"
 import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type {
   ChartColorToken,
@@ -288,7 +289,7 @@ export interface DashboardItemBase {
    * row height in the grid is `max(itemHeight)` across all items in the row,
    * so a single tall item makes the whole row tall. When neither
    * `itemHeight` nor `rowSpan` is provided, the grid falls back to a
-   * type-specific default (chart 336, metric 144, collection 480).
+   * type-specific default (chart 336, metric 144, collection 480, text 240).
    *
    * Should be a multiple of 48 to align with the grid's snap unit, but the
    * field accepts any positive number for pixel-accurate persisted resizes.
@@ -358,6 +359,13 @@ export interface DashboardMetricData {
   comparison?: {
     value: number
     label: string
+    /**
+     * Where the figure comes from, revealed by an ⓘ icon after it — "the
+     * median across all companies on Factorial", say. A string renders a
+     * plain tooltip; the structured form renders a hoverable card that can
+     * carry a link, the same affordance as `DashboardItemBase.info`.
+     */
+    info?: string | InfoHintContent
   }
 }
 
@@ -419,13 +427,61 @@ export interface DashboardCollectionItem<
 }
 
 // ---------------------------------------------------------------------------
+// Text item
+// ---------------------------------------------------------------------------
+
+/** A follow-up question rendered as a ghost button under a text item's body. */
+export interface DashboardTextItemAction {
+  /**
+   * Short, single-line copy — a question the reader might ask next, such as
+   * "Who are those people?". Buttons do not wrap, so keep it brief.
+   */
+  label: string
+  onClick: () => void
+  /** Leading icon. Defaults to the One mark, since a question opens the assistant. */
+  icon?: IconType
+}
+
+/** Text items render at most this many actions; extra entries are ignored. */
+export const DASHBOARD_TEXT_ITEM_MAX_ACTIONS = 3
+
+/**
+ * A frameless block of copy that introduces or summarizes the widgets around
+ * it: a display-size headline, a short markdown body and up to three follow-up
+ * questions rendered as ghost buttons.
+ *
+ * It carries no data fetcher. Whoever composes the dashboard — the host or the
+ * agent — resolves the copy before the dashboard renders, so every number in
+ * `content` is already a string. Set `useDashboardFilters: false` when the
+ * text is a snapshot, and name the period it describes in the body.
+ *
+ * There is no subheader: the headline speaks for itself, so `description` is
+ * not part of this item. In the grid it packs as one slot and, when it shares a
+ * row, is capped at 30% of the row width.
+ */
+export interface DashboardTextItem extends Omit<
+  DashboardItemBase,
+  "description"
+> {
+  type: "text"
+  /**
+   * Markdown body, one or two sentences. Inline formatting only: the title is
+   * already the widget's heading, so markdown headings inside the body would
+   * break the page outline.
+   */
+  content: string
+  /** Follow-up questions, stacked under the body. At most three are shown. */
+  actions?: DashboardTextItemAction[]
+}
+
+// ---------------------------------------------------------------------------
 // Item union — discriminated on `type`
 // ---------------------------------------------------------------------------
 
 /**
  * A single dashboard item. Discriminated on `type`.
  *
- * Currently supports `"chart"`, `"metric"`, and `"collection"`.
+ * Currently supports `"chart"`, `"metric"`, `"collection"` and `"text"`.
  * Future types (e.g. `"custom"`) extend this union.
  */
 export type DashboardItem<
@@ -434,6 +490,7 @@ export type DashboardItem<
   | DashboardChartItem<Filters>
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
+  | DashboardTextItem
 
 /** Report-style definitions accepted by a dashboard item's filter control. */
 export type DashboardItemFiltersDefinition<Keys extends string = string> =

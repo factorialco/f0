@@ -841,3 +841,65 @@ describe("DashboardGrid", () => {
     })
   })
 })
+
+describe("DashboardGrid text items", () => {
+  const textItem: DashboardItem = {
+    id: "note",
+    type: "text",
+    title: "Headcount +5%",
+    content: "Engineering hired ten people.",
+  }
+
+  it("gives a row with a text block the text block's 240px default", () => {
+    const { container } = render(
+      <DashboardGrid items={[textItem, ...makeMetricItems(144)]} filters={{}} />
+    )
+
+    expect(getDashboardRowHeight(container)).toBe("240px")
+  })
+
+  it("packs a text block as one slot beside three metrics", () => {
+    const items: DashboardItem[] = [
+      textItem,
+      ...makeMetricItems(144),
+      {
+        id: "third",
+        type: "metric",
+        title: "Third",
+        fetchData: async () => ({ value: 1 }),
+      },
+    ]
+    const { container } = render(<DashboardGrid items={items} filters={{}} />)
+
+    const cards = Array.from(container.querySelectorAll("[data-card-id]"))
+    expect(cards).toHaveLength(4)
+    expect(new Set(cards.map((card) => card.parentElement)).size).toBe(1)
+  })
+
+  it("caps a text block at 30% of the row it shares", () => {
+    const { container } = render(
+      <DashboardGrid items={[textItem, ...makeMetricItems(144)]} filters={{}} />
+    )
+
+    const note = container.querySelector<HTMLElement>('[data-card-id="note"]')
+    expect(note?.style.maxWidth).toBe("30%")
+    const metric = container.querySelector<HTMLElement>(
+      '[data-card-id="headcount"]'
+    )
+    expect(metric?.style.maxWidth).toBe("")
+  })
+
+  it("lets a text block alone in its row take the full width", () => {
+    // Two rows via saved positions: the text block has its row to itself and a
+    // metric sits below it, so the grid still renders row wrappers.
+    const items: DashboardItem[] = [
+      { ...textItem, x: 0, y: 0 },
+      { ...makeMetricItems(144)[0], x: 0, y: 1 },
+    ]
+    const { container } = render(<DashboardGrid items={items} filters={{}} />)
+
+    const note = container.querySelector<HTMLElement>('[data-card-id="note"]')
+    expect(note).not.toBeNull()
+    expect(note?.style.maxWidth).toBe("")
+  })
+})

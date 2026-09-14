@@ -497,10 +497,40 @@ export interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
   computation: CollectionComputation
 }
 
+/**
+ * A follow-up question shown as a ghost button under a text item. The host
+ * turns `prompt` into a click that opens the assistant with the question and
+ * the related widgets as context.
+ */
+export interface ChatDashboardTextItemAction {
+  /** Short, single-line copy, e.g. "Who are those people?" */
+  label: string
+  /** The message sent to the assistant when the button is clicked. */
+  prompt: string
+}
+
+/**
+ * A frameless block of copy that summarizes the widgets around it. `title` is
+ * the display-size headline ("Headcount +5%"), `content` the markdown body.
+ * There is no computation: every number in the copy is already resolved as a
+ * string when the item is authored, and the period it describes is named in
+ * the body. The renderer shows no subheader, so `description` is ignored.
+ */
+export interface ChatDashboardTextItem extends ChatDashboardItemBase {
+  type: "text"
+  /** Markdown body, one or two sentences, inline formatting only (no headings). */
+  content: string
+  /** Ids of the dashboard items this block summarizes. */
+  relatedItemIds?: string[]
+  /** Follow-up questions. Renderers show at most three. */
+  actions?: ChatDashboardTextItemAction[]
+}
+
 export type ChatDashboardItem =
   | ChatDashboardChartItem
   | ChatDashboardMetricItem
   | ChatDashboardCollectionItem
+  | ChatDashboardTextItem
 
 /**
  * Complete dashboard configuration received via `displayDashboard`.

@@ -1,6 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { MetricItem, MetricValue } from "../components/MetricItem/MetricItem"
 import type { DashboardMetricItem } from "../types"
 
@@ -131,6 +131,61 @@ describe("MetricItem", () => {
         expect(screen.getByText("Peer median 14")).toBeInTheDocument()
       )
       expect(container.querySelectorAll("svg")).toHaveLength(0)
+    })
+
+    it("explains the reference figure on hover when the comparison carries info", async () => {
+      const user = userEvent.setup()
+      render(
+        <MetricItem
+          item={metricItem({
+            format: { type: "percent" },
+            decimals: 1,
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: {
+                  value: 13.5,
+                  label: "Peer median",
+                  info: "The median across all companies on Factorial.",
+                },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      const line = await screen.findByText("Peer median 13.5%")
+      const trigger = line.parentElement?.querySelector('[tabindex="0"]')
+      expect(trigger).not.toBeNull()
+
+      await user.hover(trigger as HTMLElement)
+
+      const tooltip = await waitFor(() => screen.getByRole("tooltip"), {
+        timeout: 2000,
+      })
+      expect(tooltip).toHaveTextContent(
+        "The median across all companies on Factorial."
+      )
+    })
+
+    it("renders no info trigger when the comparison has none", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            format: { type: "percent" },
+            decimals: 1,
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: { value: 13.5, label: "Peer median" },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      const line = await screen.findByText("Peer median 13.5%")
+      expect(line.parentElement?.querySelector('[tabindex="0"]')).toBeNull()
     })
 
     it("shows both when a metric carries a comparison and a previous value", async () => {
