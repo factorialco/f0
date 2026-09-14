@@ -64,11 +64,16 @@ describe("measureImageSize", () => {
     expect(await first).toEqual(await second)
   })
 
-  it("reports nothing for a file that fails to decode", async () => {
+  // Remembered as a failure, not forgotten: otherwise every row that mounts a
+  // dead URL asks for it again.
+  it("reports nothing for a file that fails to decode, and remembers that", async () => {
     const pending = measureImageSize("broken.webp")
     created[0].onerror?.()
     await expect(pending).resolves.toBeNull()
-    expect(knownImageSize("broken.webp")).toBeUndefined()
+    expect(knownImageSize("broken.webp")).toBeNull()
+
+    await expect(measureImageSize("broken.webp")).resolves.toBeNull()
+    expect(created).toHaveLength(1)
   })
 
   it("reports nothing when the decode yields no dimensions", async () => {
@@ -77,6 +82,6 @@ describe("measureImageSize", () => {
     const pending = measureImageSize("sizeless.svg")
     resolveWith(created[0], 0, 0)
     await expect(pending).resolves.toBeNull()
-    expect(knownImageSize("sizeless.svg")).toBeUndefined()
+    expect(knownImageSize("sizeless.svg")).toBeNull()
   })
 })

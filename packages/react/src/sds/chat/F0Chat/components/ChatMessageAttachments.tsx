@@ -3,7 +3,7 @@ import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { usePhotoIntrinsicSize } from "../hooks/usePhotoIntrinsicSize"
+import { useIntrinsicImageSize } from "../hooks/useIntrinsicImageSize"
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
@@ -61,7 +61,11 @@ export const ChatMessageAttachments = ({
   // Above the early return, where hooks have to live: a lone photo's
   // proportions, measured from the file itself when the host declares none.
   const soloImage = soleImageOf(attachments)
-  const soloSize = usePhotoIntrinsicSize(soloImage)
+  const soloSize =
+    useIntrinsicImageSize(
+      soloImage ? (soloImage.thumbnailUrl ?? soloImage.url) : undefined,
+      soloImage
+    ) ?? undefined
   if (!attachments || attachments.length === 0) {
     return null
   }

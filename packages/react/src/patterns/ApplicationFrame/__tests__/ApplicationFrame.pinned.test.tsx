@@ -70,8 +70,11 @@ describe("the community shelf", () => {
 
     await waitFor(() => expect(sheet()).toBeVisible())
     expect(within(sheet()).getByTestId("shelf-pinned")).toBeVisible()
-    // The channel is still the channel, and you can still publish.
-    expect(screen.getByText("Barcelona office")).toBeVisible()
+    // The channel is still the channel, and you can still publish. Awaited
+    // because a community's title arrives on its own clock in the mock (later
+    // than the feed, which is all `feedReady` waits for) — the header holds a
+    // placeholder until then, so asking synchronously always caught it empty.
+    expect(await screen.findByText("Barcelona office")).toBeVisible()
     expect(screen.getByTestId("chat-post-composer")).toBeVisible()
     // And the feed is still mounted underneath, at its own scroll.
     expect(cards().length).toBeGreaterThan(0)

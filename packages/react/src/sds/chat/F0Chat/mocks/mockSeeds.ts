@@ -1176,6 +1176,36 @@ export const SEEDS: Seed[] = [
           },
         ],
       },
+      // A vertical og:image — the shape a banner cannot show. Renders as a
+      // thumbnail beside the text instead of a slice of its middle.
+      {
+        from: MARCUS,
+        body: "And this is the mobile run I was describing: https://handbook.example.com/ci/mobile-run",
+        min: 35 * MIN,
+        linkPreviews: [
+          {
+            url: "https://handbook.example.com/ci/mobile-run",
+            title: "Mobile CI run — full transcript",
+            description:
+              "Every step of a failing mobile pipeline, captured end to end on a phone screen.",
+            imageUrl: mockImage("card", 3),
+          },
+        ],
+      },
+      // A tiny square favicon-sized og:image: never blown up to the card width.
+      {
+        from: MARCUS,
+        body: "Retry budget policy: https://status.example.com/retry-budget",
+        min: 34 * MIN,
+        linkPreviews: [
+          {
+            url: "https://status.example.com/retry-budget",
+            title: "Retry budget policy",
+            description: "How many retries a suite may spend before it fails.",
+            imageUrl: mockImage("card", 1),
+          },
+        ],
+      },
       // Two links in one message — compact Slack-style unfurls (titles, no images).
       {
         from: ME,

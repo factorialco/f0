@@ -1825,16 +1825,20 @@ export const SidePanelWithoutAi: Story = {
  */
 export const EmptySidePanel: Story = {
   render: () => (
-    <ApplicationFrame
-      sidePanel={{ views: [{ id: "communications", available: false }] }}
-      sidebar={
-        <ConversationsSidebar
-          withOneTab={false}
-          tabsPersistKey="empty-side-panel"
-        />
-      }
-    >
-      <CommunityMain />
-    </ApplicationFrame>
+    // The sidebar and the page still read from the mock chat app; only the
+    // PANEL is gone, which is the whole point of the story.
+    <MockChatAppProvider>
+      <ApplicationFrame
+        sidePanel={{ views: [{ id: "communications", available: false }] }}
+        sidebar={
+          <ConversationsSidebar
+            withOneTab={false}
+            tabsPersistKey="empty-side-panel"
+          />
+        }
+      >
+        <CommunityMain />
+      </ApplicationFrame>
+    </MockChatAppProvider>
   ),
 }

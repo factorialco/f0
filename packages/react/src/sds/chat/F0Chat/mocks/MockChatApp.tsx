@@ -514,9 +514,12 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const idx = state?.lastReadId
     ? messages.findIndex((m) => m.id === state.lastReadId)
     : -1
+  // Posts count too. A community's items ARE posts, so filtering to user
+  // messages left every community with nothing unread — no `firstUnreadId`,
+  // and therefore no divider, however many the seed declared.
   const unread = messages
     .slice(idx + 1)
-    .filter((m) => isUserMessage(m) && !m.isMine)
+    .filter((m) => (isUserMessage(m) || isPost(m)) && !m.isMine)
 
   return {
     currentUserId: ME.id,

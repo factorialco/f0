@@ -10,11 +10,18 @@ export type ImageIntrinsicSize = { width: number; height: number }
  * right size on the first render.
  */
 const sizes = new Map<string, ImageIntrinsicSize>()
+const failed = new Set<string>()
 const pending = new Map<string, Promise<ImageIntrinsicSize | null>>()
 
-/** What is already known about a URL, synchronously. */
-export const knownImageSize = (url: string): ImageIntrinsicSize | undefined =>
-  sizes.get(url)
+/**
+ * What is already known about a URL, synchronously: its size, `null` once it is
+ * known not to decode, `undefined` when it has never been looked at. A dead URL
+ * is remembered too — otherwise every row that mounts it asks again.
+ */
+export const knownImageSize = (
+  url: string
+): ImageIntrinsicSize | null | undefined =>
+  sizes.get(url) ?? (failed.has(url) ? null : undefined)
 
 /**
  * Decodes an image off-tree just to learn its proportions.
@@ -31,6 +38,9 @@ export const measureImageSize = (
   if (known) {
     return Promise.resolve(known)
   }
+  if (failed.has(url)) {
+    return Promise.resolve(null)
+  }
   const inFlight = pending.get(url)
   if (inFlight) {
     return inFlight
@@ -43,16 +53,20 @@ export const measureImageSize = (
     const image = new Image()
     image.onload = () => {
       const size = { width: image.naturalWidth, height: image.naturalHeight }
-      // A decode that yields no dimensions (SVG without a width attribute, a
-      // broken file) is not worth caching as a fact.
       if (size.width > 0 && size.height > 0) {
         sizes.set(url, size)
         resolve(size)
         return
       }
+      // A decode that yields no dimensions — an SVG with no width attribute, a
+      // truncated file — is as useless as a failure, and remembered as one.
+      failed.add(url)
       resolve(null)
     }
-    image.onerror = () => resolve(null)
+    image.onerror = () => {
+      failed.add(url)
+      resolve(null)
+    }
     image.src = url
   })
   const tracked = measuring.finally(() => {

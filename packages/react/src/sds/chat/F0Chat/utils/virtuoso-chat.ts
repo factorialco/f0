@@ -367,7 +367,12 @@ const ESTIMATE_CHARS_PER_LINE = 52
 const ESTIMATE_SENDER_NAME = 20
 const ESTIMATE_REPLY_QUOTE = 46
 const ESTIMATE_REACTIONS = 32
+/** Title, description and host — a card with no banner is only its texts. */
 const ESTIMATE_LINK_PREVIEW = 96
+/** Plus a banner: 24rem at the Open Graph 1.91:1 is ~200px of picture. A lone
+ * preview with an image is the only card that gets one (several stack as
+ * compact rows with a thumbnail, which fits inside the texts' own height). */
+const ESTIMATE_LINK_PREVIEW_BANNER = ESTIMATE_LINK_PREVIEW + 200
 /** Media cards are `w-[24rem]`; the album's tallest common shape is ~1:1. */
 const ESTIMATE_ALBUM = 300
 const ESTIMATE_VIDEO = 220
@@ -514,7 +519,11 @@ export function chatRowHeightEstimate(row: ChatRow): number {
     if (row.isFirstOfRun && !hasMedia) {
       height += ESTIMATE_SENDER_NAME
     }
-    height += (message.linkPreviews?.length ?? 0) * ESTIMATE_LINK_PREVIEW
+    const previews = message.linkPreviews ?? []
+    height +=
+      previews.length === 1 && previews[0]?.imageUrl
+        ? ESTIMATE_LINK_PREVIEW_BANNER
+        : previews.length * ESTIMATE_LINK_PREVIEW
   }
   if ((message.reactions?.length ?? 0) > 0) {
     height += ESTIMATE_REACTIONS

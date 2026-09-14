@@ -1120,6 +1120,111 @@ const SinglePhotoConversation = (): ReactNode => {
   )
 }
 
+const LINK_PREVIEW_CASES: {
+  body: string
+  title: string
+  description?: string
+  image?: { width: number; height: number }
+}[] = [
+  {
+    body: "1200×630 — the Open Graph standard, uncropped",
+    title: "Dealing with flaky tests — Engineering Handbook",
+    description:
+      "How we detect, quarantine and fix flaky tests across the CI pipeline.",
+    image: { width: 1200, height: 630 },
+  },
+  {
+    body: "2000×400 — a wide strip is still an honest banner",
+    title: "Release timeline",
+    description: "Every deploy of the quarter on one line.",
+    image: { width: 2000, height: 400 },
+  },
+  {
+    body: "600×1400 — a phone screenshot reads as a thumbnail",
+    title: "Mobile CI run — full transcript",
+    description:
+      "Every step of a failing mobile pipeline, captured end to end.",
+    image: { width: 600, height: 1400 },
+  },
+  {
+    body: "512×512 — a square logo is not a banner either",
+    title: "Retry budget policy",
+    description: "How many retries a suite may spend before it fails.",
+    image: { width: 512, height: 512 },
+  },
+  {
+    body: "64×64 — a favicon-sized image is never blown up",
+    title: "Status page — incident history",
+    image: { width: 64, height: 64 },
+  },
+  {
+    body: "No og:image at all — texts only",
+    title: "Plain unfurl",
+    description: "Nothing to draw, so nothing is reserved.",
+  },
+]
+
+const LinkPreviewConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      ...LINK_PREVIEW_CASES.map(
+        ({ body, title, description, image }, index) => ({
+          id: `link-preview-${index}`,
+          author: ana,
+          body,
+          createdAt: new Date().toISOString(),
+          isMine: false,
+          linkPreviews: [
+            {
+              url: `https://handbook.example.com/case-${index}`,
+              title,
+              description,
+              imageUrl: image
+                ? sizedPhoto(image.width, image.height, index * 53)
+                : undefined,
+            },
+          ],
+        })
+      ),
+      {
+        id: "link-preview-stack",
+        author: ana,
+        body: "Two links stack as compact rows, whatever their images are",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        linkPreviews: [
+          {
+            url: "https://grafana.example.com/d/ci",
+            title: "CI pipeline health — Grafana",
+            description: "Build durations, flake rate and queue times.",
+            imageUrl: sizedPhoto(1200, 630, 12),
+          },
+          {
+            url: "https://status.example.com/incidents",
+            title: "Status page — incident history",
+            description: "Past incidents and current component status.",
+            imageUrl: sizedPhoto(600, 1400, 300),
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 const meta = {
   title: "F0Chat",
   component: F0Chat,
@@ -1737,6 +1842,40 @@ export const WithDocumentAttachments: Story = {
   render: () => <DocumentConversation />,
 }
 
+/** The Open Graph image decides the card's shape: landscape and large enough
+ * spans the top at its own proportions, anything squarer, taller or smaller
+ * becomes a 64px thumbnail beside the text. Several links always stack as
+ * compact rows. The host sends no dimensions, so each image is measured once. */
+export const LinkPreviews: Story = {
+  name: "Link previews",
+  render: () => <LinkPreviewConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Give each og:image the shape that suits it", async () => {
+      // Only the rows the virtualizer has mounted — the expectation travels
+      // with the card's title.
+      const banner = ["1200×630", "2000×400"]
+      const thumb = ["600×1400", "512×512", "64×64"]
+      const cards = await canvas.findAllByTestId("chat-link-preview")
+
+      for (const card of cards) {
+        const label = card.textContent ?? ""
+        if (banner.some((size) => label.includes(size))) {
+          await expect(
+            within(card).getByTestId("chat-link-preview-banner")
+          ).toBeInTheDocument()
+        }
+        if (thumb.some((size) => label.includes(size))) {
+          await expect(
+            within(card).getByTestId("chat-link-preview-thumb")
+          ).toBeInTheDocument()
+        }
+      }
+    })
+  },
+}
+
 /** A photo on its own is the message, so it keeps its own proportions and is
  * shown whole — within 128–384 wide and 128–512 tall. Ratios past what that box
  * can hold letterbox rather than crop; photos smaller than the media width are
@@ -1762,14 +1901,31 @@ export const SinglePhotoSizing: Story = {
 
       const albums = await canvas.findAllByTestId("chat-image-album")
       for (const album of albums) {
-        const photo = within(album).getByRole("img")
+        // By `alt`, not by role: the tile is a labelled <button>, and a button
+        // has presentational children in ARIA — the photo inside it is not in
+        // the accessibility tree at all, so `getByRole("img")` finds nothing.
+        // The blur underlay is `aria-hidden`, which is what excludes it here.
+        const photo = album.querySelector<HTMLImageElement>(
+          "img:not([aria-hidden])"
+        )
+        await expect(photo).not.toBeNull()
+        if (!photo) {
+          continue
+        }
         const name = photo.getAttribute("alt") ?? ""
-        await expect(album).toHaveStyle({ width: expected[name]?.width })
+        const spec = expected[name]
+        await expect(spec).toBeDefined()
+        await expect(album).toHaveStyle({ width: spec?.width })
         // Letterboxed photos give up one side rather than being cropped; the
         // rest fill their box.
-        await expect(photo).toHaveStyle({
-          width: expected[name]?.footprint ?? "100%",
-        })
+        //
+        // Measured, not read off the style: these are percentage widths, and a
+        // real browser reports them computed — in pixels — so comparing them
+        // as written can only ever fail. The ratio is what the rule is about.
+        const footprint = spec?.footprint ? parseFloat(spec.footprint) / 100 : 1
+        await expect(
+          photo.getBoundingClientRect().width / album.clientWidth
+        ).toBeCloseTo(footprint, 1)
       }
     })
   },
@@ -2065,7 +2221,10 @@ export const CommunityCanPost: Story = {
       const title = await within(document.body).findByRole("textbox", {
         name: /title/i,
       })
-      await expect(title).toBeVisible()
+      // Awaited: the field is in the DOM as soon as the dialog mounts, but the
+      // dialog is still playing its entrance and counts as not visible until
+      // it lands.
+      await waitFor(() => expect(title).toBeVisible())
       await userEvent.type(title, "Hello everyone{Enter}")
       // Enter did not submit: the dialog is still open with the draft in it.
       await expect(title).toHaveValue("Hello everyone")
@@ -2103,7 +2262,26 @@ export const CommunityUnreadPosts: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     await step("the divider counts posts", async () => {
-      await expect(await canvas.findByText("New posts")).toBeVisible()
+      // The mock holds a community's feed back on purpose (it is a second
+      // query in production), so the wait has to clear the fixture's own delay
+      // rather than the library's default.
+      const viewport = await canvas.findByTestId(
+        "chat-message-viewport",
+        {},
+        { timeout: 5000 }
+      )
+
+      // Scrolled to, not merely awaited: the feed enters at the newest post and
+      // the divider sits twelve of them further up, outside what the
+      // virtualizer has mounted. What this story is about is the WORD the
+      // divider uses on a community, not where the feed lands.
+      await waitFor(
+        async () => {
+          viewport.scrollBy({ top: -viewport.clientHeight })
+          await expect(canvas.getByText("New posts")).toBeVisible()
+        },
+        { timeout: 10000 }
+      )
     })
   },
 }
