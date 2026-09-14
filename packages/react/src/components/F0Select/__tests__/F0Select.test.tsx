@@ -362,6 +362,27 @@ describe("Select", () => {
       },
     ]
 
+    const managerOptions = [
+      {
+        value: "ada",
+        label: "Ada Lovelace",
+        avatar: {
+          type: "person" as const,
+          firstName: "Ada",
+          lastName: "Lovelace",
+        },
+      },
+      {
+        value: "alan",
+        label: "Alan Turing",
+        avatar: {
+          type: "person" as const,
+          firstName: "Alan",
+          lastName: "Turing",
+        },
+      },
+    ]
+
     it("renders selected and placeholder states and follows controlled updates", async () => {
       const { rerender } = render(
         <F0Select
@@ -436,11 +457,10 @@ describe("Select", () => {
       )
 
       const trigger = screen.getByRole("combobox", { name: "Access level" })
-      const chevron = trigger.querySelector("[aria-hidden='true']")
+      const chevron = trigger.querySelector("[data-slot='chevron']")
 
       expect(trigger.className).toContain("h-8")
-      expect(trigger.className).toContain("pl-3")
-      expect(trigger.className).toContain("pr-2")
+      expect(trigger.className).toContain("px-2")
       expect(trigger.className).toContain("text-base")
       expect(trigger.className).toContain("font-medium")
       expect(trigger.className).not.toContain("text-sm")
@@ -498,11 +518,9 @@ describe("Select", () => {
       )
 
       const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(trigger.className).toContain("w-fit")
-      expect(trigger.className).toContain("gap-1")
-      expect(trigger).toHaveClass("rounded")
-      expect(trigger).not.toHaveClass("rounded-sm")
-      expect(trigger).not.toHaveClass("rounded-md")
+      expect(trigger.className).toContain("w-full")
+      expect(trigger.className).toContain("gap-2")
+      expect(trigger).toHaveClass("rounded-md")
       expect(trigger.className).toContain("border-0")
       expect(trigger.className).toContain("bg-transparent")
       expect(trigger.className).toContain("shadow-none")
@@ -512,8 +530,55 @@ describe("Select", () => {
       expect(chevron?.parentElement?.className).not.toContain("bg-")
     })
 
-    it("does not open when disabled", async () => {
+    it("keeps the chevron hidden until the trigger is hovered, focused or open", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const chevron = trigger.querySelector("[data-slot='chevron']")
+
+      expect(chevron).toHaveClass("opacity-0")
+      expect(chevron).toHaveClass("group-hover:opacity-100")
+      expect(chevron).toHaveClass("group-focus-visible:opacity-100")
+      expect(chevron).toHaveClass("group-data-[state=open]:opacity-100")
+      expect(trigger.className).toContain("group")
+    })
+
+    it("renders only the selected avatar and label when disabled", async () => {
       const user = userEvent.setup()
+      render(
+        <F0Select
+          variant="inline"
+          label="Manager"
+          options={managerOptions}
+          value="ada"
+          disabled
+          onChange={() => {}}
+        />
+      )
+
+      expect(
+        screen.queryByRole("combobox", { name: "Manager" })
+      ).not.toBeInTheDocument()
+      expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
+      // Avatar initials stand in for the image the mock has no src for.
+      expect(screen.getByText("A")).toBeInTheDocument()
+      // No chevron: the value is not presented as something to open.
+      expect(document.querySelector("svg")).not.toBeInTheDocument()
+
+      await user.click(screen.getByText("Ada Lovelace"))
+
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    it("renders the bare label when the disabled option has no avatar", () => {
       render(
         <F0Select
           variant="inline"
@@ -525,17 +590,30 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(trigger).toBeDisabled()
-      expect(trigger.className).toContain("disabled:bg-f1-background-tertiary")
-      expect(trigger.className).toContain(
-        "disabled:text-f1-foreground-disabled"
+      expect(
+        screen.queryByRole("combobox", { name: "Access level" })
+      ).not.toBeInTheDocument()
+      expect(screen.getByText("Viewer")).toBeInTheDocument()
+      expect(document.querySelector("svg")).not.toBeInTheDocument()
+    })
+
+    it("falls back to the placeholder when disabled with no value", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Manager"
+          placeholder="No manager"
+          options={managerOptions}
+          value={undefined}
+          disabled
+          onChange={() => {}}
+        />
       )
 
-      await user.click(trigger)
-
-      expect(trigger).toHaveAttribute("aria-expanded", "false")
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      expect(screen.getByText("No manager")).toBeInTheDocument()
+      expect(
+        screen.queryByRole("combobox", { name: "Manager" })
+      ).not.toBeInTheDocument()
     })
 
     it("selects an option and reports it through onChange", async () => {

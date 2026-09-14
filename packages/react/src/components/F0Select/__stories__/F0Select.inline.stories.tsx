@@ -102,7 +102,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Use the inline F0Select variant for compact single-value controls embedded in desktop rows, such as roles, statuses, and access levels. It is borderless, non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label provides the accessible name and becomes the visible empty-state fallback when no placeholder is provided. The popup keeps the standard F0Select density and behavior.",
+          "Use the inline F0Select variant for single-value controls embedded in desktop rows, such as managers, roles, statuses, and access levels. It is borderless and fills its container, so the value sits where a read-only row would print it; the chevron stays hidden until the row is hovered, focused or open. It is non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label provides the accessible name and becomes the visible empty-state fallback when no placeholder is provided. When `disabled`, it drops the button, the chevron and the popup and renders the selected avatar and label as plain text. The popup keeps the standard F0Select density and behavior.",
       },
     },
   },
@@ -241,6 +241,125 @@ export const DarkMode: Story = {
   ),
 }
 
+type Manager = "ada" | "alan" | "marie" | "lin"
+
+const managerOptions: F0SelectItemProps<Manager>[] = [
+  {
+    value: "ada",
+    label: "Ada Lovelace",
+    avatar: { type: "person", firstName: "Ada", lastName: "Lovelace" },
+  },
+  {
+    value: "alan",
+    label: "Alan Turing",
+    avatar: { type: "person", firstName: "Alan", lastName: "Turing" },
+  },
+  {
+    value: "marie",
+    label: "Marie Curie",
+    avatar: { type: "person", firstName: "Marie", lastName: "Curie" },
+  },
+  {
+    value: "lin",
+    label: "Lin Chen",
+    avatar: { type: "person", firstName: "Lin", lastName: "Chen" },
+  },
+]
+
+/**
+ * The employee-details layout the variant is built for: a label column and a
+ * value column the select fills, so the editable row lines up with the
+ * read-only ones around it.
+ */
+function ManagerRow({
+  disabled,
+  value,
+}: {
+  disabled?: boolean
+  value?: Manager
+}) {
+  const [manager, setManager] = useState<Manager | undefined>(value)
+
+  return (
+    <div className="flex w-[560px] items-center border-0 border-b border-solid border-f1-border-secondary py-1">
+      <span className="w-1/2 px-3 text-f1-foreground-secondary">Manager</span>
+      <div className="w-1/2">
+        <F0Select
+          variant="inline"
+          label="Manager"
+          placeholder="No manager"
+          options={managerOptions}
+          value={manager}
+          disabled={disabled}
+          showSearchBox
+          searchBoxPlaceholder="Search..."
+          onChange={setManager}
+        />
+      </div>
+    </div>
+  )
+}
+
+export const DetailRow: StoryObj = {
+  args: {},
+  render: () => <ManagerRow value="ada" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const page = within(canvasElement.closest("body")!)
+    const trigger = canvas.getByRole("combobox", { name: "Manager" })
+    const chevron = trigger.querySelector("[data-slot='chevron']")!
+
+    await step("Keep the chevron out of the way until the row is used", () => {
+      // CSS :hover cannot be driven from a play function, so the hover half of
+      // the reveal is asserted on the classes in the unit test. Here we drive
+      // the state the browser can actually enter: open.
+      expect(chevron).toHaveClass("opacity-0")
+      expect(getComputedStyle(chevron).opacity).toBe("0")
+    })
+
+    await step("Search for a manager and pick them", async () => {
+      await userEvent.click(trigger)
+      await waitFor(() => {
+        expect(page.getByRole("listbox")).toBeInTheDocument()
+      })
+      await waitFor(() => {
+        expect(getComputedStyle(chevron).opacity).toBe("1")
+      })
+
+      await userEvent.type(page.getByRole("searchbox"), "Marie")
+      await waitFor(() => {
+        expect(page.queryByRole("option", { name: /Ada Lovelace/ })).toBeNull()
+      })
+
+      await userEvent.click(page.getByRole("option", { name: /Marie Curie/ }))
+      await waitFor(() => {
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+        expect(within(trigger).getByText("Marie Curie")).toBeInTheDocument()
+      })
+    })
+  },
+}
+
+export const DetailRowDisabled: StoryObj = {
+  args: {},
+  render: () => <ManagerRow value="ada" disabled />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Show the value alone, with nothing to open", async () => {
+      expect(
+        canvas.queryByRole("combobox", { name: "Manager" })
+      ).not.toBeInTheDocument()
+      expect(canvas.getByText("Ada Lovelace")).toBeInTheDocument()
+
+      await userEvent.click(canvas.getByText("Ada Lovelace"))
+      expect(
+        within(canvasElement.closest("body")!).queryByRole("listbox")
+      ).not.toBeInTheDocument()
+    })
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   args: {},
@@ -267,6 +386,9 @@ export const Snapshot: Story = {
           />
         </div>
       </div>
+      <ManagerRow value="ada" />
+      <ManagerRow value="ada" disabled />
+      <ManagerRow disabled />
       <OpenInlineRoleSelect value="viewer" actions={[removeAccessAction]} />
     </div>
   ),

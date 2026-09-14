@@ -108,42 +108,62 @@ const asListContainerVariants = cva({
   },
 })
 
-const inlineSelectTriggerClassName = cn(
-  "group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+/**
+ * Shared box of the inline variant, worn by both the interactive trigger and
+ * the disabled read-only value so a row keeps the same metrics either way.
+ */
+const inlineSelectBoxClassName = cn(
+  "flex h-8 w-full max-w-full items-center gap-2 rounded-md px-2",
   textVariants({ variant: "label" })
 )
 
-type InlineSelectTriggerProps = {
+const inlineSelectTriggerClassName = cn(
+  inlineSelectBoxClassName,
+  "group border-0 bg-transparent text-left shadow-none outline-none transition-colors hover:cursor-pointer hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover"
+)
+
+type InlineSelectValueProps = {
   label: string
   placeholder?: string
   selection: F0SelectItemObject<string>[]
   hasValue: boolean
 }
 
+function InlineSelectValue({
+  label,
+  placeholder,
+  selection,
+  hasValue,
+}: InlineSelectValueProps) {
+  return (
+    <span className="flex min-w-0 flex-1 items-center">
+      {hasValue ? (
+        <SelectedItems selection={selection} totalSelectedCount={1} />
+      ) : (
+        <span className="truncate text-f1-foreground-secondary">
+          {placeholder ?? label}
+        </span>
+      )}
+    </span>
+  )
+}
+
 const InlineSelectTrigger = forwardRef<
   HTMLButtonElement,
-  InlineSelectTriggerProps
->(function InlineSelectTrigger(
-  { label, placeholder, selection, hasValue },
-  ref
-) {
+  InlineSelectValueProps
+>(function InlineSelectTrigger(props, ref) {
   return (
     <SelectTrigger
       ref={ref}
-      aria-label={label}
+      aria-label={props.label}
       className={cn(inlineSelectTriggerClassName, focusRing())}
     >
-      <span className="flex min-w-0 max-w-full items-center">
-        {hasValue ? (
-          <SelectedItems selection={selection} totalSelectedCount={1} />
-        ) : (
-          <span className="truncate text-f1-foreground-secondary">
-            {placeholder ?? label}
-          </span>
-        )}
-      </span>
+      <InlineSelectValue {...props} />
+      {/* Quiet until the row is engaged: the chevron keeps its space so the
+          label never reflows, it just fades in. */}
       <span
-        className="flex size-4 shrink-0 items-center justify-center text-f1-icon"
+        data-slot="chevron"
+        className="flex size-4 shrink-0 items-center justify-center text-f1-icon opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[state=open]:opacity-100"
         aria-hidden="true"
       >
         <F0Icon icon={ChevronDown} size="sm" />
@@ -153,6 +173,15 @@ const InlineSelectTrigger = forwardRef<
 })
 
 InlineSelectTrigger.displayName = "InlineSelectTrigger"
+
+/** Disabled inline select: the value alone, with no trigger affordances. */
+function InlineSelectStaticValue(props: InlineSelectValueProps) {
+  return (
+    <span className={inlineSelectBoxClassName}>
+      <InlineSelectValue {...props} />
+    </span>
+  )
+}
 
 const F0SelectComponent = forwardRef(function Select<
   T extends string,
@@ -1344,6 +1373,21 @@ const F0SelectComponent = forwardRef(function Select<
           {/* Hint or Status Message */}
           <InputMessages status={status} />
         </div>
+      </DataTestIdWrapper>
+    )
+  }
+
+  // A disabled inline select has nothing to trigger, so it drops the button,
+  // the chevron and the popup and reads as the plain value it holds.
+  if (variant === "inline" && disabled) {
+    return (
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        <InlineSelectStaticValue
+          label={label}
+          placeholder={placeholder}
+          selection={getDisplayItemsForSelection}
+          hasValue={!!localValue[0]}
+        />
       </DataTestIdWrapper>
     )
   }
