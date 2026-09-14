@@ -1,5 +1,18 @@
 # Changelog
 
+## [6.101.1](https://github.com/factorialco/f0/compare/f0-react-v6.101.0...f0-react-v6.101.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* **OneTable:** keep a sticky row opaque while hovered ([#5528](https://github.com/factorialco/f0/issues/5528)) ([57e97ab](https://github.com/factorialco/f0/commit/57e97abb69b3feaccd1e2aa3d711e4389b6578c8))
+
+
+### Performance Improvements
+
+* **F0Chat:** memoize the mention popover rows ([#5431](https://github.com/factorialco/f0/issues/5431)) ([a52e473](https://github.com/factorialco/f0/commit/a52e4735adad8ece3dee2227c62be3dd403b4079))
+* **RichText:** debounce the mention suggestion filter ([#5432](https://github.com/factorialco/f0/issues/5432)) ([efb2fbc](https://github.com/factorialco/f0/commit/efb2fbca090b0dca6028714cedde6b839af49b77))
+
 ## [6.101.0](https://github.com/factorialco/f0/compare/f0-react-v6.100.1...f0-react-v6.101.0) (2026-09-14)
 
 
