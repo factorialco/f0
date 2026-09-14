@@ -5,11 +5,20 @@ import { renderValueTooltip } from "./options"
 import type { ChartTheme } from "./theme"
 
 /**
- * ECharts draws a markLine from a series, so the lines ride on an invisible
- * series of their own rather than on the first data series: attaching them to
- * real data would hide them whenever the legend deselects it, and would put
- * them inside that series' tooltip.
+ * The invisible series the marks ride on.
+ *
+ * ECharts draws a markLine from a series, so the lines ride on one of their own
+ * rather than on the first data series: attaching them to real data would hide
+ * them whenever the legend deselects it.
+ *
+ * Exported because the chart's own
+ * tooltip formatter has to recognise a hover on it: ECharts routes a markLine
+ * tooltip formatter has to recognise a hover on it: ECharts routes a markLine
+ * hover to the GLOBAL tooltip, not to the series' own, so a series-level
+ * formatter here never runs and the reader is shown this raw name instead.
  */
+export const REFERENCE_LINE_SERIES = "__reference_lines__"
+
 export function referenceLineSeries(
   referenceLines: F0DataChartReferenceLine[] | undefined,
   theme: ChartTheme,
@@ -20,23 +29,21 @@ export function referenceLineSeries(
    */
   valueAxis: "x" | "y" = "y",
   /**
-   * Formats the value inside the line's own hover card. Pass it only on a
-   * chart whose tooltip is item-triggered: there the pointer reaches the mark,
-   * so the line can answer for itself. An axis-triggered chart claims the whole
-   * plot area and must use `referenceLineRows` instead.
+   * Whether the mark should receive pointer events so the chart's tooltip can
+   * answer for it. True only on an item-triggered chart, where the pointer
+   * reaches the mark; an axis-triggered chart claims the whole plot area and
+   * must use `referenceLineRows` instead.
    */
-  valueFormatter?: (value: number) => string
+  hoverable = false
 ): echarts.SeriesOption[] {
   if (!referenceLines || referenceLines.length === 0) {
     return []
   }
 
-  const hoverable = valueFormatter !== undefined
-
   return [
     {
       type: "line",
-      name: "__reference_lines__",
+      name: REFERENCE_LINE_SERIES,
       data: [],
       // Out of the legend: a constant is not a series the reader can toggle.
       // Silent only when nothing can be said about it — a silent mark receives
@@ -45,31 +52,6 @@ export function referenceLineSeries(
       silent: !hoverable,
       legendHoverLink: false,
       animation: false,
-      tooltip: hoverable
-        ? {
-            trigger: "item",
-            formatter: (params: { dataIndex?: number }) => {
-              const line =
-                referenceLines[
-                  typeof params.dataIndex === "number" ? params.dataIndex : 0
-                ]
-              if (!line) {
-                return ""
-              }
-
-              return renderValueTooltip(
-                {
-                  title: line.label,
-                  value: valueFormatter(line.value),
-                  rows: line.description
-                    ? [{ value: "", label: line.description }]
-                    : [],
-                },
-                theme
-              )
-            },
-          }
-        : { show: false },
       markLine: {
         // The mark is the thing being hovered, so its own silence is what
         // decides whether the series tooltip above is ever reachable.
@@ -109,6 +91,31 @@ export function referenceLineSeries(
       },
     },
   ]
+}
+
+/**
+ * The card shown when the pointer is on a reference line: what the line is,
+ * what it reads, and the peer group it describes.
+ */
+export function referenceLineTooltip(
+  referenceLines: F0DataChartReferenceLine[] | undefined,
+  dataIndex: number | undefined,
+  valueFormatter: (value: number) => string,
+  theme: ChartTheme
+): string {
+  const line = referenceLines?.[typeof dataIndex === "number" ? dataIndex : 0]
+  if (!line) {
+    return ""
+  }
+
+  return renderValueTooltip(
+    {
+      title: line.label,
+      value: valueFormatter(line.value),
+      rows: line.description ? [{ value: "", label: line.description }] : [],
+    },
+    theme
+  )
 }
 
 /**

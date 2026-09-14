@@ -279,11 +279,11 @@ describe("BarChart — reference lines", () => {
     expect(marks[0].yAxis).toBeUndefined()
   })
 
-  // A bar chart triggers its tooltip on the ITEM, so the pointer does reach
-  // the mark and the line can answer for itself — which is where a reader
-  // looks first. The mark must not be silent for that: a silent mark receives
-  // no pointer events at all, and that alone is what kept this from firing.
-  it("answers its own hover with the value and the description", () => {
+  // A bar chart triggers its tooltip on the ITEM, so the pointer does reach the
+  // mark. ECharts routes that hover to the chart's GLOBAL tooltip rather than
+  // to the series' own, so the line has to be recognised there — otherwise the
+  // reader is shown the internal series name and a bare number.
+  it("answers its own hover with its label, value and description", () => {
     render(
       <F0DataChart
         {...props}
@@ -302,13 +302,21 @@ describe("BarChart — reference lines", () => {
     const lineSeries = option.series.find(
       (s: { markLine?: unknown }) => s.markLine
     )
+    // A silent mark receives no pointer events at all, which is what kept this
+    // from ever firing.
     expect(lineSeries.silent).toBe(false)
     expect(lineSeries.markLine.silent).toBe(false)
 
-    const html = lineSeries.tooltip.formatter({ dataIndex: 0 })
+    const html = option.tooltip.formatter({
+      seriesName: lineSeries.name,
+      dataIndex: 0,
+      value: 11,
+    })
     expect(html).toContain("Peer median")
     expect(html).toContain("11%")
     expect(html).toContain("Companies in Spain with 51")
+    // Never the internal series name.
+    expect(html).not.toContain("__reference_lines__")
   })
 
   // Repeating a constant on every bar's card buries the bar's own figure under
