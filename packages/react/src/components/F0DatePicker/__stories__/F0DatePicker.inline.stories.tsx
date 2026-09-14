@@ -65,7 +65,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["!autodocs", "stable"],
 } satisfies Meta<typeof DateRow>
 
 export default meta

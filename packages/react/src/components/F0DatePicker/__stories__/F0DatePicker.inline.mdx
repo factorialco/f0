@@ -1,0 +1,125 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0DatePicker.inline.stories"
+
+<Meta of={Stories} />
+
+# DatePicker / Inline
+
+The inline `F0DatePicker` puts a date inside a record row: it reads as text where a read-only row would print its value, and only becomes an input once someone decides to change it. For a date in a form, use the default variant; for a date inside a table cell, use `OneDataCollection`'s editable table.
+
+## Anatomy
+
+<Canvas of={Stories.DetailRow} />
+
+<Controls of={Stories.DetailRow} />
+
+The row is borderless and fills its container, so the value lines up with the read-only rows above and below it. The label is the accessible name and is never shown visually — the row's own label column carries it.
+
+### Variants
+
+Who may do what comes from two props, both meant to be passed conditionally from whatever the caller already knows about the reader.
+
+| `readonly` | `onRequestChange` | What the reader gets                                                                         |
+| ---------- | ----------------- | -------------------------------------------------------------------------------------------- |
+| —          | —                 | The calendar on hover or focus. Activating the row opens the picker on the date already set. |
+| `true`     | a handler         | A request action instead. There is nothing to edit.                                          |
+| `true`     | `undefined`       | Nothing. The date is inert text.                                                             |
+
+```tsx
+<F0DatePicker
+  variant="inline"
+  label="Seniority date"
+  value={date}
+  onChange={setDate}
+  readonly={!canEdit}
+  onRequestChange={canRequest ? handleRequest : undefined}
+/>
+```
+
+The inline variant drops the field chrome: `size`, `disabled`, `clearable`, `hideLabel`, `labelIcon`, `transparent`, `required`, `loading`, `error`, `status` and `hint` are typed `never`, so passing one is a compile error rather than a silent no-op.
+
+<Canvas of={Stories.DetailRowRequestChange} />
+
+<Canvas of={Stories.DetailRowReadOnly} />
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+| Situation                        | Use the inline variant when                                                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| A record detail page             | The date is one row among many, most of which are read-only, and the row should not look like a form field until it is used. |
+| A date the reader may not change | Permission varies by reader and the row still has to render for everyone.                                                    |
+| A row that must not reflow       | The read and edit states are the same height, so revealing the input never moves the rows below it.                          |
+
+**When not to use**
+
+| Situation                                  | Use instead                                                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| A date in a form                           | The default `F0DatePicker` variant — it carries the label, validation, `status` and `hint` the form needs.  |
+| A date in a table cell                     | `OneDataCollection`'s editable table, which owns cell focus, keyboard grid navigation and row-level saving. |
+| A range, or a granularity the reader picks | The default variant — inline is built for a single settled value read at a glance.                          |
+| A date that is always being edited         | The default variant — inline's whole point is that it reads as text first.                                  |
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Pass readonly and onRequestChange from the reader's real permissions, so one call site covers every reader.",
+  }}
+  dont={{
+    description:
+      "Don't render a different component per permission tier, or hide the row entirely when the reader may not edit it.",
+  }}
+/>
+
+### Content best practices
+
+- The `label` is the accessible name. Write it as the field is named in the record, not as an instruction.
+  - **Correct:** "Seniority date", "Contract start date"
+  - **Incorrect:** "Pick a date", "Select seniority date"
+- Use `placeholder` for what an empty row should say. It defaults to the translated `date.none` ("None").
+  - **Correct:** "no date", "Not set"
+  - **Incorrect:** "dd/mm/yyyy" — the format belongs in the input, not in the read state.
+
+### Behavior
+
+- The date reads as `dd/MM/yyyy`: `displayFormat` defaults to `"default"` here rather than `"long"`, and that format carries into the input, so the value does not reformat when the row is activated.
+- Editing is a detour, not a state the caller owns. Activating the row opens the picker; committing a date or dismissing the calendar puts it back to text. `onModeChange` reports both transitions for a caller that wants to pin a hover state or log the interaction, but nothing needs to be wired for the swap to work.
+- The read and edit states are both 32px, taken from the same `inputFieldVariants` sizing the input uses, so a column of rows does not shift when one of them opens.
+- The action is kept in the DOM at `opacity-0` rather than unmounted, so Tab reaches it. Where there is no hover to reveal it with — a touch screen — it shows unconditionally.
+
+### Usage examples
+
+**A row nobody can change**
+
+A date that lives somewhere else, such as a contract start date read on an employee record.
+
+<Canvas of={Stories.DetailRowReadOnly} />
+
+**An empty row**
+
+<Canvas of={Stories.DetailRowEmpty} />
+
+## Accessibility
+
+### Keyboard interaction
+
+| Key                                 | Result                                                                                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <kbd>Tab</kbd>                      | Moves to the row when the date can be set, or to the request action when it can only be requested. Reaching either reveals it. A read-only row with no request holds nothing focusable. |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | Activates the row: opens the picker on the date already set, with the input focused. On the request action, sends the request.                                                          |
+| <kbd>Escape</kbd>                   | Dismisses the calendar and returns the row to text.                                                                                                                                     |
+
+Inside the calendar, keyboard behavior is the default `F0DatePicker`'s.
+
+### Screen reader behavior
+
+- Where the date can be set, the whole row is a single `button` named `Edit {label}`, and the calendar icon is `aria-hidden` — one control with one name, rather than a row wrapping a button.
+- Where it can only be requested, the row is not a control; the action is a `button` named `Request a change to {label}`.
+- A read-only row with no request exposes no control at all, which is what "you cannot act on this" should sound like.
+- Both names are built from `label` through `useI18n()`, so they translate with the rest of the app.
