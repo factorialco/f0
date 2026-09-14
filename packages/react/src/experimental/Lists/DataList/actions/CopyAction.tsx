@@ -6,7 +6,8 @@ import { copyToClipboard } from "../../../../lib/clipboard"
 import { cn } from "../../../../lib/utils"
 import { InternalCopyActionType } from "../ItemContainer"
 
-const COPIED_SHOWN_MS = 750
+/** How long the copy tick stays up. One figure for every copy in F0. */
+const COPIED_SHOWN_MS = 1000
 
 export type CopyActionProps = {
   children: ReactNode

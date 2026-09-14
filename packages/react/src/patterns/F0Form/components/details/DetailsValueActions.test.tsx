@@ -157,8 +157,22 @@ describe("DetailsValueActions", () => {
       expect(writeText).toHaveBeenCalledWith("ada@example.com")
       await waitFor(() =>
         expect(
-          screen.getByRole("button", { name: "Copied" })
+          screen.getByRole("button", { name: "Email copied" })
         ).toBeInTheDocument()
+      )
+    })
+
+    it("names the row in the copy confirmation, so the live region says which", async () => {
+      stubClipboard(vi.fn().mockResolvedValue(undefined))
+
+      const { container } = renderActions({ copyable: true })
+
+      await userEvent.click(screen.getByRole("button", { name: "Copy Email" }))
+
+      await waitFor(() =>
+        expect(
+          container.querySelector('[aria-live="polite"]')
+        ).toHaveTextContent("Email copied")
       )
     })
 
@@ -173,7 +187,7 @@ describe("DetailsValueActions", () => {
         expect(screen.getByText("Could not copy")).toBeInTheDocument()
       )
       expect(
-        screen.queryByRole("button", { name: "Copied" })
+        screen.queryByRole("button", { name: "Email copied" })
       ).not.toBeInTheDocument()
     })
 

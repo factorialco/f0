@@ -927,7 +927,7 @@ export const defaultTranslations = {
     /** The trailing controls on a details row. */
     details: {
       copy: "Copy {{label}}",
-      copied: "Copied",
+      copied: "{{label}} copied",
       copyFailed: "Could not copy",
       edit: "Edit {{label}}",
       saved: "{{label}} saved",
