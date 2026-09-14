@@ -76,7 +76,6 @@ import {
   CANVAS_MIN_WIDTH,
   MaximizedWindow,
 } from "./windows/WindowsColumn"
-import "./icon-motion.css"
 
 /**
  * Home — "Needs you" (Manager view).
@@ -140,26 +139,24 @@ const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"]:hover,
   [data-home-generated-section] .f0c-ease-hover:hover { background: hsl(var(--neutral-20)); box-shadow: none; }
   [aria-label="Conversation"] [data-testid="card"]:focus-within { box-shadow: none; }
-  /* THREE surfaces, not one (Angel, 2026-09-14 — this REVERSES the flat
-     chrome of 2026-08-29): the sidebars sit furthest back, the page is
-     the off-white the content lives on, and anything floating is white
-     with a secondary border and a shadow so it reads as above the page.
-     All three are composited over white rather than applied as alpha, so
-     a surface stacked on a surface cannot darken twice.
-       chrome  --neutral-5  ≈ #F5F6F8
-       page    --neutral-3  ≈ #FAFAFB
-       float   --neutral-0  = #FFFFFF */
+  /* TWO surfaces: one GROUND and what floats over it (Angel,
+     2026-09-14 — the first pass split the sidebars from the page and he
+     read the seam as "un cambio de color raro"; the ramp he wants is
+     background vs content, not sidebar vs page). Both are composited
+     over white rather than applied as alpha, so a surface stacked on a
+     surface cannot darken twice.
+       ground  --neutral-5  ≈ #F5F6F8  (rail, panel AND page)
+       float   --neutral-0  = #FFFFFF  + secondary border + shadow */
   .f0c-surface-chrome { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
-  .f0c-surface-page { background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
-  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
+  .f0c-surface-page { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
+  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
      stable selector; :has() on the nav root is the only hook. */
   div:has(> [data-home-nav]) { width: auto !important; padding-left: 0 !important; }
-  /* Rail and panel are ONE tier, so the hairline stays between them and
-     only there — panel against page is now a tonal step, which does the
-     separating without a seam darker than either side. */
+  /* Rail, panel and page are one continuous ground now, so the only
+     separation left is the hairline between the two nav columns. */
   [data-home-rail],
   [data-home-panel] {
     background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0));
@@ -167,25 +164,21 @@ const FULL_BLEED_CSS = `
   [data-home-rail] {
     box-shadow: inset -1px 0 0 rgba(5, 38, 87, 0.06);
   }
-  /* The split conversation panel is CONTENT, not chrome, so it takes the
-     page tier and keeps its leading hairline (an inset shadow rather than
-     a border, so the fixed content boxes inside it do not shrink). */
+  /* The split conversation panel sits on the same ground and keeps its
+     leading hairline (an inset shadow rather than a border, so the fixed
+     content boxes inside it do not shrink). */
   [data-one-panel] {
-    background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0));
+    background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0));
     box-shadow: inset 1px 0 0 rgba(5, 38, 87, 0.06);
   }
   /* Dark: the light values above are experimental customs with no dark
-     pair, and --neutral-3 does NOT flip in dark (it stays a navy alpha,
-     so it would darken instead of lift) — so the ramp is rebuilt from
-     f0's dark tokens instead of reused: chrome is the base, the page is
-     the base lifted by --page, floating is lifted again by --white-5. */
+     pair, so the ground is rebuilt from f0's dark tokens — one formula
+     for rail, panel, page and the One panel, exactly as in light. */
   .dark .f0c-surface-chrome,
-  .dark [data-home-rail],
-  .dark [data-home-panel] {
-    background: hsl(var(--neutral-0));
-  }
-  .dark main#content,
   .dark .f0c-surface-page,
+  .dark main#content,
+  .dark [data-home-rail],
+  .dark [data-home-panel],
   .dark [data-one-panel] {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -415,7 +408,7 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
+  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -427,7 +420,7 @@ const FULL_BLEED_CSS = `
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
+  main#content thead th { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }

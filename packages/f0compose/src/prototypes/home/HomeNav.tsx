@@ -58,7 +58,6 @@ import {
   hubLabels,
 } from "./hub/hubCatalog"
 import { hubSlug } from "./hub/hubSlug"
-import { motionKeyFor } from "./iconMotion"
 import { InboxRow } from "./inbox/InboxRow"
 import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
 import { MenuDivider, MenuRow, MenuSurface } from "./MenuRow"
@@ -209,7 +208,6 @@ function NavRow({
   return (
     <button
       onClick={onClick}
-      data-icon-motion={motionKeyFor(icon)}
       className={`f0c-pressable flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-2 text-left ${
         active
           ? "bg-f1-background-secondary"
@@ -1073,7 +1071,6 @@ function HubRow({
   return (
     <div
       onClick={onOpen}
-      data-icon-motion={motionKeyFor(HUB_ICONS[label])}
       className={`f0c-pressable group flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-1 ${
         active
           ? "bg-f1-background-secondary"
@@ -1247,7 +1244,6 @@ function RailItem({
         onClick={onClick}
         aria-label={label}
         aria-current={active ? "true" : undefined}
-        data-icon-motion={motionKeyFor(icon)}
         className="f0c-pressable group flex w-full cursor-pointer flex-col items-center gap-1 py-2"
       >
         {/* The tint is a 36x36 SQUARE around the glyph, not the whole
@@ -1298,7 +1294,6 @@ function RailIconButton({
       aria-label={label}
       aria-current={active ? "page" : undefined}
       onClick={onClick}
-      data-icon-motion={motionKeyFor(icon)}
       className={`f0c-pressable flex size-9 cursor-pointer items-center justify-center rounded-lg hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
     >
       {/* Same token as the section items above — see RailItem. */}
@@ -1463,7 +1458,10 @@ export function HomeNav() {
           70px wide, 8px of top padding, 52x68 buttons 12px apart, and a
           36x36 icon chip that is the only thing carrying the hover or
           active background. 76 rather than 70 because "Messages" and
-          "Calendar" are longer words than "DMs" and "Later". */}
+          "Calendar" are longer words than "DMs" and "Later", and NO gap
+          between items (Angel, 2026-09-14) — the chips already carry
+          their own 8px of breathing room top and bottom, and Slack's
+          extra 12 made the column read as six separate things. */}
       <div
         data-home-rail
         className="flex w-[76px] shrink-0 flex-col items-center overflow-y-auto pt-2"
@@ -1475,7 +1473,7 @@ export function HomeNav() {
         <div className="flex h-[60px] shrink-0 items-center justify-center">
           <CompanySwitcher />
         </div>
-        <div className="flex w-full flex-col gap-2 px-2">
+        <div className="flex w-full flex-col px-2">
           {railSections.map((s) => (
             <RailItem
               key={s.id}

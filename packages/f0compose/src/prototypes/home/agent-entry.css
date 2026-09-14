@@ -240,7 +240,7 @@
 [data-hybrid-root],
 [data-hybrid-work] {
   background:
-    linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))),
+    linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))),
     hsl(var(--neutral-0));
 }
 [data-hybrid-canvas] {
@@ -361,22 +361,19 @@
   border-radius: 0 !important;
 }
 
-/* Two tiers, not one (Angel, 2026-09-14, reversing the flat chrome of
-   2026-08-29): the navigation sits back on --neutral-5, the content sits
-   on --neutral-3, and what floats over the content is white. See
-   FULL_BLEED_CSS in Home.tsx for the full ramp and its dark rebuild. */
+/* ONE ground for the whole shell — navigation and page alike (Angel,
+   2026-09-14: "el whole background debería tener el mismo color que los
+   sidebars"). What separates content from background is the white sheet
+   that floats over it, not a second grey. See FULL_BLEED_CSS in Home.tsx
+   for the dark rebuild. */
 [data-home-nav],
 [data-home-rail],
-[data-home-panel] {
-  background:
-    linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))),
-    hsl(var(--neutral-0)) !important;
-}
+[data-home-panel],
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
   background:
-    linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))),
+    linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))),
     hsl(var(--neutral-0)) !important;
 }
 [data-home-panel],
@@ -384,14 +381,10 @@
   box-shadow: none !important;
   border-right: 0 !important;
 }
-/* Dark: --neutral-3 does not flip (it stays a navy alpha), so the ramp is
-   rebuilt rather than reused — chrome is the base, content is the base
-   lifted by --page. */
+/* Dark: one formula for the same one ground. */
 .dark [data-home-nav],
 .dark [data-home-rail],
-.dark [data-home-panel] {
-  background: hsl(var(--neutral-0)) !important;
-}
+.dark [data-home-panel],
 .dark [data-hybrid-root],
 .dark [data-hybrid-work],
 .dark [data-hybrid-chat] {

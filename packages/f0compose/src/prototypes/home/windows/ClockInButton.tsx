@@ -32,7 +32,6 @@ export function ClockInButton({
   return (
     <div
       data-home-clockin-button
-      data-icon-motion="timer"
       data-open={open || undefined}
       className="relative"
     >

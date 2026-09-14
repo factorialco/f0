@@ -91,6 +91,21 @@ Activity did NOT fold in here. `ActivityRecord` is a log of what One did —
 something One produced. Merging it into "Analytics" would have conflated a task
 queue with reports.
 
+## Second pass, same day
+
+Four corrections after he saw it running:
+
+- **Icon hover animations are gone**, everywhere — `iconMotion.ts` and
+  `icon-motion.css` deleted, every `data-icon-motion` attribute removed. They
+  were a per-glyph SVG animation on hover; he wanted them out of the whole
+  prototype, not just the rail.
+- **The Inbox canvas is a waiting state, not a second list.** The rows belong to
+  the second-level panel; the content side says "Select a message from the list
+  to review it here" and offers no actions.
+- **One ground, not two.** See below.
+- **No vertical gap between rail items.** The chips carry their own 8px top and
+  bottom; Slack's extra 12px made the column read as six separate things.
+
 ## Surfaces — this reverses a previous decision
 
 Angel, explicitly:
@@ -99,22 +114,27 @@ Angel, explicitly:
 > explorando yo en su momento, pero no creo que funcione e invierte la relación
 > entre background y contenido.
 
-So the flat single surface (Oskar, 2026-08-29, "que no tenga color, el mismo
-fondo que Needs you") is **replaced by a three-tier ramp**:
+The first pass split sidebars (`--neutral-5`) from the page (`--neutral-3`).
+He read the seam as "un cambio de color raro" and settled it: **one ground for
+the whole shell, and white for what floats on it.**
 
-| tier                                | token         | light                               |
-| ----------------------------------- | ------------- | ----------------------------------- |
-| sidebars (rail + panel)             | `--neutral-5` | ≈ #F5F6F8                           |
-| page / content                      | `--neutral-3` | ≈ #FAFAFB                           |
-| floating (windows, cards, popovers) | `--neutral-0` | #FFFFFF + secondary border + shadow |
+| tier                                          | token         | light                               |
+| --------------------------------------------- | ------------- | ----------------------------------- |
+| ground (rail, panel, page, One panel)          | `--neutral-5` | ≈ #F5F6F8                           |
+| floating (module sheets, windows, cards, menus)| `--neutral-0` | #FFFFFF + secondary border + shadow |
+
+So the old flat chrome (Oskar, 2026-08-29) survives as ONE ground — what
+changed is that content now sits on a white sheet above it rather than being
+the same surface as the navigation.
 
 Traps this walked into, recorded so the next session does not:
 
-- `--neutral-3` **does not flip in dark** (`base.css` keeps it a navy alpha), so
-  the dark ramp is rebuilt from `--page` / `--neutral-0` rather than reused.
-- The panel→content hairline is **gone**: with the two on different tiers, a
-  `--neutral-10` seam is darker than either side of it. The rail→panel hairline
-  stays, because those two share a tier.
+- `--neutral-3` **does not flip in dark** (`base.css` keeps it a navy alpha) —
+  which is why the first pass's page tier was a trap, and why the dark ground is
+  rebuilt from `--page` / `--neutral-0` rather than reused.
+- The panel→content hairline is **gone** (there is no tonal step there to
+  reinforce); the rail→panel hairline stays, since it is the only thing
+  separating the two nav columns.
 - Sticky headers (`.f0c-canvas-surface`, `thead th`) follow the PAGE tier, but
   inside the white module sheet they still need white — the rule now covers
   `[data-hybrid-canvas]` on non-home views as well as `[data-home-window]`.
