@@ -350,6 +350,108 @@ export const InlineEditing: Story = {
   },
 }
 
+/**
+ * The same row with a governed value: a national ID. It rests behind a fixed
+ * run of dots, so its length is no more readable than its digits, and opens as
+ * plain text under the caret, because the eye stands down while you type and a
+ * value you cannot read is one you cannot correct. `masked` also keeps password
+ * managers off it, the way `type="private"` does.
+ */
+const MaskedInlineEditingDemo = () => {
+  const [value, setValue] = useState("084 62 4471 6")
+  const [draft, setDraft] = useState(value)
+  const [editing, setEditing] = useState(false)
+
+  const startEditing = () => {
+    setDraft(value)
+    setEditing(true)
+  }
+
+  const commit = (committed: string) => {
+    setEditing(false)
+    setValue(committed)
+  }
+
+  return (
+    <div className="flex w-80 items-center gap-1 rounded-md border border-solid border-f1-border p-1">
+      <F0TextInput
+        label="Social security number"
+        hideLabel
+        masked
+        value={editing ? draft : value}
+        onChange={setDraft}
+        readonly={!editing}
+        transparent={!editing}
+        onPressEnter={() => commit(draft)}
+        onPressEscape={() => {
+          setDraft(value)
+          setEditing(false)
+        }}
+        onBlur={editing ? () => commit(draft) : undefined}
+        onClickContent={editing ? undefined : startEditing}
+        focusOnEditable={editing}
+      />
+    </div>
+  )
+}
+
+export const MaskedInlineEditing: Story = {
+  args: { label: "Social security number" },
+  render: () => <MaskedInlineEditingDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = () =>
+      canvas.getAllByLabelText("Social security number")[0] as HTMLInputElement
+
+    await waitFor(() => expect(field()).toBeDisabled())
+
+    // Twelve dots as text, not one password bullet per character: the length
+    // of a national ID is half of guessing it.
+    await expect(field()).not.toHaveAttribute("type", "password")
+    await expect(field()).toHaveValue("•".repeat(12))
+
+    // Nothing here should reach a password manager.
+    await expect(field()).toHaveAttribute("autocomplete", "off")
+    await expect(field()).toHaveAttribute("data-1p-ignore", "true")
+
+    // The eye reveals it without making it editable.
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show Social security number" })
+    )
+    await expect(field()).toHaveValue("084 62 4471 6")
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Hide Social security number" })
+    )
+    await expect(field()).toHaveValue("•".repeat(12))
+
+    const box = canvas
+      .getByTestId("input-field-wrapper")
+      .getBoundingClientRect()
+    const underPointer = document.elementFromPoint(
+      box.left + box.width / 2,
+      box.top + box.height / 2
+    )
+    await userEvent.click(underPointer as HTMLElement)
+
+    // Readable while typed, and the eye is gone, which is why.
+    await waitFor(() => expect(field()).not.toBeDisabled())
+    await expect(field()).toHaveFocus()
+    await expect(field()).toHaveValue("084 62 4471 6")
+    await expect(
+      canvas.queryByTestId("input-field-mask-toggle")
+    ).not.toBeInTheDocument()
+
+    await userEvent.keyboard("{Escape}")
+
+    // And masked again the moment it stops being edited.
+    await waitFor(() => expect(field()).toBeDisabled())
+    await expect(field()).toHaveValue("•".repeat(12))
+    await expect(
+      canvas.getByRole("button", { name: "Show Social security number" })
+    ).toBeVisible()
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {
