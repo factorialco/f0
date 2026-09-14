@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.101.0](https://github.com/factorialco/f0/compare/f0-react-v6.100.1...f0-react-v6.101.0) (2026-09-14)
+
+
+### Features
+
+* **F0Select:** add multi-level grouping and trigger label control ([#5530](https://github.com/factorialco/f0/issues/5530)) ([5276de8](https://github.com/factorialco/f0/commit/5276de87b7be56e2dce4551d8f3c1ced6bf58c06))
+
 ## [6.100.1](https://github.com/factorialco/f0/compare/f0-react-v6.100.0...f0-react-v6.100.1) (2026-09-14)
 
 
