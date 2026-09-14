@@ -451,6 +451,66 @@ export const ReportFilterCommitLifecycle: Story = {
   },
 }
 
+/** Explains the reference figure; revealed by the ⓘ after "Peer median". */
+const PEER_MEDIAN_INFO =
+  "The median of this measure across all companies on Factorial."
+
+/**
+ * Three KPIs at the default compact height, two of them stating a peer median
+ * under the value with an ⓘ that says where the figure comes from, and one
+ * without a comparison beside them.
+ */
+const compactPeerMedianItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "compact-attrition",
+    title: "Attrition Rate",
+    type: "metric",
+    x: 0,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 16.4,
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "compact-absenteeism",
+    title: "Absenteeism Rate",
+    type: "metric",
+    x: 4,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 3.2,
+      comparison: {
+        value: 2.8,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "compact-punctuality",
+    title: "Punctuality Rate",
+    type: "metric",
+    x: 8,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    // No benchmark for this measure: shows a bare KPI next to two that have one.
+    fetchData: async () => ({ value: 94.1 }),
+  },
+]
+
 const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
   {
     id: "compact-metric",
@@ -518,7 +578,11 @@ const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
     decimals: 1,
     fetchData: async () => ({
       value: 16.4,
-      comparison: { value: 13.5, label: "Peer median" },
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
     }),
   },
   {
@@ -536,7 +600,11 @@ const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
     fetchData: async () => ({
       value: 16.4,
       previousValue: 11.1,
-      comparison: { value: 13.5, label: "Peer median" },
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
     }),
   },
   {
@@ -563,6 +631,31 @@ export const MetricHeightVariants: Story = {
   ),
 }
 
+/**
+ * Compact KPIs with a peer median. The ⓘ after the figure opens a tooltip that
+ * says where it comes from; the third KPI has no comparison, so the row shows
+ * how the two states sit side by side.
+ */
+export const CompactKpisWithPeerMedian: Story = {
+  render: () => <F0AnalyticsDashboard items={compactPeerMedianItems} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(
+      await canvas.findByText("Peer median 13.5%")
+    ).toBeInTheDocument()
+    await expect(
+      await canvas.findByText("Peer median 2.8%")
+    ).toBeInTheDocument()
+    await expect(canvas.queryByText(/^Peer median 9/)).toBeNull()
+
+    const card = canvasElement.querySelector<HTMLElement>(
+      '[data-card-id="compact-attrition"]'
+    )
+    await expect(card?.parentElement?.style.height).toBe("144px")
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
@@ -573,6 +666,7 @@ export const Snapshot: Story = {
         filters={dashboardFilters}
         items={metricHeightItems}
       />
+      <F0AnalyticsDashboard items={compactPeerMedianItems} />
       <ItemFiltersDemo
         items={mixedItems}
         initialValues={{
