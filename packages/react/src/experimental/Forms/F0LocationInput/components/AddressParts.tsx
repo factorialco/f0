@@ -8,6 +8,8 @@ import type {
 } from "../types"
 
 type Props = {
+  /** Focuses address line 1 on mount */
+  autoFocus?: boolean
   /** Marks address line 1, which is the part the group cannot do without */
   required?: boolean
   value: F0LocationInputValue | undefined
@@ -38,6 +40,7 @@ const autofillTokens = {
  * region and postal code share one row.
  */
 export const AddressParts = ({
+  autoFocus,
   required,
   value,
   labels,
@@ -65,6 +68,7 @@ export const AddressParts = ({
       // The group cannot do without a street, and marking every part would
       // claim a floor number is mandatory
       required={required && key === "addressLine1"}
+      autoFocus={autoFocus && key === "addressLine1"}
       value={value?.[key] ?? ""}
       onChange={(text) => onChangePart(key, text)}
       size={size}

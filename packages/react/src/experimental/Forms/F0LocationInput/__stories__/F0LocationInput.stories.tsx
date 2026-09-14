@@ -394,6 +394,26 @@ export const OpenSuggestionList: Story = {
 }
 
 /**
+ * The way out of a search that found nothing: the address is typed by hand
+ * from there on, starting with what the user had already written. Ends with
+ * the empty list open, where the action lives.
+ */
+export const NoResultsEscapeHatch: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByRole("combobox", { name: "Address" }))
+    const search = await body.findByRole("searchbox")
+    await userEvent.type(search, "Calle Falsa 123")
+
+    await expect(
+      await body.findByRole("button", { name: "Enter it manually" })
+    ).toBeVisible()
+  },
+}
+
+/**
  * A stored address that no suggestion covers still reads on the trigger: the
  * value it came from is what gets displayed, not a matching option.
  */

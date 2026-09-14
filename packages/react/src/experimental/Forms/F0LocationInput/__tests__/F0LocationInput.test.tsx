@@ -342,6 +342,66 @@ describe("F0LocationInput", () => {
       )
     })
 
+    it("offers the way out only once the search has come back empty", async () => {
+      const user = userEvent.setup()
+      let answer!: (value: F0LocationSuggestion[]) => void
+      const slowSearch = vi.fn(
+        () =>
+          new Promise<F0LocationSuggestion[]>((resolve) => {
+            answer = resolve
+          })
+      )
+      render(<F0LocationInput label="Address" searchPlaces={slowSearch} />)
+
+      await searchAddress(user, "Calle Falsa 123")
+
+      await waitFor(() => expect(slowSearch).toHaveBeenCalled())
+      expect(listText("Searching addresses")).toBeInTheDocument()
+      // Still searching: the address may yet be there, and the way out would
+      // read as a dead end
+      expect(
+        screen.queryByRole("button", { name: "Enter it manually" })
+      ).not.toBeInTheDocument()
+
+      answer([])
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Enter it manually" })
+        ).toBeInTheDocument()
+      )
+    })
+
+    it("switches to manual entry with the typed address in place", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={vi.fn(async () => [])}
+          onChange={onChange}
+        />
+      )
+
+      await searchAddress(user, "Calle Falsa 123")
+
+      await user.click(
+        await screen.findByRole("button", { name: "Enter it manually" })
+      )
+
+      expect(
+        await screen.findByRole("textbox", { name: "Address line 1" })
+      ).toHaveValue("Calle Falsa 123")
+      expect(screen.getByRole("textbox", { name: "City" })).toBeInTheDocument()
+      expect(
+        screen.queryByRole("combobox", { name: "Address" })
+      ).not.toBeInTheDocument()
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ addressLine1: "Calle Falsa 123" }),
+        { source: "typed", isResolved: false }
+      )
+    })
+
     it("does not scope the search to the country of the current value", async () => {
       const user = userEvent.setup()
       render(

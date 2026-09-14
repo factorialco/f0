@@ -103,18 +103,23 @@ export const F0LocationInput = forwardRef<
     getCountryName,
   })
 
+  // The empty search result offers a way out, so the field can switch itself
+  // to manual entry; the prop stays the consumer's to force on
+  const [switchedToManual, setSwitchedToManual] = useState(false)
+  const manual = manualEntry || switchedToManual
+
   const labels = useMemo<Record<LocationPart, string>>(
     () => ({
       addressLine1:
         partLabels?.addressLine1 ??
-        (manualEntry ? i18n.locationInput.addressLine1 : label),
+        (manual ? i18n.locationInput.addressLine1 : label),
       addressLine2: partLabels?.addressLine2 ?? i18n.locationInput.addressLine2,
       city: partLabels?.city ?? i18n.locationInput.city,
       state: partLabels?.state ?? i18n.locationInput.state,
       postalCode: partLabels?.postalCode ?? i18n.locationInput.postalCode,
       country: partLabels?.country ?? i18n.locationInput.country,
     }),
-    [partLabels, manualEntry, label, i18n.locationInput]
+    [partLabels, manual, label, i18n.locationInput]
   )
 
   // Never the value's own country: the search only exists without manual
@@ -186,6 +191,16 @@ export const F0LocationInput = forwardRef<
       })
   }
 
+  // The way out of an empty search: the address the user typed is the best
+  // start for the line they now have to fill in by hand
+  const handleEnterManually = (query: string) => {
+    cancelPendingPick()
+    if (query) {
+      setUnlistedAddress(query)
+    }
+    setSwitchedToManual(true)
+  }
+
   const handleClear = () => {
     cancelPendingPick()
     clear()
@@ -197,12 +212,10 @@ export const F0LocationInput = forwardRef<
 
   // In detailed mode the message belongs to the group, the border to the field
   const fieldStatus =
-    manualEntry && effectiveStatus
-      ? { type: effectiveStatus.type }
-      : effectiveStatus
+    manual && effectiveStatus ? { type: effectiveStatus.type } : effectiveStatus
 
   const addressField =
-    searchPlaces && !manualEntry ? (
+    searchPlaces && !manual ? (
       <AddressSelect
         label={labels.addressLine1}
         hideLabel={hideLabel}
@@ -217,6 +230,7 @@ export const F0LocationInput = forwardRef<
         searchPlaces={searchPlaces}
         onPick={handlePick}
         onClear={handleClear}
+        onEnterManually={handleEnterManually}
         status={fieldStatus}
         required={required}
         disabled={disabled}
@@ -226,7 +240,7 @@ export const F0LocationInput = forwardRef<
         size={size}
         name={name}
       />
-    ) : manualEntry ? null : (
+    ) : manual ? null : (
       // Nothing to suggest, so the address is a field the user just types in
       <F0TextInput
         ref={ref}
@@ -248,7 +262,7 @@ export const F0LocationInput = forwardRef<
       />
     )
 
-  if (!manualEntry) {
+  if (!manual) {
     // Neither F0Select nor F0TextInput takes an onFocus, and focus events
     // bubble through React, so the pair is observed around the field
     return onFocus || onBlur ? (
@@ -284,6 +298,9 @@ export const F0LocationInput = forwardRef<
         name={name ? `${name}.country` : undefined}
       />
       <AddressParts
+        // The search field is gone the moment the way out is taken, so focus
+        // moves on to the line it was replaced by
+        autoFocus={autoFocus || switchedToManual}
         required={required}
         value={value}
         labels={labels}

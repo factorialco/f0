@@ -46,6 +46,12 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
    */
   onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void
   searchEmptyMessage?: string
+  /**
+   * Rendered under the empty state, for the way out when the list has nothing
+   * to offer. `onCreate` draws its own action, so this is for the cases where
+   * the answer is not "create what you typed".
+   */
+  searchEmptyAction?: React.ReactNode
   actions?: Action[]
   /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
   onCreate?: (value: string) => Promise<void> | void
@@ -220,6 +226,7 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     className?: never
     asList?: never
     hideArrow?: never
+    searchEmptyAction?: never
     showPreview?: never
     required?: never
     loading?: never

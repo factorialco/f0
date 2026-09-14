@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { F0Button } from "@/components/F0Button"
 import type { IconType } from "@/components/F0Icon"
 import type { InputFieldStatus } from "@/components/F0InputField"
 import type { F0SelectItemProps } from "@/components/F0Select"
@@ -37,6 +38,8 @@ type Props = {
   searchPlaces: NonNullable<F0LocationInputProps["searchPlaces"]>
   onPick: (suggestion: F0LocationSuggestion) => void
   onClear: () => void
+  /** Hands the way out to the component, with whatever the user had typed */
+  onEnterManually: (query: string) => void
   status?: InputFieldStatus
   required?: boolean
   disabled?: boolean
@@ -63,6 +66,7 @@ export const AddressSelect = ({
   searchPlaces,
   onPick,
   onClear,
+  onEnterManually,
   status: fieldStatus,
   required,
   disabled,
@@ -125,6 +129,25 @@ export const AddressSelect = ({
           )
         : ""
 
+  // Only once the provider has answered with nothing: while it is still
+  // searching the address may yet be there, and offering the way out then
+  // reads as a dead end
+  const searchEmptyAction =
+    status === "empty" ? (
+      <div className="flex w-full items-center gap-2">
+        <span className="text-f1-foreground-secondary">
+          {i18n.locationInput.noResultsHelp}
+        </span>
+        <F0Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          label={i18n.locationInput.enterManually}
+          onClick={() => onEnterManually(query.trim())}
+        />
+      </div>
+    ) : undefined
+
   const shared = {
     label,
     hideLabel,
@@ -152,6 +175,7 @@ export const AddressSelect = ({
     showSearchBox: true,
     searchBoxPlaceholder: i18n.locationInput.placeholder,
     searchEmptyMessage: emptyMessage,
+    searchEmptyAction,
     onSearchChange: search,
     // F0Select clears its own search box on close without saying so; without
     // this the next open lists the previous query's suggestions over an empty

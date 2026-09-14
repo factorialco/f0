@@ -156,9 +156,15 @@ A pick shows the suggestion on the trigger right away but emits nothing until `r
 
 ### Only a suggestion can be chosen
 
-The list offers exactly what the provider returned: there is no create action, so the field cannot invent an address. When the search comes back empty it says so and nothing changes.
+The list offers exactly what the provider returned: there is no create action, so the field cannot invent an address.
 
 A stored value that no suggestion covers is still displayed (the trigger reads the value, not a matching option). A surface that must accept addresses the provider does not know should either turn on `manualEntry` or omit `searchPlaces`, both of which give a plain text field.
+
+### When nothing is found
+
+Once the provider has answered with nothing, the empty list offers "Can't find an address?" and an **Enter it manually** action. Taking it switches the field to manual entry, keeps what the user had typed as address line 1 and moves focus there, so the address that is not in the provider can still be finished. The action is deliberately absent while the search is still running, where it would read as a dead end, and after a failed search, where the answer is to try again.
+
+<Canvas of={Stories.NoResultsEscapeHatch} />
 
 ### Country and search scope
 
@@ -337,7 +343,8 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
           Renders the whole address as separate fields the user types by hand:
           country, address line 1 and 2, city, region and postal code. There is
           no suggestion list in this shape. Defaults to <code>false</code>,
-          which is the searchable address field on its own.
+          which is the searchable address field on its own — from which the user
+          can still switch to manual entry when the search finds nothing.
         </td>
       </tr>
       <tr>
