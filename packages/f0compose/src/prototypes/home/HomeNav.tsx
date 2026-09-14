@@ -1373,9 +1373,11 @@ export function HomeNav() {
       onboarding.screen === "tour" ||
       onboarding.hidden)
   // The URL wins over the persisted section: a deep link, browser-back or
-  // a pinned module must light the item it actually landed on.
+  // a pinned module must light the item it actually landed on — and NO
+  // view at all means the canvas is Home, whatever section the panel was
+  // left on (otherwise a reload lit Calendar over a Home canvas).
   const activeSection =
-    utilityView ?? (view ? VIEW_SECTION[view] : undefined) ?? section
+    utilityView ?? (view ? VIEW_SECTION[view] : "home") ?? section
 
   // Welcome hides the secondary menu. Keep its underlying state closed too,
   // so Show me around only reveals it after the visitor clicks a rail item.
@@ -1389,7 +1391,7 @@ export function HomeNav() {
   // Browser back restores the rail selection as well as the page — for
   // every section now, not just Calendar.
   useEffect(() => {
-    const restored = view ? VIEW_SECTION[view] : undefined
+    const restored = view ? VIEW_SECTION[view] : "home"
     if (restored) setSection(restored)
   }, [view])
 
