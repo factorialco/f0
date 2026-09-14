@@ -239,9 +239,7 @@
    these — this stays in step with it so the fallback is not a lie. */
 [data-hybrid-root],
 [data-hybrid-work] {
-  background:
-    linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))),
-    hsl(var(--neutral-0));
+  background: #fafafa;
 }
 [data-hybrid-canvas] {
   transition:
@@ -361,30 +359,30 @@
   border-radius: 0 !important;
 }
 
-/* ONE ground for the whole shell — navigation and page alike (Angel,
-   2026-09-14: "el whole background debería tener el mismo color que los
-   sidebars"). What separates content from background is the white sheet
-   that floats over it, not a second grey. See FULL_BLEED_CSS in Home.tsx
-   for the dark rebuild. */
+/* The AppShell's three backgrounds, Angel's values — sidebars #F5F5F5,
+   page #FAFAFA, floating white (that one is f0's own `bg-f1-background`
+   on the sheets themselves). See FULL_BLEED_CSS in Home.tsx. */
 [data-home-nav],
 [data-home-rail],
-[data-home-panel],
+[data-home-panel] {
+  background: #f5f5f5 !important;
+}
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
-  background:
-    linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))),
-    hsl(var(--neutral-0)) !important;
+  background: #fafafa !important;
 }
 [data-home-panel],
 .dark [data-home-panel] {
   box-shadow: none !important;
   border-right: 0 !important;
 }
-/* Dark: one formula for the same one ground. */
+/* Dark: the same three tiers, rebuilt from f0's dark tokens. */
 .dark [data-home-nav],
 .dark [data-home-rail],
-.dark [data-home-panel],
+.dark [data-home-panel] {
+  background: hsl(var(--neutral-0)) !important;
+}
 .dark [data-hybrid-root],
 .dark [data-hybrid-work],
 .dark [data-hybrid-chat] {

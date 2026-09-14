@@ -1,22 +1,29 @@
-import { OneEmptyState } from "@factorialco/f0-react"
+import { useSearchParams } from "react-router-dom"
+
+import { taskTitle } from "./inboxTasks"
+import { TicketWindow } from "./TicketWindow"
 
 /**
- * The Inbox canvas is a WAITING state, not a second list (Angel,
- * 2026-09-14: "el contenido del inbox es otra vez una lista de cosas,
- * eso no tiene sentido"). The rows live in the second-level panel; this
- * side holds whatever you pick from it, and says so until you do.
- *
- * No actions: there is nothing to do here that the panel does not already
- * offer, and a button would only be a second way to do it.
+ * The Inbox canvas: the item you picked, or a line telling you to pick
+ * one (Angel, 2026-09-14 — the rows are the second level, and clicking
+ * one "should replace the empty state with whatever you opened"). No
+ * illustration and no actions: there is nothing to do here that the list
+ * beside it does not already offer.
  */
 export function InboxScreen() {
+  const [searchParams] = useSearchParams()
+  const item = searchParams.get("item")
+  if (item)
+    return (
+      <div className="flex h-full w-full min-w-0 flex-col">
+        <TicketWindow taskId={item} title={taskTitle(item)} />
+      </div>
+    )
   return (
-    <div className="flex h-full w-full flex-1 flex-col p-6">
-      <OneEmptyState
-        emoji="📥"
-        title="Nothing open"
-        description="Select a message from the list to review it here."
-      />
+    <div className="flex h-full w-full flex-1 items-center justify-center p-6">
+      <p className="text-base text-f1-foreground-secondary">
+        Select an item to read it.
+      </p>
     </div>
   )
 }

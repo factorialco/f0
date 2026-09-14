@@ -31,10 +31,10 @@ const steps = [
       "Open Inbox to review requests, approvals and other tasks waiting for you.",
   },
   {
-    target: "Messages",
+    target: "DMs",
     title: "Stay connected with your team",
     description:
-      "Open Messages to find conversations and updates from your communities.",
+      "Open DMs to find conversations and updates from your communities.",
   },
   {
     target: "Home",
@@ -152,7 +152,7 @@ export function NavigationTour({ profile }: { profile: ProfileId }) {
         popover: {
           title: steps[clicked].title,
           description: steps[clicked].description.replace(
-            /^Open (Tools|Inbox|Messages) to /,
+            /^Open (Tools|Inbox|DMs) to /,
             "Here you can "
           ),
           side: "right",

@@ -5,8 +5,6 @@ import { avatarFor } from "@/fixtures/helpers"
 
 import type { InboxTask } from "./inboxTasks"
 
-import { requestChat } from "../comms/chatStore"
-
 /**
  * A row in the Inbox (Figma 2621:28151). Measured off the frame at its
  * 419px width: the row is 66 tall, the 20px selector sits at x=12, the
@@ -20,19 +18,27 @@ import { requestChat } from "../comms/chatStore"
  * Lifted out of HomeNav on 2026-09-14, when the Inbox gained a canvas
  * screen: the panel list and the full-width list are the same rows, and a
  * second copy would have been the `CalGroup` fork all over again.
+ *
+ * No hairline between rows any more (Angel, same day) and the body opens
+ * the item ON THE CANVAS rather than in a docked window — "clicking on an
+ * item should replace the empty state with whatever you opened".
  */
 export function InboxRow({
   item,
   active,
+  onOpen,
 }: {
   item: InboxTask
   active: boolean
+  onOpen: () => void
 }) {
   const [done, setDone] = useState(false)
   return (
     <div
-      className={`flex h-[66px] w-full items-center gap-3 border-0 border-b border-solid border-f1-border-secondary px-3 ${
-        active ? "bg-f1-background-secondary" : ""
+      className={`flex h-[66px] w-full items-center gap-3 rounded-[10px] px-3 ${
+        active
+          ? "bg-f1-background-secondary"
+          : "hover:bg-f1-background-secondary"
       }`}
     >
       <F0Checkbox
@@ -53,7 +59,7 @@ export function InboxRow({
       {/* The row body opens the ticket; the checkbox beside it stays its
           own control, so ticking one off never opens it. */}
       <button
-        onClick={() => requestChat(`ticket:${item.id}`)}
+        onClick={onOpen}
         className={`flex min-w-0 flex-1 cursor-pointer flex-col items-start text-left ${
           done ? "opacity-50" : ""
         }`}

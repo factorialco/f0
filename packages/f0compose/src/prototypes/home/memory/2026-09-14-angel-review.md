@@ -106,6 +106,30 @@ Four corrections after he saw it running:
 - **No vertical gap between rail items.** The chips carry their own 8px top and
   bottom; Slack's extra 12px made the column read as six separate things.
 
+## Third pass, same day
+
+- **Rail 68px**, 56px buttons, and the glyph up from f0's 20px to 24 — at 20 the
+  drawn mark is barely 12px inside a 36px chip, which is why it read small next
+  to Slack's.
+- **"Messages" → "DMs"**, his word, Slack's word.
+- **Filled glyphs for the active item** (`navigation/filledRailIcons.tsx`). f0
+  ships no filled set for these — `icons/app` has seven one-off *Filled/Solid
+  icons and none of them is Home, Inbox, Calendar, Folders or Hub — and the
+  prototype allowlist forbids importing another pack, so each one is f0's OWN
+  outline redrawn solid: same 24 viewBox, same silhouette, same radii, interior
+  details knocked out with `fillRule="evenodd"`. Delete the file if f0 ever
+  ships a real filled set.
+- **The second-level panel resizes instantly** when you move between sections;
+  the width transition is kept only for collapse. A 419px Inbox easing out of a
+  240px Home read as one panel stretching rather than as a different panel.
+- **Empty states carry no illustration and one line** — "Select an item to read
+  it.", "Select a conversation to read it." No actions.
+- **Clicking a row replaces the canvas, it does not dock a window.** Inbox rows
+  go to `?view=inbox&item=<id>` and render `TicketWindow` inline; chat rows go
+  to `?view=messages&chat=<id>` and render `ChatWindow`. The DMs canvas titles
+  itself with the open thread.
+- **No hairlines between Inbox rows**; they are rounded, hoverable rows now.
+
 ## Surfaces — this reverses a previous decision
 
 Angel, explicitly:
@@ -118,10 +142,10 @@ The first pass split sidebars (`--neutral-5`) from the page (`--neutral-3`).
 He read the seam as "un cambio de color raro" and settled it: **one ground for
 the whole shell, and white for what floats on it.**
 
-| tier                                          | token         | light                               |
-| --------------------------------------------- | ------------- | ----------------------------------- |
-| ground (rail, panel, page, One panel)          | `--neutral-5` | ≈ #F5F6F8                           |
-| floating (module sheets, windows, cards, menus)| `--neutral-0` | #FFFFFF + secondary border + shadow |
+| tier                                            | token         | light                               |
+| ----------------------------------------------- | ------------- | ----------------------------------- |
+| ground (rail, panel, page, One panel)           | `--neutral-5` | ≈ #F5F6F8                           |
+| floating (module sheets, windows, cards, menus) | `--neutral-0` | #FFFFFF + secondary border + shadow |
 
 So the old flat chrome (Oskar, 2026-08-29) survives as ONE ground — what
 changed is that content now sits on a white sheet above it rather than being

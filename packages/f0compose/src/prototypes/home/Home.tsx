@@ -13,6 +13,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
+import type { ChatId } from "./comms/chats"
 import type { LeftPaneId } from "./comms/ChatsColumn"
 import type { WindowId } from "./windows/types"
 
@@ -22,6 +23,7 @@ import { agentById } from "./agents/agentStore"
 import { ArtifactsScreen } from "./artifacts/ArtifactsScreen"
 import { AskFactorialButton } from "./AskFactorial"
 import { CalendarScreen } from "./calendar/CalendarScreen"
+import { CHATS_BY_ID } from "./comms/chats"
 import {
   animateChatClose,
   ChatsColumn,
@@ -139,46 +141,46 @@ const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"]:hover,
   [data-home-generated-section] .f0c-ease-hover:hover { background: hsl(var(--neutral-20)); box-shadow: none; }
   [aria-label="Conversation"] [data-testid="card"]:focus-within { box-shadow: none; }
-  /* TWO surfaces: one GROUND and what floats over it (Angel,
-     2026-09-14 — the first pass split the sidebars from the page and he
-     read the seam as "un cambio de color raro"; the ramp he wants is
-     background vs content, not sidebar vs page). Both are composited
-     over white rather than applied as alpha, so a surface stacked on a
-     surface cannot darken twice.
-       ground  --neutral-5  ≈ #F5F6F8  (rail, panel AND page)
-       float   --neutral-0  = #FFFFFF  + secondary border + shadow */
-  .f0c-surface-chrome { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
-  .f0c-surface-page { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
-  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
+  /* THREE AppShell backgrounds, Angel's own values (2026-09-14). They
+     are close on purpose: the ramp says which layer is which, it is not
+     a contrast device.
+       sidebars  #F5F5F5  pushed back
+       page      #FAFAFA  off-white, where the content lives
+       floating  #FFFFFF  plus a secondary border and a shadow, so it
+                          reads as ABOVE the page
+     Literal hexes rather than f0 neutrals because f0's are navy alphas
+     (--neutral-5 composites to #F5F6F8, a cool cast he did not ask for)
+     and because a surface painted with alpha compounds when stacked.
+     Every one of them has its .dark counterpart below. */
+  .f0c-surface-chrome { background: #f5f5f5; }
+  .f0c-surface-page { background: #fafafa; }
+  main#content { padding: 0 !important; background: #fafafa; }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
      stable selector; :has() on the nav root is the only hook. */
   div:has(> [data-home-nav]) { width: auto !important; padding-left: 0 !important; }
-  /* Rail, panel and page are one continuous ground now, so the only
-     separation left is the hairline between the two nav columns. */
+  /* Rail and panel share the sidebar tier; the tonal step to the page is
+     the separation, so no hairline between the panel and the content. */
   [data-home-rail],
   [data-home-panel] {
-    background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0));
+    background: #f5f5f5;
   }
-  [data-home-rail] {
-    box-shadow: inset -1px 0 0 rgba(5, 38, 87, 0.06);
-  }
-  /* The split conversation panel sits on the same ground and keeps its
-     leading hairline (an inset shadow rather than a border, so the fixed
-     content boxes inside it do not shrink). */
+  /* The split conversation panel is CONTENT, so it takes the page tier. */
   [data-one-panel] {
-    background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0));
-    box-shadow: inset 1px 0 0 rgba(5, 38, 87, 0.06);
+    background: #fafafa;
   }
-  /* Dark: the light values above are experimental customs with no dark
-     pair, so the ground is rebuilt from f0's dark tokens — one formula
-     for rail, panel, page and the One panel, exactly as in light. */
+  /* Dark: the light hexes above have no dark pair, so the same THREE
+     tiers are rebuilt from f0's dark tokens — sidebars the base, page the
+     base lifted by --page, floating lifted again (that one is f0's own
+     bg-f1-background, which flips on its own). */
   .dark .f0c-surface-chrome,
+  .dark [data-home-rail],
+  .dark [data-home-panel] {
+    background: hsl(var(--neutral-0));
+  }
   .dark .f0c-surface-page,
   .dark main#content,
-  .dark [data-home-rail],
-  .dark [data-home-panel],
   .dark [data-one-panel] {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -408,7 +410,7 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
+  .f0c-canvas-surface { background: #fafafa; }
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -420,7 +422,7 @@ const FULL_BLEED_CSS = `
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
+  main#content thead th { background: #fafafa; }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -1046,9 +1048,15 @@ function HomeCanvas() {
   // the adjacent conversation, while the existing widget stacks stay intact.
   useResetParam(searchParams)
   const screenView = view
+  // A view id is not always a title: "messages" is the DMs section, and
+  // an open thread names itself.
+  const openChat = searchParams.get("chat")
   const screenTitle = screenView
-    ? screenView.charAt(0).toUpperCase() +
-      screenView.slice(1).replaceAll("-", " ")
+    ? screenView === "messages"
+      ? ((openChat ? CHATS_BY_ID[openChat as ChatId]?.title : undefined) ??
+        "DMs")
+      : screenView.charAt(0).toUpperCase() +
+        screenView.slice(1).replaceAll("-", " ")
     : undefined
   // Screens that run EDGE TO EDGE and scroll their own content: nesting
   // them inside the canvas gutters plus its scroller would give them a

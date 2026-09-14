@@ -1,33 +1,25 @@
-import { OneEmptyState } from "@factorialco/f0-react"
+import { useSearchParams } from "react-router-dom"
 
 import type { ChatId } from "./chats"
 
 import { CHATS_BY_ID } from "./chats"
-import { useOpenChats } from "./chatStore"
 import { ChatWindow } from "./ChatWindow"
 
 /**
- * The Messages canvas. It exists because every first-level rail item has
- * to change the content area (Angel, 2026-09-14) — before this, clicking
- * Messages swapped the panel and left whatever was on the canvas alone.
- *
- * It is a LANDING surface, not a second implementation of comms: the same
- * `ChatWindow` the docked windows use renders the open thread, so a
- * conversation reads identically whether you arrived here or opened it
- * over the canvas from the panel.
+ * The DMs canvas: the conversation you picked from the panel, rendered by
+ * the same `ChatWindow` the docked windows use, so a thread reads the
+ * same wherever you opened it from. Until you pick one, a single line —
+ * no illustration, no actions (Angel, 2026-09-14).
  */
 export function MessagesScreen() {
-  const open = useOpenChats()
-  // The open list also carries ticket ids, which are not chats.
-  const chat = open.map((id) => CHATS_BY_ID[id as ChatId]).find(Boolean)
+  const [searchParams] = useSearchParams()
+  const chat = CHATS_BY_ID[searchParams.get("chat") as ChatId]
   if (!chat)
     return (
-      <div className="flex w-full flex-1 flex-col p-6">
-        <OneEmptyState
-          emoji="💬"
-          title="No conversation open"
-          description="Pick a chat, a channel or a community from the panel to read it here."
-        />
+      <div className="flex h-full w-full flex-1 items-center justify-center p-6">
+        <p className="text-base text-f1-foreground-secondary">
+          Select a conversation to read it.
+        </p>
       </div>
     )
   return (

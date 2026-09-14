@@ -43,13 +43,13 @@ import { useSearchParams } from "react-router-dom"
 
 import { avatarFor } from "@/fixtures/helpers"
 
-import type { Chat, ChatId } from "./comms/chats"
+import type { Chat } from "./comms/chats"
 import type { InboxPreset } from "./inbox/inboxTasks"
 
 import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
-import { requestChat, requestChatsClose, useOpenChats } from "./comms/chatStore"
+import { requestChatsClose } from "./comms/chatStore"
 import {
   ADMIN_HUB,
   EMPLOYEE_HUB,
@@ -61,6 +61,7 @@ import { hubSlug } from "./hub/hubSlug"
 import { InboxRow } from "./inbox/InboxRow"
 import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
 import { MenuDivider, MenuRow, MenuSurface } from "./MenuRow"
+import { FILLED_RAIL_ICONS } from "./navigation/filledRailIcons"
 import { CompanySwitcher, RailPersonalMenu } from "./navigation/RailMenus"
 import { useNeedsYou } from "./needsYouStore"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
@@ -112,15 +113,15 @@ const NAV_OPEN_KEY = "f0compose:home:nav-open"
 /**
  * The labels changed on 2026-09-14, the ids did not (Angel: "cambiaría
  * Comms con Chat, o DMs como Slack" and "lo mismo con Cal, llámalo
- * Calendar. Se entiende mejor"). "Messages" over "DMs" because this
- * section holds channels and communities as well as direct chats.
+ * Calendar. Se entiende mejor"). "DMs" is his call, Slack's own word —
+ * it shipped as "Messages" for half a day and he shortened it.
  *
  * Ids stay `comms`/`cal`/`hub` on purpose: they are persisted in
  * localStorage and `agent-entry.css` selects on `[data-nav-section]`.
  */
 const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] = [
   { id: "home", label: "Home", icon: HomeIcon },
-  { id: "comms", label: "Messages", icon: Messages },
+  { id: "comms", label: "DMs", icon: Messages },
   { id: "inbox", label: "Inbox", icon: InboxIcon },
   { id: "cal", label: "Calendar", icon: Calendar },
   // Files earned the first level on usage (Angel, 2026-09-14). It reuses
@@ -131,7 +132,7 @@ const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] = [
 
 const PANEL_TITLES: Record<NavSectionId, string> = {
   home: "Home",
-  comms: "Messages",
+  comms: "DMs",
   inbox: "Inbox",
   cal: "Calendar",
   files: "Files",
@@ -834,17 +835,17 @@ function UnreadBadge({ count }: { count: number }) {
 /** A conversation row. Clicking opens it as a window in the left-hand
  *  stack, and the row carries NavRow's selected state while it is open. */
 function ChatRow({
-  id,
   avatar,
   label,
   unread,
   active,
+  onOpen,
 }: {
-  id: ChatId
   avatar: React.ReactNode
   label: string
   unread?: number
   active: boolean
+  onOpen: () => void
 }) {
   return (
     <SectionRow
@@ -853,7 +854,7 @@ function ChatRow({
       bold={unread !== undefined}
       trailing={unread !== undefined && <UnreadBadge count={unread} />}
       active={active}
-      onClick={() => requestChat(id)}
+      onClick={onOpen}
     />
   )
 }
@@ -864,12 +865,18 @@ function ChatRow({
  *  the chat WINDOWS render from the same data, so a row and its window
  *  can never disagree about a title, an emoji or an unread count. */
 function CommsPanelBody() {
-  const openChats = useOpenChats()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openChat = searchParams.get("chat")
   const row = (chat: Chat) => (
     <ChatRow
       key={chat.id}
-      id={chat.id}
-      active={openChats.includes(chat.id)}
+      active={openChat === chat.id}
+      onOpen={() => {
+        // On the canvas, replacing the empty state — not a window docked
+        // beside it (Angel, 2026-09-14).
+        goHome()
+        setSearchParams({ view: "messages", chat: chat.id })
+      }}
       avatar={
         chat.kind === "channel" ? (
           <SectionEmoji emoji={chat.emoji ?? "\u{1F4AC}"} />
@@ -963,16 +970,27 @@ function InboxPresets({
 
 function InboxPanelBody({ preset }: { preset: InboxPreset }) {
   const profile = useProfile()
-  const open = useOpenChats()
   // Same resolutions the canvas list reads, so the two cannot drift.
   const needsYou = useNeedsYou()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openItem = searchParams.get("item")
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-0.5 px-1.5 pb-2">
       {openInboxTasks(profile, needsYou.cleared, preset).map((item) => (
         <InboxRow
           key={item.id}
           item={item}
-          active={open.includes(`ticket:${item.id}`)}
+          active={openItem === item.id}
+          onOpen={() => {
+            // The canvas, not a docked window: the panel is the list and
+            // the content side is what you picked from it.
+            goHome()
+            setSearchParams(
+              preset === "all"
+                ? { view: "inbox", item: item.id }
+                : { view: "inbox", preset, item: item.id }
+            )
+          }}
         />
       ))}
     </div>
@@ -1226,12 +1244,15 @@ function FilesPanelBody() {
  */
 function RailItem({
   icon,
+  filled,
   label,
   active,
   onClick,
   trailing,
 }: {
   icon: IconType
+  /** The solid counterpart, shown while the item is active. */
+  filled?: IconType
   label: string
   active: boolean
   onClick: () => void
@@ -1266,7 +1287,15 @@ function RailItem({
               token (rgb(99,110,131)), not `icon-secondary` (rgb(162,172,190))
               — that was the washed-out look Oskar flagged. Active is
               distinguished by its chip background alone. */}
-          <F0Icon icon={icon} size="md" color="default" />
+          {/* 24px, not f0's 20: at 20 the drawn glyph is barely 12px
+              inside a 36px chip, which is what made the rail read small
+              beside Slack's. Filled when active, outline otherwise —
+              see `filledRailIcons`. */}
+          <F0Icon
+            icon={filled && active ? filled : icon}
+            size="lg"
+            color="default"
+          />
         </span>
         <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
           {label}
@@ -1296,8 +1325,8 @@ function RailIconButton({
       onClick={onClick}
       className={`f0c-pressable flex size-9 cursor-pointer items-center justify-center rounded-lg hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
     >
-      {/* Same token as the section items above — see RailItem. */}
-      <F0Icon icon={icon} size="md" color="default" />
+      {/* Same token and size as the section items above — see RailItem. */}
+      <F0Icon icon={icon} size="lg" color="default" />
     </button>
   )
 }
@@ -1409,6 +1438,9 @@ export function HomeNav() {
         : !utilityView && id === section && CAN_COLLAPSE[id]
           ? !panelOpen
           : true
+    // Re-clicking the same item is a collapse, which animates; moving to
+    // another section is a swap, which does not.
+    setAnimateWidth(id === section)
     setSection(id)
     setPanelOpen(nextOpen)
     persist(id, nextOpen)
@@ -1441,6 +1473,16 @@ export function HomeNav() {
    */
   const panelWidth = section === "inbox" ? 419 : section === "cal" ? 293 : 240
 
+  // True only while the last change was the panel opening or closing.
+  const [animateWidth, setAnimateWidth] = useState(false)
+  const lastSection = useRef(section)
+  useEffect(() => {
+    if (lastSection.current !== section) {
+      lastSection.current = section
+      setAnimateWidth(false)
+    }
+  }, [section])
+
   const rawPreset = searchParams.get("preset")
   const inboxPreset: InboxPreset =
     rawPreset === "request" || rawPreset === "notification" ? rawPreset : "all"
@@ -1448,6 +1490,7 @@ export function HomeNav() {
   const presetCounts = inboxPresetCounts(profile, needsYou.cleared)
 
   const collapse = () => {
+    setAnimateWidth(true)
     setPanelOpen(false)
     persist(section, false)
   }
@@ -1457,14 +1500,13 @@ export function HomeNav() {
       {/* Slack's rail geometry, which is the reference Angel named:
           70px wide, 8px of top padding, 52x68 buttons 12px apart, and a
           36x36 icon chip that is the only thing carrying the hover or
-          active background. 76 rather than 70 because "Messages" and
-          "Calendar" are longer words than "DMs" and "Later", and NO gap
+          active background. 68 wide with 56px buttons, and NO gap
           between items (Angel, 2026-09-14) — the chips already carry
           their own 8px of breathing room top and bottom, and Slack's
           extra 12 made the column read as six separate things. */}
       <div
         data-home-rail
-        className="flex w-[76px] shrink-0 flex-col items-center overflow-y-auto pt-2"
+        className="flex w-[68px] shrink-0 flex-col items-center overflow-y-auto pt-2"
       >
         {/* Figma 2621:22835 — f0's AvatarCompany in its with-logo variant
             (24px). It is the entity SWITCHER since 2026-09-14: the pattern
@@ -1473,11 +1515,12 @@ export function HomeNav() {
         <div className="flex h-[60px] shrink-0 items-center justify-center">
           <CompanySwitcher />
         </div>
-        <div className="flex w-full flex-col px-2">
+        <div className="flex w-full flex-col px-1.5">
           {railSections.map((s) => (
             <RailItem
               key={s.id}
               icon={s.icon}
+              filled={FILLED_RAIL_ICONS[s.id]}
               label={s.label}
               active={s.id === activeSection}
               onClick={() => pickSection(s.id)}
@@ -1530,7 +1573,13 @@ export function HomeNav() {
       <div
         data-home-panel
         data-nav-section={section}
-        className="f0c-ease-out h-full shrink-0 overflow-hidden transition-[width] duration-200 motion-reduce:transition-none"
+        className={`f0c-ease-out h-full shrink-0 overflow-hidden motion-reduce:transition-none ${
+          // Collapsing animates; switching section does NOT (Angel,
+          // 2026-09-14: "should change size instantly when moving between
+          // first level items") — a 419px Inbox easing out of a 240px
+          // Home reads as the panel resizing rather than as a new one.
+          animateWidth ? "transition-[width] duration-200" : ""
+        }`}
         style={{ width: panelVisible ? panelWidth : 0 }}
         ref={(node) => {
           // Keep the collapsed panel out of the tab order.
