@@ -1,4 +1,3 @@
-import { reopenOnboarding, startNavigationTour } from "../onboarding/state"
 import { F0AvatarCompany, F0AvatarPerson } from "@factorialco/f0-react"
 import {
   AlertCircleLine,
@@ -12,20 +11,18 @@ import {
   Reset,
   Sliders,
 } from "@factorialco/f0-react/icons/app"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { useSearchParams } from "react-router-dom"
 
 import { PROFILE_PEOPLE } from "../fixtures"
+import { MenuSurface } from "../MenuRow"
+import { reopenOnboarding, startNavigationTour } from "../onboarding/state"
 import { goHome } from "../one/conversationStore"
 import { useProfile } from "../profileStore"
-import factorial from "./assets/factorial.svg"
-import { HelpMenu, ProfileMenu, type HelpRow } from "./ReferenceMenus"
+import { ENTITIES, setEntity, useEntity } from "./entityStore"
+import { EntityRows, ProfileMenu, type HelpRow } from "./ReferenceMenus"
 
-const entities = [
-  { id: "factorial", name: "Factorial", src: factorial },
-  { id: "test-de-verdad", name: "Test de verdad" },
-]
-const ENTITY_KEY = "f0compose:home:legal-entity"
 // These destinations are placeholders in the reference; the prototype does not contact support.
 const HELP_URL = "https://help.factorial.example"
 const helpRows: HelpRow[] = [
@@ -48,48 +45,81 @@ const helpRows: HelpRow[] = [
   { kind: "item", label: "What's new?", icon: Megaphone },
   { kind: "footer", text: "User ID: #4079271" },
 ]
-export function CompanyLogo() {
-  return <F0AvatarCompany name="Factorial" src={factorial} size="sm" />
-}
-export function RailHelpMenu() {
-  const profile = useProfile()
-  const [, setParams] = useSearchParams()
-  const resume = (screen: "welcome" | "preferences") => {
-    setParams({})
-    reopenOnboarding(profile, screen)
+/**
+ * The company avatar at the top of the rail, which is now the entity
+ * SWITCHER (Angel, 2026-09-14: "el selector de empresa… también debería
+ * estar arriba del todo de la primera navegación del sidebar, es el patrón
+ * actual y el que buscará la gente"). Same rows as the profile menu, same
+ * store, so the two can never disagree — and the same right-of-the-rail
+ * anchoring every other rail menu uses, which is measured rather than
+ * hard-coded and so survived the rail getting wider.
+ */
+export function CompanySwitcher() {
+  const entity = useEntity()
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+
+  const toggle = () => {
+    const rect = buttonRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setPos((open) =>
+      open
+        ? null
+        : {
+            left:
+              (buttonRef.current
+                ?.closest("[data-home-rail]")
+                ?.getBoundingClientRect().right ?? rect.right) + 8,
+            top: rect.top,
+          }
+    )
   }
+
+  const menu = pos && (
+    <>
+      <div className="fixed inset-0 z-40" onClick={() => setPos(null)} />
+      <div
+        className="fixed z-50"
+        style={{ left: pos.left, top: pos.top, transformOrigin: "top left" }}
+      >
+        <MenuSurface className="w-[248px]">
+          <div
+            role="menu"
+            aria-label="Switch company"
+            className="flex flex-col"
+          >
+            <EntityRows
+              entities={ENTITIES}
+              selected={entity.id}
+              onSelect={(id) => {
+                setEntity(id)
+                setPos(null)
+              }}
+            />
+          </div>
+        </MenuSurface>
+      </div>
+    </>
+  )
+
   return (
-    <HelpMenu
-      label="Help"
-      rows={[
-        {
-          kind: "item",
-          label: "Explore the new navigation",
-          icon: BookOpen,
-          onClick: () => {
-            setParams({})
-            startNavigationTour(profile)
-          },
-        },
-        {
-          kind: "item",
-          label: "Personalise my Home",
-          icon: Sliders,
-          onClick: () => resume("preferences"),
-        },
-        { kind: "separator" },
-        ...helpRows,
-      ]}
-    />
+    <>
+      {menu && createPortal(menu, document.body)}
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label="Switch company"
+        aria-haspopup="menu"
+        onClick={toggle}
+        className="f0c-pressable flex size-11 cursor-pointer items-center justify-center rounded-xl hover:bg-f1-background-secondary"
+      >
+        <F0AvatarCompany name={entity.name} src={entity.src} size="sm" />
+      </button>
+    </>
   )
 }
 export function RailPersonalMenu() {
-  const [selected, setSelected] = useState(() => {
-    const stored = window.localStorage.getItem(ENTITY_KEY)
-    return entities.some((entity) => entity.id === stored)
-      ? stored!
-      : "factorial"
-  })
+  const entity = useEntity()
 
   useEffect(() => {
     const theme =
@@ -106,6 +136,31 @@ export function RailPersonalMenu() {
     goHome()
     setParams({ view })
   }
+  const resume = (screen: "welcome" | "preferences") => {
+    setParams({})
+    reopenOnboarding(profile, screen)
+  }
+  // The two tour rows came with Help out of the rail; they lead the list
+  // because they are about THIS prototype, not about support.
+  const help: HelpRow[] = [
+    {
+      kind: "item",
+      label: "Explore the new navigation",
+      icon: BookOpen,
+      onClick: () => {
+        setParams({})
+        startNavigationTour(profile)
+      },
+    },
+    {
+      kind: "item",
+      label: "Personalise my Home",
+      icon: Sliders,
+      onClick: () => resume("preferences"),
+    },
+    { kind: "separator" },
+    ...helpRows,
+  ]
   const personal = [
     { label: "My profile", icon: Person, onClick: () => open("profile") },
     {
@@ -141,17 +196,14 @@ export function RailPersonalMenu() {
   return (
     <ProfileMenu
       accountEmail="alicia.keys@factorial.co"
-      entities={entities}
-      selectedEntity={selected}
-      onSelectEntity={(id) => {
-        setSelected(id)
-        window.localStorage.setItem(ENTITY_KEY, id)
-      }}
+      entities={ENTITIES}
+      selectedEntity={entity.id}
+      onSelectEntity={setEntity}
       personal={personal}
-      help={helpRows}
+      help={help}
       labels={{
         personal: "Personal",
-        help: "Help",
+        help: "Get help",
         notifications: "Notifications",
       }}
     >
@@ -159,7 +211,7 @@ export function RailPersonalMenu() {
         type="button"
         aria-label="Open user menu"
         aria-haspopup="menu"
-        className="flex cursor-pointer items-center justify-center rounded-full"
+        className="f0c-pressable flex size-11 cursor-pointer items-center justify-center rounded-full hover:bg-f1-background-secondary"
       >
         <F0AvatarPerson
           firstName={person.firstName}

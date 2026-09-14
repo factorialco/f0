@@ -234,10 +234,14 @@
   height: 0;
 }
 
-/* Full-width application content; agent entry lives in the header. */
+/* Full-width application content; agent entry lives in the header. The
+   !important block near the end of this file is what actually paints
+   these — this stays in step with it so the fallback is not a lie. */
 [data-hybrid-root],
 [data-hybrid-work] {
-  background: hsl(var(--page));
+  background:
+    linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))),
+    hsl(var(--neutral-0));
 }
 [data-hybrid-canvas] {
   transition:
@@ -357,15 +361,22 @@
   border-radius: 0 !important;
 }
 
-/* Shared F0 secondary surface for navigation, canvas and One. */
+/* Two tiers, not one (Angel, 2026-09-14, reversing the flat chrome of
+   2026-08-29): the navigation sits back on --neutral-5, the content sits
+   on --neutral-3, and what floats over the content is white. See
+   FULL_BLEED_CSS in Home.tsx for the full ramp and its dark rebuild. */
 [data-home-nav],
 [data-home-rail],
-[data-home-panel],
+[data-home-panel] {
+  background:
+    linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))),
+    hsl(var(--neutral-0)) !important;
+}
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
   background:
-    linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))),
+    linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))),
     hsl(var(--neutral-0)) !important;
 }
 [data-home-panel],
@@ -373,9 +384,14 @@
   box-shadow: none !important;
   border-right: 0 !important;
 }
+/* Dark: --neutral-3 does not flip (it stays a navy alpha), so the ramp is
+   rebuilt rather than reused — chrome is the base, content is the base
+   lifted by --page. */
 .dark [data-home-nav],
 .dark [data-home-rail],
-.dark [data-home-panel],
+.dark [data-home-panel] {
+  background: hsl(var(--neutral-0)) !important;
+}
 .dark [data-hybrid-root],
 .dark [data-hybrid-work],
 .dark [data-hybrid-chat] {
@@ -383,12 +399,8 @@
     linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
 }
 
-/* The navigation panel supplies the divider beside the full-width content. */
-body:has([data-hybrid-root][data-view="home"]) [data-home-panel],
-body:has([data-hybrid-root][data-view="activity"]) [data-home-panel],
-[data-home-panel][data-nav-section="hub"] {
-  box-shadow: inset -1px 0 0 hsl(var(--neutral-10)) !important;
-}
+/* No divider between the panel and the content any more: with the two on
+   different tiers, a neutral-10 seam is darker than either side of it. */
 
 /* Embedded F0 pages share the canvas without their own outer ring. */
 [data-hybrid-canvas] .bg-f1-special-page {

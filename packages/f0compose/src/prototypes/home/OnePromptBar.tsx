@@ -298,7 +298,7 @@ export function OnePromptBar({
     <div ref={rootRef} className="relative flex w-full flex-col">
       {/* Suggestions panel — sits above the input, same width */}
       {panelOpen && (
-        <div className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-md bg-f1-background shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]">
+        <div className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]">
           <div className="flex flex-col p-1">
             {suggestions.map((suggestion, index) => (
               <button

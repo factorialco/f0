@@ -1,17 +1,14 @@
-import { Onboarding } from "./onboarding/Onboarding"
-import { getOnboarding, useOnboarding } from "./onboarding/state"
 import {
   F0AvatarPerson,
   F0Button,
   F0Heading,
   type ModuleId,
 } from "@factorialco/f0-react"
-import { Breadcrumbs, F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
 import {
-  Ellipsis,
-  Reaction,
-  Settings,
-} from "@factorialco/f0-react/icons/app"
+  Breadcrumbs,
+  F0AvatarModule,
+} from "@factorialco/f0-react/dist/experimental"
+import { Ellipsis, Reaction, Settings } from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -22,6 +19,7 @@ import type { WindowId } from "./windows/types"
 import { ActivityScreen } from "./activity/ActivityScreen"
 import { AgentsScreen } from "./agents/AgentsScreen"
 import { agentById } from "./agents/agentStore"
+import { ArtifactsScreen } from "./artifacts/ArtifactsScreen"
 import { AskFactorialButton } from "./AskFactorial"
 import { CalendarScreen } from "./calendar/CalendarScreen"
 import {
@@ -37,6 +35,7 @@ import {
   onChatsCloseRequest,
   setOpenChats,
 } from "./comms/chatStore"
+import { MessagesScreen } from "./comms/MessagesScreen"
 import { EmployeeCanvas } from "./EmployeeCanvas"
 import {
   PROFILE_PEOPLE,
@@ -45,11 +44,15 @@ import {
 } from "./fixtures"
 import { HomeNav } from "./HomeNav"
 import { ImportedHubScreen, hasImportedScreen } from "./hub/ImportedHubScreen"
+import { ToolsScreen } from "./hub/ToolsScreen"
 import { HybridHome } from "./HybridHome"
+import { InboxScreen } from "./inbox/InboxScreen"
 import { ModuleScreen } from "./ModuleScreen"
 import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
+import { Onboarding } from "./onboarding/Onboarding"
+import { getOnboarding, useOnboarding } from "./onboarding/state"
 import { completeOnboardingHome, enterHome } from "./one/conversationStore"
 import {
   goHome,
@@ -119,7 +122,11 @@ const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
   /* The native header keeps its F0 layout; only the separate live-runtime switch is hidden because this prototype uses Ask One. */
   [data-home-page-header] [role="switch"] { display: none; }
-  [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); box-shadow: none; }
+  /* A white widget on a near-white page needs its edge back: secondary
+     border + the soft shadow, which is what "floating" means in the new
+     ramp. Before 2026-09-14 the page was 6% grey and the border alone did
+     the work. */
+  [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); border-color: hsl(var(--neutral-10)); box-shadow: 0 2px 20px 0 rgba(13, 22, 37, 0.04); }
   [data-widget-overlay="true"] [role="article"] > :first-child,
   [data-widget-draggable="true"] [role="article"] > :first-child { cursor: grab; user-select: none; touch-action: none; padding-left: 24px; min-height: 40px; }
   [data-widget-draggable="true"] [role="article"] > :first-child:active { cursor: grabbing; }
@@ -133,40 +140,56 @@ const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"]:hover,
   [data-home-generated-section] .f0c-ease-hover:hover { background: hsl(var(--neutral-20)); box-shadow: none; }
   [aria-label="Conversation"] [data-testid="card"]:focus-within { box-shadow: none; }
-  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
+  /* THREE surfaces, not one (Angel, 2026-09-14 — this REVERSES the flat
+     chrome of 2026-08-29): the sidebars sit furthest back, the page is
+     the off-white the content lives on, and anything floating is white
+     with a secondary border and a shadow so it reads as above the page.
+     All three are composited over white rather than applied as alpha, so
+     a surface stacked on a surface cannot darken twice.
+       chrome  --neutral-5  ≈ #F5F6F8
+       page    --neutral-3  ≈ #FAFAFB
+       float   --neutral-0  = #FFFFFF */
+  .f0c-surface-chrome { background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0)); }
+  .f0c-surface-page { background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
+  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
      stable selector; :has() on the nav root is the only hook. */
   div:has(> [data-home-nav]) { width: auto !important; padding-left: 0 !important; }
-  /* Navigation and canvas share F0's secondary background. Inset shadows
-     separate columns without changing their content dimensions. */
+  /* Rail and panel are ONE tier, so the hairline stays between them and
+     only there — panel against page is now a tonal step, which does the
+     separating without a seam darker than either side. */
   [data-home-rail],
   [data-home-panel] {
-    background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0));
+    background: linear-gradient(hsl(var(--neutral-5)), hsl(var(--neutral-5))), hsl(var(--neutral-0));
+  }
+  [data-home-rail] {
     box-shadow: inset -1px 0 0 rgba(5, 38, 87, 0.06);
   }
-  /* The split conversation panel is another column of the same surface,
-     so it gets the same hairline — on its LEADING edge, since the canvas
-     is what it sits beside (the frame draws it as a border-right on the
-     canvas; an inset shadow here keeps the fixed content boxes from
-     shrinking, the same reason the nav columns use one). */
+  /* The split conversation panel is CONTENT, not chrome, so it takes the
+     page tier and keeps its leading hairline (an inset shadow rather than
+     a border, so the fixed content boxes inside it do not shrink). */
   [data-one-panel] {
-    background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0));
+    background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0));
     box-shadow: inset 1px 0 0 rgba(5, 38, 87, 0.06);
   }
   /* Dark: the light values above are experimental customs with no dark
-     pair, so rebuild the same relationships from f0's dark tokens — one
-     surface again (chrome base neutral-0 lifted by the --page overlay,
-     the identical formula the canvas uses), dividers to white-alpha. */
-  .dark main#content,
+     pair, and --neutral-3 does NOT flip in dark (it stays a navy alpha,
+     so it would darken instead of lift) — so the ramp is rebuilt from
+     f0's dark tokens instead of reused: chrome is the base, the page is
+     the base lifted by --page, floating is lifted again by --white-5. */
+  .dark .f0c-surface-chrome,
   .dark [data-home-rail],
-  .dark [data-home-panel],
+  .dark [data-home-panel] {
+    background: hsl(var(--neutral-0));
+  }
+  .dark main#content,
+  .dark .f0c-surface-page,
   .dark [data-one-panel] {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
-  .dark [data-home-rail],
-  .dark [data-home-panel] {
+  .dark [data-home-rail] {
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
   }
   .dark [data-one-panel] {
@@ -392,7 +415,7 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
+  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -404,7 +427,7 @@ const FULL_BLEED_CSS = `
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
+  main#content thead th { background: linear-gradient(hsl(var(--neutral-3)), hsl(var(--neutral-3))), hsl(var(--neutral-0)); }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -419,7 +442,13 @@ const FULL_BLEED_CSS = `
      The main#content prefix is repeated only to out-specify the id
      selector above; without it this loses to a rule with an id in it. */
   main#content section[data-home-window] thead th,
-  main#content section[data-home-window] .f0c-canvas-surface {
+  main#content section[data-home-window] .f0c-canvas-surface,
+  /* Module screens render inside the floating canvas sheet, which is
+     white for every non-home view — a page-tier sticky header there is
+     the same grey band, one layer further in. Home is excluded: there the
+     sheet is transparent and the bar sits on the page itself. */
+  main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] thead th,
+  main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] .f0c-canvas-surface {
     background: hsl(var(--neutral-0));
   }
 
@@ -854,10 +883,20 @@ function HomeNavbar({
             </span>
           </span>
         ) : screenTitle === "Activity" || screenTitle === "Preferences" ? (
-          <Breadcrumbs breadcrumbs={[
-            { id: "home", label: "Home", href: "/p/home", onClick: () => { goHome(); setParams({}) } },
-            { id: screenTitle.toLowerCase(), label: screenTitle },
-          ]} />
+          <Breadcrumbs
+            breadcrumbs={[
+              {
+                id: "home",
+                label: "Home",
+                href: "/p/home",
+                onClick: () => {
+                  goHome()
+                  setParams({})
+                },
+              },
+              { id: screenTitle.toLowerCase(), label: screenTitle },
+            ]}
+          />
         ) : screenTitle ? (
           <span className="flex min-w-0 items-center gap-2">
             {/* No "policies" module in f0 — company_documents is the
@@ -873,9 +912,7 @@ function HomeNavbar({
         ) : null}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {conversationTitle ? (
-          null
-        ) : screenTitle ? (
+        {conversationTitle ? null : screenTitle ? (
           <div className="flex items-center">
             {screenActions ?? (
               <>
@@ -1027,6 +1064,11 @@ function HomeCanvas() {
     screenView === "preferences" ||
     screenView === "activity" ||
     screenView === "calendar" ||
+    // The three screens the rail's own sections landed on since
+    // 2026-09-14: each scrolls its own content.
+    screenView === "messages" ||
+    screenView === "inbox" ||
+    screenView === "tools" ||
     screenView === "people" ||
     screenView === "organization" ||
     screenView === "agents" ||
@@ -1343,22 +1385,26 @@ function HomeCanvas() {
               : { flex: "1 1 0%", minWidth: 0 }
           }
         >
-          {screenView !== "preferences" && screenView !== "activity" && <div className="flex flex-col">
-            <HomeNavbar
-              openWindows={windows.state.open}
-              onToggleWindow={toggleWindow}
-              conversationTitle={activeConversation?.title}
-              homeSession={
-                !!(
-                  activeConversation?.homeBriefing ||
-                  (activeConversation?.homeSetup &&
-                    !activeConversation.homeSetup.purpose)
-                )
-              }
-              conversationEmoji={agentById(activeConversation?.agentId)?.emoji}
-              screenTitle={screenTitle}
-            />
-          </div>}
+          {screenView !== "preferences" && screenView !== "activity" && (
+            <div className="flex flex-col">
+              <HomeNavbar
+                openWindows={windows.state.open}
+                onToggleWindow={toggleWindow}
+                conversationTitle={activeConversation?.title}
+                homeSession={
+                  !!(
+                    activeConversation?.homeBriefing ||
+                    (activeConversation?.homeSetup &&
+                      !activeConversation.homeSetup.purpose)
+                  )
+                }
+                conversationEmoji={
+                  agentById(activeConversation?.agentId)?.emoji
+                }
+                screenTitle={screenTitle}
+              />
+            </div>
+          )}
           {/* Figma 975:11536 — content column: pt-24px, centered 712px column,
             welcome block pinned top, ONE bar pinned bottom (pb-12px).
             A submitted prompt replaces the greeting + Needs-you canvas
@@ -1418,6 +1464,14 @@ function HomeCanvas() {
                 <CalendarScreen />
               ) : screenView === "policies" ? (
                 <PoliciesScreen />
+              ) : screenView === "artifacts" ? (
+                <ArtifactsScreen />
+              ) : screenView === "messages" ? (
+                <MessagesScreen />
+              ) : screenView === "inbox" ? (
+                <InboxScreen />
+              ) : screenView === "tools" ? (
+                <ToolsScreen />
               ) : screenView === "activity" ? (
                 <ActivityScreen />
               ) : screenView === "agents" ? (
@@ -1481,7 +1535,15 @@ function HomeCanvas() {
         {/* Clock in is the one widget that floats instead of maximizing
           (per Oskar) — its card lives outside the column, over the
           canvas, hanging from the navbar button that opened it. */}
-        {!hideWidgets && <StaticWidgets onCloseConversation={activeConversation && !activeConversation.homeBriefing ? goHome : undefined} />}
+        {!hideWidgets && (
+          <StaticWidgets
+            onCloseConversation={
+              activeConversation && !activeConversation.homeBriefing
+                ? goHome
+                : undefined
+            }
+          />
+        )}
       </div>
     </div>
   )

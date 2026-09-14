@@ -292,7 +292,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
       }}
     >
       <div
-        className="flex h-full min-h-0 w-full bg-f1-background-secondary"
+        className="f0c-surface-page flex h-full min-h-0 w-full"
         ref={root}
         data-hybrid-root
         data-mode={view ? mode : "idle"}
@@ -306,7 +306,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
           </div>
           <div data-hybrid-dock aria-hidden="true" />
           <div
-            className="bg-f1-background-secondary"
+            className="f0c-surface-page"
             data-hybrid-chat
             data-open={open && !!view}
             role={open && view ? "region" : undefined}
