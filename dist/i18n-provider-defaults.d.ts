@@ -1134,7 +1134,7 @@ export declare const defaultTranslations: {
         /** The trailing controls on a details row. */
         readonly details: {
             readonly copy: "Copy {{label}}";
-            readonly copied: "Copied";
+            readonly copied: "{{label}} copied";
             readonly copyFailed: "Could not copy";
             readonly edit: "Edit {{label}}";
             readonly saved: "{{label}} saved";
@@ -1377,9 +1377,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -1387,11 +1389,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
