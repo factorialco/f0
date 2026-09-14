@@ -305,7 +305,6 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const [localValue, setLocalValue] = useState(value)
 
     const [revealed, setRevealed] = useState(false)
-    const masked = !!maskable && !revealed
     const childIsInput = (children as React.ReactElement)?.type === "input"
 
     // Not `:focus-within`: the trailing buttons share the wrapper.
@@ -472,9 +471,20 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const isRestingValue = !!transparent && !!readonly
     const isClickableRestingValue =
       isRestingValue && !!onClickContent && !disabled
+    // Focus alone is not editing: a child that reports it while `noEdit` still
+    // has nothing to type into.
+    const beingTyped = childFocused && !noEdit
     // Nothing in the trailing area applies to a value being typed.
     const showMaskToggle =
-      !!maskable && (!!maskToggleAlwaysVisible || !childFocused)
+      !!maskable && (!!maskToggleAlwaysVisible || !beingTyped)
+    // The mask holds exactly while its eye is reachable: a value you can read
+    // neither directly nor through the toggle is a value you cannot correct.
+    // So a plain masked field opens readable and a credential field, whose eye
+    // is pinned, stays masked while you type.
+    const masked = showMaskToggle && !revealed
+    // `type="password"` draws one bullet per character, and the length is what
+    // a resting value is hiding, so at rest the dots are the value's text.
+    const masksWithDots = masked && (!childIsInput || isRestingValue)
 
     return (
       <div
@@ -576,7 +586,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             >
               {cloneElement(children as React.ReactElement, {
                 // Spread, or an `undefined` strips the child's own type.
-                ...(masked && childIsInput ? { type: "password" } : {}),
+                ...(masked && !masksWithDots ? { type: "password" } : {}),
                 onChange: handleChange,
                 onBlur: () => {
                   setChildFocused(false)
@@ -601,8 +611,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
                 id,
-                value:
-                  masked && !childIsInput ? maskedValue : (localValue ?? ""),
+                value: masksWithDots ? maskedValue : (localValue ?? ""),
                 "aria-label": label || placeholder || "no-label",
                 "aria-busy": loading,
                 "aria-disabled": noEdit,

@@ -322,14 +322,49 @@ export const MaskedValue: Story = {
       canvas.getByRole("button", { name: "Hide This is the label" })
     ).toBeInTheDocument()
 
-    // The eye stands down while the value is being typed.
-    await userEvent.click(canvas.getByRole("textbox"))
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Hide This is the label" })
+    )
+    // A password input has no `textbox` role, hence the label lookup.
+    const value = canvas.getAllByLabelText("This is the label")[0]
+    await expect(value).toHaveAttribute("type", "password")
+
+    // The eye and the mask stand down together while the value is typed:
+    // there would be no way back to the value otherwise.
+    await userEvent.click(value)
     await waitFor(() =>
       expect(canvas.queryByTestId("input-field-mask-toggle")).toBeNull()
     )
+    await expect(value).toHaveAttribute("type", "text")
     await waitFor(() =>
       expect(canvas.getByTestId("clear-button")).toBeVisible()
     )
+  },
+}
+
+export const MaskedRestingValue: Story = {
+  args: {
+    ...Default.args,
+    label: "Social security number",
+    hideLabel: true,
+    value: "084 62 4471 6",
+    masked: true,
+    readonly: true,
+    transparent: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const value = canvas.getByLabelText("Social security number")
+
+    // Password bullets are drawn one per character, and the length of a
+    // national ID is half of guessing it.
+    await expect(value).toHaveAttribute("type", "text")
+    await expect(value).toHaveValue("•".repeat(12))
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show Social security number" })
+    )
+    await expect(value).toHaveValue("084 62 4471 6")
   },
 }
 
@@ -446,6 +481,17 @@ export const Snapshot: Story = {
         clearable: false,
         value: "ada@example.com",
         masked: true,
+      },
+      {
+        ...base,
+        clearable: false,
+        icon: undefined,
+        labelIcon: undefined,
+        hideLabel: true,
+        masked: true,
+        readonly: true,
+        transparent: true,
+        value: "084 62 4471 6",
       },
       {
         ...base,

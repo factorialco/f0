@@ -52,8 +52,9 @@ export type InputInternalProps = Pick<
 
 /**
  * Attributes that ask password managers (1Password, LastPass, Bitwarden) and
- * browser autofill to ignore the field — used by `type="private"` so sensitive
- * non-credential data is never captured or suggested.
+ * browser autofill to ignore the field, so sensitive non-credential data is
+ * never captured or suggested. `type="password"` is left out: a credential is
+ * what a password manager is for.
  */
 const passwordManagerAvoidance = {
   autoComplete: "off",
@@ -85,7 +86,7 @@ const InputInternal = ({
   return (
     <ShadcnInput
       {...props}
-      {...(type === "private" ? passwordManagerAvoidance : {})}
+      {...(type === "private" || masked ? passwordManagerAvoidance : {})}
       type={localType}
       masked={maskable || masked}
       // Checking what you just typed is what a credential field's eye is for.

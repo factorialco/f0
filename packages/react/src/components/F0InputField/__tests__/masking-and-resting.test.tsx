@@ -24,7 +24,7 @@ describe("F0InputField masking", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("masks an input child as a password field and toggles it back", async () => {
+  it("masks an editable input child as a password field and toggles it back", async () => {
     const { container } = renderField({ masked: true })
 
     const input = container.querySelector("input")!
@@ -152,6 +152,120 @@ describe("F0InputField masking", () => {
     renderField({ disabled: true, masked: true })
 
     expect(screen.getByRole("button", { name: "Show Email" })).toBeDisabled()
+  })
+
+  it("opens readable, because the eye that would reveal it is gone", async () => {
+    const { container } = renderField({ masked: true })
+    const input = container.querySelector("input")!
+
+    expect(input.type).toBe("password")
+
+    input.focus()
+
+    await waitFor(() => expect(input.type).toBe("text"))
+    expect(input).toHaveValue("ada@example.com")
+  })
+
+  it("masks the value again once the caret leaves", async () => {
+    const { container } = renderField({ masked: true })
+    const input = container.querySelector("input")!
+
+    input.focus()
+    await waitFor(() => expect(input.type).toBe("text"))
+
+    input.blur()
+    await waitFor(() => expect(input.type).toBe("password"))
+  })
+
+  it("keeps a credential field masked while it is typed, since its eye stays", async () => {
+    const { container } = renderField({
+      masked: true,
+      maskToggleAlwaysVisible: true,
+    })
+    const input = container.querySelector("input")!
+
+    input.focus()
+
+    await waitFor(() => expect(input).toHaveFocus())
+    expect(input.type).toBe("password")
+    expect(screen.getByRole("button", { name: "Show Email" })).toBeVisible()
+  })
+
+  it("does not unmask a disabled field that somehow takes focus", async () => {
+    const { container } = renderField({ masked: true, disabled: true })
+    const input = container.querySelector("input")!
+
+    input.focus()
+
+    await waitFor(() => expect(input.type).toBe("password"))
+  })
+})
+
+describe("F0InputField masked resting value", () => {
+  const renderResting = (value: string) =>
+    renderField({ masked: true, readonly: true, transparent: true, value })
+
+  it("draws dots as text, not password bullets, so the length stays hidden", () => {
+    const { container } = renderResting("084 62 4471 6")
+
+    const input = container.querySelector("input")!
+    expect(input.type).toBe("text")
+    expect(input).toHaveValue("••••••••••••")
+  })
+
+  it("caps the run at twelve, so a long value cannot be counted", () => {
+    const { container } = renderResting("0".repeat(40))
+
+    expect(container.querySelector("input")).toHaveValue("•".repeat(12))
+  })
+
+  it("holds the mask and the eye, because resting is not editing", async () => {
+    const { container } = renderResting("084 62 4471 6")
+    const input = container.querySelector("input")!
+
+    // A resting value is inert; the caret goes to the eye instead.
+    await userEvent.tab()
+
+    expect(input).not.toHaveFocus()
+    expect(input).toHaveValue("••••••••••••")
+    expect(screen.getByRole("button", { name: "Show Email" })).toBeVisible()
+  })
+
+  it("shows the real value once the eye is clicked", async () => {
+    const { container } = renderResting("084 62 4471 6")
+
+    await userEvent.click(screen.getByRole("button", { name: "Show Email" }))
+
+    expect(container.querySelector("input")).toHaveValue("084 62 4471 6")
+  })
+
+  it("unmasks when the row becomes editable and masks again when it stops", async () => {
+    const Harness = ({ editing }: { editing: boolean }) => (
+      <F0InputField
+        label="Social security number"
+        value="084 62 4471 6"
+        masked
+        readonly={!editing}
+        transparent={!editing}
+        focusOnEditable
+      >
+        <input type="text" />
+      </F0InputField>
+    )
+
+    const { container, rerender } = render(<Harness editing={false} />)
+    const input = container.querySelector("input")!
+    expect(input).toHaveValue("••••••••••••")
+
+    rerender(<Harness editing />)
+
+    await waitFor(() => expect(input).toHaveValue("084 62 4471 6"))
+    expect(input.type).toBe("text")
+
+    input.blur()
+    rerender(<Harness editing={false} />)
+
+    await waitFor(() => expect(input).toHaveValue("••••••••••••"))
   })
 })
 

@@ -270,6 +270,25 @@ describe("F0TextInput", () => {
       expect(input.type).toBe("text")
     })
 
+    it("hides a masked field from password managers, the way private is", () => {
+      render(<F0TextInput label="IBAN" value="ES91 2100" masked />)
+
+      const input = screen.getAllByLabelText("IBAN")[0]
+      expect(input).toHaveAttribute("autocomplete", "off")
+      expect(input).toHaveAttribute("data-1p-ignore", "true")
+      expect(input).toHaveAttribute("data-lpignore", "true")
+      expect(input).toHaveAttribute("data-bwignore", "true")
+      expect(input).toHaveAttribute("data-form-type", "other")
+    })
+
+    it("leaves a password field to the password manager, which is the point", () => {
+      render(<F0TextInput label="Password" type="password" />)
+
+      const input = screen.getAllByLabelText("Password")[0]
+      expect(input).not.toHaveAttribute("data-1p-ignore")
+      expect(input).not.toHaveAttribute("data-lpignore")
+    })
+
     it("keeps the eye on a readonly field while dropping its clear button", () => {
       render(
         <F0TextInput

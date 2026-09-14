@@ -189,7 +189,9 @@ Three keyboard props, in the order they run on every key:
 
 It never doubles up: a `password` or `private` field already sets it, so those types show one eye, not two.
 
-The two cases part company twice. On focus, a `masked` value loses its eye while you type it, leaving the clear button alone in the trailing area, because none of a details row's trailing controls applies to a half-finished draft; `password` and `private` keep theirs, because revealing what you just typed is exactly what a credential field's eye is for. And in naming: `password` says "Show password", while `private` and a bare `masked` are named after their own label, which is what tells two of them on one page apart.
+The two cases part company twice. Under the caret, a `masked` value loses its eye and its mask together and opens readable, leaving the clear button alone in the trailing area, because none of a details row's trailing controls applies to a half-finished draft and nobody can correct a value they cannot see; `password` and `private` keep their eye and their mask, because revealing what you just typed is exactly what a credential field's eye is for. And in naming: `password` says "Show password", while `private` and a bare `masked` are named after their own label, which is what tells two of them on one page apart.
+
+`masked` also carries `type="private"`'s password-manager avoidance: `autocomplete="off"` plus the 1Password, LastPass and Bitwarden ignore attributes. A masked IBAN in a plain text field is no more a credential than a masked national ID, so neither should end up in a vault. `type="password"` keeps autofill, which is the one case where a password manager is the point.
 
 **Resting value**
 
