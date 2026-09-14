@@ -78,6 +78,7 @@ export function useFileAttachments(
     uploadFiles: onUploadFiles,
     maxFiles,
     validateFiles,
+    uploadErrorMessage: translation.ai.fileUploadError,
     onError,
   })
   const attachedFiles: AttachedFile[] = composerFiles.files.map((item) => ({

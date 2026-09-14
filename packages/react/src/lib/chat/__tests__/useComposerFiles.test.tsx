@@ -35,10 +35,14 @@ describe("useComposerFiles", () => {
   it("retains failed files and retries only the selected file", async () => {
     const uploadFiles = vi
       .fn()
-      .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(new Error("internal upload detail"))
       .mockResolvedValueOnce(["remote-one"])
     const { result } = renderHook(() =>
-      useComposerFiles<string>({ uploadFiles, onError: vi.fn() })
+      useComposerFiles<string>({
+        uploadFiles,
+        uploadErrorMessage: "Upload unavailable",
+        onError: vi.fn(),
+      })
     )
 
     await act(async () =>
@@ -47,6 +51,10 @@ describe("useComposerFiles", () => {
     expect(result.current.files.map((item) => item.status)).toEqual([
       "error",
       "error",
+    ])
+    expect(result.current.files.map((item) => item.errorMessage)).toEqual([
+      "Upload unavailable",
+      "Upload unavailable",
     ])
     const id = result.current.files[0]!.id
     await act(async () => result.current.retryFile(id))

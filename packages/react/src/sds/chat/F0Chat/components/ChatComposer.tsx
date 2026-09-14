@@ -142,6 +142,7 @@ export const ChatComposer = (): ReactNode => {
     onAdded: (item) => onFileAdded(item),
     onError: (reason) => onFileError(reason),
     releasePreviewOnReady: true,
+    uploadErrorMessage: i18n.chat.fileUploadError,
   })
   const {
     value,

@@ -23,6 +23,7 @@ export interface ComposerFilesOptions<T> {
   validateFiles?: (files: File[]) => File[]
   onAdded?: (file: ComposerFile<T>) => void
   releasePreviewOnReady?: boolean
+  uploadErrorMessage?: string
   onError: (
     reason: "too-many" | "too-large" | "upload",
     error?: unknown
@@ -37,6 +38,7 @@ export function useComposerFiles<T>({
   validateFiles,
   onAdded,
   releasePreviewOnReady = false,
+  uploadErrorMessage,
   onError,
 }: ComposerFilesOptions<T>) {
   const [files, setFiles] = useState<ComposerFile<T>[]>([])
@@ -139,8 +141,7 @@ export function useComposerFiles<T>({
                 ? {
                     ...item,
                     status: "error",
-                    errorMessage:
-                      error instanceof Error ? error.message : undefined,
+                    errorMessage: uploadErrorMessage,
                   }
                 : item
             ),
@@ -151,7 +152,14 @@ export function useComposerFiles<T>({
         }
       }
     },
-    [onError, release, releasePreviewOnReady, update, uploadFiles]
+    [
+      onError,
+      release,
+      releasePreviewOnReady,
+      update,
+      uploadErrorMessage,
+      uploadFiles,
+    ]
   )
 
   const addFiles = useCallback(
