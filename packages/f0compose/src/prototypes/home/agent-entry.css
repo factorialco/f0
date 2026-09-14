@@ -372,6 +372,13 @@
 [data-hybrid-chat] {
   background: #fafafa !important;
 }
+/* Home's canvas is the ground itself, with no sheet over it, so there the
+   content side matches the sidebars (Angel, 2026-09-14). */
+[data-hybrid-root][data-view="home"],
+[data-hybrid-root][data-view="home"] [data-hybrid-work],
+[data-hybrid-root][data-view="home"] [data-hybrid-chat] {
+  background: #f5f5f5 !important;
+}
 [data-home-panel],
 .dark [data-home-panel] {
   box-shadow: none !important;
@@ -380,7 +387,10 @@
 /* Dark: the same three tiers, rebuilt from f0's dark tokens. */
 .dark [data-home-nav],
 .dark [data-home-rail],
-.dark [data-home-panel] {
+.dark [data-home-panel],
+.dark [data-hybrid-root][data-view="home"],
+.dark [data-hybrid-root][data-view="home"] [data-hybrid-work],
+.dark [data-hybrid-root][data-view="home"] [data-hybrid-chat] {
   background: hsl(var(--neutral-0)) !important;
 }
 .dark [data-hybrid-root],

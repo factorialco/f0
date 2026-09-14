@@ -160,10 +160,25 @@ const FULL_BLEED_CSS = `
      so the wrapper follows its content instead. The wrapper has no
      stable selector; :has() on the nav root is the only hook. */
   div:has(> [data-home-nav]) { width: auto !important; padding-left: 0 !important; }
-  /* Rail and panel share the sidebar tier; the tonal step to the page is
-     the separation, so no hairline between the panel and the content. */
+  /* Rail and panel share the sidebar tier, so the hairline between THEM
+     is the only separation they get (Angel, 2026-09-14: border-secondary
+     between the first and the second sidebar). An inset shadow rather
+     than a border, so the rail's fixed 68px does not become 69. The
+     panel needs none: the tonal step to the page does that job. */
   [data-home-rail],
   [data-home-panel] {
+    background: #f5f5f5;
+  }
+  [data-home-rail] {
+    box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
+  }
+  /* Home has no white sheet — its canvas IS the ground — so the content
+     side takes the sidebar tone there and the shell reads as one surface
+     with the conversation on it. Module screens keep the page tier under
+     their sheet. */
+  body:has([data-hybrid-root][data-view="home"]) main#content,
+  [data-hybrid-root][data-view="home"],
+  [data-hybrid-root][data-view="home"] [data-hybrid-work] {
     background: #f5f5f5;
   }
   /* The split conversation panel is CONTENT, so it takes the page tier. */
@@ -184,8 +199,10 @@ const FULL_BLEED_CSS = `
   .dark [data-one-panel] {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
-  .dark [data-home-rail] {
-    box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
+  .dark body:has([data-hybrid-root][data-view="home"]) main#content,
+  .dark [data-hybrid-root][data-view="home"],
+  .dark [data-hybrid-root][data-view="home"] [data-hybrid-work] {
+    background: hsl(var(--neutral-0));
   }
   .dark [data-one-panel] {
     box-shadow: inset 1px 0 0 hsl(var(--neutral-10));
