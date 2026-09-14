@@ -5808,6 +5808,8 @@ export declare const defaultTranslations: {
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
         readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
         readonly addressLine1Placeholder: "Enter a street and number";
         readonly addressLine2Placeholder: "Enter a floor or unit";
         readonly postalCodePlaceholder: "e.g., 08001";
@@ -13036,6 +13038,7 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     className?: never;
     asList?: never;
     hideArrow?: never;
+    searchEmptyAction?: never;
     showPreview?: never;
     required?: never;
     loading?: never;
@@ -13106,6 +13109,12 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
      */
     onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
+    /**
+     * Rendered under the empty state, for the way out when the list has nothing
+     * to offer. `onCreate` draws its own action, so this is for the cases where
+     * the answer is not "create what you typed".
+     */
+    searchEmptyAction?: React.ReactNode;
     actions?: Action_2[];
     /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
     onCreate?: (value: string) => Promise<void> | void;
@@ -20955,8 +20964,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -20964,10 +20975,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

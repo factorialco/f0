@@ -1025,6 +1025,8 @@ const e = {
     noCountryResults: "No country found",
     noResults: "No addresses found",
     searchHint: "Type an address to search",
+    noResultsHelp: "Can't find an address?",
+    enterManually: "Enter it manually",
     addressLine1Placeholder: "Enter a street and number",
     addressLine2Placeholder: "Enter a floor or unit",
     postalCodePlaceholder: "e.g., 08001",
