@@ -3902,6 +3902,14 @@ export declare type DashboardChartConfig = BarChartConfig | LineChartConfig | Fu
 export declare interface DashboardChartData {
     /** Category axis labels. Required for bar/line charts. */
     categories?: string[];
+    /**
+     * Constants to draw across the plot — a peer median, a target, an average.
+     *
+     * Part of the DATA, not the config: a figure like this arrives with the
+     * values it is compared against, and changes when they do. Bar and line
+     * charts render them; every other type ignores them.
+     */
+    referenceLines?: F0DataChartReferenceLine[];
     /** X-axis category labels for heatmap charts. */
     xCategories?: string[];
     /** Y-axis category labels for heatmap charts. */
@@ -9310,6 +9318,8 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     type: "bar";
     /** One or more data series to render as bars */
     series: F0DataChartBarSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Bar orientation. @default "vertical" */
     orientation?: "vertical" | "horizontal";
     /** Stack all series into a single bar per category. @default false */
@@ -9660,6 +9670,8 @@ export declare interface F0DataChartLineProps extends F0DataChartBaseProps {
     type: "line";
     /** One or more data series to render as lines */
     series: F0DataChartLineSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Line interpolation type. @default "linear" */
     lineType?: F0DataChartLineType;
     /** Show gradient area fill below lines. @default true */
@@ -9879,6 +9891,26 @@ export declare interface F0DataChartRadarSeries {
     data: number[];
     /** Override color for this series. Must be an F0 design token name. */
     color?: ChartColorToken;
+}
+
+/**
+ * A constant drawn across the whole plot rather than per category.
+ *
+ * For a figure that does not vary with the categories — a peer median, a
+ * target, an average. Drawn as one dashed line with its label at the end, so it
+ * reads as a threshold the bars are measured against rather than as another
+ * series: a constant repeated once per category would claim to be a quantity
+ * each of them has.
+ */
+export declare interface F0DataChartReferenceLine {
+    /** Where on the value axis to draw it. */
+    value: number;
+    /** Shown at the end of the line. Omit for an unlabelled rule. */
+    label?: string;
+    /** Must be an F0 design token name. Falls back to a neutral line colour. */
+    color?: ChartColorToken;
+    /** Solid instead of dashed. @default false */
+    solid?: boolean;
 }
 
 /**
@@ -20754,12 +20786,12 @@ declare global {
 }
 
 
-declare namespace _DaytimePage {
+declare namespace _Page {
     var displayName: string;
 }
 
 
-declare namespace _Page {
+declare namespace _DaytimePage {
     var displayName: string;
 }
 
@@ -20840,8 +20872,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -20849,10 +20883,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
