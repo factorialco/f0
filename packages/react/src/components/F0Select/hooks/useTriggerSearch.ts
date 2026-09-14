@@ -145,6 +145,26 @@ export const useTriggerSearch = ({
     [onClose, open, popupElement, triggerRef]
   )
 
+  /**
+   * Tab walks into the popup's own controls; the options are reached with the
+   * arrows and are not in that walk. False when there was nothing to walk into,
+   * which leaves Tab to the browser.
+   */
+  const focusFirstPopupControl = useCallback(() => {
+    const popup = popupElement()
+    if (!popup) {
+      return false
+    }
+
+    const [control] = getSelectContentControls(popup)
+    if (!control) {
+      return false
+    }
+
+    control.focus()
+    return true
+  }, [popupElement])
+
   /** Keys that belong to the list. Everything else is the input's. */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -160,14 +180,9 @@ export const useTriggerSearch = ({
         return
       }
 
-      // Tab walks into the popup's own controls; the options are reached with
-      // the arrows and are not in that walk.
       if (event.key === "Tab" && !event.shiftKey && open) {
-        const popup = popupElement()
-        const [control] = popup ? getSelectContentControls(popup) : []
-        if (control) {
+        if (focusFirstPopupControl()) {
           event.preventDefault()
-          control.focus()
         }
         return
       }
@@ -196,12 +211,12 @@ export const useTriggerSearch = ({
       onActiveMove(isArrowDown ? "next" : "previous")
     },
     [
+      focusFirstPopupControl,
       onActiveMove,
       onBackspaceOnEmpty,
       onOpen,
       onSelectActive,
       open,
-      popupElement,
     ]
   )
 
