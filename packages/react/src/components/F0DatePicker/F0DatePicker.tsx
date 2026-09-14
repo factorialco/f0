@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { InputFieldProps } from "@/components/F0InputField"
 import {
   NavigationGranularityKey,
   resolveGranularityDefinition,
@@ -7,57 +8,78 @@ import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
 import { DateDisplay } from "./components/DateDisplay"
 import { DateInput } from "./components/DateInput"
-import { DatePickerMode, DatePickerValue, F0DatePickerProps } from "./types"
+import {
+  DatePickerMode,
+  DatePickerValue,
+  F0DatePickerProps,
+  F0DatePickerSharedProps,
+} from "./types"
+import { InputFieldInheritedProps } from "./types.internal"
 
-export function F0DatePicker({
-  onChange,
-  value,
-  presets = [],
-  granularities = ["day"],
-  minDate,
-  maxDate,
-  open = false,
-  showIcon = true,
-  displayFormat,
-  selectOnCellOnly,
-  mode = "edit",
-  onModeChange,
-  canEdit = true,
-  onRequestChange,
-  emptyLabel,
-  ...inputProps
-}: F0DatePickerProps) {
+/**
+ * The flat shape the implementation reads. The public union is what callers are
+ * held to; internally both variants are one component, so the `never`s that
+ * keep the API honest would only get in the way here.
+ */
+type F0DatePickerImplProps = F0DatePickerSharedProps & {
+  variant?: "default" | "inline"
+  open?: boolean
+  showIcon?: boolean
+  onRequestChange?: () => void
+  onModeChange?: (mode: DatePickerMode) => void
+} & Pick<InputFieldProps<string>, InputFieldInheritedProps>
+
+export function F0DatePicker(props: F0DatePickerProps) {
+  const {
+    onChange,
+    value,
+    presets = [],
+    granularities = ["day"],
+    minDate,
+    maxDate,
+    displayFormat,
+    selectOnCellOnly,
+    variant = "default",
+    onModeChange,
+    onRequestChange,
+    open = false,
+    showIcon = true,
+    ...inputProps
+  } = props as F0DatePickerImplProps
+
+  const isInline = variant === "inline"
+
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
   const [isOpen, setIsOpen] = useState(open)
-  const [currentMode, setCurrentMode] = useState<DatePickerMode>(mode)
+  const [isReading, setIsReading] = useState(isInline)
 
   useEffect(() => {
     setIsOpen(open)
   }, [open])
 
   useEffect(() => {
-    setCurrentMode(mode)
-  }, [mode])
+    setIsReading(isInline)
+  }, [isInline])
 
-  // Reading is where a "read" picker lives: editing is a detour that lasts as
+  // Reading is where an inline picker lives: editing is a detour that lasts as
   // long as the popup, so closing it puts the date back to text.
   const closePicker = useCallback(() => {
     setIsOpen(false)
-    if (mode === "read") {
-      setCurrentMode("read")
+    if (isInline) {
+      setIsReading(true)
       onModeChange?.("read")
     }
-  }, [mode, onModeChange])
+  }, [isInline, onModeChange])
 
   const startEditing = useCallback(() => {
-    setCurrentMode("edit")
+    setIsReading(false)
     onModeChange?.("edit")
     setIsOpen(true)
   }, [onModeChange])
 
   /** A date read as text is numeric (dd/MM/yyyy), and stays numeric while edited. */
   const resolvedDisplayFormat =
-    displayFormat ?? (mode === "read" ? "default" : undefined)
+    displayFormat ?? (isInline ? "default" : undefined)
 
   const i18n = useI18n()
 
@@ -163,15 +185,13 @@ export function F0DatePicker({
     }
   }, [isOpen])
 
-  if (currentMode === "read") {
+  if (isInline && isReading) {
     return (
       <DateDisplay
         label={inputProps.label}
-        hideLabel={inputProps.hideLabel}
+        placeholder={inputProps.placeholder}
         size={inputProps.size}
-        disabled={inputProps.disabled}
-        canEdit={canEdit}
-        emptyLabel={emptyLabel}
+        readonly={inputProps.readonly}
         value={granularity.toString(
           localValue?.value,
           i18n,
@@ -200,6 +220,7 @@ export function F0DatePicker({
       <DateInput
         ref={inputRef}
         {...inputProps}
+        hideLabel={isInline ? true : inputProps.hideLabel}
         value={localValue}
         granularity={granularity}
         onDateChange={handleChangeDate}

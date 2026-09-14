@@ -8,13 +8,12 @@ import { cn, focusRing } from "@/lib/utils"
 
 type DateDisplayProps = {
   label: string
-  hideLabel?: boolean
   /** The date already formatted for reading, or `""` when there is none. */
   value: string
-  emptyLabel?: string
+  placeholder?: string
   size?: InputFieldSize
-  canEdit?: boolean
-  disabled?: boolean
+  /** The date cannot be changed here, so the calendar never appears. */
+  readonly?: boolean
   onEdit: () => void
   onRequestChange?: () => void
 }
@@ -50,12 +49,10 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
   (
     {
       label,
-      hideLabel,
       value,
-      emptyLabel,
+      placeholder,
       size = "sm",
-      canEdit = true,
-      disabled,
+      readonly,
       onEdit,
       onRequestChange,
     },
@@ -64,15 +61,14 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
     const i18n = useI18n()
 
     const isEmpty = value === ""
-    const text = isEmpty ? (emptyLabel ?? i18n.date.none) : value
+    const text = isEmpty ? (placeholder ?? i18n.date.none) : value
 
     const editLabel = i18n.t("inputs.edit", { label })
     const requestChangeLabel = i18n.t("inputs.requestChange", { label })
 
-    // `disabled` means the date cannot change by any route, so it reads as text
-    // with nothing to reach — same as having neither permission nor a request.
-    const canRequestChange = !canEdit && !!onRequestChange
-    const isInteractive = !disabled && (canEdit || canRequestChange)
+    // Read-only with nothing to ask is a dead end: the date is inert text.
+    const canRequestChange = !!readonly && !!onRequestChange
+    const canEdit = !readonly
 
     const calendarIcon = getFieldInputIcon("date")
 
@@ -89,7 +85,7 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
     )
 
     const row = (() => {
-      if (!isInteractive) {
+      if (!canEdit && !canRequestChange) {
         return (
           <div
             className={cn("flex items-center gap-2 px-2", rowSizes[size])}
@@ -154,16 +150,7 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
       )
     })()
 
-    return (
-      <div ref={ref} className="flex flex-col gap-1">
-        {hideLabel ? null : (
-          <span className="text-md flex max-w-full gap-1 truncate font-medium text-f1-foreground-secondary">
-            {label}
-          </span>
-        )}
-        {row}
-      </div>
-    )
+    return <div ref={ref}>{row}</div>
   }
 )
 
