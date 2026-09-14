@@ -34,9 +34,15 @@ team.
 
 ## First level
 
-- **72px rail, 56x56 targets.** The hover/active surface moved from the inner
-  32px pill onto the button, so the whole thing — label included — is both the
-  target and the lit area. Utilities are 44x44.
+- **76px rail, 60x68 targets, 36x36 square chip.** Second pass, after Angel
+  saw the first: the target is the whole button, but what LIGHTS UP is a 1:1
+  chip around the glyph — "no es necesario que el hover area encompasse label e
+  icono". Copied off Slack's rail, which he named as the reference and which
+  measures: 70px rail, 8px top padding, 52x68 buttons 12px apart, a 36x36 icon
+  chip at radius 8 with a 20px glyph, and an 11/12 bold label 4px below. Ours is
+  76 rather than 70 because "Messages" and "Calendar" are longer than "DMs" and
+  "Later", and the items sit 8px apart rather than 12 so six sections plus pins
+  still fit a laptop viewport. Utilities use the same 36x36 chip.
 - **Files** joined the first level; it reuses the imported documents prototype,
   and its panel lists Library / Templates / Trash.
 - **Comms → Messages**, **Cal → Calendar**. Section ids are unchanged

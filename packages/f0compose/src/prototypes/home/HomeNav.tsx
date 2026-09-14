@@ -1248,23 +1248,31 @@ function RailItem({
         aria-label={label}
         aria-current={active ? "true" : undefined}
         data-icon-motion={motionKeyFor(icon)}
-        className={`f0c-pressable group flex w-full cursor-pointer flex-col items-center gap-1 rounded-xl px-1 py-2 ${
-          active
-            ? "bg-f1-background-secondary"
-            : "hover:bg-f1-background-secondary"
-        }`}
+        className="f0c-pressable group flex w-full cursor-pointer flex-col items-center gap-1 py-2"
       >
-        <span className="flex size-6 items-center justify-center">
+        {/* The tint is a 36x36 SQUARE around the glyph, not the whole
+            button (Angel, 2026-09-14). Measured off Slack's own rail,
+            which is the reference he named: 70px rail, 52x68 buttons,
+            36x36 icon chip at radius 8, a 20px glyph inside it, and an
+            11/12 label 4px below. The button stays the target — the
+            chip is only what lights up. */}
+        <span
+          className={`flex size-9 items-center justify-center rounded-lg ${
+            active
+              ? "bg-f1-background-secondary"
+              : "group-hover:bg-f1-background-secondary"
+          }`}
+        >
           {/* Every rail glyph is the SAME weight in the design (Figma
               2694:55571 — all six export as #011637, the active one
               included): `foreground/default/secondary` composites to
               rgb(99,112,132) over the rail, which is f0's `icon` DEFAULT
               token (rgb(99,110,131)), not `icon-secondary` (rgb(162,172,190))
               — that was the washed-out look Oskar flagged. Active is
-              distinguished by its background alone. */}
+              distinguished by its chip background alone. */}
           <F0Icon icon={icon} size="md" color="default" />
         </span>
-        <span className="w-full truncate text-center text-[10px] font-medium leading-3 text-f1-foreground-secondary">
+        <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
           {label}
         </span>
       </button>
@@ -1291,7 +1299,7 @@ function RailIconButton({
       aria-current={active ? "page" : undefined}
       onClick={onClick}
       data-icon-motion={motionKeyFor(icon)}
-      className={`f0c-pressable flex size-11 cursor-pointer items-center justify-center rounded-xl hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
+      className={`f0c-pressable flex size-9 cursor-pointer items-center justify-center rounded-lg hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
     >
       {/* Same token as the section items above — see RailItem. */}
       <F0Icon icon={icon} size="md" color="default" />
@@ -1451,12 +1459,14 @@ export function HomeNav() {
 
   return (
     <div ref={rootRef} data-home-nav className="flex h-full min-h-0">
-      {/* 80px icon rail — 8 + a 64px target + 8 (Angel, 2026-09-14: "no
-          tenemos problema de espacio horizontal en Factorial, 16px no nos
-          va a hacer daño"). */}
+      {/* Slack's rail geometry, which is the reference Angel named:
+          70px wide, 8px of top padding, 52x68 buttons 12px apart, and a
+          36x36 icon chip that is the only thing carrying the hover or
+          active background. 76 rather than 70 because "Messages" and
+          "Calendar" are longer words than "DMs" and "Later". */}
       <div
         data-home-rail
-        className="flex w-20 shrink-0 flex-col items-center overflow-y-auto"
+        className="flex w-[76px] shrink-0 flex-col items-center overflow-y-auto pt-2"
       >
         {/* Figma 2621:22835 — f0's AvatarCompany in its with-logo variant
             (24px). It is the entity SWITCHER since 2026-09-14: the pattern
@@ -1465,7 +1475,7 @@ export function HomeNav() {
         <div className="flex h-[60px] shrink-0 items-center justify-center">
           <CompanySwitcher />
         </div>
-        <div className="flex w-full flex-col gap-1 px-2">
+        <div className="flex w-full flex-col gap-2 px-2">
           {railSections.map((s) => (
             <RailItem
               key={s.id}
