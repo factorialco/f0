@@ -1034,7 +1034,7 @@ export const WithMultiLevelGrouping: Story = {
  * The hierarchy shape: pick a TASK, with its project and subproject as the two
  * levels of header above it.
  *
- * Two things this story exists to show, because both are easy to get wrong:
+ * Three things this story exists to show, because each is easy to get wrong:
  *
  * 1. Group by ID, label by NAME. "Backend" is a subproject of both Apollo and
  *    Zephyr — grouping by name would fuse them into one list. The `groupBy`
@@ -1047,6 +1047,10 @@ export const WithMultiLevelGrouping: Story = {
  *    chosen task reads as a bare verb once the dropdown closes. It builds that
  *    from the RECORD, so it still reads correctly for a selection whose group
  *    is not in the loaded page.
+ * 3. `hideSelector` takes the grouping picker and its direction toggle away.
+ *    The hierarchy is what this select IS, so there is nothing here for the
+ *    user to choose — and the picker offers one field, which would drop the
+ *    `thenBy` chain and flatten the tree.
  */
 const PROJECTS = [
   { id: "p1", name: "Apollo" },
@@ -1100,6 +1104,11 @@ export const WithProjectHierarchyGrouping: Story = {
     source: createDataSourceDefinition<ProjectTask>({
       grouping: {
         mandatory: true,
+        // The hierarchy is the point of this select, not a view the user picks.
+        // The selector could only take it apart: choosing a field there replaces
+        // the whole grouping, `thenBy` included, and there is no way back to
+        // project > subproject from it.
+        hideSelector: true,
         collapsible: true,
         defaultOpenGroups: true,
         groupBy: {
