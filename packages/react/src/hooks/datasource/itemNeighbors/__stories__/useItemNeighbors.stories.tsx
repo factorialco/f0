@@ -131,8 +131,9 @@ const DetailPanel = ({ withCapability }: { withCapability: boolean }) => {
           </div>
           <div className="text-sm text-f1-foreground-secondary">
             {activeEmployee?.department}
-            {neighbors?.position !== undefined &&
-              ` — ${neighbors.position} of ${neighbors.total}`}
+            {neighbors?.position !== undefined
+              ? ` — ${neighbors.position} of ${neighbors.total}`
+              : null}
           </div>
         </div>
         <div className="flex gap-2">

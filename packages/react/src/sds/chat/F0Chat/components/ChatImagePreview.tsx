@@ -103,7 +103,7 @@ export const ChatImagePreview = (): ReactNode => {
         }
       }}
     >
-      {current && (
+      {current ? (
         <DialogContent
           container={portalTarget}
           className="h-full w-full max-w-none rounded-none bg-transparent p-0 shadow-none"
@@ -170,7 +170,7 @@ export const ChatImagePreview = (): ReactNode => {
           </div>
 
           {/* Bottom band: paging + counter (only with several images). */}
-          {multiple && (
+          {multiple ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 p-3">
               <PreviewControl
                 icon={ChevronLeft}
@@ -186,9 +186,9 @@ export const ChatImagePreview = (): ReactNode => {
                 onClick={() => go(1)}
               />
             </div>
-          )}
+          ) : null}
         </DialogContent>
-      )}
+      ) : null}
     </Dialog>
   )
 }

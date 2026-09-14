@@ -76,7 +76,7 @@ const _VBarChart = <K extends ChartConfig>(
   const bars = Object.keys(dataConfig) as (keyof ChartConfig)[]
   const preparedData = prepareData<K>(data)
   const maxLabelWidth = Math.max(
-    ...preparedData.map((el) => measureTextWidth(`${el.x}`))
+    ...preparedData.map((el) => measureTextWidth(String(el.x)))
   )
   const totalCategories = bars.reduce<Record<string, number>>((acc, key) => {
     acc[key] = data.reduce((sum, item) => sum + (item.values[key] as number), 0)
@@ -106,21 +106,21 @@ const _VBarChart = <K extends ChartConfig>(
           right: label || showRatio ? 100 : 0,
         }}
       >
-        {!hideTooltip && (
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps(true)}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }
           />
-        )}
-        {!hideGrid && (
+        ) : null}
+        {!hideGrid ? (
           <CartesianGrid
             {...cartesianGridProps()}
             vertical={true}
             horizontal={false}
           />
-        )}
+        ) : null}
         <XAxis {...xAxisProps} hide={xAxis?.hide} />
         <YAxis
           {...yAxisProps}
@@ -130,41 +130,39 @@ const _VBarChart = <K extends ChartConfig>(
 
         {bars.map((key, index) => {
           return (
-            <>
-              <Bar
-                isAnimationActive={false}
-                layout="vertical"
-                key={`bar-${key}`}
-                dataKey={key}
-                fill={
-                  dataConfig[key].color
-                    ? getColor(dataConfig[key].color)
-                    : getCategoricalColor(index)
-                }
-                radius={4}
-                maxBarSize={24}
-              >
-                {(label || showRatio) && (
-                  <LabelList
-                    key={`label-{${key}}`}
-                    position="right"
-                    offset={10}
-                    className="fill-f1-foreground"
-                    fontSize={12}
-                    formatter={valueFormatter}
-                    content={
-                      showRatio ? (
-                        <CustomLabel
-                          valueFormatter={valueFormatter}
-                          total={totalCategories[key]}
-                          showLabel={label}
-                        />
-                      ) : undefined
-                    }
-                  />
-                )}
-              </Bar>
-            </>
+            <Bar
+              isAnimationActive={false}
+              layout="vertical"
+              key={`bar-${key}`}
+              dataKey={key}
+              fill={
+                dataConfig[key].color
+                  ? getColor(dataConfig[key].color)
+                  : getCategoricalColor(index)
+              }
+              radius={4}
+              maxBarSize={24}
+            >
+              {label || showRatio ? (
+                <LabelList
+                  key={`label-{${key}}`}
+                  position="right"
+                  offset={10}
+                  className="fill-f1-foreground"
+                  fontSize={12}
+                  formatter={valueFormatter}
+                  content={
+                    showRatio ? (
+                      <CustomLabel
+                        valueFormatter={valueFormatter}
+                        total={totalCategories[key]}
+                        showLabel={label}
+                      />
+                    ) : undefined
+                  }
+                />
+              ) : null}
+            </Bar>
           )
         })}
       </BarChartPrimitive>
@@ -198,7 +196,7 @@ const CustomLabel = ({
 
   return (
     <g transform={`translate(${gx},${gy + 4})`}>
-      {showLabel && (
+      {showLabel ? (
         <text
           x={0}
           textAnchor="start"
@@ -206,7 +204,7 @@ const CustomLabel = ({
         >
           {firstText}
         </text>
-      )}
+      ) : null}
       {
         <text
           x={showLabel ? firstTextWidth + 8 : 0}

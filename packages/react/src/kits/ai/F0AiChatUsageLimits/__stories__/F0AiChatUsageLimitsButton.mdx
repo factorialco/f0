@@ -1,0 +1,392 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0AiChatUsageLimitsButton.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# AI chat usage limits
+
+Shows how much of their One allowance the viewer has used, as a percentage, from
+a compact ring that opens a popover. One settings managers can also see the
+company allowance and jump to the company usage view. The component never
+mentions credits: One is sold as capacity to get work done, so usage reads as
+"30% used", "Unlimited", or an exhausted red state.
+
+## Anatomy
+
+<Canvas of={Stories.Employee} />
+
+<Controls of={Stories.Employee} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>usage</code>
+        </td>
+        <td>
+          <code>AiChatUsageLimits | null</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          The resolved usage. <code>null</code> while loading: the ring renders
+          empty and the popover shows a skeleton.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>usage.usedPercentage</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          The viewer's own allowance consumed, 0–100. Clamped; drives the ring
+          and the first row.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>usage.description</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Already-localized sub-line under the bar, e.g. "Resets in 3h 6m".
+          Sections accept the same field.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>usage.unlimited</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          No personal cap applies: the ring and the row render neutral with
+          "Unlimited".
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>usage.sections</code>
+        </td>
+        <td>
+          <code>AiChatUsageLimitsSection[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Extra rows below a divider, typically for admins. Each carries an
+          already-localized <code>label</code>, a <code>usedPercentage</code>{" "}
+          and an optional <code>unlimited</code> flag.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>usage.onSeeCompany</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Renders the "Your company" row that opens the host's company usage
+          view.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>error</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>The host failed to load usage: the popover shows an error line.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onOpenChange</code>
+        </td>
+        <td>
+          <code>(open: boolean) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Fires on open and close. Hosts refetch on open so the numbers are
+          fresh.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>trigger</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Custom popover trigger (asChild). Defaults to the usage ring button.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>side</code>
+        </td>
+        <td>
+          <code>"top" | "bottom"</code>
+        </td>
+        <td>
+          <code>"top"</code>
+        </td>
+        <td>—</td>
+        <td>
+          Side the popover opens on. <code>"top"</code> suits the composer's
+          disclaimer row; use <code>"bottom"</code> from a header.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### States
+
+<Canvas of={Stories.Admin} />
+
+<Canvas of={Stories.Exhausted} />
+
+<Canvas of={Stories.Unlimited} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Employee</td>
+        <td>A single "Personal allowance" row with a blue ring and bar.</td>
+      </tr>
+      <tr>
+        <td>Admin</td>
+        <td>
+          Adds a bottom section with the "Your company" link and the host's
+          extra rows, such as the company allowance.
+        </td>
+      </tr>
+      <tr>
+        <td>Exhausted</td>
+        <td>At 100% the ring and the bar turn red.</td>
+      </tr>
+      <tr>
+        <td>Unlimited</td>
+        <td>
+          A neutral full ring and bar, with "Unlimited" instead of a percentage.
+        </td>
+      </tr>
+      <tr>
+        <td>Loading / error</td>
+        <td>
+          A skeleton while <code>usage</code> is <code>null</code>; a single
+          error line when <code>error</code> is set.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0AiChatUsageLimitsButton when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>One chat composer</td>
+        <td>
+          Pass the <code>usageLimits</code> prop to{" "}
+          <code>F0AiChatTextArea</code>, which renders this button at the end of
+          the disclaimer row so the viewer can check their allowance without
+          leaving the conversation.
+        </td>
+      </tr>
+      <tr>
+        <td>A header that owns chat navigation</td>
+        <td>
+          Render it with <code>side="bottom"</code> next to the other header
+          controls.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Showing credit counts or a plan name</td>
+        <td>
+          <code>F0AiChatCreditsButton</code>, the credits popover with a company
+          header.
+        </td>
+      </tr>
+      <tr>
+        <td>Warning that the allowance is running out or is gone</td>
+        <td>
+          The <code>creditWarning</code> banner of <code>F0AiChatTextArea</code>
+          .
+        </td>
+      </tr>
+      <tr>
+        <td>A full usage report with history</td>
+        <td>
+          A product page built from charts; the popover is a glance, not a
+          report.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Pass percentages the host already resolved, such as 30 for an employee who used 1,500 of a 5,000 daily allowance, and refetch on open.",
+  }}
+  dont={{
+    description:
+      'Do not pass raw credit counts or build a label like "1,500 credits left" into a section: the design speaks in shares of an allowance.',
+  }}
+/>
+
+### Content best practices
+
+- Section labels come from the host and must already be localized. Reuse the
+  words of the usage page: "Company allowance", "Personal allowance".
+- Keep labels to two or three words so the row fits beside "100% used".
+
+### Behavior
+
+- WHEN <code>usage</code> is <code>null</code> → THEN the ring is empty and the popover shows a skeleton.
+- WHEN <code>error</code> is true → THEN the popover shows only the error line.
+- WHEN <code>usedPercentage</code> is 100 or more → THEN the ring and the bar turn red.
+- WHEN <code>unlimited</code> is true → THEN the ring and the bar are neutral and the value reads "Unlimited".
+- WHEN a row has a <code>description</code> → THEN it renders under the bar in secondary text.
+- WHEN <code>onSeeCompany</code> or <code>sections</code> are provided → THEN a bottom section appears below a divider.
+- WHEN the popover opens or closes → THEN <code>onOpenChange</code> fires with the new state.
+
+### Usage examples
+
+**Admin with the company allowance**
+
+<Canvas of={Stories.Admin} />
+
+**Loading and error**
+
+<Canvas of={Stories.Loading} />
+
+<Canvas of={Stories.LoadError} />
+
+## Accessibility
+
+The ring is decorative. The trigger button carries a visually hidden name that
+includes the value, for example "Personal allowance: 30% used", and exposes{" "}
+
+<code>aria-expanded</code> and <code>aria-haspopup="dialog"</code>. Each bar is
+a <code>progressbar</code> named after its row with the ARIA value attributes
+set.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>
+          Opens or closes the popover from the ring; activates the "Your
+          company" row.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Moves focus into the popover and through the "Your company" row.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Esc</kbd>
+        </td>
+        <td>Closes the popover and returns focus to the ring.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The trigger announces the row title and the current value; the ring SVG is hidden.
+- Bars announce their row label and percentage through the <code>progressbar</code> role; an unlimited bar is an image named "Unlimited".
+- The skeleton is <code>aria-busy</code> with a polite live region.

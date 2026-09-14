@@ -34,7 +34,7 @@ export function CategoryBarSection({
           hideTooltip={hideTooltip}
         />
       </div>
-      {!!helpText && (
+      {helpText ? (
         <div className={legend ? "mt-1" : "mt-2"}>
           <span
             className={cn(
@@ -45,7 +45,7 @@ export function CategoryBarSection({
             {helpText}
           </span>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

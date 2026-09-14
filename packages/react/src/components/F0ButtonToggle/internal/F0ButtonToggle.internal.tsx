@@ -265,7 +265,7 @@ export const F0ButtonToggleInternal = forwardRef<
           </div>
         </AnimatePresence>
 
-        {variant === "expanded" && (
+        {variant === "expanded" ? (
           <AnimatePresence initial={false}>
             <span
               className={cn(
@@ -276,7 +276,7 @@ export const F0ButtonToggleInternal = forwardRef<
               {localLabel}
             </span>
           </AnimatePresence>
-        )}
+        ) : null}
       </TogglePrimitive.Root>
     )
 

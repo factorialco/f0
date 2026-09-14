@@ -316,16 +316,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // Found once when the drag starts, not on every move — this runs per
       // `pointermove`. The rect is still read live, since the panel can be
       // resized mid-drag.
-      for (const chatEl of chatDropZonesRef.current) {
-        const c = chatEl.getBoundingClientRect()
-        if (
-          clientX >= c.left &&
-          clientX <= c.right &&
-          clientY >= c.top &&
-          clientY <= c.bottom
-        ) {
-          return null
-        }
+      if (isPointInsideAny(chatDropZonesRef.current, clientX, clientY)) {
+        return null
       }
 
       const rowEls = containerRef.current
@@ -342,13 +334,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
       const rects = rowEls.map((el) => el.getBoundingClientRect())
       // Nearest row band, splitting the gap between rows at its midpoint.
-      let i = rects.length - 1
-      for (let k = 0; k < rects.length - 1; k++) {
-        if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
-          i = k
-          break
-        }
-      }
+      const i = nearestRowIndex(rects, clientY)
 
       const rect = rects[i]
       const row = cur[i]
@@ -372,14 +358,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       }
 
       const cards = rowEls[i].querySelectorAll("[data-card-id]")
-      let position = row.ids.length
-      for (let c = 0; c < cards.length; c++) {
-        const cr = cards[c].getBoundingClientRect()
-        if (clientX < cr.left + cr.width / 2) {
-          position = c
-          break
-        }
-      }
+      const position = insertPositionInRow(cards, clientX, row.ids.length)
+
       return { type: "into-row", rowIdx: i, position }
     },
     []
@@ -647,7 +627,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           <div key={ri} className="relative">
             {/* Drop line before this row. The first row also gets one so an
                 item can be reordered to the very top (afterRowIdx -1). */}
-            {canDrag && <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />}
+            {canDrag ? (
+              <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />
+            ) : null}
             <div
               data-dashboard-row=""
               className={cn(
@@ -713,7 +695,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               })}
             </div>
             {/* Row resize handle — only in edit mode */}
-            {canDrag && (
+            {canDrag ? (
               <div
                 className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
                 onMouseDown={(e) => {
@@ -748,20 +730,20 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               >
                 <div className="h-1 w-16 rounded-full bg-transparent transition-colors group-hover/resize:bg-f1-foreground-tertiary" />
               </div>
-            )}
+            ) : null}
           </div>
         )
       })}
 
       {/* Drop line after the last row — reorder to the very bottom */}
-      {canDrag && (
+      {canDrag ? (
         <RowGapDropZone active={!!isNewRowTarget(displayRows.length - 1)} />
-      )}
+      ) : null}
 
       {/* Floating ghost that tracks the cursor during a pointer drag. Its
           position is written imperatively in the pointermove handler so the
           grid doesn't re-render on every mouse move. */}
-      {dragId && (
+      {dragId ? (
         <div
           ref={ghostRef}
           className="pointer-events-none fixed left-0 top-0 z-50 max-w-xs truncate rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg"
@@ -769,7 +751,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         >
           {itemMap.get(dragId)?.title ?? ""}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -861,7 +843,7 @@ function RowItem({
 
   return (
     <>
-      {showIndicatorBefore && <DropIndicator />}
+      {showIndicatorBefore ? <DropIndicator /> : null}
       <div
         ref={itemRef}
         data-card-id={id}
@@ -870,7 +852,7 @@ function RowItem({
           isDragging && "opacity-40 scale-[0.97]"
         )}
       >
-        {canDrag && (
+        {canDrag ? (
           // Pointer-based drag (not native HTML5 DnD): a `pointerdown` on the
           // grip starts a document-tracked gesture. Native drag was unusable
           // here — its ghost never tracked the cursor over a chart canvas, and
@@ -884,10 +866,10 @@ function RowItem({
           >
             <F0Icon icon={Handle} size="xs" />
           </div>
-        )}
+        ) : null}
         {children}
       </div>
-      {showIndicatorAfter && <DropIndicator />}
+      {showIndicatorAfter ? <DropIndicator /> : null}
     </>
   )
 }
@@ -923,6 +905,51 @@ function RowGapDropZone({ active }: { active: boolean }) {
 }
 
 // ─── Layout helpers ─────────────────────────────────────────────
+
+/** Whether the point is inside any of these elements, measured live. */
+function isPointInsideAny(
+  elements: Iterable<Element>,
+  clientX: number,
+  clientY: number
+): boolean {
+  for (const element of elements) {
+    const rect = element.getBoundingClientRect()
+    if (
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+/** The row whose band holds the pointer, each gap between rows split at its midpoint. */
+function nearestRowIndex(rects: DOMRect[], clientY: number): number {
+  for (let k = 0; k < rects.length - 1; k++) {
+    if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
+      return k
+    }
+  }
+  return rects.length - 1
+}
+
+/** Where in the row a drop lands: before the first card the pointer is left of. */
+function insertPositionInRow(
+  cards: ArrayLike<Element>,
+  clientX: number,
+  fallback: number
+): number {
+  for (let c = 0; c < cards.length; c++) {
+    const rect = cards[c].getBoundingClientRect()
+    if (clientX < rect.left + rect.width / 2) {
+      return c
+    }
+  }
+  return fallback
+}
 
 /**
  * Build initial rows from items.

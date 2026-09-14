@@ -23,7 +23,7 @@ type UseChatHistoryReturn = {
   threads: ChatThread[]
   isLoading: boolean
   error: string | null
-  refetch: () => void
+  refetch: () => Promise<void>
   pinnedIds: Set<string>
   /**
    * Ids of threads with an in-flight pin/unpin/delete request. Use it to show a

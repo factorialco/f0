@@ -630,7 +630,7 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
             </div>
 
             {/* Goal indicator — bottom half when player scores, top half when AI scores */}
-            {phase === "scored" && lastScorer && (
+            {phase === "scored" && lastScorer ? (
               <div
                 className={cn(
                   "pointer-events-none absolute left-4 flex items-center",
@@ -641,16 +641,16 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
                   {translations.ai.pong.goal}
                 </span>
               </div>
-            )}
+            ) : null}
 
             {/* Game over overlay */}
-            {phase === "gameover" && endMessage && (
+            {phase === "gameover" && endMessage ? (
               <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center bg-f1-special-page/60 backdrop-blur-sm">
                 <span className="text-2xl font-semibold text-f1-foreground">
                   {endMessage}
                 </span>
               </div>
-            )}
+            ) : null}
 
             {/* Confetti canvas */}
             <canvas

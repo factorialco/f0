@@ -34,9 +34,7 @@ export const Footer = (props: FooterProps) => {
   }
 
   const toPromise = (onClick: () => void | Promise<void>) => {
-    return new Promise((resolve) => {
-      resolve(onClick())
-    })
+    return Promise.resolve(onClick())
   }
 
   const renderPrimaryAction = () => {
@@ -109,24 +107,25 @@ export const Footer = (props: FooterProps) => {
             : "justify-end"
         )}
       >
-        {secondaryActions.length > 0 &&
-          secondaryActions.map((action) => (
-            <ButtonInternal
-              key={action.value ?? action.label}
-              block={props.variant === "notification"}
-              label={action.label}
-              onClick={async () => {
-                await toPromise(action.onClick)
-                if (action.closeOnClick) {
-                  props.onClose()
-                }
-              }}
-              variant="outline"
-              icon={action.icon}
-              disabled={action.disabled}
-              loading={action.loading}
-            />
-          ))}
+        {secondaryActions.length > 0
+          ? secondaryActions.map((action) => (
+              <ButtonInternal
+                key={action.value ?? action.label}
+                block={props.variant === "notification"}
+                label={action.label}
+                onClick={async () => {
+                  await toPromise(action.onClick)
+                  if (action.closeOnClick) {
+                    props.onClose()
+                  }
+                }}
+                variant="outline"
+                icon={action.icon}
+                disabled={action.disabled}
+                loading={action.loading}
+              />
+            ))
+          : null}
         {renderPrimaryAction()}
       </div>
     </div>

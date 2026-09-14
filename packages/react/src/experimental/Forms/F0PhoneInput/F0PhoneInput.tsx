@@ -243,7 +243,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
           disabled && "cursor-not-allowed"
         )}
       >
-        {!hideLabel && label && (
+        {!hideLabel && label ? (
           <Label
             label={label}
             required={required}
@@ -252,7 +252,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
             className="min-w-0 flex-1"
             disabled={disabled}
           />
-        )}
+        ) : null}
         <div
           className={cn(
             "pointer-events-auto",
@@ -299,14 +299,14 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
             aria-invalid={effectiveStatus?.type === "error" || undefined}
             aria-busy={loading || undefined}
           />
-          {(showClear || loading) && (
+          {showClear || loading ? (
             <div
               className={cn(
                 "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
                 size === "md" && "pr-[7px]"
               )}
             >
-              {showClear && (
+              {showClear ? (
                 <button
                   className={cn(
                     "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
@@ -323,14 +323,14 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
                 >
                   <F0Icon icon={CrossedCircle} color="default" size="md" />
                 </button>
-              )}
-              {loading && (
+              ) : null}
+              {loading ? (
                 <div className="pointer-events-none flex h-6 w-6 items-center justify-center">
                   <Spinner size="small" className="mt-[1px]" />
                 </div>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <InputMessages status={effectiveStatus} />
       </div>

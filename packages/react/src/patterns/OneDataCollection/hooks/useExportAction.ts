@@ -184,6 +184,7 @@ async function fetchAllRecords<
     let currentPage = 1
 
     while (allRecords.length < MAX_EXPORT_ROWS) {
+      // oxlint-disable-next-line no-await-in-loop -- the previous response says whether there is another page
       const result = await resolveResult(
         fetchFn({
           ...baseParams,
@@ -212,6 +213,7 @@ async function fetchAllRecords<
     let cursor: string | null = null
 
     while (allRecords.length < MAX_EXPORT_ROWS) {
+      // oxlint-disable-next-line no-await-in-loop -- the previous response says whether there is another page
       const result = await resolveResult(
         fetchFn({
           ...baseParams,

@@ -15,7 +15,7 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
         aria-label={i18n.graph.controls.navigation}
         className="flex flex-col items-center gap-2"
       >
-        {onFocusUser && (
+        {onFocusUser ? (
           <F0Button
             variant="outline"
             size="md"
@@ -24,7 +24,7 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
             hideLabel
             onClick={onFocusUser}
           />
-        )}
+        ) : null}
 
         <F0Button
           variant="outline"

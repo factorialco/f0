@@ -69,7 +69,7 @@ export function CardActions({
       // (used when the card is interactive via onClick instead of a link).
       onClick={(e) => e.stopPropagation()}
     >
-      {secondaryActions && (
+      {secondaryActions ? (
         <div className="flex w-full flex-col gap-md sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
           {Array.isArray(secondaryActions) ? (
             secondaryActions.map((action, index) => (
@@ -98,9 +98,9 @@ export function CardActions({
             </F0Link>
           )}
         </div>
-      )}
+      ) : null}
 
-      {primaryAction && (
+      {primaryAction ? (
         <div className="w-full sm:w-fit [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center">
           <F0Button
             label={primaryAction.label}
@@ -114,7 +114,7 @@ export function CardActions({
             data-testid="primary-button"
           />
         </div>
-      )}
+      ) : null}
     </CardFooter>
   )
 

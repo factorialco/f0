@@ -2,10 +2,12 @@ import { ReactNode } from "react"
 import { TranslationsType } from "@/lib/providers/i18n"
 import {
   CalendarMode,
+  CalendarSelection,
   CalendarView,
   DateRange,
   DateRangeComplete,
   DateRangeString,
+  OptionalCalendarSelection,
   WeekStartsOn,
 } from "../types"
 
@@ -43,17 +45,17 @@ export interface GranularityDefinition {
   label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode
   // Format the date to a date range with dates as string
   toRangeString: (
-    date: Date | DateRange | undefined | null,
+    date: OptionalCalendarSelection,
     i18n: TranslationsType,
     format?: DateStringFormat
   ) => DateRangeString
   // Convert the date to a date range (e.g for day granularity, this will be the start and end of the day)
-  toRange: <T extends Date | DateRange | undefined | null>(
+  toRange: <T extends OptionalCalendarSelection>(
     date: T
   ) => T extends Date | DateRange ? DateRangeComplete : T
   // Format the date to a string (e.g W12 2025 -> W13 2025)
   toString: (
-    date: Date | DateRange | undefined | null,
+    date: OptionalCalendarSelection,
     i18n: TranslationsType,
     format?: DateStringFormat,
     locale?: string
@@ -76,8 +78,8 @@ export interface GranularityDefinition {
   // Render the calendar view (this is only used in the Calendar component to render the view internally, in other component use the `calendarView` prop to pass it to the Calendar component)
   render: (renderProps: {
     mode: CalendarMode
-    selected: Date | DateRange | null
-    onSelect: (date: Date | DateRange | null) => void
+    selected: CalendarSelection
+    onSelect: (date: CalendarSelection) => void
     month: Date
     onMonthChange: (date: Date) => void
     motionDirection: number

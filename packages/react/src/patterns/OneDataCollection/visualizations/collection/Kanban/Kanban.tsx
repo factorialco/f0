@@ -25,6 +25,8 @@ import type {
 import { KanbanBoard } from "./KanbanBoard"
 import { KanbanCollectionProps } from "./types"
 
+type ItemCount = number | undefined
+
 const isInfiniteScrollPaginationInfo = (
   paginationInfo: PaginationInfo | undefined | null
 ): paginationInfo is InfiniteScrollPaginatedResponse<unknown> => {
@@ -303,7 +305,7 @@ export const KanbanCollection = <
             itemCount?: (
               groupId: unknown,
               filters: unknown
-            ) => number | undefined | Promise<number | undefined>
+            ) => ItemCount | Promise<ItemCount>
           }
         >
       | undefined
@@ -534,7 +536,7 @@ export const KanbanCollection = <
                     onOpenChange={(open) => setGroupOpen(board.key, open)}
                   />
                   <AnimatePresence>
-                    {(!collapsible || openGroups[board.key]) && (
+                    {!collapsible || openGroups[board.key] ? (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -560,7 +562,7 @@ export const KanbanCollection = <
                           loading={kanbanLoading}
                         />
                       </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
                 </div>
               )

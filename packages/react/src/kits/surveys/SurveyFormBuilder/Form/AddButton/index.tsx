@@ -88,7 +88,7 @@ export const AddButton = () => {
               </div>
             </DropdownMenuItem>
           ))}
-          {datasetKeys.length > 0 && (
+          {datasetKeys.length > 0 ? (
             <>
               <DropdownMenuSeparator />
               {datasetKeys.map((dk) => {
@@ -101,7 +101,9 @@ export const AddButton = () => {
                   <DropdownMenuSub key={dk}>
                     <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
                       <div className="flex w-full flex-row items-center gap-2">
-                        {entry && <F0Icon icon={entry.icon} color="default" />}
+                        {entry ? (
+                          <F0Icon icon={entry.icon} color="default" />
+                        ) : null}
                         <span className="flex-1 text-base font-medium">
                           {entry?.label ?? dk}
                         </span>
@@ -109,7 +111,7 @@ export const AddButton = () => {
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                       <DropdownMenuSubContent>
-                        {isQuestionTypeAllowed("dropdown-single") && (
+                        {isQuestionTypeAllowed("dropdown-single") ? (
                           <DropdownMenuItem
                             onClick={() =>
                               handleAddNewQuestion("dropdown-single", dk)
@@ -122,8 +124,8 @@ export const AddButton = () => {
                               </span>
                             </div>
                           </DropdownMenuItem>
-                        )}
-                        {isQuestionTypeAllowed("dropdown-multi") && (
+                        ) : null}
+                        {isQuestionTypeAllowed("dropdown-multi") ? (
                           <DropdownMenuItem
                             onClick={() =>
                               handleAddNewQuestion("dropdown-multi", dk)
@@ -136,14 +138,14 @@ export const AddButton = () => {
                               </span>
                             </div>
                           </DropdownMenuItem>
-                        )}
+                        ) : null}
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
                 )
               })}
             </>
-          )}
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

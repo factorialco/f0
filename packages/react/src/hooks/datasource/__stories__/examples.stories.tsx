@@ -81,8 +81,8 @@ const createMockDataAdapter = () =>
 
       if (cursor) {
         filteredUsers = filteredUsers.slice(
-          parseInt(cursor),
-          parseInt(cursor) + (perPage ?? 10)
+          parseInt(cursor, 10),
+          parseInt(cursor, 10) + (perPage ?? 10)
         )
       }
 
@@ -265,7 +265,7 @@ const GroupedExample = () => {
               </span>
             </button>
 
-            {openGroups[group.key] && (
+            {openGroups[group.key] ? (
               <div
                 style={{
                   padding: "12px",
@@ -309,7 +309,7 @@ const GroupedExample = () => {
                   </div>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         ))}
       </div>
@@ -387,7 +387,7 @@ const SelectableExample = () => {
           </strong>
         </label>
 
-        {selectedItems.size > 0 && (
+        {selectedItems.size > 0 ? (
           <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
             <button
               onClick={() => {
@@ -422,7 +422,7 @@ const SelectableExample = () => {
               Export Selected
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -464,7 +464,7 @@ const SelectableExample = () => {
               >
                 {user.status}
               </span>
-              {!user.canBeSelected && (
+              {!user.canBeSelected ? (
                 <span
                   style={{
                     marginLeft: "8px",
@@ -474,7 +474,7 @@ const SelectableExample = () => {
                 >
                   (Cannot be selected)
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         ))}
@@ -610,7 +610,7 @@ const CompleteExample = () => {
           </div>
         </div>
 
-        {selectedItems.size > 0 && (
+        {selectedItems.size > 0 ? (
           <div style={{ display: "flex", gap: "8px" }}>
             <button
               onClick={() => {
@@ -645,7 +645,7 @@ const CompleteExample = () => {
               Export Selected
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Groups */}
@@ -726,7 +726,7 @@ const CompleteExample = () => {
                 </div>
               </div>
 
-              {openGroups[group.key] && (
+              {openGroups[group.key] ? (
                 <div
                   style={{
                     padding: "12px",
@@ -777,7 +777,7 @@ const CompleteExample = () => {
                         >
                           {user.status}
                         </span>
-                        {!user.canBeSelected && (
+                        {!user.canBeSelected ? (
                           <span
                             style={{
                               marginLeft: "8px",
@@ -787,12 +787,12 @@ const CompleteExample = () => {
                           >
                             (Cannot be selected)
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
           )
         })}

@@ -44,15 +44,15 @@ export const TableSettings = ({
 
   const usesExplicitColumnLocking =
     lockedColumnIds !== undefined || !!onLockedColumnIdsChange
-  const { columnsWithStatus, savedOrder, managedLockedColumnIds } = useColumns(
+  const { columnsWithStatus, savedOrder, managedLockedColumnIds } = useColumns({
     originalColumns,
     frozenColumns,
-    visualizationSettings,
+    settings: visualizationSettings,
     allowSorting,
     allowHiding,
     lockedColumnIds,
-    usesExplicitColumnLocking
-  )
+    usesExplicitColumnLocking,
+  })
 
   const items = useMemo(() => {
     const visibleUnlockedIds = new Set(

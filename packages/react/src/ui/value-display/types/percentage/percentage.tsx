@@ -34,8 +34,7 @@ export const PercentageCell = (
     return (
       <span
         className={cn(
-          "text-f1-foreground",
-          isPlaceholder && "text-f1-foreground-secondary",
+          "text-f1-foreground text-f1-foreground-secondary",
           meta.visualization === "table" && tableDisplayClassNames.text
         )}
         data-cell-type="percentage"

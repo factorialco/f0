@@ -51,10 +51,9 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
     if (isMultiple) {
       const multiProps = props as CardSelectableMultipleProps<T>
       return (multiProps.value ?? []).includes(itemValue)
-    } else {
-      const singleProps = props as CardSelectableSingleProps<T>
-      return singleProps.value === itemValue
     }
+    const singleProps = props as CardSelectableSingleProps<T>
+    return singleProps.value === itemValue
   }
 
   // Determine the appropriate group role

@@ -213,11 +213,11 @@ export function DashboardItemFilters<
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         />
       </PopoverTrigger>
-      {appliedCount && (
+      {appliedCount ? (
         <span id={`${id}-status`} className="sr-only">
           {appliedFilterLabel} ({appliedCount})
         </span>
-      )}
+      ) : null}
       <PopoverContent
         ref={contentRef}
         aria-label={i18n.filters.label}

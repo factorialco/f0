@@ -34,9 +34,9 @@ const _Await = <T,>({
             setResolvedValue(value)
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           if (!cancelled) {
-            setError(error)
+            setError(error instanceof Error ? error : new Error(String(error)))
           }
         })
         .finally(() => {
@@ -47,11 +47,10 @@ const _Await = <T,>({
       return () => {
         cancelled = true
       }
-    } else {
-      setResolvedValue(resolve)
-      setError(null)
-      setIsPending(false)
     }
+    setResolvedValue(resolve)
+    setError(null)
+    setIsPending(false)
   }, [resolve])
 
   if (isPending) {

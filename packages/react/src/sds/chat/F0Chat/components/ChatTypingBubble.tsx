@@ -106,8 +106,8 @@ export const ChatTypingBubble = ({
       animate={leaving ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.14, ease: EASE_OUT_SWIFT }}
     >
-      {isGroup &&
-        (users.length > 1 ? (
+      {isGroup ? (
+        users.length > 1 ? (
           // Several people typing: stacked avatar list, capped at 3 with a +N.
           <F0AvatarList
             type="person"
@@ -127,7 +127,8 @@ export const ChatTypingBubble = ({
               }
             }
           />
-        ))}
+        )
+      ) : null}
       {/* The point only belongs where the avatar is — in a DM there's nothing
           beside the bubble for it to aim at (see `bubbleCornerClass`). */}
       <div

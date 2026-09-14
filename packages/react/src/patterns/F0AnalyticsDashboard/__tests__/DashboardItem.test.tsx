@@ -196,11 +196,11 @@ describe("DashboardItem — description action", () => {
             data-quote={pendingQuote?.text ?? ""}
             data-open={String(open)}
           />
-          {onCapture && (
+          {onCapture ? (
             <button type="button" onClick={() => onCapture(pendingQuote)}>
               Capture pending quote
             </button>
-          )}
+          ) : null}
         </>
       )
     }

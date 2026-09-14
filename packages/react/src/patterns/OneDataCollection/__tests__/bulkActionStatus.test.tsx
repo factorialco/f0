@@ -566,7 +566,7 @@ describe("OneDataCollection bulk-action status", () => {
 
     // Bar should be dismissed and ALL selection cleared (including the new row).
     await waitFor(() => {
-      expect(queryArchiveButtons().length).toBe(0)
+      expect(queryArchiveButtons()).toHaveLength(0)
     })
 
     vi.useRealTimers()

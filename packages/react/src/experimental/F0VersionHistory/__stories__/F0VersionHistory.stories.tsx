@@ -92,7 +92,9 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => {
-    const [activeId, setActiveId] = useState<string | "current">("current")
+    const [activeId, setActiveId] = useState<"current" | (string & {})>(
+      "current"
+    )
 
     const versionsWithHandlers = mockVersions.map((version) => ({
       ...version,

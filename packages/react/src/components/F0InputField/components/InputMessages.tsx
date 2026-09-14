@@ -46,12 +46,12 @@ const InputMessages = ({ status }: InputMessagesProps) => {
   return (
     messages.length > 0 && (
       <div className="flex gap-1">
-        {icon && (
+        {icon ? (
           <F0Icon
             icon={icon}
             color={statuses[status.type].iconColor || "currentColor"}
           />
-        )}
+        ) : null}
         <ul className="list-none">
           {messages.map((message) => (
             <li

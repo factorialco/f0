@@ -278,7 +278,7 @@ export function FormCard({
         showButton: isActive,
       }}
     >
-      {visibleFields.length > 0 && !isActive && (
+      {visibleFields.length > 0 && !isActive ? (
         <div className="-mx-3 flex w-full flex-col overflow-hidden pb-1">
           <DetailsItemsList
             details={visibleFields.map((field) => ({
@@ -291,7 +291,7 @@ export function FormCard({
             tableView
           />
         </div>
-      )}
+      ) : null}
     </F0CanvasCard>
   )
 }

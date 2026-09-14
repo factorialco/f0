@@ -26,7 +26,7 @@ export const DeltaCell = (args: DeltaCellValue) => {
     <div className="flex items-center gap-1 pt-0.5">
       <F0Icon
         icon={icon}
-        color={status == "positive" ? "positive" : "critical"}
+        color={status === "positive" ? "positive" : "critical"}
       />
       <span className="text-f1-foreground font-normal">{args.label}</span>
     </div>

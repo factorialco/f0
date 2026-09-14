@@ -258,27 +258,27 @@ export function DashboardItem({
               <h3 className="text-base font-medium text-f1-foreground">
                 {title}
               </h3>
-              {info && (
+              {info ? (
                 <div className="flex shrink-0 items-center text-f1-foreground-secondary">
                   <InfoHint info={info} />
                 </div>
-              )}
+              ) : null}
             </div>
-            {description && (
+            {description ? (
               <p className="text-base text-f1-foreground-secondary">
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
-          {(itemFilters || hasAskOne) && (
+          {itemFilters || hasAskOne ? (
             <div className={actionsClassName}>
-              {itemFilters && (
+              {itemFilters ? (
                 <DashboardItemFilters
                   {...itemFilters}
                   onOpenChange={setIsFiltersOpen}
                 />
-              )}
-              {hasAskOne && (
+              ) : null}
+              {hasAskOne ? (
                 <DropdownMenu
                   open={isDropdownOpen}
                   onOpenChange={handleDropdownOpenChange}
@@ -305,9 +305,9 @@ export function DashboardItem({
                     {askOneMenuItem}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           <OneEmptyState
@@ -358,24 +358,24 @@ export function DashboardItem({
             >
               {title}
             </OneEllipsis>
-            {info && (
+            {info ? (
               <div className="flex shrink-0 items-center text-f1-foreground-secondary">
                 <InfoHint info={info} />
               </div>
-            )}
+            ) : null}
           </div>
-          {(description || descriptionAction) && (
+          {description || descriptionAction ? (
             // Baseline-aligned row so the link sits on the description's own
             // line; the text keeps its own truncation, the link never shrinks.
             <div className="flex items-baseline gap-1">
-              {description && (
+              {description ? (
                 <OneEllipsis className="text-base text-f1-foreground-secondary">
                   {description}
                 </OneEllipsis>
-              )}
-              {descriptionAction && (
+              ) : null}
+              {descriptionAction ? (
                 <>
-                  {description && (
+                  {description ? (
                     // Separator, not content: hidden from the accessibility tree
                     // so the description and the action read as two things rather
                     // than one sentence with a stray character in it.
@@ -385,7 +385,7 @@ export function DashboardItem({
                     >
                       ·
                     </span>
-                  )}
+                  ) : null}
                   <button
                     type="button"
                     onClick={descriptionAction.onClick}
@@ -394,18 +394,18 @@ export function DashboardItem({
                     {descriptionAction.label}
                   </button>
                 </>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <div className={actionsClassName}>
-          {itemFilters && (
+          {itemFilters ? (
             <DashboardItemFilters
               {...itemFilters}
               onOpenChange={setIsFiltersOpen}
             />
-          )}
-          {hasFullscreen && (
+          ) : null}
+          {hasFullscreen ? (
             <ButtonInternal
               label={
                 isFullscreen
@@ -419,8 +419,8 @@ export function DashboardItem({
               compact
               onClick={() => onFullscreenChange?.(!isFullscreen)}
             />
-          )}
-          {showMenu && (
+          ) : null}
+          {showMenu ? (
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={handleDropdownOpenChange}
@@ -451,7 +451,7 @@ export function DashboardItem({
                   </div>
                 ) : (
                   <>
-                    {hasChartTypes && (
+                    {hasChartTypes ? (
                       <div className="mb-1 flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
                         <OneEllipsis className="text-base font-medium text-f1-foreground-tertiary">
                           {translations.ai.dashboardItem.chartType}
@@ -476,8 +476,8 @@ export function DashboardItem({
                           fullWidth
                         />
                       </div>
-                    )}
-                    {hasExplanation && (
+                    ) : null}
+                    {hasExplanation ? (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onSelect={(e) => {
@@ -493,11 +493,11 @@ export function DashboardItem({
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                    )}
+                    ) : null}
 
                     {askOneMenuItem}
 
-                    {hasDownloads && (
+                    {hasDownloads ? (
                       <DropdownMenuGroup>
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
@@ -516,9 +516,9 @@ export function DashboardItem({
                                   onClick={action.onClick}
                                 >
                                   <div className="flex w-full flex-row items-center gap-2">
-                                    {action.icon && (
+                                    {action.icon ? (
                                       <F0Icon icon={action.icon} />
-                                    )}
+                                    ) : null}
                                     <span className="flex-1">
                                       {action.label}
                                     </span>
@@ -529,8 +529,8 @@ export function DashboardItem({
                           </DropdownMenuPortal>
                         </DropdownMenuSub>
                       </DropdownMenuGroup>
-                    )}
-                    {hasDelete && (
+                    ) : null}
+                    {hasDelete ? (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => {
@@ -549,12 +549,12 @@ export function DashboardItem({
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                    )}
+                    ) : null}
                   </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          ) : null}
         </div>
       </div>
       <div className={cn("flex-1", !fitContent && "min-h-0")}>

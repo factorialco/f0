@@ -224,9 +224,9 @@ export const BaseQuestion = ({
             {answering ? (
               <div className="w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold text-f1-foreground">
                 {title || titlePlaceholder}
-                {required && (
+                {required ? (
                   <span className="text-f1-foreground-critical"> *</span>
-                )}
+                ) : null}
               </div>
             ) : (
               <>
@@ -245,7 +245,7 @@ export const BaseQuestion = ({
                 />
                 <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
                   <span className="opacity-0">{title || titlePlaceholder}</span>
-                  {required && (
+                  {required ? (
                     <span
                       className={cn(
                         "text-f1-foreground-critical",
@@ -255,12 +255,12 @@ export const BaseQuestion = ({
                       {" "}
                       *
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </>
             )}
           </FrozenFieldNotice>
-          {!answering && locked && (
+          {!answering && locked ? (
             // Blocked question: a static lock sits where the actions "⋯" menu
             // would be, signalling the card is predefined and can't be edited.
             // Hovering just the lock (not the whole card) reveals why.
@@ -301,8 +301,8 @@ export const BaseQuestion = ({
                 />
               )}
             </div>
-          )}
-          {!disabled && !answering && !locked && (
+          ) : null}
+          {!disabled && !answering && !locked ? (
             <div
               className={cn(
                 "opacity-0 group-hover/question:opacity-100",
@@ -320,7 +320,7 @@ export const BaseQuestion = ({
                 hiddenActions={hiddenActions}
               />
             </div>
-          )}
+          ) : null}
         </div>
         {answering ? (
           description ? (
@@ -350,7 +350,7 @@ export const BaseQuestion = ({
         ) : null}
       </div>
       {children}
-      {answering && (
+      {answering ? (
         <FormMessage
           className="-mt-2"
           fallback={
@@ -359,8 +359,8 @@ export const BaseQuestion = ({
               : t("forms.validation.invalidType")
           }
         />
-      )}
-      {!disabled && !answering && !locked && (
+      ) : null}
+      {!disabled && !answering && !locked ? (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",
@@ -381,7 +381,7 @@ export const BaseQuestion = ({
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-80">
-              {!isWithinSection && (
+              {!isWithinSection ? (
                 <>
                   <DropdownMenuItem onClick={handleAddNewSection}>
                     <div className="flex w-full flex-row items-center gap-2">
@@ -393,7 +393,7 @@ export const BaseQuestion = ({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
-              )}
+              ) : null}
               {regularTypes.map((qt) => (
                 <DropdownMenuItem
                   key={qt.questionType}
@@ -407,7 +407,7 @@ export const BaseQuestion = ({
                   </div>
                 </DropdownMenuItem>
               ))}
-              {datasetKeys.length > 0 && (
+              {datasetKeys.length > 0 ? (
                 <>
                   <DropdownMenuSeparator />
                   {datasetKeys.map((dk) => {
@@ -420,9 +420,9 @@ export const BaseQuestion = ({
                       <DropdownMenuSub key={dk}>
                         <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
                           <div className="flex w-full flex-row items-center gap-2">
-                            {entry && (
+                            {entry ? (
                               <F0Icon icon={entry.icon} color="default" />
-                            )}
+                            ) : null}
                             <span className="flex-1 text-base font-medium">
                               {entry?.label ?? dk}
                             </span>
@@ -430,7 +430,7 @@ export const BaseQuestion = ({
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent>
-                            {isQuestionTypeAllowed("dropdown-single") && (
+                            {isQuestionTypeAllowed("dropdown-single") ? (
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleAddNewQuestion("dropdown-single", dk)
@@ -445,8 +445,8 @@ export const BaseQuestion = ({
                                   </span>
                                 </div>
                               </DropdownMenuItem>
-                            )}
-                            {isQuestionTypeAllowed("dropdown-multi") && (
+                            ) : null}
+                            {isQuestionTypeAllowed("dropdown-multi") ? (
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleAddNewQuestion("dropdown-multi", dk)
@@ -461,18 +461,18 @@ export const BaseQuestion = ({
                                   </span>
                                 </div>
                               </DropdownMenuItem>
-                            )}
+                            ) : null}
                           </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                       </DropdownMenuSub>
                     )
                   })}
                 </>
-              )}
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      )}
+      ) : null}
     </div>
   )
 

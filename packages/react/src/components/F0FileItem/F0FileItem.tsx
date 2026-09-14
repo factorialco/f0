@@ -94,8 +94,8 @@ const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
         >
           {file.name}
         </OneEllipsis>
-        {hasActions &&
-          (singleAction ? (
+        {hasActions ? (
+          singleAction ? (
             <F0Button
               label={singleAction.label}
               size={buttonSizeMap[size]}
@@ -111,7 +111,8 @@ const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
               icon={Ellipsis}
               size={buttonSizeMap[size]}
             />
-          ))}
+          )
+        ) : null}
       </div>
     )
   }

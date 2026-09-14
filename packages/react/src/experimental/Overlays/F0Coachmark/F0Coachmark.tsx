@@ -231,7 +231,7 @@ const CoachmarkPanel = ({
       {/* Under the panel and over everything else. Rendered from here rather
           than by the provider so the two always agree on which element is lit:
           the panel points at `target`, and so does the hole. */}
-      {overlay && (
+      {overlay ? (
         <CoachmarkSpotlight
           target={target}
           container={container}
@@ -240,7 +240,7 @@ const CoachmarkPanel = ({
             onOutsideInteraction?.()
           }}
         />
-      )}
+      ) : null}
       <PopoverContent
         ref={contentRef}
         container={container}
@@ -351,7 +351,7 @@ const CoachmarkPanel = ({
                 className="flex-shrink-0"
               />
             </div>
-            {description && (
+            {description ? (
               // One level down from the title, which keeps the panel's own
               // colour. Same pairing F0Toast uses for title vs description.
               <p
@@ -360,16 +360,16 @@ const CoachmarkPanel = ({
               >
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
           {/* `ml-auto` on the action rather than `justify-end` on the row, so
               the action stays right aligned whether or not a step is present. */}
           <div className="flex flex-row items-center gap-3">
-            {step && (
+            {step ? (
               <p className="text-f1-foreground-inverse-secondary">
                 {step.current}/{step.total}
               </p>
-            )}
+            ) : null}
             <ButtonInternal
               variant="outline"
               label={label}
@@ -378,7 +378,7 @@ const CoachmarkPanel = ({
             />
           </div>
         </div>
-        {arrow && !centred && (
+        {arrow && !centred ? (
           <PopoverArrow asChild width={ARROW_WIDTH} height={ARROW_HEIGHT}>
             {/* The fill uses the panel's own surface tokens, alpha included, so
                 both composite over the same backdrop to the same colour. It is
@@ -392,7 +392,7 @@ const CoachmarkPanel = ({
               />
             </svg>
           </PopoverArrow>
-        )}
+        ) : null}
       </PopoverContent>
     </Popover>
   )

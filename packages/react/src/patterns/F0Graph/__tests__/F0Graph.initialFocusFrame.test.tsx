@@ -104,7 +104,7 @@ describe("F0Graph — initial focus frame is measurement-independent", () => {
       </div>
     )
     settle()
-    expect(mockReactFlow.setCenter.mock.calls.length).toBe(afterEntry)
+    expect(mockReactFlow.setCenter.mock.calls).toHaveLength(afterEntry)
   })
 
   it("still frames when a re-render churns the node set before the settle delay", () => {

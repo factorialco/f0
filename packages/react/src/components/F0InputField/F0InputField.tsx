@@ -184,7 +184,7 @@ export type InputFieldProps<T> = {
   onClickChildren?: () => void
   /** Receives the click, so a caller can tell where in the field it landed. */
   onClickContent?: (event: React.MouseEvent) => void
-  value?: T | undefined
+  value?: T
   onChange?: (value: T) => void
   size?: InputFieldSize
   /* @deprecated Use state (with type error)instead */
@@ -459,7 +459,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         )}
         ref={ref}
       >
-        {((!hideLabel && label) || (maxLength && !hideMaxLength)) && (
+        {(!hideLabel && label) || (maxLength && !hideMaxLength) ? (
           <div
             className={cn(
               "flex max-w-full items-center",
@@ -470,7 +470,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               className={cn("flex min-w-0 flex-1 flex-row gap-4")}
               data-testid="input-field-top"
             >
-              {!hideLabel && label && (
+              {!hideLabel && label ? (
                 <Label
                   label={label}
                   required={required}
@@ -479,15 +479,15 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   className="min-w-0 flex-1"
                   disabled={disabled}
                 />
-              )}
-              {maxLength && !hideMaxLength && !noEdit && (
+              ) : null}
+              {maxLength && !hideMaxLength && !noEdit ? (
                 <div className="text-right text-f1-foreground-secondary">
                   {lengthProvider(localValue)}/{maxLength}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
         <div
           className={cn(
             "relative h-fit transition-all",
@@ -514,7 +514,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             className="pointer-events-auto relative flex h-full w-full min-w-0 flex-1"
             onClick={handleClickContent}
           >
-            {(icon || avatar) && (
+            {icon || avatar ? (
               <div
                 data-slot="icon"
                 className={cn(
@@ -522,17 +522,17 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   size === "md" && "left-3 top-[9px]"
                 )}
               >
-                {icon && (
+                {icon ? (
                   <F0Icon
                     onClick={handleClickContent}
                     icon={icon}
                     color="default"
                   />
-                )}
-                {avatar && <F0Avatar avatar={avatar} size="xs" />}
+                ) : null}
+                {avatar ? <F0Avatar avatar={avatar} size="xs" /> : null}
               </div>
-            )}
-            {showValueSlot && (
+            ) : null}
+            {showValueSlot ? (
               <div
                 data-slot="value"
                 className={cn(
@@ -548,7 +548,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               >
                 {valueSlot}
               </div>
-            )}
+            ) : null}
             <div
               onClick={handleClickChildren}
               className="w-full min-w-0 flex-1"
@@ -600,7 +600,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             <div
               data-slot="placeholder"
               className={cn(
-                "pointer-events-none absolute left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
+                // `line-clamp-1` used to sit here, but it sets `display` and
+                // loses to `flex`, so a placeholder longer than the field
+                // wrapped onto a second line and spilled out of it. The child
+                // truncates instead.
+                "pointer-events-none absolute inset-x-0 top-[1px] z-10 flex flex-1 justify-start overflow-hidden px-3 text-f1-foreground-secondary transition-opacity",
                 !canGrow && "bottom-0",
                 canGrow && "items-start",
                 (icon || avatar) && "pl-8",
@@ -618,9 +622,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               aria-hidden="true"
               title={placeholder}
             >
-              {placeholder}
+              <span className="min-w-0 truncate">{placeholder}</span>
             </div>
-            {(clearable || hasAppend || loading) && (
+            {clearable || hasAppend || loading ? (
               <div
                 className={cn(
                   "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
@@ -628,9 +632,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   "relative"
                 )}
               >
-                {clearable && !noEdit && (
+                {clearable && !noEdit ? (
                   <AnimatePresence initial={hasSomethingToClear}>
-                    {hasSomethingToClear && (
+                    {hasSomethingToClear ? (
                       <motion.button
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -655,15 +659,15 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                           size="md"
                         />
                       </motion.button>
-                    )}
+                    ) : null}
                   </AnimatePresence>
-                )}
+                ) : null}
 
-                {hasAppend && (
+                {hasAppend ? (
                   <div className="flex min-h-6 min-w-6 items-center justify-center self-center">
                     {append}
-                    {appendTag && <AppendTag text={appendTag} />}
-                    {buttonToggle && (
+                    {appendTag ? <AppendTag text={appendTag} /> : null}
+                    {buttonToggle ? (
                       <F0ButtonToggle
                         label={buttonToggle.label}
                         icon={buttonToggle.icon}
@@ -672,12 +676,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         onSelectedChange={buttonToggle.onChange}
                         size="sm"
                       />
-                    )}
+                    ) : null}
                   </div>
-                )}
+                ) : null}
 
                 <AnimatePresence>
-                  {loading && (
+                  {loading ? (
                     <div
                       className={cn(
                         "pointer-events-none flex h-6 w-6 items-center justify-center",
@@ -700,10 +704,10 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                     >
                       <Spinner size="small" className="mt-[1px]" />
                     </div>
-                  )}
+                  ) : null}
                 </AnimatePresence>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         <InputMessages status={status} />

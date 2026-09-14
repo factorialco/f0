@@ -39,9 +39,9 @@ const PageLayoutContentBlockComponent = ({
           {title}
         </TitleTag>
 
-        {description && (
+        {description ? (
           <p className="text-sm text-f1-foreground-secondary">{description}</p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex-1">{children}</div>

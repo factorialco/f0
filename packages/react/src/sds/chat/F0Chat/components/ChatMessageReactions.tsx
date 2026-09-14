@@ -98,14 +98,14 @@ export const ChatMessageReactions = ({
           </motion.span>
         ))}
       </AnimatePresence>
-      {canReact && (
+      {canReact ? (
         <ChatEmojiPickerButton
           size="md"
           variant="outline"
           label={i18n.chat.react}
           onSelect={(emoji) => react(emoji, "inlinePicker")}
         />
-      )}
+      ) : null}
     </div>
   )
 }

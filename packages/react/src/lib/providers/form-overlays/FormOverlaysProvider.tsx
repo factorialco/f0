@@ -57,9 +57,9 @@ export const FormOverlaysProvider = ({
 
   return (
     <>
-      {isRenderer &&
-        typeof document !== "undefined" &&
-        createPortal(<FormOverlays items={items} />, document.body)}
+      {isRenderer && typeof document !== "undefined"
+        ? createPortal(<FormOverlays items={items} />, document.body)
+        : null}
       {children}
     </>
   )

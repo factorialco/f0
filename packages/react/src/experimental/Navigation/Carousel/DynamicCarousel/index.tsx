@@ -123,7 +123,7 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
             )}
       </div>
 
-      {canScrollPrev && (
+      {canScrollPrev ? (
         <ButtonInternal
           size="lg"
           compact
@@ -137,9 +137,9 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
           label="Previous"
           hideLabel
         ></ButtonInternal>
-      )}
+      ) : null}
 
-      {canScrollNext && (
+      {canScrollNext ? (
         <ButtonInternal
           size="lg"
           variant={"outline"}
@@ -153,7 +153,7 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
           label="Next"
           hideLabel
         ></ButtonInternal>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -299,29 +299,29 @@ export function F0VideoPlayerInternal({
         // immediately (otherwise the opacity gate would hide the poster too).
         style={{ opacity: video.videoLoaded || poster ? 1 : 0 }}
       >
-        {captions.trackSrc && (
+        {captions.trackSrc ? (
           <track
             kind="captions"
             src={captions.trackSrc}
             label={t("videoPlayer.captions")}
             default={false}
           />
-        )}
-        {audioDescription.trackSrc && (
+        ) : null}
+        {audioDescription.trackSrc ? (
           <track
             kind="descriptions"
             src={audioDescription.trackSrc}
             label={t("videoPlayer.audioDescription")}
             default={false}
           />
-        )}
+        ) : null}
       </video>
 
       {/* Center play affordance while paused, so a still frame / poster reads
           as a video without hovering to reveal the controls. Visual only
           (`aria-hidden`, not focusable): the labelled play control lives in the
           controls bar and Space toggles playback on the focused region. */}
-      {!video.isPlaying && (
+      {!video.isPlaying ? (
         <div
           aria-hidden
           data-video-play-overlay
@@ -336,14 +336,14 @@ export function F0VideoPlayerInternal({
             <F0Icon icon={SolidPlay} size="lg" color="#fff" />
           </button>
         </div>
-      )}
+      ) : null}
 
       {/* Description text shown as a caption for deaf/HoH viewers when captions
           are on — the visual counterpart of the spoken audio description. Drawn
           here (top, distinct italic style) since browsers don't render
           `kind="descriptions"` tracks; `aria-hidden` because screen-reader users
           get the spoken description instead. */}
-      {captions.showing && audioDescription.activeCue && (
+      {captions.showing && audioDescription.activeCue ? (
         <div
           aria-hidden
           className="dark pointer-events-none absolute inset-x-0 top-0 z-[2] flex justify-center p-3"
@@ -355,7 +355,7 @@ export function F0VideoPlayerInternal({
             {audioDescription.activeCue}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Polite live region so play/pause via keyboard shortcuts is announced. */}
       <span className="sr-only" aria-live="polite">
@@ -364,7 +364,7 @@ export function F0VideoPlayerInternal({
 
       {/* Render the controls only once the video is ready — avoids focusable
           controls living inside an `aria-hidden` subtree before load. */}
-      {video.videoLoaded && (
+      {video.videoLoaded ? (
         <Controls
           isPlaying={video.isPlaying}
           currentTime={video.currentTime}
@@ -403,7 +403,7 @@ export function F0VideoPlayerInternal({
           onSeek={seek}
           download={download}
         />
-      )}
+      ) : null}
     </div>
   )
 }

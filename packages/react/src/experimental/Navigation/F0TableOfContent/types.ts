@@ -20,6 +20,8 @@ export type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     : TOCItem<NextDepth<Depth>>[]
 }
 
+export type DropPosition = "before" | "after" | "inside"
+
 export type TOCItemAction =
   | {
       label: string

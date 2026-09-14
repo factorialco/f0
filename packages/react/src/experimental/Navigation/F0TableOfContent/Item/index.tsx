@@ -7,7 +7,7 @@ import { motion } from "motion/react"
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useDraggable } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
-import { TOCItem } from "../types"
+import { DropPosition, TOCItem } from "../types"
 import { PrimitiveItem } from "./PrimitiveItem"
 
 interface TOCItemProps {
@@ -19,9 +19,9 @@ interface TOCItemProps {
   isExpanded?: boolean
   onToggleExpanded?: (id: string) => void
   children?: ReactNode
-  onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragOver?: (itemId: string, position: DropPosition) => void
   onDragLeave?: () => void
-  onDrop?: (itemId: string, position: "before" | "after" | "inside") => void
+  onDrop?: (itemId: string, position: DropPosition) => void
   canDropInside?: boolean
   currentParentId?: string | null
   draggedItemId?: string | null
@@ -116,7 +116,6 @@ export function Item({
           setOverEdge(null)
           setIsOverInside(false)
           lastReportedStateRef.current = null
-          return
         }
       },
       onDrag: ({ self, source }) => {
@@ -191,7 +190,7 @@ export function Item({
       },
       onDrop: ({ self }) => {
         const data = self.data as { position?: string }
-        let position: "before" | "after" | "inside" = "after"
+        let position: DropPosition
 
         if (data.position === "inside") {
           position = "inside"

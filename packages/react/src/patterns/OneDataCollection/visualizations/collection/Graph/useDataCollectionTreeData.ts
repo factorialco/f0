@@ -106,10 +106,10 @@ const resolveFetchResult = <R>(result: unknown): Promise<R[]> => {
             subscription.unsubscribe()
           }
         },
-        error: (err) => {
+        error: (err: unknown) => {
           if (!settled) {
             settled = true
-            reject(err)
+            reject(err instanceof Error ? err : new Error(String(err)))
           }
         },
         complete: () => {
@@ -206,8 +206,10 @@ const collectSubtreeIds = <R extends RecordType>(
       frontier.push(id)
     }
   }
-  for (let cursor = 0; cursor < frontier.length; cursor++) {
-    for (const childId of childrenByParent.get(frontier[cursor]) ?? []) {
+  // Children are pushed to `frontier` while it is iterated, so the walk visits
+  // the tree level by level.
+  for (const parentId of frontier) {
+    for (const childId of childrenByParent.get(parentId) ?? []) {
       if (collected.has(childId)) {
         continue
       }
@@ -527,6 +529,7 @@ export function useDataCollectionTreeData<
           break
         }
 
+        // oxlint-disable-next-line no-await-in-loop -- each level loads in parallel; the next level comes from its results
         const results = await Promise.all(
           loadable.map((node) =>
             loadChildrenOf(node.id).then((children) => ({ children }))
@@ -641,7 +644,7 @@ export function useDataCollectionTreeData<
           )
           setNodes((prev) => mergeHydratedData(prev, hydrated))
         })
-        .catch((cause) => {
+        .catch((cause: unknown) => {
           const dataError = toDataError(cause)
           setError(dataError)
           callbacksRef.current.onLoadError(dataError)
@@ -764,6 +767,7 @@ export function useDataCollectionTreeData<
           break
         }
 
+        // oxlint-disable-next-line no-await-in-loop -- each level loads in parallel; the next level comes from its results
         const childArrays = await Promise.all(
           loadable.map((node) => loadChildrenOf(node.id))
         )

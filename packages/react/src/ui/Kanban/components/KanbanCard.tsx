@@ -128,7 +128,7 @@ export function KanbanCard<T = unknown>({
       onClick={handleClick}
     >
       <CardInternal {...props} disableOverlayLink={draggable} />
-      {props.link && (
+      {props.link ? (
         <F0Link
           ref={linkRef}
           href={props.link}
@@ -140,8 +140,8 @@ export function KanbanCard<T = unknown>({
         >
           &nbsp;
         </F0Link>
-      )}
-      {showIndicator && (forcedEdge ?? overEdge) && (
+      ) : null}
+      {showIndicator && (forcedEdge ?? overEdge) ? (
         <>
           {(() => {
             const activeEdge = (forcedEdge ?? overEdge) as "top" | "bottom"
@@ -158,7 +158,7 @@ export function KanbanCard<T = unknown>({
             )
           })()}
         </>
-      )}
+      ) : null}
     </div>
   )
 }

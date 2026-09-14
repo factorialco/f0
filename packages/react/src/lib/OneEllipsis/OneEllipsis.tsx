@@ -36,7 +36,7 @@ const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   }
   if (lines > 1) {
     // For multi-line, check if content height exceeds line-clamp height
-    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight)
+    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight, 10)
     return element.scrollHeight > lineHeight * lines
   }
   // For single line, check if content width exceeds container width

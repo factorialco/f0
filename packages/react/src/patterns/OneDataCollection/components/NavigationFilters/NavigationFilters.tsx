@@ -24,24 +24,25 @@ export const NavigationFilters = <
 }: NavigationFiltersProps<NavigationFilters>) => {
   return (
     <>
-      {navigationFilters &&
-        Object.entries(navigationFilters).map(([key, filter]) => {
-          const filterDef = navigationFilterTypes[filter.type]
-          return (
-            <React.Fragment key={key}>
-              {filterDef.render({
-                filter: filter,
-                value: currentNavigationFilters[key]!,
-                onChange: (value) => {
-                  onChangeNavigationFilters({
-                    ...currentNavigationFilters,
-                    [key]: value,
-                  })
-                },
-              })}
-            </React.Fragment>
-          )
-        })}
+      {navigationFilters
+        ? Object.entries(navigationFilters).map(([key, filter]) => {
+            const filterDef = navigationFilterTypes[filter.type]
+            return (
+              <React.Fragment key={key}>
+                {filterDef.render({
+                  filter: filter,
+                  value: currentNavigationFilters[key]!,
+                  onChange: (value) => {
+                    onChangeNavigationFilters({
+                      ...currentNavigationFilters,
+                      [key]: value,
+                    })
+                  },
+                })}
+              </React.Fragment>
+            )
+          })
+        : null}
     </>
   )
 }

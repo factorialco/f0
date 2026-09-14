@@ -242,6 +242,7 @@ describe("Breadcrumbs", async () => {
     })
   })
 
+  // Skipped since eaed0ace4 without a recorded reason. Un-skip or document.
   it.skip("renders select type breadcrumb correctly", async () => {
     const breadcrumbs = [
       { id: "home", label: "Home", href: "/" },

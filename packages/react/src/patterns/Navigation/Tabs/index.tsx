@@ -87,13 +87,13 @@ export const BaseTabs: React.FC<TabsProps> = ({
               asChild
             >
               <Link role="link" {...props}>
-                {props.variant === "upsell" && (
+                {props.variant === "upsell" ? (
                   <F0Icon
                     icon={Upsell}
                     size="md"
                     className="mr-1 text-[hsl(var(--promote-50))]"
                   />
-                )}
+                ) : null}
                 {label}
               </Link>
             </TabNavigationLink>

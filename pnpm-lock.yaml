@@ -14,11 +14,6 @@ overrides:
   '@factorialco/f0-react-native>react-dom': 19.2.3
   '@factorialco/f0-react-native>react-test-renderer': 19.2.3
 
-patchedDependencies:
-  react-virtuoso@4.18.11:
-    hash: 569197f359405782672f6be75b86ca9e056899d093310ad38389369e98676812
-    path: patches/react-virtuoso@4.18.11.patch
-
 importers:
 
   .:
@@ -464,8 +459,8 @@ importers:
         specifier: ^2.7.1
         version: 2.7.1(@types/react@18.3.18)(react@18.3.1)
       react-virtuoso:
-        specifier: ^4.18.10
-        version: 4.18.11(patch_hash=569197f359405782672f6be75b86ca9e056899d093310ad38389369e98676812)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.18.13
+        version: 4.18.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: ^2.12.7
         version: 2.15.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -677,6 +672,9 @@ importers:
       eslint-plugin-import:
         specifier: ^2.32.0
         version: 2.32.0(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-react:
+        specifier: ^7.37.5
+        version: 7.37.5(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-react-refresh:
         specifier: ^0.4.26
         version: 0.4.26(eslint@9.39.2(jiti@2.6.1))
@@ -10852,8 +10850,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-virtuoso@4.18.11:
-    resolution: {integrity: sha512-Qeeq9vqa5seCxACvzbQTUeq3s2/Bu+VlwOMF0jfy3E/ZKHLiXWwJpXBhv2rckqYkvm1XRVFLCBMCmqCU8JNEJg==}
+  react-virtuoso@4.18.13:
+    resolution: {integrity: sha512-M4kP7zbV7JmLrnJYs0X2FBA8gnNlHisSYuKMyeJVYtWz31CAJeP57dgPJzfneUdKDKmL9SiqvcBQ32si8CfQSQ==}
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
@@ -14286,7 +14284,7 @@ snapshots:
       getenv: 2.0.0
       glob: 13.0.6
       resolve-from: 5.0.0
-      semver: 7.7.3
+      semver: 7.8.5
       slash: 3.0.0
       slugify: 1.6.6
       xcode: 3.0.1
@@ -14329,7 +14327,7 @@ snapshots:
       require-from-string: 2.0.2
       resolve-from: 5.0.0
       resolve-workspace-root: 2.0.1
-      semver: 7.7.3
+      semver: 7.8.5
       slugify: 1.6.6
       sucrase: 3.35.1
     transitivePeerDependencies:
@@ -24399,7 +24397,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.18
 
-  react-virtuoso@4.18.11(patch_hash=569197f359405782672f6be75b86ca9e056899d093310ad38389369e98676812)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-virtuoso@4.18.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

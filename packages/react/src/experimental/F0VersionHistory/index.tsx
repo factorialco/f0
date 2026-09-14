@@ -29,13 +29,13 @@ function _F0VersionHistory({
 
       <ScrollArea className="h-full flex-1">
         <div className="flex flex-col gap-1">
-          {currentVersion && (
+          {currentVersion ? (
             <CurrentVersionIndicator
               title={currentVersion.title}
               onClick={currentVersion.onClick}
               isActive={activeVersionId === "current"}
             />
-          )}
+          ) : null}
           {versions.map((version) => (
             <VersionItem
               key={version.id}

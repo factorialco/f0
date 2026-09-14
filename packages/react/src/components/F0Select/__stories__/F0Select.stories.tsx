@@ -336,15 +336,17 @@ const meta: Meta = {
             {isMultiplePaginated ? (
               <>
                 <p>{getSelectionDisplay()}</p>
-                {selectionStatus && (
+                {selectionStatus ? (
                   <p>Total: {selectionStatus.selectedCount}</p>
-                )}
-                {getFiltersDisplay() && <p>Filters: {getFiltersDisplay()}</p>}
+                ) : null}
+                {getFiltersDisplay() ? (
+                  <p>Filters: {getFiltersDisplay()}</p>
+                ) : null}
               </>
             ) : (
               <>
                 Selected: {JSON.stringify(truncatedValue, null, 2)}
-                {args.multiple && ` - Total: ${localValue?.length ?? 0}`}
+                {args.multiple ? ` - Total: ${localValue?.length ?? 0}` : null}
               </>
             )}
           </div>
@@ -722,25 +724,23 @@ export const WithSearchBox: Story = {
   },
   render: (args) => {
     return (
-      <>
-        <F0Select
-          showSearchBox
-          label="Select a theme"
-          onChange={fn()}
-          searchFn={(option, searchValue) => {
-            console.log("searchFn", option, searchValue)
-            return (
-              option.type === "separator" ||
-              !searchValue ||
-              option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-              option.description
-                ?.toLowerCase()
-                .includes(searchValue.toLowerCase())
-            )
-          }}
-          options={args.options}
-        />
-      </>
+      <F0Select
+        showSearchBox
+        label="Select a theme"
+        onChange={fn()}
+        searchFn={(option, searchValue) => {
+          console.log("searchFn", option, searchValue)
+          return (
+            option.type === "separator" ||
+            !searchValue ||
+            option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+            option.description
+              ?.toLowerCase()
+              .includes(searchValue.toLowerCase())
+          )
+        }}
+        options={args.options}
+      />
     )
   },
 }
@@ -834,13 +834,13 @@ export const WithDataSourceGrouping: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
           workplace: {
             name: "Workplace",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.workplace === groupId).length,
           },
@@ -917,7 +917,7 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
@@ -973,7 +973,7 @@ export const WithManyCollapsibleGroups: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },

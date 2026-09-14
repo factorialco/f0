@@ -150,19 +150,20 @@ export function ChatMentionPopover({
         )
       })}
 
-      {showMemberSkeleton &&
-        Array.from({ length: 3 }, (_, i) => (
-          <div
-            key={`skeleton-${i}`}
-            className="flex items-center gap-2 p-2"
-            aria-hidden="true"
-          >
-            <Skeleton className="size-5 shrink-0 rounded-full" />
-            <Skeleton
-              className={cn("h-4 rounded", i === 1 ? "w-24" : "w-32")}
-            />
-          </div>
-        ))}
+      {showMemberSkeleton
+        ? Array.from({ length: 3 }, (_, i) => (
+            <div
+              key={`skeleton-${i}`}
+              className="flex items-center gap-2 p-2"
+              aria-hidden="true"
+            >
+              <Skeleton className="size-5 shrink-0 rounded-full" />
+              <Skeleton
+                className={cn("h-4 rounded", i === 1 ? "w-24" : "w-32")}
+              />
+            </div>
+          ))
+        : null}
     </div>
   )
 }

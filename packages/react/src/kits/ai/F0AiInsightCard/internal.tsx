@@ -52,7 +52,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
 
     return (
       <div className="relative">
-        {selected && (
+        {selected ? (
           <>
             <div
               data-testid="selected-border"
@@ -73,7 +73,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               )}
             />
           </>
-        )}
+        ) : null}
         <div
           ref={ref}
           role={onClick ? "button" : undefined}

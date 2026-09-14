@@ -127,7 +127,7 @@ describe("Fix 2 — renderNode stabilization", () => {
     )
 
     // No crash — stable ref pattern handles the update
-    expect(true).toBe(true)
+    expect(screen.getByRole("tree", { name: "Graph view" })).toBeInTheDocument()
   })
 })
 

@@ -128,7 +128,7 @@ const _TabNavigationLink = React.forwardRef<
             )}
           >
             {children}
-            {active && !secondary && (
+            {active && !secondary ? (
               <motion.div
                 layoutId="underline"
                 className="absolute inset-x-0 -bottom-3 h-px bg-f1-background-inverse"
@@ -138,7 +138,7 @@ const _TabNavigationLink = React.forwardRef<
                   duration: 0.5,
                 }}
               />
-            )}
+            ) : null}
           </span>
         ))}
       </NavigationMenuPrimitives.Link>

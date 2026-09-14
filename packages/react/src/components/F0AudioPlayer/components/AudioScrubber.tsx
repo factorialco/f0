@@ -98,7 +98,7 @@ export const AudioScrubber = ({
           style={{ width: `${percent}%` }}
         />
       </SliderTrack>
-      {!isDisabled && (
+      {!isDisabled ? (
         <span
           aria-hidden
           style={{ left: knobLeft }}
@@ -108,7 +108,7 @@ export const AudioScrubber = ({
             "group-has-[:focus-visible]:ring-1 group-has-[:focus-visible]:ring-f1-special-ring group-has-[:focus-visible]:ring-offset-1"
           )}
         />
-      )}
+      ) : null}
 
       <SliderThumb
         aria-label={i18n.audioPlayer.seek}

@@ -130,7 +130,7 @@ export const SortAndHideSettings = ({
 
   return (
     <div className="relative -mr-2 flex flex-col gap-2">
-      {onAddColumn && (
+      {onAddColumn ? (
         <div className="flex">
           <ButtonInternal
             variant="ghost"
@@ -140,7 +140,7 @@ export const SortAndHideSettings = ({
             onClick={onAddColumn}
           />
         </div>
-      )}
+      ) : null}
       {/*
         Cap the scrollable viewport (not the ScrollArea root) at ~8 rows.
         Radix's viewport is `height: 100%`, which does not resolve against a
@@ -164,7 +164,7 @@ export const SortAndHideSettings = ({
           allowSorting={allowSorting}
           allowHiding={allowHiding}
         />
-        {showToggleAll && (
+        {showToggleAll ? (
           <div className="sticky bottom-0 flex justify-between bg-f1-background/80 p-2 pl-0 backdrop-blur-sm">
             <F0Button
               variant="outline"
@@ -179,7 +179,7 @@ export const SortAndHideSettings = ({
               onClick={() => toggleAll(false)}
             />
           </div>
-        )}
+        ) : null}
       </ScrollArea>
     </div>
   )

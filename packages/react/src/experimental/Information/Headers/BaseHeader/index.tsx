@@ -47,6 +47,11 @@ interface BaseHeaderProps {
       }
     | AvatarVariant
 
+  /**
+   * Markdown. Inline formatting only — a link out to the resource's source of
+   * truth is the case this exists for. Clamped to two lines behind a "show all"
+   * toggle.
+   */
   description?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]
@@ -149,7 +154,7 @@ export function BaseHeader({
             !description && "md:items-center"
           )}
         >
-          {avatar && (
+          {avatar ? (
             <div className="flex items-start">
               <F0Avatar
                 avatar={{
@@ -160,7 +165,7 @@ export function BaseHeader({
                 size="xl"
               />
             </div>
-          )}
+          ) : null}
           <div className="flex flex-col gap-1">
             <span
               className={cn(
@@ -170,18 +175,18 @@ export function BaseHeader({
             >
               {title}
             </span>
-            {description && <Description description={description} />}
+            {description ? <Description description={description} /> : null}
           </div>
         </div>
 
-        {allMetadata.length > 0 && (
+        {allMetadata.length > 0 ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:hidden">
             <Metadata items={allMetadata} rowGap={metadataRowGap} />
           </div>
-        )}
+        ) : null}
 
         <div className="flex w-full shrink-0 flex-col gap-x-2 gap-y-3 md:hidden">
-          {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) && (
+          {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) ? (
             <div className="w-full md:hidden [&>*]:w-full">
               <F0Button
                 label={primaryAction.label}
@@ -194,8 +199,8 @@ export function BaseHeader({
                 loading={primaryAction.loading}
               />
             </div>
-          )}
-          {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) && (
+          ) : null}
+          {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) ? (
             <div className="w-full md:hidden [&>*]:w-full">
               <F0ButtonDropdown
                 items={primaryAction.items}
@@ -208,7 +213,7 @@ export function BaseHeader({
                 loading={primaryAction.loading}
               />
             </div>
-          )}
+          ) : null}
 
           {visibleSecondaryActions.map((action, index) => (
             <Fragment key={getSecondaryActionKey(action, index)}>
@@ -241,12 +246,12 @@ export function BaseHeader({
             </Fragment>
           ))}
 
-          {visibleOtherActions.length > 0 && (
+          {visibleOtherActions.length > 0 ? (
             <div className="w-full [&>*]:w-full [&_button]:w-full">
               <MobileDropdown items={visibleOtherActions} />
             </div>
-          )}
-          {onClose && (
+          ) : null}
+          {onClose ? (
             <div className="w-full md:hidden [&>*]:w-full">
               <F0Button
                 label={i18n.actions.close}
@@ -256,15 +261,15 @@ export function BaseHeader({
                 onClick={onClose}
               />
             </div>
-          )}
+          ) : null}
         </div>
 
         <div className="-m-1 hidden w-fit shrink-0 flex-wrap items-center gap-x-2 gap-y-2 p-1 md:flex md:overflow-x-auto">
-          {visibleOtherActions.length > 0 && (
+          {visibleOtherActions.length > 0 ? (
             <div>
               <Dropdown items={visibleOtherActions} />
             </div>
-          )}
+          ) : null}
           {visibleSecondaryActions.map((action, index) => (
             <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="hidden md:block">
@@ -295,10 +300,10 @@ export function BaseHeader({
             </Fragment>
           ))}
           {isPrimaryActionVisible &&
-            (hasSecondaryActions || hasOtherActions) && (
-              <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-            )}
-          {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) && (
+          (hasSecondaryActions || hasOtherActions) ? (
+            <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+          ) : null}
+          {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) ? (
             <div className="hidden md:block">
               <F0Button
                 label={primaryAction.label}
@@ -310,8 +315,8 @@ export function BaseHeader({
                 loading={primaryAction.loading}
               />
             </div>
-          )}
-          {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) && (
+          ) : null}
+          {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) ? (
             <div className="hidden md:block">
               <F0ButtonDropdown
                 items={primaryAction.items}
@@ -324,8 +329,8 @@ export function BaseHeader({
                 loading={primaryAction.loading}
               />
             </div>
-          )}
-          {onClose && (
+          ) : null}
+          {onClose ? (
             <>
               <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
               <div className="hidden md:block">
@@ -338,14 +343,14 @@ export function BaseHeader({
                 />
               </div>
             </>
-          )}
+          ) : null}
         </div>
       </div>
-      {allMetadata.length > 0 && (
+      {allMetadata.length > 0 ? (
         <div className="hidden flex-wrap items-center gap-x-3 gap-y-1 md:block">
           <Metadata items={allMetadata} rowGap={metadataRowGap} />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

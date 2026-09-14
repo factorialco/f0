@@ -100,16 +100,16 @@ const _F0Alert = ({
               </div>
               <div className="flex flex-col gap-0.5">
                 <p className={titleVariants({ variant })}>{title}</p>
-                {description && (
+                {description ? (
                   <p className="text-base text-f1-foreground-secondary">
                     {description}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
-            {(action || link) && (
+            {action || link ? (
               <div className="flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0">
-                {link && (
+                {link ? (
                   <F0Link
                     href={link.href}
                     target="_blank"
@@ -118,8 +118,8 @@ const _F0Alert = ({
                   >
                     {link.label}
                   </F0Link>
-                )}
-                {action && (
+                ) : null}
+                {action ? (
                   <F0Button
                     label={action.label}
                     variant="outline"
@@ -128,15 +128,15 @@ const _F0Alert = ({
                     disabled={action.disabled}
                     type="button"
                   />
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
           </div>
-          {onClose && (
+          {onClose ? (
             <div className="flex-shrink-0 self-start @xs:self-center">
               <CloseButton onClose={onClose} />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

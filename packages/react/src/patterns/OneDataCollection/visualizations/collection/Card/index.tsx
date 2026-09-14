@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
 import {
   F0Card,
@@ -12,7 +11,7 @@ import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
+import { useGroups } from "@/hooks/datasource/useGroups"
 import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -273,18 +272,7 @@ const GroupCards = <
         const metadata = getMetadata(item, cardProperties)
 
         return (
-          <motion.div
-            key={index}
-            layout
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            custom={index}
-            variants={getAnimationVariants({
-              delay: 0.02,
-              duration: 0.3,
-            })}
-          >
+          <div key={index}>
             <F0Card
               key={index}
               title={title(item)}
@@ -307,7 +295,7 @@ const GroupCards = <
               metadata={metadata}
               fullHeight={true}
             />
-          </motion.div>
+          </div>
         )
       })}
     </CardGrid>
@@ -450,31 +438,30 @@ export const CardCollection = <
           </CardGrid>
         ) : (
           <>
-            {data?.type === "grouped" &&
-              data.groups.map((group) => {
-                return (
-                  <>
-                    <GroupHeader
-                      label={group.label}
-                      itemCount={group.itemCount}
-                      onOpenChange={(open) => setGroupOpen(group.key, open)}
-                      open={openGroups[group.key]}
-                      selectable={!!source.selectable}
-                      showOpenChange={collapsible}
-                      select={
-                        groupAllSelectedStatus[group.key]?.checked
-                          ? true
-                          : groupAllSelectedStatus[group.key]?.indeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onSelectChange={(checked) =>
-                        handleSelectGroupChange(group, checked)
-                      }
-                      className="px-page pb-2 pt-4"
-                    />
-                    <AnimatePresence>
-                      {(!collapsible || openGroups[group.key]) && (
+            {data?.type === "grouped"
+              ? data.groups.map((group) => {
+                  return (
+                    <>
+                      <GroupHeader
+                        label={group.label}
+                        itemCount={group.itemCount}
+                        onOpenChange={(open) => setGroupOpen(group.key, open)}
+                        open={openGroups[group.key]}
+                        selectable={!!source.selectable}
+                        showOpenChange={collapsible}
+                        select={
+                          groupAllSelectedStatus[group.key]?.checked
+                            ? true
+                            : groupAllSelectedStatus[group.key]?.indeterminate
+                              ? "indeterminate"
+                              : false
+                        }
+                        onSelectChange={(checked) =>
+                          handleSelectGroupChange(group, checked)
+                        }
+                        className="px-page pb-2 pt-4"
+                      />
+                      {!collapsible || openGroups[group.key] ? (
                         <GroupCards
                           key={group.key}
                           source={source}
@@ -493,13 +480,13 @@ export const CardCollection = <
                           compact={compact}
                           tmpFullWidth={tmpFullWidth}
                         />
-                      )}
-                    </AnimatePresence>
-                  </>
-                )
-              })}
+                      ) : null}
+                    </>
+                  )
+                })
+              : null}
 
-            {data?.type === "flat" && (
+            {data?.type === "flat" ? (
               <GroupCards
                 source={source}
                 items={data.records}
@@ -517,7 +504,7 @@ export const CardCollection = <
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
               />
-            )}
+            ) : null}
           </>
         )}
       </div>

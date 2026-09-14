@@ -120,7 +120,7 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
         return true
       }}
     >
-      {!isToolbarOpen && (!enhanceActive || shouldKeepEnhanceVisible) && (
+      {!isToolbarOpen && (!enhanceActive || shouldKeepEnhanceVisible) ? (
         <div
           ref={bubbleMenuContainerRef}
           className={cn(
@@ -131,7 +131,7 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
             shouldKeepEnhanceVisible && "invisible"
           )}
         >
-          {enhance?.config && (
+          {enhance?.config ? (
             <>
               <EnhanceActivator
                 enhance={enhance}
@@ -143,7 +143,7 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
               />
               <ToolbarDivider />
             </>
-          )}
+          ) : null}
           <Toolbar
             editor={editor}
             disableButtons={disableButtons}
@@ -152,7 +152,7 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
             plainHtmlMode={plainHtmlMode}
           />
         </div>
-      )}
+      ) : null}
     </BubbleMenu>
   )
 })

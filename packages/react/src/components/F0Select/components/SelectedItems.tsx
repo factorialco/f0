@@ -67,6 +67,44 @@ function MultiSelectDisplay({
 }
 
 /**
+ * The multi-selection reading: "All (n)", a bare count when the labels are not
+ * loaded, or the labels themselves.
+ */
+function SelectedMultiple({
+  selection,
+  totalSelectedCount,
+  allSelected,
+}: Pick<SelectValueProps, "selection" | "totalSelectedCount" | "allSelected">) {
+  const i18n = useI18n()
+  const selectedCount = totalSelectedCount ?? selection.length
+
+  if (selectedCount === 0 && selection.length === 0) {
+    return null
+  }
+
+  if (allSelected === true) {
+    return (
+      <div className="flex w-full items-center gap-1 text-left">
+        <OneEllipsis className="min-w-0 flex-1 text-f1-foreground">
+          {`${i18n.status.selected.all} (${selectedCount})`}
+        </OneEllipsis>
+      </div>
+    )
+  }
+
+  if (selection.length === 0 && selectedCount > 0) {
+    return <SelectedCount count={selectedCount} />
+  }
+
+  return (
+    <MultiSelectDisplay
+      selection={selection}
+      totalSelectedCount={selectedCount}
+    />
+  )
+}
+
+/**
  * Component for displaying the selected item or items in the inputField
  */
 export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
@@ -74,33 +112,12 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
     { selection, multiple, totalSelectedCount, allSelected, hideItemIcon },
     ref
   ) {
-    const i18n = useI18n()
-
     if (multiple) {
-      const selectedCount = totalSelectedCount ?? selection.length
-
-      if (selectedCount === 0 && selection.length === 0) {
-        return null
-      }
-
-      if (allSelected === true) {
-        return (
-          <div className="flex w-full items-center gap-1 text-left">
-            <OneEllipsis className="min-w-0 flex-1 text-f1-foreground">
-              {`${i18n.status.selected.all} (${selectedCount})`}
-            </OneEllipsis>
-          </div>
-        )
-      }
-
-      if (selection.length === 0 && selectedCount > 0) {
-        return <SelectedCount count={selectedCount} />
-      }
-
       return (
-        <MultiSelectDisplay
+        <SelectedMultiple
           selection={selection}
-          totalSelectedCount={selectedCount}
+          totalSelectedCount={totalSelectedCount}
+          allSelected={allSelected}
         />
       )
     }
@@ -141,16 +158,16 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
 
     return (
       <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
-        {selectedItem.avatar && (
+        {selectedItem.avatar ? (
           <div className="flex shrink-0 items-center">
             <F0Avatar avatar={selectedItem.avatar} size="xs" />
           </div>
-        )}
-        {selectedItem.icon && !hideItemIcon && (
+        ) : null}
+        {selectedItem.icon && !hideItemIcon ? (
           <div className="h-5 shrink-0 text-f1-icon">
             <F0Icon icon={selectedItem.icon} />
           </div>
-        )}
+        ) : null}
         <OneEllipsis tag="span" className="text-left text-f1-foreground">
           {/* `selectedLabel` when the item carries one: out here there is no
               group header or sibling to read the row's short label against. */}

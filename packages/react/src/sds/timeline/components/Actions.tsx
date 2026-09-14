@@ -16,7 +16,7 @@ export const Actions = ({
 
   return (
     <div className="flex flex-col gap-2 xs:flex-row xs:items-center [&>*]:w-full [&>*]:xs:w-auto">
-      {hasOther && <Dropdown items={otherActions} size="md" />}
+      {hasOther ? <Dropdown items={otherActions} size="md" /> : null}
       {secondaryActions?.map((action, index) => (
         <F0Button
           key={`${action.label}-${index}`}
@@ -29,10 +29,10 @@ export const Actions = ({
           loading={action.loading}
         />
       ))}
-      {primaryAction && (hasOther || hasSecondary) && (
+      {primaryAction && (hasOther || hasSecondary) ? (
         <div className="mx-1 hidden h-4 w-px bg-f1-background-secondary-hover xs:block" />
-      )}
-      {primaryAction && (
+      ) : null}
+      {primaryAction ? (
         <F0Button
           label={primaryAction.label}
           icon={primaryAction.icon}
@@ -42,7 +42,7 @@ export const Actions = ({
           disabled={primaryAction.disabled}
           loading={primaryAction.loading}
         />
-      )}
+      ) : null}
     </div>
   )
 }

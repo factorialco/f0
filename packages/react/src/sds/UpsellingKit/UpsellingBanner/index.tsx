@@ -43,9 +43,7 @@ const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
         return (
           <UpsellingButton
             label={action.label}
-            onRequest={async () => {
-              await action.onClick()
-            }}
+            onRequest={action.onClick}
             errorMessage={action.errorMessage}
             successMessage={action.successMessage}
             loadingState={action.loadingState}
@@ -81,9 +79,12 @@ const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
         primaryAction={basePrimaryAction}
         secondaryAction={baseSecondaryAction}
       >
-        {primaryAction?.variant === "promote" && renderAction(primaryAction)}
-        {secondaryAction?.variant === "promote" &&
-          renderAction(secondaryAction)}
+        {primaryAction?.variant === "promote"
+          ? renderAction(primaryAction)
+          : null}
+        {secondaryAction?.variant === "promote"
+          ? renderAction(secondaryAction)
+          : null}
       </BaseBanner>
     )
   }

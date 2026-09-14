@@ -1,4 +1,6 @@
-// Import gridstack to ensure original types are loaded before augmentation
+// The empty import makes this file a module, so the block below augments
+// gridstack's types instead of replacing them.
+// oxlint-disable-next-line import/no-empty-named-blocks
 import type {} from "gridstack"
 
 declare module "gridstack" {

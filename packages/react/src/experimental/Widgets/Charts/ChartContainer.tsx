@@ -17,7 +17,9 @@ export const ChartContainer = Object.assign(
   >(function ChartContainer({ chart, summaries, ...props }, ref) {
     return (
       <Widget ref={ref} {...props} summaries={summaries}>
-        {chart && <div className="min-h-52 min-w-52 grow pt-2">{chart}</div>}
+        {chart ? (
+          <div className="min-h-52 min-w-52 grow pt-2">{chart}</div>
+        ) : null}
       </Widget>
     )
   }),

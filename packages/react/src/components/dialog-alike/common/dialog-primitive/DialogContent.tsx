@@ -107,7 +107,7 @@ export const DialogContent = forwardRef<
 
     return (
       <DialogPortal container={container}>
-        {context.showOverlay && <DialogOverlay />}
+        {context.showOverlay ? <DialogOverlay /> : null}
         <DialogPrimitive.Content
           ref={ref}
           className={cn(

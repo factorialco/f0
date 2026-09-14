@@ -56,7 +56,7 @@ export const ResourceCards: Story = {
   tags: ["no-sidebar"],
   render: () => (
     <div className="mx-auto flex w-full max-w-[520px] flex-col gap-4">
-      <AssistantLine>I've created your survey.</AssistantLine>
+      <AssistantLine>I&apos;ve created your survey.</AssistantLine>
       {/* Superseded: faded + non-interactive, no action button. */}
       <div className="pointer-events-none opacity-50">
         <F0CardHorizontal
@@ -66,7 +66,7 @@ export const ResourceCards: Story = {
         />
       </div>
       <AssistantLine>
-        Done — I've added the question to your survey.
+        Done — I&apos;ve added the question to your survey.
       </AssistantLine>
       {/* Active (open in the canvas): the button reads "Close". */}
       <F0CardHorizontal
@@ -96,7 +96,7 @@ export const HilConversation: Story = {
   render: () => (
     <div className="mx-auto flex w-full max-w-[520px] flex-col gap-4">
       <AssistantLine>
-        Good idea — here's a change I'd suggest. Review it below.
+        Good idea — here&apos;s a change I&apos;d suggest. Review it below.
       </AssistantLine>
       <F0CardHorizontal
         title="Add an open-ended comment question"
@@ -104,7 +104,7 @@ export const HilConversation: Story = {
         status={{ icon: Check, variant: "positive", label: "Accepted" }}
       />
       <UserLine>Can you drop the demographics section?</UserLine>
-      <AssistantLine>Here's that change.</AssistantLine>
+      <AssistantLine>Here&apos;s that change.</AssistantLine>
       <F0CardHorizontal
         title="Remove the demographics section"
         description="Drops 4 questions"
@@ -112,7 +112,7 @@ export const HilConversation: Story = {
         inactive
       />
       <UserLine>Add a rating question instead.</UserLine>
-      <AssistantLine>Here's the change — apply it?</AssistantLine>
+      <AssistantLine>Here&apos;s the change — apply it?</AssistantLine>
       <F0CardHorizontal
         title="Add a 1–5 satisfaction rating"
         description="A new rating question before the comment"

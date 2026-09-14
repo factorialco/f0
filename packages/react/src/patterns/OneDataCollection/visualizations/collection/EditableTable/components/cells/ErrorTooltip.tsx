@@ -44,7 +44,7 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
               {children}
             </div>
           </TooltipTrigger>
-          {message && (
+          {message ? (
             <TooltipContent
               side="top"
               className="border-black/10 flex items-center gap-1 bg-[#fff] shadow-md"
@@ -54,7 +54,7 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
                 {message}
               </span>
             </TooltipContent>
-          )}
+          ) : null}
         </Tooltip>
       </TooltipProvider>
     </div>

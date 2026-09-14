@@ -159,6 +159,90 @@ const customEdgeTypes: EdgeTypes = {
   graphEdge: F0GraphEdgeWrapper as unknown as EdgeTypes[string],
 }
 
+/**
+ * Which node and edge list the view draws, and the loading state behind it.
+ *
+ * Three sources, one shape: a lazily loaded tree (`rootNodes` + `loadChildren`),
+ * a full tree with a deferred second batch merged in, or the plain props. The
+ * unused hooks still run — hooks cannot be called conditionally — so each is
+ * handed empty inputs when it is not the source.
+ */
+function useResolvedGraphData<T>({
+  rootNodes,
+  loadChildren,
+  nodes,
+  edges,
+  deferredNodes,
+  onDeferredLoadComplete,
+  onDeferredLoadError,
+}: Pick<
+  F0GraphProps<T>,
+  | "rootNodes"
+  | "loadChildren"
+  | "nodes"
+  | "edges"
+  | "deferredNodes"
+  | "onDeferredLoadComplete"
+  | "onDeferredLoadError"
+>) {
+  // ── Lazy tree mode ──
+  const isLazyMode = rootNodes !== undefined && loadChildren !== undefined
+  const emptyNodes = useRef<GraphNode<T>[]>([]).current
+  const emptyLoader = useRef<(id: string) => Promise<GraphNode<T>[]>>(
+    async () => []
+  ).current
+  const lazyTree = useLazyTree<T>({
+    rootNodes: isLazyMode ? rootNodes! : emptyNodes,
+    loadChildren: isLazyMode ? loadChildren! : emptyLoader,
+  })
+
+  // ── Resolve flat node list (merge deferred batch in full-tree mode) ──
+  const deferredMerge = useDeferredMerge<T>({
+    initialNodes: nodes ?? [],
+    initialEdges: edges ?? [],
+    deferredNodes: isLazyMode ? undefined : deferredNodes,
+  })
+
+  const prevDeferredStatus = useRef(deferredMerge.deferredStatus)
+  useEffect(() => {
+    const prev = prevDeferredStatus.current
+    const curr = deferredMerge.deferredStatus
+    prevDeferredStatus.current = curr
+
+    if (prev !== "resolved" && curr === "resolved") {
+      onDeferredLoadComplete?.()
+    }
+    if (prev !== "error" && curr === "error" && deferredMerge.error) {
+      onDeferredLoadError?.(deferredMerge.error)
+    }
+  }, [
+    deferredMerge.deferredStatus,
+    deferredMerge.error,
+    onDeferredLoadComplete,
+    onDeferredLoadError,
+  ])
+
+  const resolvedNodes: GraphNode<T>[] = isLazyMode
+    ? lazyTree.nodes
+    : deferredNodes
+      ? deferredMerge.mergedNodes
+      : (nodes ?? [])
+
+  const resolvedEdgesProp = isLazyMode
+    ? edges
+    : deferredNodes
+      ? deferredMerge.mergedEdges
+      : edges
+
+  return {
+    isLazyMode,
+    lazyTree,
+    resolvedNodes,
+    resolvedEdgesProp,
+    deferredStatus: deferredMerge.deferredStatus,
+  }
+}
+
 // ─── View (consumes ReactFlow hooks via the provider in the shell) ─────────
 export function F0GraphView<T = unknown>(
   props: F0GraphProps<T> & { handleRef?: ForwardedRef<F0GraphHandle> }
@@ -267,54 +351,22 @@ export function F0GraphView<T = unknown>(
 
   const edgeTypes = renderEdge ? customEdgeTypes : defaultEdgeTypes
 
-  // ── Lazy tree mode ──
-  const isLazyMode = rootNodes !== undefined && loadChildren !== undefined
-  const emptyNodes = useRef<GraphNode<T>[]>([]).current
-  const emptyLoader = useRef<(id: string) => Promise<GraphNode<T>[]>>(
-    async () => []
-  ).current
-  const lazyTree = useLazyTree<T>({
-    rootNodes: isLazyMode ? rootNodes! : emptyNodes,
-    loadChildren: isLazyMode ? loadChildren! : emptyLoader,
-  })
-
-  // ── Resolve flat node list (merge deferred batch in full-tree mode) ──
-  const deferredMerge = useDeferredMerge<T>({
-    initialNodes: nodesProp ?? [],
-    initialEdges: edgesProp ?? [],
-    deferredNodes: isLazyMode ? undefined : deferredNodes,
-  })
-
-  const prevDeferredStatus = useRef(deferredMerge.deferredStatus)
-  useEffect(() => {
-    const prev = prevDeferredStatus.current
-    const curr = deferredMerge.deferredStatus
-    prevDeferredStatus.current = curr
-
-    if (prev !== "resolved" && curr === "resolved") {
-      onDeferredLoadComplete?.()
-    }
-    if (prev !== "error" && curr === "error" && deferredMerge.error) {
-      onDeferredLoadError?.(deferredMerge.error)
-    }
-  }, [
-    deferredMerge.deferredStatus,
-    deferredMerge.error,
+  // ── Lazy tree mode / deferred merge / plain props ──
+  const {
+    isLazyMode,
+    lazyTree,
+    resolvedNodes,
+    resolvedEdgesProp,
+    deferredStatus,
+  } = useResolvedGraphData<T>({
+    rootNodes,
+    loadChildren,
+    nodes: nodesProp,
+    edges: edgesProp,
+    deferredNodes,
     onDeferredLoadComplete,
     onDeferredLoadError,
-  ])
-
-  const resolvedNodes: GraphNode<T>[] = isLazyMode
-    ? lazyTree.nodes
-    : deferredNodes
-      ? deferredMerge.mergedNodes
-      : (nodesProp ?? [])
-
-  const resolvedEdgesProp = isLazyMode
-    ? edgesProp
-    : deferredNodes
-      ? deferredMerge.mergedEdges
-      : edgesProp
+  })
 
   // ── Build tree ──
   const { roots, nodeMap } = useTreeBuilder(resolvedNodes)
@@ -816,9 +868,7 @@ export function F0GraphView<T = unknown>(
   )
 
   const isDeferredLoading =
-    !isLazyMode &&
-    deferredNodes !== undefined &&
-    deferredMerge.deferredStatus === "loading"
+    !isLazyMode && deferredNodes !== undefined && deferredStatus === "loading"
 
   // Depend on the derived flag, not the raw count: every node wrapper consumes
   // this context, so keying it on `visibleTreeNodes.length` re-rendered all of
@@ -1010,19 +1060,19 @@ export function F0GraphView<T = unknown>(
                       </ReactFlow>
                     </div>
 
-                    {canvasActions && (
+                    {canvasActions ? (
                       <div className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]">
                         {canvasActions}
                       </div>
-                    )}
+                    ) : null}
 
-                    {canvasFooterActions && (
+                    {canvasFooterActions ? (
                       <div className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2">
                         {canvasFooterActions}
                       </div>
-                    )}
+                    ) : null}
 
-                    {showControls && (
+                    {showControls ? (
                       <div className="absolute bottom-6 left-6 z-10">
                         <F0GraphControls
                           onZoomIn={handleZoomIn}
@@ -1043,7 +1093,7 @@ export function F0GraphView<T = unknown>(
                           labels={controlLabels}
                         />
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </F0GraphStackHoverContext.Provider>
               </F0GraphSelectionContext.Provider>

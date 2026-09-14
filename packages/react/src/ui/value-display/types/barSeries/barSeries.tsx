@@ -146,7 +146,7 @@ function BarWithTooltip({
               />
             ) : isUnder ? (
               <>
-                {heightValuePx > 0 && (
+                {heightValuePx > 0 ? (
                   <div
                     style={{
                       width: BAR_WIDTH_PX,
@@ -155,8 +155,8 @@ function BarWithTooltip({
                       borderRadius: heightNeutralPx > 0 ? "2px 2px 0 0" : 2,
                     }}
                   />
-                )}
-                {heightNeutralPx > 0 && (
+                ) : null}
+                {heightNeutralPx > 0 ? (
                   <div
                     className="bg-f1-border-secondary"
                     style={{
@@ -165,7 +165,7 @@ function BarWithTooltip({
                       borderRadius: heightValuePx > 0 ? "0 0 2px 2px" : 2,
                     }}
                   />
-                )}
+                ) : null}
               </>
             ) : isOver && heightOvertimePx > 0 ? (
               <>
@@ -188,7 +188,7 @@ function BarWithTooltip({
               </>
             ) : (
               <>
-                {heightValuePx > 0 && (
+                {heightValuePx > 0 ? (
                   <div
                     style={{
                       width: BAR_WIDTH_PX,
@@ -197,8 +197,8 @@ function BarWithTooltip({
                       borderRadius: heightNeutralPx > 0 ? "2px 2px 0 0" : 2,
                     }}
                   />
-                )}
-                {heightNeutralPx > 0 && (
+                ) : null}
+                {heightNeutralPx > 0 ? (
                   <div
                     className="bg-f1-border-secondary"
                     style={{
@@ -207,7 +207,7 @@ function BarWithTooltip({
                       borderRadius: heightValuePx > 0 ? "0 0 2px 2px" : 2,
                     }}
                   />
-                )}
+                ) : null}
               </>
             )}
           </div>

@@ -39,20 +39,18 @@ export const DropdownSingleQuestion = ({
 
   const handleCreate =
     answering && !isMulti && allowCreate && dataset.onCreate
-      ? (value: string) => {
-          return dataset.onCreate!(value).then(
-            (record) => {
-              const option = dataset.mapOptions(record)
-              onQuestionChange?.({
-                id: props.id,
-                type: "dropdown-single",
-                value: option.value,
-              })
-            },
-            (err: unknown) => {
-              console.warn("[SurveyFormBuilder] onCreate failed:", err)
-            }
-          )
+      ? async (value: string) => {
+          try {
+            const record = await dataset.onCreate!(value)
+            const option = dataset.mapOptions(record)
+            onQuestionChange?.({
+              id: props.id,
+              type: "dropdown-single",
+              value: option.value,
+            })
+          } catch (err) {
+            console.warn("[SurveyFormBuilder] onCreate failed:", err)
+          }
         }
       : undefined
 

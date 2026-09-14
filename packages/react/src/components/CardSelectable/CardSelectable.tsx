@@ -40,7 +40,9 @@ function RadioIndicator({ checked }: { checked: boolean }) {
           : "border-2 border-solid border-f1-border bg-f1-background"
       )}
     >
-      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+      {checked ? (
+        <div className="h-2 w-2 rounded-full bg-f1-background" />
+      ) : null}
     </div>
   )
 }
@@ -57,7 +59,7 @@ function CheckboxIndicator({ checked }: { checked: boolean }) {
           : "border border-solid border-f1-border bg-f1-background"
       )}
     >
-      {checked && <F0Icon icon={Check} size="sm" />}
+      {checked ? <F0Icon icon={Check} size="sm" /> : null}
     </div>
   )
 }
@@ -173,7 +175,7 @@ function _CardSelectable<T extends CardSelectableValue>({
           moreInfoLink && "pb-0"
         )}
       >
-        {item.avatar && <AvatarRender avatar={item.avatar} />}
+        {item.avatar ? <AvatarRender avatar={item.avatar} /> : null}
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-col gap-0.5">
             <span
@@ -183,35 +185,35 @@ function _CardSelectable<T extends CardSelectableValue>({
               )}
             >
               {item.title}
-              {item.required && (
+              {item.required ? (
                 <span className="ml-0.5 text-f1-foreground-critical">*</span>
-              )}
+              ) : null}
             </span>
-            {item.description && (
+            {item.description ? (
               <span className="text-base text-f1-foreground-secondary">
                 {item.description}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
         {renderIndicator()}
       </div>
 
       {/* Outside the interactive header — see the `moreInfoLink` note above. */}
-      {moreInfoLink && (
+      {moreInfoLink ? (
         <div
           className={cn(
             "flex flex-row items-start gap-3 pt-2",
             grouped ? "px-4 pb-3" : compact ? "px-3 pb-3" : "px-4 pb-4"
           )}
         >
-          {item.avatar && (
+          {item.avatar ? (
             /* Invisible copy of the avatar keeps the link aligned with the
                title column without hardcoding the avatar's width. */
             <div aria-hidden="true" className="invisible">
               <AvatarRender avatar={item.avatar} />
             </div>
-          )}
+          ) : null}
           <F0Link
             href={moreInfoLink.href}
             target="_blank"
@@ -223,10 +225,10 @@ function _CardSelectable<T extends CardSelectableValue>({
             {moreInfoLink.label ?? forms.moreInformation}
           </F0Link>
         </div>
-      )}
+      ) : null}
 
       {/* Expandable content — outside the interactive area, attached below */}
-      {hasSelectedContent && (
+      {hasSelectedContent ? (
         <motion.div
           initial={false}
           animate={{
@@ -250,7 +252,7 @@ function _CardSelectable<T extends CardSelectableValue>({
             </div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </div>
   )
 }

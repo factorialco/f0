@@ -70,16 +70,16 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
       {...dataAttributes}
     >
       <div className="flex items-center gap-3 px-4 py-3">
-        {module && <F0AvatarModule module={module} size="md" />}
+        {module ? <F0AvatarModule module={module} size="md" /> : null}
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-lg font-semibold text-f1-foreground">
             {heading}
           </h2>
-          {subtitle && (
+          {subtitle ? (
             <p className="truncate text-base text-f1-foreground-secondary">
               {subtitle}
             </p>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -96,7 +96,7 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
           )}
         >
           {visibleDescription}
-          {shouldTruncate && !expanded && (
+          {shouldTruncate && !expanded ? (
             <>
               {" "}
               <button
@@ -112,11 +112,11 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
                 {seeMoreLabel}
               </button>
             </>
-          )}
+          ) : null}
         </p>
       </div>
 
-      {actions && (
+      {actions ? (
         <div className="flex items-center justify-end gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
           <F0Button
             type="button"
@@ -125,7 +125,7 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
             onClick={actions.onPrimaryAction}
           />
         </div>
-      )}
+      ) : null}
     </section>
   )
 }

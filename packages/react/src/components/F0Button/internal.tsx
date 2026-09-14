@@ -173,15 +173,15 @@ const ButtonInternal = forwardRef<
             (iconPosition === "right" ? "-mr-[3px]" : "-ml-[3px]")
         )}
       >
-        {iconPosition === "left" && iconNode}
-        {emoji && (
+        {iconPosition === "left" ? iconNode : null}
+        {emoji ? (
           <EmojiImage
             emoji={emoji}
             mode={emojiMode}
             size={size === "sm" ? "sm" : "md"}
             alt={""}
           />
-        )}
+        ) : null}
         {!shouldHideLabel ? (
           <OneEllipsis
             className={cn(
@@ -207,9 +207,9 @@ const ButtonInternal = forwardRef<
         ) : (
           <span className="sr-only">{buttonLabel}</span>
         )}
-        {iconPosition === "right" && iconNode}
+        {iconPosition === "right" ? iconNode : null}
         {append}{" "}
-        {hasCounter && (
+        {hasCounter ? (
           <span
             className={cn(
               "ml-1 inline-flex items-center",
@@ -220,7 +220,7 @@ const ButtonInternal = forwardRef<
           >
             <Counter value={counterValue} size={counterSize} type="default" />
           </span>
-        )}
+        ) : null}
       </div>
     </Action>
   )

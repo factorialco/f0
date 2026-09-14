@@ -699,8 +699,8 @@ export const RendererTypes: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
+                          firstName: "Jordan",
+                          lastName: "Avery",
                           src: "/avatars/person04.jpg",
                         },
                         {
@@ -767,8 +767,8 @@ export const CustomCardProperties: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
+                          firstName: "Jordan",
+                          lastName: "Avery",
                           src: "/avatars/person04.jpg",
                         },
                         {
@@ -1487,12 +1487,12 @@ export const WithSynchronousData: Story = {
         fetchData: ({ filters, sortings, navigationFilters }) => {
           // Ensure sortings are properly applied
           return {
-            records: filterUsers(
-              mockUsers,
-              filters,
-              sortings,
-              navigationFilters
-            ),
+            records: filterUsers({
+              users: mockUsers,
+              filterValues: filters,
+              sortingState: sortings,
+              navigationFilters,
+            }),
           }
         },
       },

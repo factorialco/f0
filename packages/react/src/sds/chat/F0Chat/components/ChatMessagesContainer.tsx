@@ -634,7 +634,7 @@ export const ChatMessagesContainer = (): ReactNode => {
         )}
       />
 
-      {ready && (
+      {ready ? (
         <ChatViewportOverlays
           atTop={atTop}
           scrolledUp={scrolledUp}
@@ -647,7 +647,7 @@ export const ChatMessagesContainer = (): ReactNode => {
           reducedMotion={reducedMotion}
           onJumpToBottom={jumpToBottom}
         />
-      )}
+      ) : null}
     </div>
   )
 }

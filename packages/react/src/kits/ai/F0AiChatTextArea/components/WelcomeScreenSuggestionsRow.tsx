@@ -213,7 +213,7 @@ export const WelcomeScreenSuggestionsRow = ({
           </div>
         </PopoverAnchor>
       </div>
-      {activeGroup && (
+      {activeGroup ? (
         <PopoverContent
           side={side}
           align="start"
@@ -271,7 +271,7 @@ export const WelcomeScreenSuggestionsRow = ({
             ))}
           </div>
         </PopoverContent>
-      )}
+      ) : null}
     </Popover>
   )
 }

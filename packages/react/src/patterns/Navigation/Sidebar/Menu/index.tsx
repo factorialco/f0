@@ -79,12 +79,14 @@ const MenuItemContent = ({
         />
         <span>{item.label}</span>
       </div>
-      {(item.tag || item.badge) && (
+      {item.tag || item.badge ? (
         <div className="flex flex-shrink-0 items-center gap-1.5">
-          {item.tag && <F0TagRaw text={item.tag} />}
-          {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+          {item.tag ? <F0TagRaw text={item.tag} /> : null}
+          {item.badge ? (
+            <Counter value={item.badge} size="sm" type="bold" />
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -626,7 +628,7 @@ function MenuContent({
         isDragging && "cursor-grabbing [&_*]:cursor-grabbing"
       )}
     >
-      {hasRoot && (
+      {hasRoot ? (
         <div className="flex w-full flex-col gap-3 bg-transparent px-3">
           {nonSortableItems
             .filter((category) => category.isRoot)
@@ -638,9 +640,9 @@ function MenuContent({
               />
             ))}
         </div>
-      )}
+      ) : null}
 
-      {hasFavorites && (
+      {hasFavorites ? (
         <div className="mt-3 flex w-full flex-col gap-3 bg-transparent px-3">
           <SidebarCollapsibleSection title={t.favorites.favorites}>
             <div ref={favoritesRef}>
@@ -661,9 +663,9 @@ function MenuContent({
             </div>
           </SidebarCollapsibleSection>
         </div>
-      )}
+      ) : null}
 
-      {hasNonSortableItems && (
+      {hasNonSortableItems ? (
         <div className="mt-3 flex w-full flex-col gap-3 bg-transparent px-3">
           {nonSortableItems
             .filter((category) => !category.isRoot)
@@ -675,9 +677,9 @@ function MenuContent({
               />
             ))}
         </div>
-      )}
+      ) : null}
 
-      {hasSortableItems && (
+      {hasSortableItems ? (
         <div
           className={cn(
             "mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none"
@@ -700,7 +702,7 @@ function MenuContent({
             </Reorder.Group>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

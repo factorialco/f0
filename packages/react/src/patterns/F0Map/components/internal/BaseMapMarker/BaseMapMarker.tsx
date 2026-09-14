@@ -437,7 +437,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
     // the tip is only slightly rounded.
     const caret = (
       <AnimatePresence>
-        {selected && (
+        {selected ? (
           <motion.svg
             key="caret"
             width={m.caretW}
@@ -473,7 +473,7 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
           >
             <path d="M0 0h16c-4.2 3-6.6 6.9-7.4 11.7a0.62 0.62 0 0 1-1.2 0C6.6 6.9 4.2 3 0 0Z" />
           </motion.svg>
-        )}
+        ) : null}
       </AnimatePresence>
     )
 

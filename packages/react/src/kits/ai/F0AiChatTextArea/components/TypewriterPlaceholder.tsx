@@ -77,6 +77,25 @@ export const TypewriterPlaceholder = ({
     const pauseBeforeDelete = 2000
     const pauseBeforeNext = 1000
 
+    const startDeleting = () => {
+      deleteIntervalRef.current = setInterval(() => {
+        if (currentIndex > 0) {
+          currentIndex--
+          setDisplayedPlaceholder(placeholderText.slice(0, currentIndex))
+        } else {
+          if (deleteIntervalRef.current) {
+            clearInterval(deleteIntervalRef.current)
+            deleteIntervalRef.current = null
+          }
+          placeholderTimeoutRef.current = setTimeout(() => {
+            const nextIndex =
+              (currentPlaceholderIndex + 1) % Math.max(placeholders.length, 1)
+            setCurrentPlaceholderIndex(nextIndex)
+          }, pauseBeforeNext)
+        }
+      }, deleteSpeed)
+    }
+
     typeIntervalRef.current = setInterval(() => {
       if (currentIndex < placeholderText.length) {
         setDisplayedPlaceholder(placeholderText.slice(0, currentIndex + 1))
@@ -86,25 +105,10 @@ export const TypewriterPlaceholder = ({
           clearInterval(typeIntervalRef.current)
           typeIntervalRef.current = null
         }
-        placeholderTimeoutRef.current = setTimeout(() => {
-          deleteIntervalRef.current = setInterval(() => {
-            if (currentIndex > 0) {
-              currentIndex--
-              setDisplayedPlaceholder(placeholderText.slice(0, currentIndex))
-            } else {
-              if (deleteIntervalRef.current) {
-                clearInterval(deleteIntervalRef.current)
-                deleteIntervalRef.current = null
-              }
-              placeholderTimeoutRef.current = setTimeout(() => {
-                const nextIndex =
-                  (currentPlaceholderIndex + 1) %
-                  Math.max(placeholders.length, 1)
-                setCurrentPlaceholderIndex(nextIndex)
-              }, pauseBeforeNext)
-            }
-          }, deleteSpeed)
-        }, pauseBeforeDelete)
+        placeholderTimeoutRef.current = setTimeout(
+          startDeleting,
+          pauseBeforeDelete
+        )
       }
     }, typeSpeed)
 
@@ -146,9 +150,9 @@ export const TypewriterPlaceholder = ({
           )}
         >
           {displayedPlaceholder}
-          {isTyping && !shouldReduceMotion && (
+          {isTyping && !shouldReduceMotion ? (
             <span className="f0-chat-cursor-blink">|</span>
-          )}
+          ) : null}
         </div>
       </motion.div>
     </AnimatePresence>

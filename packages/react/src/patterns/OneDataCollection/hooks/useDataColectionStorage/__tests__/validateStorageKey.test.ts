@@ -119,11 +119,11 @@ describe("parseStorageKey", () => {
 
   describe("invalid keys", () => {
     it("should return null for invalid keys", () => {
-      expect(parseStorageKey("")).toBe(null)
-      expect(parseStorageKey("employees")).toBe(null)
-      expect(parseStorageKey("/v1")).toBe(null)
-      expect(parseStorageKey("employees/1")).toBe(null)
-      expect(parseStorageKey("employees/v")).toBe(null)
+      expect(parseStorageKey("")).toBeNull()
+      expect(parseStorageKey("employees")).toBeNull()
+      expect(parseStorageKey("/v1")).toBeNull()
+      expect(parseStorageKey("employees/1")).toBeNull()
+      expect(parseStorageKey("employees/v")).toBeNull()
     })
   })
 })

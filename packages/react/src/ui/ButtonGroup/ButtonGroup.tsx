@@ -343,10 +343,10 @@ function ButtonGroupStacked({
 
   return (
     <>
-      {otherActions.length > 0 && <MobileDropdown items={otherActions} />}
+      {otherActions.length > 0 ? <MobileDropdown items={otherActions} /> : null}
       {stackedSecondaries}
-      {secondaryLink && renderSecondaryLink(secondaryLink, size)}
-      {primaryAction && renderPrimaryNode(primaryAction, size)}
+      {secondaryLink ? renderSecondaryLink(secondaryLink, size) : null}
+      {primaryAction ? renderPrimaryNode(primaryAction, size) : null}
     </>
   )
 }
@@ -385,15 +385,24 @@ function ButtonGroupRow({
     measurementContainerRef.current?.setAttribute("inert", "")
   }, [measurementContainerRef])
 
-  // Before the first measurement, optimistically show everything to avoid a flash.
-  // When `canOverflow` is false the group never sheds: every secondary stays
-  // inline and nothing is measured away into the "⋯" menu.
-  const shownPlain = !canOverflow
-    ? plainSecondaries
-    : isInitialized
-      ? visibleItems
-      : plainSecondaries
-  const overflowedPlain = !canOverflow ? [] : isInitialized ? overflowItems : []
+  /**
+   * What stays inline and what sheds into the "⋯" menu.
+   *
+   * Before the first measurement, optimistically show everything to avoid a
+   * flash. When `canOverflow` is false the group never sheds: every secondary
+   * stays inline and nothing is measured away.
+   */
+  const splitByOverflow = (): {
+    shown: typeof plainSecondaries
+    overflowed: typeof plainSecondaries
+  } => {
+    if (!canOverflow || !isInitialized) {
+      return { shown: plainSecondaries, overflowed: [] }
+    }
+    return { shown: visibleItems, overflowed: overflowItems }
+  }
+
+  const { shown: shownPlain, overflowed: overflowedPlain } = splitByOverflow()
   const shownIds = new Set(shownPlain.map((action) => action.id))
 
   const primaryNode = primaryAction
@@ -472,7 +481,7 @@ function ButtonGroupRow({
       >
         {/* Hidden measurement copy, used to compute the visible/overflow split.
             Skipped when the group can't overflow — nothing is ever measured away. */}
-        {canOverflow && (
+        {canOverflow ? (
           <div
             ref={measurementContainerRef}
             aria-hidden="true"
@@ -482,13 +491,13 @@ function ButtonGroupRow({
               renderActionButton(action, size, "outline")
             )}
           </div>
-        )}
+        ) : null}
 
-        {menuItems.length > 0 && (
+        {menuItems.length > 0 ? (
           <div ref={customOverflowIndicatorRef}>
             <Dropdown items={menuItems} icon={Ellipsis} size={size} />
           </div>
-        )}
+        ) : null}
 
         {cleanedTokens.map((token) =>
           token.kind === "sep" ? (
@@ -498,13 +507,13 @@ function ButtonGroupRow({
           )
         )}
 
-        {secondaryLink && renderSecondaryLink(secondaryLink, size)}
+        {secondaryLink ? renderSecondaryLink(secondaryLink, size) : null}
       </div>
 
       {splitSecondaries.map((action) =>
         renderSplitButton(action, size, "outline")
       )}
-      {dividerBeforePinned && <ButtonGroupSeparator />}
+      {dividerBeforePinned ? <ButtonGroupSeparator /> : null}
       {primaryNode}
     </>
   )

@@ -91,31 +91,24 @@ function _ProductCard({
               style={getCardStyles()}
               onClick={onClick}
             >
-              <>
-                {type === "one-campaign" ? (
-                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                    <F0Icon icon={One} size="lg" className="!h-8 !w-8" />
-                  </div>
-                ) : (
-                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-                    <F0AvatarModule
-                      module={props.module as ModuleId}
-                      size="md"
-                    />
-                  </div>
-                )}
-
-                <div className="flex flex-1 flex-col">
-                  <div>
-                    <h3 className="text-lg font-medium">{title}</h3>
-                    <p className="text-f1-foreground-secondary">
-                      {description}
-                    </p>
-                  </div>
+              {type === "one-campaign" ? (
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+                  <F0Icon icon={One} size="lg" className="!h-8 !w-8" />
                 </div>
-              </>
+              ) : (
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+                  <F0AvatarModule module={props.module as ModuleId} size="md" />
+                </div>
+              )}
 
-              {dismissable && (
+              <div className="flex flex-1 flex-col">
+                <div>
+                  <h3 className="text-lg font-medium">{title}</h3>
+                  <p className="text-f1-foreground-secondary">{description}</p>
+                </div>
+              </div>
+
+              {dismissable ? (
                 <div className="h-6 w-6">
                   <F0Button
                     variant="ghost"
@@ -126,7 +119,7 @@ function _ProductCard({
                     label="Close"
                   />
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

@@ -92,8 +92,10 @@ export const Content = ({
       </ScrollArea>
 
       <AnimatePresence>
-        {!isAtTop && <ScrollShadow position="top" key="shadow-top" />}
-        {!isAtBottom && <ScrollShadow position="bottom" key="shadow-bottom" />}
+        {!isAtTop ? <ScrollShadow position="top" key="shadow-top" /> : null}
+        {!isAtBottom ? (
+          <ScrollShadow position="bottom" key="shadow-bottom" />
+        ) : null}
       </AnimatePresence>
     </div>
   )

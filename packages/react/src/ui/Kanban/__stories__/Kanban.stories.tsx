@@ -162,13 +162,7 @@ export const ProjectStatuses: Story = {
               return lane?.items.findIndex((item) => item.id === id) ?? -1
             },
             onMove: async (fromLaneId, toLaneId, source, destiny) => {
-              await console.log(
-                "DND onMove",
-                fromLaneId,
-                toLaneId,
-                source,
-                destiny
-              )
+              console.log("DND onMove", fromLaneId, toLaneId, source, destiny)
               // Simulate optimistic lock conflict when moving to 'review'
               if (toLaneId === "review") {
                 await new Promise((r) => setTimeout(r, 50))

@@ -117,7 +117,7 @@ const AIEnhanceMenu = ({
               customInputRef.current?.focus()
             }}
           >
-            {isIdle && (
+            {isIdle ? (
               <>
                 <input
                   data-enhance-input="true"
@@ -155,8 +155,8 @@ const AIEnhanceMenu = ({
                   />
                 </div>
               </>
-            )}
-            {isLoading && (
+            ) : null}
+            {isLoading ? (
               <div
                 className={cn(
                   "relative z-20 flex h-8 min-w-0 flex-1 items-center gap-2 pl-2",
@@ -173,8 +173,8 @@ const AIEnhanceMenu = ({
                   onClick={onRetry}
                 />
               </div>
-            )}
-            {isReview && (
+            ) : null}
+            {isReview ? (
               <div
                 className={cn(
                   "relative z-20 flex items-center justify-between gap-2",
@@ -187,9 +187,9 @@ const AIEnhanceMenu = ({
                   label="Try again"
                   onClick={onRetry}
                 />
-                {useCompactReview && (
+                {useCompactReview ? (
                   <div className="h-4 w-px bg-f1-border rounded-full" />
-                )}
+                ) : null}
                 <div className="flex items-center gap-2">
                   <F0Button
                     variant="outline"
@@ -203,11 +203,11 @@ const AIEnhanceMenu = ({
                   />
                 </div>
               </div>
-            )}
+            ) : null}
           </motion.div>
         </DropdownMenuTrigger>
 
-        {showOptions && (
+        {showOptions ? (
           <DropdownMenuContent
             align="start"
             sideOffset={4}
@@ -229,9 +229,9 @@ const AIEnhanceMenu = ({
                   <DropdownMenuSub key={option.id}>
                     <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
                       <div className="flex w-full flex-row items-center gap-2">
-                        {option.icon && (
+                        {option.icon ? (
                           <F0Icon icon={option.icon} color="default" />
-                        )}
+                        ) : null}
                         <span className="flex-1 text-base font-medium">
                           {option.label}
                         </span>
@@ -254,9 +254,9 @@ const AIEnhanceMenu = ({
                             }}
                           >
                             <div className="flex w-full flex-row items-center gap-2">
-                              {subOption.icon && (
+                              {subOption.icon ? (
                                 <F0Icon icon={subOption.icon} color="default" />
-                              )}
+                              ) : null}
                               <span className="flex-1">{subOption.label}</span>
                             </div>
                           </DropdownMenuItem>
@@ -276,16 +276,16 @@ const AIEnhanceMenu = ({
                   }}
                 >
                   <div className="flex w-full flex-row items-center gap-2">
-                    {option.icon && (
+                    {option.icon ? (
                       <F0Icon icon={option.icon} color="default" />
-                    )}
+                    ) : null}
                     <span className="flex-1">{option.label}</span>
                   </div>
                 </DropdownMenuItem>
               )
             })}
           </DropdownMenuContent>
-        )}
+        ) : null}
       </DropdownMenu>
     </div>
   )

@@ -292,7 +292,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             )}
           >
             <SectionHeader title={title} description={description ?? ""} />
-            {sectionConfig?.action && (
+            {sectionConfig?.action ? (
               <F0Button
                 label={sectionConfig.action.label}
                 icon={sectionConfig.action.icon}
@@ -301,7 +301,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                 variant="outline"
                 size="md"
               />
-            )}
+            ) : null}
           </div>
 
           <div className={`flex flex-col ${FIELD_GAP}`}>
@@ -358,13 +358,13 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             })}
           </div>
 
-          {rootError && (
+          {rootError ? (
             <p className="mt-4 text-base font-medium text-f1-foreground-critical">
               {rootError.message}
             </p>
-          )}
+          ) : null}
 
-          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
+          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) ? (
             <div className="mt-4 flex justify-end">
               <F0Button
                 type="submit"
@@ -374,7 +374,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                 disabled={hasErrors || isFormLoading}
               />
             </div>
-          )}
+          ) : null}
         </form>
       </FormProvider>
     </F0FormContext.Provider>

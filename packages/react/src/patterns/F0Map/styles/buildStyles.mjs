@@ -214,8 +214,8 @@ const flavor = (theme) => {
     boundary: neutral(theme, 30),
     water: tint(theme, L ? "malibu.50" : "malibu.60", L ? 0.45 : 0.5, land),
     // Greens a gentle step deeper than the green land, so parks/woods still read.
-    park: tint(theme, L ? "flubber.60" : "flubber.60", 0.42, land),
-    wood: tint(theme, L ? "flubber.70" : "flubber.70", 0.55, land),
+    park: tint(theme, "flubber.60", 0.42, land),
+    wood: tint(theme, "flubber.70", 0.55, land),
     // Urban land use (and the zoomed-in base land) is a warm tan - Google
     // Maps' land colour - clearly warmer than a plain neutral and distinct from
     // the green countryside. yellow.60 is deep enough to read as a tan rather
@@ -425,7 +425,7 @@ const recolor = (style, theme) => {
   const f = saturatedFlavor(theme)
   const out = JSON.parse(JSON.stringify(style))
   out.name = `f0-${theme}`
-  out.metadata = { ...(out.metadata || {}), "f0:generated": true }
+  out.metadata = { ...out.metadata, "f0:generated": true }
 
   for (const layer of out.layers || []) {
     const lid = layer.id.toLowerCase()
@@ -435,7 +435,7 @@ const recolor = (style, theme) => {
     // (the boxed route numbers like "B-25"), and all basemap POI icons/labels
     // (metro, shops, etc.) - our own markers are the only points of interest.
     if (/ferry|shipping|shield|poi_/.test(lid)) {
-      layer.layout = { ...(layer.layout || {}), visibility: "none" }
+      layer.layout = { ...layer.layout, visibility: "none" }
       continue
     }
     // Base land: green when zoomed out (the world / regional view), fading to
@@ -448,7 +448,7 @@ const recolor = (style, theme) => {
     // park polygons still paint on top at those zooms.
     if (layer.type === "background") {
       layer.paint = {
-        ...(layer.paint || {}),
+        ...layer.paint,
         "background-color": [
           "interpolate",
           ["linear"],
@@ -625,11 +625,9 @@ const recolor = (style, theme) => {
   // raster with no layers pointing at it (we don't want shaded relief); left in,
   // its tile fetches fail and keep `map.isStyleLoaded()` from ever resolving.
   const usedSources = new Set(out.layers.map((l) => l.source).filter(Boolean))
-  for (const name of Object.keys(out.sources)) {
-    if (!usedSources.has(name)) {
-      delete out.sources[name]
-    }
-  }
+  out.sources = Object.fromEntries(
+    Object.entries(out.sources).filter(([name]) => usedSources.has(name))
+  )
 
   return out
 }

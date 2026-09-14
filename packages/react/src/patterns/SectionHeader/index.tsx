@@ -63,15 +63,15 @@ const _SectionHeader = ({
           <h2 className="text-lg font-semibold text-f1-foreground">{title}</h2>
           <p className="text-f1-foreground-secondary">{description}</p>
         </div>
-        {link && (
+        {link ? (
           <div className="w-fit">
             <F0Link href={link.href} target="_blank">
               {link.label}
             </F0Link>
           </div>
-        )}
+        ) : null}
       </div>
-      {action && (
+      {action ? (
         <>
           <div className="hidden md:block">
             <F0Button
@@ -92,7 +92,7 @@ const _SectionHeader = ({
             />
           </div>
         </>
-      )}
+      ) : null}
     </div>
   )
 }

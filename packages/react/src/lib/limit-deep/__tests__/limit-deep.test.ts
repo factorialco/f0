@@ -92,7 +92,7 @@ describe("limitDeep", () => {
     it("should handle null values in objects", () => {
       const obj = { value: null }
       const result = limitDeep(obj, 5)
-      expect(result.value).toBe(null)
+      expect(result.value).toBeNull()
     })
   })
 

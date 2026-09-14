@@ -18,7 +18,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
 
   return (
     <AnimatePresence>
-      {open && (
+      {open ? (
         <motion.div
           key="chat-window"
           aria-hidden={!open}
@@ -54,7 +54,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
             </motion.div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

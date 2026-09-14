@@ -98,7 +98,7 @@ export const Content = ({
           onCreateLabel={onCreateLabel}
         />
       </div>
-      {isExpanded && (
+      {isExpanded ? (
         <div
           className="min-h-0"
           style={{
@@ -115,7 +115,7 @@ export const Content = ({
             hiddenAvatar={hiddenAvatar}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

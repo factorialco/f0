@@ -27,7 +27,7 @@ type Story = StoryObj<WidgetInboxListProps>
 
 export const Default: Story = {
   args: {
-    items: new Array(12).fill(null).map(() => ({
+    items: Array.from({ length: 12 }, () => ({
       ...(DefaulWidgetInboxListItemStory.args as WidgetInboxListItemProps),
     })),
     onClickItem: () => {},
@@ -37,7 +37,7 @@ export const Default: Story = {
 export const WithLongTitles: Story = {
   args: {
     ...Default.args,
-    items: new Array(12).fill(null).map(() => ({
+    items: Array.from({ length: 12 }, () => ({
       ...(WithLongTitleWidgetInboxListItemStory.args as WidgetInboxListItemProps),
     })),
   },

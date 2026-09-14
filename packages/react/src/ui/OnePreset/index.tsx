@@ -72,7 +72,7 @@ const _Preset = ({
         onChange={() => onClick?.()}
       />
       <span className="min-w-0 truncate">{label}</span>
-      {number !== undefined && (
+      {number !== undefined ? (
         <Await resolve={number} fallback={<Skeleton className="h-4 w-4" />}>
           {(number) =>
             number !== undefined && (
@@ -83,10 +83,10 @@ const _Preset = ({
             )
           }
         </Await>
-      )}
-      {hasActions && (
+      ) : null}
+      {hasActions ? (
         <AnimatePresence initial={false}>
-          {showActions && (
+          {showActions ? (
             <motion.span
               key="preset-actions"
               className="-my-0.5 -ml-1.5 -mr-1 flex items-center gap-0.5 overflow-hidden"
@@ -95,7 +95,7 @@ const _Preset = ({
               exit={{ opacity: 0, width: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              {onEdit && (
+              {onEdit ? (
                 <F0Button
                   variant="ghost"
                   size="sm"
@@ -104,11 +104,11 @@ const _Preset = ({
                   icon={Pencil}
                   onClick={actionHandler(onEdit)}
                 />
-              )}
+              ) : null}
             </motion.span>
-          )}
+          ) : null}
         </AnimatePresence>
-      )}
+      ) : null}
     </motion.label>
   )
 

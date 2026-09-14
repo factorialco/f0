@@ -46,7 +46,7 @@ export const ChatDocumentPreview = (): ReactNode => {
         }
       }}
     >
-      {file && kind && (
+      {file && kind ? (
         <DialogContent
           container={portalTarget}
           className="h-full w-full max-w-none rounded-none bg-transparent p-0 shadow-none"
@@ -91,7 +91,7 @@ export const ChatDocumentPreview = (): ReactNode => {
             </div>
           </div>
         </DialogContent>
-      )}
+      ) : null}
     </Dialog>
   )
 }

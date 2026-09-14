@@ -141,21 +141,22 @@ const SecondaryActionsButtons = ({
       })}
 
       {/* Render button actions - these might be hidden in little mode */}
-      {!shouldHideButtonActions &&
-        buttonActions.map((action, index) => (
-          <F0Button
-            key={`button-${index}`}
-            onClick={(e) => {
-              e.preventDefault()
-              action.onClick()
-            }}
-            variant={"variant" in action ? action.variant : "outline"}
-            size="md"
-            label={action.label}
-            disabled={disableButtons || action.disabled}
-            icon={"icon" in action ? action.icon : undefined}
-          />
-        ))}
+      {!shouldHideButtonActions
+        ? buttonActions.map((action, index) => (
+            <F0Button
+              key={`button-${index}`}
+              onClick={(e) => {
+                e.preventDefault()
+                action.onClick()
+              }}
+              variant={"variant" in action ? action.variant : "outline"}
+              size="md"
+              label={action.label}
+              disabled={disableButtons || action.disabled}
+              icon={"icon" in action ? action.icon : undefined}
+            />
+          ))
+        : null}
     </div>
   )
 }
@@ -237,7 +238,7 @@ const renderPrimaryActionContent = ({
           icon={sub.icon}
         />
       ))}
-      {primaryAction.subActions?.length && <ToolbarDivider />}
+      {primaryAction.subActions?.length ? <ToolbarDivider /> : null}
       <PrimaryActionButton
         primaryAction={primaryAction.action}
         disableButtons={disableButtons}
@@ -297,17 +298,19 @@ const ActionsMenu = ({
         disableButtons={disableButtons}
       />
 
-      {shouldShowDivider && <ToolbarDivider />}
+      {shouldShowDivider ? <ToolbarDivider /> : null}
 
-      {primaryAction &&
-        renderPrimaryActionContent({
-          primaryAction,
-          isFullscreen,
-          listOfActions,
-          handleOnClick: onActionClick,
-          disableButtons,
-          includeSecondaryInDropdown: shouldIncludeSecondaryInDropdown ?? false,
-        })}
+      {primaryAction
+        ? renderPrimaryActionContent({
+            primaryAction,
+            isFullscreen,
+            listOfActions,
+            handleOnClick: onActionClick,
+            disableButtons,
+            includeSecondaryInDropdown:
+              shouldIncludeSecondaryInDropdown ?? false,
+          })
+        : null}
     </div>
   )
 }

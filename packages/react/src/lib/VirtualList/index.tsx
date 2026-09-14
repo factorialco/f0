@@ -59,7 +59,7 @@ const _VirtualList = forwardRef<HTMLDivElement, VirtualListProps>(
               }}
             >
               {/* this is a protection in case the library sends null | undefined */}
-              {!vi ? <></> : renderer(vi)}
+              {!vi ? null : renderer(vi)}
             </div>
           ))}
         </div>

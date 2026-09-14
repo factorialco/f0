@@ -44,12 +44,12 @@ const PreviewTexts = ({
   compact: boolean
 }): ReactNode => (
   <div className="flex min-w-0 flex-col gap-0.5 p-2.5">
-    {preview.title && (
+    {preview.title ? (
       <ClampText className="text-base font-medium text-f1-foreground">
         {preview.title}
       </ClampText>
-    )}
-    {preview.description && (
+    ) : null}
+    {preview.description ? (
       <span
         className={cn(
           "text-sm text-f1-foreground-secondary",
@@ -58,7 +58,7 @@ const PreviewTexts = ({
       >
         {preview.description}
       </span>
-    )}
+    ) : null}
     <ClampText className="text-sm text-f1-foreground">
       {hostOf(preview.url)}
     </ClampText>
@@ -104,7 +104,7 @@ export const ChatLinkPreview = ({
             index === previews.length - 1
           )}
         >
-          {!compact && preview.imageUrl && (
+          {!compact && preview.imageUrl ? (
             <FadeInImage
               src={preview.imageUrl}
               alt=""
@@ -113,7 +113,7 @@ export const ChatLinkPreview = ({
               // the transcript mid-conversation.
               className="h-40 w-full bg-f1-background-secondary object-cover"
             />
-          )}
+          ) : null}
           <PreviewTexts preview={preview} compact={compact} />
         </a>
       ))}

@@ -85,15 +85,20 @@ const canvasContainer = (): HTMLElement => {
 
 // The inset animates, so an assertion has to wait for a settled value: an
 // unwritten edge reads as "" and an in-flight one as some fraction of the
-// target. Assert the exact px so a wrong-but-nonzero inset can't pass.
-const waitForEdge = (edge: "left" | "right", px: number) =>
-  waitFor(() => expect(canvasContainer().style[edge]).toBe(`${px}px`))
+// target. Wait for the exact px so a wrong-but-nonzero inset can't pass, then
+// return it so each test states its own expectation.
+const settledEdge = async (edge: "left" | "right", px: number) => {
+  await waitFor(() => expect(canvasContainer().style[edge]).toBe(`${px}px`))
+  return canvasContainer().style[edge]
+}
 
-const waitForReservedEdge = (edge: "left" | "right") =>
-  waitForEdge(edge, DEFAULT_CHAT_WIDTH)
+const RESERVED_EDGE = `${DEFAULT_CHAT_WIDTH}px`
+const FLUSH_EDGE = "0px"
 
-const waitForFlushEdge = (edge: "left" | "right") =>
-  waitFor(() => expect(canvasContainer().style[edge]).toBe("0px"))
+const reservedEdge = (edge: "left" | "right") =>
+  settledEdge(edge, DEFAULT_CHAT_WIDTH)
+
+const flushEdge = (edge: "left" | "right") => settledEdge(edge, 0)
 
 describe("ApplicationFrame canvas inset", () => {
   beforeEach(() => {
@@ -107,20 +112,20 @@ describe("ApplicationFrame canvas inset", () => {
 
     // Default behavior: the canvas hugs the seam and leaves the chat's width
     // free on that edge.
-    await waitForReservedEdge("right")
+    expect(await reservedEdge("right")).toBe(RESERVED_EDGE)
   })
 
   it("reserves nothing for canvas content that covers the chat", async () => {
     renderFrame()
     await userEvent.click(screen.getByText("open-covering"))
 
-    await waitForFlushEdge("right")
+    expect(await flushEdge("right")).toBe(FLUSH_EDGE)
   })
 
   it("keeps the chat mounted underneath a covering canvas", async () => {
     renderFrame()
     await userEvent.click(screen.getByText("open-covering"))
-    await waitForFlushEdge("right")
+    expect(await flushEdge("right")).toBe(FLUSH_EDGE)
 
     // Covered, not closed: the conversation keeps its state, so dismissing the
     // canvas returns to exactly the step the user left.
@@ -133,41 +138,43 @@ describe("ApplicationFrame canvas inset", () => {
 
     // Mirrored: the canvas sits opposite the panel, so a left-docked chat is
     // reserved on the left and the right edge stays flush.
-    await waitForReservedEdge("left")
-    await waitForFlushEdge("right")
+    expect(await reservedEdge("left")).toBe(RESERVED_EDGE)
+    expect(await flushEdge("right")).toBe(FLUSH_EDGE)
   })
 
   it("clears the mirrored inset for covering content too", async () => {
     renderFrame("left")
     await userEvent.click(screen.getByText("open-covering"))
 
-    await waitForFlushEdge("left")
-    await waitForFlushEdge("right")
+    expect(await flushEdge("left")).toBe(FLUSH_EDGE)
+    expect(await flushEdge("right")).toBe(FLUSH_EDGE)
   })
 
   it("animates the inset away when open content starts covering the chat", async () => {
     renderFrame()
     await userEvent.click(screen.getByText("open-docked"))
-    await waitForReservedEdge("right")
+    expect(await reservedEdge("right")).toBe(RESERVED_EDGE)
 
     // The canvas stays mounted across this swap (content is non-null
     // throughout), so this is the one path that actually animates rather than
     // mounting at its target — motion seeds `initial` from `animate` on mount.
     await userEvent.click(screen.getByText("open-covering"))
-    await waitForFlushEdge("right")
+    expect(await flushEdge("right")).toBe(FLUSH_EDGE)
 
     // ...and back, so a one-way write can't pass.
     await userEvent.click(screen.getByText("open-docked"))
-    await waitForReservedEdge("right")
+    expect(await reservedEdge("right")).toBe(RESERVED_EDGE)
   })
 
   it("tracks the chat width while resizable", async () => {
     renderFrame(undefined, { resizable: true })
     await userEvent.click(screen.getByText("open-docked"))
-    await waitForReservedEdge("right")
+    expect(await reservedEdge("right")).toBe(RESERVED_EDGE)
 
     await userEvent.click(screen.getByText("widen-chat"))
-    await waitForEdge("right", RESIZED_CHAT_WIDTH)
+    expect(await settledEdge("right", RESIZED_CHAT_WIDTH)).toBe(
+      `${RESIZED_CHAT_WIDTH}px`
+    )
   })
 
   it("broadcasts the handle drag so the frame can track it 1:1", async () => {
@@ -180,7 +187,7 @@ describe("ApplicationFrame canvas inset", () => {
     renderFrame(undefined, { resizable: true })
     // The handle only exists once the panel is open and docked.
     await userEvent.click(screen.getByText("open-docked"))
-    await waitForReservedEdge("right")
+    expect(await reservedEdge("right")).toBe(RESERVED_EDGE)
     expect(screen.getByText("resizing:false")).toBeInTheDocument()
 
     const handle = await waitFor(() => {

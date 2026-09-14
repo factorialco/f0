@@ -1,4 +1,4 @@
-import { ComponentProps, ComponentType, ReactNode } from "react"
+import { ComponentProps, ComponentType, ReactNode, RefObject } from "react"
 import { TableHead } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
@@ -350,3 +350,9 @@ export type TableCustomizationProps<
   /** Override the visualization settings key (column order/visibility). If not provided, uses the "table" key. */
   visualizationSettings?: TableVisualizationSettings
 }
+
+/** The `ref` a table row accepts, as callback or object. */
+export type TableRowRef =
+  | ((element: HTMLTableRowElement | null) => void)
+  | RefObject<HTMLTableRowElement>
+  | null

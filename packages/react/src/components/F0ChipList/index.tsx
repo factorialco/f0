@@ -70,12 +70,12 @@ const _F0ChipList = ({
         return <Chip key={index} {...chip} />
       })}
 
-      {showCounter && (
+      {showCounter ? (
         <ChipCounter
           count={remainingCount}
           list={initialRemainingCount ? undefined : remainingChips}
         />
-      )}
+      ) : null}
     </div>
   )
 }

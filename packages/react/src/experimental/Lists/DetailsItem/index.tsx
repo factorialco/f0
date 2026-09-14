@@ -73,37 +73,44 @@ export interface DetailsItemType {
 
 const ItemContent: FC<{ content: DetailsItemContent }> = ({ content }) => (
   <>
-    {content.type === "weekdays" && (
+    {content.type === "weekdays" ? (
       <li className="list-none px-1.5 py-1">
         <Weekdays {...content} />
       </li>
-    )}
-    {content.type === "person" && <DataList.PersonItem {...content} />}
-    {content.type === "item" && <DataList.Item {...content} />}
-    {content.type === "team" && <DataList.TeamItem {...content} />}
-    {content.type === "company" && <DataList.CompanyItem {...content} />}
-    {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
-    {content.type === "alert-tag" && <DataList.AlertTagItem {...content} />}
-    {content.type === "balance-tag" && <DataList.BalanceTagItem {...content} />}
-    {content.type === "status-tag" && <DataList.StatusTagItem {...content} />}
-    {content.type === "raw-tag" && <DataList.RawTagItem {...content} />}
-    {content.type === "tag-list" && (
+    ) : null}
+    {content.type === "person" ? <DataList.PersonItem {...content} /> : null}
+    {content.type === "item" ? <DataList.Item {...content} /> : null}
+    {content.type === "team" ? <DataList.TeamItem {...content} /> : null}
+    {content.type === "company" ? <DataList.CompanyItem {...content} /> : null}
+    {content.type === "dot-tag" ? <DataList.DotTagItem {...content} /> : null}
+    {content.type === "alert-tag" ? (
+      <DataList.AlertTagItem {...content} />
+    ) : null}
+    {content.type === "balance-tag" ? (
+      <DataList.BalanceTagItem {...content} />
+    ) : null}
+    {content.type === "status-tag" ? (
+      <DataList.StatusTagItem {...content} />
+    ) : null}
+    {content.type === "raw-tag" ? <DataList.RawTagItem {...content} /> : null}
+    {content.type === "tag-list" ? (
       <DataList.TagListItem {...content.tagList} />
-    )}
-    {content.type === "avatar-list" && (
+    ) : null}
+    {content.type === "avatar-list" ? (
       <li className="list-none px-1.5 py-1">
         <F0AvatarList {...content.avatarList} />
       </li>
-    )}
-    {content.type === "file" &&
-      (() => {
-        const { type: _type, ...fileProps } = content
-        return (
-          <li className="list-none px-1.5 py-1">
-            <F0FileItem {...fileProps} />
-          </li>
-        )
-      })()}
+    ) : null}
+    {content.type === "file"
+      ? (() => {
+          const { type: _type, ...fileProps } = content
+          return (
+            <li className="list-none px-1.5 py-1">
+              <F0FileItem {...fileProps} />
+            </li>
+          )
+        })()
+      : null}
   </>
 )
 

@@ -81,11 +81,11 @@ beforeEach(() => {
   vi.stubGlobal(
     "URL",
     class extends URL {
-      static override createObjectURL = (blob: Blob) => {
+      static override readonly createObjectURL = (blob: Blob) => {
         blobCapture = blob
         return "blob:mock"
       }
-      static override revokeObjectURL = vi.fn()
+      static override readonly revokeObjectURL = vi.fn()
     }
   )
 
@@ -358,7 +358,9 @@ describe("useExportAction", () => {
       const pageSize = 100
 
       const fetchData = vi.fn().mockImplementation(({ pagination }) => {
-        const cursorIndex = pagination.cursor ? parseInt(pagination.cursor) : 0
+        const cursorIndex = pagination.cursor
+          ? parseInt(pagination.cursor, 10)
+          : 0
         const pageRecords = allRecords.slice(
           cursorIndex,
           cursorIndex + pageSize

@@ -52,19 +52,17 @@ const getGroupedCommands = ({
       ? [
           {
             title: aiBlockConfig.title,
-            commands: [
-              ...aiBlockConfig.buttons.map((button) => ({
-                title: button.label,
-                command: (editor: Editor) => {
-                  editor
-                    .chain()
-                    .focus()
-                    .executeAIAction(button.type, aiBlockConfig)
-                    .run()
-                },
-                icon: button.icon,
-              })),
-            ],
+            commands: aiBlockConfig.buttons.map((button) => ({
+              title: button.label,
+              command: (editor: Editor) => {
+                editor
+                  .chain()
+                  .focus()
+                  .executeAIAction(button.type, aiBlockConfig)
+                  .run()
+              },
+              icon: button.icon,
+            })),
           },
         ]
       : []),

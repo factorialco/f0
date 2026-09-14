@@ -84,7 +84,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
   </table>
 </Unstyled>
 
-### Participant, receipt, reaction, and upload contracts
+### Participant, receipt, reaction, message, and upload contracts
 
 <Unstyled>
   <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
@@ -192,6 +192,22 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
         <td>
           Maximum size of each selected, dropped, or pasted file, in bytes. The
           ApplicationFrame mock uses <code>100 * 1024 * 1024</code> (100 MB).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>runtime.maxMessageCharacters</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>Unlimited</td>
+        <td>—</td>
+        <td>
+          Maximum number of characters in a sent or edited message. An oversized
+          draft stays in the composer, the runtime mutation is not called, and
+          the validation banner remains until the text is within the limit. Omit
+          this field when the host has no message limit.
         </td>
       </tr>
       <tr>
@@ -401,6 +417,7 @@ memoization is required of the host.
 - WHEN the running platform cannot draw an emoji — a release newer than its font, or a sequence it splits into parts → THEN F0 leaves that emoji out of the picker and the `:` suggestions instead of offering a tofu box. Emoji arriving in a received message are shown as-is.
 - WHEN emoji support cannot be measured (no canvas, a sandboxed frame, server rendering) → THEN F0 offers the complete set rather than hiding emoji on the strength of a failed probe.
 - WHEN emoji are typed into the composer → THEN the highlight overlay stays off and the native textarea keeps its own text, so IME composition remains visible. Only mentions and ghost completions turn the overlay on.
+- WHEN a message body and its mention metadata use canonically equivalent Unicode spellings → THEN F0 preserves the body’s exact mention span and its associated person. Editing immediately before or after that span keeps the mention; editing inside it removes the complete mention.
 - WHEN an image, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders an image-sized square preview immediately while the upload continues.
 - WHEN a video enters the composer → THEN F0 keeps the same compact height but renders a wider 16:9 preview so its media type is visually distinct.
 - WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
@@ -441,6 +458,14 @@ Type `:` followed by an emoji shortcode or name. Select a result with the
 keyboard or pointer without leaving the composer.
 
 <Canvas of={Stories.EmojiAutocomplete} />
+
+**Message character limits**
+
+Set <code>runtime.maxMessageCharacters</code> to the transport&apos;s limit. The
+example uses 10 characters to make the validation easy to exercise; a host
+with a 5,000-character transport limit passes <code>5000</code>.
+
+<Canvas of={Stories.MessageCharacterLimit} />
 
 **Document attachments**
 
@@ -485,3 +510,8 @@ Voice notes expose their waveform as a seek slider. Use the arrow keys to move
 through the recording and Home or End to jump to either edge. The playback
 speed button remains in the tab order and replaces the duration while it has
 keyboard focus; its accessible name includes the current speed.
+
+When a message exceeds the configured character limit, submitting from the
+textarea keeps focus there, marks it invalid, associates it with the visible
+error, and announces the atomic alert. Correcting or replacing the draft
+removes the invalid state and alert.

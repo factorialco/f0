@@ -102,14 +102,14 @@ const AiPromotionChatCmp = () => {
           </div>
 
           {/* Description */}
-          {description && (
+          {description ? (
             <p className="text-md text-f1-foreground-secondary">
               {description}
             </p>
-          )}
+          ) : null}
 
           {/* Benefits list */}
-          {benefits?.length && (
+          {benefits?.length ? (
             <ul className="flex flex-col gap-2">
               {benefits.map((benefit, index) => (
                 <li key={index} className="flex items-center gap-1">
@@ -120,10 +120,10 @@ const AiPromotionChatCmp = () => {
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
 
           {/* Actions */}
-          {actions?.length && (
+          {actions?.length ? (
             <div className="flex flex-col gap-3 pt-2">
               {actions.map((action, index) => (
                 <CustomButton
@@ -133,7 +133,7 @@ const AiPromotionChatCmp = () => {
                 />
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 

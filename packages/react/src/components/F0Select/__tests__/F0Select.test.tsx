@@ -1548,6 +1548,27 @@ describe("Select", () => {
     expect(handleChange).not.toHaveBeenCalled()
   })
 
+  it("closes the dropdown when a bottom action is clicked", async () => {
+    const handleAction = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        actions={[{ label: "Reset", onClick: handleAction }]}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByRole("button", { name: "Reset" }))
+
+    expect(handleAction).toHaveBeenCalledOnce()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+  })
+
   it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
     const user = userEvent.setup()
 
@@ -2725,11 +2746,16 @@ describe("Select", () => {
         />
       )
 
-      expect(screen.getByText("Search themes")).toHaveClass("opacity-100")
+      // The text sits in a truncating child; the opacity is on the container.
+      expect(
+        screen.getByText("Search themes").closest('[data-slot="placeholder"]')
+      ).toHaveClass("opacity-100")
 
       await user.type(getTriggerSearchInput(), "O")
 
-      expect(screen.getByText("Search themes")).toHaveClass("opacity-0")
+      expect(
+        screen.getByText("Search themes").closest('[data-slot="placeholder"]')
+      ).toHaveClass("opacity-0")
     })
 
     it("filters on the keystroke, with no wait of its own", async () => {

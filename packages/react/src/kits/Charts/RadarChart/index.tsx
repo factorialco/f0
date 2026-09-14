@@ -146,7 +146,7 @@ const _RadarChart = <K extends ChartConfig>(
               />
             ))}
 
-          {series.length > 1 && (
+          {series.length > 1 ? (
             <ChartLegend
               iconType="star"
               content={
@@ -157,7 +157,7 @@ const _RadarChart = <K extends ChartConfig>(
                 />
               }
             />
-          )}
+          ) : null}
         </RadarChartPrimitive>
       </ChartContainer>
     </DataTestIdWrapper>

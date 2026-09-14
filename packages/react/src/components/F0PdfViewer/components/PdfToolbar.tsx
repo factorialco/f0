@@ -72,14 +72,14 @@ export const PdfToolbar = ({
       )}
     >
       <div className={groupClassName}>
-        {hasDocument && (
+        {hasDocument ? (
           <span
             aria-live="polite"
             className="whitespace-nowrap text-sm font-medium text-f1-foreground-secondary"
           >
             {currentPage} / {totalPages}
           </span>
-        )}
+        ) : null}
         <ToolbarButton
           label={pdfViewer.previousPage}
           onClick={onPreviousPage}
@@ -115,13 +115,13 @@ export const PdfToolbar = ({
       </div>
 
       <div className={groupClassName}>
-        {rotatable && (
+        {rotatable ? (
           <ToolbarButton
             label={pdfViewer.rotate}
             onClick={onRotate}
             icon={Reset}
           />
-        )}
+        ) : null}
         <ToolbarButton
           label={pdfViewer.print}
           onClick={onPrint}

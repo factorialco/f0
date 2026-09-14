@@ -3,6 +3,7 @@ import type {
   F0SelectItemObject,
   F0SelectItemProps,
 } from "@/components/F0Select"
+import type { Action as SelectAction } from "@/components/F0Select/components/SelectBottomActions"
 import {
   DataSourceDefinition,
   FiltersDefinition,
@@ -105,6 +106,11 @@ export type SelectCellConfig<R extends RecordType> = {
   clearable?: boolean
   showSearchBox?: boolean
   defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined
+  /**
+   * Buttons rendered below the options, for what a value cannot express —
+   * dropping a scheduled change, say. Pass a function to decide them per row.
+   */
+  actions?: SelectAction[] | ((item: R) => SelectAction[] | undefined)
 } & (
   | {
       options:

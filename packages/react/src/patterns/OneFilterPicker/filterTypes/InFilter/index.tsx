@@ -42,7 +42,7 @@ export const inFilter: FilterTypeDefinition<
 
       return hasMultipleSelections
         ? `${firstSelectedLabel} +${remainingCount}`
-        : `${firstSelectedLabel}`
+        : firstSelectedLabel
     }
 
     // If getLabel is provided, use it to resolve labels without fetching all options
@@ -109,7 +109,7 @@ export const inFilter: FilterTypeDefinition<
 
     return hasMultipleSelections
       ? `${firstSelectedLabel} +${remainingCount}`
-      : `${firstSelectedLabel}`
+      : firstSelectedLabel
   },
 }
 

@@ -56,12 +56,13 @@ export const ItemContainer = forwardRef<HTMLLIElement, ItemContainerProps>(
           action={action}
           className={cn("flex items-center gap-1.5 p-1.5", className)}
         >
-          {LeftIcon &&
-            (typeof LeftIcon === "function" ? (
+          {LeftIcon ? (
+            typeof LeftIcon === "function" ? (
               LeftIcon({})
             ) : (
               <F0Icon icon={LeftIcon} size="md" aria-hidden="true" />
-            ))}
+            )
+          ) : null}
           <div className="line-clamp-5 flex-1 whitespace-pre-line text-left">
             {text}
           </div>

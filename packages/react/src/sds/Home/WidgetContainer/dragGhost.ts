@@ -88,7 +88,7 @@ export const takePageSurface = (
   }
 }
 
-const TRANSPARENT = ["rgba(0, 0, 0, 0)", "transparent", ""]
+const TRANSPARENT = new Set(["rgba(0, 0, 0, 0)", "transparent", ""])
 
 const opaqueBackgroundOf = (from: Element): string | null => {
   if (typeof getComputedStyle !== "function") {
@@ -96,7 +96,7 @@ const opaqueBackgroundOf = (from: Element): string | null => {
   }
   for (let el: Element | null = from; el; el = el.parentElement) {
     const colour = getComputedStyle(el).backgroundColor
-    if (!TRANSPARENT.includes(colour)) {
+    if (!TRANSPARENT.has(colour)) {
       return colour
     }
   }

@@ -97,12 +97,12 @@ const ImageNodeView = ({
           draggable={false}
           className="block h-auto w-full rounded-md transition-all duration-150 ease-out"
         />
-        {uploading && (
+        {uploading ? (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-f1-background-secondary backdrop-blur-[2px] transition-opacity duration-200">
             <Spinner size="medium" />
           </div>
-        )}
-        {isEditable && !uploading && (
+        ) : null}
+        {isEditable && !uploading ? (
           <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/image:opacity-100">
             <F0Button
               onClick={deleteNode}
@@ -112,8 +112,8 @@ const ImageNodeView = ({
               hideLabel
             />
           </div>
-        )}
-        {isEditable && !uploading && (
+        ) : null}
+        {isEditable && !uploading ? (
           <div
             className={cn(
               "absolute right-2 top-1/2 -translate-y-1/2 flex cursor-col-resize items-center justify-center",
@@ -127,7 +127,7 @@ const ImageNodeView = ({
             aria-label="Resize image"
             tabIndex={0}
           />
-        )}
+        ) : null}
       </div>
     </NodeViewWrapper>
   )

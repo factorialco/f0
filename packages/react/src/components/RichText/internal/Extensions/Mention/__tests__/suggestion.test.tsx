@@ -42,7 +42,9 @@ vi.mock("@tiptap/react", () => {
   }
 
   return {
-    Editor: class {},
+    Editor: class {
+      destroy() {}
+    },
     ReactRenderer: MockReactRenderer,
   }
 })

@@ -33,14 +33,14 @@ const AnchoredCoachmark = ({
       <span ref={setTarget} className="inline-flex">
         <F0Button variant="outline" label={anchorLabel} />
       </span>
-      {target && (
+      {target ? (
         <F0Coachmark
           {...props}
           target={target}
           onAction={() => undefined}
           onClose={() => undefined}
         />
-      )}
+      ) : null}
     </>
   )
 }

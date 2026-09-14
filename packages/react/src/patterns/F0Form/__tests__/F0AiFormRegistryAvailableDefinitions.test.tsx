@@ -907,14 +907,14 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
               capturedRegistry = r
             }}
           />
-          {showForm && (
+          {showForm ? (
             <F0Form
               name="canvas-form"
               schema={formSchema}
               defaultValues={{ name: "Alice", email: "alice@test.com" }}
               onSubmit={async () => ({ success: true })}
             />
-          )}
+          ) : null}
         </F0AiFormRegistryProvider>
       )
     }

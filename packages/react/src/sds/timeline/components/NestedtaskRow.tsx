@@ -26,7 +26,9 @@ const NestedItem = ({ props }: { props: F0TimelineRowTaskProps }) => {
       >
         {title}
       </h4>
-      {description && <F0Text content={description} variant="description" />}
+      {description ? (
+        <F0Text content={description} variant="description" />
+      ) : null}
     </div>
   )
 }
@@ -63,12 +65,12 @@ export const NestedtaskRow = ({
       <div className="flex min-h-8 items-center gap-3">
         <NestedtaskHeader props={props} contentId={contentId} />
       </div>
-      {metadata && hasMetadata && (
+      {metadata && hasMetadata ? (
         <div className="pl-9">
           <Metadata items={metadata} />
         </div>
-      )}
-      {isExpanded && (
+      ) : null}
+      {isExpanded ? (
         <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
           {content !== undefined
             ? content
@@ -76,8 +78,8 @@ export const NestedtaskRow = ({
                 <NestedItem key={`${item.title}-${index}`} props={item} />
               ))}
         </div>
-      )}
-      {hasActions && (
+      ) : null}
+      {hasActions ? (
         <div className="pl-9">
           <Actions
             primaryAction={primaryAction}
@@ -85,7 +87,7 @@ export const NestedtaskRow = ({
             otherActions={otherActions}
           />
         </div>
-      )}
+      ) : null}
     </TimelineRowLayout>
   )
 }

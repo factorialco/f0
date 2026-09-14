@@ -14,7 +14,12 @@ const ICON_MOTION = {
   exit: { opacity: 0 },
 }
 
-export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
+export const F0ActionItem = ({
+  title,
+  suffix,
+  status,
+  inGroup,
+}: F0ActionItemProps) => {
   const shouldReduceMotion = useReducedMotion()
   const transition = {
     duration: shouldReduceMotion ? 0 : 0.18,
@@ -30,7 +35,7 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
       <div className="flex h-5 w-6 shrink-0 items-center justify-start">
         <AnimatePresence mode="wait">
-          {inProgress && (
+          {inProgress ? (
             <motion.div
               key="inProgress"
               className="flex h-5 w-5 shrink-0 items-center justify-center"
@@ -43,13 +48,13 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
                 icon={DottedCircle}
               />
             </motion.div>
-          )}
-          {(executing || writing) && (
+          ) : null}
+          {executing || writing ? (
             <div className="flex h-5 w-5 shrink-0 items-center justify-center">
               <ChatSpinner variant={executing ? "default" : "continuous"} />
             </div>
-          )}
-          {completed && (
+          ) : null}
+          {completed ? (
             <motion.div
               key="completed"
               {...ICON_MOTION}
@@ -63,10 +68,10 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
                 icon={OutlineCircle}
               />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
-      {title && (
+      {title ? (
         <p
           className={cn(
             "text-pretty leading-5",
@@ -75,7 +80,12 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
         >
           {title}
         </p>
-      )}
+      ) : null}
+      {/* Sibling of the title, not a child: `shine-text` paints through
+          `-webkit-text-fill-color: transparent`, which children inherit — the
+          counter would shimmer along with the label instead of sitting still
+          beside it. */}
+      {suffix ? <span className="shrink-0 leading-5">{suffix}</span> : null}
     </div>
   )
 }

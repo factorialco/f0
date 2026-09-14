@@ -99,7 +99,7 @@ export const MockConnectedChatHeader = ({
         credits={credits}
         employeeCredits={employeeCredits}
       />
-      {isHistoryOpen && historyEnabled && (
+      {isHistoryOpen && historyEnabled ? (
         <MockChatHistoryDialog
           fetchThreads={fetchThreads}
           deleteThread={deleteThread}
@@ -107,7 +107,7 @@ export const MockConnectedChatHeader = ({
           onSelectThread={handleSelectThread}
           onNewChat={handleNewChat}
         />
-      )}
+      ) : null}
     </>
   )
 }

@@ -7,7 +7,11 @@ import {
   isSameYear,
   startOfQuarter,
 } from "date-fns"
-import { DateRange, DateRangeComplete } from "../../types"
+import {
+  DateRange,
+  DateRangeComplete,
+  OptionalCalendarSelection,
+} from "../../types"
 import {
   formatDateRange,
   formatDateToString,
@@ -24,7 +28,7 @@ import { QuarterView } from "./QuarterView"
 const QUARTER_FORMAT = "'Q'Q yyyy"
 
 export function toQuarterGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
+  T extends OptionalCalendarSelection,
 >(date: T): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(date, startOfQuarter, endOfQuarter)
 }
@@ -36,11 +40,11 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
   }
 }
 
-const formatQuarterShort = (date: Date | DateRange | undefined | null) => {
+const formatQuarterShort = (date: OptionalCalendarSelection) => {
   return formatDateToString(date, QUARTER_FORMAT)
 }
 
-const formatQuarterLong = (date: Date | DateRange | undefined | null) => {
+const formatQuarterLong = (date: OptionalCalendarSelection) => {
   const dateRange = toQuarterGranularityDateRange(date)
   if (!dateRange) {
     return ""

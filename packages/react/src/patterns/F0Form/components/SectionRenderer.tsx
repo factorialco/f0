@@ -55,7 +55,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
         )}
       >
         <SectionHeader title={title} description={description ?? ""} />
-        {action && (
+        {action ? (
           <F0Button
             label={action.label}
             icon={action.icon}
@@ -64,7 +64,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
             variant="outline"
             size="md"
           />
-        )}
+        ) : null}
       </div>
       <div className={`flex flex-col ${FIELD_GAP}`}>
         {groupedItems.map((item, index) => {

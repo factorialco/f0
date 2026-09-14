@@ -51,7 +51,7 @@ export const TextareaField = ({
       >
         {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
       </div>
-      {hasOverlay && (
+      {hasOverlay ? (
         <div
           ref={highlightRef}
           aria-hidden={true}
@@ -85,8 +85,8 @@ export const TextareaField = ({
             )
           )}
         </div>
-      )}
-      {!inputValue && !multiplePlaceholders && (
+      ) : null}
+      {!inputValue && !multiplePlaceholders ? (
         <p
           className={cn(
             "col-start-1 row-start-1",
@@ -101,7 +101,7 @@ export const TextareaField = ({
             ? placeholders[0]
             : resolvedDefaultPlaceholder}
         </p>
-      )}
+      ) : null}
       <textarea
         aria-label={resolvedDefaultPlaceholder}
         autoFocus={false}
@@ -143,14 +143,14 @@ export const TextareaField = ({
               : "caret-transparent")
         )}
       />
-      {multiplePlaceholders && (
+      {multiplePlaceholders ? (
         <TypewriterPlaceholder
           placeholders={placeholders}
           defaultPlaceholder={resolvedDefaultPlaceholder}
           inputValue={inputValue}
           inProgress={inProgress ?? false}
         />
-      )}
+      ) : null}
     </div>
   )
 }

@@ -90,7 +90,7 @@ export const GroupingSelector = <
             }
           />
         </div>
-        {currentGrouping?.field && (
+        {currentGrouping?.field ? (
           <F0Button
             hideLabel
             label={i18n.collections.grouping.toggleDirection}
@@ -103,7 +103,7 @@ export const GroupingSelector = <
               })
             }
           />
-        )}
+        ) : null}
       </div>
     </div>
   )

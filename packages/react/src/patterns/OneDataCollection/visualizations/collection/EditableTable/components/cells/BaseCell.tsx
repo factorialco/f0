@@ -85,9 +85,9 @@ export function BaseCell({
       )}
     >
       <ErrorTooltip message={error}>
-        {hintPosition === "left" && hintIcon}
+        {hintPosition === "left" ? hintIcon : null}
         <div className="min-w-0 flex-1">{children}</div>
-        {hintPosition === "right" && hintIcon}
+        {hintPosition === "right" ? hintIcon : null}
       </ErrorTooltip>
     </div>
   )

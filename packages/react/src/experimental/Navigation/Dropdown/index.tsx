@@ -126,7 +126,7 @@ const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
                   }}
                   className="flex w-full cursor-pointer items-center gap-2 p-3"
                 >
-                  {item.icon && (
+                  {item.icon ? (
                     <span
                       className={cn(
                         "h-5 w-5 text-f1-icon",
@@ -135,7 +135,7 @@ const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
                     >
                       <F0Icon icon={item.icon} size="md" />
                     </span>
-                  )}
+                  ) : null}
                   <span
                     className={cn(
                       "font-medium",

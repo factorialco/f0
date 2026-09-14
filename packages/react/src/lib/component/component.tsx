@@ -14,6 +14,6 @@ export const Component = <
 
     return <Component ref={ref} {...props} />
   })
-  Forwarded.displayName = `${meta.name}`
+  Forwarded.displayName = meta.name
   return Forwarded
 }

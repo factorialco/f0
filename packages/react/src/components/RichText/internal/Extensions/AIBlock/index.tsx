@@ -250,9 +250,9 @@ const AIButtonsSection = ({
   onButtonClick: (type: string) => void
 }) => (
   <div className="flex flex-col gap-2">
-    {config.title && (
+    {config.title ? (
       <div className="text-f1-foreground-secondary">{config.title}</div>
-    )}
+    ) : null}
     <div className="relative flex flex-row flex-wrap items-center gap-2">
       {config.buttons?.map((button, index) => (
         <F0Button

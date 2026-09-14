@@ -543,12 +543,12 @@ const LargeAsyncOptionsComponent = (props: { cache: boolean }) => {
         This example loads a large list of countries asynchronously. Open the
         Countries filter and use the search field to filter the options.
       </p>
-      {props.cache && (
+      {props.cache ? (
         <p>
           The options are cached so that the same options are not loaded again
           when the filter is opened.
         </p>
-      )}
+      ) : null}
       <OneFilterPickerComponent
         filters={largeAsyncDefinition}
         value={filters}

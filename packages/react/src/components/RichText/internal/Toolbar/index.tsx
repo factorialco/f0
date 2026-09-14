@@ -36,7 +36,7 @@ const intersperse = (arr: ReactNode[], sep: ReactNode) =>
   arr.map((item, index) => (
     <Fragment key={`intersperse-${index}`}>
       {item}
-      {index < arr.length - 1 && sep}
+      {index < arr.length - 1 ? sep : null}
     </Fragment>
   ))
 

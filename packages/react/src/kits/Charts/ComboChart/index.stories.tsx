@@ -172,7 +172,7 @@ export const Biaxial: Meta<typeof ComboChart<typeof departmentConfig>> = {
     },
     yAxis: {
       hide: false,
-      tickFormatter: (value: string) => `${value}`,
+      tickFormatter: (value: string) => value,
     },
     legend: true,
   },

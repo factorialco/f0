@@ -186,7 +186,7 @@ export const ChatMessageAttachments = ({
         isMine ? "items-end" : "items-start"
       )}
     >
-      {images.length > 0 && (
+      {images.length > 0 ? (
         // The mosaic clips its own cells, so the cells carry no radius — the
         // interior seams stay square like WhatsApp's. The hairline lives on the
         // container for the same reason mobile puts it there: a mostly-white
@@ -239,7 +239,7 @@ export const ChatMessageAttachments = ({
             )
           })}
         </div>
-      )}
+      ) : null}
       {videoFiles.map((file, i) => (
         <ChatVideoAttachment
           key={`${file.url}-${i}`}
@@ -287,7 +287,7 @@ export const ChatMessageAttachments = ({
       {cards.map((card, i) => (
         <ChatCardAttachment key={`${card.title}-${i}`} card={card} />
       ))}
-      {plainFiles.length > 0 && (
+      {plainFiles.length > 0 ? (
         // Files flow side by side and wrap, instead of stacking vertically.
         <div className={cn("flex flex-wrap gap-1", isMine && "justify-end")}>
           {plainFiles.map((file, i) => (
@@ -308,10 +308,10 @@ export const ChatMessageAttachments = ({
             />
           ))}
         </div>
-      )}
-      {metaHost === "below" && (
+      ) : null}
+      {metaHost === "below" ? (
         <ChatMessageMeta message={message} placement="below" />
-      )}
+      ) : null}
     </div>
   )
 }

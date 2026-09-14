@@ -19,9 +19,8 @@ export function omitProps<T extends Record<string, unknown>, K extends string>(
   obj: T,
   keys: readonly K[]
 ): Omit<T, K> {
-  const result = { ...obj }
-  for (const key of keys) {
-    delete result[key as keyof T]
-  }
-  return result as Omit<T, K>
+  const omitted = new Set<string>(keys)
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => !omitted.has(key))
+  ) as Omit<T, K>
 }

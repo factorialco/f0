@@ -67,9 +67,8 @@ export function useOverflowCalculation<T>(
     const itemElements = measurementContainerRef.current.children
     const widths: number[] = []
 
-    for (let i = 0; i < itemElements.length; i++) {
-      const itemWidth = itemElements[i].getBoundingClientRect().width
-      widths.push(itemWidth)
+    for (const itemElement of itemElements) {
+      widths.push(itemElement.getBoundingClientRect().width)
     }
 
     return widths
@@ -81,8 +80,8 @@ export function useOverflowCalculation<T>(
       let visibleCount = 0
       let accumulatedWidth = 0
 
-      for (let i = 0; i < itemWidths.length; i++) {
-        const newWidth = accumulatedWidth + itemWidths[i]
+      for (const itemWidth of itemWidths) {
+        const newWidth = accumulatedWidth + itemWidth
 
         if (newWidth > availableWidth) {
           break

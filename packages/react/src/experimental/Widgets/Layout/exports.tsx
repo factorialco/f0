@@ -21,5 +21,14 @@ export type {
   WidgetContainerSide,
   WidgetVirtualization,
 } from "../../../sds/Home/WidgetContainer"
+// Named by NewHomeLayoutProps (`tracking`). The providers and the hook behind
+// them stay internal: the layout is the only thing that publishes tracking, and
+// the components inside it are the only things that report.
+export type {
+  HomeTrackingOptions,
+  HomeWidgetActionEvent,
+  HomeWidgetActionKind,
+  HomeWidgetItemActivateEvent,
+} from "../../../sds/Home/tracking"
 export * from "./Dashboard"
 export * from "./WidgetStrip"

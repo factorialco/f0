@@ -146,7 +146,7 @@ function _OnePagination({
   return (
     <PaginationRoot>
       <PaginationContent role="navigation" aria-label={ariaLabel}>
-        {showControls && (
+        {showControls ? (
           <PaginationItem>
             <PaginationPrevious
               aria-disabled={currentPage === 1 || disabled}
@@ -165,39 +165,40 @@ function _OnePagination({
               }}
             />
           </PaginationItem>
-        )}
+        ) : null}
 
-        {!isIndeterminate &&
-          getPageNumbers.map((page, index) => (
-            <PaginationItem
-              key={index}
-              className={cn(
-                "hidden sm:flex",
-                page === currentPage && "flex",
-                disabled && "pointer-events-none opacity-50"
-              )}
-            >
-              {page === "..." ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  aria-current={page === currentPage ? "page" : undefined}
-                  isActive={page === currentPage}
-                  onClick={() => handlePageChange(page as number)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handlePageChange(page as number)
-                    }
-                  }}
-                  tabIndex={0}
-                >
-                  {page}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
+        {!isIndeterminate
+          ? getPageNumbers.map((page, index) => (
+              <PaginationItem
+                key={index}
+                className={cn(
+                  "hidden sm:flex",
+                  page === currentPage && "flex",
+                  disabled && "pointer-events-none opacity-50"
+                )}
+              >
+                {page === "..." ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    aria-current={page === currentPage ? "page" : undefined}
+                    isActive={page === currentPage}
+                    onClick={() => handlePageChange(page as number)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handlePageChange(page as number)
+                      }
+                    }}
+                    tabIndex={0}
+                  >
+                    {page}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))
+          : null}
 
-        {showControls && (
+        {showControls ? (
           <PaginationItem>
             <PaginationNext
               aria-disabled={
@@ -230,7 +231,7 @@ function _OnePagination({
               }}
             />
           </PaginationItem>
-        )}
+        ) : null}
       </PaginationContent>
     </PaginationRoot>
   )

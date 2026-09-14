@@ -50,5 +50,5 @@ export function F0EventCatcherProvider({
 export function useF0EventCatcher() {
   const context = useContext(EventCatcherContext)
 
-  return context ?? { onEvent: () => Promise.resolve(false) }
+  return context ?? { onEvent: () => undefined }
 }

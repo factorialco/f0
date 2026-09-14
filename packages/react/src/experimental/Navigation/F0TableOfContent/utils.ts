@@ -203,17 +203,13 @@ export function wouldCreateCycle(
     return false
   }
 
-  function isDescendant(
-    items: TOCItem[],
-    ancestorId: string,
-    descendantId: string
-  ): boolean {
+  function isDescendant(items: TOCItem[], descendantId: string): boolean {
     for (const item of items) {
       if (item.id === descendantId) {
         return true
       }
       if (item.children) {
-        if (isDescendant(item.children, ancestorId, descendantId)) {
+        if (isDescendant(item.children, descendantId)) {
           return true
         }
       }
@@ -224,7 +220,7 @@ export function wouldCreateCycle(
   // Check if targetParentId is a descendant of itemId
   const itemWithChildren = findItemInTree(items, itemId)
   if (itemWithChildren?.item.children) {
-    return isDescendant(itemWithChildren.item.children, itemId, targetParentId)
+    return isDescendant(itemWithChildren.item.children, targetParentId)
   }
 
   return false

@@ -73,7 +73,7 @@ export function CardOptions({
           "pointer-events-auto absolute right-2 top-2 rounded-sm bg-f1-background/60 p-1 shadow-md backdrop-blur-sm"
       )}
     >
-      {hasOtherActions && (
+      {hasOtherActions ? (
         <div className="flex items-center justify-center">
           <Dropdown items={otherActions} open={isOpen} onOpenChange={setIsOpen}>
             <ButtonInternal
@@ -89,8 +89,8 @@ export function CardOptions({
             />
           </Dropdown>
         </div>
-      )}
-      {selectable && (
+      ) : null}
+      {selectable ? (
         <div className="flex items-center justify-center">
           <F0Checkbox
             title={title}
@@ -100,8 +100,8 @@ export function CardOptions({
             stopPropagation
           />
         </div>
-      )}
-      {bookmark && (
+      ) : null}
+      {bookmark ? (
         <div className="flex items-center justify-center">
           <ButtonInternal
             label={bookmark.label ?? title ?? translations.actions.save}
@@ -118,7 +118,7 @@ export function CardOptions({
             }}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

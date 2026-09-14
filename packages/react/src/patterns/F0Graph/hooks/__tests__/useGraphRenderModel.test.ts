@@ -25,6 +25,8 @@ const wrapper = ({ children }: { children: ReactNode }) =>
 const renderModel = (options: Parameters<typeof useGraphRenderModel>[0]) =>
   renderHook(() => useGraphRenderModel(options), { wrapper })
 
+// Fixture builder: 39 call sites read better positionally than as objects.
+// oxlint-disable-next-line max-params
 const treeNode = (
   id: string,
   parentId: string | null,

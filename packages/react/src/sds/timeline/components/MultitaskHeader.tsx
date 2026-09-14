@@ -23,12 +23,12 @@ export const MultitaskHeader = ({
           onOpenChange={() => onExpandToggle()}
           showOpenChange
         />
-        {completedCount !== undefined && (
+        {completedCount !== undefined ? (
           <F0TagStatus
             text={`${completedCount}/${taskCount}`}
             variant={status === "completed" ? "positive" : "warning"}
           />
-        )}
+        ) : null}
       </div>
     </>
   )

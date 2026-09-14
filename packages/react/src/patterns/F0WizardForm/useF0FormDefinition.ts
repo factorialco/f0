@@ -211,7 +211,7 @@ export function useAsyncDefaultValues<T>(
           setIsLoading(false)
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!controller.signal.aborted) {
           console.warn(
             "[useAsyncDefaultValues] Async defaultValues rejected:",

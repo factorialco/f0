@@ -2,14 +2,35 @@ import { StoryFn, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 import { CheckDouble, ExternalLink } from "@/icons/app"
 import { WithDataTestIdProps } from "@/lib/data-testid"
-import { CalloutSkeleton } from "./CalloutInternal"
+import { CalloutSkeleton } from "./CalloutSkeleton"
 import { F0Callout, F0CalloutProps } from "."
-
 const meta = {
   title: "AI/AICallout",
   component: F0Callout,
+  // The tag is what the sidebar badge (❌) and the component-status API read.
+  // Deliberately not a "(deprecated)" title suffix: that changes the Storybook
+  // id, so every existing link and bookmark to this page 404s, and it marks
+  // nothing the tag does not already mark.
+  tags: ["deprecated"],
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component: [
+          "**Deprecated — use `F0AiCallout`.** Same construction, brought in line with the design.",
+          "",
+          "This one leaves `critical` with no glyph and an uncoloured title, so the strongest status",
+          "is the only one that is not signalled, and its `ai` variant stacks a gradient on a semantic",
+          "colour — two signals for one message. It is also silent about authorship, which for AI",
+          "output is the thing a reader needs most.",
+          "",
+          'Migration: `variant` → `status` (`variant="ai"` becomes `status="neutral"`, which needs an',
+          "`icon`), `actions: [a, b]` → `action` plus `secondaryAction` where the second really is the",
+          "way out of the first, and `children` unchanged. The byline is not a prop: every F0AiCallout",
+          "renders it.",
+        ].join("\n"),
+      },
+    },
   },
   argTypes: {
     title: {

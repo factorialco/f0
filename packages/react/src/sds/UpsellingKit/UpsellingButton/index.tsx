@@ -118,7 +118,7 @@ function _UpsellingButton({
         loading={isLoading}
         {...props}
       />
-      {showConfirmation && responseStatus && (
+      {showConfirmation && responseStatus ? (
         <UpsellRequestResponseDialog
           open={true}
           onClose={handleModalClose}
@@ -129,7 +129,7 @@ function _UpsellingButton({
           closeLabel={closeLabel}
           portalContainer={portalContainer}
         />
-      )}
+      ) : null}
     </>
   )
 }

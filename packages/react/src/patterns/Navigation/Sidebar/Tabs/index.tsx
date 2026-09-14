@@ -5,10 +5,20 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
-const UnreadDot = () => {
+
+const UnreadDot = ({ isActive }: { isActive: boolean }) => {
   return (
-    <div className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
-      <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
+    <div className="absolute right-0 top-0 flex h-2 w-2 items-center justify-center rounded-full bg-f1-background">
+      <div
+        className={cn(
+          "flex h-2 w-2 items-center justify-center rounded-full",
+          isActive
+            ? " bg-f1-background-secondary"
+            : "bg-f1-background-secondary-hover"
+        )}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-f1-special-highlight" />
+      </div>
     </div>
   )
 }
@@ -123,7 +133,7 @@ const TabButton = ({
           Toggled (no fade) so it appears/disappears directly — shown only once
           the pill has settled (see `showAura`) so it never flashes mid-transition.
           The slower spin comes from the inline animation-duration (keyframe is 2s). */}
-      {showAura && (
+      {showAura ? (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded"
@@ -134,16 +144,16 @@ const TabButton = ({
           />
           <span className="absolute inset-0 rounded bg-f1-background" />
         </span>
-      )}
+      ) : null}
       {/* The sliding active background — one element shared across tabs. */}
-      {isActive && (
+      {isActive ? (
         <motion.span
           layoutId="sidebar-tab-active-pill"
           transition={transition}
           aria-hidden="true"
           className="absolute inset-0 rounded bg-f1-background-inverse-secondary ring-1 ring-inset ring-f1-border dark:bg-f1-background"
         />
-      )}
+      ) : null}
       <div className="main flex h-8 min-w-0 items-center justify-center">
         {/* Icon inherits the span's colour (F0Icon ignores a passed className),
             so an inactive tab only darkens its icon on hover — no background. */}
@@ -157,6 +167,8 @@ const TabButton = ({
           <F0Icon icon={tab.icon} size="md" color="currentColor" />
           {/* The unread dot shows on an inactive tab (hover only darkens the
               icon now, so the dot no longer needs to hide). */}
+
+          {tab.badge ? <UnreadDot isActive={isActive} /> : null}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
@@ -179,8 +191,6 @@ const TabButton = ({
           </span>
         </span>
       </div>
-
-      {tab.badge && <UnreadDot />}
     </button>
   )
 }

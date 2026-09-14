@@ -88,13 +88,14 @@ export function useAxisLabelTooltip(
         return overlay
       }
       overlay = document.createElement("div")
+      const padding = theme.tooltip.padding.map((p) => `${p}px`).join(" ")
       overlay.style.cssText = [
         "position: absolute",
         "pointer-events: none",
         "z-index: 9999",
         "opacity: 0",
         "transition: opacity 0.15s",
-        `padding: ${theme.tooltip.padding.map((p) => `${p}px`).join(" ")}`,
+        `padding: ${padding}`,
         `border-radius: ${theme.tooltip.borderRadius}px`,
         `border: 1px solid ${theme.colors.borderSecondary}`,
         `box-shadow: ${theme.tooltip.boxShadow}`,

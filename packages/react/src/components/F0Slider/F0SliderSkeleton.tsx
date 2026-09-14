@@ -13,7 +13,7 @@ const F0SliderSkeleton = ({ hideLabel = false }: F0SliderSkeletonProps) => {
       aria-busy="true"
       aria-live="polite"
     >
-      {!hideLabel && <Skeleton className="h-4 w-24 rounded-md" />}
+      {!hideLabel ? <Skeleton className="h-4 w-24 rounded-md" /> : null}
       <div className="flex items-center py-2">
         <Skeleton className="h-1.5 w-full rounded-full" />
       </div>

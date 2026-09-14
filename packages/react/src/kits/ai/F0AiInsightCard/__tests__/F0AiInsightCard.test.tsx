@@ -41,7 +41,9 @@ vi.mock("@/ui/OverflowList", () => ({
     return (
       <div data-testid="overflow-list-mock">
         {visible.map((item, i) => renderListItem(item, i))}
-        {overflowCount > 0 && renderOverflowIndicator?.(overflowCount, false)}
+        {overflowCount > 0
+          ? renderOverflowIndicator?.(overflowCount, false)
+          : null}
       </div>
     )
   },

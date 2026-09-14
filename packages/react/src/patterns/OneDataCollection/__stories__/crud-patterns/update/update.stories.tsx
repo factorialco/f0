@@ -100,11 +100,11 @@ function RightPositionDialogScenario({
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && (
+        {previewedResource ? (
           <div className="flex h-full flex-col p-4">
             <CrudContentPlaceholder minHeight="h-[calc(95dvh-12.5rem)]" />
           </div>
-        )}
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
@@ -126,7 +126,7 @@ function RightPositionDialogScenario({
         }}
         disableContentPadding
       >
-        {selectedResource && (
+        {selectedResource ? (
           <ResourceFormF0
             key={selectedResource.id}
             mode="update"
@@ -134,7 +134,7 @@ function RightPositionDialogScenario({
             formRef={formRef}
             onSuccess={() => setSelectedResource(null)}
           />
-        )}
+        ) : null}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -201,7 +201,9 @@ function UpdateWithSameFormScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {previewedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
@@ -356,7 +358,9 @@ function CardActionsUpdateScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {previewedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}

@@ -35,6 +35,7 @@ import {
   type DescriptionPart,
   type HomeListItemAction,
 } from "./HomeListItem"
+import { useHomeWidgetTracking } from "./tracking"
 
 /**
  * The item-churn animation, re-exported so a BESPOKE renderer draws its items
@@ -1091,6 +1092,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const { schema, items } = params
   const allRows = items as ListRow[]
   const [expanded, setExpanded] = useState(false)
+  const { reportAction, reportItemActivate } = useHomeWidgetTracking()
   // ASKED, not measured: the slot is built before the frame renders but drawn
   // inside it, so the card it landed in is the one thing it can only learn from
   // context. `false` for a list rendered outside a `Widget`.
@@ -1119,7 +1121,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       {/* Keyed by the row's OWN id, so a row that goes away is the one that
           animates out and the rest close the gap. */}
       <HomeSlotItems>
-        {rows.map(({ href, description, ...row }) => {
+        {rows.map(({ href, description, ...row }, index) => {
           // A compact row hides its second line and offers it on hover
           // instead — as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
           // segmented description arrives dot-joined and untinted. Computed
@@ -1138,6 +1140,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
               right={listRight(schema.right, row, rightAvatarSize)}
               actions={row.actions}
               href={schema.clickBehavior === "link" ? href : undefined}
+              onActivate={() => reportItemActivate(row.id, index + 1)}
             />
           )
           return (
@@ -1171,7 +1174,14 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
             }
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              // Reported on the way OUT of the cap only: collapsing the list
+              // again is not a reader reaching for more.
+              if (!expanded) {
+                reportAction("view-more")
+              }
+              setExpanded(!expanded)
+            }}
           />
         </div>
       ) : null}

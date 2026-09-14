@@ -191,12 +191,12 @@ function CategoryBar({
             </div>
           </div>
         </TooltipTrigger>
-        {!hideTooltip && tooltipItems.length > 0 && (
+        {!hideTooltip && tooltipItems.length > 0 ? (
           <CategoryBarTooltipContent
             items={tooltipItems}
             activeKey={activeKey}
           />
-        )}
+        ) : null}
       </Tooltip>
     </TooltipProvider>
   )

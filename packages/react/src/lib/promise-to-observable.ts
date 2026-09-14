@@ -49,10 +49,10 @@ export function promiseToObservable<T>(
         })
         observer.complete()
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         observer.next({
           loading: false,
-          error,
+          error: error instanceof Error ? error : new Error(String(error)),
           data: null,
         })
         observer.complete()

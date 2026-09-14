@@ -129,7 +129,7 @@ export function BreadcrumbCollectionSelect({
         showSearchBox={item.searchbox}
         onFiltersChange={stableOnFiltersChange}
       />
-      {pendingHref && (
+      {pendingHref ? (
         <Link
           href={pendingHref}
           ref={navRef}
@@ -137,7 +137,7 @@ export function BreadcrumbCollectionSelect({
           aria-hidden
           className="hidden"
         />
-      )}
+      ) : null}
     </>
   )
 }

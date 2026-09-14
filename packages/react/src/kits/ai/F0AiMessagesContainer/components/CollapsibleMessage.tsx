@@ -72,7 +72,7 @@ export const CollapsibleMessage = ({
         <div className="min-h-6 flex items-center">
           <span>{title}</span>
         </div>
-        {!lockOpen && <F0Icon icon={ChevronRight} />}
+        {!lockOpen ? <F0Icon icon={ChevronRight} /> : null}
       </CollapsibleTrigger>
       <CollapsibleContent forceMount className="data-[state=open]:mt-3">
         <motion.div

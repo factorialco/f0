@@ -107,7 +107,7 @@ const DialogActions = ({
         onClick={onClose}
         size={isSmallScreen ? "lg" : undefined}
       />
-      {showSecondButton && (
+      {showSecondButton ? (
         <F0Button
           variant="promote"
           label={successButtonLabel}
@@ -117,7 +117,7 @@ const DialogActions = ({
           }}
           size={isSmallScreen ? "lg" : undefined}
         />
-      )}
+      ) : null}
     </>
   )
 

@@ -69,7 +69,7 @@ function StructuredHint({
           <p className="text-f1-foreground-inverse-secondary">
             {info.description}
           </p>
-          {info.link && (
+          {info.link ? (
             <button
               type="button"
               onClick={() => {
@@ -83,7 +83,7 @@ function StructuredHint({
             >
               {info.link.label}
             </button>
-          )}
+          ) : null}
         </div>
       </HoverCardContent>
     </HoverCard>

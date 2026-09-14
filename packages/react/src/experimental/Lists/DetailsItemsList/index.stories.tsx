@@ -178,8 +178,8 @@ export const TableViewWithPersonList: Story = {
         title: "Tech Lead",
         content: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: "Jordan",
+          lastName: "Avery",
           avatarUrl: "/avatars/person05.jpg",
         },
       },
@@ -232,8 +232,8 @@ export const WithAvatarList: Story = {
                 src: "/avatars/person01.jpg",
               },
               {
-                firstName: "Dani",
-                lastName: "Moreno",
+                firstName: "Jordan",
+                lastName: "Avery",
                 src: "/avatars/person05.jpg",
               },
               {
@@ -282,8 +282,8 @@ export const TableViewWithAvatarList: Story = {
                 src: "/avatars/person01.jpg",
               },
               {
-                firstName: "Dani",
-                lastName: "Moreno",
+                firstName: "Jordan",
+                lastName: "Avery",
                 src: "/avatars/person05.jpg",
               },
               {

@@ -151,6 +151,13 @@ export type DataCollectionSourceDefinition<
    * Data Collection specific datasource elements / features
    */
 
+  /**
+   * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+   * lists everything the callbacks below close over: miss one and a row keeps
+   * calling the closure it mounted with.
+   */
+  memoizeDefinition?: boolean
+
   /** Navigation filters */
   navigationFilters?: NavigationFilters
 
@@ -218,6 +225,19 @@ export type DataCollectionSource<
     NavigationFilters,
     Grouping
   > & {
+    /**
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
+     */
+    definition?: DataCollectionSourceDefinition<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>
     setCurrentNavigationFilters: React.Dispatch<
       React.SetStateAction<NavigationFiltersState<NavigationFilters>>

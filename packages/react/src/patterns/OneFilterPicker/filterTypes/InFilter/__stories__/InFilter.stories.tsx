@@ -352,7 +352,7 @@ const dataSourceFilterOptions: InFilterOptions<string, MockUser> = {
     dataAdapter: {
       fetchData: async ({ pagination, search }) => {
         const { cursor, perPage = 10 } = pagination
-        const startIndex = cursor ? parseInt(cursor) : 0
+        const startIndex = cursor ? parseInt(cursor, 10) : 0
         const endIndex = startIndex + perPage
 
         const users = search
