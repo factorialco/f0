@@ -1,3 +1,6 @@
+import { AiCalloutAction as AiCalloutAction_2 } from './types';
+import { AiCalloutFinding as AiCalloutFinding_2 } from './types';
+import { AiCalloutStatus as AiCalloutStatus_2 } from './types';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './experimental';
@@ -28,6 +31,7 @@ import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
+import { DataAttributes as DataAttributes_2 } from './experimental';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
@@ -62,6 +66,7 @@ import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
+import { IconType as IconType_2 } from './experimental';
 import { InFilterOptions } from './InFilter/types';
 import { ItemProps } from './types';
 import { JSONContent } from '@tiptap/react';
@@ -445,6 +450,252 @@ declare type AIButton = {
     editable?: boolean;
 };
 
+export declare type AiCalloutAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
+/**
+ * One entry in a stacked callout. Each finding is resolved on its own, so each
+ * carries its own action — "Review" on a duplicate invoice does something
+ * different from "Review" on a tax mismatch.
+ */
+export declare type AiCalloutFinding = {
+    /**
+     * Stable across renders. Findings are resolved and removed one at a time, so
+     * an index would re-key the survivors and animate the wrong rows out.
+     */
+    id: string;
+    title: string;
+    description: ReactNode;
+    action?: AiCalloutAction;
+};
+
+declare type AiCalloutSharedProps = DataAttributes_3 & {
+    /**
+     * Required on purpose — there is no safe default. Defaulting a blocking
+     * finding to a mild status is the one mistake nobody catches in review,
+     * because the callout still looks correct.
+     *
+     * One callout is **one evaluation with one severity**, whether it carries a
+     * single verdict or a list of findings. Mixed severity is two callouts, not
+     * one: "Suggestions to review" in `warning` beside "Issues to resolve" in
+     * `critical`, which is how the design draws it.
+     */
+    status: AiCalloutStatus;
+    /**
+     * A single verdict ("Possible duplicate") when the callout carries one, or
+     * what the list adds up to ("Issues to resolve") when it stacks.
+     *
+     * **This is the only text in the tinted zone, and it is always about the
+     * record — never about One and never the record's identity.** Both are
+     * already on screen: the byline says who produced this, and the page says
+     * which record it is. "One drafted a resolution plan" spends the coloured
+     * zone re-announcing the byline; "Six steps to set up this workstation" says
+     * what the reader is looking at. It carries the colour because it is the one
+     * line that carries severity, so it has to be the conclusion, not the
+     * provenance.
+     */
+    title: string;
+    /**
+     * Overrides the glyph the status would pick. Required for `neutral`, which
+     * has no semantic glyph of its own — pass one that describes the content
+     * (e.g. `Summary` from `@/icons/ai`).
+     */
+    icon?: IconType;
+};
+
+declare type AiCalloutSingleProps = AiCalloutSharedProps & {
+    /**
+     * The reason, in one line. "Two of five policy checks failed."
+     *
+     * **This is the title of the white card**, and the split from the tinted one
+     * is by job, not by importance: up there is *what it is*, down here is *why*.
+     * Same size and weight on purpose — they are one sentence broken in two, not
+     * a heading and a subheading — which is exactly why they must not be two
+     * nouns of the same kind. Never a score, a count or a status word here.
+     *
+     * There are four prose jobs in this shape and each slot gets exactly one:
+     * `title` is the verdict, this is the reason, `children` is the nuance that
+     * changes what the reader does, and `evidence` is the proof. The test: read
+     * only the emphasised text — `title` plus this — and it has to stand alone as
+     * a decision. "Rejection recommended · Two of five policy checks failed"
+     * does; "Rejection recommended · Client lunch · $712.65" does not, which is
+     * why this must not carry the record's identity. The page around the callout
+     * already says which expense this is.
+     */
+    summary?: string;
+    /** The reasoning behind the verdict. Accepts a list when there is more than one reason. */
+    children: ReactNode;
+    /**
+     * **The move the verdict recommends**, rendered outlined. That binding is the
+     * rule: if the reasoning above actually concludes something else, the verdict
+     * is wrong, not the button. A callout titled "Rejection recommended" whose
+     * outlined action is "Request changes" is telling the reader two different
+     * things and making them guess which one One meant.
+     */
+    action?: AiCalloutAction;
+    /**
+     * **The way out of the recommendation** — "Approve anyway" against "Reject".
+     * Ghost, so the pair reads as a hierarchy and not as two peers.
+     *
+     * It has to be the *override*, not a third option. Pairing "Reject" with
+     * "Request changes" looks like two buttons but is really three paths with one
+     * missing, and the reader cannot tell which of them One is recommending.
+     *
+     * This reopens the "one action, and only one" rule on purpose. That rule was
+     * right for a plain callout, where two outlined buttons were noise for a
+     * message with no room to justify either. A recommendation with an auditable
+     * rationale is the case the rule pointed at: a decision that needs two paths,
+     * somewhere that has the room to explain them.
+     */
+    secondaryAction?: AiCalloutAction;
+    /** Dismisses the callout. Acts on the container, so it lives in the header. */
+    onClose?: () => void;
+    /**
+     * The reasoning that led to the verdict, revealed on demand. The header
+     * gains a toggle; nothing in the body is truncated or clamped, so the
+     * description stays fully readable whether this is open or closed.
+     */
+    evidence?: {
+        /**
+         * **Names what is behind the disclosure, as a noun phrase** — "the 5
+         * checks", "the six steps", "why this was rejected". The component supplies
+         * the verb, so it renders as "See the 5 checks" closed and "Hide the 5
+         * checks" open.
+         *
+         * It is required because a bare chevron says "there is more", which is what
+         * a list of separate recommendations says too; naming the content is what
+         * tells the reader these are not more verdicts. Splitting it this way is
+         * also what keeps the label honest: the product cannot pass a verb, so the
+         * label can only ever name something.
+         */
+        name: string;
+        /**
+         * One line per step of the reasoning. Plain nodes rather than
+         * title/description pairs: a policy check is usually a single fact, and
+         * splitting it in two padded "Receipt verified / Passed." into a heading
+         * with a body. Emphasis goes inline, where the number or the rule actually
+         * is, instead of always landing on the check's name.
+         *
+         * They carry no action, and that absence is the contract: the day one
+         * needs a button it has become a finding, and the callout should carry
+         * `findings`. Work with no button is still fine here — see `kind`.
+         */
+        items: ReactNode[];
+        /**
+         * What the disclosure holds, which is the one thing the label cannot
+         * enforce on its own.
+         *
+         * `rationale` (the default) is why the verdict is the verdict: sentences,
+         * bulleted, read once and never touched again.
+         *
+         * `steps` is a plan the reader works through, and the only difference is
+         * the marker: numbered, because the order is part of the content — you
+         * confirm the device before you order it. Numbers do that job on their own,
+         * which is why there are no checkboxes here. Per-item state is work the
+         * record already tracks better than a message can, and a message that
+         * remembers things is no longer a message.
+         *
+         * The contract above holds in both: no CTA per item. A step is work the
+         * reader does elsewhere, over hours or days, and the moment one needs its
+         * own button this is `findings`.
+         */
+        kind?: "rationale" | "steps";
+    };
+    /**
+     * Uncontrolled initial state of the rationale. Defaults to folded, which is
+     * the opposite of the stacked default and deliberately so: here the verdict
+     * is already on screen and the reasoning is optional, so opening it is the
+     * reader's move, not ours.
+     */
+    defaultOpen?: boolean;
+    /** Controlled state. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    findings?: never;
+};
+
+declare interface AiCalloutSkeletonProps {
+    status?: AiCalloutStatus;
+    /** Drops the footer, for callouts that will load without an action. */
+    compact?: boolean;
+}
+
+declare type AiCalloutStackedProps = AiCalloutSharedProps & {
+    /**
+     * Switches the callout to its stacked layout: the byline moves up beside the
+     * title because the whole evaluation shares one provenance, each finding gets
+     * its own row and its own action, and the header gains a toggle. Passing the
+     * list is what turns this on — there is no `stacked` flag, because the product
+     * already knows whether it holds one verdict or several.
+     *
+     * **Order matters.** `findings[0]` is the headline: it stays on screen when
+     * the rest are folded, so it is the one row the reader is guaranteed to see.
+     * Sort by severity, not by detection order.
+     *
+     * A list of one is a valid state, not a degenerate case: an evaluation that
+     * started with four findings and has had three resolved should not change
+     * shape on the last one. It simply loses the toggle and the deck, since
+     * folding would hide nothing.
+     */
+    findings: AiCalloutFinding[];
+    /**
+     * Uncontrolled initial state. Defaults to open — a folded finding is a
+     * finding nobody read. Folded still shows the headline row behind a deck edge,
+     * never just the header.
+     */
+    defaultOpen?: boolean;
+    /** Controlled state, for folding several callouts together. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    children?: never;
+    summary?: never;
+    action?: never;
+    secondaryAction?: never;
+    /**
+     * A stacked callout already is its own list. Evidence is the other shape:
+     * one verdict whose reasoning can be audited.
+     */
+    evidence?: never;
+    /**
+     * Not available while stacked, and the fold is why. Folding keeps the headline
+     * finding on screen, so there is deliberately no state in which the callout
+     * shows nothing — one that can be reduced to a tinted strip with no finding on
+     * it is dismissable under another name, and unresolved findings would go with
+     * it.
+     */
+    onClose?: never;
+};
+
+export declare type AiCalloutStatus = (typeof aiCalloutStatuses)[number];
+
+/**
+ * How much the message matters, from a report the reader can skim to something
+ * they have to act on now.
+ *
+ * | status     | use it when                                   | example                     |
+ * | ---------- | --------------------------------------------- | --------------------------- |
+ * | `neutral`  | nothing is asked of the reader                | Summary of a device history |
+ * | `info`     | there is something to do, nothing is wrong    | 5 invoices linked           |
+ * | `positive` | One endorses what the reader already did      | Approval recommended        |
+ * | `warning`  | something may be wrong — look                 | Requires review             |
+ * | `critical` | something is wrong — act                      | Request repayment           |
+ *
+ * `neutral` or `info` is the only pair worth spelling out. `neutral` is the
+ * absence of a status — 4% surface, uncoloured title, no glyph of its own —
+ * and means there is nothing to do at all, so passing it an `action` warns in
+ * development. `info` means the reader has work even when there is no button
+ * to offer: the work is often elsewhere, and the button is a convenience,
+ * never what earns the colour.
+ *
+ * One callout is **one evaluation with one severity**. Mixed severity is two
+ * callouts, not one.
+ */
+export declare const aiCalloutStatuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
 /**
  * Credits configuration for the AI chat.
  * Groups all credits-related props into a single object.
@@ -473,6 +724,10 @@ declare type AiChatCredits = {
 declare type AiChatCreditWarning = {
     /** The severity level of the warning. */
     level: "soft";
+    /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+    text?: string;
+    /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+    actionLabel?: string;
     /** Called when the user dismisses the credit warning banner. */
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
@@ -582,8 +837,15 @@ declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -1159,6 +1421,11 @@ declare interface BaseHeaderProps_2 {
         name: string;
         src?: string;
     } | AvatarVariant;
+    /**
+     * Markdown. Inline formatting only — a link out to the resource's source of
+     * truth is the case this exists for. Clamped to two lines behind a "show all"
+     * toggle.
+     */
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -4055,7 +4322,7 @@ declare type Data<R extends RecordType> = {
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
 
-declare type DataAttributes_2 = {
+declare type DataAttributes_3 = {
     [key: `data-${string}`]: string | undefined;
 };
 
@@ -4173,6 +4440,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     visualizationFilters?: Record<string, CurrentFiltersState>;
     /** User-created custom presets persisted alongside the rest of the state. */
     customPresets?: PresetsDefinition<FiltersDefinition>;
+    /** The active view's id, so a revisit restores which view is selected and not
+     *  just the views themselves. */
+    selectedPresetId?: string;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
@@ -5222,6 +5492,13 @@ declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
+        readonly attribution: "Suggested by One";
+        readonly evidence: {
+            readonly show: "See {{name}}";
+            readonly hide: "Hide {{name}}";
+        };
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -5270,6 +5547,13 @@ declare const defaultTranslations: {
             readonly creditsError: "Could not load credits";
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
+        };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
         };
         readonly reportCard: {
             readonly tableLabel: "Table";
@@ -6113,7 +6397,7 @@ declare type DropdownInternalProps = {
      * @default false
      */
     disabled?: boolean;
-} & DataAttributes_2;
+} & DataAttributes_3;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -6606,11 +6890,72 @@ export declare interface F0ActionBarRef {
     wiggle: (options?: WiggleOptions) => void;
 }
 
+/**
+ * @deprecated Use `F0AiCallout` instead.
+ *
+ * It carries no status, so it cannot say how much a message matters, and it
+ * signals "this came from AI" with a gradient instead — two signals for one
+ * message, drawn from raw hex rather than tokens, so it cannot follow a theme.
+ * Its two actions are both outlined, which reads as two peers where there is
+ * really a recommendation and a way out of it.
+ *
+ * `F0AiCallout` says where the message came from in words, in every shape, and
+ * `status="neutral"` is the rung for exactly this case: AI output with nothing
+ * to decide.
+ *
+ * @removeIn 7.0.0
+ * @migration `title` unchanged. `content` becomes `children` and takes nodes
+ * rather than a string. Add `status="neutral"` with an `icon` that describes
+ * the content (e.g. `Summary` from `@/icons/ai`) — `neutral` has no glyph of
+ * its own. `primaryAction` becomes `action` and `secondaryAction` stays, but
+ * only when it is the way out of the first rather than a second peer.
+ * `F0AiBanner.Skeleton` becomes `F0AiCallout.Skeleton`.
+ */
 export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
 };
 
 export declare type F0AiBannerProps = AiBannerInternalProps;
+
+export declare const F0AiCallout: ForwardRefExoticComponent<(Omit<DataAttributes_2 & {
+status: AiCalloutStatus_2;
+title: string;
+icon?: IconType_2;
+} & {
+summary?: string;
+children: ReactNode;
+action?: AiCalloutAction_2;
+secondaryAction?: AiCalloutAction_2;
+onClose?: () => void;
+evidence?: {
+name: string;
+items: ReactNode[];
+kind?: "rationale" | "steps";
+};
+defaultOpen?: boolean;
+open?: boolean;
+onOpenChange?: (open: boolean) => void;
+findings?: never;
+} & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> | Omit<DataAttributes_2 & {
+status: AiCalloutStatus_2;
+title: string;
+icon?: IconType_2;
+} & {
+findings: AiCalloutFinding_2[];
+defaultOpen?: boolean;
+open?: boolean;
+onOpenChange?: (open: boolean) => void;
+children?: never;
+summary?: never;
+action?: never;
+secondaryAction?: never;
+evidence?: never;
+onClose?: never;
+} & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref">) & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<F0AiCalloutProps & RefAttributes<HTMLDivElement>>, never> & {
+    Skeleton: ({ status, compact }: AiCalloutSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0AiCalloutProps = AiCalloutSingleProps | AiCalloutStackedProps;
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
@@ -6960,6 +7305,26 @@ declare type F0ButtonToggleInternalProps = {
 
 export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
 
+/**
+ * @deprecated Use `F0AiCallout` instead.
+ *
+ * `F0AiCallout` is the same construction — tinted container, white card, action
+ * row — brought in line with the design, and it fixes two things this one gets
+ * wrong: `critical` renders with no icon and an uncoloured title (the strongest
+ * status is the only one that isn't signalled), and the `ai` variant stacks a
+ * gradient on top of a semantic colour, which is two signals for one message.
+ * It also makes attribution structural: the byline is always rendered, so the
+ * callout can never fail to say where it came from.
+ *
+ * @removeIn 7.0.0
+ * @migration Replace `F0Callout` with `F0AiCallout` from the same entry point.
+ * `variant` becomes `status`, and `variant="ai"` becomes `status="neutral"`,
+ * which additionally requires an `icon` because `neutral` has no glyph of its
+ * own. `children` is unchanged. `actions: [a, b]` becomes `action={a}` plus
+ * `secondaryAction={b}`, and only when the second is the way out of the first
+ * rather than a third path — otherwise drop it. Remove nothing for the byline:
+ * it is not a prop, every `F0AiCallout` renders it.
+ */
 export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
 };
@@ -8900,7 +9265,7 @@ compact?: boolean;
 }) => JSX_2.Element;
 }>;
 
-export declare interface F0MeetingCardProps extends WithDataTestIdProps, DataAttributes_2 {
+export declare interface F0MeetingCardProps extends WithDataTestIdProps, DataAttributes_3 {
     /** Lifecycle of the meeting. See {@link meetingStates}. */
     state: MeetingState;
     /**
@@ -10657,6 +11022,49 @@ export declare interface HomeSlotParamsMap {
     indicators: IndicatorsListProps;
 }
 
+export declare type HomeTrackingOptions = {
+    /** A widget's header link, footer action, or "View more" was used. */
+    onWidgetAction?: (event: HomeWidgetActionEvent) => void;
+    /**
+     * A row inside a widget was activated. Fires ALONGSIDE the navigation the
+     * row's `href` performs — it does not replace or gate it, so a middle-click
+     * or a modified click still behaves like the link it is.
+     */
+    onWidgetItemActivate?: (event: HomeWidgetItemActivateEvent) => void;
+};
+
+/**
+ * Payload for `tracking.onWidgetAction`. The widget is named by the id the host
+ * gave it, which is the key to everything else the host already knows about it.
+ */
+export declare type HomeWidgetActionEvent = {
+    widgetId: string;
+    action: HomeWidgetActionKind;
+};
+
+/**
+ * TRACKING FOR THE HOME — the same shape the AI kit uses (`AiChatTrackingOptions`):
+ * the host passes callbacks, the components fire them, and nothing about a
+ * widget's data changes to make it measurable.
+ *
+ * This exists because a Home widget is DECLARATIVE. Its rows carry an `href`
+ * and never an `onClick` (that is the one click behavior a `list` slot has, and
+ * a type test holds the line), so a host had no seam to observe an interaction
+ * from — its analytics simply could not see the Home. These callbacks are that
+ * seam, and they leave the row data alone: navigation is still the anchor's.
+ *
+ * BEHAVIOUR ONLY, deliberately. The payloads carry what the reader DID and say
+ * nothing about which column a widget sits in or where in it — that is the
+ * host's own persisted layout, and duplicating it into an analytics event
+ * would make two sources for one fact, the stale one being the event.
+ */
+/**
+ * WHICH AFFORDANCE was used. A widget has three ways out of it and they mean
+ * different things to whoever reads the numbers: the header's own link, the
+ * footer's call to action, and the "View more" a capped list grows.
+ */
+export declare type HomeWidgetActionKind = "header-link" | "footer-action" | "view-more";
+
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
  * through to the frame.
@@ -10763,6 +11171,19 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/** Payload for `tracking.onWidgetItemActivate`. */
+export declare type HomeWidgetItemActivateEvent = {
+    widgetId: string;
+    /** The row's own id, as the slot was given it. */
+    itemId: string | number;
+    /**
+     * 1-based place of the row within its slot, AS DRAWN. Not layout state: it
+     * is where the reader's attention landed in a list ordered by its own data,
+     * which is the one position worth reporting.
+     */
+    itemPosition: number;
 };
 
 /**
@@ -11945,7 +12366,7 @@ export declare type NavigationGranularityKey = GranularityDefinitionKey | "perio
 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes_2;
+} & DataAttributes_3;
 
 export declare type NavigationProps = {
     previous?: NavigationTarget;
@@ -12121,6 +12542,17 @@ export declare interface NewHomeLayoutProps {
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
+    /**
+     * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+     * shape the AI kit takes (`ai.tracking`).
+     *
+     * A widget is declarative: its rows carry an `href` and never an `onClick`,
+     * so a host had no seam to observe a row from and its analytics could not see
+     * the Home at all. These fire for EVERY widget in the column, so a newly
+     * added one is measured without remembering anything. Nothing here changes
+     * behaviour — a row still navigates through its own anchor.
+     */
+    tracking?: HomeTrackingOptions;
     /** The daytime gradient period for the page surface. */
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
@@ -13722,6 +14154,11 @@ declare type SelectCellConfig<R extends RecordType> = {
     clearable?: boolean;
     showSearchBox?: boolean;
     defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined;
+    /**
+     * Buttons rendered below the options, for what a value cannot express —
+     * dropping a scheduled change, say. Pass a function to decide them per row.
+     */
+    actions?: Action[] | ((item: R) => Action[] | undefined);
 } & ({
     options: F0SelectItemProps<string>[] | ((item: R) => F0SelectItemProps<string>[]);
     source?: never;
@@ -14492,7 +14929,7 @@ export declare const Switch: typeof _Switch;
 
 declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, required, ...rest }: SwitchProps): JSX_2.Element;
 
-declare interface SwitchProps extends DataAttributes_2 {
+declare interface SwitchProps extends DataAttributes_3 {
     /**
      * The title of the switch
      */
@@ -14541,7 +14978,7 @@ export declare type TabItem = {
     index?: boolean;
     variant?: "default" | "upsell";
     onClick?: () => void;
-} & DataAttributes_2 & ({
+} & DataAttributes_3 & ({
     href: string;
 } | {
     id: string;
@@ -16514,8 +16951,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -16523,10 +16962,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
