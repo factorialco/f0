@@ -5,13 +5,13 @@ const x = ({
   url: a,
   width: s,
   onError: o,
-  onRendered: f
+  onRendered: c
 }) => {
-  const l = n(null), [c, m] = g(null), u = n(o);
+  const f = n(null), [l, m] = g(null), u = n(o);
   u.current = o;
-  const i = n(f);
-  return i.current = f, p(() => {
-    const t = l.current;
+  const i = n(c);
+  return i.current = c, p(() => {
+    const t = f.current;
     if (!t)
       return;
     let r = !1;
@@ -19,20 +19,17 @@ const x = ({
       if (!e.ok)
         throw new Error(`${e.status}`);
       return e.blob();
-    }).then((e) => {
-      if (!r)
-        return b(e, t, void 0, {
-          inWrapper: !1,
-          breakPages: !1,
-          ignoreLastRenderedPageBreak: !0,
-          renderHeaders: !1,
-          renderFooters: !1
-        }).then(() => {
-          if (r)
-            return;
-          const d = t.scrollWidth;
-          m(d > 0 ? Math.min(1, s / d) : 1), i.current();
-        });
+    }).then(async (e) => {
+      if (r || (await b(e, t, void 0, {
+        inWrapper: !1,
+        breakPages: !1,
+        ignoreLastRenderedPageBreak: !0,
+        renderHeaders: !1,
+        renderFooters: !1
+      }), r))
+        return;
+      const d = t.scrollWidth;
+      m(d > 0 ? Math.min(1, s / d) : 1), i.current();
     }).catch(() => {
       r || u.current();
     }), () => {
@@ -41,8 +38,8 @@ const x = ({
   }, [a, s]), /* @__PURE__ */ h("div", { className: "overflow-hidden bg-f1-background text-left", children: /* @__PURE__ */ h(
     "div",
     {
-      ref: l,
-      style: c !== null ? { transform: `scale(${c})`, transformOrigin: "top left" } : void 0
+      ref: f,
+      style: l !== null ? { transform: `scale(${l})`, transformOrigin: "top left" } : void 0
     }
   ) });
 };

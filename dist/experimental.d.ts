@@ -1,3 +1,6 @@
+import { AiCalloutAction as AiCalloutAction_2 } from './types';
+import { AiCalloutFinding as AiCalloutFinding_2 } from './types';
+import { AiCalloutStatus as AiCalloutStatus_2 } from './types';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './experimental';
@@ -28,17 +31,18 @@ import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
+import { DataAttributes as DataAttributes_2 } from './experimental';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
-import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
+import { F0CommandPaletteProviderProps as F0CommandPaletteProviderProps_2 } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
@@ -62,6 +66,7 @@ import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
+import { IconType as IconType_2 } from './experimental';
 import { InFilterOptions } from './InFilter/types';
 import { ItemProps } from './types';
 import { JSONContent } from '@tiptap/react';
@@ -99,7 +104,6 @@ import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from './experimental';
-import { StyleSpecification } from 'maplibre-gl';
 import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
@@ -446,6 +450,252 @@ declare type AIButton = {
     editable?: boolean;
 };
 
+export declare type AiCalloutAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
+/**
+ * One entry in a stacked callout. Each finding is resolved on its own, so each
+ * carries its own action — "Review" on a duplicate invoice does something
+ * different from "Review" on a tax mismatch.
+ */
+export declare type AiCalloutFinding = {
+    /**
+     * Stable across renders. Findings are resolved and removed one at a time, so
+     * an index would re-key the survivors and animate the wrong rows out.
+     */
+    id: string;
+    title: string;
+    description: ReactNode;
+    action?: AiCalloutAction;
+};
+
+declare type AiCalloutSharedProps = DataAttributes_3 & {
+    /**
+     * Required on purpose — there is no safe default. Defaulting a blocking
+     * finding to a mild status is the one mistake nobody catches in review,
+     * because the callout still looks correct.
+     *
+     * One callout is **one evaluation with one severity**, whether it carries a
+     * single verdict or a list of findings. Mixed severity is two callouts, not
+     * one: "Suggestions to review" in `warning` beside "Issues to resolve" in
+     * `critical`, which is how the design draws it.
+     */
+    status: AiCalloutStatus;
+    /**
+     * A single verdict ("Possible duplicate") when the callout carries one, or
+     * what the list adds up to ("Issues to resolve") when it stacks.
+     *
+     * **This is the only text in the tinted zone, and it is always about the
+     * record — never about One and never the record's identity.** Both are
+     * already on screen: the byline says who produced this, and the page says
+     * which record it is. "One drafted a resolution plan" spends the coloured
+     * zone re-announcing the byline; "Six steps to set up this workstation" says
+     * what the reader is looking at. It carries the colour because it is the one
+     * line that carries severity, so it has to be the conclusion, not the
+     * provenance.
+     */
+    title: string;
+    /**
+     * Overrides the glyph the status would pick. Required for `neutral`, which
+     * has no semantic glyph of its own — pass one that describes the content
+     * (e.g. `Summary` from `@/icons/ai`).
+     */
+    icon?: IconType;
+};
+
+declare type AiCalloutSingleProps = AiCalloutSharedProps & {
+    /**
+     * The reason, in one line. "Two of five policy checks failed."
+     *
+     * **This is the title of the white card**, and the split from the tinted one
+     * is by job, not by importance: up there is *what it is*, down here is *why*.
+     * Same size and weight on purpose — they are one sentence broken in two, not
+     * a heading and a subheading — which is exactly why they must not be two
+     * nouns of the same kind. Never a score, a count or a status word here.
+     *
+     * There are four prose jobs in this shape and each slot gets exactly one:
+     * `title` is the verdict, this is the reason, `children` is the nuance that
+     * changes what the reader does, and `evidence` is the proof. The test: read
+     * only the emphasised text — `title` plus this — and it has to stand alone as
+     * a decision. "Rejection recommended · Two of five policy checks failed"
+     * does; "Rejection recommended · Client lunch · $712.65" does not, which is
+     * why this must not carry the record's identity. The page around the callout
+     * already says which expense this is.
+     */
+    summary?: string;
+    /** The reasoning behind the verdict. Accepts a list when there is more than one reason. */
+    children: ReactNode;
+    /**
+     * **The move the verdict recommends**, rendered outlined. That binding is the
+     * rule: if the reasoning above actually concludes something else, the verdict
+     * is wrong, not the button. A callout titled "Rejection recommended" whose
+     * outlined action is "Request changes" is telling the reader two different
+     * things and making them guess which one One meant.
+     */
+    action?: AiCalloutAction;
+    /**
+     * **The way out of the recommendation** — "Approve anyway" against "Reject".
+     * Ghost, so the pair reads as a hierarchy and not as two peers.
+     *
+     * It has to be the *override*, not a third option. Pairing "Reject" with
+     * "Request changes" looks like two buttons but is really three paths with one
+     * missing, and the reader cannot tell which of them One is recommending.
+     *
+     * This reopens the "one action, and only one" rule on purpose. That rule was
+     * right for a plain callout, where two outlined buttons were noise for a
+     * message with no room to justify either. A recommendation with an auditable
+     * rationale is the case the rule pointed at: a decision that needs two paths,
+     * somewhere that has the room to explain them.
+     */
+    secondaryAction?: AiCalloutAction;
+    /** Dismisses the callout. Acts on the container, so it lives in the header. */
+    onClose?: () => void;
+    /**
+     * The reasoning that led to the verdict, revealed on demand. The header
+     * gains a toggle; nothing in the body is truncated or clamped, so the
+     * description stays fully readable whether this is open or closed.
+     */
+    evidence?: {
+        /**
+         * **Names what is behind the disclosure, as a noun phrase** — "the 5
+         * checks", "the six steps", "why this was rejected". The component supplies
+         * the verb, so it renders as "See the 5 checks" closed and "Hide the 5
+         * checks" open.
+         *
+         * It is required because a bare chevron says "there is more", which is what
+         * a list of separate recommendations says too; naming the content is what
+         * tells the reader these are not more verdicts. Splitting it this way is
+         * also what keeps the label honest: the product cannot pass a verb, so the
+         * label can only ever name something.
+         */
+        name: string;
+        /**
+         * One line per step of the reasoning. Plain nodes rather than
+         * title/description pairs: a policy check is usually a single fact, and
+         * splitting it in two padded "Receipt verified / Passed." into a heading
+         * with a body. Emphasis goes inline, where the number or the rule actually
+         * is, instead of always landing on the check's name.
+         *
+         * They carry no action, and that absence is the contract: the day one
+         * needs a button it has become a finding, and the callout should carry
+         * `findings`. Work with no button is still fine here — see `kind`.
+         */
+        items: ReactNode[];
+        /**
+         * What the disclosure holds, which is the one thing the label cannot
+         * enforce on its own.
+         *
+         * `rationale` (the default) is why the verdict is the verdict: sentences,
+         * bulleted, read once and never touched again.
+         *
+         * `steps` is a plan the reader works through, and the only difference is
+         * the marker: numbered, because the order is part of the content — you
+         * confirm the device before you order it. Numbers do that job on their own,
+         * which is why there are no checkboxes here. Per-item state is work the
+         * record already tracks better than a message can, and a message that
+         * remembers things is no longer a message.
+         *
+         * The contract above holds in both: no CTA per item. A step is work the
+         * reader does elsewhere, over hours or days, and the moment one needs its
+         * own button this is `findings`.
+         */
+        kind?: "rationale" | "steps";
+    };
+    /**
+     * Uncontrolled initial state of the rationale. Defaults to folded, which is
+     * the opposite of the stacked default and deliberately so: here the verdict
+     * is already on screen and the reasoning is optional, so opening it is the
+     * reader's move, not ours.
+     */
+    defaultOpen?: boolean;
+    /** Controlled state. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    findings?: never;
+};
+
+declare interface AiCalloutSkeletonProps {
+    status?: AiCalloutStatus;
+    /** Drops the footer, for callouts that will load without an action. */
+    compact?: boolean;
+}
+
+declare type AiCalloutStackedProps = AiCalloutSharedProps & {
+    /**
+     * Switches the callout to its stacked layout: the byline moves up beside the
+     * title because the whole evaluation shares one provenance, each finding gets
+     * its own row and its own action, and the header gains a toggle. Passing the
+     * list is what turns this on — there is no `stacked` flag, because the product
+     * already knows whether it holds one verdict or several.
+     *
+     * **Order matters.** `findings[0]` is the headline: it stays on screen when
+     * the rest are folded, so it is the one row the reader is guaranteed to see.
+     * Sort by severity, not by detection order.
+     *
+     * A list of one is a valid state, not a degenerate case: an evaluation that
+     * started with four findings and has had three resolved should not change
+     * shape on the last one. It simply loses the toggle and the deck, since
+     * folding would hide nothing.
+     */
+    findings: AiCalloutFinding[];
+    /**
+     * Uncontrolled initial state. Defaults to open — a folded finding is a
+     * finding nobody read. Folded still shows the headline row behind a deck edge,
+     * never just the header.
+     */
+    defaultOpen?: boolean;
+    /** Controlled state, for folding several callouts together. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    children?: never;
+    summary?: never;
+    action?: never;
+    secondaryAction?: never;
+    /**
+     * A stacked callout already is its own list. Evidence is the other shape:
+     * one verdict whose reasoning can be audited.
+     */
+    evidence?: never;
+    /**
+     * Not available while stacked, and the fold is why. Folding keeps the headline
+     * finding on screen, so there is deliberately no state in which the callout
+     * shows nothing — one that can be reduced to a tinted strip with no finding on
+     * it is dismissable under another name, and unresolved findings would go with
+     * it.
+     */
+    onClose?: never;
+};
+
+export declare type AiCalloutStatus = (typeof aiCalloutStatuses)[number];
+
+/**
+ * How much the message matters, from a report the reader can skim to something
+ * they have to act on now.
+ *
+ * | status     | use it when                                   | example                     |
+ * | ---------- | --------------------------------------------- | --------------------------- |
+ * | `neutral`  | nothing is asked of the reader                | Summary of a device history |
+ * | `info`     | there is something to do, nothing is wrong    | 5 invoices linked           |
+ * | `positive` | One endorses what the reader already did      | Approval recommended        |
+ * | `warning`  | something may be wrong — look                 | Requires review             |
+ * | `critical` | something is wrong — act                      | Request repayment           |
+ *
+ * `neutral` or `info` is the only pair worth spelling out. `neutral` is the
+ * absence of a status — 4% surface, uncoloured title, no glyph of its own —
+ * and means there is nothing to do at all, so passing it an `action` warns in
+ * development. `info` means the reader has work even when there is no button
+ * to offer: the work is often elsewhere, and the button is a convenience,
+ * never what earns the colour.
+ *
+ * One callout is **one evaluation with one severity**. Mixed severity is two
+ * callouts, not one.
+ */
+export declare const aiCalloutStatuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
 /**
  * Credits configuration for the AI chat.
  * Groups all credits-related props into a single object.
@@ -474,6 +724,10 @@ declare type AiChatCredits = {
 declare type AiChatCreditWarning = {
     /** The severity level of the warning. */
     level: "soft";
+    /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+    text?: string;
+    /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+    actionLabel?: string;
     /** Called when the user dismisses the credit warning banner. */
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
@@ -583,8 +837,15 @@ declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -1099,7 +1360,7 @@ export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, 
  */
 export declare type BaseDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters>, FetchReturn = BaseResponse<R>> = {
     /** Indicates this adapter doesn't use pagination */
-    paginationType?: never | undefined;
+    paginationType?: undefined;
     /**
      * Function to fetch data based on filter options
      * @param options - The filter options to apply when fetching data
@@ -1160,6 +1421,11 @@ declare interface BaseHeaderProps_2 {
         name: string;
         src?: string;
     } | AvatarVariant;
+    /**
+     * Markdown. Inline formatting only — a link out to the resource's source of
+     * truth is the case this exists for. Clamped to two lines behind a "show all"
+     * toggle.
+     */
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -1633,6 +1899,8 @@ export declare interface CalendarEventProps {
 }
 
 export declare type CalendarMode = "single" | "range";
+
+export declare type CalendarSelection = Date | DateRange | null;
 
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
@@ -3291,6 +3559,430 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+/** A flat global command: a shortcut, a jump, a thing to create. */
+export declare type CommandAction = CommandActionBase & CommandDoes<(context: CommandRunContext) => void>;
+
+/** A flat global command: a shortcut, a jump, a thing to create. */
+declare type CommandActionBase = {
+    id: string;
+    label: string;
+    icon?: IconType;
+    /** Extra terms the ranker should match on. */
+    keywords?: string;
+    /** Second line. Leave it out unless it says something the label cannot. */
+    description?: string;
+};
+
+export declare type CommandActionRisk = (typeof commandActionRisks)[number];
+
+/**
+ * Friction tier of an action.
+ *
+ * It is a claim about CONSEQUENCE, not a confirmation step — the palette never
+ * asks. `danger` keeps a row out of the default selection and stops a bare
+ * `Enter` from reaching it, so the reader has to arrive on it deliberately; the
+ * confirmation itself belongs to the dialog the consumer already owns.
+ */
+export declare const commandActionRisks: readonly ["none", "confirm", "danger"];
+
+/**
+ * The assistant escape hatch — the way out of the list when nothing in it fit.
+ *
+ * Optional by design: with no `assistant`, the bar button, the trailing row and
+ * the `mod+Enter` binding all disappear rather than degrading into dead
+ * affordances. The palette does not know or care WHICH assistant this is; it
+ * hands over a prompt and the scope it was built from.
+ */
+export declare type CommandAssistant = {
+    /** The bar button's label, e.g. "Ask One". */
+    label: string;
+    /** The assistant's own mark. Rendered as given — not tinted to a control glyph. */
+    icon?: IconType;
+    /**
+     * Receives the prompt the reader built. `ref` is the scope it was asked
+     * inside, when there was one.
+     */
+    onAsk: (prompt: string, ref?: CommandEntityRef) => void;
+};
+
+/**
+ * Whether an action can run on the current scope, and why not.
+ *
+ * A gated action is never hidden: it stays listed, sinks below the runnable
+ * ones, and shows its reason. Policy changes an action's behaviour, never its
+ * presence — a row that vanishes teaches the reader nothing.
+ */
+export declare type CommandAvailability = {
+    disabled: boolean;
+    reason?: string;
+};
+
+/**
+ * A row has to DO something, and there are exactly two things it can be: a
+ * DESTINATION or a BEHAVIOUR. `href` for the first, `run` for the second, and
+ * the union is what makes "one of them, never neither" a type error rather than
+ * a row that silently does nothing when pressed.
+ *
+ * Most rows are destinations, so most rows want a plain string and no callback:
+ * writing `run: () => navigate("/x")` to express "go to /x" buries a link inside
+ * a function, and the palette then cannot know it IS a link — which is what
+ * lets a destination row offer `Copy link` and open in a new tab.
+ *
+ * `TRun` is the callback's own shape, because a global command is handed the
+ * context while an entity action is handed its target as well.
+ */
+declare type CommandDoes<TRun, THref = string> = {
+    href: THref;
+    run?: never;
+} | {
+    run: TRun;
+    href?: never;
+};
+
+/**
+ * An action that applies to a scoped record or selection.
+ *
+ * Either a destination or a behaviour, never neither. The destination may be a
+ * plain string when it is the same wherever you came from, or a function of the
+ * target when it is not — `(ref) => \`/devices/${ref.id}/history\`` — and it
+ * receives the collected parameters too, so a step's answer can end up in the
+ * URL.
+ */
+export declare type CommandEntityAction = CommandEntityActionBase & CommandDoes<(ref: CommandEntityRef, values: CommandParamValues, context: CommandRunContext) => void, string | ((ref: CommandEntityRef, values: CommandParamValues) => string)>;
+
+/** An action that applies to a scoped record or selection. */
+declare type CommandEntityActionBase = {
+    /** Unique within its provider. */
+    key: string;
+    /** Verb-first, so scanning and search both work: "Lock screen". */
+    label: string;
+    description?: string;
+    icon: IconType;
+    /** Origin as metadata, never as navigation: "Script", "Query". */
+    badge?: string;
+    risk: CommandActionRisk;
+    /** Extra terms the ranker should match on. */
+    keywords?: string;
+    availability?: (ref: CommandEntityRef) => CommandAvailability;
+    impact?: (ref: CommandEntityRef) => CommandImpact | undefined;
+    /** Floats the action into "Suggested" while the query is empty. */
+    suggested?: (ref: CommandEntityRef) => boolean;
+    params?: CommandParamStep[];
+};
+
+/**
+ * A named set of actions on one record: "Security", "Maintenance", "Lifecycle".
+ *
+ * The heading sits HERE rather than on each action, for the same reason it sits
+ * on `CommandGroup` rather than on each command. Three maintenance actions used
+ * to write `group: "Maintenance"` three times — three chances to disagree — and
+ * because the heading was per-row the palette then had to re-sort the list so
+ * that rows of one intent came out contiguous, or a straggler re-emitted a
+ * heading that had already appeared. A group cannot be non-contiguous.
+ */
+export declare type CommandEntityActionGroup = {
+    label: string;
+    items: CommandEntityAction[];
+};
+
+/**
+ * The public surface of `F0CommandPalette` (SPEC-006 / SPEC-039).
+ *
+ * The palette has ONE grammar — `[scope] › [action] › [params]` — and every type
+ * here is a piece of it. Read them in that order: an `CommandEntityRef` is the
+ * scope, a `CommandEntityAction` is the verb, a `CommandParamStep` is a value the
+ * verb still needs.
+ */
+/** A person rendered as a real avatar instead of an icon. */
+export declare type CommandEntityAvatar = {
+    firstName: string;
+    lastName: string;
+    src?: string;
+};
+
+/**
+ * One domain's contribution to the palette: how to find its records, and what
+ * can be done to one.
+ *
+ * Declaring an action here once is what keeps a row menu, a bulk bar and the
+ * palette projections of a single list instead of N×M surfaces.
+ */
+export declare type CommandEntityProvider = {
+    /** Stable discriminator, and the value of `CommandEntityRef.type`. */
+    type: string;
+    /** Group heading in the global list, e.g. "Devices". */
+    label: string;
+    /**
+     * Record lookup. Ranking across providers is the palette's job.
+     *
+     * MAY BE ASYNC, because real entity search is remote. Return an array when the
+     * records are already in hand and a promise when they are not — the palette
+     * renders skeleton rows in this provider's group while one is outstanding, and
+     * a reason row if it rejects.
+     *
+     * The palette calls this on every query change and applies only the NEWEST
+     * response, so a slow answer to `mac` can never overwrite a fast one to
+     * `macbook`. It does not debounce: a provider that wants fewer round trips
+     * should debounce inside its own `search`, since only it knows what a
+     * round trip costs.
+     */
+    search: (query: string, limit: number) => CommandEntityRef[] | Promise<CommandEntityRef[]>;
+    /**
+     * The actions a ref can run. Omit it while a domain has not adopted the
+     * registry: its records stay findable, they are just not yet actionable —
+     * a valid state, since the palette still offers navigation.
+     */
+    actions?: (ref: CommandEntityRef) => CommandEntityActionGroup[];
+    /**
+     * The records that live INSIDE a ref, so the palette can narrow before it
+     * acts: a team's people, a project's tasks, a folder's documents.
+     *
+     * Named `inside` and not `children` on purpose: this returns REFS, and a prop
+     * called `children` on anything React-shaped reads as a `ReactNode` slot.
+     * Props here are data, strongly typed — never rendered nodes handed in.
+     *
+     * Return refs of any `type`. The palette resolves each one's actions from the
+     * provider matching that type, so a team provider hands back `person` refs and
+     * the person provider supplies what can be done to them — nothing has to know
+     * about both.
+     *
+     * `query` is what has been typed inside the scope, and `limit` caps the rows:
+     * a team of forty is a list to filter, not a list to print.
+     */
+    inside?: (ref: CommandEntityRef, query: string, limit: number) => CommandEntityRef[] | Promise<CommandEntityRef[]>;
+};
+
+/**
+ * What the palette is scoped to: one record, or a selection of them.
+ *
+ * `kind: "many"` carries an id SNAPSHOT rather than a live selection, taken when
+ * the palette opened — it is the authoritative target list for the run, so a
+ * selection changing behind the overlay cannot redirect an action mid-flight.
+ */
+export declare type CommandEntityRef = {
+    type: string;
+    kind: "one";
+    id: string;
+    /** Scope label and row title, e.g. `MacBook Pro 14"`. */
+    label: string;
+    /** Tells duplicates apart while choosing, e.g. an owner or a model. */
+    sublabel?: string;
+    icon?: IconType;
+    avatar?: CommandEntityAvatar;
+    /** Where `Enter` goes in global mode. Scoping uses `/` instead. */
+    href?: string;
+} | {
+    type: string;
+    kind: "many";
+    ids: string[];
+    /** Scope label, e.g. `12 devices`. */
+    label: string;
+    icon?: IconType;
+};
+
+/**
+ * ONE HEADING AND WHAT SITS UNDER IT.
+ *
+ * Either items the consumer wrote, or a provider that fetches records — one
+ * ordered list holds both, and the order it is written in is the order the
+ * groups appear on screen.
+ *
+ * There is no separate `navigation` prop and no built-in "Go to". A destination
+ * is a command whose `CommandDoes` picked `href`, so a group of destinations is
+ * a group like any other and the product names it. The palette used to assign
+ * those headings itself, which made "Actions" and "Go to" the only two words on
+ * screen a product could not choose — and put copy about the consumer's own
+ * content into a labels table, where it did not belong.
+ *
+ * Exactly one of `items` or `provider`, enforced by `never` on the other, so a
+ * group carrying both is a type error rather than a silent precedence rule.
+ *
+ * Give it a STABLE identity — module scope, or memoised. It keys the row memos.
+ */
+export declare type CommandGroup = {
+    label: string;
+    items: CommandAction[];
+    provider?: never;
+} | {
+    provider: CommandEntityProvider;
+    label?: never;
+    items?: never;
+};
+
+/** How a run lands on a selection — stated on the row, before the commit. */
+export declare type CommandImpact = {
+    eligible: number;
+    total: number;
+    skipped: number;
+    reason?: string;
+};
+
+/**
+ * EVERY WORD THE PALETTE PUTS ON SCREEN — all of it, and all of it required.
+ *
+ * The palette ships no copy of its own. It renders the consumer's records,
+ * their commands and their destinations, so the words wrapped around that
+ * content belong to the same product and arrive the same way: as props, rather
+ * than half here and half in a shared translation table this component would
+ * have to grow a key in every time a row learned a new state.
+ *
+ * REQUIRED, not optional with a fallback, because a fallback is exactly where
+ * an untranslated string hides. An English default renders perfectly inside a
+ * Spanish app and nothing fails — nothing is even detectably wrong until a
+ * reader sees it. A required field is a compile error instead.
+ *
+ * ANYTHING THAT INTERPOLATES IS A FUNCTION, never a template carrying
+ * `{{name}}`. A function is typed, so a missing value is a compile error rather
+ * than a literal `{{name}}` on screen; it cannot be handed the wrong
+ * interpolation dialect; and it is the only form that can reorder its parts or
+ * choose a plural, which a template cannot do in any language that inflects.
+ *
+ * Define it at MODULE SCOPE and hand over the same object every render. It is
+ * static copy, so there is nothing to recompute — and the palette keys its row
+ * memos off these values.
+ */
+export declare type CommandPaletteLabels = {
+    /** Accessible name of the overlay, for a screen reader announcing it. */
+    label: string;
+    /** The prompt in the field while nothing is typed and nothing is scoped. */
+    placeholder: string;
+    /** The short form, for a field sharing its row with the assistant on a phone. */
+    placeholderPhone: string;
+    /** The prompt once the palette is scoped and only actions remain. */
+    placeholderScoped: string;
+    /** The same, once the palette is scoped to a record. */
+    fieldLabelScoped: (name: string) => string;
+    empty: {
+        title: string;
+        description: string;
+    };
+    /**
+     * Headings over the buckets the palette COMPUTES, and only those.
+     *
+     * Every other heading arrives with its content: a `CommandGroup` names itself
+     * with `label`, and a provider names its records' group the same way. What is
+     * left here is the three rearrangements the palette performs on that content
+     * — what you did lately, what it floats first, what it had to gate. Those are
+     * facts about this component's own behaviour, so they are generic copy;
+     * "Actions" and "Go to" never were, and used to sit here by mistake.
+     */
+    groups: {
+        recent: string;
+        suggested: string;
+        unavailable: string;
+    };
+    /** The key legend's labels. The keys themselves are glyphs, not copy. */
+    footer: {
+        actions: string;
+        rowActions: string;
+        ask: string;
+        choose: string;
+        leaveScope: string;
+        goBack: string;
+    };
+    /** The chip in the field, which is a control and needs a name. */
+    scope: {
+        remove: (name: string) => string;
+    };
+    /** Visible text and tooltips on the controls a row carries. */
+    rowActions: {
+        actions: string;
+        actionsFor: (label: string) => string;
+        copyLink: string;
+        copyLinkTo: (label: string) => string;
+        linkCopied: string;
+    };
+    /**
+     * What the live region says when the palette changes under the reader.
+     *
+     * `scoped` is handed the count so it can pick its own plural — including the
+     * zero case, which is why there is no separate "no actions" string.
+     */
+    announce: {
+        scoped: (name: string, count: number) => string;
+        cleared: string;
+        unavailable: (label: string, reason: string) => string;
+        linkCopied: (url: string) => string;
+    };
+    /** What one row says, and what pressing it will do. */
+    row: {
+        open: (label: string) => string;
+        run: (label: string) => string;
+        ask: (label: string) => string;
+        /** One word each, on the tooltip of a row's own `↵`. */
+        verb: {
+            open: string;
+            run: string;
+            ask: string;
+        };
+        /** Shown on a gated row that supplied no reason of its own. */
+        unavailable: string;
+        /** Shown in a provider's group when its search could not be reached. */
+        searchFailed: string;
+    };
+    /**
+     * The blast radius, as a sentence. Three values and a conditional reason,
+     * which is more than a template can put in a sensible order.
+     */
+    impact: (impact: CommandImpact) => string;
+};
+
+/** One choice inside a parameter step. */
+export declare type CommandParamOption = {
+    value: string;
+    label: string;
+    sublabel?: string;
+    icon?: IconType;
+    avatar?: CommandEntityAvatar;
+};
+
+/**
+ * A value the action still needs, rendered as the next level of the palette
+ * rather than as a separate dialog.
+ *
+ * Covers the `select` and `multiple` shapes. An action needing free-form or
+ * multi-field input should collect nothing here and hand off to its own dialog
+ * from `run` instead.
+ */
+export declare type CommandParamStep = {
+    key: string;
+    /** Level heading and input placeholder, e.g. "Choose a version". */
+    label: string;
+    options: (ref: CommandEntityRef) => CommandParamOption[];
+    multiple?: boolean;
+};
+
+/** Values collected across the parameter levels, keyed by `CommandParamStep.key`. */
+export declare type CommandParamValues = Record<string, string[]>;
+
+export declare type CommandRowAction = {
+    key: string;
+    /**
+     * The accessible name, and it always carries the target: `Copy link to
+     * MacBook Pro 14"`. The tooltip may be shorter — see `tip`.
+     */
+    label: string;
+    icon?: IconType;
+    /**
+     * Visible text next to the icon. Give it to at most one action per row —
+     * otherwise the row turns into a row of buttons.
+     */
+    text?: string;
+    tip?: string;
+    run: () => void;
+};
+
+/**
+ * What the palette lends an action at run time, so a provider stays free of the
+ * router and of any assistant runtime. An action that has to reach a screen
+ * calls `navigate` rather than importing a router itself.
+ */
+export declare type CommandRunContext = {
+    navigate: (href: string) => void;
+    /** Hands a prompt to the assistant. A no-op when no `assistant` is configured. */
+    ask: (prompt: string) => void;
+};
+
 export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
@@ -3630,7 +4322,7 @@ declare type Data<R extends RecordType> = {
  */
 export declare type DataAdapter<R extends RecordType, Filters extends FiltersDefinition> = BaseDataAdapter<R, Filters, BaseFetchOptions<Filters>, BaseResponse<R>> | PaginatedDataAdapter<R, Filters, PaginatedFetchOptions<Filters>, PaginatedResponse<R>>;
 
-declare type DataAttributes_2 = {
+declare type DataAttributes_3 = {
     [key: `data-${string}`]: string | undefined;
 };
 
@@ -3668,6 +4360,11 @@ declare interface DataCollectionSettingsContextType {
  * Extends the base data source with data collection specific elements / features
  */
 export declare type DataCollectionSource<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> = DataSource<R, Filters, Sortings, Grouping> & DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
+    /**
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
+     */
+    definition?: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>;
     setCurrentNavigationFilters: React.Dispatch<React.SetStateAction<NavigationFiltersState<NavigationFilters>>>;
     /** Current summaries data */
@@ -3684,6 +4381,12 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /**
      * Data Collection specific datasource elements / features
      */
+    /**
+     * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+     * lists everything the callbacks below close over: miss one and a row keeps
+     * calling the closure it mounted with.
+     */
+    memoizeDefinition?: boolean;
     /** Navigation filters */
     navigationFilters?: NavigationFilters;
     currentNavigationFilters?: NavigationFiltersState<NavigationFilters>;
@@ -3729,7 +4432,7 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
     filters?: CurrentFiltersState;
-    search?: string | undefined;
+    search?: string;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
     /** Per-visualization filter states, keyed by visualization index.
@@ -3737,6 +4440,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     visualizationFilters?: Record<string, CurrentFiltersState>;
     /** User-created custom presets persisted alongside the rest of the state. */
     customPresets?: PresetsDefinition<FiltersDefinition>;
+    /** The active view's id, so a revisit restores which view is selected and not
+     *  just the views themselves. */
+    selectedPresetId?: string;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
@@ -3754,7 +4460,7 @@ declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeature
  */
 declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search", "visualizationFilters"];
 
-declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | `${DataCollectionStorageFeature}`)[];
+declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | DataCollectionStorageFeature)[];
 
 /**
  * Represents an error that occurred during data fetching
@@ -4786,6 +5492,13 @@ declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
+        readonly attribution: "Suggested by One";
+        readonly evidence: {
+            readonly show: "See {{name}}";
+            readonly hide: "Hide {{name}}";
+        };
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -4834,6 +5547,13 @@ declare const defaultTranslations: {
             readonly creditsError: "Could not load credits";
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
+        };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
         };
         readonly reportCard: {
             readonly tableLabel: "Table";
@@ -4972,6 +5692,7 @@ declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -5610,7 +6331,7 @@ declare type DialogControls = {
 } | {
     kind: "back";
     label: string;
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
 };
 
 declare type DialogPosition = (typeof dialogPositions)[number];
@@ -5676,7 +6397,7 @@ declare type DropdownInternalProps = {
      * @default false
      */
     disabled?: boolean;
-} & DataAttributes_2;
+} & DataAttributes_3;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -5718,6 +6439,8 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
+
+declare type DropPosition = "before" | "after" | "inside";
 
 /* Excluded from this release type: EditableColumn */
 
@@ -6167,11 +6890,72 @@ export declare interface F0ActionBarRef {
     wiggle: (options?: WiggleOptions) => void;
 }
 
+/**
+ * @deprecated Use `F0AiCallout` instead.
+ *
+ * It carries no status, so it cannot say how much a message matters, and it
+ * signals "this came from AI" with a gradient instead — two signals for one
+ * message, drawn from raw hex rather than tokens, so it cannot follow a theme.
+ * Its two actions are both outlined, which reads as two peers where there is
+ * really a recommendation and a way out of it.
+ *
+ * `F0AiCallout` says where the message came from in words, in every shape, and
+ * `status="neutral"` is the rung for exactly this case: AI output with nothing
+ * to decide.
+ *
+ * @removeIn 7.0.0
+ * @migration `title` unchanged. `content` becomes `children` and takes nodes
+ * rather than a string. Add `status="neutral"` with an `icon` that describes
+ * the content (e.g. `Summary` from `@/icons/ai`) — `neutral` has no glyph of
+ * its own. `primaryAction` becomes `action` and `secondaryAction` stays, but
+ * only when it is the way out of the first rather than a second peer.
+ * `F0AiBanner.Skeleton` becomes `F0AiCallout.Skeleton`.
+ */
 export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
 };
 
 export declare type F0AiBannerProps = AiBannerInternalProps;
+
+export declare const F0AiCallout: ForwardRefExoticComponent<(Omit<DataAttributes_2 & {
+status: AiCalloutStatus_2;
+title: string;
+icon?: IconType_2;
+} & {
+summary?: string;
+children: ReactNode;
+action?: AiCalloutAction_2;
+secondaryAction?: AiCalloutAction_2;
+onClose?: () => void;
+evidence?: {
+name: string;
+items: ReactNode[];
+kind?: "rationale" | "steps";
+};
+defaultOpen?: boolean;
+open?: boolean;
+onOpenChange?: (open: boolean) => void;
+findings?: never;
+} & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> | Omit<DataAttributes_2 & {
+status: AiCalloutStatus_2;
+title: string;
+icon?: IconType_2;
+} & {
+findings: AiCalloutFinding_2[];
+defaultOpen?: boolean;
+open?: boolean;
+onOpenChange?: (open: boolean) => void;
+children?: never;
+summary?: never;
+action?: never;
+secondaryAction?: never;
+evidence?: never;
+onClose?: never;
+} & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref">) & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<F0AiCalloutProps & RefAttributes<HTMLDivElement>>, never> & {
+    Skeleton: ({ status, compact }: AiCalloutSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0AiCalloutProps = AiCalloutSingleProps | AiCalloutStackedProps;
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
@@ -6521,6 +7305,26 @@ declare type F0ButtonToggleInternalProps = {
 
 export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
 
+/**
+ * @deprecated Use `F0AiCallout` instead.
+ *
+ * `F0AiCallout` is the same construction — tinted container, white card, action
+ * row — brought in line with the design, and it fixes two things this one gets
+ * wrong: `critical` renders with no icon and an uncoloured title (the strongest
+ * status is the only one that isn't signalled), and the `ai` variant stacks a
+ * gradient on top of a semantic colour, which is two signals for one message.
+ * It also makes attribution structural: the byline is always rendered, so the
+ * callout can never fail to say where it came from.
+ *
+ * @removeIn 7.0.0
+ * @migration Replace `F0Callout` with `F0AiCallout` from the same entry point.
+ * `variant` becomes `status`, and `variant="ai"` becomes `status="neutral"`,
+ * which additionally requires an `icon` because `neutral` has no glyph of its
+ * own. `children` is unchanged. `actions: [a, b]` becomes `action={a}` plus
+ * `secondaryAction={b}`, and only when the second is the way out of the first
+ * rather than a third path — otherwise drop it. Remove nothing for the byline:
+ * it is not a prop, every `F0AiCallout` renders it.
+ */
 export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
 };
@@ -7374,6 +8178,12 @@ export declare type F0ChatRuntime = {
      */
     maxFileSizeBytes?: number;
     /**
+     * Maximum number of characters allowed in a message. The composer keeps an
+     * oversized draft in place and shows its existing validation banner instead
+     * of calling `sendMessage`. Omit for no limit.
+     */
+    maxMessageCharacters?: number;
+    /**
      * Optional voice dictation — same signature as the AI chat (streams partials).
      * Not part of the Stream transport; a host wires it to its own speech service
      * (the Stream adapter omits it, so the mic button stays hidden there).
@@ -7546,6 +8356,62 @@ export declare type F0ChatVoiceAttachment = {
     name?: string;
 };
 
+/** What `useCommandPalette()` hands back. */
+export declare type F0CommandPaletteApi = {
+    open: () => void;
+    /**
+     * Open already scoped to a record or a selection — the shortcut for any
+     * surface that already knows its target (a row menu, a bulk bar, a detail
+     * header), so the only thing left to do is name the verb.
+     */
+    openScoped: (ref: CommandEntityRef) => void;
+    close: () => void;
+    isOpen: boolean;
+};
+
+/**
+ * @experimental This is an experimental API use it at your own risk
+ */
+export declare const F0CommandPaletteProvider: ({ children, groups, recent, assistant, labels, onNavigate, shortcut, open: openProp, onOpenChange, }: F0CommandPaletteProviderProps_2) => JSX_2.Element;
+
+export declare type F0CommandPaletteProviderProps = {
+    children: ReactNode;
+    /** Every word the palette puts on screen. Required: it ships none itself. */
+    labels: CommandPaletteLabels;
+    /**
+     * Everything findable, as an ordered list of groups.
+     *
+     * One prop rather than three, because `actions`, `navigation` and `providers`
+     * were the same idea three times — a heading and the rows under it. Order
+     * here is order on screen, so where records sit relative to commands is the
+     * product's call and no longer a rule buried in this component.
+     */
+    groups: CommandGroup[];
+    /**
+     * Ids of items in `groups` to lead the empty state with, most recent first.
+     *
+     * Consumer-owned on purpose: what counts as recent is a fact about the app's
+     * history, not about this overlay, and the palette must not be the thing that
+     * decides to write to storage.
+     */
+    recent?: string[];
+    assistant?: CommandAssistant;
+    /**
+     * How an `href` is followed. Defaults to a full page load, which is right for
+     * an app without a client router and wrong for one with it — pass the router's
+     * own navigate.
+     */
+    onNavigate?: (href: string) => void;
+    /**
+     * Bind `mod+K` to open the palette.
+     * @default true
+     */
+    shortcut?: boolean;
+    /** Controlled open state. Leave it out to let the palette own it. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+};
+
 /**
  * F0CommunityPostsCarousel — the Communities widget's content: the latest posts as
  * TILES you page through, two at a time on a main-column card and one in
@@ -7693,7 +8559,7 @@ declare type F0DialogPrimaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -7704,7 +8570,7 @@ declare type F0DialogSecondaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -8113,8 +8979,13 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
 
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
-    /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-    getMap: () => default_3.Map | null;
+    /**
+     * The rendering engine's own map object, as an escape hatch. Typed `unknown`
+     * on purpose: what comes back depends on the provider, so narrowing it is a
+     * deliberate decision at the call site instead of an implicit dependency on
+     * whichever engine F0Map happens to use. `null` until the map has mounted.
+     */
+    getNativeMap: () => unknown;
     /** Center on a marker (and select it). Always animates unless reduced-motion. */
     focusMarker: (id: string) => void;
     /** Frame all markers in view. */
@@ -8269,7 +9140,7 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     /** Initial camera. Defaults to a city-level view. Read once on mount. */
     initialViewport?: F0MapViewport;
     /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
-    mapStyle?: F0MapStylePair;
+    mapStyle?: F0MapStyle;
     /**
      * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
      * the map (and resets the camera), so treat it as static.
@@ -8325,6 +9196,13 @@ export declare interface F0MapProps extends WithDataTestIdProps {
 }
 
 /**
+ * Which rendering engine a style is written for. The tag exists so a style
+ * built for one engine can never be handed to another: the shapes are not
+ * interchangeable, and without it the mismatch would only surface at runtime.
+ */
+export declare type F0MapProvider = "maplibre";
+
+/**
  * A route: a polyline drawn through the given coordinates exactly as provided.
  * `F0Map` renders the path; it does not compute routing - fetch that
  * server-side (or from a routing engine) and pass the resulting vertices.
@@ -8349,12 +9227,15 @@ export declare interface F0MapSkeletonProps extends WithDataTestIdProps {
 }
 
 /**
- * A light/dark pair of MapLibre styles. Each entry is either a hosted style
- * URL or an inline `StyleSpecification`.
+ * A light/dark style pair for one engine. `light` and `dark` are deliberately
+ * opaque - their real shape belongs to the engine (a MapLibre
+ * `StyleSpecification` or a style URL today), and F0Map's public surface must
+ * never make a consumer import an engine's types to describe a style.
  */
-export declare interface F0MapStylePair {
-    light: string | StyleSpecification;
-    dark: string | StyleSpecification;
+export declare interface F0MapStyle {
+    provider: F0MapProvider;
+    light: unknown;
+    dark: unknown;
 }
 
 /**
@@ -8365,7 +9246,7 @@ export declare interface F0MapStylePair {
  * resolved to concrete hex for the light and dark neutral ramps. Regenerate with
  * `node src/patterns/F0Map/styles/buildStyles.mjs`.
  */
-export declare const f0MapStyles: F0MapStylePair;
+export declare const f0MapStyles: F0MapStyle;
 
 /** Initial camera position for the map. */
 export declare interface F0MapViewport {
@@ -8384,7 +9265,7 @@ compact?: boolean;
 }) => JSX_2.Element;
 }>;
 
-export declare interface F0MeetingCardProps extends WithDataTestIdProps, DataAttributes_2 {
+export declare interface F0MeetingCardProps extends WithDataTestIdProps, DataAttributes_3 {
     /** Lifecycle of the meeting. See {@link meetingStates}. */
     state: MeetingState;
     /**
@@ -9218,7 +10099,7 @@ export declare interface F0VersionHistoryProps {
     title: string;
     versions: Version[];
     currentVersion?: CurrentVersion;
-    activeVersionId?: string | "current";
+    activeVersionId?: "current" | (string & {});
 }
 
 /**
@@ -9574,9 +10455,9 @@ export declare interface GranularityDefinition {
         max?: Date;
     } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
-    toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
-    toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
+    toRangeString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
+    toRange: <T extends OptionalCalendarSelection>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
+    toString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -9585,8 +10466,8 @@ export declare interface GranularityDefinition {
     getViewDateFromDate: (date: Date) => Date;
     render: (renderProps: {
         mode: CalendarMode;
-        selected: Date | DateRange | null;
-        onSelect: (date: Date | DateRange | null) => void;
+        selected: CalendarSelection;
+        onSelect: (date: CalendarSelection) => void;
         month: Date;
         onMonthChange: (date: Date) => void;
         motionDirection: number;
@@ -10152,6 +11033,49 @@ export declare interface HomeSlotParamsMap {
     indicators: IndicatorsListProps;
 }
 
+export declare type HomeTrackingOptions = {
+    /** A widget's header link, footer action, or "View more" was used. */
+    onWidgetAction?: (event: HomeWidgetActionEvent) => void;
+    /**
+     * A row inside a widget was activated. Fires ALONGSIDE the navigation the
+     * row's `href` performs — it does not replace or gate it, so a middle-click
+     * or a modified click still behaves like the link it is.
+     */
+    onWidgetItemActivate?: (event: HomeWidgetItemActivateEvent) => void;
+};
+
+/**
+ * Payload for `tracking.onWidgetAction`. The widget is named by the id the host
+ * gave it, which is the key to everything else the host already knows about it.
+ */
+export declare type HomeWidgetActionEvent = {
+    widgetId: string;
+    action: HomeWidgetActionKind;
+};
+
+/**
+ * TRACKING FOR THE HOME — the same shape the AI kit uses (`AiChatTrackingOptions`):
+ * the host passes callbacks, the components fire them, and nothing about a
+ * widget's data changes to make it measurable.
+ *
+ * This exists because a Home widget is DECLARATIVE. Its rows carry an `href`
+ * and never an `onClick` (that is the one click behavior a `list` slot has, and
+ * a type test holds the line), so a host had no seam to observe an interaction
+ * from — its analytics simply could not see the Home. These callbacks are that
+ * seam, and they leave the row data alone: navigation is still the anchor's.
+ *
+ * BEHAVIOUR ONLY, deliberately. The payloads carry what the reader DID and say
+ * nothing about which column a widget sits in or where in it — that is the
+ * host's own persisted layout, and duplicating it into an analytics event
+ * would make two sources for one fact, the stale one being the event.
+ */
+/**
+ * WHICH AFFORDANCE was used. A widget has three ways out of it and they mean
+ * different things to whoever reads the numbers: the header's own link, the
+ * footer's call to action, and the "View more" a capped list grows.
+ */
+export declare type HomeWidgetActionKind = "header-link" | "footer-action" | "view-more";
+
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
  * through to the frame.
@@ -10258,6 +11182,19 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/** Payload for `tracking.onWidgetItemActivate`. */
+export declare type HomeWidgetItemActivateEvent = {
+    widgetId: string;
+    /** The row's own id, as the slot was given it. */
+    itemId: string | number;
+    /**
+     * 1-based place of the row within its slot, AS DRAWN. Not layout state: it
+     * is where the reader's attention landed in a list ordered by its own data,
+     * which is the one position worth reporting.
+     */
+    itemPosition: number;
 };
 
 /**
@@ -10585,7 +11522,7 @@ declare type InputFieldProps<T> = {
     onClickChildren?: () => void;
     /** Receives the click, so a caller can tell where in the field it landed. */
     onClickContent?: (event: React.MouseEvent) => void;
-    value?: T | undefined;
+    value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
     error?: string | boolean;
@@ -11461,7 +12398,7 @@ export declare type NavigationGranularityKey = GranularityDefinitionKey | "perio
 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
-} & DataAttributes_2;
+} & DataAttributes_3;
 
 export declare type NavigationProps = {
     previous?: NavigationTarget;
@@ -11637,6 +12574,17 @@ export declare interface NewHomeLayoutProps {
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
+    /**
+     * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+     * shape the AI kit takes (`ai.tracking`).
+     *
+     * A widget is declarative: its rows carry an `href` and never an `onClick`,
+     * so a host had no seam to observe a row from and its analytics could not see
+     * the Home at all. These fire for EVERY widget in the column, so a newly
+     * added one is measured without remembering anything. Nothing here changes
+     * behaviour — a row still navigates through its own anchor.
+     */
+    tracking?: HomeTrackingOptions;
     /** The daytime gradient period for the page surface. */
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
@@ -11971,9 +12919,9 @@ export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth,
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
-    onSelect?: (date: Date | DateRange | null) => void;
+    onSelect?: (date: CalendarSelection) => void;
     defaultMonth?: Date;
-    defaultSelected?: Date | DateRange | null;
+    defaultSelected?: CalendarSelection;
     showNavigation?: boolean;
     showInput?: boolean;
     minDate?: Date;
@@ -12317,6 +13265,8 @@ declare interface Option_2 {
     target?: string;
     onClick?: (event: any) => unknown;
 }
+
+export declare type OptionalCalendarSelection = CalendarSelection | undefined;
 
 declare interface OverflowListProps<T> {
     items: T[];
@@ -13236,6 +14186,11 @@ declare type SelectCellConfig<R extends RecordType> = {
     clearable?: boolean;
     showSearchBox?: boolean;
     defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined;
+    /**
+     * Buttons rendered below the options, for what a value cannot express —
+     * dropping a scheduled change, say. Pass a function to decide them per row.
+     */
+    actions?: Action[] | ((item: R) => Action[] | undefined);
 } & ({
     options: F0SelectItemProps<string>[] | ((item: R) => F0SelectItemProps<string>[]);
     source?: never;
@@ -14006,7 +14961,7 @@ export declare const Switch: typeof _Switch;
 
 declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, required, ...rest }: SwitchProps): JSX_2.Element;
 
-declare interface SwitchProps extends DataAttributes_2 {
+declare interface SwitchProps extends DataAttributes_3 {
     /**
      * The title of the switch
      */
@@ -14055,7 +15010,7 @@ export declare type TabItem = {
     index?: boolean;
     variant?: "default" | "upsell";
     onClick?: () => void;
-} & DataAttributes_2 & ({
+} & DataAttributes_3 & ({
     href: string;
 } | {
     id: string;
@@ -14516,9 +15471,9 @@ declare interface TOCItemProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     children?: ReactNode;
-    onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDragOver?: (itemId: string, position: DropPosition) => void;
     onDragLeave?: () => void;
-    onDrop?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDrop?: (itemId: string, position: DropPosition) => void;
     canDropInside?: boolean;
     currentParentId?: string | null;
     draggedItemId?: string | null;
@@ -14722,6 +15677,15 @@ export declare type UpsellActionDefinition = {
 export declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
+
+/**
+ * Open the palette from anywhere below the provider.
+ *
+ * `openScoped(ref)` is the one every surface that already knows its target
+ * should reach for — a row menu, a bulk bar, a detail header. The UI supplies
+ * the scope, the reader supplies the intent.
+ */
+export declare const useCommandPalette: () => F0CommandPaletteApi;
 
 export declare type UseDataCollectionData<R extends RecordType> = UseDataCollectionDataReturn<R> & {
     summaries?: R;
@@ -15691,8 +16655,17 @@ export declare interface WidgetProps {
         };
         count?: number;
     };
-    /** The card's footer button — its call to action. `neutral`/`sm` by default. */
-    action?: F0ButtonProps;
+    /**
+     * The card's footer button — its call to action. `neutral`/`sm` by default,
+     * `outline`/`md` once the card is wide.
+     *
+     * AN ARRAY draws TWO, side by side, for a card that carries both its own call
+     * to action and the way out of it ("Sign now", "Go to Documents"). A pair is
+     * drawn `outline` at every width: two buttons in a footer are a set of equals,
+     * and filling one of them nominates it as the card's answer. Two is the
+     * ceiling — a third belongs in `actions`, the overflow menu.
+     */
+    action?: F0ButtonProps | F0ButtonProps[];
     /**
      * Extra classes for the FOOTER row that `action` draws in. For content that
      * BLEEDS past the card's content box and wants the footer brought onto its
@@ -15879,7 +16852,7 @@ declare type WithDataTestIdProps = {
 };
 
 declare type WithGroupId<RecordType> = RecordType & {
-    [GROUP_ID_SYMBOL]: unknown | undefined;
+    [GROUP_ID_SYMBOL]: unknown;
 };
 
 declare type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<PropertyDefinition_2<R>, "hide"> & {
@@ -16010,8 +16983,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -16019,10 +16994,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
