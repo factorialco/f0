@@ -12,7 +12,7 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
-import { datepickerSizes, DatePickerValue } from "../types"
+import { datepickerSizes, datePickerModes, DatePickerValue } from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
@@ -37,6 +37,8 @@ const meta = {
           "For each granularity the input selector will show a button to navigate to the current date in the granularity, you can hide that via props",
           "The component also allows you navigation arrows to allow user to navigate to the next or previous item in the granularity.",
           "Note the value and defaultValue are objects with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
+          'On a record, a date usually reads as text and only becomes an input once someone edits it. That is `mode="read"`: the date renders as dd/MM/yyyy, hovering it (or tabbing to it) reveals the calendar, and activating that opens the picker on the date already set. Closing the picker puts the date back to text',
+          "Who may do what is `canEdit` and `onRequestChange`. With `canEdit` the reader gets the calendar; without it, `onRequestChange` gives them a way to ask whoever administers the record, and with neither the date is just text. `disabled` reads the same way",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
@@ -91,6 +93,34 @@ const meta = {
           summary: "(open: boolean) => void",
         },
       },
+    },
+    mode: {
+      description:
+        "Whether the picker shows the input field or the date as text. In `read` mode `displayFormat` defaults to `default` (dd/MM/yyyy).",
+      control: "inline-radio",
+      options: datePickerModes,
+      table: { type: { summary: '"edit" | "read"' } },
+    },
+    onModeChange: {
+      description:
+        "Called whenever the picker moves between reading and editing",
+      control: "function",
+      table: { type: { summary: "(mode: DatePickerMode) => void" } },
+    },
+    canEdit: {
+      description:
+        "Whether the reader may change the date. `false` drops the edit action in `read` mode.",
+      control: "boolean",
+    },
+    onRequestChange: {
+      description:
+        "Asks whoever administers the record to change the date. Renders as an action in `read` mode, and only while `canEdit` is false.",
+      control: "function",
+      table: { type: { summary: "() => void" } },
+    },
+    emptyLabel: {
+      description: "What `read` mode shows in place of an empty date",
+      control: "text",
     },
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
@@ -353,6 +383,124 @@ export const WithClearable: Story = {
   },
 }
 
+/**
+ * A date on a record reads as text until someone with permission edits it. This
+ * is the HR admin / manager view of an employee's Seniority date: hovering the
+ * value (or tabbing to it) reveals the calendar, and activating it opens the
+ * picker on the date already set.
+ */
+export const ReadModeEditable: Story = {
+  args: {
+    label: "Seniority date",
+    mode: "read",
+    value: {
+      value: { from: new Date(2018, 8, 1), to: new Date(2018, 8, 1) },
+      granularity: "day",
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("the date reads as dd/MM/yyyy, not as an input", async () => {
+      await expect(canvas.getByText("01/09/2018")).toBeVisible()
+      await expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
+    })
+
+    await step("activating the value opens the calendar on it", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: "Edit Seniority date" })
+      )
+      await expect(canvas.getByRole("textbox")).toHaveValue("01/09/2018")
+      await expect(await screen.findByRole("grid")).toBeInTheDocument()
+      await expect(
+        screen.getByRole("combobox", { name: /month/i })
+      ).toHaveTextContent("September")
+    })
+
+    await step("dismissing it puts the date back to text", async () => {
+      await userEvent.keyboard("{Escape}")
+      await expect(
+        await canvas.findByRole("button", { name: "Edit Seniority date" })
+      ).toBeVisible()
+    })
+  },
+}
+
+/**
+ * The same field seen by the employee it belongs to. They cannot set the date,
+ * so the calendar is replaced by a request that goes to whoever administers the
+ * record.
+ */
+export const ReadModeRequestChange: Story = {
+  args: {
+    label: "Seniority date",
+    mode: "read",
+    canEdit: false,
+    onRequestChange: fn(),
+    value: {
+      value: { from: new Date(2018, 8, 1), to: new Date(2018, 8, 1) },
+      granularity: "day",
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("there is nothing to edit", async () => {
+      await expect(
+        canvas.queryByRole("button", { name: "Edit Seniority date" })
+      ).not.toBeInTheDocument()
+    })
+
+    await step("the change is requested from the keyboard", async () => {
+      // A pointer reveals the action by hovering the row; a keyboard reveals it
+      // by reaching it, which is the path assertable here — CSS `:hover` is a
+      // native browser state that synthetic pointer events never enter.
+      await userEvent.tab()
+
+      const request = canvas.getByRole("button", {
+        name: "Request a change to Seniority date",
+      })
+      await expect(request).toHaveFocus()
+
+      await userEvent.click(request)
+      await expect(args.onRequestChange).toHaveBeenCalledOnce()
+    })
+  },
+}
+
+/**
+ * A date nobody on this screen can change — an employee's contract start date,
+ * which lives on the contract. It reads as text with no affordances at all,
+ * which is also what `disabled` gives you in `read` mode.
+ */
+export const ReadModeLocked: Story = {
+  args: {
+    label: "Contract start date",
+    mode: "read",
+    canEdit: false,
+    value: {
+      value: { from: new Date(2021, 3, 12), to: new Date(2021, 3, 12) },
+      granularity: "day",
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getByText("12/04/2021")).toBeVisible()
+    await expect(canvas.queryAllByRole("button")).toHaveLength(0)
+  },
+}
+
+/** With no date set, `read` mode falls back to `emptyLabel`. */
+export const ReadModeEmpty: Story = {
+  args: {
+    label: "Seniority date",
+    mode: "read",
+    emptyLabel: "no date",
+    value: undefined,
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({ width: "100%" })),
   args: {
@@ -363,6 +511,10 @@ export const Snapshot: Story = {
       clearable: true,
       labelIcon: Placeholder,
       label: "Label text here",
+    }
+    const readValue: DatePickerValue = {
+      value: { from: new Date(2018, 8, 1), to: new Date(2018, 8, 1) },
+      granularity: "day",
     }
     const snapshotVariants: (Record<string, unknown> & typeof base)[] = [
       { ...base },
@@ -380,6 +532,21 @@ export const Snapshot: Story = {
       { ...base, status: { type: "info" as const, message: "Info message" } },
       { ...base, hint: "Hint message" },
       { ...base, open: true },
+      { ...base, mode: "read" as const, value: readValue },
+      {
+        ...base,
+        mode: "read" as const,
+        value: readValue,
+        canEdit: false,
+        onRequestChange: fn(),
+      },
+      { ...base, mode: "read" as const, value: readValue, canEdit: false },
+      {
+        ...base,
+        mode: "read" as const,
+        value: undefined,
+        emptyLabel: "no date",
+      },
     ]
     return (
       <div className="flex flex-col gap-4">

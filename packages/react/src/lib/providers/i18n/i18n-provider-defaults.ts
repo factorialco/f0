@@ -42,6 +42,8 @@ export const defaultTranslations = {
       show: "Show {{label}}",
       hide: "Hide {{label}}",
     },
+    edit: "Edit {{label}}",
+    requestChange: "Request a change to {{label}}",
   },
   link: {
     opensInNewTab: "opens in new tab",

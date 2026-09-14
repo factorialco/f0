@@ -5,8 +5,9 @@ import {
 } from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
+import { DateDisplay } from "./components/DateDisplay"
 import { DateInput } from "./components/DateInput"
-import { DatePickerValue, F0DatePickerProps } from "./types"
+import { DatePickerMode, DatePickerValue, F0DatePickerProps } from "./types"
 
 export function F0DatePicker({
   onChange,
@@ -19,14 +20,44 @@ export function F0DatePicker({
   showIcon = true,
   displayFormat,
   selectOnCellOnly,
+  mode = "edit",
+  onModeChange,
+  canEdit = true,
+  onRequestChange,
+  emptyLabel,
   ...inputProps
 }: F0DatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
   const [isOpen, setIsOpen] = useState(open)
+  const [currentMode, setCurrentMode] = useState<DatePickerMode>(mode)
 
   useEffect(() => {
     setIsOpen(open)
   }, [open])
+
+  useEffect(() => {
+    setCurrentMode(mode)
+  }, [mode])
+
+  // Reading is where a "read" picker lives: editing is a detour that lasts as
+  // long as the popup, so closing it puts the date back to text.
+  const closePicker = useCallback(() => {
+    setIsOpen(false)
+    if (mode === "read") {
+      setCurrentMode("read")
+      onModeChange?.("read")
+    }
+  }, [mode, onModeChange])
+
+  const startEditing = useCallback(() => {
+    setCurrentMode("edit")
+    onModeChange?.("edit")
+    setIsOpen(true)
+  }, [onModeChange])
+
+  /** A date read as text is numeric (dd/MM/yyyy), and stays numeric while edited. */
+  const resolvedDisplayFormat =
+    displayFormat ?? (mode === "read" ? "default" : undefined)
 
   const i18n = useI18n()
 
@@ -95,7 +126,7 @@ export function F0DatePicker({
 
     // If the granularity is not a range, close the popup
     if (shouldClose) {
-      setIsOpen(false)
+      closePicker()
     }
   }
 
@@ -109,7 +140,11 @@ export function F0DatePicker({
   }
 
   const handlePickerOpenChange = (open: boolean) => {
-    setIsOpen(open)
+    if (open) {
+      setIsOpen(true)
+    } else {
+      closePicker()
+    }
     inputProps.onOpenChange?.(open)
   }
 
@@ -127,6 +162,26 @@ export function F0DatePicker({
       })
     }
   }, [isOpen])
+
+  if (currentMode === "read") {
+    return (
+      <DateDisplay
+        label={inputProps.label}
+        hideLabel={inputProps.hideLabel}
+        size={inputProps.size}
+        disabled={inputProps.disabled}
+        canEdit={canEdit}
+        emptyLabel={emptyLabel}
+        value={granularity.toString(
+          localValue?.value,
+          i18n,
+          resolvedDisplayFormat ?? "default"
+        )}
+        onEdit={startEditing}
+        onRequestChange={onRequestChange}
+      />
+    )
+  }
 
   return (
     <DatePickerPopup
@@ -149,7 +204,7 @@ export function F0DatePicker({
         granularity={granularity}
         onDateChange={handleChangeDate}
         showIcon={showIcon}
-        displayFormat={displayFormat}
+        displayFormat={resolvedDisplayFormat}
       />
     </DatePickerPopup>
   )
