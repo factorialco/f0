@@ -7,6 +7,7 @@ import type {
   F0DataChartPieSeries,
   F0DataChartPointClick,
   F0DataChartRadarIndicator,
+  F0DataChartReferenceLine,
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
@@ -218,6 +219,14 @@ export type DashboardChartConfig =
 export interface DashboardChartData {
   /** Category axis labels. Required for bar/line charts. */
   categories?: string[]
+  /**
+   * Constants to draw across the plot — a peer median, a target, an average.
+   *
+   * Part of the DATA, not the config: a figure like this arrives with the
+   * values it is compared against, and changes when they do. Bar and line
+   * charts render them; every other type ignores them.
+   */
+  referenceLines?: F0DataChartReferenceLine[]
   /** X-axis category labels for heatmap charts. */
   xCategories?: string[]
   /** Y-axis category labels for heatmap charts. */

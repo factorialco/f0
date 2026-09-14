@@ -14,6 +14,7 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
+import { referenceLineSeries } from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -162,6 +163,7 @@ export function useLineChartOptions(
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
+    referenceLines,
     echartsOptions,
   }: F0DataChartLineProps,
   size: LineChartSize
@@ -269,7 +271,7 @@ export function useLineChartOptions(
     return buildBaseChartOptions({
       categories,
       theme,
-      series: echartsSeries,
+      series: [...echartsSeries, ...referenceLineSeries(referenceLines, theme)],
       legendData,
       isVertical: true,
       showGrid,
@@ -296,6 +298,7 @@ export function useLineChartOptions(
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
+    referenceLines,
     echartsOptions,
     theme,
     i18n,

@@ -20,6 +20,7 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
+import { referenceLineSeries } from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -1021,6 +1022,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber = 2,
+    referenceLines,
     echartsOptions,
   }: F0DataChartBarProps,
   size: BarChartSize,
@@ -1272,7 +1274,12 @@ export function useBarChartOptions(
     const options = buildBaseChartOptions({
       categories,
       theme,
-      series: echartsSeries,
+      // Appended, so a reference line never takes a palette colour from the
+      // data or shifts the bars' own ordering.
+      series: [
+        ...echartsSeries,
+        ...referenceLineSeries(referenceLines, theme, isVertical ? "y" : "x"),
+      ],
       legendData,
       isVertical,
       showGrid,
@@ -1569,6 +1576,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber,
+    referenceLines,
     echartsOptions,
     theme,
     i18n,

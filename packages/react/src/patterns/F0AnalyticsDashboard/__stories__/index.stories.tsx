@@ -490,6 +490,22 @@ const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
     fetchData: async () => ({ value: 76.5, previousValue: 100 }),
   },
   {
+    id: "peer-reference-line",
+    title: "Gender salary gap by team",
+    description: "A constant is drawn once across the plot, not once per bar.",
+    type: "chart",
+    chart: { type: "bar", orientation: "horizontal" },
+    colSpan: 8,
+    x: 0,
+    y: 9,
+    itemHeight: 336,
+    fetchData: async () => ({
+      categories: ["People", "Customer Support", "Sales", "Operations"],
+      series: [{ name: "Salary gap", data: [24.98, 15.17, 12.17, 9.4] }],
+      referenceLines: [{ value: 11, label: "Peer median" }],
+    }),
+  },
+  {
     id: "peer-comparison",
     title: "KPI with a peer comparison",
     description: "A reference figure is stated, not turned into a trend.",
