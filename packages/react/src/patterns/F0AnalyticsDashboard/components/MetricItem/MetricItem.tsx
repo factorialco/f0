@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { cn, focusRing } from "@/lib/utils"
 import type {
   FiltersDefinition,
@@ -101,7 +102,7 @@ export function MetricValue({
   value: string
   trend?: MetricTrend
   /** Already formatted, so it reads in the same units as the value above it. */
-  comparison?: { value: string; label: string }
+  comparison?: { value: string; label: string; info?: string | InfoHintContent }
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const { height, width } = useContainerSize(ref)
@@ -191,9 +192,16 @@ export function MetricValue({
           // Stated, never arrowed: a peer median or a target is a different
           // quantity from this metric's own past, and an up/down arrow beside
           // it would read as a movement that never happened.
-          <span className="whitespace-nowrap text-base font-medium text-f1-foreground-secondary">
-            {comparison.label} {comparison.value}
-          </span>
+          <div className="flex items-center gap-1 text-f1-foreground-secondary">
+            <span className="whitespace-nowrap text-base font-medium">
+              {comparison.label} {comparison.value}
+            </span>
+            {comparison.info ? (
+              // Says where the figure comes from, so a reader can judge it
+              // before comparing against it.
+              <InfoHint info={comparison.info} label={comparison.label} />
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>
@@ -258,6 +266,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
               ? {
                   value: format(data.comparison.value),
                   label: data.comparison.label,
+                  info: data.comparison.info,
                 }
               : undefined
           }

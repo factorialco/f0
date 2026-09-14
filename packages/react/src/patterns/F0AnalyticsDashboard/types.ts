@@ -367,6 +367,13 @@ export interface DashboardMetricData {
   comparison?: {
     value: number
     label: string
+    /**
+     * Where the figure comes from, revealed by an ⓘ icon after it — "the
+     * median across all companies on Factorial", say. A string renders a
+     * plain tooltip; the structured form renders a hoverable card that can
+     * carry a link, the same affordance as `DashboardItemBase.info`.
+     */
+    info?: string | InfoHintContent
   }
 }
 
