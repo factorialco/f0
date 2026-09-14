@@ -78,9 +78,13 @@ const meta: Meta<typeof F0CommunityPostsList> = {
   args: { posts: POSTS, labels: LABELS },
   // A MAIN-COLUMN width, since that is where this belongs: a cover beside a
   // title and two lines of body needs the room to be beside anything.
+  //
+  // `p-4` IS THE CARD'S OWN PADDING, standing in for it: the list bleeds out by
+  // exactly that so its dividers reach a card's border, and without something
+  // here to absorb it the rows simply overhang the story.
   decorators: [
     (Story) => (
-      <div className="w-[712px] max-w-full p-2">
+      <div className="w-[712px] max-w-full p-4">
         <Story />
       </div>
     ),
@@ -132,7 +136,7 @@ export const Loading: Story = {
 export const Narrow: Story = {
   decorators: [
     (Story) => (
-      <div className="w-[396px] max-w-full p-2">
+      <div className="w-[396px] max-w-full p-4">
         <Story />
       </div>
     ),
@@ -197,11 +201,14 @@ export const InsideAWidget: Story = {
     const canvas = within(canvasElement)
 
     const more = await canvas.findByRole("button", { name: "View more (1)" })
-    await expect(canvas.getAllByRole("article")).toHaveLength(3)
+    // The fourth post is the one the cap is holding back. Counted by its own
+    // title rather than by rows: the widget's CARD is a `role="article"` too,
+    // so a row count in here is one more than the number of posts.
+    await expect(canvas.queryByText(POSTS[3].title)).not.toBeInTheDocument()
 
     await userEvent.click(more)
 
-    await expect(canvas.getAllByRole("article")).toHaveLength(4)
+    await expect(canvas.getByText(POSTS[3].title)).toBeInTheDocument()
     await expect(
       canvas.getByRole("button", { name: "View less" })
     ).toBeInTheDocument()
