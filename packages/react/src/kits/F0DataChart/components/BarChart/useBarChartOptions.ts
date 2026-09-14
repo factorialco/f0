@@ -20,7 +20,10 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
-import { referenceLineSeries } from "../../utils/referenceLines"
+import {
+  referenceLineRows,
+  referenceLineSeries,
+} from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -1278,12 +1281,7 @@ export function useBarChartOptions(
       // data or shifts the bars' own ordering.
       series: [
         ...echartsSeries,
-        ...referenceLineSeries(
-          referenceLines,
-          theme,
-          isVertical ? "y" : "x",
-          tooltipValueFormatter ?? valueFormatter
-        ),
+        ...referenceLineSeries(referenceLines, theme, isVertical ? "y" : "x"),
       ],
       legendData,
       isVertical,
@@ -1478,6 +1476,11 @@ export function useBarChartOptions(
                     value: `${((value / target) * 100).toFixed(1)}%`,
                     label: i18n.dataChart.tooltip.ofTarget,
                   },
+                // The reference lines ride along here rather than answering to
+                // their own hover: the chart's tooltip is axis-triggered, so it
+                // owns the whole plot and a mark never receives the pointer.
+                // Hovering any bar is also how a reader finds a 1.5px rule.
+                ...referenceLineRows(referenceLines, formatTooltipValue),
               ],
             },
             theme

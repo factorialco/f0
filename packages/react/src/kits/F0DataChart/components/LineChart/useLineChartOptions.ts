@@ -268,17 +268,12 @@ export function useLineChartOptions(
       )
     }
 
-    return buildBaseChartOptions({
+    const lineOptions = buildBaseChartOptions({
       categories,
       theme,
       series: [
         ...echartsSeries,
-        ...referenceLineSeries(
-          referenceLines,
-          theme,
-          "y",
-          tooltipValueFormatter ?? valueFormatter
-        ),
+        ...referenceLineSeries(referenceLines, theme, "y"),
       ],
       legendData,
       isVertical: true,
@@ -294,6 +289,8 @@ export function useLineChartOptions(
       containerHeight,
       boundaryGap: false,
     })
+
+    return lineOptions
   }, [
     categories,
     series,

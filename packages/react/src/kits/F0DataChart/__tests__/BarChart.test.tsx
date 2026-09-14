@@ -240,7 +240,6 @@ describe("BarChart — reference lines", () => {
       (s: { markLine?: unknown }) => s.markLine
     )
     expect(lineSeries.silent).toBe(true)
-    expect(lineSeries.tooltip).toEqual({ show: false })
     expect(option.legend?.data ?? []).not.toContain(lineSeries.name)
   })
 
@@ -281,20 +280,10 @@ describe("BarChart — reference lines", () => {
     expect(marks[0].yAxis).toBeUndefined()
   })
 
-  // A line with something to say answers for itself on hover; one with only a
-  // label has nothing to add beyond the text already printed beside it.
-  it("is hoverable only when it carries a description", () => {
-    render(
-      <F0DataChart
-        {...props}
-        referenceLines={[{ value: 11, label: "Peer median" }]}
-      />
-    )
-    expect(
-      getLatestOption().series.find((s: { markLine?: unknown }) => s.markLine)
-        .silent
-    ).toBe(true)
-
+  // The chart's tooltip is axis-triggered and owns the whole plot, so a mark
+  // never receives the pointer. What the line has to say rides along in that
+  // tooltip instead — which is also how a reader finds a 1.5px rule at all.
+  it("adds the line to the tooltip, with its description", () => {
     render(
       <F0DataChart
         {...props}
@@ -308,16 +297,24 @@ describe("BarChart — reference lines", () => {
         ]}
       />
     )
-    const lineSeries = getLatestOption().series.find(
-      (s: { markLine?: unknown }) => s.markLine
-    )
-    expect(lineSeries.silent).toBe(false)
 
-    const html = lineSeries.tooltip.formatter({ dataIndex: 0 })
+    const option = getLatestOption()
+    const html = option.tooltip.formatter([
+      {
+        seriesName: "Salary gap",
+        name: "Sales",
+        value: 12.17,
+        dataIndex: 1,
+        marker: "",
+      },
+    ])
     expect(html).toContain("Peer median")
-    // Formatted by the chart's own formatter, so the hover and the axis agree.
     expect(html).toContain("11%")
     expect(html).toContain("Companies in Spain with 51")
+    // The mark itself stays inert: it cannot answer a hover it never gets.
+    expect(
+      option.series.find((s: { markLine?: unknown }) => s.markLine).silent
+    ).toBe(true)
   })
 
   it("adds nothing when a chart declares none", () => {

@@ -502,7 +502,14 @@ const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
     fetchData: async () => ({
       categories: ["People", "Customer Support", "Sales", "Operations"],
       series: [{ name: "Salary gap", data: [24.98, 15.17, 12.17, 9.4] }],
-      referenceLines: [{ value: 11, label: "Peer median" }],
+      referenceLines: [
+        {
+          value: 11,
+          label: "Peer median",
+          description:
+            "Median of companies in Spain with 51–200 employees (210 companies). Illustrative distribution — not computed from real companies.",
+        },
+      ],
     }),
   },
   {

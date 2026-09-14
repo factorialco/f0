@@ -1,7 +1,6 @@
 import type * as echarts from "echarts"
 import type { F0DataChartReferenceLine } from "../types"
 import { resolveChartColorToken } from "./colors"
-import { renderValueTooltip } from "./options"
 import type { ChartTheme } from "./theme"
 
 /**
@@ -18,50 +17,19 @@ export function referenceLineSeries(
    * axis; horizontal bars measure along the X axis, and a line pinned to the
    * wrong one is drawn off the plot entirely.
    */
-  valueAxis: "x" | "y" = "y",
-  /** Formats the value inside a hover tooltip, matching the chart's own. */
-  valueFormatter: (value: number) => string = (value) => String(value)
+  valueAxis: "x" | "y" = "y"
 ): echarts.SeriesOption[] {
   if (!referenceLines || referenceLines.length === 0) {
     return []
   }
-
-  const hoverable = referenceLines.some((line) => line.description)
 
   return [
     {
       type: "line",
       name: "__reference_lines__",
       data: [],
-      // Out of the legend, and out of the axis tooltip that lists the series
-      // at a category: a constant belongs to none of them. A line that carries
-      // a description answers for itself instead, on hover.
-      silent: !hoverable,
-      tooltip: hoverable
-        ? {
-            trigger: "item",
-            formatter: (params: { dataIndex?: number; data?: unknown }) => {
-              const line =
-                referenceLines[
-                  typeof params.dataIndex === "number" ? params.dataIndex : 0
-                ]
-              if (!line) {
-                return ""
-              }
-
-              return renderValueTooltip(
-                {
-                  title: line.label,
-                  value: valueFormatter(line.value),
-                  rows: line.description
-                    ? [{ value: "", label: line.description }]
-                    : [],
-                },
-                theme
-              )
-            },
-          }
-        : { show: false },
+      // Out of the legend: a constant is not a series the reader can toggle.
+      silent: true,
       legendHoverLink: false,
       animation: false,
       markLine: {
@@ -98,4 +66,29 @@ export function referenceLineSeries(
       },
     },
   ]
+}
+
+/**
+ * The reference lines as tooltip rows, for the axis-triggered tooltip that
+ * every cartesian chart uses.
+ *
+ * A markLine cannot answer a hover of its own there: the axis trigger claims
+ * the whole plot area, so the pointer never reaches the mark. Reading the
+ * figure off the tooltip is also kinder than asking anyone to hit a 1.5px rule.
+ */
+export function referenceLineRows(
+  referenceLines: F0DataChartReferenceLine[] | undefined,
+  valueFormatter: (value: number) => string
+): { value: string; label: string }[] {
+  if (!referenceLines || referenceLines.length === 0) {
+    return []
+  }
+
+  return referenceLines.flatMap((line) => {
+    const label = line.label ?? ""
+    const row = { value: valueFormatter(line.value), label }
+    return line.description
+      ? [row, { value: "", label: line.description }]
+      : [row]
+  })
 }
