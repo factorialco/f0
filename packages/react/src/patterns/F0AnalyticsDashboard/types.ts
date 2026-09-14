@@ -342,6 +342,23 @@ export interface DashboardMetricData {
   value: number
   /** Optional previous value — used to compute a trend indicator */
   previousValue?: number
+  /**
+   * A reference figure to show the value against, under the number.
+   *
+   * Distinct from {@link DashboardMetricData.previousValue}, which is this
+   * metric at an earlier time and renders as a rise or a fall. A comparison is
+   * a different quantity entirely — a peer median, a target, a company-wide
+   * average — so it is stated rather than turned into a trend: an arrow next to
+   * it would read as "it moved", which it did not.
+   *
+   * `value` is in the metric's own units and is formatted exactly like the
+   * headline number, so the two can be read against each other. `label` says
+   * what the figure is, in the consumer's own words and language.
+   */
+  comparison?: {
+    value: number
+    label: string
+  }
 }
 
 /**
