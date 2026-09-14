@@ -471,9 +471,13 @@ export const DetailRow: Story = {
     await step("Open the calendar on the date already set", async () => {
       await userEvent.click(row)
       expect(canvas.getByRole("textbox")).toHaveValue("01/09/2018")
-      expect(await screen.findByRole("grid")).toBeInTheDocument()
+
+      // Not `findByRole("grid")`: framer-motion re-keys the day grid on mount,
+      // so two of them coexist for ~150ms and the query resolves inside that
+      // window and throws on the duplicate. The month header is singular the
+      // whole time and says the same thing.
       expect(
-        screen.getByRole("combobox", { name: /month/i })
+        await screen.findByRole("combobox", { name: /month/i })
       ).toHaveTextContent("September")
     })
 
