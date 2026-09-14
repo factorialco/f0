@@ -428,8 +428,16 @@ const FULL_BLEED_CSS = `
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
   .f0c-canvas-surface { background: #fafafa; }
+  /* On Home the ground is the sidebar tone, so the sticky greeting bar
+     takes it too — otherwise it reads as a lighter band behind "Welcome
+     to your new Home" (Angel, 2026-09-14). Still opaque, because it is
+     sticky and the conversation scrolls under it. */
+  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: #f5f5f5; }
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
+  }
+  .dark [data-hybrid-root][data-view="home"] .f0c-canvas-surface {
+    background: hsl(var(--neutral-0));
   }
   /* The People table's header is STICKY, so it needs an opaque ground or
      rows scroll through it — but f0 paints it bg-f1-background, i.e.
