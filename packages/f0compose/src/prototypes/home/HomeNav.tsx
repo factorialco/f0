@@ -1443,6 +1443,7 @@ export function HomeNav() {
     // Re-clicking the same item is a collapse, which animates; moving to
     // another section is a swap, which does not.
     setAnimateWidth(id === section)
+    if (id !== section) jumpLayout()
     setSection(id)
     setPanelOpen(nextOpen)
     persist(id, nextOpen)
@@ -1460,6 +1461,7 @@ export function HomeNav() {
   /** A pinned module: the Tools panel stays the coherent second level
    *  behind it, so the pin reads as a shortcut rather than a section. */
   const openModule = (label: string) => {
+    if (section !== "hub") jumpLayout()
     goHome()
     setSearchParams({ view: hubSlug(label) })
     setSection("hub")
@@ -1477,6 +1479,23 @@ export function HomeNav() {
 
   // True only while the last change was the panel opening or closing.
   const [animateWidth, setAnimateWidth] = useState(false)
+
+  /**
+   * Killing the panel's own width transition was not enough: the CANVAS
+   * carries a 420ms width transition of its own (for the chat's side
+   * mode), and a section switch changes the width available to it, so
+   * the content edge kept sliding. This flags the body for one frame and
+   * `agent-entry.css` suppresses every transition under it — which is
+   * the only channel available, since the canvas is a sibling tree.
+   */
+  const jumpLayout = () => {
+    document.body.setAttribute("data-nav-instant", "")
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        document.body.removeAttribute("data-nav-instant")
+      )
+    )
+  }
   const lastSection = useRef(section)
   useEffect(() => {
     if (lastSection.current !== section) {

@@ -505,3 +505,15 @@ body:has([data-hybrid-root]:not([data-view="home"])) [data-home-panel] {
   border-radius: 16px;
   @apply shadow-md;
 }
+
+/* One frame with no motion at all, set by the nav while it swaps
+   sections: the second level must change size instantly (Angel,
+   2026-09-14), and the canvas's own width transition was animating the
+   space the panel gave back. */
+body[data-nav-instant] [data-home-panel],
+body[data-nav-instant] [data-hybrid-canvas],
+body[data-nav-instant] [data-hybrid-work],
+body[data-nav-instant] [data-hybrid-target],
+body[data-nav-instant] [data-hybrid-composer] {
+  transition: none !important;
+}
