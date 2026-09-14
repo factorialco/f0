@@ -2,11 +2,21 @@ import { useEffect, useState } from "react"
 import { RecordType } from "./types/records.typings"
 import { GroupRecord } from "./useData"
 
+/**
+ * Every group in the tree, parents before their children. Open/closed state is
+ * keyed by group key alone, and a nested group's key is as much a key as a
+ * top-level one — so the whole tree has to be seeded, not just its first level.
+ */
+const flattenGroups = <R extends RecordType>(
+  groups: GroupRecord<R>[]
+): GroupRecord<R>[] =>
+  groups.flatMap((group) => [group, ...flattenGroups(group.subGroups ?? [])])
+
 const computeDefaultOpenGroups = <R extends RecordType>(
   groups: GroupRecord<R>[],
   defaultOpenGroups: boolean | GroupRecord<R>["key"][]
 ): Record<string, boolean> =>
-  groups.reduce<Record<string, boolean>>((acc, group) => {
+  flattenGroups(groups).reduce<Record<string, boolean>>((acc, group) => {
     acc[group.key] =
       typeof defaultOpenGroups === "boolean"
         ? defaultOpenGroups
@@ -22,7 +32,9 @@ export const useGroups = <R extends RecordType>(
     computeDefaultOpenGroups(groups, defaultOpenGroups)
   )
 
-  const groupKeys = groups.map((group) => group.key).join("|")
+  const groupKeys = flattenGroups(groups)
+    .map((group) => group.key)
+    .join("|")
 
   useEffect(() => {
     const defaultValue = computeDefaultOpenGroups(groups, defaultOpenGroups)
