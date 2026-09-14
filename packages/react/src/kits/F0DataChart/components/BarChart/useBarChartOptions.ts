@@ -1278,7 +1278,12 @@ export function useBarChartOptions(
       // data or shifts the bars' own ordering.
       series: [
         ...echartsSeries,
-        ...referenceLineSeries(referenceLines, theme, isVertical ? "y" : "x"),
+        ...referenceLineSeries(
+          referenceLines,
+          theme,
+          isVertical ? "y" : "x",
+          tooltipValueFormatter ?? valueFormatter
+        ),
       ],
       legendData,
       isVertical,

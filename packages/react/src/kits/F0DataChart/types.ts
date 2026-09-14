@@ -209,6 +209,15 @@ export interface F0DataChartReferenceLine {
   color?: ChartColorToken
   /** Solid instead of dashed. @default false */
   solid?: boolean
+  /**
+   * Shown when the reader hovers the line, under its label and value.
+   *
+   * For saying what the figure actually is — which companies a peer median
+   * covers, which quarter a target belongs to, whether it is an estimate. A
+   * line with no description is not hoverable: there would be nothing to add
+   * beyond the label already printed beside it.
+   */
+  description?: string
 }
 
 // ---------------------------------------------------------------------------

@@ -271,7 +271,15 @@ export function useLineChartOptions(
     return buildBaseChartOptions({
       categories,
       theme,
-      series: [...echartsSeries, ...referenceLineSeries(referenceLines, theme)],
+      series: [
+        ...echartsSeries,
+        ...referenceLineSeries(
+          referenceLines,
+          theme,
+          "y",
+          tooltipValueFormatter ?? valueFormatter
+        ),
+      ],
       legendData,
       isVertical: true,
       showGrid,

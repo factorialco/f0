@@ -1,6 +1,7 @@
 import type * as echarts from "echarts"
 import type { F0DataChartReferenceLine } from "../types"
 import { resolveChartColorToken } from "./colors"
+import { renderValueTooltip } from "./options"
 import type { ChartTheme } from "./theme"
 
 /**
@@ -17,21 +18,50 @@ export function referenceLineSeries(
    * axis; horizontal bars measure along the X axis, and a line pinned to the
    * wrong one is drawn off the plot entirely.
    */
-  valueAxis: "x" | "y" = "y"
+  valueAxis: "x" | "y" = "y",
+  /** Formats the value inside a hover tooltip, matching the chart's own. */
+  valueFormatter: (value: number) => string = (value) => String(value)
 ): echarts.SeriesOption[] {
   if (!referenceLines || referenceLines.length === 0) {
     return []
   }
+
+  const hoverable = referenceLines.some((line) => line.description)
 
   return [
     {
       type: "line",
       name: "__reference_lines__",
       data: [],
-      // Out of the legend and out of the tooltip: a constant is not a series
-      // the reader can toggle or hover a value from.
-      silent: true,
-      tooltip: { show: false },
+      // Out of the legend, and out of the axis tooltip that lists the series
+      // at a category: a constant belongs to none of them. A line that carries
+      // a description answers for itself instead, on hover.
+      silent: !hoverable,
+      tooltip: hoverable
+        ? {
+            trigger: "item",
+            formatter: (params: { dataIndex?: number; data?: unknown }) => {
+              const line =
+                referenceLines[
+                  typeof params.dataIndex === "number" ? params.dataIndex : 0
+                ]
+              if (!line) {
+                return ""
+              }
+
+              return renderValueTooltip(
+                {
+                  title: line.label,
+                  value: valueFormatter(line.value),
+                  rows: line.description
+                    ? [{ value: "", label: line.description }]
+                    : [],
+                },
+                theme
+              )
+            },
+          }
+        : { show: false },
       legendHoverLink: false,
       animation: false,
       markLine: {

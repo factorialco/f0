@@ -281,6 +281,45 @@ describe("BarChart — reference lines", () => {
     expect(marks[0].yAxis).toBeUndefined()
   })
 
+  // A line with something to say answers for itself on hover; one with only a
+  // label has nothing to add beyond the text already printed beside it.
+  it("is hoverable only when it carries a description", () => {
+    render(
+      <F0DataChart
+        {...props}
+        referenceLines={[{ value: 11, label: "Peer median" }]}
+      />
+    )
+    expect(
+      getLatestOption().series.find((s: { markLine?: unknown }) => s.markLine)
+        .silent
+    ).toBe(true)
+
+    render(
+      <F0DataChart
+        {...props}
+        valueFormatter={(v: number) => `${v}%`}
+        referenceLines={[
+          {
+            value: 11,
+            label: "Peer median",
+            description: "Companies in Spain with 51–200 employees",
+          },
+        ]}
+      />
+    )
+    const lineSeries = getLatestOption().series.find(
+      (s: { markLine?: unknown }) => s.markLine
+    )
+    expect(lineSeries.silent).toBe(false)
+
+    const html = lineSeries.tooltip.formatter({ dataIndex: 0 })
+    expect(html).toContain("Peer median")
+    // Formatted by the chart's own formatter, so the hover and the axis agree.
+    expect(html).toContain("11%")
+    expect(html).toContain("Companies in Spain with 51")
+  })
+
   it("adds nothing when a chart declares none", () => {
     render(<F0DataChart {...props} />)
 
