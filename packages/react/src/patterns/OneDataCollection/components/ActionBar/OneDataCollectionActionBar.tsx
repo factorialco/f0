@@ -14,9 +14,11 @@ import { useI18n } from "@/lib/providers/i18n"
 
 export type { ActionBarGroup, ActionBarItem, ActionBarStatus, F0ActionBarRef }
 
+type PrimaryActions = ActionBarItem[] | ActionBarGroup[] | ActionBarGroup
+
 interface OneDataCollectionActionBarProps {
   isOpen: boolean
-  primaryActions?: ActionBarItem[] | ActionBarGroup[] | ActionBarGroup
+  primaryActions?: PrimaryActions
   secondaryActions?: ActionBarItem[]
   selectedNumber?: number
   onUnselect?: () => void
@@ -39,9 +41,7 @@ const WarningAlert = ({ message }: { message: string }) => (
  * loading + disabled. Used to shift the loading indicator from the bar level
  * down to the button/dropdown level.
  */
-function withLoadingOnActions(
-  actions: ActionBarItem[] | ActionBarGroup[] | ActionBarGroup
-): ActionBarItem[] | ActionBarGroup[] | ActionBarGroup {
+function withLoadingOnActions(actions: PrimaryActions): PrimaryActions {
   const markItem = (item: ActionBarItem): ActionBarItem => ({
     ...item,
     loading: true,

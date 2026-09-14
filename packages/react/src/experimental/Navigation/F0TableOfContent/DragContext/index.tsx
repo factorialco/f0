@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from "react"
+import { DropPosition } from "../types"
 
 interface DragContextType {
   isDragging: boolean
@@ -7,8 +8,8 @@ interface DragContextType {
   setDraggedItemId: (id: string | null) => void
   dragOverItemId: string | null
   setDragOverItemId: (id: string | null) => void
-  dragOverPosition: "before" | "after" | "inside" | null
-  setDragOverPosition: (position: "before" | "after" | "inside" | null) => void
+  dragOverPosition: DropPosition | null
+  setDragOverPosition: (position: DropPosition | null) => void
 }
 
 const DragContext = createContext<DragContextType | undefined>(undefined)
@@ -17,9 +18,9 @@ export function DragProvider({ children }: { children: ReactNode }) {
   const [isDragging, setIsDragging] = useState(false)
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
-  const [dragOverPosition, setDragOverPosition] = useState<
-    "before" | "after" | "inside" | null
-  >(null)
+  const [dragOverPosition, setDragOverPosition] = useState<DropPosition | null>(
+    null
+  )
   return (
     <DragContext.Provider
       value={{

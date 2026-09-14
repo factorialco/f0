@@ -169,6 +169,73 @@ function resolveInitialEntries(
     }))
 }
 
+/** The drop target, shown while the field still has room for another file. */
+const FileDropzone = ({
+  disabled,
+  text,
+  acceptedTypesLabel,
+  acceptedTypesTemplate,
+  statusClasses,
+  plain,
+  dragOver,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onClick,
+  onKeyDown,
+}: {
+  disabled: boolean | undefined
+  /** The prompt in the middle of the zone. */
+  text: string
+  /** The types line under it, when the field restricts them. */
+  acceptedTypesLabel: string | undefined
+  /** Its i18n template, with a `{{types}}` placeholder. */
+  acceptedTypesTemplate: string
+  /** Status colours from the field's own error or hint state. */
+  statusClasses: string
+  /** No status of its own, so hover may paint it. */
+  plain: boolean
+  dragOver: boolean
+  onDragOver: (e: React.DragEvent) => void
+  onDragLeave: (e: React.DragEvent) => void
+  onDrop: (e: React.DragEvent) => void
+  onClick: () => void
+  onKeyDown: (e: React.KeyboardEvent) => void
+}) => (
+  <div
+    role="button"
+    tabIndex={disabled ? -1 : 0}
+    onDragOver={onDragOver}
+    onDragLeave={onDragLeave}
+    onDrop={onDrop}
+    onClick={onClick}
+    onKeyDown={onKeyDown}
+    aria-disabled={disabled}
+    className={cn(
+      "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-[1px] border-dashed px-4 py-10 transition-colors",
+      statusClasses,
+      !disabled &&
+        !dragOver &&
+        plain &&
+        "hover:border-f1-border-hover hover:bg-f1-background-secondary",
+      disabled && "cursor-not-allowed opacity-50",
+      focusRing("rounded-xl")
+    )}
+  >
+    <F0AvatarIcon icon={Upload} size="md" />
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="text-center text-base font-medium text-f1-foreground">
+        {text}
+      </span>
+      {acceptedTypesLabel ? (
+        <span className="text-center text-base text-f1-foreground-secondary">
+          {acceptedTypesTemplate.replace("{{types}}", acceptedTypesLabel)}
+        </span>
+      ) : null}
+    </div>
+  </div>
+)
+
 export function FileFieldRenderer({
   field,
   formField,
@@ -524,41 +591,20 @@ export function FileFieldRenderer({
         </div>
       ) : null}
       {!isLoadingInitialFiles && showDropzone ? (
-        <div
-          role="button"
-          tabIndex={field.disabled ? -1 : 0}
+        <FileDropzone
+          disabled={field.disabled}
+          text={dropzoneText}
+          acceptedTypesLabel={acceptedTypesLabel}
+          acceptedTypesTemplate={translations.acceptedTypes}
+          statusClasses={dropzoneStatusClasses}
+          plain={!hasDecorativeStatus}
+          dragOver={isDragOver}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={handleDropzoneClick}
           onKeyDown={handleDropzoneKeyDown}
-          aria-disabled={field.disabled}
-          className={cn(
-            "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-[1px] border-dashed px-4 py-10 transition-colors",
-            dropzoneStatusClasses,
-            !field.disabled &&
-              !isDragOver &&
-              !hasDecorativeStatus &&
-              "hover:border-f1-border-hover hover:bg-f1-background-secondary",
-            field.disabled && "cursor-not-allowed opacity-50",
-            focusRing("rounded-xl")
-          )}
-        >
-          <F0AvatarIcon icon={Upload} size="md" />
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-center text-base font-medium text-f1-foreground">
-              {dropzoneText}
-            </span>
-            {acceptedTypesLabel ? (
-              <span className="text-center text-base text-f1-foreground-secondary">
-                {translations.acceptedTypes.replace(
-                  "{{types}}",
-                  acceptedTypesLabel
-                )}
-              </span>
-            ) : null}
-          </div>
-        </div>
+        />
       ) : null}
 
       <input

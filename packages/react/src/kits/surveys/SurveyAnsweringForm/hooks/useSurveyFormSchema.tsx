@@ -136,22 +136,8 @@ function buildDateSchema(
     })
 }
 
-function buildFileSchema(
-  isRequired: boolean,
-  t: (key: TranslationKey) => string
-) {
-  return z
-    .array(z.string())
-    .optional()
-    .superRefine((v, ctx) => {
-      if (isRequired && (!v || v.length === 0)) {
-        ctx.addIssue({
-          code: "custom",
-          message: t("forms.validation.required"),
-        })
-      }
-    })
-}
+// Uploaded files are a list of ids, the same shape as a multi select.
+const buildFileSchema = buildMultiSelectSchema
 
 function buildCheckboxSchema(
   isRequired: boolean,
@@ -217,15 +203,26 @@ export function extractFlatQuestions(
   return questions
 }
 
-function buildFieldForQuestion(
-  q: QuestionElement,
-  t: (key: TranslationKey) => string,
-  sectionId?: string,
+type BuildFieldOptions = {
+  q: QuestionElement
+  t: (key: TranslationKey) => string
+  sectionId?: string
+  previewMode?: boolean
+  /** Defaults to `previewMode`. */
+  disableFields?: boolean
+  formUseUpload?: UseFileUpload
+  datasets?: SurveyDatasets
+}
+
+function buildFieldForQuestion({
+  q,
+  t,
+  sectionId,
   previewMode = false,
   disableFields = previewMode,
-  formUseUpload?: UseFileUpload,
-  datasets?: SurveyDatasets
-): ZodTypeAny {
+  formUseUpload,
+  datasets,
+}: BuildFieldOptions): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
     label,
@@ -415,19 +412,17 @@ function buildFieldForQuestion(
             q.allowCreate && dataset.onCreate
               ? {
                   ...field,
-                  onCreate: (searchValue: string) => {
-                    return dataset.onCreate!(searchValue).then(
-                      (record) => {
-                        const option = dataset.mapOptions(record)
-                        ;(onChange as (value: unknown) => void)(option.value)
-                      },
-                      (err: unknown) => {
-                        console.warn(
-                          "[SurveyAnsweringForm] onCreate failed:",
-                          err
-                        )
-                      }
-                    )
+                  onCreate: async (searchValue: string) => {
+                    try {
+                      const record = await dataset.onCreate!(searchValue)
+                      const option = dataset.mapOptions(record)
+                      ;(onChange as (value: unknown) => void)(option.value)
+                    } catch (err) {
+                      console.warn(
+                        "[SurveyAnsweringForm] onCreate failed:",
+                        err
+                      )
+                    }
                   },
                 }
               : field
@@ -652,18 +647,32 @@ function buildFieldForQuestion(
   }
 }
 
-export function useSurveyFormSchema(
-  elements: SurveyFormBuilderElement[],
-  mode: SurveyAnsweringFormMode,
-  t: (key: TranslationKey) => string,
-  defaultValues?: Partial<SurveyAnswers>,
-  currentQuestionId?: string,
-  accumulatedValues?: Record<string, unknown>,
+export type UseSurveyFormSchemaOptions = {
+  elements: SurveyFormBuilderElement[]
+  mode: SurveyAnsweringFormMode
+  t: (key: TranslationKey) => string
+  defaultValues?: Partial<SurveyAnswers>
+  currentQuestionId?: string
+  accumulatedValues?: Record<string, unknown>
+  previewMode?: boolean
+  /** Defaults to `previewMode`. */
+  disableFields?: boolean
+  useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
+}
+
+export function useSurveyFormSchema({
+  elements,
+  mode,
+  t,
+  defaultValues,
+  currentQuestionId,
+  accumulatedValues,
   previewMode = false,
   disableFields = previewMode,
-  useUpload?: UseFileUpload,
-  datasets?: SurveyDatasets
-) {
+  useUpload,
+  datasets,
+}: UseSurveyFormSchemaOptions) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
     const defaults: Record<string, unknown> = {}
@@ -690,15 +699,15 @@ export function useSurveyFormSchema(
             continue
           }
 
-          shape[q.id] = buildFieldForQuestion(
+          shape[q.id] = buildFieldForQuestion({
             q,
             t,
-            mode === "all-questions" ? sectionId : undefined,
+            sectionId: mode === "all-questions" ? sectionId : undefined,
             previewMode,
             disableFields,
-            useUpload,
-            datasets
-          )
+            formUseUpload: useUpload,
+            datasets,
+          })
           defaults[q.id] =
             accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
         }
@@ -709,15 +718,14 @@ export function useSurveyFormSchema(
           continue
         }
 
-        shape[q.id] = buildFieldForQuestion(
+        shape[q.id] = buildFieldForQuestion({
           q,
           t,
-          undefined,
           previewMode,
           disableFields,
-          useUpload,
-          datasets
-        )
+          formUseUpload: useUpload,
+          datasets,
+        })
         defaults[q.id] =
           accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
       }

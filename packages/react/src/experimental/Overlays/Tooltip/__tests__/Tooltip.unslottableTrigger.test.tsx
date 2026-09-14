@@ -17,6 +17,7 @@ describe("TooltipInternal with a trigger the Slot cannot clone onto", () => {
     const user = userEvent.setup()
     render(
       <TooltipInternal instant description="Scheduled to move on 2999-01-01">
+        {/* oxlint-disable-next-line react/jsx-no-useless-fragment -- a Fragment child is what this test covers */}
         <>
           <span>badge</span>
         </>

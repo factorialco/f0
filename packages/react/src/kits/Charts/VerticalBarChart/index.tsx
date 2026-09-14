@@ -130,41 +130,39 @@ const _VBarChart = <K extends ChartConfig>(
 
         {bars.map((key, index) => {
           return (
-            <>
-              <Bar
-                isAnimationActive={false}
-                layout="vertical"
-                key={`bar-${key}`}
-                dataKey={key}
-                fill={
-                  dataConfig[key].color
-                    ? getColor(dataConfig[key].color)
-                    : getCategoricalColor(index)
-                }
-                radius={4}
-                maxBarSize={24}
-              >
-                {label || showRatio ? (
-                  <LabelList
-                    key={`label-{${key}}`}
-                    position="right"
-                    offset={10}
-                    className="fill-f1-foreground"
-                    fontSize={12}
-                    formatter={valueFormatter}
-                    content={
-                      showRatio ? (
-                        <CustomLabel
-                          valueFormatter={valueFormatter}
-                          total={totalCategories[key]}
-                          showLabel={label}
-                        />
-                      ) : undefined
-                    }
-                  />
-                ) : null}
-              </Bar>
-            </>
+            <Bar
+              isAnimationActive={false}
+              layout="vertical"
+              key={`bar-${key}`}
+              dataKey={key}
+              fill={
+                dataConfig[key].color
+                  ? getColor(dataConfig[key].color)
+                  : getCategoricalColor(index)
+              }
+              radius={4}
+              maxBarSize={24}
+            >
+              {label || showRatio ? (
+                <LabelList
+                  key={`label-{${key}}`}
+                  position="right"
+                  offset={10}
+                  className="fill-f1-foreground"
+                  fontSize={12}
+                  formatter={valueFormatter}
+                  content={
+                    showRatio ? (
+                      <CustomLabel
+                        valueFormatter={valueFormatter}
+                        total={totalCategories[key]}
+                        showLabel={label}
+                      />
+                    ) : undefined
+                  }
+                />
+              ) : null}
+            </Bar>
           )
         })}
       </BarChartPrimitive>

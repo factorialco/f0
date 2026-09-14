@@ -29,6 +29,39 @@ const iconSize: Record<AvatarSize, F0IconProps["size"]> = {
   "2xl": "lg",
 }
 
+const isSize = (
+  size: AvatarSize | InternalAvatarProps["size"]
+): size is AvatarSize => avatarSizes.includes(size as AvatarSize)
+
+/**
+ * The size to draw at. A deprecated internal size is mapped to its avatar
+ * size, and says so.
+ */
+const resolveAvatarSize = (size: BaseAvatarProps["size"]): AvatarSize => {
+  if (size && !isSize(size)) {
+    console.warn(
+      `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`
+    )
+    return sizesMapping[size] ?? DEFAULT_SIZE
+  }
+  return size ?? DEFAULT_SIZE
+}
+
+/** The ground the avatar sits on: an icon, an image or a flag, or nothing. */
+const avatarBackgroundClass = ({
+  icon,
+  src,
+  flag,
+}: Pick<BaseAvatarProps, "icon" | "src" | "flag">): string => {
+  if (icon) {
+    return "bg-f1-background-secondary"
+  }
+  if (src || flag) {
+    return "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
+  }
+  return ""
+}
+
 export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
   (
     {
@@ -53,20 +86,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       []
     )
 
-    const isSize = (
-      size: AvatarSize | InternalAvatarProps["size"]
-    ): size is AvatarSize => avatarSizes.includes(size as AvatarSize)
-
-    // Check if size is a valid avatar size
-    let mappedSize: AvatarSize
-    if (size && !isSize(size)) {
-      console.warn(
-        `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`
-      )
-      mappedSize = sizesMapping[size] ?? DEFAULT_SIZE
-    } else {
-      mappedSize = size ?? DEFAULT_SIZE
-    }
+    const mappedSize = resolveAvatarSize(size)
 
     const initials = getInitials(name, mappedSize)
     const avatarColor =
@@ -126,13 +146,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
             aria-labelledby={ariaLabelledby}
             translate="no"
             data-a11y-color-contrast-ignore
-            className={
-              icon
-                ? "bg-f1-background-secondary"
-                : src || flag
-                  ? "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
-                  : ""
-            }
+            className={avatarBackgroundClass({ icon, src, flag })}
           >
             {icon ? (
               <F0Icon

@@ -156,33 +156,43 @@ export function Kanban<TRecord extends RecordType>(
     // Snapshot
     const prev = localLanes
 
-    // Find source record and indices in snapshot (robust to mis-reported fromLaneId)
-    let fromLaneIdx = prev.findIndex((l) => l.id === fromLaneId)
     const toLaneIdx = prev.findIndex((l) => l.id === toLaneId)
     if (toLaneIdx === -1) {
       return Promise.reject(new Error("Lane not found"))
     }
-    let sourceIndex = -1
-    if (fromLaneIdx !== -1) {
-      sourceIndex = prev[fromLaneIdx].items.findIndex((item, index) => {
-        const key = String(getKey(item as TRecord, index, fromLaneId))
-        return key === String(sourceId)
-      })
-    }
-    if (sourceIndex === -1) {
-      for (let i = 0; i < prev.length; i++) {
-        const laneId = prev[i].id as string
-        const idx = prev[i].items.findIndex((item, index) => {
-          const key = String(getKey(item as TRecord, index, laneId))
+
+    /**
+     * Where the dragged record actually is in the snapshot. `fromLaneId` can be
+     * mis-reported, so a miss there falls back to searching every lane.
+     */
+    const findSource = () => {
+      const itemIndexIn = (laneIdx: number) =>
+        prev[laneIdx].items.findIndex((item, index) => {
+          const key = String(
+            getKey(item as TRecord, index, prev[laneIdx].id as string)
+          )
           return key === String(sourceId)
         })
-        if (idx !== -1) {
-          fromLaneIdx = i
-          sourceIndex = idx
-          break
+
+      const reportedLaneIdx = prev.findIndex((l) => l.id === fromLaneId)
+      if (reportedLaneIdx !== -1) {
+        const itemIndex = itemIndexIn(reportedLaneIdx)
+        if (itemIndex !== -1) {
+          return { laneIdx: reportedLaneIdx, itemIndex }
         }
       }
+
+      for (let i = 0; i < prev.length; i++) {
+        const itemIndex = itemIndexIn(i)
+        if (itemIndex !== -1) {
+          return { laneIdx: i, itemIndex }
+        }
+      }
+
+      return { laneIdx: -1, itemIndex: -1 }
     }
+
+    const { laneIdx: fromLaneIdx, itemIndex: sourceIndex } = findSource()
     if (fromLaneIdx === -1 || sourceIndex === -1) {
       return Promise.resolve(undefined as unknown as TRecord)
     }

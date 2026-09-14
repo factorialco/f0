@@ -38,7 +38,7 @@ export default meta
 
 type Story = StoryObj<typeof ActivityItemList>
 
-const ITEMS = new Array(10).fill(null).map((_, index) => ({
+const ITEMS = Array.from({ length: 10 }, (_, index) => ({
   id: index.toString(),
   title: `Activity Item ${index + 1}`,
   description:

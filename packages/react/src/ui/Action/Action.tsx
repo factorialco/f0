@@ -15,6 +15,84 @@ import {
   loadingVariants,
 } from "./variants"
 
+const compactPaddingVariants = cva({
+  variants: {
+    size: {
+      sm: "!px-[4px]",
+      md: "!px-[6px]",
+      lg: "!px-[10px]",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+})
+
+/**
+ * What sits inside the button or the link: the label between its adornments,
+ * with the loading state drawn over it (the label stays in the flow at
+ * `opacity-0` so the control keeps its width).
+ */
+const ActionContent = ({
+  children,
+  prepend,
+  append,
+  compact,
+  size,
+  loading,
+  variant,
+  mode,
+}: Pick<
+  ActionProps,
+  "children" | "prepend" | "append" | "compact" | "size" | "loading" | "mode"
+> & {
+  variant: NonNullable<ActionProps["variant"]>
+}) => (
+  <>
+    <div
+      className={cn(
+        "main flex min-w-0 flex-1 items-center justify-center gap-1",
+        compact && compactPaddingVariants({ size }),
+        loading && "opacity-0",
+        iconVariants({ variant: variant, mode })
+      )}
+    >
+      {prepend}
+      <span className="flex min-w-0 flex-1 items-center justify-center">
+        {children}
+      </span>
+      {append}
+    </div>
+    <AnimatePresence>
+      {loading ? (
+        <>
+          {isLinkStyled(variant) ? (
+            <Skeleton className="absolute inset-0 my-auto h-full w-full" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                className={cn(
+                  loadingVariants({
+                    size,
+                    variant: variant,
+                  })
+                )}
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                aria-label="Loading..."
+              />
+            </div>
+          )}
+        </>
+      ) : null}
+    </AnimatePresence>
+  </>
+)
+
 export const Action = React.forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   ActionProps
@@ -59,64 +137,6 @@ export const Action = React.forwardRef<
     ? linkSizeVariants({ size })
     : buttonSizeVariants({ size })
 
-  const compactClasses = cva({
-    variants: {
-      size: {
-        sm: "!px-[4px]",
-        md: "!px-[6px]",
-        lg: "!px-[10px]",
-      },
-    },
-    defaultVariants: {
-      size: "md",
-    },
-  })
-  const innerContent = (
-    <>
-      <div
-        className={cn(
-          "main flex min-w-0 flex-1 items-center justify-center gap-1",
-          compact && compactClasses({ size }),
-          loading && "opacity-0",
-          iconVariants({ variant: localVariant, mode })
-        )}
-      >
-        {prepend}
-        <span className="flex min-w-0 flex-1 items-center justify-center">
-          {children}
-        </span>
-        {append}
-      </div>
-      <AnimatePresence>
-        {loading ? (
-          <>
-            {isLinkStyled(localVariant) ? (
-              <Skeleton className="absolute inset-0 my-auto h-full w-full" />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.div
-                  className={cn(
-                    loadingVariants({
-                      size,
-                      variant: localVariant,
-                    })
-                  )}
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  aria-label="Loading..."
-                />
-              </div>
-            )}
-          </>
-        ) : null}
-      </AnimatePresence>
-    </>
-  )
-
   const CommonProps = {
     disabled,
     className: cn(variantClasses, sizeClasses, focusRing(), className),
@@ -125,6 +145,20 @@ export const Action = React.forwardRef<
     title,
     ...restProps,
   }
+
+  const content = (
+    <ActionContent
+      prepend={prepend}
+      append={append}
+      compact={compact}
+      size={size}
+      loading={loading}
+      variant={localVariant}
+      mode={mode}
+    >
+      {children}
+    </ActionContent>
+  )
 
   const mainElement = isAnchor(props) ? (
     <Link
@@ -142,7 +176,7 @@ export const Action = React.forwardRef<
       aria-disabled={disabled}
       role="link"
     >
-      {innerContent}
+      {content}
     </Link>
   ) : (
     <button
@@ -156,7 +190,7 @@ export const Action = React.forwardRef<
       data-pressed={pressed}
       role="button"
     >
-      {innerContent}
+      {content}
     </button>
   )
 

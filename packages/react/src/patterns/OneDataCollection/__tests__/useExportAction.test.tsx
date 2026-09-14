@@ -358,7 +358,9 @@ describe("useExportAction", () => {
       const pageSize = 100
 
       const fetchData = vi.fn().mockImplementation(({ pagination }) => {
-        const cursorIndex = pagination.cursor ? parseInt(pagination.cursor) : 0
+        const cursorIndex = pagination.cursor
+          ? parseInt(pagination.cursor, 10)
+          : 0
         const pageRecords = allRecords.slice(
           cursorIndex,
           cursorIndex + pageSize

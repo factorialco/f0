@@ -165,17 +165,15 @@ const ProductUpdates = ({
                   onClick={onItemClick}
                 />
                 {updates.length > 1 ? (
-                  <>
-                    <div className="pb-1">
-                      {restUpdates.map((update, index) => (
-                        <DropdownItem
-                          key={index}
-                          {...update}
-                          onClick={onItemClick}
-                        />
-                      ))}
-                    </div>
-                  </>
+                  <div className="pb-1">
+                    {restUpdates.map((update, index) => (
+                      <DropdownItem
+                        key={index}
+                        {...update}
+                        onClick={onItemClick}
+                      />
+                    ))}
+                  </div>
                 ) : null}
               </div>
             ) : null}

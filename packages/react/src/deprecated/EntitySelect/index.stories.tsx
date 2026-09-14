@@ -307,7 +307,7 @@ export const SingleSelector = {
         }
         selectedEntities={!selected ? [] : [selected]}
         onSelect={(selection) => {
-          if (selectedGroup != "all") {
+          if (selectedGroup !== "all") {
             const found = GROUP_DATA["all"].find(
               (el) => el.id === selection?.subItems?.[0]?.subId
             )
@@ -498,7 +498,7 @@ export const WithCustomTrigger = {
           selectedEntities={selected}
           onSelect={(selection: EntitySelectEntity[]) => {
             setSelected(selection)
-            if (selectedGroup != "all") {
+            if (selectedGroup !== "all") {
               let total = 0
               selection.forEach((el) => (total += el.subItems?.length ?? 0))
               setNumSelected(total)
@@ -763,7 +763,7 @@ export const WithDeactivatedEntities = {
   },
 }
 
-export const Error = {
+const ErrorState = {
   args: {
     ...defaultArgs,
     error: "This is an error",
@@ -785,3 +785,6 @@ export const Disabled = {
     disabled: true,
   },
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

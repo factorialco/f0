@@ -1,5 +1,6 @@
 "use client"
 
+import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import {
   createContext,
   type FC,
@@ -8,9 +9,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
+import { useMediaQuery } from "usehooks-ts"
 import { useI18n } from "@/lib/providers/i18n"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
@@ -24,6 +27,11 @@ import {
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
+import {
+  panelBoundsFor,
+  resolvePanelWidth,
+  type PanelBounds,
+} from "../utils/panelWidth"
 import { usePersistedState } from "./usePersistedState"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
@@ -34,8 +42,7 @@ const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
 
-const CHAT_WIDTH_MIN = 300
-const CHAT_WIDTH_MAX = 712
+const { min: CHAT_WIDTH_MIN, max: CHAT_WIDTH_MAX } = panelWidths
 
 /** How long a pending panel-content restore may wait for the host before
  * falling back to the AI chat — a host that never resolves (the conversation
@@ -88,40 +95,79 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
 
-  const [chatWidth, setChatWidth] = usePersistedState<number>(
-    CHAT_WIDTH_STORAGE_KEY,
-    DEFAULT_CHAT_WIDTH,
-    (v): v is number =>
+  const [chatWidth, setChatWidth] = usePersistedState<number>({
+    key: CHAT_WIDTH_STORAGE_KEY,
+    fallback: DEFAULT_CHAT_WIDTH,
+    validate: (v): v is number =>
       typeof v === "number" &&
       !isNaN(v) &&
       v >= CHAT_WIDTH_MIN &&
       v <= CHAT_WIDTH_MAX,
-    undefined,
     // The only continuously-changing persisted value: a drag would otherwise
     // mean one synchronous localStorage write per animation frame.
-    CHAT_WIDTH_PERSIST_DEBOUNCE_MS
-  )
+    debounceMs: CHAT_WIDTH_PERSIST_DEBOUNCE_MS,
+  })
 
   // Not persisted: this is the live state of a pointer drag, not a preference.
   const [isResizing, setIsResizing] = useState(false)
 
-  const [open, setOpen] = usePersistedState<boolean>(
-    CHAT_OPEN_STORAGE_KEY,
-    defaultVisualizationMode === "fullscreen",
-    (v): v is boolean => typeof v === "boolean"
+  // How much room the frame has for panel + content, published by
+  // ApplicationFrame from its measured content box. 0 means "not measured yet".
+  const [frameWidth, setFrameWidth] = useState(0)
+
+  const chatWidthBounds: PanelBounds = useMemo(
+    () => panelBoundsFor(frameWidth),
+    [frameWidth]
   )
+
+  // `chatWidth` above is the PREFERENCE — what the user last dragged to, kept
+  // in localStorage against the absolute range. This is what the layout
+  // actually reserves. Narrowing the window must not overwrite a width chosen
+  // deliberately on a wider one, so the clamp lives here and not in the
+  // setter: widen the window again and the preference comes back untouched.
+  const effectiveChatWidth = useMemo(
+    () => resolvePanelWidth(chatWidth, frameWidth),
+    [chatWidth, frameWidth]
+  )
+
+  // Whether the panel covers the frame instead of sitting beside it.
+  //
+  // Derived once, here, because two consumers need the same answer: the frame
+  // reserves (or doesn't) against it, and the window hides its resize handle
+  // against it. They each computed their own version before, which is how you
+  // end up dragging a seam on a panel that is already full-screen.
+  //
+  // Width alone decides it for a mouse — a half-screen laptop window is a
+  // legitimate place to want two columns. Touch is judged on the viewport
+  // instead, so a tablet still gets the drawer it expects rather than two
+  // columns nobody can hit.
+  const isCoarsePointer = useMediaQuery("(pointer: coarse)", {
+    initializeWithValue: true,
+  })
+  const isCompactViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
+  const panelOverlays =
+    (isCoarsePointer && isCompactViewport) || chatWidthBounds.shouldOverlay
+
+  const [open, setOpen] = usePersistedState<boolean>({
+    key: CHAT_OPEN_STORAGE_KEY,
+    fallback: defaultVisualizationMode === "fullscreen",
+    validate: (v): v is boolean => typeof v === "boolean",
+  })
 
   const fallbackVisualizationMode: VisualizationMode =
     defaultVisualizationMode === "canvas"
       ? "sidepanel"
       : defaultVisualizationMode
   const [visualizationMode, setVisualizationModeRaw] =
-    usePersistedState<VisualizationMode>(
-      CHAT_VISUALIZATION_MODE_STORAGE_KEY,
-      fallbackVisualizationMode,
-      (v): v is VisualizationMode => v === "sidepanel" || v === "fullscreen",
-      isPersistableVisualizationMode
-    )
+    usePersistedState<VisualizationMode>({
+      key: CHAT_VISUALIZATION_MODE_STORAGE_KEY,
+      fallback: fallbackVisualizationMode,
+      validate: (v): v is VisualizationMode =>
+        v === "sidepanel" || v === "fullscreen",
+      shouldWrite: isPersistableVisualizationMode,
+    })
 
   const [mode, setMode] = useState<AiChatMode>("chat")
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
@@ -293,11 +339,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // persist only its id so a reload can reopen WHAT was showing, not just that
   // the panel was open. The host re-mounts the content when it's loaded.
   const [persistedPanelContentId, setPersistedPanelContentId] =
-    usePersistedState<string | null>(
-      CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
-      null,
-      (v): v is string | null => v === null || typeof v === "string"
-    )
+    usePersistedState<string | null>({
+      key: CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
+      fallback: null,
+      validate: (v): v is string | null => v === null || typeof v === "string",
+    })
 
   // Pending restore: the panel reopened (persisted `open`) while hosted
   // content was up on the last session. Until the host re-mounts it (via
@@ -409,6 +455,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        effectiveChatWidth,
+        chatWidthBounds,
+        panelOverlays,
+        setFrameWidth,
         isResizing,
         setIsResizing,
         tracking,
@@ -507,6 +557,10 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   chatWidth: DEFAULT_CHAT_WIDTH,
+  effectiveChatWidth: DEFAULT_CHAT_WIDTH,
+  // Unmeasured, so the absolute range — same fallback the provider starts on.
+  chatWidthBounds: panelBoundsFor(0),
+  panelOverlays: false,
   panelSide: "right",
   panelContentSide: "right",
   visualizationMode: "sidepanel",

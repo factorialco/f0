@@ -7,7 +7,7 @@ import { F0DialogContent } from "./components/F0DialogContent"
 import { F0DialogFooter } from "./components/F0DialogFooter"
 import { F0DialogHeader } from "./components/F0DialogHeader"
 import { F0DialogProvider } from "./components/F0DialogProvider"
-import { F0DialogInternalProps } from "./internal-types"
+import { F0DialogInternalProps, F0DialogSideControls } from "./internal-types"
 import { useIsSmallScreen } from "./utils"
 
 const dialogWrapperClassName = cva({
@@ -68,6 +68,56 @@ const dialogContentClassName = cva({
     variant: "center",
   },
 })
+
+/** Where the previous/next controls sit when they are not in a bar. */
+const SIDE_CONTROLS_SEAT = "absolute top-1/2 z-10 -translate-y-1/2"
+
+/**
+ * The dialog's previous/next controls. On a phone they become a bar along the
+ * bottom of the content, in the flow (`sticky`, so it holds the bottom of a
+ * panel that scrolls); anywhere else they hang off either side of the dialog.
+ */
+const DialogSideControls = ({
+  controls,
+  inBar,
+}: {
+  controls: F0DialogSideControls | undefined
+  inBar: boolean
+}) => {
+  if (!controls) {
+    return null
+  }
+
+  if (inBar) {
+    return (
+      <div
+        className={cn(
+          "sticky bottom-0 z-10 flex shrink-0 flex-row items-center justify-between gap-2",
+          "border border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
+          "bg-f1-background px-4 py-3"
+        )}
+      >
+        {controls.previous}
+        {controls.next}
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {controls.previous ? (
+        <div className={cn(SIDE_CONTROLS_SEAT, "-left-14")}>
+          {controls.previous}
+        </div>
+      ) : null}
+      {controls.next ? (
+        <div className={cn(SIDE_CONTROLS_SEAT, "-right-14")}>
+          {controls.next}
+        </div>
+      ) : null}
+    </>
+  )
+}
 
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   dismissable = true,
@@ -208,31 +258,9 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
    */
   const controlsInBar = isSmallScreen
   const isFullscreenOnPhone = isSmallScreen && position === "fullscreen"
-  const sideControlsSeat = "absolute top-1/2 z-10 -translate-y-1/2"
-  const renderedSideControls = !sideControls ? null : controlsInBar ? (
-    <div
-      className={cn(
-        "sticky bottom-0 z-10 flex shrink-0 flex-row items-center justify-between gap-2",
-        "border border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
-        "bg-f1-background px-4 py-3"
-      )}
-    >
-      {sideControls.previous}
-      {sideControls.next}
-    </div>
-  ) : (
-    <>
-      {sideControls.previous ? (
-        <div className={cn(sideControlsSeat, "-left-14")}>
-          {sideControls.previous}
-        </div>
-      ) : null}
-      {sideControls.next ? (
-        <div className={cn(sideControlsSeat, "-right-14")}>
-          {sideControls.next}
-        </div>
-      ) : null}
-    </>
+
+  const renderedSideControls = (
+    <DialogSideControls controls={sideControls} inBar={controlsInBar} />
   )
 
   if (isSmallScreen && asBottomSheetInMobile) {

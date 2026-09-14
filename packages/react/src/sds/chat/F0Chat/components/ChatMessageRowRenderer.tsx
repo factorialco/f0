@@ -74,7 +74,6 @@ const ChatMessageRowRendererComponent = ({
   /** Typing row only: streak-start gate for the bubble's entry pop. */
   typingEntry?: TypingEntryState
 }): ReactNode => {
-  const channelType = useF0ChatChannelType()
   // No per-row bottom padding: the transcript's bottom breathing room lives on
   // the viewport (constant), so being/stopping-being the last row never
   // changes a row's height (stable measurements = no send-time churn).
@@ -107,6 +106,8 @@ const ChatMessageRowRendererComponent = ({
     return null
   })
   const animate = entry !== null
+  /** Its place in the arriving batch, or `null` for a row already on screen. */
+  const entryOrder = entry?.order ?? null
   // Mark as "seen" after commit (not during render) so render stays pure and a
   // Strict-Mode double render can't wrongly flag a fresh arrival as already shown.
   useEffect(() => {
@@ -118,30 +119,8 @@ const ChatMessageRowRendererComponent = ({
   }, [row, animatedIds])
 
   if (row.type === "separator" || row.type === "system") {
-    // Centered, author-less rows — same fast opacity-only entry as messages.
-    const inner =
-      row.type === "separator" ? (
-        // On a noticeboard the separator is the ONLY clock: the posts are
-        // seeded, so they don't carry one of their own (see ChatMessageMeta).
-        <DateTimeSeparator
-          at={row.at}
-          padded
-          withTime={channelType === "announcement"}
-        />
-      ) : (
-        <ChatSystemMessage message={row.message} />
-      )
-    return animate ? (
-      <motion.div
-        className={spacing}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={rowEntryTransition(entry?.order ?? 0)}
-      >
-        {inner}
-      </motion.div>
-    ) : (
-      <div className={spacing}>{inner}</div>
+    return (
+      <ChatCenteredRow row={row} spacing={spacing} entryOrder={entryOrder} />
     )
   }
 
@@ -229,7 +208,7 @@ const ChatMessageRowRendererComponent = ({
       className={cn("flex flex-col gap-1", spacing)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={rowEntryTransition(entry?.order ?? 0)}
+      transition={rowEntryTransition(entryOrder ?? 0)}
     >
       {content}
     </motion.div>
@@ -246,4 +225,49 @@ const ChatMessageRowRendererComponent = ({
  * (`previousRows`), and `animatedIds`/`freshIds` are stable (mutated)
  * containers, so equality holds across event-driven renders.
  */
+/**
+ * A centred, author-less row: a date separator or a system notice. Arrives
+ * with the same fast opacity-only entry as a message.
+ */
+const ChatCenteredRow = ({
+  row,
+  spacing,
+  entryOrder,
+}: {
+  row: Extract<ChatRow, { type: "separator" } | { type: "system" }>
+  spacing: string
+  /** Its place in the arriving batch, or `null` for a row already on screen. */
+  entryOrder: number | null
+}) => {
+  const channelType = useF0ChatChannelType()
+
+  const inner =
+    row.type === "separator" ? (
+      // On a noticeboard the separator is the ONLY clock: the posts are
+      // seeded, so they don't carry one of their own (see ChatMessageMeta).
+      <DateTimeSeparator
+        at={row.at}
+        padded
+        withTime={channelType === "announcement"}
+      />
+    ) : (
+      <ChatSystemMessage message={row.message} />
+    )
+
+  if (entryOrder === null) {
+    return <div className={spacing}>{inner}</div>
+  }
+
+  return (
+    <motion.div
+      className={spacing}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={rowEntryTransition(entryOrder)}
+    >
+      {inner}
+    </motion.div>
+  )
+}
+
 export const ChatMessageRowRenderer = memo(ChatMessageRowRendererComponent)

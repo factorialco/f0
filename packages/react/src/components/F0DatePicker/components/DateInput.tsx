@@ -101,31 +101,29 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const placeholder = inputProps.placeholder ?? granularity.placeholder()
 
     return (
-      <>
-        <Input
-          {...inputProps}
-          placeholder={placeholder}
-          icon={showIcon ? getFieldInputIcon("date") : undefined}
-          ref={ref}
-          onFocus={() => onOpenChange?.(true)}
-          onClear={() => {
-            onClear?.()
-            setInputValue("")
-            handleNewValue("", granularity)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleBlur()
-            }
-          }}
-          type="text"
-          onChange={handleChange}
-          error={error || inputProps.error}
-          onBlur={handleBlur}
-          value={inputValue}
-          onClickContent={() => onOpenChange?.(true)}
-        />
-      </>
+      <Input
+        {...inputProps}
+        placeholder={placeholder}
+        icon={showIcon ? getFieldInputIcon("date") : undefined}
+        ref={ref}
+        onFocus={() => onOpenChange?.(true)}
+        onClear={() => {
+          onClear?.()
+          setInputValue("")
+          handleNewValue("", granularity)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleBlur()
+          }
+        }}
+        type="text"
+        onChange={handleChange}
+        error={error || inputProps.error}
+        onBlur={handleBlur}
+        value={inputValue}
+        onClickContent={() => onOpenChange?.(true)}
+      />
     )
   }
 )

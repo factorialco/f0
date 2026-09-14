@@ -165,7 +165,7 @@ export type InputFieldProps<T> = {
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
   onClickContent?: () => void
-  value?: T | undefined
+  value?: T
   onChange?: (value: T) => void
   size?: InputFieldSize
   /* @deprecated Use state (with type error)instead */

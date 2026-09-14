@@ -27,6 +27,28 @@ interface TreeConnectorProps {
   fromVisualization?: TableVisualizationType
 }
 
+/** The editable table starts the connector lower and shifts it further in. */
+const editableTableConnectorVars = ({
+  horizontalOffset,
+  isDetailedVariant,
+  lineHeight,
+}: {
+  horizontalOffset: number
+  isDetailedVariant: boolean
+  /** `false` when the row has no measured height yet. */
+  lineHeight: string | false
+}): Record<string, string> => {
+  const inset = isDetailedVariant ? 12 : 0
+
+  return {
+    "--horizontal-offset": `${horizontalOffset + (isDetailedVariant ? 12 : 8)}px`,
+    "--starting-y": "52px",
+    ...(lineHeight
+      ? { "--line-height": `calc(${lineHeight} - ${inset}px)` }
+      : {}),
+  }
+}
+
 export const connectorVariables = (
   height: number,
   nestedRowProps?: NestedRowProps & {
@@ -59,15 +81,11 @@ export const connectorVariables = (
 
   const editableTableVars =
     fromVisualization === "editableTable"
-      ? {
-          "--horizontal-offset": `${horizontalOffset + (isDetailedVariant ? 12 : 8)}px`,
-          "--starting-y": "52px",
-          ...(lineHeight
-            ? {
-                "--line-height": `calc(${lineHeight} - ${isDetailedVariant ? 12 : 0}px)`,
-              }
-            : {}),
-        }
+      ? editableTableConnectorVars({
+          horizontalOffset,
+          isDetailedVariant,
+          lineHeight,
+        })
       : {}
 
   const rowOffset =
@@ -75,11 +93,13 @@ export const connectorVariables = (
       ? SELECTABLE_EDITABLE_ROW_OFFSET
       : SELECTABLE_ROW_OFFSET
 
+  const selectableOffset = nestedRowProps?.selectableRow ? rowOffset : 0
+
   return {
-    "--line-left": `-${2 * CHEVRON_SIZE - (nestedRowProps?.selectableRow ? rowOffset : 0)}px`,
+    "--line-left": `-${2 * CHEVRON_SIZE - selectableOffset}px`,
     "--line-width": LINE_WIDTH,
     "--horizontal-offset": `${horizontalOffset}px`,
-    "--horizontal-left": `calc(4px - ${nestedRowProps?.selectableRow ? rowOffset : 0}px)`,
+    "--horizontal-left": `calc(4px - ${selectableOffset}px)`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
     "--connector-width": `${connectorWidth}px`,
     ...(lineHeight ? { "--line-height": lineHeight } : {}),

@@ -61,11 +61,10 @@ export const numberFilter: FilterTypeDefinition<
           return i18n.t("filters.number.lessThanOrEqualShort", {
             value: value?.to?.value,
           })
-        } else {
-          return i18n.t("filters.number.lessThanShort", {
-            value: value?.to?.value,
-          })
         }
+        return i18n.t("filters.number.lessThanShort", {
+          value: value?.to?.value,
+        })
       }
 
       if (value?.from?.value !== undefined) {
@@ -73,11 +72,10 @@ export const numberFilter: FilterTypeDefinition<
           return i18n.t("filters.number.greaterThanOrEqualShort", {
             value: value?.from?.value,
           })
-        } else {
-          return i18n.t("filters.number.greaterThanShort", {
-            value: value?.from?.value,
-          })
         }
+        return i18n.t("filters.number.greaterThanShort", {
+          value: value?.from?.value,
+        })
       }
     }
 

@@ -169,7 +169,7 @@ export function createF0FormTester<TSchema extends F0FormSchema>(
   const validate = async (
     values?: Record<string, unknown>
   ): Promise<F0FormValidationResult> => {
-    const merged = { ...(defaultValues ?? {}), ...(values ?? {}) }
+    const merged = { ...defaultValues, ...values }
 
     // Build dynamic schema from raw merged values BEFORE null conversion,
     // matching the order used in createConditionalResolver.
@@ -215,7 +215,7 @@ export function createF0FormTester<TSchema extends F0FormSchema>(
     defaultValues
 
   const getVisibleFields = (values?: Record<string, unknown>): string[] => {
-    const merged = { ...(defaultValues ?? {}), ...(values ?? {}) }
+    const merged = { ...defaultValues, ...values }
     const objectSchema = unwrapToZodObject(schema)
     const visible: string[] = []
 
@@ -248,7 +248,7 @@ export function createF0FormTester<TSchema extends F0FormSchema>(
       return { success: false, errors: validation.errors }
     }
 
-    const merged = { ...(defaultValues ?? {}), ...(values ?? {}) }
+    const merged = { ...defaultValues, ...values }
     return onSubmit(merged as z.infer<TSchema>)
   }
 

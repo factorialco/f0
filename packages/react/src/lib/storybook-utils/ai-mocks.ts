@@ -29,6 +29,7 @@ export const makeMockTranscribe =
       if (signal?.aborted) {
         break
       }
+      // oxlint-disable-next-line no-await-in-loop -- words stream out one at a time with a delay between them
       await new Promise((r) => setTimeout(r, 60 + Math.random() * 100))
       acc = acc ? `${acc} ${word}` : word
       onPartial(acc)

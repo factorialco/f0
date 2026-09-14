@@ -425,7 +425,7 @@ const recolor = (style, theme) => {
   const f = saturatedFlavor(theme)
   const out = JSON.parse(JSON.stringify(style))
   out.name = `f0-${theme}`
-  out.metadata = { ...(out.metadata || {}), "f0:generated": true }
+  out.metadata = { ...out.metadata, "f0:generated": true }
 
   for (const layer of out.layers || []) {
     const lid = layer.id.toLowerCase()
@@ -435,7 +435,7 @@ const recolor = (style, theme) => {
     // (the boxed route numbers like "B-25"), and all basemap POI icons/labels
     // (metro, shops, etc.) - our own markers are the only points of interest.
     if (/ferry|shipping|shield|poi_/.test(lid)) {
-      layer.layout = { ...(layer.layout || {}), visibility: "none" }
+      layer.layout = { ...layer.layout, visibility: "none" }
       continue
     }
     // Base land: green when zoomed out (the world / regional view), fading to
@@ -448,7 +448,7 @@ const recolor = (style, theme) => {
     // park polygons still paint on top at those zooms.
     if (layer.type === "background") {
       layer.paint = {
-        ...(layer.paint || {}),
+        ...layer.paint,
         "background-color": [
           "interpolate",
           ["linear"],

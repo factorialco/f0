@@ -62,10 +62,16 @@ export const useDataCollectionStorage = <
   }
 
   const storageFeatures = useMemo(
-    // Settings and customPresets are always included, regardless of the
-    // consumer's `features` allowlist: presets are a first-class, always-on
-    // capability and must persist whenever a storage key is present.
-    () => [...getFeatures(featuresDef), "settings", "customPresets"],
+    // Settings, the views and which one is selected are always included,
+    // regardless of the consumer's `features` allowlist: views are a
+    // first-class, always-on capability and must persist whenever a storage key
+    // is present.
+    () => [
+      ...getFeatures(featuresDef),
+      "settings",
+      "customPresets",
+      "selectedPresetId",
+    ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
     [JSON.stringify(featuresDef)]
   )

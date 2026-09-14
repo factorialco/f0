@@ -13,11 +13,13 @@ f0 has two enforcement mechanisms and they are not interchangeable. Pick by
 | Inline styles                    | 244              | `.scripts/check-inline-styles.ts` — AST scan + shrink-only baseline |
 | `dangerouslySetInnerHTML` misuse | 1–2              | a rule in here, shipped as `error`                                  |
 
-A lint rule has no baseline mechanism: it is on or off for the whole codebase.
-With hundreds of pre-existing violations that leaves only "ship it as `off`" or
-"add hundreds of suppressions", which is why the inline-styles gate is a script.
-With one or two violations you just fix them and turn the rule on, and a rule is
-the better tool — it runs on every file, needs no debt file, and cannot drift.
+A lint rule is on or off for the whole codebase. With hundreds of pre-existing
+violations that leaves "ship it as `off`", "add hundreds of suppressions", or
+the RATCHET group in `.oxlintrc.json`: the rule runs as `"warn"`, `pnpm lint`
+hides warnings (`--quiet`), and `pnpm check:lint-debt` compares them per file
+against `.scripts/lint-debt.json`, a baseline that may only shrink. It runs on
+staged files in the pre-commit hook and over the whole tree in CI. With one or
+two violations you just fix them and turn the rule on as `error`.
 
 So: **a handful of violations → write a rule here. Hundreds → write a ratchet
 script.** If a rule you want lands in between, that is the signal to fix the

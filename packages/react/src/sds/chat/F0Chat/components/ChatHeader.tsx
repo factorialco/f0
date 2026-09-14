@@ -1,11 +1,10 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { type ReactNode } from "react"
-import { useMediaQuery } from "usehooks-ts"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -59,11 +58,15 @@ export const ChatHeader = ({
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatSearch()
-  // On mobile the chat already fills the screen, so the fullscreen toggle is a
-  // no-op — hide it (matches F0AiChatHeader).
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
+  // When the panel is covering the frame the chat already fills the screen and
+  // the fullscreen toggle is a no-op, so hide it (matches F0AiChatHeader).
+  //
+  // Read from the panel rather than the viewport: a narrow window no longer
+  // implies a covering panel — a laptop at half the screen splits — and the
+  // old viewport rule was hiding the button on a chat that plainly had
+  // somewhere to expand into. `useAiChat` answers `false` with no provider, so
+  // a standalone chat keeps its button.
+  const { panelOverlays } = useAiChat()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
   const showGroupFallback =
@@ -186,7 +189,7 @@ export const ChatHeader = ({
                 />
               </Dropdown>
             ) : null}
-            {onToggleFullscreen && !isSmallScreen ? (
+            {onToggleFullscreen && !panelOverlays ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel

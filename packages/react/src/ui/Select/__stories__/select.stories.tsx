@@ -44,25 +44,24 @@ const SelectWithHooks = ({
           {props.children}
         </Select>
       )
-    } else {
-      const [value, setValue] = useState<string | undefined>(
-        props.value as string | undefined
-      )
-      const handleChange = (value: string) => {
-        console.log("value", value)
-        setValue(value)
-        props.onValueChange(value)
-      }
-
-      return (
-        <Select
-          {...rest}
-          value={value}
-          onValueChange={handleChange}
-          multiple={false}
-        />
-      )
     }
+    const [value, setValue] = useState<string | undefined>(
+      props.value as string | undefined
+    )
+    const handleChange = (value: string) => {
+      console.log("value", value)
+      setValue(value)
+      props.onValueChange(value)
+    }
+
+    return (
+      <Select
+        {...rest}
+        value={value}
+        onValueChange={handleChange}
+        multiple={false}
+      />
+    )
   }
 
   const items = useMemo(

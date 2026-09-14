@@ -499,7 +499,10 @@ export const NonBlocking: Story = {
         description:
           'The primary action runs for 3s. Because it is nonBlocking, "Cancel" stays clickable while it runs.',
         content: (
-          <div>Click "Start", then notice "Cancel" is still enabled.</div>
+          <div>
+            Click &quot;Start&quot;, then notice &quot;Cancel&quot; is still
+            enabled.
+          </div>
         ),
         actions: {
           primary: {

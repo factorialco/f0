@@ -87,14 +87,12 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
       {isLoading ? (
         <Skeleton className="h-5 w-[100px]" />
       ) : (
-        <>
-          <Chip
-            variant="selected"
-            {...chipLabel}
-            onClose={onRemove}
-            onClick={onSelect}
-          />
-        </>
+        <Chip
+          variant="selected"
+          {...chipLabel}
+          onClose={onRemove}
+          onClick={onSelect}
+        />
       )}
     </motion.div>
   )

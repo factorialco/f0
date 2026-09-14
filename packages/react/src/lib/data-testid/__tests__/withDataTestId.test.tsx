@@ -227,10 +227,10 @@ describe("withDataTestId", () => {
       type WrappedProps = WithDataTestIdPropsOf<typeof Wrapped>
 
       const _goodProps: WrappedProps = {
-        onChange: (value: DateValue | undefined, label: string | undefined) => {
-          void value
-          void label
-        },
+        onChange: (
+          _value: DateValue | undefined,
+          _label: string | undefined
+        ) => {},
         dataTestId: "test",
       }
       expect(_goodProps).toBeDefined()

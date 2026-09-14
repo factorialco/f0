@@ -23,40 +23,33 @@ const textFormatEnforcer = (
   warn = false,
   componentName = ""
 ) => {
-  if (rules.disallowEmpty && text.length === 0) {
-    const errorMessage = `${componentName}: You need to provide some text that is not empty`
+  /** Every rule reports the same way: a warning, or a thrown error. */
+  const report = (message: string) => {
     if (warn) {
-      console.warn(errorMessage)
+      console.warn(message)
     } else {
-      throw Error(errorMessage)
+      throw Error(message)
     }
+  }
+
+  if (rules.disallowEmpty && text.length === 0) {
+    report(`${componentName}: You need to provide some text that is not empty`)
   }
 
   if (rules.maxLength !== undefined && text.length > rules.maxLength) {
-    const errorMessage = `${componentName}: "${text}" should have no more than ${rules.maxLength} characters`
-    if (warn) {
-      console.warn(errorMessage)
-    } else {
-      throw Error(errorMessage)
-    }
+    report(
+      `${componentName}: "${text}" should have no more than ${rules.maxLength} characters`
+    )
   }
 
   if (rules.minLength !== undefined && text.length < rules.minLength) {
-    const errorMessage = `${componentName}: "${text}" should have at least ${rules.minLength} characters`
-    if (warn) {
-      console.warn(errorMessage)
-    } else {
-      throw Error(errorMessage)
-    }
+    report(
+      `${componentName}: "${text}" should have at least ${rules.minLength} characters`
+    )
   }
 
   if (rules.disallowEmojis && containsEmojis(text)) {
-    const errorMessage = `${componentName}: Emojis are not allowed here: "${text}"`
-    if (warn) {
-      console.warn(errorMessage)
-    } else {
-      throw Error(errorMessage)
-    }
+    report(`${componentName}: Emojis are not allowed here: "${text}"`)
   }
 }
 

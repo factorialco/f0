@@ -168,15 +168,15 @@ export const TableCollection = <
     lockedColumnIds !== undefined || !!onLockedColumnIdsChange
 
   // Sorted and hidden columns
-  const { columns: orderedColumns, stickyColumnIds } = useColumns(
+  const { columns: orderedColumns, stickyColumnIds } = useColumns({
     originalColumns,
     frozenColumns,
-    visualizationSettings ?? settings.visualization?.table,
-    allowColumnReordering,
-    allowColumnHiding,
+    settings: visualizationSettings ?? settings.visualization?.table,
+    allowSorting: allowColumnReordering,
+    allowHiding: allowColumnHiding,
     lockedColumnIds,
-    usesExplicitColumnLocking
-  )
+    usesExplicitColumnLocking,
+  })
   const stickyColumnIdSet = useMemo(
     () => new Set(stickyColumnIds),
     [stickyColumnIds]
@@ -407,9 +407,8 @@ export const TableCollection = <
           field: columnSorting,
           order: "desc",
         }
-      } else {
-        return null
       }
+      return null
     })
   }
 

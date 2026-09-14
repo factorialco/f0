@@ -168,6 +168,10 @@ export type AiChatCredits = {
 export type AiChatCreditWarning = {
   /** The severity level of the warning. */
   level: "soft"
+  /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+  text?: string
+  /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+  actionLabel?: string
   /** Called when the user dismisses the credit warning banner. */
   onDismiss?: () => void
   /** Called when the user clicks the "Get Credits" button. */
@@ -348,8 +352,15 @@ export type AiChatProviderProps = {
   welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   /**
-   * Enable resizable chat window
-   * When enabled, the chat can be resized between 300px and 50% of the screen width
+   * Enable the panel's drag-to-resize seam.
+   *
+   * The width is bounded by the room the frame actually has, not by a flat
+   * number: 300–712px while there is space for both, then whatever leaves the
+   * main content its minimum, then an even split. Narrower still and the panel
+   * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+   *
+   * The width the user drags to is remembered; a narrow window only shrinks
+   * what is displayed, so widening it again restores their choice.
    */
   resizable?: boolean
   /**
@@ -560,4 +571,30 @@ export type AiChatTranslations = TranslationShape<typeof aiTranslations>
 export interface AiChatTranslationsProviderProps {
   children: React.ReactNode
   translations: AiChatTranslations
+}
+
+export type AiChatUsageLimitsSection = {
+  id: string
+  /** Already localized. */
+  label: string
+  /** Already localized, e.g. "Renews Sep 4". */
+  description?: string
+  usedPercentage: number
+  unlimited?: boolean
+}
+
+/**
+ * Host-resolved numbers for `F0AiChatUsageLimitsButton`. Percentages only: the
+ * product avoids credit counts in the chat.
+ */
+export type AiChatUsageLimits = {
+  /** The viewer's own allowance, 0–100. */
+  usedPercentage: number
+  /** Already localized, e.g. "Resets in 3h 6m". */
+  description?: string
+  unlimited?: boolean
+  /** Extra rows below a divider, typically for admins. */
+  sections?: AiChatUsageLimitsSection[]
+  /** Renders the "Your company" row. */
+  onSeeCompany?: () => void
 }

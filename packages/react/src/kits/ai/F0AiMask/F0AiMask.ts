@@ -100,7 +100,7 @@ function parseColor(colorStr: string): [number, number, number] {
     throw new Error(`Invalid color format: ${colorStr}`)
   }
   const [, r, g, b] = match
-  return [parseInt(r) / 255, parseInt(g) / 255, parseInt(b) / 255]
+  return [parseInt(r, 10) / 255, parseInt(g, 10) / 255, parseInt(b, 10) / 255]
 }
 
 export class F0AiMask {

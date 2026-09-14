@@ -133,6 +133,84 @@ function formatPointValue(
       )(value)
 }
 
+type ChartOfType<T extends F0DataChartProps["type"]> = Extract<
+  F0DataChartProps,
+  { type: T }
+>
+
+/** `Title — Context`, or the title alone when the point carries no context. */
+function quoteHeading(title: string, context?: string | null): string {
+  return context ? `${title} — ${context}` : title
+}
+
+function scatterQuote(
+  title: string,
+  chart: ChartOfType<"scatter">,
+  point: F0AnalyticsDashboardPointClick
+): string {
+  const xLabel = chart.xAxisName ?? "X"
+  const yLabel = chart.yAxisName ?? "Y"
+  const series = point.seriesName ? `${point.seriesName}\n` : ""
+
+  return `${quoteHeading(title, point.category)}\n${series}${xLabel}: ${formatPointValue(chart, point.values[0], "x")}\n${yLabel}: ${formatPointValue(chart, point.values[1])}`
+}
+
+function lineQuote(
+  title: string,
+  chart: ChartOfType<"line">,
+  point: F0AnalyticsDashboardPointClick
+): string {
+  const category = chart.categoryFormatter
+    ? chart.categoryFormatter(point.category)
+    : point.category
+  const rows = point.series.map(
+    ({ name, value }) => `${name}: ${formatPointValue(chart, value)}`
+  )
+
+  return `${quoteHeading(title, category)}\n${rows.join("\n")}`
+}
+
+function radarQuote(
+  title: string,
+  chart: ChartOfType<"radar">,
+  point: F0AnalyticsDashboardPointClick
+): string {
+  const rows = chart.indicators
+    .slice(0, point.values.length)
+    .map(
+      ({ name }, index) =>
+        `${name}: ${formatPointValue(chart, point.values[index])}`
+    )
+
+  return `${quoteHeading(title, point.category)}\n${rows.join("\n")}`
+}
+
+function heatmapQuote(
+  title: string,
+  chart: ChartOfType<"heatmap">,
+  point: F0AnalyticsDashboardPointClick
+): string {
+  const xCategory = chart.xCategories[point.values[0]]
+  const yCategory = chart.yCategories[point.values[1]]
+  const context = [yCategory, xCategory].filter(Boolean).join(" — ")
+
+  return `${quoteHeading(title, context)}\n${formatPointValue(chart, point.value)}`
+}
+
+function singlePointQuote(
+  title: string,
+  chart: F0DataChartProps,
+  point: F0AnalyticsDashboardPointClick
+): string {
+  const category =
+    "categoryFormatter" in chart && chart.categoryFormatter
+      ? chart.categoryFormatter(point.category)
+      : point.category
+  const label = point.seriesName ? `${point.seriesName}: ` : ""
+
+  return `${quoteHeading(title, category)}\n${label}${formatPointValue(chart, point.value)}`
+}
+
 /** @internal Exported for focused quote-contract tests. */
 export function buildPointQuoteText(
   title: string,
@@ -140,24 +218,11 @@ export function buildPointQuoteText(
   point: F0AnalyticsDashboardPointClick
 ): string {
   if (chart.type === "scatter" && point.values.length >= 2) {
-    const heading = point.category ? `${title} — ${point.category}` : title
-    const xLabel = chart.xAxisName ?? "X"
-    const yLabel = chart.yAxisName ?? "Y"
-    const series = point.seriesName ? `${point.seriesName}\n` : ""
-
-    return `${heading}\n${series}${xLabel}: ${formatPointValue(chart, point.values[0], "x")}\n${yLabel}: ${formatPointValue(chart, point.values[1])}`
+    return scatterQuote(title, chart, point)
   }
 
   if (chart.type === "line" && point.series.length > 1) {
-    const category = chart.categoryFormatter
-      ? chart.categoryFormatter(point.category)
-      : point.category
-    const heading = category ? `${title} — ${category}` : title
-    const rows = point.series.map(
-      ({ name, value }) => `${name}: ${formatPointValue(chart, value)}`
-    )
-
-    return `${heading}\n${rows.join("\n")}`
+    return lineQuote(title, chart, point)
   }
 
   if (
@@ -165,34 +230,14 @@ export function buildPointQuoteText(
     chart.indicators.length &&
     point.values.length > 1
   ) {
-    const heading = point.category ? `${title} — ${point.category}` : title
-    const rows = chart.indicators
-      .slice(0, point.values.length)
-      .map(
-        ({ name }, index) =>
-          `${name}: ${formatPointValue(chart, point.values[index])}`
-      )
-
-    return `${heading}\n${rows.join("\n")}`
+    return radarQuote(title, chart, point)
   }
 
   if (chart.type === "heatmap" && point.values.length >= 3) {
-    const xCategory = chart.xCategories[point.values[0]]
-    const yCategory = chart.yCategories[point.values[1]]
-    const context = [yCategory, xCategory].filter(Boolean).join(" — ")
-    const heading = context ? `${title} — ${context}` : title
-
-    return `${heading}\n${formatPointValue(chart, point.value)}`
+    return heatmapQuote(title, chart, point)
   }
 
-  const category =
-    "categoryFormatter" in chart && chart.categoryFormatter
-      ? chart.categoryFormatter(point.category)
-      : point.category
-  const heading = category ? `${title} — ${category}` : title
-  const label = point.seriesName ? `${point.seriesName}: ` : ""
-
-  return `${heading}\n${label}${formatPointValue(chart, point.value)}`
+  return singlePointQuote(title, chart, point)
 }
 
 type AccessibleChartPoint = {

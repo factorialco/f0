@@ -97,14 +97,14 @@ export function useFileAttachments(
         file,
         status: "uploading" as const,
       }))
-      const errorIds = newAttached.map((n) => n.id)
+      const errorIds = new Set(newAttached.map((n) => n.id))
 
       setAttachedFiles((prev) => [...prev, ...newAttached])
 
       const markBatchAsError = (errorMessage: string) =>
         setAttachedFiles((prev) =>
           prev.map((att) =>
-            errorIds.includes(att.id)
+            errorIds.has(att.id)
               ? { ...att, status: "error" as const, errorMessage }
               : att
           )

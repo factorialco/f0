@@ -55,15 +55,21 @@ const undefinedValueByVisualization: Partial<
   list: undefined,
 }
 
-export const renderProperty = <R extends RecordType>(
-  item: R,
-  property: PropertyDefinition<R>,
-  visualization: VisualizationType,
-  i18n: TranslationsType,
-  options?: {
-    tableAlign?: ValueDisplayTableAlignment
-  }
-): ReactNode => {
+type RenderPropertyOptions<R extends RecordType> = {
+  item: R
+  property: PropertyDefinition<R>
+  visualization: VisualizationType
+  i18n: TranslationsType
+  tableAlign?: ValueDisplayTableAlignment
+}
+
+export const renderProperty = <R extends RecordType>({
+  item,
+  property,
+  visualization,
+  i18n,
+  tableAlign,
+}: RenderPropertyOptions<R>): ReactNode => {
   const renderDefinition = property.render(item)
 
   const undefinedValue =
@@ -76,7 +82,7 @@ export const renderProperty = <R extends RecordType>(
     {
       visualization,
       i18n,
-      tableAlign: options?.tableAlign,
+      tableAlign,
     },
     undefinedValue
   )
