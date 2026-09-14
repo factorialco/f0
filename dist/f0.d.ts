@@ -4150,6 +4150,13 @@ export declare interface DashboardMetricData {
     comparison?: {
         value: number;
         label: string;
+        /**
+         * Where the figure comes from, revealed by an ⓘ icon after it — "the
+         * median across all companies on Factorial", say. A string renders a
+         * plain tooltip; the structured form renders a hoverable card that can
+         * carry a link, the same affordance as `DashboardItemBase.info`.
+         */
+        info?: string | InfoHintContent;
     };
 }
 
@@ -20839,9 +20846,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20849,11 +20858,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
