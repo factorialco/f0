@@ -65,6 +65,7 @@ const escapeUserText = (s: string): string =>
  * provide the wiring.
  */
 export const F0AiChatTextArea = ({
+  draftKey = "default",
   onSubmit,
   onStop,
   inProgress,
@@ -96,13 +97,41 @@ export const F0AiChatTextArea = ({
 }: F0AiChatTextAreaProps) => {
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
-  const [inputValue, setInputValue] = useState("")
-  const [cursorPosition, setCursorPosition] = useState(0)
+  const {
+    renderedScopeKey,
+    value: inputValue,
+    cursorPosition,
+    setValue: setInputValue,
+    setCursorPosition,
+    attachedFiles,
+    fileInputRef,
+    onUploadFiles,
+    acceptValue,
+    isAtMaxFiles,
+    maxFiles,
+    processFiles,
+    handleFileSelect,
+    handleRemoveFile,
+    retryFile,
+    transientError,
+    showTransientError,
+    paste,
+    submit,
+  } = useFileAttachments(fileAttachments, draftKey)
+  const currentDraftKeyRef = useRef(draftKey)
+  currentDraftKeyRef.current = draftKey
   const [isPreSending, setIsPreSending] = useState(false)
+  const currentContextRef = useRef(pendingContext)
+  const currentQuoteRef = useRef(pendingQuote)
+  currentContextRef.current = pendingContext
+  currentQuoteRef.current = pendingQuote
   // Set when the user hits send while an attachment is still uploading: the
   // submit is queued and fired once uploads finish (see effect below), so the
   // message goes WITH the file instead of being dropped or sent without it.
-  const [pendingSubmit, setPendingSubmit] = useState(false)
+  const [pendingSubmitScopes, setPendingSubmitScopes] = useState<Set<string>>(
+    () => new Set()
+  )
+  const pendingSubmit = pendingSubmitScopes.has(draftKey)
   const [hoveredSuggestion, setHoveredSuggestion] =
     useState<WelcomeScreenSuggestionItem | null>(null)
   // Whether focus is anywhere in the composer — what opens a collapsed bar, and
@@ -141,22 +170,8 @@ export const F0AiChatTextArea = ({
     [tracking, onSuggestionClick]
   )
 
-  const {
-    attachedFiles,
-    fileInputRef,
-    onUploadFiles,
-    acceptValue,
-    isAtMaxFiles,
-    maxFiles,
-    processFiles,
-    handleFileSelect,
-    handleRemoveFile,
-    clearFiles,
-    transientError,
-    showTransientError,
-  } = useFileAttachments(fileAttachments)
-
   const mentions = useMentions({
+    scopeKey: draftKey,
     inputValue,
     setInputValue,
     cursorPosition,
@@ -257,10 +272,14 @@ export const F0AiChatTextArea = ({
   // a transient banner so the user knows the click was acknowledged but the
   // send was blocked, instead of silently swallowing the event.
   useEffect(() => {
-    if (!pendingSubmit || isUploading) {
+    if (renderedScopeKey !== draftKey || !pendingSubmit || isUploading) {
       return
     }
-    setPendingSubmit(false)
+    setPendingSubmitScopes((current) => {
+      const next = new Set(current)
+      next.delete(draftKey)
+      return next
+    })
     if (hasErrorFiles) {
       showTransientError(translation.ai.fileUploadBlockedSubmit)
       return
@@ -268,6 +287,8 @@ export const F0AiChatTextArea = ({
     formRef.current?.requestSubmit()
   }, [
     pendingSubmit,
+    renderedScopeKey,
+    draftKey,
     isUploading,
     hasErrorFiles,
     showTransientError,
@@ -276,6 +297,9 @@ export const F0AiChatTextArea = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (renderedScopeKey !== draftKey) {
+      return
+    }
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
     if (isClarifying) {
@@ -285,52 +309,64 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend && !isPreSending) {
+    } else if (hasDataToSend) {
       // Attachment still uploading: queue the send instead of dropping it.
       if (isUploading) {
-        setPendingSubmit(true)
+        setPendingSubmitScopes((current) => new Set(current).add(draftKey))
         textareaRef.current?.focus()
         return
       }
-      if (onBeforeSubmit) {
-        setIsPreSending(true)
-        try {
-          if ((await onBeforeSubmit()) === false) {
-            textareaRef.current?.focus()
-            return
+      if (hasErrorFiles) {
+        showTransientError(translation.ai.fileUploadBlockedSubmit)
+        return
+      }
+      setIsPreSending(true)
+      const submittedFiles = uploadedFiles
+      const submittedContext = pendingContext
+      const submittedQuote = pendingQuote
+      try {
+        await submit(
+          async ({ text: submittedText, scopeKey: submittedScope }) => {
+            if (onBeforeSubmit && (await onBeforeSubmit()) === false) {
+              return false
+            }
+            if (currentDraftKeyRef.current !== submittedScope) {
+              return false
+            }
+
+            const transformed = mentions.transformMentions(submittedText.trim())
+            const safeUserText = escapeUserText(transformed)
+
+            const files = submittedFiles.flatMap((f) =>
+              f.uploadedFile ? [f.uploadedFile] : []
+            )
+
+            await onSubmit({
+              text: safeUserText,
+              files,
+              context: submittedContext,
+              quote: submittedQuote,
+            })
+
+            if (
+              submittedContext &&
+              currentDraftKeyRef.current === submittedScope &&
+              currentContextRef.current === submittedContext
+            ) {
+              onPendingContextChange?.(null)
+            }
+            if (
+              submittedQuote &&
+              currentDraftKeyRef.current === submittedScope &&
+              currentQuoteRef.current === submittedQuote
+            ) {
+              onPendingQuoteChange?.(null)
+            }
           }
-        } finally {
-          setIsPreSending(false)
-        }
+        )
+      } finally {
+        setIsPreSending(false)
       }
-
-      const transformed = mentions.transformMentions(inputValue.trim())
-      // Escape markdown/HTML in the user's own text so `*hola*` stays literal
-      // and only features we control (@mentions) produce rich rendering.
-      const safeUserText = escapeUserText(transformed)
-
-      const files = uploadedFiles.flatMap((f) =>
-        f.uploadedFile ? [f.uploadedFile] : []
-      )
-
-      const consumedContext = pendingContext
-      const consumedQuote = pendingQuote
-      if (consumedContext) {
-        onPendingContextChange?.(null)
-      }
-      if (consumedQuote) {
-        onPendingQuoteChange?.(null)
-      }
-
-      await onSubmit({
-        text: safeUserText,
-        files,
-        context: consumedContext,
-        quote: consumedQuote,
-      })
-
-      setInputValue("")
-      clearFiles()
     }
 
     textareaRef.current?.focus()
@@ -350,6 +386,16 @@ export const F0AiChatTextArea = ({
         formRef.current?.requestSubmit()
       }
     }
+  }
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    if (!onUploadFiles) {
+      return
+    }
+    paste(event, (text, caret) => {
+      setInputValue(text)
+      setCursorPosition(caret)
+    })
   }
 
   const updateCursorPosition = () => {
@@ -746,7 +792,9 @@ export const F0AiChatTextArea = ({
                     attachedFiles={attachedFiles}
                     isUploading={isUploading}
                     onRemove={handleRemoveFile}
+                    onRetry={retryFile}
                     removeLabel={translation.ai.removeFile}
+                    retryLabel={translation.chat.retry}
                   />
 
                   {/* THE TEXT BAND. A flex row only in the `inside` layout,
@@ -793,6 +841,7 @@ export const F0AiChatTextArea = ({
                         setCursorPosition(cursorPos)
                       }}
                       onKeyDown={handleKeyDown}
+                      onPaste={handlePaste}
                       onCursorUpdate={updateCursorPosition}
                       onScroll={syncHighlightScroll}
                       highlightSegments={highlightSegments}

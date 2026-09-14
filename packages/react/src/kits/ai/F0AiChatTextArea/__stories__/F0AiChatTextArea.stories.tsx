@@ -16,6 +16,7 @@ import {
   Upsell,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
@@ -312,6 +313,7 @@ const buildClarifyingState = (
 })
 
 type WrapperProps = {
+  draftKey?: string
   placeholders?: string[]
   fileAttachments?: AiChatFileAttachmentConfig
   onTranscribe?: TranscribeFn
@@ -335,6 +337,7 @@ type WrapperProps = {
 }
 
 const Wrapper = ({
+  draftKey,
   placeholders,
   fileAttachments,
   onTranscribe,
@@ -395,6 +398,7 @@ const Wrapper = ({
   return (
     <div className="flex flex-col gap-4 w-[640px]">
       <F0AiChatTextArea
+        draftKey={draftKey}
         ref={composerRef}
         onSubmit={handleSubmit}
         onStop={() => console.log("stop")}
@@ -454,13 +458,40 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof Wrapper>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const Snapshot: Story = {
+  args: {
+    initialPendingContext: PENDING_CONTEXT,
+    fileAttachments: FILE_UPLOAD_CONFIG,
+  },
+  parameters: withSnapshot({}),
+}
+
+export const DraftScopes: Story = {
+  render: () => {
+    const [scope, setScope] = useState("first")
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setScope("first")}>
+            First conversation
+          </button>
+          <button type="button" onClick={() => setScope("second")}>
+            Second conversation
+          </button>
+        </div>
+        <Wrapper draftKey={scope} fileAttachments={FILE_UPLOAD_CONFIG} />
+      </div>
+    )
+  },
+}
 
 // Interactive story to inspect the textarea ↔ clarifying panel transition.
 // Click "Trigger clarifying mode" to see the swap animation.

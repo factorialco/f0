@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import type { PersonProfile } from "../F0AiChat/types"
 import { escapeXml } from "./highlight-utils"
 
@@ -13,6 +20,7 @@ export type MentionEntry = {
 }
 
 export type UseMentionsOptions = {
+  scopeKey?: string
   /** Current textarea value (controlled) */
   inputValue: string
   /** Setter for the textarea value */
@@ -203,6 +211,7 @@ export type PopoverPosition = { left: number; bottom: number } | null
 const DEBOUNCE_MS = 250
 
 export function useMentions({
+  scopeKey = "default",
   inputValue,
   setInputValue,
   cursorPosition,
@@ -215,6 +224,8 @@ export function useMentions({
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [mentions, setMentions] = useState<MentionEntry[]>([])
+  const mentionScopeRef = useRef(scopeKey)
+  const mentionsByScopeRef = useRef(new Map<string, MentionEntry[]>())
 
   // Track the position of the @ that triggered the current search
   const atIndexRef = useRef<number>(-1)
@@ -223,6 +234,26 @@ export function useMentions({
   // Track @ positions dismissed due to empty results, so we don't
   // reopen the popover while the user keeps typing at the same trigger.
   const dismissedAtIndexRef = useRef<number>(-1)
+
+  useLayoutEffect(() => {
+    if (mentionScopeRef.current === scopeKey) {
+      return
+    }
+    mentionsByScopeRef.current.set(mentionScopeRef.current, mentions)
+    mentionScopeRef.current = scopeKey
+    searchIdRef.current += 1
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    atIndexRef.current = -1
+    dismissedAtIndexRef.current = -1
+    setIsOpen(false)
+    setQuery("")
+    setResults([])
+    setIsLoading(false)
+    setSelectedIndex(0)
+    setMentions(mentionsByScopeRef.current.get(scopeKey) ?? [])
+  }, [scopeKey])
 
   // Detect @ trigger on every input/cursor change
   useEffect(() => {

@@ -100,6 +100,73 @@ const renderChat = (runtime: F0ChatRuntime) =>
   )
 
 describe("F0Chat", () => {
+  it("parks the composer draft when switching channels", () => {
+    const first = makeRuntime()
+    const second = makeRuntime({
+      channel: { ...first.channel, id: "c2", title: "Other" },
+    })
+    const { rerender } = render(
+      <F0ChatProvider runtime={first}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    const composer = screen.getByPlaceholderText(/write something here/i)
+    fireEvent.change(composer, { target: { value: "first draft" } })
+
+    rerender(
+      <F0ChatProvider runtime={second}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(composer).toHaveValue("")
+    fireEvent.change(composer, { target: { value: "second draft" } })
+
+    rerender(
+      <F0ChatProvider runtime={first}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(composer).toHaveValue("first draft")
+  })
+
+  it("does not clear the destination draft when leaving an edit", async () => {
+    const first = makeRuntime({ editMessage: vi.fn(), editWindowMs: 60_000 })
+    const second = makeRuntime({
+      channel: { ...first.channel, id: "c2", title: "Other" },
+      editMessage: vi.fn(),
+      editWindowMs: 60_000,
+    })
+    const { rerender } = render(
+      <F0ChatProvider runtime={first}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    const composer = screen.getByPlaceholderText(/write something here/i)
+    fireEvent.change(composer, { target: { value: "first draft" } })
+    rerender(
+      <F0ChatProvider runtime={second}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1]!)
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    expect(composer).toHaveValue("Hi back")
+    rerender(
+      <F0ChatProvider runtime={first}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(composer).toHaveValue("first draft")
+    rerender(
+      <F0ChatProvider runtime={second}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(composer).toHaveValue("")
+  })
+
   it("renders the channel title and messages", () => {
     renderChat(makeRuntime())
     expect(screen.getAllByText("María José").length).toBeGreaterThan(0)
@@ -1231,7 +1298,7 @@ describe("F0Chat", () => {
     ).toBeTruthy()
   })
 
-  it("releases local preview URLs when an upload fails", async () => {
+  it("retains a failed preview for retry and releases it on removal", async () => {
     let rejectUpload: (error: Error) => void = () => {}
     const uploadFiles = vi.fn(
       () =>
@@ -1260,10 +1327,22 @@ describe("F0Chat", () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByTestId("chat-composer-image-preview")
-      ).not.toBeInTheDocument()
+        screen.getByRole("button", { name: /Retry:.*cover\.webp/ })
+      ).toBeInTheDocument()
     )
+    expect(
+      screen.getByTestId("chat-composer-image-preview")
+    ).toBeInTheDocument()
     expect(screen.getByText("Upload failed")).toBeInTheDocument()
+    expect(revokeObjectUrl).not.toHaveBeenCalledWith(localUrl)
+    await userEvent.click(
+      screen.getByRole("button", { name: /Retry:.*cover\.webp/ })
+    )
+    expect(screen.getByPlaceholderText(/write something here/i)).toHaveFocus()
+    expect(uploadFiles).toHaveBeenCalledTimes(2)
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove cover.webp" })
+    )
     expect(revokeObjectUrl).toHaveBeenCalledWith(localUrl)
     revokeObjectUrl.mockRestore()
   })
@@ -1384,6 +1463,38 @@ describe("F0Chat", () => {
         clipboardData: { files: [] },
       })
     ).toBe(true)
+  })
+
+  it("keeps text and a pasted screenshot in the same message", async () => {
+    const image = new File(["image"], "screenshot.png", { type: "image/png" })
+    const uploadFiles = vi.fn(async () => [
+      {
+        kind: "image" as const,
+        url: "https://example.com/screenshot.png",
+        name: "screenshot.png",
+        mimeType: "image/png",
+      },
+    ])
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ uploadFiles, sendMessage }))
+    const textarea = screen.getByPlaceholderText("Write something here..")
+
+    fireEvent.paste(textarea, {
+      clipboardData: {
+        files: [image],
+        getData: (type: string) =>
+          type === "text/plain" ? "Please inspect" : "",
+      },
+    })
+    expect(textarea).toHaveValue("Please inspect")
+    await waitFor(() => expect(uploadFiles).toHaveBeenCalledTimes(1))
+    fireEvent.keyDown(textarea, { key: "Enter" })
+
+    expect(sendMessage).toHaveBeenCalledTimes(1)
+    expect(sendMessage.mock.calls[0]?.[0]).toMatchObject({
+      body: "Please inspect",
+      attachments: [{ name: "screenshot.png" }],
+    })
   })
 
   it("renders the empty state when there are no messages", () => {

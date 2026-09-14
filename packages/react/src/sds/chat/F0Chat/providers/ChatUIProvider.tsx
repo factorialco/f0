@@ -66,7 +66,7 @@ type ChatComposeTargetContextValue = {
 export type ChatComposerHandle = {
   retarget: (previous: ChatComposeTarget, next: ChatComposeTarget) => void
   /** Drop the whole draft — text, attachments, mentions — not just an edit's. */
-  abandonDraft: () => void
+  abandonDraft: (scope?: string) => void
 }
 
 /** Identity-stable for the provider's lifetime, so message rows can move the
@@ -292,21 +292,24 @@ export const ChatUIProvider = ({
     [setComposeTarget]
   )
 
-  // Only the transcript is keyed by channel; this provider and the composer
-  // survive the switch, so the draft has to be dropped by hand or it is sent to
-  // the next conversation. Layout, not passive: a passive effect lets a frame
-  // paint the old draft under the new channel.
+  // The composer parks plain drafts by channel. A reply or edit also carries a
+  // message target, so discard that draft before changing channels.
   const channelIdRef = useRef(channel.id)
   useLayoutEffect(
-    function abandonDraftOnChannelChange() {
+    function parkDraftOnChannelChange() {
       if (channelIdRef.current === channel.id) {
         return
       }
+      if (targetRef.current.kind !== "none") {
+        composerHandleRef.current?.abandonDraft(channelIdRef.current)
+      }
       channelIdRef.current = channel.id
-      composerHandleRef.current?.abandonDraft()
-      clearComposeTarget()
+      targetRef.current = { kind: "none" }
+      setTarget({ kind: "none" })
+      setImagePreview(null)
+      setDocumentPreview(null)
     },
-    [channel.id, clearComposeTarget]
+    [channel.id]
   )
 
   /** Scroll to a message and highlight it; `persist` keeps the ring (search). */

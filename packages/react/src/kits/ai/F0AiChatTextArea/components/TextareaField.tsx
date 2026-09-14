@@ -9,6 +9,7 @@ interface TextareaFieldProps {
   inputValue: string
   onInputChange: (value: string, cursorPos: number) => void
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
   onCursorUpdate: () => void
   onScroll: () => void
   highlightSegments: HighlightSegment[]
@@ -25,6 +26,7 @@ export const TextareaField = ({
   inputValue,
   onInputChange,
   onKeyDown,
+  onPaste,
   onCursorUpdate,
   onScroll,
   highlightSegments,
@@ -113,6 +115,7 @@ export const TextareaField = ({
           onInputChange(e.target.value, e.target.selectionStart ?? 0)
         }}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
         onKeyUp={onCursorUpdate}
         onClick={onCursorUpdate}
         onSelect={onCursorUpdate}

@@ -22,6 +22,7 @@ export type AiChatTextAreaUsageLimits = Pick<
 export type AttachedFile = {
   id: string
   file: File
+  previewUrl?: string | null
   status: "uploading" | "uploaded" | "error"
   uploadedFile?: UploadedFile
   errorMessage?: string
@@ -52,6 +53,8 @@ export type F0AiChatTextAreaSubmitPayload = {
 
 export type F0AiChatTextAreaProps = {
   ref: RefObject<HTMLDivElement>
+  /** Scope for in-memory drafts. Switching conversations parks text and files. */
+  draftKey?: string
   /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
   onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>
   /** Called when the user clicks the stop button while a response is streaming. */
