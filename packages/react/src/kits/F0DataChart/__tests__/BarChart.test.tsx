@@ -227,7 +227,7 @@ describe("BarChart — reference lines", () => {
     expect(option.series[0].data).toHaveLength(3)
   })
 
-  it("keeps the line out of the legend and the tooltip", () => {
+  it("keeps the line out of the legend", () => {
     render(
       <F0DataChart
         {...props}
@@ -239,7 +239,6 @@ describe("BarChart — reference lines", () => {
     const lineSeries = option.series.find(
       (s: { markLine?: unknown }) => s.markLine
     )
-    expect(lineSeries.silent).toBe(true)
     expect(option.legend?.data ?? []).not.toContain(lineSeries.name)
   })
 
@@ -280,10 +279,11 @@ describe("BarChart — reference lines", () => {
     expect(marks[0].yAxis).toBeUndefined()
   })
 
-  // The chart's tooltip is axis-triggered and owns the whole plot, so a mark
-  // never receives the pointer. What the line has to say rides along in that
-  // tooltip instead — which is also how a reader finds a 1.5px rule at all.
-  it("adds the line to the tooltip, with its description", () => {
+  // A bar chart triggers its tooltip on the ITEM, so the pointer does reach
+  // the mark and the line can answer for itself — which is where a reader
+  // looks first. The mark must not be silent for that: a silent mark receives
+  // no pointer events at all, and that alone is what kept this from firing.
+  it("answers its own hover with the value and the description", () => {
     render(
       <F0DataChart
         {...props}
@@ -299,22 +299,44 @@ describe("BarChart — reference lines", () => {
     )
 
     const option = getLatestOption()
-    const html = option.tooltip.formatter([
-      {
-        seriesName: "Salary gap",
-        name: "Sales",
-        value: 12.17,
-        dataIndex: 1,
-        marker: "",
-      },
-    ])
+    const lineSeries = option.series.find(
+      (s: { markLine?: unknown }) => s.markLine
+    )
+    expect(lineSeries.silent).toBe(false)
+    expect(lineSeries.markLine.silent).toBe(false)
+
+    const html = lineSeries.tooltip.formatter({ dataIndex: 0 })
     expect(html).toContain("Peer median")
     expect(html).toContain("11%")
     expect(html).toContain("Companies in Spain with 51")
-    // The mark itself stays inert: it cannot answer a hover it never gets.
-    expect(
-      option.series.find((s: { markLine?: unknown }) => s.markLine).silent
-    ).toBe(true)
+  })
+
+  // Repeating a constant on every bar's card buries the bar's own figure under
+  // a sentence that never changes.
+  it("stays out of each bar's own tooltip", () => {
+    render(
+      <F0DataChart
+        {...props}
+        valueFormatter={(v: number) => `${v}%`}
+        referenceLines={[
+          {
+            value: 11,
+            label: "Peer median",
+            description: "Companies in Spain with 51–200 employees",
+          },
+        ]}
+      />
+    )
+
+    const html = getLatestOption().tooltip.formatter({
+      seriesName: "Salary gap",
+      name: "Sales",
+      value: 12.17,
+      dataIndex: 1,
+      marker: "",
+    })
+    expect(html).toContain("Sales")
+    expect(html).not.toContain("Peer median")
   })
 
   it("adds nothing when a chart declares none", () => {

@@ -14,7 +14,10 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
-import { referenceLineSeries } from "../../utils/referenceLines"
+import {
+  referenceLineRows,
+  referenceLineSeries,
+} from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -190,7 +193,8 @@ export function useLineChartOptions(
 
     const echartsSeries = series.map((s, i) =>
       buildSeriesEntry({
-        series: // When forced off, also strip the per-series override so it doesn't
+        // When forced off, also strip the per-series override so it doesn't
+        series:
           // accidentally re-enable area on a single series in `buildSeriesEntry`.
           isMultiSeries ? { ...s, showArea: false } : s,
         index: i,
@@ -249,6 +253,9 @@ export function useLineChartOptions(
                 i18n.dataChart.tooltip.fromPrevious,
                 theme
               ),
+              // A line's tooltip fires on the axis, which owns the whole plot,
+              // so its marks never receive the pointer and must ride along here.
+              ...referenceLineRows(referenceLines, formatTooltipValue),
             ],
           },
           theme
@@ -258,11 +265,14 @@ export function useLineChartOptions(
       return renderValueTooltip(
         {
           title: category,
-          rows: points.map((point) => ({
-            marker: point.marker,
-            value: formatTooltipValue(Number(point.value)),
-            label: String(point.seriesName ?? ""),
-          })),
+          rows: [
+            ...points.map((point) => ({
+              marker: point.marker,
+              value: formatTooltipValue(Number(point.value)),
+              label: String(point.seriesName ?? ""),
+            })),
+            ...referenceLineRows(referenceLines, formatTooltipValue),
+          ],
         },
         theme
       )
