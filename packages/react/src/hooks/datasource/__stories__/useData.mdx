@@ -314,6 +314,65 @@ function GroupedUserList() {
 }
 ```
 
+### Multi-level (nested) grouping
+
+A grouping state can name more than one field. `field` is the outer level;
+`thenBy` lists the levels nested inside it, in order. Every level names another
+field of the SAME `groupBy` map, so it reuses that field's `label` — there is
+nothing extra to configure.
+
+```tsx
+const dataSource = useDataSource({
+  grouping: {
+    groupBy: {
+      department: { name: "Department", label: (key) => key },
+      office: { name: "Office", label: (key) => key },
+    },
+  },
+  // Department, and inside each department, office.
+  currentGrouping: { field: "department", thenBy: [{ field: "office" }] },
+  dataAdapter: {
+    /* ... */
+  },
+})
+```
+
+Each group then carries its next level in `subGroups`:
+
+```tsx
+function renderGroups(groups: GroupRecord<User>[]) {
+  return groups.map((group) => (
+    <div key={group.key}>
+      <h3>
+        {group.label} ({group.itemCount})
+      </h3>
+      {group.subGroups
+        ? renderGroups(group.subGroups)
+        : group.records.map((user) => <div key={user.id}>{user.name}</div>)}
+    </div>
+  ))
+}
+```
+
+Three things are worth knowing before you rely on it:
+
+- **`records` stays complete at every level.** A group with `subGroups` still
+  holds all of its records, so a renderer that doesn't know about nesting shows
+  exactly what it showed without `thenBy` — one level, all the rows. A renderer
+  that DOES read `subGroups` must render one or the other, never both, or every
+  record appears twice.
+- **A sub-group's key is scoped to its parent**, because "Barcelona" under
+  Engineering and "Barcelona" under Sales are two different groups and
+  open/closed state is keyed by key alone. Treat keys as opaque.
+- **A sub-group's `itemCount` is its own length.** The nested levels are cut
+  client-side out of records already fetched, and the definition's `itemCount`
+  answers for a whole field ("how many people are in Barcelona"), not for a
+  branch of the tree ("how many of THIS department's people are").
+
+A level naming a field the definition doesn't declare is dropped rather than
+thrown on, so a `thenBy` that outlives a definition change degrades to fewer
+levels instead of an empty list.
+
 ### Observable Data Source
 
 ```tsx

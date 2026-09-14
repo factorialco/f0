@@ -67,6 +67,31 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
    * @default false for field selects; true for inline selects
    */
   fitContentWidth?: boolean
+  /**
+   * What the TRIGGER says for a selected option — decided once for the whole
+   * select, instead of per option inside `mapOptions`.
+   *
+   * A row is read in the context the list gives it: under its group headers,
+   * beside its siblings. The trigger has none of that, so a label that is clear
+   * in the list can be ambiguous alone ("Backend", once the project header is
+   * gone). This is where the context goes back on, in whatever order reads
+   * best — `"Ship the API (Backend, Apollo)"` as readily as
+   * `"Apollo › Backend › Ship the API"`.
+   *
+   * Receives the option — its own `label`, and the `selectedLabel` `mapOptions`
+   * set if any — together with the record it was mapped from. Build the path
+   * from the RECORD (`item.project.name`), not from the group headers on
+   * screen: a selection made earlier, or one restored from `defaultItem`, is
+   * shown by the trigger while its group is nowhere in the loaded data, and the
+   * record is the part that is always there.
+   *
+   * Returns the string to show. It replaces `selectedLabel` for every selected
+   * option; the rows in the list are untouched.
+   */
+  getSelectedLabel?: (selection: {
+    option: F0SelectItemObject<T, ResolvedRecordType<R>>
+    item?: ResolvedRecordType<R>
+  }) => string
 } & WithDataTestIdProps
 
 type F0SelectSingleSelectionProps<T extends string, R = unknown> = {

@@ -102,6 +102,14 @@ If it is mandatory, the data must be grouped by one of the grouping fields. If
 it is not mandatory, the user can choose not grouping the data and still
 choosing group by one of the available fields.
 
+### Hide selector
+
+The `hideSelector` property takes the grouping picker away and leaves the
+grouping itself in force — for a grouping the product decides and the user does
+not. The headers render; the control to change them never does. Pair it with
+`mandatory: true` and a `defaultGrouping`, or the state can still arrive as "no
+grouping" with no control left to leave it.
+
 ### Collapsible
 
 The `collapsible` property is used to define if the grouping is collapsible or

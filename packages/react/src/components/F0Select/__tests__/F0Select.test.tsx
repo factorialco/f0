@@ -1876,6 +1876,467 @@ describe("Select", () => {
     // passes whether the bug is present or not. It is verified in a browser.
   })
 
+  describe("multi-level grouping", () => {
+    type NestedItem = {
+      value: string
+      label: string
+      role: string
+      workplace: string
+    }
+
+    const nestedItems: NestedItem[] = [
+      { value: "a1", label: "Alice", role: "Engineer", workplace: "Barcelona" },
+      { value: "a2", label: "Bob", role: "Engineer", workplace: "Madrid" },
+      { value: "a3", label: "Cleo", role: "Engineer", workplace: "Barcelona" },
+      { value: "b1", label: "Dan", role: "Designer", workplace: "Barcelona" },
+    ]
+
+    const buildNestedSource = ({
+      defaultOpenGroups = true,
+      thenBy = [{ field: "workplace" as const }],
+    }: {
+      defaultOpenGroups?: boolean
+      thenBy?: { field: "workplace" | "missing" }[]
+    } = {}) =>
+      createDataSourceDefinition<NestedItem>({
+        grouping: {
+          mandatory: true,
+          collapsible: true,
+          defaultOpenGroups,
+          groupBy: {
+            role: {
+              name: "Role",
+              label: (groupId) => `${groupId}`,
+              // Deliberately field-wide, to prove the nested level does not
+              // reuse it: every Barcelona person, not this role's.
+              itemCount: (groupId) =>
+                nestedItems.filter((item) => item.role === groupId).length,
+            },
+            workplace: {
+              name: "Workplace",
+              label: (groupId) => `${groupId}`,
+              itemCount: (groupId) =>
+                nestedItems.filter((item) => item.workplace === groupId).length,
+            },
+          },
+        },
+        defaultGrouping: { field: "role", thenBy },
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: () =>
+            Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: nestedItems,
+              total: nestedItems.length,
+            }),
+        },
+      })
+
+    const mapOptions = (item: NestedItem) => ({
+      value: item.value,
+      label: item.label,
+    })
+
+    const renderNested = async (
+      source: ReturnType<typeof buildNestedSource>
+    ) => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={source}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      return user
+    }
+
+    it("renders a header for every level and each record exactly once", async () => {
+      await renderNested(buildNestedSource())
+
+      expect(screen.getByText("Designer")).toBeInTheDocument()
+      // "Barcelona" exists under both roles: two headers, one per parent.
+      expect(screen.getAllByText("Barcelona")).toHaveLength(2)
+      expect(screen.getByText("Madrid")).toBeInTheDocument()
+
+      // A parent group carries all of its records, and its sub-groups carry
+      // the same records again — the list must show them once, not twice.
+      for (const label of ["Alice", "Bob", "Cleo", "Dan"]) {
+        expect(screen.getAllByText(label)).toHaveLength(1)
+      }
+    })
+
+    it("indents each level one step further than the one above it", async () => {
+      await renderNested(buildNestedSource())
+
+      // The top-level header carries no indent of its own...
+      const roleHeader = screen.getByText("Engineer").closest("div")!
+      expect(roleHeader.parentElement).not.toHaveClass("pl-5")
+
+      // ...the level below it is indented once...
+      const officeHeader = screen.getAllByText("Barcelona")[0].closest("div")!
+      expect(officeHeader.parentElement).toHaveClass("pl-5")
+
+      // ...and a row sits one step further in than the header it belongs to,
+      // clearing that header's chevron.
+      const row = screen.getByText("Alice").closest("div")!
+      expect(row.closest(".pl-10")).not.toBeNull()
+    })
+
+    it("counts a sub-group by its own records, not by the whole field", async () => {
+      await renderNested(buildNestedSource())
+
+      // Three people work in Barcelona, but only two of them are Engineers.
+      const engineerBarcelona = screen.getAllByText("Barcelona")[0]
+      expect(
+        within(engineerBarcelona.parentElement!).getByText("2")
+      ).toBeInTheDocument()
+    })
+
+    it("collapses one sub-group without touching its siblings", async () => {
+      const user = await renderNested(buildNestedSource())
+
+      await user.click(screen.getAllByText("Barcelona")[0])
+
+      await waitFor(() => {
+        expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+      })
+      expect(screen.queryByText("Cleo")).not.toBeInTheDocument()
+      // Madrid, under the same parent, is untouched...
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      // ...and so is the Barcelona of the other parent.
+      expect(screen.getByText("Dan")).toBeInTheDocument()
+    })
+
+    it("hides a collapsed group's sub-headers, not just its records", async () => {
+      const user = await renderNested(buildNestedSource())
+
+      await user.click(screen.getByText("Engineer"))
+
+      await waitFor(() => {
+        expect(screen.queryByText("Madrid")).not.toBeInTheDocument()
+      })
+      // Only the Designer branch's Barcelona is left.
+      expect(screen.getAllByText("Barcelona")).toHaveLength(1)
+      expect(screen.getByText("Dan")).toBeInTheDocument()
+    })
+
+    it("falls back to the levels it knows when `thenBy` names an unknown field", async () => {
+      await renderNested(
+        buildNestedSource({ thenBy: [{ field: "missing" as const }] })
+      )
+
+      // The unknown level is dropped, leaving plain single-level grouping
+      // rather than an empty list.
+      expect(screen.queryByText("Barcelona")).not.toBeInTheDocument()
+      expect(screen.getByText("Alice")).toBeInTheDocument()
+      expect(screen.getByText("Dan")).toBeInTheDocument()
+    })
+  })
+
+  /**
+   * A grouping (and a sorting) the product decides and the user cannot: the
+   * rows come out grouped and sorted, and neither control is on screen.
+   */
+  describe("fixed grouping and sorting", () => {
+    type FixedItem = {
+      value: string
+      label: string
+      role: string
+    }
+
+    const fixedItems: FixedItem[] = [
+      { value: "a1", label: "Alice", role: "Engineer" },
+      { value: "b1", label: "Carol", role: "Designer" },
+    ]
+
+    const buildFixedSource = ({
+      hideSelector,
+      onFetch,
+    }: {
+      hideSelector?: boolean
+      onFetch?: (sortings: unknown) => void
+    } = {}) =>
+      createDataSourceDefinition<FixedItem>({
+        grouping: {
+          mandatory: true,
+          hideSelector,
+          collapsible: true,
+          defaultOpenGroups: true,
+          groupBy: {
+            role: {
+              name: "Role",
+              label: (groupId) => `${groupId}`,
+            },
+            // A second field, so the picker would have a real choice to offer
+            // if it were allowed to render.
+            label: {
+              name: "Name",
+              label: (groupId) => `${groupId}`,
+            },
+          },
+        },
+        sortings: { label: { label: "Name" } },
+        defaultSortings: { field: "label", order: "desc" },
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: ({ sortings }) => {
+            onFetch?.(sortings)
+            return Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: fixedItems,
+              total: fixedItems.length,
+            })
+          },
+        },
+      })
+
+    const mapOptions = (item: FixedItem) => ({
+      value: item.value,
+      label: item.label,
+    })
+
+    const openWith = async (
+      source: ReturnType<typeof buildFixedSource>,
+      extraProps: Record<string, unknown> = {}
+    ) => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={source}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+          {...extraProps}
+        />
+      )
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      return user
+    }
+
+    it("shows the grouping picker by default", async () => {
+      await openWith(buildFixedSource())
+
+      expect(
+        screen.getByRole("combobox", { name: /group by/i })
+      ).toBeInTheDocument()
+    })
+
+    it("hides the picker but keeps the grouping when hideSelector is set", async () => {
+      await openWith(buildFixedSource({ hideSelector: true }))
+
+      expect(
+        screen.queryByRole("combobox", { name: /group by/i })
+      ).not.toBeInTheDocument()
+      // The direction toggle goes with it — it is the other half of the picker.
+      expect(
+        screen.queryByRole("button", { name: /direction/i })
+      ).not.toBeInTheDocument()
+      // ...and the grouping itself is still applied.
+      expect(screen.getByText("Engineer")).toBeInTheDocument()
+      expect(screen.getByText("Designer")).toBeInTheDocument()
+      expect(screen.getByText("Alice")).toBeInTheDocument()
+    })
+
+    it("drops the whole top bar when the picker was the only thing in it", async () => {
+      await openWith(buildFixedSource({ hideSelector: true }), {
+        showSearchBox: false,
+      })
+
+      // No search box, no filters, no grouping picker — and so no empty strip
+      // of chrome above the options either.
+      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("combobox", { name: /group by/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("passes a fixed sorting through to the adapter, with no sorting control", async () => {
+      const onFetch = vi.fn()
+      await openWith(buildFixedSource({ hideSelector: true, onFetch }), {
+        showSearchBox: false,
+      })
+
+      expect(onFetch).toHaveBeenCalled()
+      // The fixed sorting first, then the grouping field grouping adds so its
+      // records arrive contiguous.
+      expect(onFetch.mock.calls[0][0]).toEqual([
+        { field: "label", order: "desc" },
+        { field: "role", order: "asc" },
+      ])
+      // F0Select has never rendered a sorting picker; this pins that, so a
+      // fixed sorting stays fixed.
+      expect(
+        screen.queryByRole("combobox", { name: /sort/i })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe("getSelectedLabel", () => {
+    type LabelItem = {
+      value: string
+      label: string
+      project: string
+      subproject: string
+    }
+
+    const labelItems: LabelItem[] = [
+      {
+        value: "t1",
+        label: "Ship the API",
+        project: "Apollo",
+        subproject: "Backend",
+      },
+      {
+        value: "t2",
+        label: "Dark mode",
+        project: "Apollo",
+        subproject: "Web",
+      },
+    ]
+
+    const labelSource = createDataSourceDefinition<LabelItem>({
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: () =>
+          Promise.resolve({
+            type: "infinite-scroll" as const,
+            cursor: "100",
+            perPage: 100,
+            hasMore: false,
+            records: labelItems,
+            total: labelItems.length,
+          }),
+      },
+    })
+
+    // "z (y, x)" — the leaf first, its ancestors after, innermost first.
+    const leafFirst = ({ item }: { item?: LabelItem }) =>
+      item ? `${item.label} (${item.subproject}, ${item.project})` : ""
+
+    it("renames the selection on the trigger, leaving the list rows alone", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={labelSource}
+          mapOptions={(item: LabelItem) => ({
+            value: item.value,
+            label: item.label,
+            // The path format this REPLACES, to prove it takes precedence.
+            selectedLabel: `${item.project} > ${item.subproject} > ${item.label}`,
+            item,
+          })}
+          getSelectedLabel={leafFirst}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Ship the API")).toBeInTheDocument()
+      })
+
+      // The row says what the row said.
+      expect(
+        screen.queryByText("Apollo > Backend > Ship the API")
+      ).not.toBeInTheDocument()
+
+      await user.click(screen.getByText("Ship the API"))
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Ship the API (Backend, Apollo)")
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("receives the option as well as the record", async () => {
+      const user = userEvent.setup()
+      const getSelectedLabel = vi.fn(() => "formatted")
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={labelSource}
+          mapOptions={(item: LabelItem) => ({
+            value: item.value,
+            label: item.label,
+            item,
+          })}
+          getSelectedLabel={getSelectedLabel}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Dark mode")).toBeInTheDocument()
+      })
+      await user.click(screen.getByText("Dark mode"))
+
+      await waitFor(() => {
+        expect(getSelectedLabel).toHaveBeenCalled()
+      })
+      const arg = getSelectedLabel.mock.calls.at(-1)![0] as {
+        option: { value: string; label: string }
+        item?: LabelItem
+      }
+      expect(arg.option.value).toBe("t2")
+      expect(arg.option.label).toBe("Dark mode")
+      expect(arg.item?.subproject).toBe("Web")
+    })
+
+    it("labels a selection that is not in the loaded data", async () => {
+      // `defaultItem` stands in for a selection whose group is nowhere on
+      // screen — the case a group-header-derived path could not have served.
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={labelSource}
+          mapOptions={(item: LabelItem) => ({
+            value: item.value,
+            label: item.label,
+            item,
+          })}
+          value="t9"
+          defaultItem={{
+            value: "t9",
+            label: "Retire v1",
+            item: {
+              value: "t9",
+              label: "Retire v1",
+              project: "Zephyr",
+              subproject: "Backend",
+            },
+          }}
+          getSelectedLabel={leafFirst}
+          onChange={() => {}}
+        />
+      )
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Retire v1 (Backend, Zephyr)")
+        ).toBeInTheDocument()
+      })
+    })
+  })
+
   describe("onCreate", () => {
     it("shows create button in empty state when search has text", async () => {
       const user = userEvent.setup()

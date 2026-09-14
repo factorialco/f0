@@ -14,6 +14,11 @@ import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 // a machine without WebGL (the map constructor throwing).
 const mock = vi.hoisted(() => {
   const instances: MockMap[] = []
+  const markers: {
+    element?: HTMLElement
+    position: [number, number] | null
+    added: boolean
+  }[] = []
   const state = { throwOnCreate: false }
 
   class MockMap {
@@ -155,13 +160,22 @@ const mock = vi.hoisted(() => {
     }
   }
   class MockMarker {
-    setLngLat() {
+    constructor(opts?: { element?: HTMLElement }) {
+      markers.push({ element: opts?.element, position: null, added: false })
+      this.index = markers.length - 1
+    }
+    index: number
+    setLngLat(at: [number, number]) {
+      markers[this.index].position = at
       return this
     }
     addTo() {
+      markers[this.index].added = true
       return this
     }
-    remove() {}
+    remove() {
+      markers.splice(this.index, 1)
+    }
   }
   class MockLngLatBounds {
     extend() {
@@ -177,6 +191,7 @@ const mock = vi.hoisted(() => {
 
   return {
     instances,
+    markers,
     state,
     Map: MockMap,
     Marker: MockMarker,
@@ -223,6 +238,7 @@ const LINE_LAYERS = ["f0-map-lines-solid", "f0-map-lines-dashed"]
 describe("F0Map", () => {
   beforeEach(() => {
     mock.instances.length = 0
+    mock.markers.length = 0
     mock.state.throwOnCreate = false
   })
 
@@ -347,6 +363,21 @@ describe("F0Map", () => {
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("markers", () => {
+    it("anchors one engine marker per point, at its coordinates", () => {
+      render(<F0Map markers={POINTS} />)
+      expect(mock.markers).toHaveLength(POINTS.length)
+      expect(mock.markers.map((m) => m.position)).toEqual(
+        POINTS.map((p) => p.coordinates)
+      )
+      // Anchored to the map, with the element the content is portalled into.
+      expect(mock.markers.every((m) => m.added)).toBe(true)
+      expect(mock.markers.every((m) => m.element instanceof HTMLElement)).toBe(
+        true
+      )
     })
   })
 
