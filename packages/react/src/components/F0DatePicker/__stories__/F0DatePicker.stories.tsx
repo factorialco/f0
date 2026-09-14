@@ -147,10 +147,12 @@ const meta = {
               },
             }}
           />
-          <div className="text-gray-500 mt-10 text-sm">
-            <p>Value: {JSON.stringify(value, null, 2)}</p>
-            <p>Value Simple: {valueSimple}</p>
-          </div>
+          {parameters?.hideValueReadout ? null : (
+            <div className="text-gray-500 mt-10 text-sm">
+              <p>Value: {JSON.stringify(value, null, 2)}</p>
+              <p>Value Simple: {valueSimple}</p>
+            </div>
+          )}
         </div>
       )
     },
@@ -198,6 +200,10 @@ export const WithDataTestId: Story = {
 }
 
 export const InsideDialog: Story = {
+  // The dialog mounts open and portals to the body, so on the Docs page — which
+  // renders every story at once — it floats over the whole page. It stays a
+  // story, and its play function still runs; it just stops hijacking the docs.
+  tags: ["!autodocs"],
   parameters: {
     docs: {
       description: {
@@ -383,121 +389,175 @@ export const WithClearable: Story = {
   },
 }
 
+const detailRowDate: DatePickerValue = {
+  value: { from: new Date(2018, 8, 1), to: new Date(2018, 8, 1) },
+  granularity: "day",
+}
+
+const detailRowParameters = { width: "560px", hideValueReadout: true }
+
 /**
- * A date on a record reads as text until someone with permission edits it. This
- * is the HR admin / manager view of an employee's Seniority date: hovering the
- * value (or tabbing to it) reveals the calendar, and activating it opens the
- * picker on the date already set.
+ * The employee-details layout read mode is built for: a label column and a
+ * value column the picker fills, so a row someone can edit lines up with the
+ * read-only ones around it.
  */
-export const ReadModeEditable: Story = {
-  args: {
-    label: "Seniority date",
-    mode: "read",
-    value: {
-      value: { from: new Date(2018, 8, 1), to: new Date(2018, 8, 1) },
-      granularity: "day",
-    },
-  },
+function DateRow({
+  label,
+  value: initialValue,
+  canEdit,
+  disabled,
+  emptyLabel,
+  onRequestChange,
+}: {
+  label: string
+  value?: DatePickerValue
+  canEdit?: boolean
+  disabled?: boolean
+  emptyLabel?: string
+  onRequestChange?: () => void
+}) {
+  const [value, setValue] = useState<DatePickerValue | undefined>(initialValue)
+
+  return (
+    <div className="flex w-[560px] items-center border-0 border-b border-solid border-f1-border-secondary py-1">
+      <span className="w-1/2 px-3 text-f1-foreground-secondary">{label}</span>
+      <div className="w-1/2">
+        <F0DatePicker
+          mode="read"
+          label={label}
+          hideLabel
+          value={value}
+          canEdit={canEdit}
+          disabled={disabled}
+          emptyLabel={emptyLabel}
+          onRequestChange={onRequestChange}
+          onChange={setValue}
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A date on a record, read by someone who may change it. It reads as text; the
+ * calendar arrives on hover or focus and opens on the date already set.
+ */
+export const DetailRow: Story = {
+  parameters: detailRowParameters,
+  args: { label: "Date" },
+  render: () => <DateRow label="Date" value={detailRowDate} canEdit />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
+    const row = canvas.getByRole("button", { name: "Edit Date" })
+    const calendar = row.querySelector("[data-slot='edit-affordance']")!
 
-    await step("the date reads as dd/MM/yyyy, not as an input", async () => {
-      await expect(canvas.getByText("01/09/2018")).toBeVisible()
-      await expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
+    await step("Read the date the way the rows around it read theirs", () => {
+      expect(canvas.getByText("01/09/2018")).toBeVisible()
+      expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
     })
 
-    await step("activating the value opens the calendar on it", async () => {
-      await userEvent.click(
-        canvas.getByRole("button", { name: "Edit Seniority date" })
-      )
-      await expect(canvas.getByRole("textbox")).toHaveValue("01/09/2018")
-      await expect(await screen.findByRole("grid")).toBeInTheDocument()
-      await expect(
+    await step("Keep the calendar out of the way until the row is used", () => {
+      // The hover half of the reveal is beyond a play function's reach: `:hover`
+      // is a native browser state that synthetic pointer events never enter. The
+      // rule is asserted on the classes here and on pixels in the Snapshot
+      // story; the focus half is driven for real in DetailRowRequestChange.
+      expect(calendar).toHaveClass("opacity-0")
+      expect(calendar).toHaveClass("group-hover:opacity-100")
+      expect(calendar).toHaveClass("group-focus-within:opacity-100")
+    })
+
+    const readHeight = row.getBoundingClientRect().height
+
+    await step("Open the calendar on the date already set", async () => {
+      await userEvent.click(row)
+      expect(canvas.getByRole("textbox")).toHaveValue("01/09/2018")
+      expect(await screen.findByRole("grid")).toBeInTheDocument()
+      expect(
         screen.getByRole("combobox", { name: /month/i })
       ).toHaveTextContent("September")
     })
 
-    await step("dismissing it puts the date back to text", async () => {
+    await step("Hold the row's height while the input has it", () => {
+      // Read mode sizes itself off `inputFieldVariants`, so swapping in the
+      // input must not move the rows below. Measured rather than asserted on
+      // classes: this runs in a real browser and layout is the thing at stake.
+      const field = canvas
+        .getByRole("textbox")
+        .closest("[data-testid='input-field-wrapper']")!
+
+      expect(field.getBoundingClientRect().height).toBe(readHeight)
+    })
+
+    await step("Put the date back to text once it is dismissed", async () => {
       await userEvent.keyboard("{Escape}")
-      await expect(
-        await canvas.findByRole("button", { name: "Edit Seniority date" })
+      expect(
+        await canvas.findByRole("button", { name: "Edit Date" })
       ).toBeVisible()
     })
   },
 }
 
 /**
- * The same field seen by the employee it belongs to. They cannot set the date,
- * so the calendar is replaced by a request that goes to whoever administers the
- * record.
+ * The same row read by someone who may not change the date. The calendar is
+ * replaced by a request to whoever administers the record.
  */
-export const ReadModeRequestChange: Story = {
-  args: {
-    label: "Seniority date",
-    mode: "read",
-    canEdit: false,
-    onRequestChange: fn(),
-    value: {
-      value: { from: new Date(2018, 8, 1), to: new Date(2018, 8, 1) },
-      granularity: "day",
-    },
-  },
+export const DetailRowRequestChange: Story = {
+  parameters: detailRowParameters,
+  args: { label: "Date", onRequestChange: fn() },
+  render: ({ onRequestChange }) => (
+    <DateRow
+      label="Date"
+      value={detailRowDate}
+      canEdit={false}
+      onRequestChange={onRequestChange}
+    />
+  ),
   play: async ({ args, canvasElement, step }) => {
     const canvas = within(canvasElement)
 
-    await step("there is nothing to edit", async () => {
-      await expect(
-        canvas.queryByRole("button", { name: "Edit Seniority date" })
+    await step("Offer nothing to edit", () => {
+      expect(
+        canvas.queryByRole("button", { name: "Edit Date" })
       ).not.toBeInTheDocument()
+      expect(canvas.getByText("01/09/2018")).toBeVisible()
     })
 
-    await step("the change is requested from the keyboard", async () => {
-      // A pointer reveals the action by hovering the row; a keyboard reveals it
-      // by reaching it, which is the path assertable here — CSS `:hover` is a
-      // native browser state that synthetic pointer events never enter.
+    await step("Reach the request with the keyboard alone", async () => {
+      // Reaching it is the other half of the reveal, and the half a play
+      // function can drive: focus is real state where `:hover` is not.
       await userEvent.tab()
 
       const request = canvas.getByRole("button", {
-        name: "Request a change to Seniority date",
+        name: "Request a change to Date",
       })
-      await expect(request).toHaveFocus()
+      expect(request).toHaveFocus()
 
       await userEvent.click(request)
-      await expect(args.onRequestChange).toHaveBeenCalledOnce()
+      expect(args.onRequestChange).toHaveBeenCalledOnce()
     })
   },
 }
 
 /**
- * A date nobody on this screen can change — an employee's contract start date,
- * which lives on the contract. It reads as text with no affordances at all,
- * which is also what `disabled` gives you in `read` mode.
+ * A date nobody on the screen can change. It reads as text with no affordances
+ * at all, which is also what `disabled` gives you.
  */
-export const ReadModeLocked: Story = {
-  args: {
-    label: "Contract start date",
-    mode: "read",
-    canEdit: false,
-    value: {
-      value: { from: new Date(2021, 3, 12), to: new Date(2021, 3, 12) },
-      granularity: "day",
-    },
-  },
-  play: async ({ canvasElement }) => {
+export const DetailRowDisabled: Story = {
+  parameters: detailRowParameters,
+  args: { label: "Date" },
+  render: () => <DateRow label="Date" value={detailRowDate} disabled />,
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
 
-    await expect(canvas.getByText("12/04/2021")).toBeVisible()
-    await expect(canvas.queryAllByRole("button")).toHaveLength(0)
-  },
-}
+    await step("Show the date alone, with nothing to open", async () => {
+      expect(canvas.getByText("01/09/2018")).toBeVisible()
+      expect(canvas.queryAllByRole("button")).toHaveLength(0)
 
-/** With no date set, `read` mode falls back to `emptyLabel`. */
-export const ReadModeEmpty: Story = {
-  args: {
-    label: "Seniority date",
-    mode: "read",
-    emptyLabel: "no date",
-    value: undefined,
+      await userEvent.click(canvas.getByText("01/09/2018"))
+      expect(
+        within(canvasElement.closest("body")!).queryByRole("grid")
+      ).not.toBeInTheDocument()
+    })
   },
 }
 
@@ -540,13 +600,6 @@ export const Snapshot: Story = {
         canEdit: false,
         onRequestChange: fn(),
       },
-      { ...base, mode: "read" as const, value: readValue, canEdit: false },
-      {
-        ...base,
-        mode: "read" as const,
-        value: undefined,
-        emptyLabel: "no date",
-      },
     ]
     return (
       <div className="flex flex-col gap-4">
@@ -575,6 +628,18 @@ export const Snapshot: Story = {
             </div>
           </section>
         ))}
+        <section>
+          <h4 className="mb-3 text-lg font-semibold">Detail rows</h4>
+          <DateRow label="Date" value={readValue} canEdit />
+          <DateRow
+            label="Date"
+            value={readValue}
+            canEdit={false}
+            onRequestChange={fn()}
+          />
+          <DateRow label="Date" value={readValue} disabled />
+          <DateRow label="Date" canEdit emptyLabel="no date" />
+        </section>
       </div>
     )
   },

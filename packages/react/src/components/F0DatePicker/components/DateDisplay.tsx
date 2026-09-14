@@ -19,9 +19,13 @@ type DateDisplayProps = {
   onRequestChange?: () => void
 }
 
+/**
+ * Matched to `inputFieldVariants` so the row does not resize when the date
+ * swaps between reading and the input.
+ */
 const rowSizes: Record<InputFieldSize, string> = {
-  sm: "h-8 text-sm",
-  md: "h-10 text-base",
+  sm: "h-[32px]",
+  md: "h-[40px]",
 }
 
 /**
@@ -49,7 +53,7 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
       hideLabel,
       value,
       emptyLabel,
-      size = "md",
+      size = "sm",
       canEdit = true,
       disabled,
       onEdit,
@@ -114,6 +118,7 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
             {valueText}
             <span
               aria-hidden="true"
+              data-slot="edit-affordance"
               className={cn(
                 "flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-bold",
                 actionReveal
@@ -140,6 +145,7 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
             onClick={onRequestChange}
             aria-label={requestChangeLabel}
             title={requestChangeLabel}
+            data-slot="request-change-affordance"
             className={cn(actionButton, actionReveal, focusRing())}
           >
             <F0Icon icon={Comment} size="sm" />

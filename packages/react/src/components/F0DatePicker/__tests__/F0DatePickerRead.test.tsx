@@ -8,7 +8,7 @@ import {
 } from "../../../testing/test-utils"
 import { DatePickerValue } from "../types"
 
-const seniorityDate: DatePickerValue = {
+const dayValue: DatePickerValue = {
   value: {
     from: new Date(2018, 8, 1, 0, 0, 0),
     to: new Date(2018, 8, 1, 23, 59, 59),
@@ -17,14 +17,7 @@ const seniorityDate: DatePickerValue = {
 }
 
 const renderRead = (props: Partial<Parameters<typeof F0DatePicker>[0]> = {}) =>
-  render(
-    <F0DatePicker
-      label="Seniority date"
-      mode="read"
-      value={seniorityDate}
-      {...props}
-    />
-  )
+  render(<F0DatePicker label="Date" mode="read" value={dayValue} {...props} />)
 
 describe("F0DatePicker read mode", () => {
   it("reads the date as dd/MM/yyyy text instead of an input", () => {
@@ -38,15 +31,13 @@ describe("F0DatePicker read mode", () => {
     const user = userEvent.setup()
     renderRead()
 
-    await user.click(
-      screen.getByRole("button", { name: "Edit Seniority date" })
-    )
+    await user.click(screen.getByRole("button", { name: "Edit Date" }))
 
     expect(screen.getByRole("textbox")).toHaveValue("01/09/2018")
   })
 
   it("still shows the long format in edit mode by default", () => {
-    render(<F0DatePicker label="Seniority date" value={seniorityDate} />)
+    render(<F0DatePicker label="Date" value={dayValue} />)
 
     expect(screen.getByRole("textbox")).toHaveValue("01 Sep 2018")
   })
@@ -62,7 +53,7 @@ describe("F0DatePicker read mode", () => {
       renderRead()
 
       expect(
-        screen.getByRole("button", { name: "Edit Seniority date" })
+        screen.getByRole("button", { name: "Edit Date" })
       ).toBeInTheDocument()
       expect(screen.getAllByRole("button")).toHaveLength(1)
     })
@@ -71,9 +62,7 @@ describe("F0DatePicker read mode", () => {
       const user = userEvent.setup()
       renderRead()
 
-      await user.click(
-        screen.getByRole("button", { name: "Edit Seniority date" })
-      )
+      await user.click(screen.getByRole("button", { name: "Edit Date" }))
 
       expect(screen.getByRole("textbox")).toBeInTheDocument()
       expect(await screen.findByRole("dialog")).toBeInTheDocument()
@@ -84,9 +73,7 @@ describe("F0DatePicker read mode", () => {
       renderRead()
 
       await user.tab()
-      expect(
-        screen.getByRole("button", { name: "Edit Seniority date" })
-      ).toHaveFocus()
+      expect(screen.getByRole("button", { name: "Edit Date" })).toHaveFocus()
 
       await user.keyboard("{Enter}")
       expect(screen.getByRole("textbox")).toBeInTheDocument()
@@ -97,9 +84,7 @@ describe("F0DatePicker read mode", () => {
       const onModeChange = vi.fn()
       renderRead({ onModeChange })
 
-      await user.click(
-        screen.getByRole("button", { name: "Edit Seniority date" })
-      )
+      await user.click(screen.getByRole("button", { name: "Edit Date" }))
 
       expect(onModeChange).toHaveBeenCalledWith("edit")
     })
@@ -109,14 +94,12 @@ describe("F0DatePicker read mode", () => {
       const onModeChange = vi.fn()
       renderRead({ onModeChange })
 
-      await user.click(
-        screen.getByRole("button", { name: "Edit Seniority date" })
-      )
+      await user.click(screen.getByRole("button", { name: "Edit Date" }))
       await user.keyboard("{Escape}")
 
       expect(onModeChange).toHaveBeenLastCalledWith("read")
       expect(
-        await screen.findByRole("button", { name: "Edit Seniority date" })
+        await screen.findByRole("button", { name: "Edit Date" })
       ).toBeInTheDocument()
     })
 
@@ -125,9 +108,7 @@ describe("F0DatePicker read mode", () => {
       const onChange = vi.fn()
       renderRead({ onChange })
 
-      await user.click(
-        screen.getByRole("button", { name: "Edit Seniority date" })
-      )
+      await user.click(screen.getByRole("button", { name: "Edit Date" }))
       await screen.findByRole("grid")
       const twelfth = screen
         .getAllByRole("gridcell", { name: "12" })
@@ -136,7 +117,7 @@ describe("F0DatePicker read mode", () => {
 
       expect(onChange).toHaveBeenCalledOnce()
       expect(
-        await screen.findByRole("button", { name: "Edit Seniority date" })
+        await screen.findByRole("button", { name: "Edit Date" })
       ).toBeInTheDocument()
       expect(screen.getByText("12/09/2018")).toBeInTheDocument()
     })
@@ -147,7 +128,7 @@ describe("F0DatePicker read mode", () => {
 
       expect(
         screen.queryByRole("button", {
-          name: "Request a change to Seniority date",
+          name: "Request a change to Date",
         })
       ).not.toBeInTheDocument()
     })
@@ -160,12 +141,12 @@ describe("F0DatePicker read mode", () => {
       renderRead({ canEdit: false, onRequestChange })
 
       expect(
-        screen.queryByRole("button", { name: "Edit Seniority date" })
+        screen.queryByRole("button", { name: "Edit Date" })
       ).not.toBeInTheDocument()
 
       await user.click(
         screen.getByRole("button", {
-          name: "Request a change to Seniority date",
+          name: "Request a change to Date",
         })
       )
 
@@ -207,15 +188,15 @@ describe("F0DatePicker read mode", () => {
     it("reads the field label above the value", () => {
       renderRead()
 
-      expect(screen.getByText("Seniority date")).toBeInTheDocument()
+      expect(screen.getByText("Date")).toBeInTheDocument()
     })
 
     it("hides it when asked, keeping it on the action", () => {
       renderRead({ hideLabel: true })
 
-      expect(screen.queryByText("Seniority date")).not.toBeInTheDocument()
+      expect(screen.queryByText("Date")).not.toBeInTheDocument()
       expect(
-        screen.getByRole("button", { name: "Edit Seniority date" })
+        screen.getByRole("button", { name: "Edit Date" })
       ).toBeInTheDocument()
     })
   })
