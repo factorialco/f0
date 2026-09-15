@@ -1366,7 +1366,10 @@ function RailItem({
         </span>
         <span
           className={`w-full truncate text-center text-[11px] font-semibold leading-3 ${
-            active ? "text-f1-foreground-accent" : "text-f1-foreground-secondary"
+            // The glyph carries the accent; the label just goes to full
+            // foreground (Angel, 2026-09-14) — a red word under a red
+            // mark was saying the same thing twice.
+            active ? "text-f1-foreground" : "text-f1-foreground-secondary"
           }`}
         >
           {label}
