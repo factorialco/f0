@@ -1471,8 +1471,13 @@ export function HomeNav() {
     jumpLayout()
     goHome()
     setSearchParams({ view: hubSlug(label) })
+    // The section moves to `hub` as well as closing the panel: leaving it
+    // on Inbox or DMs meant the "never load collapsed" guard for those
+    // two immediately re-opened the panel you had just left (Angel,
+    // 2026-09-14 — Inbox stayed open behind Tracking).
+    setSection("hub")
     setPanelOpen(false)
-    persist(section, false)
+    persist("hub", false)
   }
 
   /**
