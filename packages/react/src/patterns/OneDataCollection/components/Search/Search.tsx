@@ -42,13 +42,6 @@ interface SearchProps {
   onLoadMore?: () => void
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
-  /**
-   * Label for the button that sends the query, shown while one is being
-   * written. Naming what is on the other end is the consumer's to say — and
-   * without it the only way to learn the field does more than filter is to
-   * press Enter and find out.
-   */
-  submitLabel?: string
   /** Placeholders cycled while the field sits idle and empty. */
   placeholderRotation?: string[]
   /** Holds the in-input searching state while a submitted query resolves. */
@@ -79,7 +72,6 @@ export type SearchPresentation = Pick<
   SearchProps,
   | "placeholderRotation"
   | "onSubmit"
-  | "submitLabel"
   | "status"
   | "onCancel"
   | "displayValue"
@@ -130,18 +122,15 @@ const useRotatingPlaceholder = (
 /** The round clear affordance, shared by the open field and its collapsed form. */
 const DismissButton = ({
   label,
-  hidden,
   onDismiss,
 }: {
   label: string
-  hidden?: boolean
   onDismiss: () => void
 }) => (
   <motion.div
     tabIndex={0}
     className={cn(
       "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
-      hidden && "hidden",
       focusRing()
     )}
     onClick={(e) => {
@@ -179,7 +168,6 @@ export const Search = ({
   loadingMore = false,
   onLoadMore,
   onSubmit,
-  submitLabel,
   placeholderRotation,
   status = "idle",
   onCancel,
@@ -207,8 +195,6 @@ export const Search = ({
   // An in-flight query holds the field open: collapsing would hide the spinner
   // and the only affordance to abort it.
   const expanded = open || searching
-  // A query is being written: not yet sent, not yet resolved.
-  const composing = Boolean(submitLabel && text && !displayValue && !searching)
   const placeholder = useRotatingPlaceholder(
     placeholderRotation,
     Boolean(text) || searching,
@@ -427,37 +413,8 @@ export const Search = ({
                       onKeyDown={handleKeyDown}
                     />
                   )}
-                  {composing ? (
-                    <motion.button
-                      type="button"
-                      layout
-                      className={cn(
-                        "flex shrink-0 items-center gap-1 rounded-md bg-f1-background-secondary px-2 py-0.5 text-sm text-f1-foreground",
-                        "transition-colors hover:bg-f1-background-hover",
-                        focusRing()
-                      )}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (text) {
-                          submitQuery(text)
-                        }
-                      }}
-                    >
-                      {submitLabel}
-                      <span
-                        aria-hidden
-                        className="text-f1-foreground-secondary"
-                      >
-                        ↵
-                      </span>
-                    </motion.button>
-                  ) : null}
                   <DismissButton
                     label={searching ? i18n.actions.cancel : i18n.actions.clear}
-                    hidden={composing}
                     onDismiss={handleClearOrCancel}
                   />
                 </motion.div>
