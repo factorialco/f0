@@ -92,7 +92,7 @@ import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
-import { useClockIn, useClockInWidgetRequests } from "./windows/clockInStore"
+import { useClockInWidgetRequests } from "./windows/clockInStore"
 import { ClockInWindow } from "./windows/ClockInWindow"
 import { FloatingWindow } from "./windows/FloatingWindow"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
@@ -1045,17 +1045,14 @@ const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
 ]
 
 function HomeRecommendations() {
-  const clockedIn = useClockIn().clockedInAt !== null
   return (
     <HomeRecommendationCarousel
       // Clock-in leads and stays: once it is running it becomes the
       // outline timer rather than leaving (Angel, 2026-09-15).
       pinned={<ClockInPill />}
-      items={RECOMMENDATIONS.map((item, index) => ({
-        ...item,
-        // With the clock running the digest is what leads the queue.
-        primary: clockedIn && index === 0,
-      }))}
+      // Every recommendation is a ghost: the only filled thing on the row
+      // is clock-in, and it is not one of them (Angel, 2026-09-15).
+      items={RECOMMENDATIONS}
     />
   )
 }

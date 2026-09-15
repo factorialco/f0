@@ -1606,6 +1606,7 @@ export function HomeNav() {
             so what is left down here is Settings and you. Help lives in
             the profile menu as "Get help". */}
         <div className="mt-auto flex flex-col items-center gap-1 pb-3 pt-2">
+          <RailClockIn />
           <RailIconButton
             icon={Settings}
             label="Settings"
@@ -1615,7 +1616,6 @@ export function HomeNav() {
               setSearchParams({ view: "settings" })
             }}
           />
-          <RailClockIn />
           <RailPersonalMenu />
         </div>
       </div>

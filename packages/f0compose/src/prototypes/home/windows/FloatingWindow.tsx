@@ -70,7 +70,12 @@ export function FloatingWindow({
       // card once it is mounted.
       if (anchorEl?.matches("[data-home-clockin-pill]")) {
         flip.current = { top: anchor.top, bottom: anchor.bottom }
-        setPos({ x: anchor.left, y: anchor.bottom + GAP })
+        // Centred on the pill, not hung off its left edge (Angel,
+        // 2026-09-15).
+        setPos({
+          x: anchor.left + anchor.width / 2 - width / 2,
+          y: anchor.bottom + GAP,
+        })
         return
       }
       setPos({ x: anchor.right - width, y: anchor.bottom + GAP })

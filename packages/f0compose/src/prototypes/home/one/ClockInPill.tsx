@@ -7,6 +7,8 @@ import {
   toggleClockIn,
   useClockIn,
 } from "../windows/clockInStore"
+import { ClockDot } from "./ClockDot"
+import { RollingTime } from "./RollingTime"
 
 /**
  * Clock-in, in front of the recommendations and never part of them
@@ -51,14 +53,14 @@ export function ClockInPill() {
     >
       {clockedInAt ? (
         <span className="flex size-5 shrink-0 items-center justify-center">
-          <span className="home-clock-dot size-2 rounded-full bg-f1-background-positive-bold" />
+          <ClockDot />
         </span>
       ) : (
         <span className="flex size-5 shrink-0 items-center justify-center text-f1-icon-inverse">
           <F0Icon icon={SolidPlay} size="md" color="currentColor" />
         </span>
       )}
-      <span className="tabular-nums">{clockedInAt ? elapsed : "Clock-in"}</span>
+      {clockedInAt ? <RollingTime value={elapsed} /> : <span>Clock-in</span>}
     </button>
   )
 }

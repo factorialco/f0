@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react"
 
+import { ClockDot } from "../one/ClockDot"
+import { RollingTime } from "../one/RollingTime"
 import { requestClockInWidget, useClockIn } from "./clockInStore"
 
 /**
- * The running clock, under Settings in the rail (Angel, 2026-09-15): once
- * you are clocked in, the rail carries a live dot and the elapsed time,
- * and clicking it brings the clock-in card out beside it. It is absent
- * when you are clocked out, so the rail only grows while something is
- * actually running.
+ * The running clock in the rail, above Settings (Angel, 2026-09-15): once
+ * you are clocked in the rail carries the breathing mark and the time in
+ * the same mm:ss the pill shows, and clicking it brings the clock-in card
+ * out beside it. It is absent when you are clocked out, so the rail only
+ * grows while something is actually running.
  */
-function elapsedLabel(since: number, now: number): string {
-  const minutes = Math.max(0, Math.floor((now - since) / 60000))
-  if (minutes < 60) return `${minutes} min`
-  const hours = Math.floor(minutes / 60)
-  return `${hours}h ${String(minutes % 60).padStart(2, "0")}`
+function pad(value: number) {
+  return String(value).padStart(2, "0")
 }
 
 export function RailClockIn() {
@@ -23,25 +22,26 @@ export function RailClockIn() {
   useEffect(() => {
     if (!clockedInAt) return
     setNow(Date.now())
-    // Once a second, not once a minute: the label rolls over on its own
-    // boundary rather than up to 59s late.
     const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [clockedInAt])
 
   if (!clockedInAt) return null
 
+  const seconds = Math.max(0, Math.floor((now - clockedInAt) / 1000))
+  const elapsed = `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`
+
   return (
     <button
       data-home-clockin-rail
-      aria-label={`Clocked in for ${elapsedLabel(clockedInAt, now)}`}
+      aria-label={`Clocked in, ${elapsed}`}
       onClick={requestClockInWidget}
-      className="f0c-pressable flex cursor-pointer flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 hover:bg-f1-background-secondary"
+      // text-base is f0's 14px: the 11px of the rail's own labels is for
+      // words under a glyph, and this is a readout (Angel, 2026-09-15).
+      className="f0c-pressable flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1 text-base font-medium text-f1-foreground hover:bg-f1-background-secondary"
     >
-      <span className="home-clock-dot size-2 rounded-full bg-f1-background-positive-bold" />
-      <span className="text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
-        {elapsedLabel(clockedInAt, now)}
-      </span>
+      <ClockDot size={8} />
+      <RollingTime value={elapsed} />
     </button>
   )
 }

@@ -597,6 +597,22 @@ body[data-nav-instant] main#content > * {
 .home-clock-dot {
   animation: home-clock-pulse 2s ease-in-out infinite;
 }
+/* The halo breathes against the core, a beat behind it, which is what
+   gives the mark its "still running" feel. */
+@keyframes home-clock-halo {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.05;
+    transform: scale(1.45);
+  }
+}
+.home-clock-halo {
+  animation: home-clock-halo 2s ease-in-out infinite;
+}
 /* The same breathing dot inside the clock-in card, a size down, and the
    ring with its counter dialled back to 90% (Angel, 2026-09-15). */
 [data-home-floating] .aspect-square.h-4 {

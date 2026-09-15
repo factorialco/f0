@@ -30,6 +30,9 @@ const GAP = 8
 const CHEVRON_ROOM = 12
 /** How steep the fade into the chevron is (Angel, 2026-09-15). */
 const FADE_SPAN = 64
+/** The row's own edge, softened over 12px so nothing ends on a cut. */
+const EDGE_FADE =
+  "linear-gradient(to right, black calc(100% - 12px), transparent 100%)"
 
 export function HomeRecommendationCarousel({
   pinned,
@@ -115,7 +118,21 @@ export function HomeRecommendationCarousel({
       {/* Clock-in is its own control, not a recommendation, so the two
           groups are split the way f0's headers split theirs. */}
       {pinned && <div className="mx-1 h-4 w-px bg-f1-border-secondary" />}
-      {canGoBack && (
+      {/* The back arrow GROWS in and shrinks out rather than popping: an
+          unmount at the end of the glide snapped the whole row sideways
+          (Angel, 2026-09-15). Width and opacity both animate, so the row
+          slides into the space instead of jumping into it. */}
+      <div
+        className="flex shrink-0 items-center overflow-hidden"
+        style={{
+          width: canGoBack ? 32 : 0,
+          opacity: canGoBack ? 1 : 0,
+          marginRight: canGoBack ? 0 : -8,
+          pointerEvents: canGoBack ? "auto" : "none",
+          transition:
+            "width 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease-out, margin-right 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      >
         <F0Button
           variant="outline"
           size="sm"
@@ -124,13 +141,20 @@ export function HomeRecommendationCarousel({
           label="Previous recommendations"
           onClick={() => go(-1)}
         />
-      )}
+      </div>
       <div
         ref={viewRef}
         onScroll={sync}
         // `overflow-x: hidden` still scrolls programmatically, and the
         // smooth behaviour is the browser's own, so a second click during
         // the glide simply retargets it instead of being swallowed.
+        // A 12px linear fade on the right border, so the row never ends
+        // on a hard cut (Angel, 2026-09-15). It lives on the VIEWPORT, so
+        // it is the last thing the pills pass under.
+        style={{
+          maskImage: EDGE_FADE,
+          WebkitMaskImage: EDGE_FADE,
+        }}
         className="home-recommendations min-w-0 flex-1 overflow-x-hidden"
       >
         <div
