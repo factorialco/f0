@@ -1,0 +1,108 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as PostsListStories from "./index.stories"
+
+<Meta of={PostsListStories} />
+
+# F0CommunityPostsList
+
+The Communities widget's content as a **list**: the latest posts as full-width
+rows — a cover beside each post's title and the opening lines of its body, the
+poster under them — divided by a rule that reaches the card's own border.
+
+It is the other shape of `F0CommunityPostsCarousel`, and the two take the same
+posts: `CommunityPostListItem` extends the tile's own `CommunityPostSummary`, so
+switching between them is a change of component and not of data.
+
+## Anatomy
+
+A row is its cover, its words and its byline. The list opens with three of them
+and puts the rest behind "View more"; the toggle says how many are still hidden
+and turns into "View less" once they are out.
+
+<Canvas of={PostsListStories.Default} />
+
+<Controls of={PostsListStories.Default} />
+
+An **event** post is drawn as the event card the Communities feed itself draws —
+title, time, place and date chip — rather than as a title over a body. An event's
+when and where are its preview; the body is what you open the post for.
+
+<Canvas of={PostsListStories.WithAnEvent} />
+
+Below the width at which the `Widget` frame decides it is wide (480px), a row
+becomes a column: the cover goes full width above the words, and the body
+previews a line more of the post now that the picture is not taking one.
+
+<Canvas of={PostsListStories.Narrow} />
+
+While the posts are in flight it draws placeholder rows — as many as the slot
+said were coming — so the card is already the height it will be.
+
+<Canvas of={PostsListStories.Loading} />
+
+## Guidelines
+
+### Design best practices
+
+- **Give it the main column.** A cover beside a title and two lines of body needs
+  the room to be beside anything. In a rail the rows stack into columns and each
+  post costs a screenful.
+- **Let the row be the target.** The whole row opens the post; there is no "Read
+  more" and nothing else in it is clickable, which is also why the post's own
+  links are not live in the preview.
+- **Keep the counters in words.** `counters` takes strings — "128 visits", "4
+  comments" — because the plural, the thousands separator and the noun are the
+  app's locale and not this component's.
+
+### When to use
+
+Reach for the list when Communities is **one card among several** on a Home and
+the reader is skimming: three posts visible at once, the rest one press away, and
+nothing to operate to see the second one.
+
+### When not to use
+
+- **When the posts are what the card is for.** If Communities is the page rather
+  than a widget on it, `F0CommunityPostsCarousel` previews more of each post and
+  is the better read.
+- **In a rail or any narrow column.** It still works, but a stacked cover and
+  three rows fill a rail; a `list` slot's plain rows say more per pixel there.
+- **For a feed you page through.** This holds the posts it is given and expands
+  to all of them. A feed that arrives a page at a time belongs in the carousel,
+  which asks for the next page itself.
+
+<DoDonts
+  do={{
+    description:
+      "Fetch one page of posts and let the toggle expand to all of them.",
+    guidelines: [
+      "The count in “View more (n)” is the posts it is holding back — it can only be honest about posts it has",
+      "Cap the query where the card's own spec caps it, not in this component",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't hand it an unbounded feed and expect “View more” to fetch.",
+    guidelines: [
+      "There is no pagination prop — expanding renders what is already loaded",
+      "A feed that arrives a page at a time belongs in F0CommunityPostsCarousel",
+    ],
+  }}
+/>
+
+## Accessibility
+
+- **One target per row, named by the post.** The row is opened through a single
+  anchor (or button, for a post with no `href`) stretched over it, so a screen
+  reader hears the post's title once rather than a link per part of the row. An
+  event row's card holds a title, a time and a place, so its target is named with
+  the title alone.
+- **Covers are decorative.** The picture carries `role="presentation"`: the title
+  beside it already names the post, and an `alt` repeating it would read the post
+  twice.
+- **Axe blocks on these stories** (`a11y: { test: "error" }`) rather than warning
+  — a stretched hit area is exactly the shape that loses its accessible name
+  without anyone noticing.
