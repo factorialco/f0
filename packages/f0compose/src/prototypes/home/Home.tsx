@@ -68,6 +68,7 @@ import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { GuidedHome } from "./setup/HomeArtifacts"
+import { HomeWaves } from "./waves/HomeWaves"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
@@ -1471,7 +1472,7 @@ function HomeCanvas() {
             module window is no longer inside this column at all — it is a
             pane beside it, so nothing here has to make room for it. */}
           <div
-            className={`flex min-h-0 w-full flex-1 flex-col items-center ${
+            className={`relative flex min-h-0 w-full flex-1 flex-col items-center ${
               // No top padding in a CONVERSATION (per Oskar): the thread
               // brings its own `pt-2`, and the extra 24 pushed the first
               // turn away from the navbar for no reason. The greeting
@@ -1479,6 +1480,9 @@ function HomeCanvas() {
               fullWidthView ? "" : activeConversation ? "px-4" : "px-4 pt-6"
             }`}
           >
+            {/* The backdrop: radical waves dissolving into the page's own
+                ground, behind everything and deaf to the pointer. */}
+            {homeLanding && <HomeWaves />}
             {/* Home's composer sits on the VIEWPORT's midline with the
                 content under it (Angel, 2026-09-14). Two flex-1 siblings
                 — this spacer above, the content scroller below — always
