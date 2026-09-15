@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.106.1](https://github.com/factorialco/f0/compare/f0-react-v6.106.0...f0-react-v6.106.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** guard persisted state and the Save view chip ([#5291](https://github.com/factorialco/f0/issues/5291)) ([08e7e12](https://github.com/factorialco/f0/commit/08e7e12a4d2838c7e18f22801d5e21e248e3a1b2))
+
 ## [6.106.0](https://github.com/factorialco/f0/compare/f0-react-v6.105.0...f0-react-v6.106.0) (2026-09-15)
 
 
