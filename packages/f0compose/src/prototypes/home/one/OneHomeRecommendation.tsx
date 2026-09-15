@@ -111,8 +111,8 @@ export function OneHomeRecommendation({
         transform: leaving ? "translateX(-12px)" : "none",
         transition: `opacity ${EXIT_MS}ms ease-out, transform ${EXIT_MS}ms ease-out, background-color 300ms ease-out, box-shadow 300ms ease-out, color 300ms ease-out`,
       }}
-      // 4px backdrop blur under every weight (Angel, 2026-09-15).
-      className={`f0c-pressable inline-flex h-8 shrink-0 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded border-none text-base font-medium backdrop-blur-[4px] ${done ? "px-1.5" : "pl-2.5 pr-3.5"} ${CHROME[variant]}`}
+      // 24px backdrop blur under every weight (Angel, 2026-09-15).
+      className={`f0c-pressable inline-flex h-8 shrink-0 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded border-none text-base font-medium backdrop-blur-[24px] ${done ? "px-1.5" : "pl-2.5 pr-3.5"} ${CHROME[variant]}`}
     >
       {/* Both glyphs live in the same 20px box and cross-fade, so the
           pill's left edge never shifts as they swap. */}

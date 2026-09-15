@@ -80,6 +80,7 @@ import {
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import { HomeRecommendationCarousel } from "./one/HomeRecommendationCarousel"
+import { OneHomeRecommendation } from "./one/OneHomeRecommendation"
 import { PanelExpand } from "./PanelCollapse"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
@@ -1046,26 +1047,29 @@ const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
 
 function HomeRecommendations() {
   const [clockedIn, setClockedIn] = useState(false)
-  const items = [
-    ...(clockedIn
-      ? []
-      : [
-          {
-            icon: SolidPlay,
-            label: "Clock-in",
-            primary: true,
-            dismissOnClick: true,
-            onClick: toggleClockIn,
-            onDismissed: () => setClockedIn(true),
-          },
-        ]),
-    ...RECOMMENDATIONS.map((item, index) => ({
-      ...item,
-      // Once the clock is running the digest is what leads the queue.
-      primary: clockedIn && index === 0,
-    })),
-  ]
-  return <HomeRecommendationCarousel items={items} />
+  return (
+    <HomeRecommendationCarousel
+      // Clock-in leads until it is done, and it never rotates away
+      // (Angel, 2026-09-15).
+      pinned={
+        clockedIn ? undefined : (
+          <OneHomeRecommendation
+            variant="primary"
+            icon={SolidPlay}
+            label="Clock-in"
+            dismissOnClick
+            onClick={toggleClockIn}
+            onDismissed={() => setClockedIn(true)}
+          />
+        )
+      }
+      items={RECOMMENDATIONS.map((item, index) => ({
+        ...item,
+        // With the clock running the digest is what leads the queue.
+        primary: clockedIn && index === 0,
+      }))}
+    />
+  )
 }
 
 /**
