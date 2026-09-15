@@ -636,28 +636,26 @@ function HomePanelBody() {
   return (
     <div className="flex h-full min-h-0 flex-col px-3 pb-3">
       <div className="home-panel-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-        {/* New chat on top, then the chats you have had (Angel,
-            2026-09-14). Routines and Activity are in Tools › AI,
-            Artifacts in Files. */}
-        <NavRow
-          icon={Plus}
-          label="New chat"
-          onClick={() => {
-            // A clean canvas, not just a change of view (per Oskar).
-            // Home owns the widgets stack and lives outside this tree, so
-            // this goes through the same channel the reply-driven windows
-            // use.
-            requestWindowsCollapse()
-            goHome()
-            setSearchParams({})
-          }}
-        />
         {/* Routines and AI Activity are back under New chat (Angel,
             2026-09-15): what One runs for you belongs beside the place
-            you talk to it, not inside the Tools catalog. The divider is
-            the one every other panel draws between its fixed rows and
-            its list. */}
+            you talk to it, not inside the Tools catalog. All three sit in
+            ONE group, so the spacing between them is even, and the
+            divider is the one every other panel draws between its fixed
+            rows and its list. */}
         <div className="flex flex-col gap-0.5">
+          <NavRow
+            icon={Plus}
+            label="New chat"
+            onClick={() => {
+              // A clean canvas, not just a change of view (per Oskar).
+              // Home owns the widgets stack and lives outside this tree,
+              // so this goes through the same channel the reply-driven
+              // windows use.
+              requestWindowsCollapse()
+              goHome()
+              setSearchParams({})
+            }}
+          />
           <NavRow
             icon={BackgroundTasks}
             label="Routines"

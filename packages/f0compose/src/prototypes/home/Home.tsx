@@ -1595,9 +1595,19 @@ function HomeCanvas() {
         {/* The digest stands on its own at the foot of the canvas, out of
             the recommendation row (Angel, 2026-09-15). Absolutely placed,
             so the composer keeps the midline it is centred on. */}
-        {homeLanding && atTop && (
-          <div className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center">
-            <div className="pointer-events-auto">
+        {homeLanding && (
+          <div
+            // Mounted either way: coming back to the top it fades and
+            // lifts into place rather than appearing (Angel, 2026-09-15).
+            className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center"
+            style={{
+              opacity: atTop ? 1 : 0,
+              transform: atTop ? "none" : "translateY(8px)",
+              transition:
+                "opacity 260ms ease-out, transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          >
+            <div className={atTop ? "pointer-events-auto" : ""}>
               <DailyDigestButton />
             </div>
           </div>
@@ -1743,7 +1753,7 @@ function HomeCanvas() {
                       </div>
                     </div>
                   </div>
-                  <div ref={digestRef} className="w-full">
+                  <div ref={digestRef} className="flex w-full justify-center">
                     <DailyDigest />
                   </div>
                 </>
