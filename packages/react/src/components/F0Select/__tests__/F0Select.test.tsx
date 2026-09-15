@@ -336,6 +336,7 @@ describe("Select", () => {
       expectTypeOf<InlineProps["children"]>().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["asList"]>().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["showPreview"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["hideArrow"]>().toEqualTypeOf<undefined>()
       expectTypeOf<
         InlineProps["withApplySelection"]
       >().toEqualTypeOf<undefined>()

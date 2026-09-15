@@ -178,6 +178,7 @@ const F0SelectComponent = forwardRef(function Select<
     onSearchChange,
     searchBoxPlaceholder,
     searchEmptyMessage,
+    searchEmptyAction,
     size: sizeProp,
     actions,
     onCreate,
@@ -197,6 +198,7 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
+    hideArrow = false,
     preserveSelectionOnDatasetChange = true,
     fitContentWidth,
     getSelectedLabel,
@@ -1205,7 +1207,8 @@ const F0SelectComponent = forwardRef(function Select<
     : i18n.select.create
 
   const emptyAction =
-    handleCreate && currentSearch?.trim() ? (
+    searchEmptyAction ??
+    (handleCreate && currentSearch?.trim() ? (
       <div className="flex w-full">
         <F0Button
           type="button"
@@ -1215,7 +1218,7 @@ const F0SelectComponent = forwardRef(function Select<
           label={createLabel}
         />
       </div>
-    ) : undefined
+    ) : undefined)
 
   const selectContent = (
     <SelectContent
@@ -1466,11 +1469,13 @@ const F0SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow
-                  open={openLocal}
-                  disabled={disabled}
-                  size={effectiveSize}
-                />
+                hideArrow ? undefined : (
+                  <Arrow
+                    open={openLocal}
+                    disabled={disabled}
+                    size={effectiveSize}
+                  />
+                )
               }
             >
               <button
