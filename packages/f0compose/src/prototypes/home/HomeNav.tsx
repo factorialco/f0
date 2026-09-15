@@ -17,9 +17,7 @@ import {
   Files,
   Filter,
   Folder,
-  Archive,
   Folders,
-  Graph,
   Headset,
   Messages,
   Office,
@@ -1163,8 +1161,9 @@ function FilesPanelBody() {
   }
   return (
     <div className="flex flex-col gap-3 px-3 pb-1.5">
-      {/* The destinations first (Angel, 2026-09-14) — everything Files can
-          show you, Artifacts included now that it lives here. */}
+      {/* Two destinations only (Angel, 2026-09-15): Templates, Artifacts,
+          Reports and Trash left the panel, and the reports themselves now
+          sit in the library below like any other file. */}
       <div className="flex flex-col gap-0.5">
         <NavRow
           icon={Folders}
@@ -1173,34 +1172,10 @@ function FilesPanelBody() {
           onClick={() => open("")}
         />
         <NavRow
-          icon={Folder}
-          label="Templates"
-          active={view === "files" && page === "templates"}
-          onClick={() => open("templates")}
-        />
-        <NavRow
           icon={UserProtected}
           label="Policies"
           active={view === "policies"}
           onClick={() => openView("policies")}
-        />
-        <NavRow
-          icon={Archive}
-          label="Artifacts"
-          active={view === "artifacts"}
-          onClick={() => openView("artifacts")}
-        />
-        <NavRow
-          icon={Graph}
-          label="Reports"
-          active={view === "reports"}
-          onClick={() => openView("reports")}
-        />
-        <NavRow
-          icon={Delete}
-          label="Trash"
-          active={view === "files" && page === "trash"}
-          onClick={() => open("trash")}
         />
       </div>
       <PanelDivider />

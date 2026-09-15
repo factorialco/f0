@@ -24,18 +24,20 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 export type OneHomeRecommendationVariant = "primary" | "outline" | "ghost"
 
 /**
- * All three weights wear the ghost chrome (Angel, 2026-09-15): what says
- * "this is the one" is the GLYPH turning radical, not a filled pill. So
- * the promotion of a secondary recommendation is a colour change on its
- * icon, which is why the difference lives in `ICON` rather than here.
+ * The primary is radical all the way round with a white glyph; the other
+ * two are ghosts (Angel, 2026-09-15). `accent` is the radical ramp in f0
+ * (--accent-50 IS radical.50) — `critical` is the coral red of error
+ * states and would be the wrong red here.
  */
-const CHROME =
-  "bg-transparent text-f1-foreground hover:bg-f1-background-secondary"
+const CHROME: Record<OneHomeRecommendationVariant, string> = {
+  primary:
+    "bg-f1-background-accent-bold text-f1-foreground-inverse hover:bg-f1-background-accent-bold-hover",
+  outline: "bg-transparent text-f1-foreground hover:bg-f1-background-secondary",
+  ghost: "bg-transparent text-f1-foreground hover:bg-f1-background-secondary",
+}
 
 const ICON: Record<OneHomeRecommendationVariant, string> = {
-  // `accent`, not `critical`: radical IS f0's accent (--accent-50 is
-  // radical.50), while critical is the coral red of error states.
-  primary: "text-f1-icon-accent",
+  primary: "text-f1-icon-inverse",
   outline: "text-f1-icon",
   ghost: "text-f1-icon",
 }
@@ -109,8 +111,8 @@ export function OneHomeRecommendation({
         transform: leaving ? "translateX(-12px)" : "none",
         transition: `opacity ${EXIT_MS}ms ease-out, transform ${EXIT_MS}ms ease-out, background-color 300ms ease-out, box-shadow 300ms ease-out, color 300ms ease-out`,
       }}
-      // 400px backdrop blur under every weight (Angel, 2026-09-15).
-      className={`f0c-pressable inline-flex h-8 shrink-0 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded border-none text-base font-medium backdrop-blur-[400px] ${done ? "px-1.5" : "pl-2.5 pr-3.5"} ${CHROME}`}
+      // 4px backdrop blur under every weight (Angel, 2026-09-15).
+      className={`f0c-pressable inline-flex h-8 shrink-0 cursor-pointer items-center overflow-hidden whitespace-nowrap rounded border-none text-base font-medium backdrop-blur-[4px] ${done ? "px-1.5" : "pl-2.5 pr-3.5"} ${CHROME[variant]}`}
     >
       {/* Both glyphs live in the same 20px box and cross-fade, so the
           pill's left edge never shifts as they swap. */}

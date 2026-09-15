@@ -1037,7 +1037,7 @@ function HomeRecommendations() {
       <OneHomeRecommendation
         variant={clockedIn ? "primary" : "outline"}
         icon={Feed}
-        label="Get daily digest"
+        label="View daily digest"
       />
     </div>
   )
