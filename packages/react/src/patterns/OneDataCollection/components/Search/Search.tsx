@@ -98,6 +98,22 @@ const PLACEHOLDER_ROTATION_MS = 4000
 // the field has finished widening can wait exactly that long.
 const EXPAND_DURATION_MS = 200
 
+/**
+ * Splits a suggestion into what has already been typed and what it adds, so the
+ * completion is what stands out — the typed half is already on screen above.
+ */
+const renderCompletion = (suggestion: string, typed: string | undefined) => {
+  if (!typed || !suggestion.toLowerCase().startsWith(typed.toLowerCase())) {
+    return suggestion
+  }
+  return (
+    <>
+      {suggestion.slice(0, typed.length)}
+      <span className="font-semibold">{suggestion.slice(typed.length)}</span>
+    </>
+  )
+}
+
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
     <F0Icon icon={Spinner} className="animate-spin" />
@@ -147,10 +163,15 @@ export const Search = ({
   // and the only affordance to abort it.
   const expanded = open || searching
   const suggestionItems = suggestions ?? []
-  // Suggestions are the empty-input counterpart of the results list: they go as
-  // soon as there is something to match against.
+  // Suggestions track what is being typed, so the list completes the query
+  // instead of only offering a starting point. Preview results win when there
+  // are any: those are records, these are just phrasings.
   const suggestionsVisible =
-    open && showResults && !text && !searching && suggestionItems.length > 0
+    open &&
+    showResults &&
+    !searching &&
+    !resultsVisible &&
+    suggestionItems.length > 0
 
   const rotation = placeholderRotation ?? []
   const placeholder =
@@ -523,8 +544,8 @@ export const Search = ({
                         focusRing()
                       )}
                     >
-                      <span className="truncate text-base text-f1-foreground">
-                        {suggestion}
+                      <span className="truncate text-base font-normal text-f1-foreground">
+                        {renderCompletion(suggestion, text)}
                       </span>
                     </button>
                   </li>
