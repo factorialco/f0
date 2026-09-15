@@ -25,12 +25,17 @@ import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { F0Meeting } from "@/sds/meetings/F0Meeting"
+import { useMeetingSurfaceOptional } from "@/sds/meetings/F0Meeting/providers/MeetingSurfaceProvider"
+import { type F0MeetingProviderProps } from "@/sds/meetings/F0Meeting/types"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 import {
   resolveLayoutTransition,
   resolvePanelTransition,
   resolvePanelWidthTarget,
 } from "./layoutTransition"
+import { MeetingOneSwitch } from "./MeetingOneSwitch"
+import { MeetingPanelPresenter } from "./MeetingPanelPresenter"
 import { SidePanelContentWindow } from "./SidePanel/SidePanelContentWindow"
 import { SidePanelProvider, useSidePanel } from "./SidePanel/SidePanelProvider"
 import type { SidePanelViewDefinition } from "./SidePanel/types"
@@ -84,6 +89,16 @@ export interface ApplicationFrameProps {
    * behaves exactly as before: present when `ai.enabled`, absent otherwise.
    */
   sidePanel?: ApplicationFrameSidePanelProps
+  /**
+   * Live meeting. The frame owns the one place a call can render; the host owns
+   * the runtime. `runtime: null` (or omitting the prop) means no meeting.
+   *
+   * In `panel` mode the call IS the side panel's content, like a conversation.
+   * In every other mode its window portals to `document.body`, because a
+   * floating window cannot work under a transformed, overflow-hidden ancestor.
+   * See `F0MeetingSurface`.
+   */
+  meeting?: Omit<F0MeetingProviderProps, "children">
   banner?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
@@ -96,7 +111,18 @@ function _ApplicationFrame({
   ai,
   aiPromotion,
   sidePanel,
+  meeting,
 }: ApplicationFrameProps) {
+  // The call's header gets a way into the AI chat. It is composed here rather
+  // than left to the host because the switch needs the panel, and the host
+  // cannot reach it from where the call's header renders.
+  const headerContent = (
+    <>
+      {meeting?.headerContent}
+      <MeetingOneSwitch />
+    </>
+  )
+
   // `ai` is normalised into a view like anything else, rather than being the
   // special case that decides whether the panel exists at all.
   const views = useMemo<SidePanelViewDefinition[]>(
@@ -139,14 +165,28 @@ function _ApplicationFrame({
             : "sidepanel"
         }
       >
-        <ApplicationFrameWithProvider
-          ai={ai}
-          aiPromotion={aiPromotion}
-          sidebar={sidebar}
-          banner={banner}
+        {/* Under the panel and above the AI provider, and neither is
+            arbitrary. Under, because in `panel` mode the room is presented
+            INTO the panel and therefore renders in the panel's tree — every
+            meeting context has to be an ancestor of it there. Above, because
+            switching the call between fullscreen and a window must not
+            re-render the chat. */}
+        <F0Meeting
+          {...meeting}
+          runtime={meeting?.runtime ?? null}
+          headerContent={headerContent}
         >
-          {children}
-        </ApplicationFrameWithProvider>
+          {/* Renders nothing: owns the whole call ⇄ panel relationship. */}
+          <MeetingPanelPresenter />
+          <ApplicationFrameWithProvider
+            ai={ai}
+            aiPromotion={aiPromotion}
+            sidebar={sidebar}
+            banner={banner}
+          >
+            {children}
+          </ApplicationFrameWithProvider>
+        </F0Meeting>
       </SidePanelProvider>
     </FrameProvider>
   )
@@ -261,6 +301,16 @@ function useAutoCloseSidebar(
  *   z-20  Sidebar backdrop / Chat (fullscreen)
  *   z-30  Sidebar (unlocked/floating)
  *   z-0   Chat (normal)
+ *
+ * The meeting's WINDOW is not in here: it portals to `document.body`, so it
+ * competes with the other body-level portals instead. That band is
+ *   z-40  Meeting (floating window / minimized pill)
+ *   z-45  Meeting (fullscreen)
+ * which is reserved for meetings and deliberately sits below Radix dialogs
+ * (z-50) so a modal can still cover a call, and below toasts (z-[100]).
+ *
+ * A call in `panel` mode has no window and no layer of its own: it is the
+ * panel's content, and it stacks wherever the panel does.
  */
 function ApplicationFrameContent({
   ai,
@@ -489,6 +539,47 @@ function ApplicationFrameContent({
       window.removeEventListener("resize", publish)
     }
   }, [setFrameWidth, sidebarSlotWidth])
+
+  // The same box, as a RECT, for the meeting.
+  //
+  // Its floating window is `fixed` and lives in a portal, so it has no other
+  // way to know where "inside the frame" is — which is what it sizes itself
+  // against when it has to sit beside an open panel. Nothing about the call's
+  // PANEL mode goes through here: there the room is the panel's content and
+  // the panel places it. Padding lives inside this box, so animating it does
+  // not move the border box and this cannot feed back on itself.
+  const setMeetingFrameRect = useMeetingSurfaceOptional()?.setFrameRect
+  useEffect(() => {
+    const element = mainAreaRef.current
+    if (!element || !setMeetingFrameRect) {
+      return
+    }
+
+    let frame = 0
+    const publish = (): void => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const bounds = element.getBoundingClientRect()
+        setMeetingFrameRect({
+          x: bounds.left,
+          y: bounds.top,
+          width: bounds.width,
+          height: bounds.height,
+        })
+      })
+    }
+
+    publish()
+    const observer = new ResizeObserver(publish)
+    observer.observe(element)
+    window.addEventListener("resize", publish)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener("resize", publish)
+      setMeetingFrameRect(null)
+    }
+  }, [setMeetingFrameRect])
 
   // Fed by `window.resize` alone — see the hook for why the frame's own
   // measurement must not raise it.

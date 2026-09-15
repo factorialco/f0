@@ -6,6 +6,7 @@ import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { rowEntryTransition } from "../utils/chat-motion"
 import { rowItem, type ChatRow } from "../utils/grouping"
+import { ChatCallMessage } from "./ChatCallMessage"
 import { ChatMessageItem } from "./ChatMessageItem"
 import { ChatPostRow } from "./ChatPostRow"
 import { ChatSystemMessage } from "./ChatSystemMessage"
@@ -145,11 +146,16 @@ const ChatMessageRowRendererComponent = ({
     }
   }, [row, animatedIds])
 
-  if (row.type === "post") {
-    // FULL WIDTH, no gutter and no bubble: the card IS the row. The messages'
-    // `flex flex-col gap-1` exists to stack a bubble over its meta line, and a
-    // post has neither.
-    const card = <ChatPostRow post={row.post} last={row.isLast} />
+  // Card rows: FULL WIDTH, no gutter and no bubble — the card IS the row. The
+  // messages' `flex flex-col gap-1` exists to stack a bubble over its meta
+  // line, and neither a post nor a call has either.
+  if (row.type === "post" || row.type === "call") {
+    const card =
+      row.type === "post" ? (
+        <ChatPostRow post={row.post} last={row.isLast} />
+      ) : (
+        <ChatCallMessage call={row.message.call} />
+      )
     return animate ? (
       <motion.div
         className={spacing}

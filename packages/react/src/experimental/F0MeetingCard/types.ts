@@ -10,10 +10,22 @@ import { WithDataTestIdProps } from "@/lib/data-testid"
  * `now`.
  */
 export const meetingStates = [
+  /**
+   * A call that has been started and is waiting for the other side. Distinct
+   * from `scheduled`, which counts down to a time somebody agreed on earlier —
+   * a ringing call has no such time, it is happening now.
+   */
+  "ringing",
   "scheduled",
   "inProgress",
   "summarizing",
   "finished",
+  /**
+   * Ended without the other side ever joining. Deliberately not `cancelled`:
+   * that one strikes the title through, which on "Missed call" says the
+   * opposite of what happened.
+   */
+  "missed",
   "cancelled",
 ] as const
 

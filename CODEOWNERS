@@ -22,6 +22,7 @@
 /packages/react/src/sds/chat/ @factorialco/platform-ai-building-blocks
 /packages/react/src/sds/Home/ @factorialco/foundations
 /packages/react/src/sds/inbox/ @factorialco/foundations
+/packages/react/src/sds/meetings/ @factorialco/communications
 /packages/react/src/sds/Profile/ @factorialco/organizations
 /packages/react/src/sds/social/ @factorialco/talent-spaces
 /packages/react/src/sds/timeline/ @factorialco/time-tracking

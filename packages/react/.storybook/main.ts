@@ -115,6 +115,10 @@ const config: StorybookConfig = {
       titlePrefix: "Domain specific/Communications",
     }, // unvalidated chat — holding area until recurrent use is proven, then promote
     {
+      directory: "../src/sds/meetings",
+      titlePrefix: "Domain specific/Communications",
+    }, // headless video room — same holding area as chat
+    {
       directory: "../src/sds/UpsellingKit",
       titlePrefix: "Domain specific/Growth",
     },
