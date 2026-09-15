@@ -24,6 +24,7 @@ export type {
   DashboardCanvasContent,
   DataDownloadCanvasContent,
   AutofillTimesheetCanvasContent,
+  BulkResolveInconsistenciesCanvasContent,
   F0AIMessage,
   F0AiChatWelcomeCard,
   F0Message,
