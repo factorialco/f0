@@ -29,9 +29,9 @@ export function HomeBackdrop() {
         activeColor="#E61942"
         proximity={70}
         shockRadius={250}
-        shockStrength={4}
+        shockStrength={2}
         resistance={1600}
-        returnDuration={1.5}
+        returnDuration={0.9}
       />
     </div>
   )
