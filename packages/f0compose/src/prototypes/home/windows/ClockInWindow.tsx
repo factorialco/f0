@@ -61,7 +61,7 @@ export function ClockInWindow({ compact = false }: { compact?: boolean }) {
     : []
 
   return (
-    <div className="px-3 pb-3 pt-1">
+    <div className="px-3 pt-1">
       <ClockInControls
         data={entries}
         trackedMinutes={trackedMinutes}

@@ -1721,7 +1721,6 @@ function HomeCanvas() {
             title="Clock in"
             width={240}
             anchorSelector="[data-home-clockin-pill], [data-home-clockin-rail]"
-            onDock={() => setClockInCard(false)}
             onClose={() => setClockInCard(false)}
           >
             <ClockInWindow />

@@ -32,10 +32,14 @@ export function FloatingWindow({
   /** The control the card first hangs from. */
   anchorSelector: string
   children: React.ReactNode
-  onDock: () => void
+  /** Omitted where the card has no column to go back to, which drops the
+   *  dock button from its header (Angel, 2026-09-15). */
+  onDock?: () => void
   onClose: () => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
+  /** Set by anchors that may flip above their control. */
+  const flip = useRef<{ top: number; bottom: number } | null>(null)
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
 
   // Position before paint, or the card flashes at 0,0 for a frame.
@@ -61,8 +65,11 @@ export function FloatingWindow({
       }
       // The composer's own clock pill: the card drops straight under it,
       // LEFT edges flush, because the pill sits at the start of the row
-      // rather than at the end of a toolbar (Angel, 2026-09-15).
+      // rather than at the end of a toolbar (Angel, 2026-09-15). Below or
+      // ABOVE, never floating loose over the row: `flip` measures the
+      // card once it is mounted.
       if (anchorEl?.matches("[data-home-clockin-pill]")) {
+        flip.current = { top: anchor.top, bottom: anchor.bottom }
         setPos({ x: anchor.left, y: anchor.bottom + GAP })
         return
       }
@@ -74,15 +81,21 @@ export function FloatingWindow({
     setPos({ x: window.innerWidth - width - GAP, y: GAP })
   }, [anchorSelector, width])
 
-  // The rail anchor sits at the BOTTOM of the screen, so a card hung at
-  // its top would run off the edge. Measured once it is on screen, since
-  // the height is the content's (Angel, 2026-09-15).
+  // Heights are the content's, so the fit can only be judged once the
+  // card is on screen (Angel, 2026-09-15). An anchor that flips goes
+  // ABOVE its control when there is no room under it; everything else is
+  // simply pulled back inside the viewport.
   useLayoutEffect(() => {
     const card = cardRef.current?.getBoundingClientRect()
     if (!card || !pos) return
     const GAP = 8
     const maxY = window.innerHeight - card.height - GAP
-    if (pos.y > maxY) setPos({ x: pos.x, y: Math.max(GAP, maxY) })
+    if (pos.y <= maxY) return
+    const above = flip.current && flip.current.top - card.height - GAP
+    setPos({
+      x: pos.x,
+      y: above && above > GAP ? above : Math.max(GAP, maxY),
+    })
   }, [pos])
 
   const startDrag = (e: React.PointerEvent) => {
@@ -130,14 +143,16 @@ export function FloatingWindow({
         </span>
         <div className="flex shrink-0 items-center">
           {/* Floating, the toggle offers you the side panel back. */}
-          <F0Button
-            variant="ghost"
-            size="md"
-            icon={SidePanelIcon}
-            hideLabel
-            label={`Dock ${title}`}
-            onClick={onDock}
-          />
+          {onDock && (
+            <F0Button
+              variant="ghost"
+              size="md"
+              icon={SidePanelIcon}
+              hideLabel
+              label={`Dock ${title}`}
+              onClick={onDock}
+            />
+          )}
           <F0Button
             variant="ghost"
             size="md"

@@ -38,7 +38,7 @@ export function RailClockIn() {
       onClick={requestClockInWidget}
       className="f0c-pressable flex cursor-pointer flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 hover:bg-f1-background-secondary"
     >
-      <span className="size-2 rounded-full bg-f1-background-positive-bold" />
+      <span className="home-clock-dot size-2 rounded-full bg-f1-background-positive-bold" />
       <span className="text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
         {elapsedLabel(clockedInAt, now)}
       </span>
