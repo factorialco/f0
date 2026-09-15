@@ -436,6 +436,22 @@ export function HybridHome({ children }: { children: ReactNode }) {
                 data-hybrid-editor
                 hidden={asking}
                 aria-hidden={compact || asking}
+                // The textarea only covers a band of the sheet, so a
+                // click on the padding around it did nothing (Angel,
+                // 2026-09-15). Anywhere on the surface focuses the field;
+                // the buttons inside it keep their own clicks.
+                onMouseDown={(event) => {
+                  const target = event.target
+                  if (
+                    target instanceof HTMLElement &&
+                    target.closest("button, a, input, textarea")
+                  )
+                    return
+                  const field = event.currentTarget.querySelector("textarea")
+                  if (!field) return
+                  event.preventDefault()
+                  field.focus()
+                }}
               >
                 <F0Box
                   position="relative"

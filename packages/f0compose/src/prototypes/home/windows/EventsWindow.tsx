@@ -1,98 +1,59 @@
-import { F0Icon } from "@factorialco/f0-react"
-import { ChevronRight } from "@factorialco/f0-react/icons/app"
+import type { CalendarEventProps } from "@factorialco/f0-react/dist/experimental"
 
-export type HomeEvent = {
-  id: string
-  title: string
-  subtitle: string
-  month: string
-  day: string
-  endMonth?: string
-  endDay?: string
-  accent: string
-}
+import { CalendarEventList } from "@factorialco/f0-react/dist/experimental"
 
-// Same events as the "Home - Vision" feed design. Exported so the nav's
-// Cal section can list the same upcoming events.
-export const homeEvents: HomeEvent[] = [
+/**
+ * The agenda widget, rendered by f0's OWN `CalendarEventList` (Angel,
+ * 2026-09-15: the widgets were hand-copied from production and their
+ * paddings had drifted). Production's Events spec emits
+ * `homeSlot('event-list', { events })`, and this component is what that
+ * slot resolves to, so the rows here are the production rows.
+ */
+
+/** A fixed "today" keeps the seeded agenda stable across sessions. */
+const TODAY = new Date(2026, 6, 22)
+const day = (offset: number, hour = 9) =>
+  new Date(2026, 6, TODAY.getDate() + offset, hour)
+
+export const homeEvents: CalendarEventProps[] = [
   {
-    id: "sarah-birthday",
     title: "Sarah's birthday",
-    subtitle: "Turns 30 🎉",
-    month: "JUL",
-    day: "24",
-    accent: "#E51943",
+    description: "Turns 30 🎉",
+    color: "#E51943",
+    isPending: false,
+    fromDate: day(2),
   },
   {
-    id: "company-holiday",
     title: "Company holiday",
-    subtitle: "2 days off",
-    month: "JUL",
-    day: "30",
-    endMonth: "JUL",
-    endDay: "31",
-    accent: "#0CA57F",
+    description: "2 days off",
+    color: "#0CA57F",
+    isPending: false,
+    fromDate: day(8),
+    toDate: day(9),
   },
   {
-    id: "team-offsite",
+    label: "Costa Brava",
     title: "Team offsite",
-    subtitle: "Costa Brava · not confirmed",
-    month: "AUG",
-    day: "3",
-    endMonth: "AUG",
-    endDay: "4",
-    accent: "#F5A51C",
+    description: "Not confirmed yet",
+    color: "#F5A51C",
+    isPending: true,
+    fromDate: day(12),
+    toDate: day(13),
   },
   {
-    id: "all-hands",
     title: "Monthly all-hands",
-    subtitle: "Q3 roadmap update",
-    month: "AUG",
-    day: "7",
-    accent: "#5596F6",
+    subtitle: "16:00",
+    description: "Q3 roadmap update",
+    color: "#5596F6",
+    isPending: false,
+    fromDate: day(16, 16),
   },
 ]
 
-function DateChip({ month, day }: { month: string; day: string }) {
-  return (
-    <span className="flex w-9 shrink-0 flex-col items-center rounded-md border border-solid border-f1-border-secondary bg-f1-background py-0.5">
-      <span className="text-sm font-medium text-f1-foreground-critical">
-        {month}
-      </span>
-      <span className="text-base font-semibold text-f1-foreground">{day}</span>
-    </span>
-  )
-}
-
 export function EventsWindow() {
   return (
-    <div className="flex flex-col gap-1 p-3">
-      {homeEvents.map((event) => (
-        <div
-          key={event.id}
-          className="flex items-center gap-3 rounded-[10px] py-2 pl-2 pr-1 hover:bg-f1-background-secondary"
-        >
-          <span
-            className="h-9 w-1 shrink-0 rounded-full"
-            style={{ backgroundColor: event.accent }}
-          />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-base font-medium text-f1-foreground">
-              {event.title}
-            </span>
-            <span className="truncate text-base text-f1-foreground-secondary">
-              {event.subtitle}
-            </span>
-          </div>
-          <DateChip month={event.month} day={event.day} />
-          {event.endDay && event.endMonth && (
-            <>
-              <F0Icon icon={ChevronRight} size="xs" color="secondary" />
-              <DateChip month={event.endMonth} day={event.endDay} />
-            </>
-          )}
-        </div>
-      ))}
+    <div className="px-1 pb-2">
+      <CalendarEventList events={homeEvents} showAllItems />
     </div>
   )
 }

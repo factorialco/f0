@@ -880,7 +880,7 @@ function InboxPresets({
     { id: "notification", label: "Notifications" },
   ]
   return (
-    <div className="flex shrink-0 gap-1.5 overflow-x-auto px-3 pb-2">
+    <div className="flex shrink-0 gap-1.5 overflow-visible px-3 pb-2">
       {options.map((option) => (
         <PresetChip
           key={option.id}

@@ -23,8 +23,14 @@ import { documentRecords } from "./documents"
 import { candidates, phaseLabel, type RecruitmentPhase } from "./recruitment"
 import { upcomingShifts } from "./shifts"
 
-// PR #48 WidgetListItem's static row composition. The existing WindowStack owns
-// the outer widget, title, resizing and close controls; no nested card or chat.
+/**
+ * f0's own widget-row geometry, copied from `WidgetAvatarsListItem`
+ * (`rounded-md border border-transparent p-2 gap-2.5`, a one-line title
+ * over a secondary subtitle) so these rows measure the same as the
+ * production widgets (Angel, 2026-09-15). The avatars differ per widget
+ * (icon, file, date), which is why the f0 component itself cannot be used
+ * here: it only takes person avatars.
+ */
 function ReferenceRow({
   avatar,
   title,
@@ -37,14 +43,14 @@ function ReferenceRow({
   end?: ReactNode
 }) {
   return (
-    <F0Box display="flex" alignItems="center" gap="md" paddingY="sm">
+    <div className="flex flex-row items-center gap-2.5 rounded-md border border-solid border-transparent p-2 text-f1-foreground">
       {avatar}
-      <F0Box grow minWidth="0" display="flex" flexDirection="column">
-        <F0Text content={title} variant="label" ellipsis />
-        <F0Text content={subtitle} variant="description" ellipsis />
-      </F0Box>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <p className="line-clamp-1 font-medium">{title}</p>
+        <p className="line-clamp-1 text-f1-foreground-secondary">{subtitle}</p>
+      </div>
       {end}
-    </F0Box>
+    </div>
   )
 }
 
@@ -83,7 +89,7 @@ export function RecruitmentWindow({
   candidateId,
 }: { limit?: number; candidateId?: string } = {}) {
   return (
-    <F0Box padding="lg" display="flex" flexDirection="column" gap="sm">
+    <div className="flex flex-col px-1 pb-2">
       {candidates
         .filter((c) => !candidateId || c.id === candidateId)
         .slice(0, limit)
@@ -98,12 +104,12 @@ export function RecruitmentWindow({
             }
           />
         ))}
-    </F0Box>
+    </div>
   )
 }
 export function DocumentsWindow() {
   return (
-    <F0Box padding="lg" display="flex" flexDirection="column" gap="sm">
+    <div className="flex flex-col px-1 pb-2">
       {documentRecords.map((d) => (
         <ReferenceRow
           key={d.id}
@@ -114,13 +120,13 @@ export function DocumentsWindow() {
           subtitle={`${d.action} · ${d.when}`}
         />
       ))}
-    </F0Box>
+    </div>
   )
 }
 
 export function ShiftsWindow() {
   return (
-    <F0Box padding="lg" display="flex" flexDirection="column" gap="sm">
+    <div className="flex flex-col px-1 pb-2">
       {upcomingShifts.map((shift) => (
         <ReferenceRow
           key={shift.id}
@@ -129,6 +135,6 @@ export function ShiftsWindow() {
           subtitle={`${shift.workplace} · Break ${shift.plannedBreak}`}
         />
       ))}
-    </F0Box>
+    </div>
   )
 }
