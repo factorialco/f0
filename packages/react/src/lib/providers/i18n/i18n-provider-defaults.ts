@@ -988,8 +988,6 @@ export const defaultTranslations = {
       reasonPlaceholder: "Anything that helps them decide",
       submit: "Send request",
       pending: "Requested: {{value}}",
-      approve: "Approve",
-      decline: "Decline",
     },
     validation: {
       required: "This field is required",

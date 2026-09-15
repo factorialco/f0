@@ -8,11 +8,25 @@ import type { F0Field } from "../types"
  */
 const POPUP_FIELD_TYPES: ReadonlySet<string> = new Set(["date", "select"])
 
+/**
+ * Types whose control IS the read state. A toggle already says what it holds
+ * and takes one click to change, so a row renders it as it is rather than
+ * spelling it out and asking for a second click to get the control back.
+ */
+export const TOGGLE_FIELD_TYPES: ReadonlySet<string> = new Set([
+  "checkbox",
+  "switch",
+])
+
 /** What the editor needs to mount ready to use, threaded through `renderFieldInput`. */
 export type InlineEditorOptions = {
   autoFocus: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** Tells the renderer it is standing in for a row, so it drops the field chrome. */
+  inline: boolean
+  /** Forces the control off — how a row renders a toggle nobody may change. */
+  disabled?: boolean
 }
 
 export type UseInlineFieldResult = {
@@ -101,6 +115,7 @@ export function useInlineField(field: F0Field): UseInlineFieldResult {
     stopEditing,
     editorOptions: {
       autoFocus: true,
+      inline: true,
       open: usesPopup ? true : undefined,
       onOpenChange: usesPopup ? handleOpenChange : undefined,
     },

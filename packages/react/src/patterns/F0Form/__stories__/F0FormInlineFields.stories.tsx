@@ -7,9 +7,9 @@ import type { F0Field, F0FieldRequestChange } from "../fields/types"
 
 const fields = {
   text: {
-    id: "employeeNumber",
+    id: "reference",
     type: "text",
-    label: "Employee number",
+    label: "Reference",
     placeholder: "not set",
   },
   number: {
@@ -21,13 +21,8 @@ const fields = {
   date: {
     id: "startDate",
     type: "date",
-    label: "Date",
+    label: "Start date",
     placeholder: "no date",
-  },
-  contract: {
-    id: "contractStart",
-    type: "text",
-    label: "Contract start date",
   },
   select: {
     id: "contract",
@@ -37,6 +32,11 @@ const fields = {
       { value: "full", label: "Full time" },
       { value: "part", label: "Part time" },
     ],
+  },
+  switch: {
+    id: "remote",
+    type: "switch",
+    label: "Remote",
   },
 } satisfies Record<string, F0Field>
 
@@ -51,7 +51,8 @@ type RowProps = {
 /**
  * The record layout an inline field is built for: a label column and a value
  * column the field fills, so a row someone can edit lines up with the read-only
- * ones around it.
+ * ones around it. `FieldCard` is the bordered group those rows sit in, matching
+ * the detail screen this pattern is for.
  */
 function FieldRow({
   field,
@@ -67,10 +68,8 @@ function FieldRow({
       : true
 
   return (
-    <div className="flex w-[560px] items-center border-0 border-b border-solid border-f1-border-secondary py-1">
-      <span className="w-1/2 px-3 text-f1-foreground-secondary">
-        {field.label}
-      </span>
+    <div className="flex items-center border-0 border-b border-solid border-f1-border-secondary px-4 py-2 last:border-b-0">
+      <span className="w-1/2 text-f1-foreground-secondary">{field.label}</span>
       <div className="w-1/2">
         <F0FormField
           field={{ ...field, inline } as never}
@@ -83,45 +82,52 @@ function FieldRow({
   )
 }
 
+function FieldCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-[720px] rounded-lg border border-solid border-f1-border-secondary">
+      {children}
+    </div>
+  )
+}
+
 /**
  * framer-motion fades the calendar's month in, and the a11y addon scans the
  * whole document the moment the play function returns — catching the weekday
  * headers mid-fade and failing their contrast on a colour the token never
- * actually renders. Waiting for every ancestor to reach full opacity is what
- * makes that scan measure the real thing.
+ * actually renders. One settle past the fade is what makes that scan measure
+ * the real thing. Deliberately a fixed wait: the fade has a known duration and
+ * no state to observe, and polling ancestors for opacity 1 breaks the story
+ * outside the test runner, where the animation is still running.
  */
-async function waitUntilOpaque(selector: string) {
-  await waitFor(() => {
-    const node = document.querySelector(selector)
-    expect(node).not.toBeNull()
-    for (
-      let element = node as HTMLElement | null;
-      element;
-      element = element.parentElement
-    ) {
-      expect(Number(getComputedStyle(element).opacity)).toBe(1)
-    }
-  })
-}
+const MONTH_FADE_MS = 300
+const settleMonthFade = () =>
+  new Promise((resolve) => setTimeout(resolve, MONTH_FADE_MS))
 
 const meta: Meta<RowProps> = {
   title: "Forms/F0Form/Inline fields",
   component: FieldRow,
   tags: ["experimental"],
   parameters: { a11y: { test: "error" } },
-  args: { field: fields.text, value: "EMP-0042" },
+  args: { field: fields.text, value: "REF-0042" },
+  decorators: [
+    (Story) => (
+      <FieldCard>
+        <Story />
+      </FieldCard>
+    ),
+  ],
 }
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Someone who may change the employee number, on a record detail screen. */
+/** Someone who may change the value, on a record detail screen. */
 export const DetailRow: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
 
     await step("Read the value as text, with no field chrome around it", () => {
-      expect(canvas.getByText("EMP-0042")).toBeInTheDocument()
+      expect(canvas.getByText("REF-0042")).toBeInTheDocument()
       expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
     })
 
@@ -147,7 +153,7 @@ export const DetailRow: Story = {
       async () => {
         await userEvent.tab()
         expect(document.activeElement).toBe(
-          canvas.getByRole("button", { name: "Edit Employee number" })
+          canvas.getByRole("button", { name: "Edit Reference" })
         )
       }
     )
@@ -159,7 +165,7 @@ export const DetailRow: Story = {
       const readHeight = row.getBoundingClientRect().height
 
       await userEvent.click(
-        canvas.getByRole("button", { name: "Edit Employee number" })
+        canvas.getByRole("button", { name: "Edit Reference" })
       )
 
       const input = canvas.getByRole("textbox")
@@ -174,7 +180,7 @@ export const DetailRow: Story = {
     await step("Put the value back to text on Escape", async () => {
       await userEvent.keyboard("{Escape}")
       expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
-      expect(canvas.getByText("EMP-0042")).toBeInTheDocument()
+      expect(canvas.getByText("REF-0042")).toBeInTheDocument()
     })
   },
 }
@@ -198,48 +204,101 @@ export const DetailRowDate: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
 
-    await step("Read the date the way the picker's own input reads it", () => {
-      expect(canvas.getByText("15 Sep 2025")).toBeInTheDocument()
+    await step("Read the day in the reader's own locale", () => {
+      // Storybook runs under `en`, so the month leads. The same date reads
+      // `15/09/2025` under en-GB and `15.09.2025` under de-DE.
+      expect(canvas.getByText("09/15/2025")).toBeInTheDocument()
     })
 
     await step("Open the calendar on the date already set", async () => {
-      await userEvent.click(canvas.getByRole("button", { name: "Edit Date" }))
+      await userEvent.click(
+        canvas.getByRole("button", { name: "Edit Start date" })
+      )
 
       // Never the day grid: framer-motion re-keys it on mount and two coexist
       // for ~150ms, so the query throws on the duplicate. The month header is
       // singular the whole time, and is what "opens on the date set" means.
       await waitFor(() => expect(document.body).toHaveTextContent(/September/i))
-      await waitUntilOpaque(".rdp-head")
+      await settleMonthFade()
+    })
+
+    await step("Put the date back to text once one is picked", async () => {
+      await userEvent.click(await within(document.body).findByText("16"))
+
+      await waitFor(() =>
+        expect(canvas.getByText("09/16/2025")).toBeInTheDocument()
+      )
+      expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
     })
   },
 }
 
-/** A select row opens its dropdown, with the current option already chosen. */
+/** A select row opens its dropdown, borderless, with the options in it. */
 export const DetailRowSelect: Story = {
   tags: ["!autodocs"],
   args: { field: fields.select, value: "part" },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
+    const body = within(document.body)
 
     await step("Read the option's label, not its value", () => {
       expect(canvas.getByText("Part time")).toBeInTheDocument()
     })
 
-    await step("Open the dropdown as the row is activated", async () => {
-      await userEvent.click(
-        canvas.getByRole("button", { name: "Edit Contract" })
-      )
-      await waitFor(() =>
-        expect(document.querySelector('[role="combobox"]')).toHaveAttribute(
-          "aria-expanded",
-          "true"
+    await step(
+      "Offer the options, with no field chrome around them",
+      async () => {
+        await userEvent.click(
+          canvas.getByRole("button", { name: "Edit Contract" })
         )
-      )
+
+        expect(
+          await body.findByRole("option", { name: /Full time/ })
+        ).toBeInTheDocument()
+        // The borderless trigger, not the bordered field: a row gains no chrome
+        // from being edited.
+        expect(
+          canvasElement.querySelector("[data-testid='input-field-wrapper']")
+        ).toBeNull()
+      }
+    )
+  },
+}
+
+/**
+ * A toggle sits in the row as itself. There is nothing to reveal and nothing to
+ * swap in: it already shows what it holds and changes on one click.
+ */
+export const DetailRowSwitch: Story = {
+  args: { field: fields.switch, value: true },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Render the control, not the word for it", () => {
+      expect(canvas.getByRole("switch")).toBeChecked()
+      expect(canvas.queryByText("Yes")).not.toBeInTheDocument()
+      expect(
+        canvas.queryByRole("button", { name: /Edit/ })
+      ).not.toBeInTheDocument()
+    })
+
+    await step("Change it on one click, with no editor to enter", async () => {
+      await userEvent.click(canvas.getByRole("switch"))
+      expect(canvas.getByRole("switch")).not.toBeChecked()
     })
   },
 }
 
-/** Someone who may copy the employee number as well as change it. */
+/** A toggle nobody may change is the control, off — there is no text to fall back on. */
+export const DetailRowSwitchReadOnly: Story = {
+  args: { field: fields.switch, value: true, readonly: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByRole("switch")).toBeDisabled()
+  },
+}
+
+/** Someone who may copy the value as well as change it. */
 export const DetailRowCopyable: Story = {
   args: { copyable: true },
   play: async ({ canvasElement, step }) => {
@@ -247,7 +306,7 @@ export const DetailRowCopyable: Story = {
 
     await step("Offer the copy beside the editing affordance", () => {
       expect(
-        canvas.getByRole("button", { name: "Copy Employee number" })
+        canvas.getByRole("button", { name: "Copy Reference" })
       ).toBeInTheDocument()
     })
 
@@ -263,7 +322,7 @@ export const DetailRowReadOnly: Story = {
   args: { readonly: true },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const value = canvas.getByRole("textbox", { name: "Employee number" })
+    const value = canvas.getByRole("textbox", { name: "Reference" })
 
     expect(value).toHaveAttribute("aria-readonly", "true")
     expect(value).toHaveAttribute("tabindex", "0")
@@ -282,14 +341,17 @@ export const DetailRowEmpty: Story = {
   },
 }
 
-/** Someone who may read the contract start date but not set it. */
+/**
+ * Someone who may read the start date but not set it. The ask offers the
+ * field's own editor, so a date is picked from a calendar rather than typed.
+ */
 export const DetailRowRequestChange: Story = {
   // The dialog portals to the body, and the Docs page renders every story at
   // once, so it would float over the whole page.
   tags: ["!autodocs"],
   args: {
-    field: fields.contract,
-    value: "01 Jan 2024",
+    field: fields.date,
+    value: new Date(2024, 0, 1),
     readonly: true,
     requestChange: { onSubmit: fn() },
   },
@@ -303,7 +365,7 @@ export const DetailRowRequestChange: Story = {
       ).not.toBeInTheDocument()
       expect(
         canvas.getByRole("button", {
-          name: "Request a change to Contract start date",
+          name: "Request a change to Start date",
         })
       ).toBeInTheDocument()
     })
@@ -316,100 +378,106 @@ export const DetailRowRequestChange: Story = {
       await userEvent.tab()
       await userEvent.click(
         canvas.getByRole("button", {
-          name: "Request a change to Contract start date",
+          name: "Request a change to Start date",
         })
       )
 
       const dialog = await body.findByRole("dialog")
       expect(dialog).toHaveTextContent("It says now")
-      expect(dialog).toHaveTextContent("01 Jan 2024")
+      expect(dialog).toHaveTextContent("01/01/2024")
     })
 
-    await step(
-      "Hold the request back until it says something new",
-      async () => {
-        const send = body.getByRole("button", { name: "Send request" })
-        expect(send).toBeDisabled()
+    await step("Pick the new value rather than spelling it out", async () => {
+      const send = body.getByRole("button", { name: "Send request" })
+      expect(send).toBeDisabled()
 
-        await userEvent.type(
-          body.getByRole("textbox", { name: "It should say" }),
-          "01 Feb 2024"
-        )
-        expect(send).toBeEnabled()
+      await userEvent.click(
+        body.getByRole("textbox", { name: "It should say" })
+      )
+      // A calendar, because the field is a date. The ask starts empty, so it
+      // opens on today rather than on a month this story can name.
+      await waitFor(() =>
+        expect(body.getByRole("combobox", { name: /month/i })).toBeVisible()
+      )
+      await settleMonthFade()
+      await userEvent.click(body.getByText("15"))
 
-        await userEvent.click(send)
-        expect(args.requestChange?.onSubmit).toHaveBeenCalledWith({
-          from: "01 Jan 2024",
-          to: "01 Feb 2024",
+      await waitFor(() => expect(send).toBeEnabled())
+      await userEvent.click(send)
+
+      expect(args.requestChange?.onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: "01/01/2024",
+          to: expect.stringMatching(/^\d{2}\/15\/\d{4}$/),
           reason: undefined,
         })
-      }
-    )
+      )
+    })
   },
 }
 
-/** Whoever administers the record, looking at a change someone asked for. */
+/** A request already on the record, waiting for someone else to answer it. */
 export const DetailRowPendingChange: Story = {
   args: {
-    field: fields.contract,
-    value: "01 Jan 2024",
+    field: fields.date,
+    value: new Date(2024, 0, 1),
     readonly: true,
     requestChange: {
       onSubmit: fn(),
-      pending: { id: "req-1", to: "01 Feb 2024" },
-      onResolve: fn(),
-      canResolve: true,
+      pending: { id: "req-1", to: "01/15/2024" },
+      onCancel: fn(),
     },
   },
   play: async ({ args, canvasElement, step }) => {
     const canvas = within(canvasElement)
 
     await step("Say what was asked for, under the value it is about", () => {
-      expect(canvas.getByText("Requested: 01 Feb 2024")).toBeInTheDocument()
+      expect(canvas.getByText("Requested: 01/15/2024")).toBeInTheDocument()
       expect(
         canvas.queryByRole("button", { name: /Request a change/ })
       ).not.toBeInTheDocument()
     })
 
-    await step("Let whoever can answer it answer it", async () => {
-      await userEvent.click(canvas.getByRole("button", { name: "Approve" }))
-      expect(args.requestChange?.onResolve).toHaveBeenCalledWith(
-        "req-1",
-        "approved"
-      )
+    await step("Let whoever asked take it back", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Cancel" }))
+      expect(args.requestChange?.onCancel).toHaveBeenCalledWith("req-1")
     })
   },
 }
 
+/**
+ * The record this pattern is for: one card of rows, mixed types, mixed
+ * permissions, read side by side the way a detail screen shows them.
+ */
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({ width: "100%" }),
+  decorators: [(Story) => <Story />],
   render: () => (
-    <div className="flex flex-col">
-      <FieldRow field={fields.text} value="EMP-0042" />
-      <FieldRow field={fields.text} value="EMP-0042" copyable />
-      <FieldRow field={fields.text} value="EMP-0042" readonly />
-      <FieldRow field={fields.text} value={undefined} />
-      <FieldRow field={fields.number} value={37.5} />
+    <FieldCard>
+      <FieldRow field={fields.select} value="full" />
+      <FieldRow field={fields.text} value="REF-0042" copyable />
       <FieldRow field={fields.date} value={new Date(2025, 8, 15)} />
-      <FieldRow field={fields.select} value="part" />
+      <FieldRow field={fields.number} value={37.5} />
+      <FieldRow field={fields.switch} value={true} />
+      <FieldRow field={fields.text} value={undefined} />
+      <FieldRow field={fields.text} value="REF-0042" readonly />
       <FieldRow
-        field={fields.contract}
-        value="01 Jan 2024"
+        field={fields.date}
+        value={new Date(2024, 0, 1)}
         readonly
         requestChange={{ onSubmit: fn() }}
       />
       <FieldRow
-        field={fields.contract}
-        value="01 Jan 2024"
+        field={fields.date}
+        value={new Date(2024, 0, 1)}
         readonly
         requestChange={{
           onSubmit: fn(),
-          pending: { id: "req-1", to: "01 Feb 2024" },
-          onResolve: fn(),
-          canResolve: true,
+          pending: { id: "req-1", to: "01/15/2024" },
+          onCancel: fn(),
         }}
       />
-    </div>
+    </FieldCard>
   ),
 }

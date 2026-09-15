@@ -137,44 +137,34 @@ describe("requesting a change", () => {
       ).not.toBeInTheDocument()
     })
 
-    it("offers approve and decline to whoever can answer it", async () => {
+    it("lets whoever asked take it back", async () => {
       const user = userEvent.setup()
-      const onResolve = vi.fn()
+      const onCancel = vi.fn()
       render(
-        <Row
-          field={fieldWith({
-            onSubmit: vi.fn(),
-            pending,
-            onResolve,
-            canResolve: true,
-          })}
-        />
+        <Row field={fieldWith({ onSubmit: vi.fn(), pending, onCancel })} />
       )
 
-      expect(
-        screen.getByRole("button", { name: "Decline" })
-      ).toBeInTheDocument()
-      await user.click(screen.getByRole("button", { name: "Approve" }))
+      await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-      expect(onResolve).toHaveBeenCalledWith("req-1", "approved")
+      expect(onCancel).toHaveBeenCalledWith("req-1")
     })
 
-    it("offers only a withdrawal to whoever asked", async () => {
-      const user = userEvent.setup()
-      const onResolve = vi.fn()
+    it("offers no answer here — approving lives where approvals already live", () => {
       render(
-        <Row field={fieldWith({ onSubmit: vi.fn(), pending, onResolve })} />
+        <Row
+          field={fieldWith({ onSubmit: vi.fn(), pending, onCancel: vi.fn() })}
+        />
       )
 
       expect(
         screen.queryByRole("button", { name: "Approve" })
       ).not.toBeInTheDocument()
-      await user.click(screen.getByRole("button", { name: "Cancel" }))
-
-      expect(onResolve).toHaveBeenCalledWith("req-1", "cancelled")
+      expect(
+        screen.queryByRole("button", { name: "Decline" })
+      ).not.toBeInTheDocument()
     })
 
-    it("says what is pending without offering an answer nobody can give", () => {
+    it("says what is pending without a withdrawal nobody can make", () => {
       render(<Row field={fieldWith({ onSubmit: vi.fn(), pending })} />)
 
       expect(screen.getByText("Requested: 01 Feb 2024")).toBeInTheDocument()

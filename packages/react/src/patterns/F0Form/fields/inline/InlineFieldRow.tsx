@@ -17,8 +17,12 @@ import { FORM_SIZE } from "../../constants"
 import type { F0Field } from "../types"
 import { formatFieldValue } from "./formatFieldValue"
 import { RequestChangeDialog } from "./RequestChangeDialog"
-import type { F0FieldInlineConfig, F0FieldRequestChange } from "./types"
-import { type InlineEditorOptions, useInlineField } from "./useInlineField"
+import type { F0FieldInlineConfig, F0FieldPendingChange } from "./types"
+import {
+  type InlineEditorOptions,
+  TOGGLE_FIELD_TYPES,
+  useInlineField,
+} from "./useInlineField"
 
 /**
  * Matched to `inputFieldVariants` so the row does not resize when the value
@@ -223,50 +227,41 @@ const CopyAction = ({
 }
 
 /**
- * A request nobody has answered yet, under the value it is about. It carries
- * its own resolution: whoever can answer approves or declines, and whoever
- * asked withdraws.
+ * A request nobody has answered yet, under the value it is about. Answering is
+ * not offered here — that lives wherever the product already handles approvals
+ * — so the only action is the asker taking their own ask back.
  */
 const PendingChange = ({
-  requestChange,
+  pending,
+  onCancel,
 }: {
-  requestChange: F0FieldRequestChange & {
-    pending: NonNullable<F0FieldRequestChange["pending"]>
-  }
+  pending: F0FieldPendingChange
+  onCancel?: (id: string) => void
 }) => {
-  const { t, forms, actions } = useI18n()
-  const { pending, onResolve, canResolve } = requestChange
-
-  const resolutions = canResolve
-    ? ([
-        ["approved", forms.requestChange.approve],
-        ["declined", forms.requestChange.decline],
-      ] as const)
-    : ([["cancelled", actions.cancel]] as const)
+  const { t, actions } = useI18n()
 
   return (
     <div
       data-slot="pending-change"
       className="flex items-center gap-2 rounded bg-f1-background-secondary px-1.5 py-0.5"
     >
-      <span className="min-w-0 flex-1 truncate text-f1-foreground-secondary">
+      {/* No truncation: the requested value is the whole of what this says, so
+          a long one wraps onto a second line rather than being cut. */}
+      <span className="min-w-0 flex-1 text-f1-foreground-secondary">
         {t("forms.requestChange.pending", { value: pending.to })}
       </span>
-      {onResolve
-        ? resolutions.map(([resolution, resolutionLabel]) => (
-            <button
-              key={resolution}
-              type="button"
-              onClick={() => onResolve(pending.id, resolution)}
-              className={cn(
-                "shrink-0 cursor-pointer rounded border-0 bg-transparent p-0 font-medium text-f1-foreground",
-                focusRing()
-              )}
-            >
-              {resolutionLabel}
-            </button>
-          ))
-        : null}
+      {onCancel ? (
+        <button
+          type="button"
+          onClick={() => onCancel(pending.id)}
+          className={cn(
+            "shrink-0 cursor-pointer rounded border-0 bg-transparent p-0 font-medium text-f1-foreground",
+            focusRing()
+          )}
+        >
+          {actions.cancel}
+        </button>
+      ) : null}
     </div>
   )
 }
@@ -307,6 +302,15 @@ function editIconFor(field: F0Field): IconType {
   return byType ?? Pencil
 }
 
+/**
+ * A toggle sits in the row as itself. There is nothing to reveal — it already
+ * shows what it holds and changes on one click — so it is rendered at rest,
+ * and read-only means the control is off rather than the value becoming words.
+ */
+const ToggleValue = ({ children }: { children: ReactNode }) => (
+  <div className="flex min-w-0 flex-1 items-center">{children}</div>
+)
+
 export type InlineFieldRowProps = {
   field: F0Field
   config: F0FieldInlineConfig
@@ -342,10 +346,13 @@ export function InlineFieldRow({
   } = useInlineField(field)
   const [isRequesting, setIsRequesting] = useState(false)
 
+  const isToggle = TOGGLE_FIELD_TYPES.has(field.type)
+  // A toggle has no text form in the row, but the ask and its answer still
+  // describe it in prose, so the formatted value is what those read.
   const text = formatFieldValue(field, value, i18n, locale)
   const { copied, copy } = useCopyToClipboard(text)
 
-  if (!isReading) {
+  if (!isToggle && !isReading) {
     return (
       <div
         className="w-full"
@@ -373,32 +380,38 @@ export function InlineFieldRow({
     />
   )
 
+  const valueSlot = isToggle ? (
+    <ToggleValue>
+      {renderEditor({ ...editorOptions, autoFocus: false, disabled: !canEdit })}
+    </ToggleValue>
+  ) : canEdit ? (
+    <EditableValue
+      ref={setReadValue}
+      editLabel={i18n.t("inputs.edit", { label: field.label })}
+      editIcon={editIconFor(field)}
+      onEdit={startEditing}
+      pinned={copied}
+    >
+      {valueText}
+    </EditableValue>
+  ) : (
+    <ReadOnlyValue ref={setReadValue} label={field.label}>
+      {valueText}
+    </ReadOnlyValue>
+  )
+
   return (
     <div className="flex w-full flex-col gap-1">
       <div
         className={rowClass({
           copied,
-          interactive: canEdit || hasActions,
+          interactive: (canEdit && !isToggle) || hasActions,
           hasError: !!hasError,
         })}
         data-slot="inline-field-row"
         data-testid="inline-field-row"
       >
-        {canEdit ? (
-          <EditableValue
-            ref={setReadValue}
-            editLabel={i18n.t("inputs.edit", { label: field.label })}
-            editIcon={editIconFor(field)}
-            onEdit={startEditing}
-            pinned={copied}
-          >
-            {valueText}
-          </EditableValue>
-        ) : (
-          <ReadOnlyValue ref={setReadValue} label={field.label}>
-            {valueText}
-          </ReadOnlyValue>
-        )}
+        {valueSlot}
 
         {hasActions ? (
           <ActionStrip pinned={copied}>
@@ -417,15 +430,15 @@ export function InlineFieldRow({
         ) : null}
       </div>
 
-      {requestChange && pending ? (
-        <PendingChange requestChange={{ ...requestChange, pending }} />
+      {pending ? (
+        <PendingChange pending={pending} onCancel={requestChange?.onCancel} />
       ) : null}
 
       {requestChange ? (
         <RequestChangeDialog
           isOpen={isRequesting}
           onClose={() => setIsRequesting(false)}
-          label={field.label}
+          field={field}
           current={text}
           onSubmit={requestChange.onSubmit}
         />

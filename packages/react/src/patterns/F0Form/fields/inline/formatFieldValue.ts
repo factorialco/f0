@@ -48,9 +48,15 @@ function formatNumber(field: F0NumberField, value: unknown, locale?: string) {
 }
 
 /**
- * `"long"` is what `F0DatePicker` shows with no `displayFormat`, which is how
- * `DateFieldRenderer` mounts it — so the row reads the same string whether it
- * is being read or edited.
+ * A day reads in the reader's own locale — `15/09/2025` in en-GB, `09/15/2025`
+ * in en-US, `15.09.2025` in de-DE — because a record prints dates the way the
+ * person reading it writes them.
+ *
+ * The granularity helpers cannot do that for a day: their `"default"` format is
+ * the fixed `dd/MM/yyyy` pattern `F0DatePicker`'s input also parses, and it
+ * ignores the locale it is handed. Every coarser granularity — a month, a
+ * quarter, a year — has no ordering to get wrong, so those stay with the helper
+ * rather than growing a second date formatter here.
  */
 function formatDate(
   field: Extract<F0Field, { type: "date" }>,
@@ -61,10 +67,22 @@ function formatDate(
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
     return ""
   }
-  const granularity = resolveGranularityDefinition(
-    field.granularities?.[0] ?? "day"
+
+  const granularityKey = field.granularities?.[0] ?? "day"
+  if (granularityKey === "day") {
+    return new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(value)
+  }
+
+  return resolveGranularityDefinition(granularityKey).toString(
+    value,
+    i18n,
+    "long",
+    locale
   )
-  return granularity.toString(value, i18n, "long", locale)
 }
 
 const isOption = <T>(

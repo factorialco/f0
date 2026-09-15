@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react"
 import { F0TextAreaInput } from "@/components/F0TextAreaInput"
-import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
+import { useL10n } from "@/lib/providers/l10n"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { F0FormField } from "@/patterns/F0FormField"
+import type { F0Field } from "../types"
+import { formatFieldValue } from "./formatFieldValue"
 import type { F0FieldChangeRequest } from "./types"
 
 type RequestChangeDialogProps = {
   isOpen: boolean
   onClose: () => void
-  label: string
-  /** The value as the row reads it, which is what the request is measured against. */
+  field: F0Field
+  /** The current value as the row reads it, which is what the request is measured against. */
   current: string
   onSubmit: (change: F0FieldChangeRequest) => void | Promise<void>
 }
@@ -21,12 +24,14 @@ type RequestChangeDialogProps = {
 export function RequestChangeDialog({
   isOpen,
   onClose,
-  label,
+  field,
   current,
   onSubmit,
 }: RequestChangeDialogProps) {
-  const { t, forms, actions } = useI18n()
-  const [to, setTo] = useState("")
+  const i18n = useI18n()
+  const { t, forms, actions } = i18n
+  const { locale } = useL10n()
+  const [to, setTo] = useState<unknown>(undefined)
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -34,21 +39,25 @@ export function RequestChangeDialog({
   // was written against.
   useEffect(() => {
     if (isOpen) {
-      setTo("")
+      setTo(undefined)
       setReason("")
     }
   }, [isOpen])
 
-  // Nothing to send until the reader has written something, and something
-  // other than what the record already says.
-  const canSubmit = to.trim() !== "" && to.trim() !== current
+  // The request carries the same text the row would print, so what the asker
+  // picked and what the record says are compared as one kind of thing.
+  const toText = formatFieldValue(field, to, i18n, locale)
+
+  // Nothing to send until the reader has chosen something, and something other
+  // than what the record already says.
+  const canSubmit = toText !== "" && toText !== current
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
       await onSubmit({
         from: current,
-        to: to.trim(),
+        to: toText,
         reason: reason.trim() || undefined,
       })
       onClose()
@@ -61,7 +70,7 @@ export function RequestChangeDialog({
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={t("forms.requestChange.title", { label })}
+      title={t("forms.requestChange.title", { label: field.label })}
       description={forms.requestChange.description}
       width="sm"
       primaryAction={{
@@ -79,12 +88,21 @@ export function RequestChangeDialog({
           </span>
           <span className="font-medium text-f1-foreground">{current}</span>
         </div>
-        <F0TextInput
-          label={forms.requestChange.newLabel}
-          placeholder={current}
+        {/* The field's own editor, not a text box: asking for a date should
+            open a calendar, and asking for an option should offer the options.
+            `inline` is dropped so the editor wears its full field chrome here —
+            this is a form, not a row. */}
+        <F0FormField
+          field={
+            {
+              ...field,
+              label: forms.requestChange.newLabel,
+              placeholder: current,
+              inline: undefined,
+            } as never
+          }
           value={to}
           onChange={setTo}
-          clearable
         />
         <F0TextAreaInput
           label={forms.requestChange.reasonLabel}

@@ -15,6 +15,17 @@ interface DateFieldRendererProps {
   open?: boolean
   /** Told when the calendar closes, which is how an inline row knows the date is text again. */
   onOpenChange?: (open: boolean) => void
+  /**
+   * Reads the date numerically rather than as `15 Sep 2025`, so a detail row's
+   * text keeps its shape through a click.
+   *
+   * Only its shape: `displayFormat="default"` is the fixed `dd/MM/yyyy` pattern
+   * the picker's input also parses, while the row reads the day in the reader's
+   * locale. They agree wherever the locale puts the day first and disagree on
+   * the order elsewhere — a gap in `F0DatePicker`, which has no locale-aware
+   * format to ask for, not something the row can close from here.
+   */
+  inline?: boolean
 }
 
 /**
@@ -54,6 +65,7 @@ export function DateFieldRenderer({
   status,
   open,
   onOpenChange,
+  inline,
 }: DateFieldRendererProps) {
   // Convert form Date value to DatePickerValue for the picker
   // Form value may be null (used instead of undefined to prevent
@@ -102,6 +114,7 @@ export function DateFieldRenderer({
       onChange={handleChange}
       open={open}
       onOpenChange={handleOpenChange}
+      displayFormat={inline ? "default" : undefined}
       size={FORM_SIZE}
       hideLabel
       error={error}

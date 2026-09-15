@@ -16,6 +16,8 @@ interface SelectFieldRendererProps {
   open?: boolean
   /** Told when the dropdown closes, which is how an inline row knows the value is text again. */
   onOpenChange?: (open: boolean) => void
+  /** Uses F0Select's own borderless trigger, so a detail row gains no field chrome. */
+  inline?: boolean
 }
 
 /**
@@ -29,6 +31,7 @@ function SelectWithOptions({
   status,
   open,
   onOpenChange,
+  inline,
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     options: NonNullable<F0SelectField["options"]>
@@ -52,6 +55,31 @@ function SelectWithOptions({
     hideLabel: true as const,
     open,
     onOpenChange,
+  }
+
+  // The borderless trigger, so a detail row gains no field chrome. It is
+  // single-selection only, so a multiple select keeps the field variant — its
+  // border is the honest rendering of a control the inline one cannot be.
+  if (inline && !field.multiple) {
+    return (
+      <F0Select
+        variant="inline"
+        label={field.label}
+        placeholder={field.placeholder}
+        disabled={field.disabled}
+        options={field.options}
+        showSearchBox={field.showSearchBox}
+        searchBoxPlaceholder={field.searchBoxPlaceholder}
+        onCreate={field.onCreate}
+        open={open}
+        onOpenChange={onOpenChange}
+        value={(formField.value as string) ?? undefined}
+        onChange={(value: string) => {
+          formField.onChange(value)
+          formField.onBlur()
+        }}
+      />
+    )
   }
 
   if (field.multiple) {
@@ -109,6 +137,7 @@ function SelectWithSource({
   status,
   open,
   onOpenChange,
+  inline,
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     source: NonNullable<F0SelectField["source"]>
@@ -134,6 +163,29 @@ function SelectWithSource({
     hideLabel: true as const,
     open,
     onOpenChange,
+  }
+
+  if (inline && !field.multiple) {
+    return (
+      <F0Select
+        variant="inline"
+        label={field.label}
+        placeholder={field.placeholder}
+        disabled={field.disabled}
+        source={field.source}
+        mapOptions={field.mapOptions}
+        showSearchBox={field.showSearchBox}
+        searchBoxPlaceholder={field.searchBoxPlaceholder}
+        onCreate={field.onCreate}
+        open={open}
+        onOpenChange={onOpenChange}
+        value={(formField.value as string) ?? undefined}
+        onChange={(value: string) => {
+          formField.onChange(value)
+          formField.onBlur()
+        }}
+      />
+    )
   }
 
   if (field.multiple) {

@@ -258,6 +258,43 @@ describe("InlineFieldRow", () => {
     })
   })
 
+  describe("a toggle", () => {
+    const switchField: F0Field = {
+      id: "remote",
+      type: "switch",
+      label: "Remote",
+      inline: true,
+    }
+
+    it("sits in the row as itself, with nothing to reveal", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <Row field={switchField} initialValue={true} onChange={onChange} />
+      )
+
+      expect(screen.getByRole("switch")).toBeChecked()
+      expect(screen.queryByText("Yes")).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /Edit/ })
+      ).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole("switch"))
+      expect(onChange).toHaveBeenLastCalledWith(false)
+    })
+
+    it("is the control, off, where nobody may change it", () => {
+      render(
+        <Row
+          field={{ ...switchField, inline: { readonly: true } }}
+          initialValue={true}
+        />
+      )
+
+      expect(screen.getByRole("switch")).toBeDisabled()
+    })
+  })
+
   describe("the hover reveal", () => {
     it("keeps the affordance in the DOM, hidden and inert until the row is engaged", () => {
       render(<Row field={textField} initialValue="EMP-0042" />)

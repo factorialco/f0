@@ -89,13 +89,19 @@ describe("formatFieldValue", () => {
   describe("date", () => {
     const date = field({ id: "start", type: "date", label: "Start" } as F0Field)
 
-    it("reads the date the way the picker's own input does", () => {
-      expect(formatFieldValue(date, new Date(2025, 7, 1), i18n)).toBe(
-        "01 Aug 2025"
+    it("reads the day in the reader's own locale", () => {
+      expect(formatFieldValue(date, new Date(2025, 7, 1), i18n, "en-GB")).toBe(
+        "01/08/2025"
+      )
+      expect(formatFieldValue(date, new Date(2025, 7, 1), i18n, "en-US")).toBe(
+        "08/01/2025"
+      )
+      expect(formatFieldValue(date, new Date(2025, 7, 1), i18n, "de-DE")).toBe(
+        "01.08.2025"
       )
     })
 
-    it("follows the field's granularity", () => {
+    it("leaves a coarser granularity to the calendar's own helper", () => {
       const monthly = { ...date, granularities: ["month"] } as F0Field
       expect(formatFieldValue(monthly, new Date(2025, 7, 1), i18n)).toContain(
         "2025"

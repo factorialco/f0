@@ -195,7 +195,6 @@ export type FieldType =
 
 export type {
   F0FieldChangeRequest,
-  F0FieldChangeResolution,
   F0FieldInlineConfig,
   F0FieldInlineProp,
   F0FieldPendingChange,

@@ -50,6 +50,19 @@ export interface RenderFieldInputOptions {
   autoFocus?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /**
+   * The editor is standing in for a detail row, so it drops the chrome the row
+   * does not have: a select uses its own borderless `inline` trigger, and a
+   * date reads in the numeric format the row printed, so the text does not
+   * change shape the moment someone clicks it.
+   */
+  inline?: boolean
+  /**
+   * Forces the control off regardless of the field's own `disabled`. A detail
+   * row uses it for a toggle nobody may change: a toggle has no read-as-text
+   * state to fall back on, so read-only has to be the control itself.
+   */
+  disabled?: boolean
 }
 
 /**
@@ -68,13 +81,18 @@ export function renderFieldInput({
   autoFocus,
   open,
   onOpenChange,
+  inline,
+  disabled,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
 
   // Evaluate disabled (can be boolean or function) and combine with submitting/loading state
   const isDisabled =
-    evaluateDisabled(field.disabled, values) || isSubmitting || !!isFormLoading
+    evaluateDisabled(field.disabled, values) ||
+    isSubmitting ||
+    !!isFormLoading ||
+    !!disabled
 
   const errorAndLoadingProps = {
     error: hasError,
@@ -135,6 +153,7 @@ export function renderFieldInput({
           status={visualStatus}
           open={open}
           onOpenChange={onOpenChange}
+          inline={inline}
         />
       )
     case "checkbox":
@@ -166,6 +185,7 @@ export function renderFieldInput({
           status={visualStatus}
           open={open}
           onOpenChange={onOpenChange}
+          inline={inline}
         />
       )
     case "time":
