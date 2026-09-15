@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.101.2](https://github.com/factorialco/f0/compare/f0-react-v6.101.1...f0-react-v6.101.2) (2026-09-15)
+
+
+### Bug Fixes
+
+* **F0Chat:** keep attachment downloads in the app ([#5538](https://github.com/factorialco/f0/issues/5538)) ([a9a67d0](https://github.com/factorialco/f0/commit/a9a67d0e65c1b12d2498814fd4359cacd2a0856c))
+
 ## [6.101.1](https://github.com/factorialco/f0/compare/f0-react-v6.101.0...f0-react-v6.101.1) (2026-09-14)
 
 
