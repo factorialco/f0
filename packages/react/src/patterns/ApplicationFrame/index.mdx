@@ -1,0 +1,214 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as ApplicationFrameStories from "./index.stories"
+
+<Meta of={ApplicationFrameStories} />
+
+# Application frame
+
+`ApplicationFrame` is the top-level application shell. It coordinates the main
+navigation, the page, banners, and an optional side panel.
+
+## Anatomy
+
+<Canvas of={ApplicationFrameStories.Default} />
+
+<Controls of={ApplicationFrameStories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sidebar</code>
+        </td>
+        <td>Main application navigation rendered beside the page.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>children</code>
+        </td>
+        <td>Page content rendered in the frame's main landmark.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>banner</code>
+        </td>
+        <td>Optional full-width content rendered above the shell.</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>
+          <code>sidePanel</code>
+        </td>
+        <td>
+          Declares what may occupy the side panel, independently of the AI chat.
+        </td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>
+          <code>ai</code>
+        </td>
+        <td>Configures the F0 AI chat and its connected content slots.</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>
+          <code>aiPromotion</code>
+        </td>
+        <td>Configures the promotional AI surface for non-enabled users.</td>
+        <td>No</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## The side panel
+
+The panel is the frame's own space — the resizable, fullscreen-able column
+beside the page. The AI chat is one of the things that can occupy it, not its
+owner: a product with conversations and no assistant gets the same panel.
+
+<Canvas of={ApplicationFrameStories.SidePanelWithoutAi} />
+
+### Declaring a view
+
+A view is a product's claim on the panel. Declaring one is what lets the frame
+answer _"is there anything at all to show?"_ without the host working it out.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Field</th>
+        <th className="text-left">Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>id</code>
+        </td>
+        <td>Identifies the view. Required.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>available</code>
+        </td>
+        <td>
+          Whether this view can occupy the panel at all. Defaults to{" "}
+          <code>true</code>. Set it from the permission or feature flag that
+          decides whether the product exists for this customer.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>side</code>
+        </td>
+        <td>
+          Edge this view docks to. Falls back to <code>sidePanel.side</code>,
+          then <code>"right"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>render</code>
+        </td>
+        <td>
+          For views that own their whole surface. Omit it for views whose
+          content is pushed at runtime with <code>present()</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Declaring a view and putting something in it are deliberately separate steps.
+Availability is a configuration fact — _this product exists here_. Content is a
+runtime fact — _this conversation is open now_. With only the second, a view
+that could open looks identical to a product that is not installed, which is
+exactly how the panel ended up gated on the AI chat's permission.
+
+### Presenting content
+
+Descendants drive the panel with `useSidePanel()`, which exposes `open`,
+`setOpen`, `layout`, `setLayout`, `activeContent`, `present`, `clear`,
+`restoringViewId`, `cancelRestore`, the width state, and `hasAvailableView`.
+
+```tsx
+const { present, clear, setOpen } = useSidePanel()
+
+// Opens the panel and mounts the conversation in it.
+present({ id: conversationId, content: <ChatApp /> })
+
+// Hands the panel back — to the AI chat if there is one, otherwise it closes.
+clear()
+setOpen(false)
+```
+
+### Nothing to show
+
+<Canvas of={ApplicationFrameStories.EmptySidePanel} />
+
+When no view is available the panel does not exist: no container, no chrome, no
+reserved width. A persisted open state is ignored too, so a user who left a
+conversation open does not come back to an empty column after that product is
+removed.
+
+## Guidelines
+
+- Declare a view for any product that can occupy the panel, and drive
+  `available` from the same permission that decides whether the product is
+  there at all.
+- Give each presented view a stable `id` so reload restoration is
+  deterministic.
+- When `restoringViewId` is set after a reload, either restore the matching
+  content with `present()` or call `cancelRestore()` when it is no longer
+  available. A safety timeout covers a host that never answers.
+- With the AI chat and hosted content on opposite edges, the frame keeps them
+  mutually exclusive and moves the page between the two.
+
+<DoDonts
+  do={{
+    description: "Keep product-owned content independent from AI availability.",
+    guidelines: [
+      "Declare a side-panel view for conversations, inspectors or other contextual content.",
+      "Read the panel through useSidePanel from product integrations.",
+      "Set `available` from the product's own permission, not the assistant's.",
+    ],
+  }}
+  dont={{
+    description: "Do not couple panel behavior to the AI chat.",
+    guidelines: [
+      "Do not check useAiChat().enabled before opening product-owned content.",
+      "Do not use AI canvas or file-drop APIs from a hosted view.",
+      "Do not leave a pending restore unresolved when the content is unavailable.",
+    ],
+  }}
+/>
+
+## Accessibility
+
+- The frame provides a skip link to the main `content` landmark.
+- A resizable panel exposes a focusable vertical separator with its current,
+  minimum and maximum width.
+- With the separator focused, use Left/Right Arrow to adjust the width, Home
+  for the minimum, End for the maximum, and Enter to restore the default. This
+  is the alternative to dragging; double-clicking the seam also restores the
+  default width.
+- Panel and page transitions honor the user's reduced-motion preference.
+- A pending restore exposes a labelled loading status until the host resolves
+  or cancels it.
+- Hosted content owns its own landmarks, accessible name, focus movement and
+  close controls. Opening the panel does not move focus.

@@ -116,8 +116,8 @@ const meta = {
   tags: ["experimental", "!autodocs", "no-sidebar"],
   args: { items: widget },
   beforeEach: () => {
-    window.localStorage.removeItem("ONE-ai-chat-open")
-    window.localStorage.removeItem("ONE-ai-chat-visualization-mode")
+    window.localStorage.removeItem("f0-side-panel-open")
+    window.localStorage.removeItem("f0-side-panel-layout")
   },
   decorators: [
     (Story) => (

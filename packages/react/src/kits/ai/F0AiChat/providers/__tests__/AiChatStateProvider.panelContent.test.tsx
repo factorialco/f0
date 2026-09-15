@@ -128,11 +128,109 @@ describe("AiChatStateProvider panel content", () => {
     })
     expect(result.current.panelContentSide).toBe("right")
   })
+
+  // Hosted content and the canvas are laid out in the same space. Without
+  // this, opening a conversation over an open canvas left both up and the
+  // canvas painted over the content.
+  it("leaves canvas mode when hosted content takes the panel", () => {
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    act(() => {
+      result.current.openCanvas({
+        type: "form",
+        title: "Example form",
+        description: "Example",
+        formName: "example",
+      })
+    })
+    expect(result.current.visualizationMode).toBe("canvas")
+
+    act(() => {
+      result.current.setPanelContent({ id: "conv", content: <div>Conv</div> })
+    })
+
+    expect(result.current.visualizationMode).toBe("sidepanel")
+    expect(result.current.panelContent?.id).toBe("conv")
+  })
+})
+
+describe("AiChatStateProvider visibility tracking", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  const trackingWrapper = (onVisibility: () => void, enabled = true) => {
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+      <TestProviders>
+        <AiChatStateProvider enabled={enabled} tracking={{ onVisibility }}>
+          {children}
+        </AiChatStateProvider>
+      </TestProviders>
+    )
+    return Wrapper
+  }
+
+  // An impression of the CHAT, not of the panel: the panel also opens for
+  // hosted content, and counting that reports one AI impression per
+  // conversation opened.
+  it("tracks each transition into the visible AI view", () => {
+    const onVisibility = vi.fn()
+    const { result } = renderHook(() => useAiChat(), {
+      wrapper: trackingWrapper(onVisibility),
+    })
+
+    act(() => {
+      result.current.setOpen(true)
+    })
+    expect(onVisibility).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      result.current.setPanelContent({ id: "conv", content: <div>Conv</div> })
+    })
+    expect(onVisibility).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      result.current.clearPanelContent()
+    })
+    expect(onVisibility).toHaveBeenCalledTimes(2)
+  })
+
+  it("does not track a hosted panel while AI is disabled", () => {
+    const onVisibility = vi.fn()
+    const { result } = renderHook(() => useAiChat(), {
+      wrapper: trackingWrapper(onVisibility, false),
+    })
+
+    act(() => {
+      result.current.setPanelContent({ id: "conv", content: <div>Conv</div> })
+    })
+
+    expect(result.current.open).toBe(true)
+    expect(onVisibility).not.toHaveBeenCalled()
+  })
+
+  it("waits for a pending restore to resolve before tracking AI visibility", () => {
+    localStorage.setItem("f0-side-panel-open", "true")
+    localStorage.setItem("f0-side-panel-view-id", '"conv"')
+    const onVisibility = vi.fn()
+    const { result } = renderHook(() => useAiChat(), {
+      wrapper: trackingWrapper(onVisibility),
+    })
+
+    expect(result.current.restoringPanelContentId).toBe("conv")
+    expect(onVisibility).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.cancelPanelContentRestore()
+    })
+
+    expect(onVisibility).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("AiChatStateProvider panel content restore", () => {
-  const ID_KEY = "ONE-ai-chat-panel-content-id"
-  const OPEN_KEY = "ONE-ai-chat-open"
+  const ID_KEY = "f0-side-panel-view-id"
+  const OPEN_KEY = "f0-side-panel-open"
 
   beforeEach(() => {
     localStorage.clear()

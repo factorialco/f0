@@ -54,6 +54,15 @@ type UseChatVirtuosoOptions = {
    * under a scroll position that isn't final yet. A ref because readiness is
    * keyed by `listKey`, which this hook is the one to produce. */
   canPrefetchRef?: MutableRefObject<boolean>
+  /**
+   * The deepest row the reader has scrolled past, whenever it advances — the
+   * read signal for a feed of posts (see {@link lastSeenRowIndex}).
+   *
+   * A CALLBACK rather than returned state: this fires on every scroll frame,
+   * and routing it through a re-render would re-render the transcript for the
+   * length of a scroll. Must be identity-stable.
+   */
+  onSeenRowIndex?: (index: number) => void
 }
 
 type UseChatVirtuosoReturn = {
@@ -129,6 +138,41 @@ export const topVisibleRowIndex = (
 }
 
 /**
+ * The last row the reader has genuinely SEEN: the deepest one whose bottom edge
+ * has passed the fold, so at least half of it has been on screen.
+ *
+ * The mirror of {@link topVisibleRowIndex}, and the measurement a feed of posts
+ * needs. A chat clears its unread the moment you touch the bottom, which is
+ * fine for one-line bubbles and wrong for items a screenful tall: reaching the
+ * end of a feed is not the same as having read the twelve posts on the way.
+ *
+ * The threshold is HALF the row, or one whole viewport of it — whichever comes
+ * first. Half alone would mean a post taller than the screen could never be
+ * read at all; a viewport alone would mark a one-line row read before it had
+ * even fully appeared.
+ */
+export const lastSeenRowIndex = (
+  items: MeasuredChatItem[],
+  scrollTop: number,
+  clientHeight: number,
+  firstItemIndex: number
+): number | null => {
+  const fold = scrollTop + clientHeight
+  let seen: number | null = null
+  for (const { index, offset, size } of items) {
+    const threshold = offset + Math.min(size / 2, clientHeight)
+    if (threshold > fold) {
+      break
+    }
+    const local = Math.max(0, index - firstItemIndex)
+    if (seen === null || local > seen) {
+      seen = local
+    }
+  }
+  return seen
+}
+
+/**
  * What the reader is looking at, as a row plus how much of it sits above the
  * fold — the pair `scrollToIndex({ align: "start", offset })` restores exactly.
  * Read from Virtuoso's cached offsets, so capturing it costs no layout.
@@ -175,6 +219,7 @@ export function useChatVirtuoso({
   conversationKey,
   reducedMotion,
   canPrefetchRef,
+  onSeenRowIndex,
 }: UseChatVirtuosoOptions): UseChatVirtuosoReturn {
   const virtuosoRef = useRef<VirtuosoHandle>(null)
   const scrollerElRef = useRef<HTMLElement | null>(null)
@@ -487,6 +532,11 @@ export function useChatVirtuoso({
   // jump affordance). The sticky index uses Virtuoso's cached item offsets,
   // avoiding a query + forced DOM layout on every animation frame. ----
   const measureRafRef = useRef<number | null>(null)
+  // Behind a ref so `scheduleDerivedScrollState` keeps one identity for the
+  // hook's life: it is a dependency of half the scroll wiring, and rebuilding
+  // it would re-register listeners mid-scroll.
+  const onSeenRowIndexRef = useRef(onSeenRowIndex)
+  onSeenRowIndexRef.current = onSeenRowIndex
   const scheduleDerivedScrollState = useCallback(() => {
     if (measureRafRef.current != null) {
       return
@@ -564,6 +614,18 @@ export function useChatVirtuoso({
               metrics.scrollTop,
               firstIndex
             ) ?? anchorRef.current)
+
+      // Derived from metrics that are already on file this frame — no second
+      // observer, no extra layout read.
+      const seen = lastSeenRowIndex(
+        renderedItemsRef.current,
+        metrics.scrollTop,
+        metrics.clientHeight,
+        firstIndex
+      )
+      if (seen !== null) {
+        onSeenRowIndexRef.current?.(seen)
+      }
 
       warmMediaAhead(scrollingUp ? "up" : "down", firstIndex)
     })

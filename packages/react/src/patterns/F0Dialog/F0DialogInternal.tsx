@@ -121,6 +121,7 @@ const DialogSideControls = ({
 
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   dismissable = true,
+  dismissOnInteractOutside = true,
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
@@ -323,6 +324,12 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          // A press outside stops meaning "dismiss" — see
+          // `dismissOnInteractOutside`. Escape and the close button still work,
+          // so the panel is never a dead end.
+          onInteractOutside={
+            dismissOnInteractOutside ? undefined : (e) => e.preventDefault()
+          }
           container={containerProp}
           defaultContainerId={defaultContainerId}
         >

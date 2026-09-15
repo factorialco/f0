@@ -50,7 +50,15 @@ export type F0ChatUser = {
  * {@link F0ChatCapabilities}), so a read-only channel needs no configuration at
  * all while a host that has a poster still turns `canSend` back on.
  */
-export type F0ChatChannelType = "dm" | "group" | "announcement"
+/**
+ * `community` is a FEED: its items are {@link F0ChatPost}s — a title, a body
+ * with formatting, a cover — rather than chat bubbles, and what you do at the
+ * bottom is publish rather than send. Reading and reacting are on by default;
+ * posting is off until the host grants it, because a community is a place most
+ * people read and a few write in. It differs from an `announcement` in exactly
+ * that: a noticeboard is written by the product, a community by its members.
+ */
+export type F0ChatChannelType = "dm" | "group" | "announcement" | "community"
 
 /**
  * A person mentioned in a message. `id` matches an {@link F0ChatUser.id}; `name`
@@ -111,6 +119,107 @@ export type F0ChatChannel = {
    * generic i18n line.
    */
   readOnlyNotice?: string
+  /**
+   * Community only. The posts kept at the top of this community, newest pin
+   * first — SUMMARIES, not the posts themselves.
+   *
+   * Not derived from `messages` on purpose: the whole point of pinning is that
+   * the post is far enough back to be hard to find, which usually means outside
+   * the loaded window. Deriving it would make the bar appear and disappear as
+   * the reader scrolls. Empty or absent ⇒ no bar.
+   */
+  pinnedPosts?: F0ChatPinnedPost[]
+  /**
+   * Community only. Posts written but not yet visible to anyone — scheduled for
+   * a moment that hasn't arrived. They are NOT in `messages` (nobody can read
+   * them yet), so this is the only place they exist for the panel.
+   */
+  scheduledPosts?: F0ChatScheduledPost[]
+  /**
+   * Community only. The current user's own unfinished posts — see
+   * {@link F0ChatDraftPost} for why they are not scheduled posts without a
+   * date. Only ever THEIRS: nobody sees anyone else's drafts.
+   */
+  draftPosts?: F0ChatDraftPost[]
+}
+
+/**
+ * A pinned post as the bar needs it: enough to name it, and its id to jump to.
+ * The post itself is fetched by the jump, not carried here.
+ */
+export type F0ChatPinnedPost = {
+  id: string
+  title: string
+  /** ISO — when it was pinned, which is what orders the list. */
+  pinnedAt: string
+  /**
+   * The opening of the body as PLAIN TEXT — the row clamps it to two lines.
+   * Titles alone read as a list of headlines, and two lines of the post is
+   * usually what tells you whether this is the one you were looking for.
+   *
+   * Plain text, not the post's HTML: this is a preview, so the host strips
+   * (`stripHtml`) rather than F0 rendering markup it would then have to clamp.
+   */
+  excerpt?: string
+  /**
+   * The post's cover, as a THUMBNAIL beside the title. A feed of photographs is
+   * remembered as photographs — the picture finds the post faster than the
+   * headline does. Absent ⇒ the row is text, full width.
+   */
+  thumbnailUrl?: string
+}
+
+/** A post waiting for its moment. */
+export type F0ChatScheduledPost = {
+  id: string
+  title: string
+  /** ISO — when it becomes visible. */
+  scheduledFor: string
+  /** Present ⇒ it announces an event, and the row says so. */
+  event?: F0ChatPostEvent
+  /** As {@link F0ChatPinnedPost.excerpt} — plain text, clamped to two lines. */
+  excerpt?: string
+  /** As {@link F0ChatPinnedPost.thumbnailUrl}. An event's own image counts. */
+  thumbnailUrl?: string
+}
+
+/**
+ * A post written and kept, with no date and no audience yet.
+ *
+ * ITS OWN LIST, not a scheduled post without a date. Pinned and scheduled are
+ * facts about the CHANNEL — everyone who publishes there sees the same queue —
+ * while a draft is one person's, and folding them together leaves "whose
+ * drafts?" unanswered in the one place it must not be. The verbs differ for the
+ * same reason: a draft has no moment to bring forward, so it is published or
+ * deleted, never "published NOW" or "cancelled".
+ */
+export type F0ChatDraftPost = {
+  id: string
+  /** May be empty — a draft is unfinished by definition, title included. */
+  title: string
+  /** ISO — when it was last written to, which is how drafts are ordered. */
+  savedAt: string
+  /** As {@link F0ChatPinnedPost.excerpt}. */
+  excerpt?: string
+  /** As {@link F0ChatPinnedPost.thumbnailUrl}. */
+  thumbnailUrl?: string
+}
+
+/**
+ * An entry in a shelf row's menu — publish now, edit, cancel, delete.
+ *
+ * Same shape as {@link F0ChatPostAction} minus the post argument: neither a
+ * scheduled post nor a draft is an {@link F0ChatPost} (no author line, no
+ * counters, no reactions — nothing has happened yet), so the host closes over
+ * the one it is building the menu for instead of being handed it back.
+ */
+export type F0ChatShelfAction = {
+  id: string
+  label: string
+  icon?: IconType
+  onClick: () => void
+  /** Renders the entry in red (cancel). */
+  critical?: boolean
 }
 
 export type F0ChatImageAttachment = {
@@ -403,15 +512,262 @@ export type F0ChatSystemMessage = {
   body?: string
 }
 
+/**
+ * An event a post announces (a talk, an offsite, a townhall). It takes the
+ * card's MEDIA SLOT — it replaces the cover rather than stacking under it —
+ * which is why both are optional and only one is ever drawn.
+ *
+ * `date` is ISO like every other timestamp in this file: the item has to
+ * survive a transport, and a `Date` doesn't. F0 parses it once, at the render
+ * edge.
+ */
+export type F0ChatPostEvent = {
+  title: string
+  /** When the event HAPPENS — not when the post was published. */
+  date: string
+  /** Where: a room, an office, a URL if it's remote. */
+  place?: string
+  mediaUrl?: string
+}
+
+/**
+ * A COMMUNITY POST: the third kind of transcript item, and the only one that is
+ * neither a bubble nor a centered line.
+ *
+ * It's an item rather than a separate `runtime.posts` list because everything a
+ * feed needs is already built around {@link F0ChatItem}: day separators, the
+ * unread divider, `markRead`, pagination, jump-to-item, the sticky date pill
+ * and the sidebar badge all fall out of `id` + `createdAt`, and each would need
+ * a second implementation if posts lived outside.
+ *
+ * The payload is DATA AND NOTHING ELSE — no handlers, no ReactNode: it is what
+ * a transport can carry, the same rule as {@link F0ChatCardAttachment}. What a
+ * click does comes from {@link F0ChatRuntime.openPost}; what its menu offers,
+ * from {@link F0ChatRuntime.postActions}.
+ *
+ * What F0 DERIVES and the host must not send: the words "in" and "Comment"
+ * (i18n), and the wording of the counters (numbers on the wire,
+ * `{{count}} comments` at the edge; otherwise the host translates what F0
+ * already translates). The community's name is the one exception, and only in
+ * an aggregated feed — see {@link F0ChatPost.community}.
+ */
+export type F0ChatPost = {
+  type: "post"
+  id: string
+  /** ISO — feeds day separators, ordering and unread exactly like a message's. */
+  createdAt: string
+  /**
+   * Who wrote it. The SAME identity type as a message's author, so hover cards,
+   * mentions and read receipts keep meaning one thing across the union. Omit it
+   * when the community itself publishes (there is no person to name).
+   */
+  author?: F0ChatUser
+  /**
+   * Whether the current user wrote it. Feeds the default edit/delete policy in
+   * `postActions` — NOT any alignment: a post is never tinted "mine", it takes
+   * the full width for everyone.
+   */
+  isMine?: boolean
+  /** One-line headline, always visible (the card clamps it to two lines). */
+  title: string
+  /**
+   * The body, as SANITIZED HTML — posts are written in a rich text editor, so
+   * unlike a message's plain `body` this one carries formatting. Sanitizing is
+   * the host's job: F0 hands it straight to the card (`PostDescription`), and a
+   * transport that returns raw user HTML would inject it here.
+   */
+  description?: string
+  /**
+   * An image or a video. Drawn in a 16:9 box RESERVED BEFORE it loads, so a
+   * post never changes height after being measured — which is what a
+   * virtualized transcript demands of any row (see `chatRowHeightEstimate`).
+   */
+  mediaUrl?: string
+  /** An event announcement, drawn INSTEAD of `mediaUrl`. */
+  event?: F0ChatPostEvent
+  /** How many people opened it. Omit when the host doesn't count visits — the
+   * counters line then shows comments alone. */
+  viewCount?: number
+  /**
+   * How many comments it has. Always present: "0 comments" is information (it's
+   * an invitation), whereas a missing counter reads as a broken card.
+   */
+  commentCount: number
+  /**
+   * Reactions, in the SAME shape as a message's — so they go through the same
+   * {@link F0ChatRuntime.toggleReaction} and {@link F0ChatRuntime.loadReactionUsers}
+   * with the post's id as the item id. A post with no reactions still shows the
+   * picker: that is the affordance for adding the first.
+   */
+  reactions?: F0ChatReaction[]
+  /**
+   * Files hanging off the post. Not shown on the feed card — a row of download
+   * chips is not something you skim past — so these only ever paint in the
+   * detail view.
+   */
+  attachments?: F0ChatPostAttachment[]
+  /**
+   * Whether this post takes comments and reactions at all. The author can turn
+   * them off per post, and when they are off BOTH disappear — the reaction bar
+   * and the comment section are one block, and half of it is worse than none.
+   * @default true
+   */
+  allowCommentsAndReactions?: boolean
+  /**
+   * An action the reader has to take before the post counts as done. Present
+   * ⇒ the detail view shows the acknowledgement bar; `completedAt` decides
+   * whether it asks or confirms.
+   */
+  requiredAction?: F0ChatPostRequiredAction
+  /**
+   * Whether the current user may edit, delete or reconfigure this post — the
+   * host's own policy, not something F0 can infer from `isMine` (a moderator
+   * manages posts that aren't theirs). Drives the detail view's overflow menu.
+   */
+  canManage?: boolean
+  /**
+   * ISO ⇒ this post is pinned in its community, and its card says so.
+   *
+   * Only the badge: the BAR reads {@link F0ChatChannel.pinnedPosts}, because a
+   * pinned post is usually not in the loaded window at all.
+   */
+  pinnedAt?: string
+  /**
+   * Where the post was published, named on the card as "… in Barcelona".
+   *
+   * ONLY for an aggregated feed — a channel that gathers posts from several
+   * communities at once. In a single community's channel the answer is already
+   * the channel title an inch above every card, so sending it there prints the
+   * same word twice per post; omit it and F0 draws no origin at all.
+   *
+   * That makes this the one field where the host tells F0 something F0 would
+   * otherwise derive, and the reason is that an aggregated feed is the one
+   * place where the derivation is wrong: "which of my communities is this
+   * from?" is the question the reader actually has, and the channel can't
+   * answer it.
+   *
+   * Clicking it calls {@link F0ChatRuntime.openCommunity}; without that
+   * handler the name is still drawn, just not as a link.
+   */
+  community?: F0ChatPostCommunity
+}
+
+/** The community a post came from, for an aggregated feed's origin label. */
+export type F0ChatPostCommunity = {
+  id: string
+  /** As the reader knows it — "Barcelona", "Company news". No `#`. */
+  name: string
+}
+
+/** A file attached to a post: the chip is a download link, nothing more. */
+export type F0ChatPostAttachment = {
+  id: string
+  filename: string
+  url: string
+}
+
+/**
+ * "Read and acknowledge" — the only action type that exists. A union of one on
+ * purpose: the product ships two more as "Coming soon", and a bare string here
+ * would let a host send one that nothing renders.
+ */
+export type F0ChatPostRequiredAction = {
+  type: "acknowledge"
+  /** ISO, when the CURRENT user completed it. Absent ⇒ still pending. */
+  completedAt?: string
+}
+
+/** A comment on a post. */
+export type F0ChatPostComment = {
+  id: string
+  author: F0ChatUser
+  /** Sanitized HTML — comments carry mentions, so they are not plain text. */
+  text: string
+  createdAt: string
+  /** Whether the current user may edit or delete it. */
+  isMine?: boolean
+}
+
+/** One entry of "who has opened this post". */
+export type F0ChatPostVisit = {
+  id: string
+  /** Absent when the host cannot resolve the visitor — rendered as "Anonymous". */
+  author?: F0ChatUser
+  createdAt: string
+}
+
 /** Anything that can appear in the transcript, oldest → newest. */
-export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage
+export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage | F0ChatPost
 
 export const isSystemMessage = (
   item: F0ChatItem
 ): item is F0ChatSystemMessage => item.type === "system"
 
+/**
+ * A WHITELIST, not "anything that isn't a system row". The transcript's item
+ * union grows (posts, and whatever comes after), and every growth would
+ * otherwise be classified as a message here — silently, with no compile error,
+ * across the ~40 call sites that narrow through this guard. A post would come
+ * out with a delivery footer, editable with ↑, and would crash the client-side
+ * search on a `body` it doesn't have.
+ */
 export const isUserMessage = (item: F0ChatItem): item is F0ChatMessage =>
-  item.type !== "system"
+  item.type === undefined || item.type === "message"
+
+export const isPost = (item: F0ChatItem): item is F0ChatPost =>
+  item.type === "post"
+
+/**
+ * A single entry in a post's overflow menu (edit, delete, pin, report). Already
+ * localized, like {@link F0ChatHeaderAction.label} — F0 never knows which of
+ * these the current user is allowed, so the host builds the list per post.
+ */
+export type F0ChatPostAction = {
+  id: string
+  label: string
+  icon?: IconType
+  onClick: (post: F0ChatPost) => void
+  /** Renders the entry in red (delete, report). */
+  critical?: boolean
+}
+
+/**
+ * What the post composer produces — the whole form, not a subset.
+ *
+ * Files go RAW, un-uploaded: a post's media belongs in its own storage rather
+ * than the chat's attachment bucket, so reusing `uploadFiles` would leave it in
+ * the wrong place — and this lets the host publish atomically (upload + create)
+ * in one transaction it can roll back whole.
+ */
+export type F0ChatCreatePostInput = {
+  title: string
+  /** Sanitized HTML from the editor. Empty is valid: a headline with a photo
+   * is a post. */
+  description?: string
+  /** The cover, raw. One file: an image or a video, never both. */
+  cover?: File | null
+  /** Files attached to the body. */
+  files?: File[]
+  mentions?: F0ChatMention[]
+  /** Which community it goes to. The composer only ever offers the ones the
+   * host said the user can post in. */
+  communityId?: string
+  /** Present ⇒ the post announces an event, and its card draws that instead of
+   * the cover. */
+  event?: F0ChatPostEvent
+  /** @default true */
+  allowCommentsAndReactions?: boolean
+  /** @default false — mailing everyone is opt-in, not opt-out. */
+  sendNotifications?: boolean
+  /** Present ⇒ readers must acknowledge it. */
+  requiredAction?: F0ChatPostRequiredAction["type"]
+  /**
+   * When it becomes visible. `undefined` publishes now, an ISO string schedules
+   * it, and `null` saves a draft — the three modes the composer offers, in one
+   * field, exactly as the product's own API models them.
+   */
+  publishedAt?: string | null
+}
 
 export type F0ChatSendInput = {
   body: string
@@ -610,10 +966,27 @@ export type F0ChatEvents = {
   /** A card attachment was activated — `source` tells the footer button apart
    * from a click on the card body. Carries no title or URL. */
   onCardActivated?: (p: { source: "card" | "action" }) => void
+  /** Opening a post from the feed. `source` separates a click on the card from
+   * one on the Comment button. Carries no title. */
+  onPostOpened?: (p: { source: "card" | "comment" }) => void
+  /** An entry of a post's overflow menu was chosen. The host already knows what
+   * its own action does — this is here so the MENU's use is measurable. */
+  onPostActionInvoked?: (p: { actionId: string }) => void
+  /** The post composer was opened. Pair with `onPostCompositionCancelled` to
+   * measure abandonment — the host only sees posts that were published. */
+  onPostCompositionStarted?: () => void
+  /** The composer was dismissed without publishing. `hadDraft` distinguishes
+   * an accidental open from giving up on written text. */
+  onPostCompositionCancelled?: (p: { hadDraft: boolean }) => void
   onSearchOpened?: () => void
   onSearchResultNavigated?: (p: { direction: "next" | "prev" }) => void
   onJumpedToQuotedMessage?: () => void
   onJumpedToBottom?: () => void
+  /** The community shelf was opened on one of its two lists. */
+  onShelfOpened?: (p: { list: "pinned" | "scheduled" | "draft" }) => void
+  /** A scheduled post was opened from the shelf. Its counterpart for pinned
+   * posts is `openPost`'s `source: "pinned"`. */
+  onScheduledPostOpened?: () => void
 }
 
 /**
@@ -766,6 +1139,108 @@ export type F0ChatRuntime = {
    * ignore the parameter.
    */
   markRead?: (untilMessageId?: string) => void | Promise<void>
+  /**
+   * Publish a post (community channels). Same optimistic contract as
+   * `sendMessage` — client-side id, synchronous echo with `type: "post"`,
+   * reconcile by id — with ONE deliberate difference: it returns a promise the
+   * composer AWAITS. A post is written in a dialog, and the dialog has to stay
+   * open until it knows the post landed; losing a page of text to a dropped
+   * request is a different order of loss from losing a line.
+   *
+   * Omit it and the publish affordance never mounts, even where `canSend` is
+   * true — there would be nowhere for the post to go.
+   */
+  createPost?: (input: F0ChatCreatePostInput) => Promise<void>
+  /**
+   * Open a post — its page or its dialog, with the comments. F0 owns no
+   * navigation, so the card, the Comment button and the counter all call here;
+   * `source` tells them apart for the host's telemetry.
+   *
+   * Without it the card is not clickable — and `CommunityPost` drops the
+   * pointer cursor, the hover tint and the focus ring on its own, which is
+   * exactly what should happen when there is nowhere to go.
+   */
+  openPost?: (
+    id: string,
+    context: { source: "card" | "comment" | "pinned" }
+  ) => void
+  /**
+   * Go to a community, from the origin label an aggregated feed puts on each
+   * card (see {@link F0ChatPost.community}).
+   *
+   * Separate from `openPost` because it is a different destination — the
+   * community, not the post — and hosts wire the two to different routes.
+   * Omit it and the name is still drawn, just not clickable: an aggregated feed
+   * that cannot navigate should still say where each post came from.
+   */
+  openCommunity?: (communityId: string) => void
+  /**
+   * Each post's overflow menu. FUNCTION form, like `headerActions`: every post
+   * offers exactly what the user may do to THAT post, and only the host knows.
+   * F0 keeps it behind a ref (like {@link F0ChatEvents}), so it can be rebuilt
+   * every render without re-rendering the feed.
+   */
+  postActions?: (post: F0ChatPost) => F0ChatPostAction[]
+  /**
+   * The post whose page is open right now, beside the feed. Its card is drawn
+   * SELECTED, so the feed keeps saying where you are in it.
+   *
+   * The host's to tell, not F0's: `openPost` hands over and F0 hears nothing
+   * back — where it opened, whether the reader then navigated somewhere else,
+   * whether they arrived on that post by a link instead of from this feed. A
+   * card that lit up on click and stayed lit would be lying by the second page.
+   *
+   * Omit and no card is ever selected.
+   */
+  activePostId?: string
+  /**
+   * Take a post off the community's pinned list.
+   *
+   * PINNING is not here: it is a decision about one post, taken where that post
+   * is, so it belongs in `postActions` alongside edit and delete — where the
+   * host already decides who may do what. Unpinning is taken looking at ALL the
+   * pins at once, and that place — the pinned list — exists only inside F0, so
+   * there is nowhere else to put it.
+   *
+   * Omit and the pinned list is read-only (still a way to find them).
+   */
+  unpinPost?: (postId: string) => void | Promise<void>
+  /**
+   * Each scheduled post's menu — publish now, edit, cancel. Same story as
+   * `postActions`: only the host knows what its API allows, and every one of
+   * these writes to the post backend rather than the chat transport.
+   */
+  scheduledActions?: (post: F0ChatScheduledPost) => F0ChatShelfAction[]
+  /**
+   * Open a scheduled post. Separate from `openPost` because it is NOT an
+   * {@link F0ChatPost}: it has no counters, no reactions and no comments —
+   * nothing has happened to it yet. The host decides what it shows; a
+   * PREVIEW of the post as the community will see it is the useful answer.
+   *
+   * Without it the shelf's scheduled rows are not clickable, and the row's
+   * menu is the only way in.
+   */
+  openScheduledPost?: (postId: string) => void
+  /**
+   * Each draft's menu — publish, delete. Kept apart from `scheduledActions`
+   * because the verbs are not the same ones: there is no moment to bring
+   * forward and nothing to cancel.
+   */
+  draftActions?: (post: F0ChatDraftPost) => F0ChatShelfAction[]
+  /**
+   * Open a draft. The useful answer is the COMPOSER with the draft loaded —
+   * what you want from something half-written is to keep writing it — which is
+   * also why this is not `openScheduledPost` with a different argument: that
+   * one previews, this one edits.
+   *
+   * Without it the shelf's draft rows are not clickable.
+   */
+  openDraftPost?: (postId: string) => void
+  /**
+   * Escape hatch: a host with its own post-creation flow opens it here, and F0
+   * does not mount its dialog. Present ⇒ `createPost` is never called.
+   */
+  composePost?: () => void
   /**
    * Per-channel permissions (frozen / read-only channels, moderation…). Omit
    * for the default policy — see {@link F0ChatCapabilities}.

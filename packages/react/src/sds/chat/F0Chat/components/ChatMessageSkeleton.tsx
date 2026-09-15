@@ -32,6 +32,7 @@ const SkeletonRun = ({
 export const ChatMessageSkeleton = (): ReactNode => (
   <div
     aria-hidden
+    data-testid="chat-message-skeleton"
     className="mx-auto flex w-full max-w-content flex-col gap-6 px-4 pt-4"
   >
     <SkeletonRun mine={false} widths={["w-48", "w-32"]} />

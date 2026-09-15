@@ -84,6 +84,23 @@ export type F0DialogInternalProps = {
    * @default true
    */
   dismissable?: boolean
+  /**
+   * Whether pressing OUTSIDE the dialog closes it. Escape and the close button
+   * are unaffected — this is the narrow version of {@link dismissable}, which
+   * takes all three away at once.
+   *
+   * Turn it off for a SIDE PANEL that sits beside something the reader is meant
+   * to keep using. A left/right dialog is already non-modal — no overlay, no
+   * focus trap — so the surface next to it is live; but Radix still treats a
+   * click there as "dismiss", which means using the thing beside the panel
+   * closes the panel. That is the case this exists for: a post open next to an
+   * open chat.
+   *
+   * Leave it on (the default) for an ordinary drawer, where clicking away IS
+   * how you close it.
+   * @default true
+   */
+  dismissOnInteractOutside?: boolean
   // Whether to render the dialog as a bottom sheet on mobile
   asBottomSheetInMobile?: boolean
   // The position of the dialog
