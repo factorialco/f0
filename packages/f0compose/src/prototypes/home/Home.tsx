@@ -16,7 +16,6 @@ import {
   CheckCircleLine,
   DollarBill,
   Ellipsis,
-  Feed,
   File,
   PalmTree,
   Reaction,
@@ -79,6 +78,7 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
+import { DailyDigestButton } from "./one/DailyDigestButton"
 import { HomeRecommendationCarousel } from "./one/HomeRecommendationCarousel"
 import { PanelExpand } from "./PanelCollapse"
 import { PeopleScreen } from "./people/PeopleScreen"
@@ -1033,7 +1033,6 @@ function HomeNavbar({
 /** What a Factorial user actually opens Home to do, in the order the day
  *  tends to need them. Clock-in leads and is the only one that acts. */
 const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
-  { icon: Feed, label: "View daily digest" },
   { icon: Timer, label: "Review this week's timesheet" },
   { icon: CheckCircleLine, label: "Approve 3 pending time off requests" },
   { icon: PalmTree, label: "Request time off for the Easter break" },
@@ -1514,6 +1513,16 @@ function HomeCanvas() {
             (Angel, 2026-09-14): the widgets float on it as cards, they do
             not cut it off. Behind everything, deaf to the pointer. */}
         {homeLanding && <HomeBackdrop />}
+        {/* The digest stands on its own at the foot of the canvas, out of
+            the recommendation row (Angel, 2026-09-15). Absolutely placed,
+            so the composer keeps the midline it is centred on. */}
+        {homeLanding && (
+          <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-10 flex justify-center">
+            <div className="pointer-events-auto">
+              <DailyDigestButton />
+            </div>
+          </div>
+        )}
         {/* Left-hand Comms stack — conversations opened from the nav. Same
           window system as the widgets, mirrored (Figma 2707:406513). */}
         <ChatsColumn
