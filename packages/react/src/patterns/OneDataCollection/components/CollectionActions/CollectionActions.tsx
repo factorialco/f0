@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import {
+  ButtonDropdownVariant,
+  F0ButtonDropdown,
+} from "@/components/F0ButtonDropdown"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Ellipsis } from "@/icons/app"
@@ -16,6 +19,7 @@ import {
 type CollectionActionProps = {
   primaryActions?: PrimaryActionItemDefinition[]
   primaryActionsLabel?: string
+  primaryActionsVariant?: ButtonDropdownVariant
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
   upsellAction?: UpsellActionDefinition
@@ -24,6 +28,7 @@ type CollectionActionProps = {
 export const CollectionActions = ({
   primaryActions,
   primaryActionsLabel,
+  primaryActionsVariant = "default",
   secondaryActions,
   otherActions,
   upsellAction,
@@ -70,6 +75,7 @@ export const CollectionActions = ({
         <F0ButtonDropdown
           mode="dropdown"
           size="md"
+          variant={primaryActionsVariant}
           trigger={primaryActionsLabel}
           items={primaryActionsButtons.map((action, index) => ({
             label: action.label,
@@ -95,7 +101,7 @@ export const CollectionActions = ({
               size="md"
               onClick={action.onClick}
               icon={action.icon}
-              variant="default"
+              variant={primaryActionsVariant}
               label={action.label}
               loading={action.loading}
               disabled={action.disabled}
@@ -112,6 +118,7 @@ export const CollectionActions = ({
         primaryActionsButtons.length > 1 && (
           <F0ButtonDropdown
             size="md"
+            variant={primaryActionsVariant}
             items={primaryActionsButtons.map((action, index) => ({
               label: action.label,
               icon: action.icon,

@@ -1,4 +1,5 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
+import type { ButtonDropdownVariant } from "@/components/F0ButtonDropdown"
 import {
   BaseDataAdapter,
   BaseFetchOptions,
@@ -173,6 +174,10 @@ export type DataCollectionSourceDefinition<
   primaryActions?: PrimaryActionsDefinitionFn
   /** Label for the primary actions dropdown trigger button */
   primaryActionsLabel?: string
+  /** Visual variant for the primary actions button. "default" renders the
+   * highlighted primary style; use "outline" or "neutral" when another element
+   * on the page already holds the primary action. */
+  primaryActionsVariant?: ButtonDropdownVariant
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
   /** Optional upsell button rendered in the collection toolbar. Opt-in per

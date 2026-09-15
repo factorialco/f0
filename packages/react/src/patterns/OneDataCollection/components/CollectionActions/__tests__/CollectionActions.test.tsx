@@ -43,6 +43,7 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
     onClick,
     mode,
     trigger,
+    variant,
   }: Record<string, unknown>) => (
     <div
       data-testid={
@@ -51,6 +52,7 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
       data-items={JSON.stringify(items)}
       data-mode={mode || "split"}
       data-trigger={trigger ? String(trigger) : undefined}
+      data-variant={variant as string}
     >
       <button
         data-testid={
@@ -264,6 +266,81 @@ describe("CollectionActions", () => {
       // Should use dropdown mode since at least one action has a description
       expect(screen.getByTestId("button-dropdown-mode")).toBeInTheDocument()
       expect(screen.queryByTestId("button-split-mode")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("primaryActionsVariant", () => {
+    it("renders the single primary action with the default variant when not provided", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        { label: "New expense", icon: mockIcon, onClick: vi.fn() },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(screen.getByTestId("f0-button")).toHaveAttribute(
+        "data-variant",
+        "default"
+      )
+    })
+
+    it("applies the variant to the single primary action button", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        { label: "New expense", icon: mockIcon, onClick: vi.fn() },
+      ]
+
+      render(
+        <CollectionActions
+          primaryActions={actions}
+          primaryActionsVariant="outline"
+        />
+      )
+
+      expect(screen.getByTestId("f0-button")).toHaveAttribute(
+        "data-variant",
+        "outline"
+      )
+    })
+
+    it("applies the variant to the split button", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        { label: "New expense", icon: mockIcon, onClick: vi.fn() },
+        { label: "Mileage", icon: mockIcon, onClick: vi.fn() },
+      ]
+
+      render(
+        <CollectionActions
+          primaryActions={actions}
+          primaryActionsVariant="outline"
+        />
+      )
+
+      expect(screen.getByTestId("button-split-mode")).toHaveAttribute(
+        "data-variant",
+        "outline"
+      )
+    })
+
+    it("applies the variant to the dropdown-mode button", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "New expense",
+          icon: mockIcon,
+          description: "Create a new expense",
+          onClick: vi.fn(),
+        },
+      ]
+
+      render(
+        <CollectionActions
+          primaryActions={actions}
+          primaryActionsVariant="neutral"
+        />
+      )
+
+      expect(screen.getByTestId("button-dropdown-mode")).toHaveAttribute(
+        "data-variant",
+        "neutral"
+      )
     })
   })
 

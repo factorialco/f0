@@ -307,6 +307,7 @@ const OneDataCollectionComp = <
     // Actions
     primaryActions,
     primaryActionsLabel,
+    primaryActionsVariant,
     secondaryActions,
     upsellAction,
     // Summary
@@ -1772,6 +1773,7 @@ const OneDataCollectionComp = <
                     <CollectionActions
                       primaryActions={primaryActionItems}
                       primaryActionsLabel={primaryActionsLabel}
+                      primaryActionsVariant={primaryActionsVariant}
                       secondaryActions={secondaryActionsItems}
                       otherActions={otherActionsItems}
                       upsellAction={upsellActionItem}

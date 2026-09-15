@@ -322,6 +322,31 @@ export const MultiplePrimaryActionsExample: Story = {
   },
 }
 
+export const OutlinePrimaryActionsExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      primaryActions: () => [
+        {
+          label: "Create user",
+          icon: Ai,
+          onClick: () => console.log(`Creating a user`),
+        },
+        {
+          label: "Create admin",
+          icon: Person,
+          onClick: () => console.log(`Creating a admin`),
+        },
+      ],
+      primaryActionsVariant: "outline",
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
 export const MultiplePrimaryActionsWithDescriptionsExample: Story = {
   render: () => {
     const dataSource = useDataCollectionSource({
