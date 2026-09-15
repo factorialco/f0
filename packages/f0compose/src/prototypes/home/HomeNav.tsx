@@ -33,6 +33,7 @@ import {
   SearchPerson,
   Settings,
   Sliders,
+  UserProtected,
   Home as HomeIcon,
   Hub as HubIcon,
   Inbox as InboxIcon,
@@ -1194,6 +1195,7 @@ function HubPanelBody() {
 function FilesPanelBody() {
   const [searchParams, setSearchParams] = useSearchParams()
   const page = searchParams.get("page") ?? ""
+  const view = searchParams.get("view")
   const open = (next: string) => {
     goHome()
     setSearchParams(next ? { view: "files", page: next } : { view: "files" })
@@ -1225,6 +1227,17 @@ function FilesPanelBody() {
           label="Trash"
           active={page === "trash"}
           onClick={() => open("trash")}
+        />
+        {/* Policies came over from Tools (Angel, 2026-09-14): same kind of
+            thing as Library and Templates, so it lives beside them. */}
+        <NavRow
+          icon={UserProtected}
+          label="Policies"
+          active={view === "policies"}
+          onClick={() => {
+            goHome()
+            setSearchParams({ view: "policies" })
+          }}
         />
       </div>
     </div>

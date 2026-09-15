@@ -121,8 +121,6 @@ export const meta: PrototypeMeta = {
 // while Home is mounted and restore them on unmount.
 const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
-  /* The native header keeps its F0 layout; only the separate live-runtime switch is hidden because this prototype uses Ask One. */
-  [data-home-page-header] [role="switch"] { display: none; }
   /* A white widget on a near-white page needs its edge back: secondary
      border + the soft shadow, which is what "floating" means in the new
      ramp. Before 2026-09-14 the page was 6% grey and the border alone did

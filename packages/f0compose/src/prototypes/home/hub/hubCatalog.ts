@@ -163,14 +163,9 @@ export const ADMIN_HUB: HubGroup[] = [
     // points at that screen — PeopleScreen IS Organization › People
     // (Figma 2730:459215). Without that mapping the prototype's one real
     // Hub destination would lose its only entry point in this panel.
-    items: [
-      "Organization",
-      "Documents",
-      "Policies",
-      "Tickets",
-      "Spaces",
-      "Kudos",
-    ],
+    // Policies moved to the Files panel on 2026-09-14 (Angel): it is a
+    // library of documents, so it belongs beside Library and Templates.
+    items: ["Organization", "Documents", "Tickets", "Spaces", "Kudos"],
   },
   {
     label: "Operations",

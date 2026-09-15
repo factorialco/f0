@@ -13,6 +13,14 @@
 [data-hybrid-canvas] {
   width: 100%;
   transition:
+    opacity 280ms ease,
+    visibility 420ms;
+}
+/* Width eases ONLY while the conversation panel is sharing the canvas.
+   Navigation must never animate it (Angel, 2026-09-14). */
+[data-hybrid-root][data-mode="side"] [data-hybrid-canvas],
+[data-hybrid-root][data-mode="focus"] [data-hybrid-canvas] {
+  transition:
     width 420ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 280ms ease,
     visibility 420ms;
@@ -242,6 +250,13 @@
   background: #f7f7f7;
 }
 [data-hybrid-canvas] {
+  transition:
+    opacity 280ms ease,
+    visibility 420ms,
+    border-radius 420ms;
+}
+[data-hybrid-root][data-mode="side"] [data-hybrid-canvas],
+[data-hybrid-root][data-mode="focus"] [data-hybrid-canvas] {
   transition:
     width 420ms cubic-bezier(0.22, 1, 0.36, 1),
     height 420ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -491,7 +506,10 @@ body:has([data-hybrid-root]:not([data-view="home"])) [data-home-panel] {
 [data-hybrid-root]:not([data-view="widgets"]) [data-hybrid-canvas] {
   border: 1px solid hsl(var(--neutral-10));
   border-radius: 16px;
-  @apply shadow-md;
+  /* Barely there: one point of lightness separates the sheet from the
+     ground, so the shadow only has to hint at the edge (Angel,
+     2026-09-14 — shadow-md was too strong for that). */
+  box-shadow: 0 1px 3px 0 rgba(13, 22, 37, 0.03);
 }
 /* Home sits in the same white sheet as Inbox, Calendar and the modules
    (Angel, 2026-09-14: "ahora está flotando free"). Its canvas keeps its
