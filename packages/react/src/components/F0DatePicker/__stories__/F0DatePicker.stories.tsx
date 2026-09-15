@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { addMonths, subDays } from "date-fns"
 import MockDate from "mockdate"
-import { ComponentType, useState } from "react"
+import { useState } from "react"
 import { expect, fn, screen, userEvent, within } from "storybook/test"
 import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
 import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
@@ -12,22 +12,13 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
-import {
-  datepickerSizes,
-  DatePickerValue,
-  F0DatePickerDefaultProps,
-} from "../types"
+import { datepickerSizes, DatePickerValue } from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
 const meta = {
   title: "DatePicker",
-  // Type-only narrowing to the default branch. `F0DatePickerProps` is a union
-  // and the component is not generic, so `Meta<typeof F0DatePicker>` intersects
-  // the branches and collapses every story's args to `never`. The inline
-  // variant has its own stories file. Runtime component and docgen are
-  // unchanged.
-  component: F0DatePicker as ComponentType<F0DatePickerDefaultProps>,
+  component: F0DatePicker,
   async beforeEach() {
     MockDate.set(mockDate)
 
@@ -134,7 +125,7 @@ const meta = {
       )
     },
   ],
-} satisfies Meta<F0DatePickerDefaultProps>
+} satisfies Meta<typeof F0DatePicker>
 
 export default meta
 type Story = StoryObj<typeof meta>
