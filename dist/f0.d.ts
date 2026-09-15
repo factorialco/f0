@@ -4163,6 +4163,15 @@ export declare type Data<R extends RecordType> = {
     records: WithGroupId<R>[];
     type: "grouped" | "flat";
     groups: GroupRecord<R>[];
+    /**
+     * The records with no value at the FIRST grouping level — they belong to no
+     * group at all, and read as plain rows above the ones that do.
+     *
+     * The counterpart of a group's `ownRecords` one level up: between them a list
+     * can be grouped without being uniformly grouped, which is what a real
+     * hierarchy looks like — some rows nested two deep, some one, some loose.
+     */
+    ungroupedRecords?: WithGroupId<R>[];
 };
 
 /**
@@ -5100,6 +5109,10 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -5765,6 +5778,174 @@ export declare const defaultTranslations: {
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly emptyTitle: "No posts yet";
+            readonly emptyDescription: "Posts shared in this community will appear here.";
+            readonly emptyDescriptionCanPost: "Be the first to post here.";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly pinnedPostsCount: {
+                readonly one: "{{count}} pinned post";
+                readonly other: "{{count}} pinned posts";
+            };
+            readonly pinPost: "Pin post";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly noPinnedPosts: "No pinned posts";
+            readonly noPinnedPostsDescription: "Pin a post and it stays at the top of this community.";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledPostsCount: {
+                readonly one: "{{count}} scheduled post";
+                readonly other: "{{count}} scheduled posts";
+            };
+            readonly scheduledEvent: "Event";
+            /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
+            readonly publishesAt: "Publishes {{when}}";
+            readonly noScheduledPosts: "Nothing scheduled";
+            readonly noScheduledPostsDescription: "Posts you schedule will wait here until their time.";
+            readonly scheduledActions: "Scheduled post actions";
+            readonly publishNow: "Publish now";
+            readonly cancelScheduled: "Cancel";
+            readonly draftPosts: "Drafts";
+            readonly draftPostsCount: {
+                readonly one: "{{count}} draft";
+                readonly other: "{{count}} drafts";
+            };
+            /** Where a scheduled row prints its date, a draft prints this. */
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly publishDraft: "Publish";
+            readonly deleteDraft: "Delete draft";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
+    };
+    readonly communities: {
+        readonly composer: {
+            readonly createPost: "Create post";
+            readonly createEvent: "Create event";
+            readonly editPost: "Edit post";
+            readonly basicInformation: "Basic information";
+            readonly postSettings: "Post settings";
+            readonly postCover: "Post cover";
+            readonly addMedia: "Drag and drop or click here";
+            readonly addMediaSubtitle: "any image, video or GIF";
+            readonly addMediaSize: "1200x600px";
+            readonly deletePhoto: "Delete photo";
+            readonly deleteVideo: "Delete video";
+            readonly coverActions: "Cover options";
+            readonly title: "Title";
+            readonly titlePlaceholder: "e.g. World Mental Health Day";
+            readonly description: "Description";
+            readonly descriptionPlaceholder: "Share what's special about it";
+            readonly attachmentsSizePerPost: "Up to 150 MB in attachments per post";
+            readonly previousAttachments: "Previously added attachments";
+            readonly isEventLabel: "This is an event";
+            readonly isEventDescription: "Select this to include a date, time, and location for this event.";
+            readonly eventStartDate: "Event start date";
+            readonly eventStartTime: "Start time";
+            readonly eventLocation: "Event location";
+            readonly eventLocationPlaceholder: "Where will this take place?";
+            readonly requireAction: "Require action";
+            readonly requireActionDescription: "Select how you want to track that users have taken the required action";
+            readonly actionType: "Action type";
+            readonly actionTypePlaceholder: "Select action type";
+            readonly actionTypeAcknowledge: "Acknowledge post";
+            readonly actionTypeAcknowledgeDescription: "Employees read and acknowledge the post";
+            readonly actionTypeWatchVideo: "Watch video";
+            readonly actionTypeWatchVideoDescription: "Employees watch the entire video";
+            readonly actionTypeClickedLink: "Clicked a link";
+            readonly actionTypeClickedLinkDescription: "Employees click the first link in the post";
+            readonly actionTypeComingSoon: "Coming soon";
+            readonly continue: "Continue";
+            readonly publishTitle: "Publish";
+            readonly publishDescription: "When publishing the post, it will be visible in the dashboard of each employee.";
+            readonly publish: "Publish";
+            readonly selectCommunity: "Select community";
+            readonly allowCommentsAndReactions: "Allow comments and reactions.";
+            readonly sendEmailNotification: "Send email notification";
+            readonly schedulePost: "Schedule post";
+            readonly scheduleDate: "Date";
+            readonly scheduleTime: "Time";
+            readonly confirm: "Confirm";
+            readonly cancel: "Cancel";
+            readonly saveAsDraft: "Save as draft";
+            readonly save: "Save";
+            readonly cantBeEmpty: "can't be empty";
+            readonly invalidInput: "Invalid input. Only alphanumeric characters are allowed";
+            readonly publishedSuccess: "The post has been published";
+            readonly scheduledSuccess: "The post has been scheduled";
+            readonly draftSuccess: "The post has been saved as draft";
+            readonly publishError: "There was an error creating the post, please try again.";
+        };
+        readonly detail: {
+            readonly postActions: "Post actions";
+            readonly edit: "Edit post";
+            readonly delete: "Delete post";
+            readonly deleteDescription: "Are you sure you want to delete this post? This action cannot be undone.";
+            readonly proceed: "Proceed";
+            readonly turnInteractionsOff: "Turn comments and reactions off";
+            readonly turnInteractionsOn: "Turn comments and reactions on";
+            readonly insights: "Insights";
+            readonly visits: {
+                readonly one: "Visit";
+                readonly other: "Visits";
+            };
+            readonly postViews: "Post views";
+            readonly anonymous: "Anonymous";
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+            readonly commentPlaceholder: "Click here to write a comment...";
+            readonly submit: "Submit";
+            readonly deleteComment: "Delete comment";
+            readonly deleteCommentDescription: "Are you sure you want to delete this comment? This action cannot be undone.";
+            readonly editComment: "Edit";
+            readonly acknowledgeRequired: "Post acknowledgement required";
+            readonly acknowledge: "I acknowledge";
+            readonly acknowledgeLater: "Acknowledge later";
+            readonly acknowledgedOn: "Acknowledged on {{date}}, at {{time}}";
+            readonly closePostTitle: "Close post?";
+            readonly closePostDescription: "You haven't acknowledged this post yet. You can acknowledge it later.";
+            readonly closePost: "Close post";
+            readonly continueReading: "Continue reading";
+            readonly close: "Close";
+            readonly home: "Home";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -5811,6 +5992,31 @@ export declare const defaultTranslations: {
         readonly countryWithDialCode: "{{country}} {{dialCode}}";
         readonly searchCountry: "Search country or dial code";
         readonly noResults: "No country found";
+    };
+    readonly locationInput: {
+        readonly country: "Country";
+        readonly addressLine1: "Address line 1";
+        readonly addressLine2: "Address line 2";
+        readonly city: "City";
+        readonly state: "Region";
+        readonly postalCode: "Postal code";
+        readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
+        readonly searchCountry: "Search country";
+        readonly noCountryResults: "No country found";
+        readonly noResults: "No addresses found";
+        readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
+        readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -8744,6 +8950,13 @@ declare type F0ButtonDropdownBaseProps<T = string> = {
      * @default undefined
      */
     tooltip?: string;
+    /**
+     * Where the menu is portalled. Defaults to the document body; inside a modal
+     * layer pass that layer's own element (an `F0Dialog` publishes it as
+     * `portalContainer`) so its focus trap contains the menu rather than fighting
+     * it.
+     */
+    container?: HTMLElement | null;
 };
 
 /**
@@ -12879,6 +13092,14 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * Hides the trigger's dropdown arrow. For fields where the select is an
+     * implementation detail rather than the affordance: the value is a typed
+     * search result, not one of a few known options, and the arrow promises a
+     * list the user is not meant to browse.
+     * @default false
+     */
+    hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
@@ -12894,6 +13115,8 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     children?: never;
     className?: never;
     asList?: never;
+    hideArrow?: never;
+    searchEmptyAction?: never;
     showPreview?: never;
     required?: never;
     loading?: never;
@@ -12964,6 +13187,12 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
      */
     onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
+    /**
+     * Rendered under the empty state, for the way out when the list has nothing
+     * to offer. `onCreate` draws its own action, so this is for the cases where
+     * the answer is not "create what you typed".
+     */
+    searchEmptyAction?: React.ReactNode;
     actions?: Action_2[];
     /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
     onCreate?: (value: string) => Promise<void> | void;
@@ -12985,6 +13214,31 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
      * @default false for field selects; true for inline selects
      */
     fitContentWidth?: boolean;
+    /**
+     * What the TRIGGER says for a selected option — decided once for the whole
+     * select, instead of per option inside `mapOptions`.
+     *
+     * A row is read in the context the list gives it: under its group headers,
+     * beside its siblings. The trigger has none of that, so a label that is clear
+     * in the list can be ambiguous alone ("Backend", once the project header is
+     * gone). This is where the context goes back on, in whatever order reads
+     * best — `"Ship the API (Backend, Apollo)"` as readily as
+     * `"Apollo › Backend › Ship the API"`.
+     *
+     * Receives the option — its own `label`, and the `selectedLabel` `mapOptions`
+     * set if any — together with the record it was mapped from. Build the path
+     * from the RECORD (`item.project.name`), not from the group headers on
+     * screen: a selection made earlier, or one restored from `defaultItem`, is
+     * shown by the trigger while its group is nowhere in the loaded data, and the
+     * record is the part that is always there.
+     *
+     * Returns the string to show. It replaces `selectedLabel` for every selected
+     * option; the rows in the list are untouched.
+     */
+    getSelectedLabel?: (selection: {
+        option: F0SelectItemObject<T, ResolvedRecordType<R>>;
+        item?: ResolvedRecordType<R>;
+    }) => string;
 } & WithDataTestIdProps;
 
 /**
@@ -14671,6 +14925,15 @@ export declare interface GridStackReactWidget extends Omit<GridStackWidget, "con
  */
 export declare const GROUP_ID_SYMBOL: unique symbol;
 
+/**
+ * Joins a nested group's key to its parent's. Sub-group keys have to be unique
+ * across the whole tree — "Barcelona" under Engineering and "Barcelona" under
+ * Sales are two different groups, and everything downstream (open/closed state,
+ * selection) addresses a group by its key alone. A unit separator keeps the key
+ * unambiguous without colliding with anything that can appear in a field value.
+ */
+export declare const GROUP_KEY_SEPARATOR = "\u001F";
+
 declare interface GroupGridProps<Widget extends GroupGridWidget, Deps extends Record<string, unknown> = Record<string, unknown>> {
     widgets: Optional<Widget, "x" | "y">[];
     editMode?: boolean;
@@ -14720,6 +14983,14 @@ declare type GroupGridWidgetSize = {
 export declare type GroupingDefinition<R extends RecordType> = {
     /** Whether grouping is mandatory or the user can chose not to group */
     mandatory?: boolean;
+    /**
+     * Hides the grouping picker, leaving the grouping itself in force. For a
+     * grouping the product decides and the user does not: the headers render,
+     * the control to change them never does.
+     *
+     * Pair it with `mandatory: true` and a `defaultGrouping`/`currentGrouping`,
+     * or the state can still arrive as "no grouping" with no way to leave it.
+     */
     hideSelector?: boolean;
     groupBy: {
         [K in RecordPaths<R>]?: {
@@ -14742,19 +15013,62 @@ export declare type GroupingDefinition<R extends RecordType> = {
 });
 
 /**
+ * One level of grouping: a field of the definition's `groupBy` map, plus the
+ * direction its groups are laid out in.
+ * @template Grouping - The grouping definition
+ */
+export declare type GroupingLevelState<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
+    field: keyof Grouping["groupBy"];
+    order?: SortOrder;
+};
+
+/**
  * The selected the grouping state
  * @template Grouping - The grouping definition
  */
-export declare type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
-    field: keyof Grouping["groupBy"];
-    order?: SortOrder;
-} | undefined;
+export declare type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> = (GroupingLevelState<R, Grouping> & {
+    /**
+     * Extra grouping levels, nested inside `field` in the order given: the
+     * second level splits each first-level group, the third splits each of
+     * those, and so on.
+     *
+     * Every level names another field of the SAME `groupBy` map, so it reuses
+     * that field's `name` and `label` and needs no configuration of its own.
+     * A level whose field the definition doesn't declare is ignored rather
+     * than thrown on, so a stale `thenBy` degrades to fewer levels instead of
+     * an empty list.
+     *
+     * Renderers that don't know about nesting see only the first level: each
+     * top-level group still carries all of its records flattened in
+     * `records`, exactly as it does without `thenBy`.
+     */
+    thenBy?: GroupingLevelState<R, Grouping>[];
+}) | undefined;
 
 export declare type GroupRecord<RecordType> = {
     key: string;
     label: string | Promise<string>;
     itemCount: number | undefined | Promise<number | undefined>;
     records: RecordType[];
+    /**
+     * The next grouping level cut out of `records`, present only when the
+     * grouping state asked for one (`thenBy`). `records` stays complete either
+     * way, so a renderer that ignores this field shows exactly what it showed
+     * before nesting existed.
+     */
+    subGroups?: GroupRecord<RecordType>[];
+    /**
+     * The records that belong to THIS group and to none of its `subGroups` —
+     * the ones with no value at the next level down.
+     *
+     * A tree whose branches differ in depth has these: a subproject with tasks
+     * under it becomes a sub-group, while one without stays a row of its parent.
+     * Without somewhere to put them they would bucket under the missing value
+     * and surface beneath a heading with no name.
+     *
+     * Only set when `subGroups` is, and only when some record lacks that value.
+     */
+    ownRecords?: RecordType[];
 };
 
 /**
@@ -18103,10 +18417,10 @@ export declare const setDataCollectionUrlParams: <CurrentFiltersState extends Fi
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
  */
 export declare type SidePanelContent = {
     id: string;
@@ -19545,10 +19859,13 @@ export declare type UsageLimitsPopoverSide = (typeof usageLimitsPopoverSides)[nu
 export declare const usageLimitsPopoverSides: readonly ["top", "bottom"];
 
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
