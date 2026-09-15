@@ -5,119 +5,155 @@ import {
   F0Heading,
   F0TagStatus,
   F0Text,
-} from "@factorialco/f0-react";
-import "./home-generation.css";
-import { Pencil } from "@factorialco/f0-react/icons/app";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { OnePersonListItem } from "@factorialco/f0-react/dist/experimental";
-import { setHomePreparing } from "./homeGeneration";
+} from "@factorialco/f0-react"
 
-import { avatarFor } from "@/fixtures/helpers";
+import "./home-generation.css"
+import { OnePersonListItem } from "@factorialco/f0-react/dist/experimental"
+import { Pencil } from "@factorialco/f0-react/icons/app"
+import { useEffect, useLayoutEffect, useState } from "react"
 
-import type { HomeArtifact } from "./homeSetup";
+import { avatarFor } from "@/fixtures/helpers"
 
-import { FactorialAgentIcon } from "../FactorialAgentIcon";
-import { PROFILE_PEOPLE, needsYouTasks } from "../fixtures";
-import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets";
-import { candidates } from "../home-widgets/recruitment";
-import { NeedsYouItem } from "../NeedsYouItem";
+import type { HomeArtifact } from "./homeSetup"
+
+import { FactorialAgentIcon } from "../FactorialAgentIcon"
+import { PROFILE_PEOPLE, needsYouTasks } from "../fixtures"
+import { RecruitmentWindow } from "../home-widgets/OriginalStackWidgets"
+import { candidates } from "../home-widgets/recruitment"
+import { NeedsYouItem } from "../NeedsYouItem"
 import {
   startHomeFocusEdit,
   type ChatMessage,
   type Conversation,
-} from "../one/conversationStore";
-import { COMMUNITY_POSTS } from "../windows/communityPosts";
-import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh";
-import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data";
-import { useFixedWidgets } from "./widgetPreferences";
-import { useWidgetCatalog } from "../widget-editor/model";
+} from "../one/conversationStore"
+import { useWidgetCatalog } from "../widget-editor/model"
+import { COMMUNITY_POSTS } from "../windows/communityPosts"
+import { setHomePreparing } from "./homeGeneration"
+import { HomeLoadingSkeleton, useHomeRefreshing } from "./homeRefresh"
+import { REPORT_SAMPLE, PERSONAL_TASKS, HOME_FOCUS_LABELS } from "./mock-data"
+import { useFixedWidgets } from "./widgetPreferences"
 
 // Pending questions replace the original composer in its existing slot; completed questions stay in the transcript.
 export function HomeQuestion({
   message,
 }: {
-  conversation: Conversation;
-  message: ChatMessage;
+  conversation: Conversation
+  message: ChatMessage
 }) {
-  const q = message.question!;
-  if (!q.answer && !q.skipped) return null;
-  return <F0Text content={q.text} variant="body" />;
+  const q = message.question!
+  if (!q.answer && !q.skipped) return null
+  return <F0Text content={q.text} variant="body" />
 }
 
 // Same 10 characters / 24ms cadence as the original One conversation store.
-function HomeStreamingText({ content, animate, preparing }: { content: string; animate: boolean; preparing: boolean }) {
-  const [chars, setChars] = useState(0);
+function HomeStreamingText({
+  content,
+  animate,
+  preparing,
+}: {
+  content: string
+  animate: boolean
+  preparing: boolean
+}) {
+  const [chars, setChars] = useState(0)
   useEffect(() => {
-    if (!animate) return;
-    setChars(0);
-    const timer = window.setInterval(() => setChars(value => {
-      if (value + 10 >= content.length) window.clearInterval(timer);
-      return value + 10;
-    }), 24);
-    return () => window.clearInterval(timer);
-  }, [animate, content]);
-  return <div className="home-streaming-text">
-    <div aria-hidden="true" className="home-text-measure"><F0Text content={content} /></div>
-    <div><F0Text content={preparing ? "" : animate ? content.slice(0, chars) : content} /></div>
-  </div>;
+    if (!animate) return
+    setChars(0)
+    const timer = window.setInterval(
+      () =>
+        setChars((value) => {
+          if (value + 10 >= content.length) window.clearInterval(timer)
+          return value + 10
+        }),
+      24
+    )
+    return () => window.clearInterval(timer)
+  }, [animate, content])
+  return (
+    <div className="home-streaming-text">
+      <div aria-hidden="true" className="home-text-measure">
+        <F0Text content={content} />
+      </div>
+      <div>
+        <F0Text
+          content={preparing ? "" : animate ? content.slice(0, chars) : content}
+        />
+      </div>
+    </div>
+  )
 }
 
 function Briefing({
   artifact,
   entrance,
 }: {
-  artifact: Extract<HomeArtifact, { kind: "briefing" }>;
-  entrance: boolean;
+  artifact: Extract<HomeArtifact, { kind: "briefing" }>
+  entrance: boolean
 }) {
-  const personalWidgets = useFixedWidgets(artifact.profile);
-  const widgetCatalog = useWidgetCatalog(artifact.profile);
-  const fixedWidgets = [...personalWidgets, ...widgetCatalog.employees];
-  const key = `f0compose:home:generated-v1:${artifact.profile}`;
+  const personalWidgets = useFixedWidgets(artifact.profile)
+  const widgetCatalog = useWidgetCatalog(artifact.profile)
+  const fixedWidgets = [...personalWidgets, ...widgetCatalog.employees]
+  const key = `f0compose:home:generated-v1:${artifact.profile}`
   const [stage, setStage] = useState(() => {
     try {
       return !entrance ||
         localStorage.getItem(key) ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? 3
-        : 0;
+        : 0
     } catch {
-      return 3;
+      return 3
     }
-  });
+  })
   useLayoutEffect(() => {
-    setHomePreparing(artifact.profile, stage === 0);
-    return () => setHomePreparing(artifact.profile, false);
-  }, [artifact.profile, stage]);
+    setHomePreparing(artifact.profile, stage === 0)
+    return () => setHomePreparing(artifact.profile, false)
+  }, [artifact.profile, stage])
   useEffect(() => {
-    if (stage === 3) return;
-    const prepare = window.setTimeout(() => setStage(1), 750);
+    if (stage === 3) return
+    const prepare = window.setTimeout(() => setStage(1), 750)
     const complete = window.setTimeout(() => {
-      setStage(3);
-      try { localStorage.setItem(key, "true"); } catch { /* Session remains usable. */ }
-      window.dispatchEvent(new Event("home-generation-complete"));
-    }, 1250);
-    return () => { clearTimeout(prepare); clearTimeout(complete); };
-  }, [key]);
+      setStage(3)
+      try {
+        localStorage.setItem(key, "true")
+      } catch {
+        /* Session remains usable. */
+      }
+      window.dispatchEvent(new Event("home-generation-complete"))
+    }, 1250)
+    return () => {
+      clearTimeout(prepare)
+      clearTimeout(complete)
+    }
+  }, [key])
   const focuses = artifact.focuses?.length
     ? artifact.focuses
-    : ["personal", "team"];
+    : ["personal", "team"]
   const tasks = [
     ...(artifact.focuses?.includes("team") ? needsYouTasks.slice(0, 1) : []),
     ...(focuses.includes("recruitment")
       ? needsYouTasks.filter((t) => t.module === "ats")
       : []),
     ...(focuses.includes("personal") ? PERSONAL_TASKS : []),
-  ];
-  const post = COMMUNITY_POSTS[0];
+  ]
+  const post = COMMUNITY_POSTS[0]
   const focusedOn = focuses
     .map((focus) =>
-      HOME_FOCUS_LABELS[focus as keyof typeof HOME_FOCUS_LABELS].toLowerCase(),
+      HOME_FOCUS_LABELS[focus as keyof typeof HOME_FOCUS_LABELS].toLowerCase()
     )
-    .join(" and ");
+    .join(" and ")
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
-      <HomeStreamingText content={`I’ve focused your briefing on ${focusedOn}.`} animate={stage === 1} preparing={stage === 0} />
-      {stage === 0 && <div className="home-preparation-status" role="status">Preparing your Home…</div>}
+      <HomeStreamingText
+        content={`I’ve focused your briefing on ${focusedOn}.`}
+        animate={stage === 1}
+        preparing={stage === 0}
+      />
+      {stage === 0 && (
+        <div className="home-preparation-status" role="status">
+          Preparing your Home…
+        </div>
+      )}
       {tasks.length > 0 && (
         <F0Box
           display="flex"
@@ -126,25 +162,42 @@ function Briefing({
           data-home-generated-section="attention"
         >
           <HomeStreamingText
-            animate={stage === 1} preparing={stage === 0}
+            animate={stage === 1}
+            preparing={stage === 0}
             content={
               focuses.includes("personal")
                 ? "Your Modelo 145 is due tomorrow. You also have a survey due this week and 3 forms to complete."
                 : `You have ${tasks.length} ${tasks.length === 1 ? "item" : "items"} to review. Here’s where you can help.`
             }
           />
-          <div className="home-generation-region" data-preparing={stage === 0 || undefined}>
-          <F0Box display="flex" flexDirection="column" aria-hidden={stage === 0 || undefined}>
-            {tasks.map((task, index) => (
-              <NeedsYouItem
-                key={task.id}
-                task={task}
-                surface="primary"
-                index={index}
-              />
-            ))}
-          </F0Box>
-          {stage === 0 && <div className="home-generation-skeleton" aria-label="Preparing your tasks">{tasks.map(task => <OnePersonListItem.Skeleton key={task.id} />)}</div>}
+          <div
+            className="home-generation-region"
+            data-preparing={stage === 0 || undefined}
+          >
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              aria-hidden={stage === 0 || undefined}
+            >
+              {tasks.map((task, index) => (
+                <NeedsYouItem
+                  key={task.id}
+                  task={task}
+                  surface="primary"
+                  index={index}
+                />
+              ))}
+            </F0Box>
+            {stage === 0 && (
+              <div
+                className="home-generation-skeleton"
+                aria-label="Preparing your tasks"
+              >
+                {tasks.map((task) => (
+                  <OnePersonListItem.Skeleton key={task.id} />
+                ))}
+              </div>
+            )}
           </div>
         </F0Box>
       )}
@@ -159,39 +212,50 @@ function Briefing({
             content="From your communities, you’ve been invited to a Taco party:"
             variant="label"
           />
-          <div className="home-generation-region" data-preparing={stage === 0 || undefined}>
-          <F0Card
-            compact
-            title={post.title}
-            descriptionSize="small"
-            description={`${post.author} in ${post.community} · ${post.posted}`}
-            avatar={{
-              type: "person",
-              firstName: "Eleanor",
-              lastName: "Pena",
-              src: avatarFor(post.seed),
-            }}
-          />
-          {stage === 0 && <div className="home-generation-skeleton"><OnePersonListItem.Skeleton /></div>}
+          <div
+            className="home-generation-region"
+            data-preparing={stage === 0 || undefined}
+          >
+            <F0Card
+              compact
+              title={post.title}
+              descriptionSize="small"
+              description={`${post.author} in ${post.community} · ${post.posted}`}
+              avatar={{
+                type: "person",
+                firstName: "Eleanor",
+                lastName: "Pena",
+                src: avatarFor(post.seed),
+              }}
+            />
+            {stage === 0 && (
+              <div className="home-generation-skeleton">
+                <OnePersonListItem.Skeleton />
+              </div>
+            )}
           </div>
         </F0Box>
       )}
-      <HomeStreamingText content="Let me know if you are missing anything, so we can adjust." animate={stage === 1} preparing={stage === 0} />
+      <HomeStreamingText
+        content="Let me know if you are missing anything, so we can adjust."
+        animate={stage === 1}
+        preparing={stage === 0}
+      />
     </F0Box>
-  );
+  )
 }
 
 export function HomeArtifactView({
   artifact,
   entrance = false,
 }: {
-  artifact: HomeArtifact;
-  entrance?: boolean;
+  artifact: HomeArtifact
+  entrance?: boolean
 }) {
   if (artifact.kind === "briefing")
-    return <Briefing artifact={artifact} entrance={entrance} />;
+    return <Briefing artifact={artifact} entrance={entrance} />
   if (artifact.kind === "routine") {
-    const d = artifact.draft;
+    const d = artifact.draft
     return (
       <F0Card title={d.title} description="Routine · local simulation">
         <F0Box display="flex" flexDirection="column" gap="md">
@@ -206,16 +270,16 @@ export function HomeArtifactView({
           <F0Text content={`Outcome: ${d.action}`} />
         </F0Box>
       </F0Card>
-    );
+    )
   }
-  const d = artifact.draft;
-  const recruitment = d.metric === "recruitment";
+  const d = artifact.draft
+  const recruitment = d.metric === "recruitment"
   const actual = recruitment
     ? REPORT_SAMPLE.daysWithoutProgress
     : Math.round(
-        (REPORT_SAMPLE.expenseActual / REPORT_SAMPLE.expenseBudget - 1) * 100,
-      );
-  const alert = actual > d.threshold;
+        (REPORT_SAMPLE.expenseActual / REPORT_SAMPLE.expenseBudget - 1) * 100
+      )
+  const alert = actual > d.threshold
   return (
     <F0Card title={d.title} description={`Report · ${d.cadence} · sample data`}>
       <F0Box display="flex" flexDirection="column" gap="md">
@@ -261,17 +325,17 @@ export function HomeArtifactView({
         )}
       </F0Box>
     </F0Card>
-  );
+  )
 }
 
 export function GuidedHome({ conversation }: { conversation: Conversation }) {
   const loading = useHomeRefreshing(
-    conversation.homeSetup?.profile ?? conversation.homeBriefing ?? "admin",
-  );
-  const setup = conversation.homeSetup;
+    conversation.homeSetup?.profile ?? conversation.homeBriefing ?? "admin"
+  )
+  const setup = conversation.homeSetup
   const saved = [...conversation.messages]
     .reverse()
-    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact;
+    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact
   const artifact: HomeArtifact = setup
     ? {
         kind: "briefing",
@@ -283,7 +347,7 @@ export function GuidedHome({ conversation }: { conversation: Conversation }) {
         kind: "briefing",
         focus: "team",
         profile: conversation.homeBriefing!,
-      });
+      })
   return (
     <div className="mx-auto w-[712px] max-w-full pb-6">
       {loading ? (
@@ -295,24 +359,24 @@ export function GuidedHome({ conversation }: { conversation: Conversation }) {
         <HomeArtifactView artifact={artifact} entrance />
       )}
     </div>
-  );
+  )
 }
 
 export function HomeSessionBar({
   conversation,
 }: {
-  conversation: Conversation;
+  conversation: Conversation
 }) {
-  const profile = conversation.homeSetup?.profile ?? conversation.homeBriefing;
-  if (!profile || conversation.homeSetup?.purpose) return null;
+  const profile = conversation.homeSetup?.profile ?? conversation.homeBriefing
+  if (!profile || conversation.homeSetup?.purpose) return null
   const saved = [...conversation.messages]
     .reverse()
-    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact;
+    .find((m) => m.homeArtifact?.kind === "briefing")?.homeArtifact
   const focuses = conversation.homeSetup?.focuses ??
     (saved?.kind === "briefing" ? saved.focuses : undefined) ?? [
       "personal",
       "team",
-    ];
+    ]
   return (
     <F0Box display="flex" flexDirection="column" gap="md" paddingY="xl">
       <FactorialAgentIcon width={40} height={40} />
@@ -340,5 +404,5 @@ export function HomeSessionBar({
         </F0Box>
       </F0Box>
     </F0Box>
-  );
+  )
 }

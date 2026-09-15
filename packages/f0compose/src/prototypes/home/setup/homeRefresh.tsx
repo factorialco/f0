@@ -1,7 +1,9 @@
-import { useSyncExternalStore } from "react"
 import { CommunityPostSkeleton } from "@factorialco/f0-react/dist/experimental"
-import { FactorialAgentIcon } from "../FactorialAgentIcon"
+import { useSyncExternalStore } from "react"
+
 import type { ProfileId } from "../profileStore"
+
+import { FactorialAgentIcon } from "../FactorialAgentIcon"
 
 const listeners = new Set<() => void>()
 const refreshing = new Set<ProfileId>()
@@ -39,11 +41,7 @@ export function useHomeRefreshing(profile: ProfileId) {
 // Original One working-state composition, with the approved bot artwork.
 export function HomeWorking() {
   return (
-    <div
-      role="status"
-      className="flex items-center gap-2"
-      data-home-working
-    >
+    <div role="status" className="flex items-center gap-2" data-home-working>
       <FactorialAgentIcon width={24} height={24} />
       <p className="shine-text text-pretty">Updating your home…</p>
     </div>
@@ -52,11 +50,7 @@ export function HomeWorking() {
 
 export function HomeLoadingSkeleton() {
   return (
-    <div
-      aria-label="Loading home content"
-      aria-busy="true"
-      data-home-skeleton
-    >
+    <div aria-label="Loading home content" aria-busy="true" data-home-skeleton>
       <CommunityPostSkeleton />
     </div>
   )

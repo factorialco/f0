@@ -1,7 +1,7 @@
 import { startConversationWithContext } from "../one/conversationStore"
 import { recordFor } from "./catalog"
-import { candidates, phaseLabel } from "./recruitment"
 import { documentRecords } from "./documents"
+import { candidates, phaseLabel } from "./recruitment"
 import { upcomingShifts } from "./shifts"
 
 // Same widget data and original conversation entry, now invoked by the header.
@@ -10,9 +10,7 @@ export function askWidget(id: string) {
   let value = ""
   let reply: string[] = []
   if (id === "payslip" || id === "holidays") {
-    const record = recordFor(
-      id === "payslip" ? "My payslip" : "My time off"
-    )
+    const record = recordFor(id === "payslip" ? "My payslip" : "My time off")
     if (!record) return
     title = record.title
     value = record.value

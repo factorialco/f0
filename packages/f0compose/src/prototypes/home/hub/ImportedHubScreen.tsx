@@ -43,7 +43,7 @@ export function ImportedHubScreen({ view }: { view: string }) {
   const content = child?.element ?? (
     <OneEmptyState
       title="No sample detail available"
-      description="The reference prototype includes the list, but this detail screen has not been built yet."
+      description="The reference prototype includes the list, but this detail screen has not been built yet"
     />
   )
   return (

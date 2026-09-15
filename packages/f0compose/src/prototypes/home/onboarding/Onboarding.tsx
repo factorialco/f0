@@ -1,12 +1,15 @@
-import { NavigationTour } from "./NavigationTour"
-import "./onboarding.css"
 import { F0Box, F0Button, F0Heading, F0Text } from "@factorialco/f0-react"
+
+import "./onboarding.css"
 import { F0OneIcon } from "@factorialco/f0-react/dist/ai"
 import { ArrowLeft } from "@factorialco/f0-react/icons/app"
+
+import type { ProfileId } from "../profileStore"
+
+import { completeOnboardingHome } from "../one/conversationStore"
 import { F0ClarifyingPanel } from "../one/f0-clarifying/F0ClarifyingPanel"
 import { Connections } from "../preferences/PreferencesScreen"
-import type { ProfileId } from "../profileStore"
-import { completeOnboardingHome } from "../one/conversationStore"
+import { NavigationTour } from "./NavigationTour"
 import {
   getOnboarding,
   SUMMARY_OPTIONS,

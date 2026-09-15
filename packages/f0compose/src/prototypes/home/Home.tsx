@@ -1,29 +1,43 @@
-import { Onboarding } from "./onboarding/Onboarding"
-import { getOnboarding, useOnboarding } from "./onboarding/state"
+import type { IconType } from "@factorialco/f0-react"
+
 import {
   F0AvatarPerson,
   F0Button,
   F0Heading,
   type ModuleId,
 } from "@factorialco/f0-react"
-import { Breadcrumbs, F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
 import {
+  Breadcrumbs,
+  F0AvatarModule,
+} from "@factorialco/f0-react/dist/experimental"
+import {
+  Calendar,
+  ChartLine,
+  CheckCircleLine,
+  DollarBill,
   Ellipsis,
+  File,
+  PalmTree,
   Reaction,
+  Receipt,
   Settings,
+  Timer,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
+import type { ChatId } from "./comms/chats"
 import type { LeftPaneId } from "./comms/ChatsColumn"
 import type { WindowId } from "./windows/types"
 
 import { ActivityScreen } from "./activity/ActivityScreen"
 import { AgentsScreen } from "./agents/AgentsScreen"
 import { agentById } from "./agents/agentStore"
+import { ArtifactsScreen } from "./artifacts/ArtifactsScreen"
 import { AskFactorialButton } from "./AskFactorial"
 import { CalendarScreen } from "./calendar/CalendarScreen"
+import { CHATS_BY_ID } from "./comms/chats"
 import {
   animateChatClose,
   ChatsColumn,
@@ -37,6 +51,7 @@ import {
   onChatsCloseRequest,
   setOpenChats,
 } from "./comms/chatStore"
+import { MessagesScreen } from "./comms/MessagesScreen"
 import { EmployeeCanvas } from "./EmployeeCanvas"
 import {
   PROFILE_PEOPLE,
@@ -44,12 +59,19 @@ import {
   type ProfilePerson,
 } from "./fixtures"
 import { HomeNav } from "./HomeNav"
+import { setHomeScrolled, useHomeScrolled } from "./homeScrollStore"
 import { ImportedHubScreen, hasImportedScreen } from "./hub/ImportedHubScreen"
+import { ToolsScreen } from "./hub/ToolsScreen"
 import { HybridHome } from "./HybridHome"
+import { InboxScreen } from "./inbox/InboxScreen"
 import { ModuleScreen } from "./ModuleScreen"
 import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
+import { setNavPanelOpen, useNavPanelOpen } from "./navPanelStore"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
+import { Onboarding } from "./onboarding/Onboarding"
+import { getOnboarding, useOnboarding } from "./onboarding/state"
+import { ClockInPill } from "./one/ClockInPill"
 import { completeOnboardingHome, enterHome } from "./one/conversationStore"
 import {
   goHome,
@@ -57,23 +79,32 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
+import { DailyDigest } from "./one/DailyDigest"
+import { DailyDigestButton } from "./one/DailyDigestButton"
+import { HomeRecommendationCarousel } from "./one/HomeRecommendationCarousel"
+import { PanelExpand } from "./PanelCollapse"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
-import { HomeSessionBar, GuidedHome } from "./setup/HomeArtifacts"
+import { GuidedHome } from "./setup/HomeArtifacts"
+import { HomeBackdrop } from "./waves/HomeBackdrop"
+import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
+import { useClockInWidgetRequests } from "./windows/clockInStore"
+import { ClockInWindow } from "./windows/ClockInWindow"
+import { FloatingWindow } from "./windows/FloatingWindow"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
 import { useWindows } from "./windows/useWindows"
+import { useWidgetCollapse } from "./windows/widgetCollapse"
 import {
   animateWindowClose,
   CANVAS_MIN_WIDTH,
   MaximizedWindow,
 } from "./windows/WindowsColumn"
-import "./icon-motion.css"
 
 /**
  * Home — "Needs you" (Manager view).
@@ -117,56 +148,96 @@ export const meta: PrototypeMeta = {
 // while Home is mounted and restore them on unmount.
 const FULL_BLEED_CSS = `
   [aria-label="Conversation"] [data-testid="card"] { border-color: hsl(var(--neutral-10)); }
-  /* The native header keeps its F0 layout; only the separate live-runtime switch is hidden because this prototype uses Ask One. */
-  [data-home-page-header] [role="switch"] { display: none; }
-  [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); box-shadow: none; }
+  /* A white widget on a near-white page needs its edge back: secondary
+     border + the soft shadow, which is what "floating" means in the new
+     ramp. Before 2026-09-14 the page was 6% grey and the border alone did
+     the work. */
+  [data-static-widget] [role="article"] { background: hsl(var(--neutral-0)); border-color: hsl(var(--neutral-10)); box-shadow: 0 2px 20px 0 rgba(13, 22, 37, 0.04); }
   [data-widget-overlay="true"] [role="article"] > :first-child,
   [data-widget-draggable="true"] [role="article"] > :first-child { cursor: grab; user-select: none; touch-action: none; padding-left: 24px; min-height: 40px; }
   [data-widget-draggable="true"] [role="article"] > :first-child:active { cursor: grabbing; }
   [data-widget-draggable="true"] [role="article"] > :first-child button { cursor: pointer; }
   [data-widget-overlay="true"] { cursor: grabbing; transform: scale(1.02); }
   [data-widget-overlay="true"] [role="article"] { box-shadow: 0 8px 24px hsl(var(--neutral-20)); }
-  [data-home-input-surface] { transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1); }
+  [data-home-input-surface] {
+    transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    /* A whisper of lift off the dotted backdrop (Angel, 2026-09-14) —
+       enough to separate the input from the grid, not enough to read as
+       a floating card. */
+    box-shadow: 0 1px 2px 0 rgba(13, 22, 37, 0.04), 0 6px 20px -6px rgba(13, 22, 37, 0.06);
+  }
   @media (prefers-reduced-motion: reduce) {
     [data-hybrid-composer], [data-home-input-surface] { transition: none !important; }
   }
   [aria-label="Conversation"] [data-testid="card"]:hover,
   [data-home-generated-section] .f0c-ease-hover:hover { background: hsl(var(--neutral-20)); box-shadow: none; }
   [aria-label="Conversation"] [data-testid="card"]:focus-within { box-shadow: none; }
-  main#content { padding: 0 !important; background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
+  /* THREE AppShell backgrounds, Angel's own values (2026-09-14). They
+     are close on purpose: the ramp says which layer is which, it is not
+     a contrast device.
+       rail      #F7F7F7  hsl(0 0% 97%) — the first sidebar, furthest back
+       ground    #FAFAFA  hsl(0 0% 98%) — the second sidebar and the
+                          surface behind the content sheet
+       sheet     #FCFCFC  hsl(0 0% 99%) — the content itself, with a
+                          secondary border and a shadow
+       cards     #FFFFFF  widgets, windows and menus, one step above the
+                          sheet they sit on
+     One ground, not two (Angel, 2026-09-14): with every view now sitting
+     in a white sheet, a second near-grey behind it was a difference you
+     could see but not name.
+     Literal hexes rather than f0 neutrals because f0's are navy alphas
+     (--neutral-5 composites to #F5F6F8, a cool cast he did not ask for)
+     and because a surface painted with alpha compounds when stacked.
+     Every one of them has its .dark counterpart below. */
+  .f0c-surface-chrome { background: #f5f5f5; }
+  .f0c-surface-page { background: #f7f7f7; }
+  main#content { padding: 0 !important; background: #f7f7f7; }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
      stable selector; :has() on the nav root is the only hook. */
   div:has(> [data-home-nav]) { width: auto !important; padding-left: 0 !important; }
-  /* Navigation and canvas share F0's secondary background. Inset shadows
-     separate columns without changing their content dimensions. */
-  [data-home-rail],
+  /* Rail and panel share the sidebar tier, so the hairline between THEM
+     is the only separation they get (Angel, 2026-09-14: border-secondary
+     between the first and the second sidebar). An inset shadow rather
+     than a border, so the rail's fixed 68px does not become 69. The
+     panel needs none: the tonal step to the page does that job. */
+  [data-home-rail] {
+    background: #f5f5f5;
+  }
+  [data-home-rail][data-panel="closed"] {
+    background: #f7f7f7;
+  }
   [data-home-panel] {
-    background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0));
-    box-shadow: inset -1px 0 0 rgba(5, 38, 87, 0.06);
+    background: #f7f7f7;
   }
-  /* The split conversation panel is another column of the same surface,
-     so it gets the same hairline — on its LEADING edge, since the canvas
-     is what it sits beside (the frame draws it as a border-right on the
-     canvas; an inset shadow here keeps the fixed content boxes from
-     shrinking, the same reason the nav columns use one). */
+  /* The hairline between the two sidebars; they share one ground, so it
+     is the only thing separating them. */
+  [data-home-rail][data-panel="open"] {
+    box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
+  }
+
+  /* The split conversation panel sits on the ground like everything
+     else; its own cards are what float. */
   [data-one-panel] {
-    background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0));
-    box-shadow: inset 1px 0 0 rgba(5, 38, 87, 0.06);
+    background: #f7f7f7;
   }
-  /* Dark: the light values above are experimental customs with no dark
-     pair, so rebuild the same relationships from f0's dark tokens — one
-     surface again (chrome base neutral-0 lifted by the --page overlay,
-     the identical formula the canvas uses), dividers to white-alpha. */
-  .dark main#content,
-  .dark [data-home-rail],
-  .dark [data-home-panel],
-  .dark [data-one-panel] {
-    background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
-  }
+  /* Dark: the light hexes above have no dark pair, so the same THREE
+     tiers are rebuilt from f0's dark tokens — sidebars the base, page the
+     base lifted by --page, floating lifted again (that one is f0's own
+     bg-f1-background, which flips on its own). */
+  .dark .f0c-surface-chrome,
   .dark [data-home-rail],
   .dark [data-home-panel] {
+    background: hsl(var(--neutral-0));
+  }
+  .dark .f0c-surface-page,
+  .dark main#content,
+  .dark [data-one-panel],
+  .dark .f0c-canvas-surface {
+    background: hsl(var(--neutral-0));
+  }
+  .dark [data-home-rail][data-panel="open"] {
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
   }
   .dark [data-one-panel] {
@@ -196,7 +267,13 @@ const FULL_BLEED_CSS = `
      The !important flags are needed throughout this block: f0 styles the
      form with Tailwind utilities that win over these selectors in
      practice, and the component exposes no className to do it properly. */
-  [data-one-composer] form { transition: border-color 140ms ease; }
+  [data-one-composer] form {
+    transition: border-color 140ms ease;
+    /* At rest the border is f0's DEFAULT (Angel, 2026-09-14) — the
+       composer sits on a patterned backdrop now, and a secondary edge
+       disappeared into the dots. */
+    border-color: hsl(var(--neutral-30)) !important;
+  }
   /* Gated to fine pointers: a touch tap fires :hover and would leave the
      composer stuck a step darker until the next tap elsewhere. */
   @media (hover: hover) and (pointer: fine) {
@@ -392,10 +469,16 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
-  .dark .f0c-canvas-surface {
+  .f0c-canvas-surface { background: #f7f7f7; }
+  /* Home is a white sheet now like every other view, so its sticky
+     greeting bar takes the sheet rather than the page tone — otherwise it
+     reads as a grey band behind "Welcome to your new Home". */
+  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: #fcfcfc; }
+  .dark [data-hybrid-root][data-view="home"] .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
+
+
   /* The People table's header is STICKY, so it needs an opaque ground or
      rows scroll through it — but f0 paints it bg-f1-background, i.e.
      white, and this canvas uses the secondary F0 background (it should not read as a
@@ -404,7 +487,7 @@ const FULL_BLEED_CSS = `
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))), hsl(var(--neutral-0)); }
+  main#content thead th { background: #f7f7f7; }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -419,8 +502,14 @@ const FULL_BLEED_CSS = `
      The main#content prefix is repeated only to out-specify the id
      selector above; without it this loses to a rule with an id in it. */
   main#content section[data-home-window] thead th,
-  main#content section[data-home-window] .f0c-canvas-surface {
-    background: hsl(var(--neutral-0));
+  main#content section[data-home-window] .f0c-canvas-surface,
+  /* Module screens render inside the floating canvas sheet, which is
+     white for every non-home view — a page-tier sticky header there is
+     the same grey band, one layer further in. Home is excluded: there the
+     sheet is transparent and the bar sits on the page itself. */
+  main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] thead th,
+  main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] .f0c-canvas-surface {
+    background: #fcfcfc;
   }
 
   .f0c-window-overlay {
@@ -836,9 +925,26 @@ function HomeNavbar({
   /** The section's own glyph, so the button says where it goes back to. */
 }) {
   const [, setParams] = useSearchParams()
+  const navPanelOpen = useNavPanelOpen()
   return (
+    // min-h-8 on the cluster, so the bar is 60px tall whether or not the
+    // expand button is mounted: without it the row collapsed to its
+    // padding with the panel open, and the centred composer jumped 16px
+    // on every toggle (Angel, 2026-09-15).
     <div className="flex w-full items-center justify-between p-[14px]">
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-h-8 min-w-0 items-center gap-2">
+        {/* The way back to the second level: with no panel there is no
+            header to hold its own toggle (Angel, 2026-09-14). */}
+        {!navPanelOpen && (
+          <F0Button
+            variant="ghost"
+            size="md"
+            icon={PanelExpand}
+            hideLabel
+            label="Expand panel"
+            onClick={() => setNavPanelOpen(true)}
+          />
+        )}
         {conversationTitle ? (
           <span className="flex min-w-0 items-center gap-2">
             {conversationEmoji && (
@@ -854,10 +960,20 @@ function HomeNavbar({
             </span>
           </span>
         ) : screenTitle === "Activity" || screenTitle === "Preferences" ? (
-          <Breadcrumbs breadcrumbs={[
-            { id: "home", label: "Home", href: "/p/home", onClick: () => { goHome(); setParams({}) } },
-            { id: screenTitle.toLowerCase(), label: screenTitle },
-          ]} />
+          <Breadcrumbs
+            breadcrumbs={[
+              {
+                id: "home",
+                label: "Home",
+                href: "/p/home",
+                onClick: () => {
+                  goHome()
+                  setParams({})
+                },
+              },
+              { id: screenTitle.toLowerCase(), label: screenTitle },
+            ]}
+          />
         ) : screenTitle ? (
           <span className="flex min-w-0 items-center gap-2">
             {/* No "policies" module in f0 — company_documents is the
@@ -873,9 +989,7 @@ function HomeNavbar({
         ) : null}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {conversationTitle ? (
-          null
-        ) : screenTitle ? (
+        {conversationTitle ? null : screenTitle ? (
           <div className="flex items-center">
             {screenActions ?? (
               <>
@@ -907,9 +1021,75 @@ function HomeNavbar({
             />
           </div>
         )}
-        <AskFactorialButton />
+        <OneSwitchSlot />
       </div>
     </div>
+  )
+}
+
+/**
+ * f0's One switch in the navbar. On a screen it is simply there; on Home
+ * it arrives once the composer has scrolled away, dropping in from the
+ * top (Angel, 2026-09-15) — which is why it is mounted a frame before it
+ * is shown, since a transition needs something to travel from.
+ */
+function OneSwitchSlot() {
+  const scrolled = useHomeScrolled()
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    if (!scrolled) {
+      setShown(false)
+      return
+    }
+    const frame = requestAnimationFrame(() => setShown(true))
+    return () => cancelAnimationFrame(frame)
+  }, [scrolled])
+  return (
+    <div
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "none" : "translateY(-14px)",
+        transition:
+          "opacity 140ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+    >
+      <AskFactorialButton />
+    </div>
+  )
+}
+
+/**
+ * The row under the composer. Clocking in confirms itself and leaves, and
+ * the digest steps up into the primary slot behind it (Angel,
+ * 2026-09-15).
+ */
+/** What a Factorial user actually opens Home to do, in the order the day
+ *  tends to need them. Clock-in leads and is the only one that acts. */
+/** Where the digest settles, measured from the suggestions (Angel,
+ *  2026-09-15). */
+const DIGEST_GAP = 128
+
+const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
+  { icon: Timer, label: "Review this week's timesheet" },
+  { icon: CheckCircleLine, label: "Approve 3 pending time off requests" },
+  { icon: PalmTree, label: "Request time off for the Easter break" },
+  { icon: Calendar, label: "See who is off this week" },
+  { icon: DollarBill, label: "Download my August payslip" },
+  { icon: Receipt, label: "Submit last week's expenses" },
+  { icon: File, label: "Sign my updated contract annex" },
+  { icon: ChartLine, label: "Finish my performance review" },
+]
+
+function HomeRecommendations() {
+  return (
+    <HomeRecommendationCarousel
+      // Clock-in leads and stays: once it is running it becomes the
+      // outline timer rather than leaving (Angel, 2026-09-15).
+      pinned={<ClockInPill />}
+      // Every recommendation is a ghost: the only filled thing on the row
+      // is clock-in, and it is not one of them (Angel, 2026-09-15).
+      items={RECOMMENDATIONS}
+    />
   )
 }
 
@@ -1003,6 +1183,18 @@ function HomeCanvas() {
   )
   const windows = useWindows()
   const chats = useChats()
+
+  // The rail's running timer lives in the nav's tree and cannot reach
+  // this one, so it bumps a counter and each bump toggles the clock-in
+  // card beside it (Angel, 2026-09-15). The widgets column is the static
+  // rail now, with no floating stack of its own, so the card is mounted
+  // here directly.
+  const clockInRequests = useClockInWidgetRequests()
+  const [clockInCard, setClockInCard] = useState(false)
+  useEffect(() => {
+    if (clockInRequests === 0) return
+    setClockInCard((open) => !open)
+  }, [clockInRequests])
   const { conversations, activeId } = useConversations()
   // Sub-screens have distinct URLs (?view=policies); an open conversation
   // always takes the canvas over the screen.
@@ -1016,9 +1208,15 @@ function HomeCanvas() {
   // the adjacent conversation, while the existing widget stacks stay intact.
   useResetParam(searchParams)
   const screenView = view
+  // A view id is not always a title: "messages" is the DMs section, and
+  // an open thread names itself.
+  const openChat = searchParams.get("chat")
   const screenTitle = screenView
-    ? screenView.charAt(0).toUpperCase() +
-      screenView.slice(1).replaceAll("-", " ")
+    ? screenView === "messages"
+      ? ((openChat ? CHATS_BY_ID[openChat as ChatId]?.title : undefined) ??
+        "DMs")
+      : screenView.charAt(0).toUpperCase() +
+        screenView.slice(1).replaceAll("-", " ")
     : undefined
   // Screens that run EDGE TO EDGE and scroll their own content: nesting
   // them inside the canvas gutters plus its scroller would give them a
@@ -1026,13 +1224,143 @@ function HomeCanvas() {
   const fullWidthView =
     screenView === "preferences" ||
     screenView === "activity" ||
+    screenView === "ai-activity" ||
     screenView === "calendar" ||
+    // The three screens the rail's own sections landed on since
+    // 2026-09-14: each scrolls its own content.
+    screenView === "messages" ||
+    screenView === "inbox" ||
+    screenView === "tools" ||
     screenView === "people" ||
     screenView === "organization" ||
     screenView === "agents" ||
     (screenView !== null && hasImportedScreen(screenView))
   // Only Home owns an in-flow composer slot. Module chats use HybridHome’s side panel.
   const showPromptBar = screenView === null
+  /**
+   * Landing on Home is JUST the composer (Angel, 2026-09-14: "remove the
+   * things below, leave just the chat there"). The briefing and the
+   * Needs-you list are what One produces once you ask it something — on
+   * arrival they were answering a question nobody had asked yet.
+   * A real thread still renders: that IS the chat.
+   */
+  const homeSession =
+    !!activeConversation?.homeBriefing ||
+    !!(activeConversation?.homeSetup && !activeConversation.homeSetup.purpose)
+  const homeLanding = showPromptBar && (!activeConversation || homeSession)
+
+  /**
+   * The landing's scroll, in two beats (Angel, 2026-09-15). The digest
+   * parks 24px below the fold, which is much further down than where it
+   * belongs — 256px under the suggestions. So the first stretch of
+   * scrolling PINS the input and its suggestions while the digest climbs
+   * into that gap; once the gap is 256px the pin releases and the whole
+   * page scrolls as one. The digest button, being the hint that there is
+   * anything down there, shows only at the very top.
+   */
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const pinRef = useRef<HTMLDivElement>(null)
+  const firstScreenRef = useRef<HTMLDivElement>(null)
+  const digestRef = useRef<HTMLDivElement>(null)
+  const recommendationsRef = useRef<HTMLDivElement>(null)
+  /** How far the first screen is held, which is also how long the dotted
+   *  grid takes to fade out. */
+  const pinned = useRef(0)
+  /** Scroll offset at which the composer meets the top of the content. */
+  const hideComposerAt = useRef(0)
+  const [atTop, setAtTop] = useState(true)
+  useLayoutEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    const pinBox = pinRef.current
+    const screen = firstScreenRef.current
+    const digest = digestRef.current
+    const recommendations = scroller.querySelector(
+      "[data-home-recommendations]"
+    )
+    // Every measurement below reads rects, which are only content
+    // coordinates while the scroller sits at the top. A resize mid-scroll
+    // (the One panel opening, say) would otherwise compute a pin of
+    // hundreds of pixels and shove the input back on screen (Angel,
+    // 2026-09-15), so a measure that cannot be trusted is deferred to the
+    // next time the page is home.
+    let stale = false
+    const measure = () => {
+      if (!pinBox || !screen || !digest || !recommendations) return
+      if (scroller.scrollTop > 0) {
+        stale = true
+        return
+      }
+      const height = scroller.clientHeight
+      // The screen is exactly one viewport and STICKS to the top, so it
+      // holds still for as long as the box around it is taller than it
+      // is. Sticky rather than a transform: a transform on the pills'
+      // ancestor makes it a backdrop root, and their blur would have
+      // nothing left to work on (Angel, 2026-09-15).
+      pinBox.style.height = `${height}px`
+      screen.style.height = `${height}px`
+      digest.style.marginTop = "0px"
+      const top = scroller.getBoundingClientRect().top
+      const base =
+        recommendations.getBoundingClientRect().bottom - top + DIGEST_GAP
+      const parked = height + 24
+      const pin = Math.max(0, parked - base)
+      // The One switch waits until the INPUT itself has gone under the
+      // top of the content: the screen is held for `pin`, and only then
+      // does the composer start climbing towards that edge (Angel,
+      // 2026-09-15).
+      const row = recommendationsRef.current
+      const sheet = scroller.querySelector("[data-home-input-surface]")
+      if (row && sheet) {
+        row.style.top = "0px"
+        row.style.top = `${
+          sheet.getBoundingClientRect().bottom -
+          row.getBoundingClientRect().top +
+          20
+        }px`
+      }
+      const composer = scroller.querySelector("[data-home-promptbar]")
+      hideComposerAt.current = composer
+        ? pin + Math.max(0, composer.getBoundingClientRect().top - top)
+        : pin + height / 2
+      pinBox.style.height = `${height + pin}px`
+      pinned.current = pin
+      // The digest parks 24px below the fold and climbs into its base
+      // position while the screen above it is held.
+      digest.style.marginTop = `${24 - pin}px`
+    }
+    measure()
+    const backdrop = document.querySelector<HTMLElement>("[data-home-backdrop]")
+    const follow = () => {
+      const offset = scroller.scrollTop
+      if (offset === 0 && stale) {
+        stale = false
+        measure()
+      }
+      setAtTop(offset < 8)
+      setHomeScrolled(offset >= hideComposerAt.current)
+      // Gone by the time the digest has climbed into place.
+      if (backdrop && pinned.current > 0)
+        backdrop.style.opacity = String(
+          Math.max(0, 1 - offset / pinned.current)
+        )
+    }
+    follow()
+    scroller.addEventListener("scroll", follow, { passive: true })
+    const observer = new ResizeObserver(measure)
+    observer.observe(scroller)
+    if (recommendations) observer.observe(recommendations)
+    return () => {
+      observer.disconnect()
+      scroller.removeEventListener("scroll", follow)
+      if (pinBox) pinBox.style.height = ""
+      if (screen) screen.style.height = ""
+      if (digest) digest.style.marginTop = ""
+      if (recommendationsRef.current) recommendationsRef.current.style.top = ""
+      if (backdrop) backdrop.style.opacity = ""
+      setHomeScrolled(false)
+    }
+  }, [homeLanding])
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
@@ -1048,7 +1376,10 @@ function HomeCanvas() {
    * closing the window restores exactly what was open.
    */
   const onModuleScreen = view !== null
-  const hideWidgets = onModuleScreen || chats.state.open.length > 0
+  // Nothing floats at the top right of Home any more (Angel,
+  // 2026-09-15): the digest below carries those widgets now.
+  const hideWidgets =
+    onModuleScreen || chats.state.open.length > 0 || homeLanding
 
   // Replies and nav panel rows can call for a window — e.g. the survey
   // preview opens itself the moment One says it created the survey. A
@@ -1183,7 +1514,37 @@ function HomeCanvas() {
   // PAIR overflows — when it is the wider of the two. The narrower one
   // keeps pushing, so the canvas always has one side to rest against.
 
-  const rightWidth = hideWidgets ? 0 : 384
+  /**
+   * The widget column's REAL width, not the 384 it takes when every
+   * widget is open: fold them all and it renders as an 88px rail, and a
+   * hard-coded 384 made the push-vs-overlay math think it still needed
+   * the full column — so the canvas parked at its 480 floor with ~280px
+   * of dead space to its right (Angel, 2026-09-14: "smudged to the left").
+   */
+  const rightRef = useRef<HTMLDivElement>(null)
+  const [rightMeasured, setRightMeasured] = useState(0)
+  /**
+   * Folded, the widget column is a 64px strip of mostly empty rail — and
+   * pushing the canvas aside for it left the composer sitting visibly
+   * left of centre (Angel, 2026-09-14). Folded it FLOATS over the canvas
+   * instead, so the input centres on the whole sheet and the little rail
+   * buttons ride on the backdrop; expanded it pushes as before.
+   */
+  const widgetIds = readSelection(profile).personal
+  const { collapsed: collapsedWidgets } = useWidgetCollapse(profile)
+  const widgetsFolded =
+    widgetIds.length === 0 ||
+    widgetIds.every((id) => collapsedWidgets.includes(id))
+  useLayoutEffect(() => {
+    const el = rightRef.current
+    if (!el) return
+    const measure = () => setRightMeasured(el.getBoundingClientRect().width)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  })
+  const rightWidth = hideWidgets || widgetsFolded ? 0 : rightMeasured || 384
   const leftWidth = stackWidth(chats.state)
   const room = shellWidth - CANVAS_MIN_WIDTH
   const soloOverflows = (width: number) => shellWidth > 0 && width > room
@@ -1302,6 +1663,33 @@ function HomeCanvas() {
         ref={shellRef}
         className="relative flex min-w-0 flex-1 overflow-hidden"
       >
+        {/* The backdrop spans the WHOLE canvas, widget column included
+            (Angel, 2026-09-14): the widgets float on it as cards, they do
+            not cut it off. Behind everything, deaf to the pointer. */}
+        {homeLanding && <HomeBackdrop />}
+        {/* The digest stands on its own at the foot of the canvas, out of
+            the recommendation row (Angel, 2026-09-15). Absolutely placed,
+            so the composer keeps the midline it is centred on. */}
+        {homeLanding && (
+          <div
+            // Mounted either way: coming back to the top it fades and
+            // lifts into place rather than appearing (Angel, 2026-09-15).
+            className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center"
+            style={{
+              opacity: atTop ? 1 : 0,
+              transform: atTop ? "none" : "translateY(12px)",
+              // Snappier (Angel, 2026-09-15): an expo-out that spends
+              // almost all of its travel in the first half, so the button
+              // is there before you have finished scrolling home.
+              transition:
+                "opacity 140ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            <div className={atTop ? "pointer-events-auto" : ""}>
+              <DailyDigestButton />
+            </div>
+          </div>
+        )}
         {/* Left-hand Comms stack — conversations opened from the nav. Same
           window system as the widgets, mirrored (Figma 2707:406513). */}
         <ChatsColumn
@@ -1343,22 +1731,36 @@ function HomeCanvas() {
               : { flex: "1 1 0%", minWidth: 0 }
           }
         >
-          {screenView !== "preferences" && screenView !== "activity" && <div className="flex flex-col">
-            <HomeNavbar
-              openWindows={windows.state.open}
-              onToggleWindow={toggleWindow}
-              conversationTitle={activeConversation?.title}
-              homeSession={
-                !!(
-                  activeConversation?.homeBriefing ||
-                  (activeConversation?.homeSetup &&
-                    !activeConversation.homeSetup.purpose)
-                )
+          {screenView !== "preferences" && screenView !== "activity" && (
+            // On the landing it FLOATS: the content scrolls under it
+            // instead of being guillotined at its edge (Angel,
+            // 2026-09-15). Its own buttons keep their clicks; the strip
+            // between them lets the wheel through to the page.
+            <div
+              className={
+                homeLanding
+                  ? "pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col [&_button]:pointer-events-auto"
+                  : "flex flex-col"
               }
-              conversationEmoji={agentById(activeConversation?.agentId)?.emoji}
-              screenTitle={screenTitle}
-            />
-          </div>}
+            >
+              <HomeNavbar
+                openWindows={windows.state.open}
+                onToggleWindow={toggleWindow}
+                conversationTitle={activeConversation?.title}
+                homeSession={
+                  !!(
+                    activeConversation?.homeBriefing ||
+                    (activeConversation?.homeSetup &&
+                      !activeConversation.homeSetup.purpose)
+                  )
+                }
+                conversationEmoji={
+                  agentById(activeConversation?.agentId)?.emoji
+                }
+                screenTitle={screenTitle}
+              />
+            </div>
+          )}
           {/* Figma 975:11536 — content column: pt-24px, centered 712px column,
             welcome block pinned top, ONE bar pinned bottom (pb-12px).
             A submitted prompt replaces the greeting + Needs-you canvas
@@ -1370,7 +1772,7 @@ function HomeCanvas() {
             module window is no longer inside this column at all — it is a
             pane beside it, so nothing here has to make room for it. */}
           <div
-            className={`flex min-h-0 w-full flex-1 flex-col items-center ${
+            className={`relative flex min-h-0 w-full flex-1 flex-col items-center ${
               // No top padding in a CONVERSATION (per Oskar): the thread
               // brings its own `pt-2`, and the extra 24 pushed the first
               // turn away from the navbar for no reason. The greeting
@@ -1378,23 +1780,73 @@ function HomeCanvas() {
               fullWidthView ? "" : activeConversation ? "px-4" : "px-4 pt-6"
             }`}
           >
+            {/* Home's composer sits on the VIEWPORT's midline with the
+                content under it (Angel, 2026-09-14). Two flex-1 siblings
+                — this spacer above, the content scroller below — always
+                split the leftover room equally, so the input stays
+                centred however long the briefing runs. */}
+            {showPromptBar && !homeLanding && (
+              <div className="order-1 w-full flex-1" />
+            )}
             <div
+              ref={scrollerRef}
               className={`flex min-h-0 w-full min-w-0 flex-1 flex-col items-center ${
+                showPromptBar ? "order-3" : ""
+              } ${
                 fullWidthView
                   ? "overflow-hidden"
                   : "home-canvas-scroll overflow-y-auto"
               }`}
             >
-              {activeConversation ? (
+              {/* ONE scrolling parent on the landing (Angel, 2026-09-15):
+                  the input, the recommendations and the digest are all in
+                  here, so a wheel anywhere moves the lot. The first block
+                  is a full screen with its contents centred, which is what
+                  puts the composer on the midline at rest and the digest
+                  exactly one screen down. */}
+              {homeLanding ? (
+                <>
+                  <div ref={pinRef} className="w-full shrink-0">
+                    <div
+                      ref={firstScreenRef}
+                      // No min-height here: at 100% of the pinned box it
+                      // would be as tall as the box and could never
+                      // stick. Its height is measured to one viewport
+                      // instead. The top padding is the floating navbar's
+                      // own height: the input centres in the room you can
+                      // actually see, not under the bar (Angel,
+                      // 2026-09-15).
+                      className="sticky top-0 flex w-full flex-col items-center justify-center pt-[60px]"
+                    >
+                      <div
+                        data-home-promptbar
+                        className="relative z-10 w-[712px] max-w-full shrink-0"
+                      >
+                        <div data-hybrid-target />
+                      </div>
+                      {/* Measured off the SHEET rather than the midline,
+                        so the 20px under the input survives whatever
+                        padding the screen carries (Angel, 2026-09-15),
+                        while still taking no part in the centring. */}
+                      <div
+                        ref={recommendationsRef}
+                        className="absolute inset-x-0 flex justify-center"
+                      >
+                        <HomeRecommendations />
+                      </div>
+                    </div>
+                  </div>
+                  <div ref={digestRef} className="flex w-full justify-center">
+                    <DailyDigest />
+                  </div>
+                </>
+              ) : activeConversation ? (
                 <div
                   data-home-inline-conversation
                   className="flex w-full min-w-0 flex-col"
                   role="region"
                   aria-label="Conversation"
                 >
-                  <div className="f0c-canvas-surface sticky top-0 z-10 mx-auto w-[712px] max-w-full">
-                    <HomeSessionBar conversation={activeConversation} />
-                  </div>
                   {activeConversation.homeBriefing ||
                   (activeConversation.homeSetup &&
                     !activeConversation.homeSetup.purpose) ? (
@@ -1418,7 +1870,15 @@ function HomeCanvas() {
                 <CalendarScreen />
               ) : screenView === "policies" ? (
                 <PoliciesScreen />
-              ) : screenView === "activity" ? (
+              ) : screenView === "artifacts" ? (
+                <ArtifactsScreen />
+              ) : screenView === "messages" ? (
+                <MessagesScreen />
+              ) : screenView === "inbox" ? (
+                <InboxScreen />
+              ) : screenView === "tools" ? (
+                <ToolsScreen />
+              ) : screenView === "activity" || screenView === "ai-activity" ? (
                 <ActivityScreen />
               ) : screenView === "agents" ? (
                 <AgentsScreen />
@@ -1465,11 +1925,13 @@ function HomeCanvas() {
                 </div>
               )}
             </div>
-            {/* The Home composer slot must not reserve space on module pages. */}
-            {showPromptBar && (
+            {/* The Home composer slot must not reserve space on module
+                pages, and on the LANDING it lives inside the scroller
+                instead (see below). */}
+            {showPromptBar && !homeLanding && (
               <div
                 data-home-promptbar
-                className="relative w-[712px] max-w-full shrink-0"
+                className="relative z-10 order-2 w-[712px] max-w-full shrink-0"
               >
                 <div data-hybrid-target />
               </div>
@@ -1477,11 +1939,39 @@ function HomeCanvas() {
           </div>
         </div>
 
+        {clockInCard && (
+          <FloatingWindow
+            title="Clock in"
+            width={240}
+            anchorSelector="[data-home-clockin-pill], [data-home-clockin-rail]"
+            onClose={() => setClockInCard(false)}
+          >
+            <ClockInWindow />
+          </FloatingWindow>
+        )}
+
         {/* Right-hand window stack — pushes the canvas, Claude-Code style. */}
         {/* Clock in is the one widget that floats instead of maximizing
           (per Oskar) — its card lives outside the column, over the
           canvas, hanging from the navbar button that opened it. */}
-        {!hideWidgets && <StaticWidgets onCloseConversation={activeConversation && !activeConversation.homeBriefing ? goHome : undefined} />}
+        {!hideWidgets && (
+          <div
+            ref={rightRef}
+            className={
+              widgetsFolded
+                ? "absolute right-0 top-0 z-10 flex h-full min-h-0"
+                : "flex h-full min-h-0 shrink-0"
+            }
+          >
+            <StaticWidgets
+              onCloseConversation={
+                activeConversation && !activeConversation.homeBriefing
+                  ? goHome
+                  : undefined
+              }
+            />
+          </div>
+        )}
       </div>
     </div>
   )

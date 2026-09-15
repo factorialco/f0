@@ -23,6 +23,7 @@ import { suggestionFor, pageReading, type Presentation } from "./agentEntryData"
 import { AgentEntryContext } from "./AskFactorial"
 import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
+import { useHomeScrolled } from "./homeScrollStore"
 import { HomeSuggestion } from "./HomeSuggestion"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import { ClarifyPanel } from "./one/ClarifyPanel"
@@ -36,7 +37,6 @@ import {
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import "./agent-entry.css"
-import { PermissionsNote } from "./one/PermissionsNote"
 import { useProfile } from "./profileStore"
 import { HomeWorking, useHomeRefreshing } from "./setup/homeRefresh"
 
@@ -87,6 +87,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
   }, [activeConversation?.id, profile])
 
   const onboarding = useOnboarding(profile)
+  const homeScrolled = useHomeScrolled()
   const suggestReport = !view && onboarding.suggestReport
   const suggestion = suggestionFor(null, profile)
   const [writing, setWriting] = useState(false)
@@ -103,7 +104,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
     document.addEventListener("pointerdown", outside)
     return () => document.removeEventListener("pointerdown", outside)
   }, [writing])
-  const expandedComposer = !view && !writing && (suggestReport || homeLanding)
+  // Only the report nudge makes the sheet taller now: with the standing
+  // suggestion gone the extra row was empty space above the placeholder
+  // (Angel, 2026-09-15).
+  const expandedComposer = !view && !writing && suggestReport
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
   const showSuggestions = !view && homeLanding && !writing
@@ -201,7 +205,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
             open && mode === "side" ? target.width - 28 : 780,
             target.width - (view ? 24 : 0)
           )
-      const height = asking ? panelHeight : compact ? 40 : 168
+      const height = asking ? panelHeight : compact ? 40 : view ? 168 : 128
       const x = target.left - parent.left + (target.width - width) / 2
       const y = target.bottom - parent.top - height - (compact ? 4 : 8)
       floating.style.setProperty("--composer-x", `${x}px`)
@@ -272,8 +276,16 @@ export function HybridHome({ children }: { children: ReactNode }) {
   return (
     <AgentEntryContext.Provider
       value={{
-        visible: !!view,
+        // On a screen the switch is always there; on Home it appears
+        // once the composer has scrolled away (Angel, 2026-09-15).
+        visible: !!view || homeScrolled,
         open: () => {
+          // On HOME the switch changes NOTHING about the canvas: the
+          // input in the middle of it is One's own, and lifting it into
+          // the side panel is what made it appear and disappear under the
+          // toggle (Angel, 2026-09-15). The switch opens its own chat and
+          // leaves the page alone.
+          if (!view) return
           setMode("side")
           setNotice("")
           if (view) {
@@ -292,7 +304,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
       }}
     >
       <div
-        className="flex h-full min-h-0 w-full bg-f1-background-secondary"
+        className="f0c-surface-page flex h-full min-h-0 w-full"
         ref={root}
         data-hybrid-root
         data-mode={view ? mode : "idle"}
@@ -306,7 +318,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
           </div>
           <div data-hybrid-dock aria-hidden="true" />
           <div
-            className="bg-f1-background-secondary"
+            className="f0c-surface-page"
             data-hybrid-chat
             data-open={open && !!view}
             role={open && view ? "region" : undefined}
@@ -374,7 +386,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking ? "auto" : expandedComposer ? 216 : 168,
+                        // The container is the SHEET: any extra height here is invisible
+                        // padding that the recommendations then sit under, which
+                        // is what was clipping them (Angel, 2026-09-15).
+                        height: asking ? "auto" : expandedComposer ? 176 : 128,
                         transition:
                           "height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
                       }
@@ -434,6 +449,22 @@ export function HybridHome({ children }: { children: ReactNode }) {
                 data-hybrid-editor
                 hidden={asking}
                 aria-hidden={compact || asking}
+                // The textarea only covers a band of the sheet, so a
+                // click on the padding around it did nothing (Angel,
+                // 2026-09-15). Anywhere on the surface focuses the field;
+                // the buttons inside it keep their own clicks.
+                onMouseDown={(event) => {
+                  const target = event.target
+                  if (
+                    target instanceof HTMLElement &&
+                    target.closest("button, a, input, textarea")
+                  )
+                    return
+                  const field = event.currentTarget.querySelector("textarea")
+                  if (!field) return
+                  event.preventDefault()
+                  field.focus()
+                }}
               >
                 <F0Box
                   position="relative"
@@ -441,10 +472,17 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   data-home-input-surface
                   background="primary"
                   border="default"
-                  borderColor="secondary"
+                  // The DEFAULT border, not secondary (Angel,
+                  // 2026-09-14): on the dotted backdrop a 6% edge
+                  // disappeared into the pattern.
+                  borderColor="default"
                   borderRadius="xl"
                 >
-                  {!view && questionReady && (homeLanding || suggestReport) && (
+                  {/* The standing "Help me get these tasks done" chip is
+                      gone (Angel, 2026-09-14) — the input opens empty.
+                      The report nudge still appears when onboarding asks
+                      for it. */}
+                  {!view && questionReady && suggestReport && (
                     <div
                       className="flex gap-1"
                       data-hybrid-suggestions
@@ -529,7 +567,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
                     </div>
                   </div>
                 </F0Box>
-                <PermissionsNote />
+                {/* The permissions line and the Pro meter left the
+                    composer on 2026-09-14 (Angel): nothing under the
+                    input but the input. */}
               </div>
             </div>
           )}

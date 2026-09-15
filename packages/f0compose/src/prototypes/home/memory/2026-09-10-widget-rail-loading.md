@@ -5,6 +5,7 @@ User approved: same canvas background for sticky greeting; finite skeleton/bot l
 Preserved base: Home/HybridHome, original conversation store, original NeedsYouItem, bot motion, WindowHeader/WindowPanel/maximized view. WindowStack gains only an opt-in vertical rail mode; Comms callers keep the old default.
 
 Observed in browser on localhost:5180 QA origin:
+
 - Confirming four widgets produced six skeleton blocks (two central, four widgets) and an animated-bot working indicator. After the finite transition both disappeared.
 - Four widgets used one 448px column with 1356px content in a 988px scroll area, instead of growing into multiple columns.
 - Collapse all left icon buttons and expanded the central home. Reload retained all four collapsed widgets. Restoring one, maximizing payroll and asking from its header opened the original central conversation with its context.

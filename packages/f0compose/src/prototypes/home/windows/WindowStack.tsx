@@ -480,9 +480,7 @@ export function WindowStack<Id extends string>({
         <span className="h-full w-[3px] rounded-full bg-transparent transition-colors group-hover:bg-f1-border group-active:bg-f1-border" />
       </div>
       {(() => {
-        const colWeights = columns.map(
-          (_, i) => state.columnWeights[i] ?? 1
-        )
+        const colWeights = columns.map((_, i) => state.columnWeights[i] ?? 1)
         const colTotal = colWeights.reduce((a, b) => a + b, 0)
         return columns.map((column, columnIndex) => {
           const columnWeight = column.reduce(
@@ -515,7 +513,7 @@ export function WindowStack<Id extends string>({
                   flexGrow: colWeights[columnIndex] / colTotal,
                   flexBasis: 0,
                 }}
-                className={`flex min-w-0 flex-col ${verticalScroll ? "overflow-y-auto gap-2" : ""}`}
+                className={`flex min-w-0 flex-col ${verticalScroll ? "gap-2 overflow-y-auto" : ""}`}
               >
                 {column.map((id, idx) => (
                   <Fragment key={panelKey(id)}>

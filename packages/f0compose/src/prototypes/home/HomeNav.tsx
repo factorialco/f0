@@ -1,4 +1,3 @@
-import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import {
   F0AvatarPerson,
   F0Checkbox,
@@ -8,58 +7,29 @@ import {
 } from "@factorialco/f0-react"
 import { SearchBar } from "@factorialco/f0-react/dist/experimental"
 import {
-  Bell,
-  AcademicCap,
-  Archive,
-  Balance,
-  Bank,
-  Basket,
-  BookOpen,
-  Building,
   Calendar,
-  ChartLine,
-  ChartPie,
-  BarGraph,
   Check,
-  CheckCircleLine,
   ChevronDown,
   ChevronRight,
-  Clock,
   Comment,
-  Computer,
   Delete,
-  DollarBill,
   Ellipsis,
+  Feed,
   Files,
   Filter,
   Folder,
   Folders,
-  Graph,
-  Handshake,
-  HardDrive,
   Headset,
-  Heart,
-  Laptop,
-  Marketplace,
-  MessageHeart,
   Messages,
-  MoneyBag,
   Office,
-  Organization,
-  PalmTree,
   Pencil,
-  People,
   Plus,
-  Present,
-  Receipt,
-  Schedule,
+  PushPin,
+  PushPinSolid,
   SearchPerson,
   Settings,
   Sliders,
-  Suitcase,
-  Timer,
   UserProtected,
-  Wallet,
   Home as HomeIcon,
   Hub as HubIcon,
   Inbox as InboxIcon,
@@ -70,23 +40,32 @@ import { useSearchParams } from "react-router-dom"
 
 import { avatarFor } from "@/fixtures/helpers"
 
-import type { Chat, ChatId } from "./comms/chats"
-import type { InboxTask } from "./inbox/inboxTasks"
+import type { Chat } from "./comms/chats"
+import type { InboxPreset } from "./inbox/inboxTasks"
 
 import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
-import { requestChat, requestChatsClose, useOpenChats } from "./comms/chatStore"
-import { hubSlug } from "./hub/hubSlug"
-import { motionKeyFor } from "./iconMotion"
-import { openInboxTasks } from "./inbox/inboxTasks"
-import { MenuDivider, MenuRow } from "./MenuRow"
+import { requestChatsClose } from "./comms/chatStore"
 import {
-  CompanyLogo,
-  RailHelpMenu,
-  RailPersonalMenu,
-} from "./navigation/RailMenus"
+  ADMIN_HUB,
+  EMPLOYEE_HUB,
+  HUB_ICONS,
+  filterHub,
+  hubLabels,
+} from "./hub/hubCatalog"
+import { hubSlug } from "./hub/hubSlug"
+import { libraryTree } from "./hub/libraryTree"
+import { InboxRow } from "./inbox/InboxRow"
+import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
+import { PresetChip } from "./inbox/PresetChip"
+import { MenuDivider, MenuRow } from "./MenuRow"
+import { FILLED_RAIL_ICONS } from "./navigation/filledRailIcons"
+import { BackgroundTasks } from "./navigation/localIcons"
+import { CompanySwitcher, RailPersonalMenu } from "./navigation/RailMenus"
+import { setNavPanelOpen, useNavPanelOpen } from "./navPanelStore"
 import { useNeedsYou } from "./needsYouStore"
+import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import {
   clearConversations,
   deleteConversation,
@@ -98,8 +77,16 @@ import {
   type Conversation,
 } from "./one/conversationStore"
 import { PanelCollapse } from "./PanelCollapse"
+import { PLAN_MODULES, RAIL_PROMOTE_MAX, usePlan } from "./planStore"
 import { useProfile } from "./profileStore"
+import {
+  pinToRail,
+  RAIL_PIN_LIMIT,
+  unpinFromRail,
+  useRailPins,
+} from "./railPinsStore"
 import { COMMUNITIES } from "./windows/communityPosts"
+import { RailClockIn } from "./windows/RailClockIn"
 
 /**
  * Home's navigation (Figma 2621:22725, "Home - Vision"): a FIXED 48px
@@ -120,25 +107,89 @@ import { COMMUNITIES } from "./windows/communityPosts"
  * cube/Spaces → LayersFront.
  */
 
-type NavSectionId = "home" | "comms" | "inbox" | "cal" | "hub"
+type NavSectionId = "home" | "comms" | "inbox" | "cal" | "files" | "hub"
 
 const NAV_SECTION_KEY = "f0compose:home:nav-section"
 const NAV_OPEN_KEY = "f0compose:home:nav-open"
+/** The last DM read, so leaving DMs and coming back reopens it rather
+ *  than dropping you on the empty state (Angel, 2026-09-15). */
+const LAST_CHAT_KEY = "f0compose:home:last-chat"
 
+/**
+ * The labels changed on 2026-09-14, the ids did not (Angel: "cambiaría
+ * Comms con Chat, o DMs como Slack" and "lo mismo con Cal, llámalo
+ * Calendar. Se entiende mejor"). "DMs" is his call, Slack's own word —
+ * it shipped as "Messages" for half a day and he shortened it.
+ *
+ * Ids stay `comms`/`cal`/`hub` on purpose: they are persisted in
+ * localStorage and `agent-entry.css` selects on `[data-nav-section]`.
+ */
 const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] = [
   { id: "home", label: "Home", icon: HomeIcon },
-  { id: "comms", label: "Comms", icon: Messages },
+  // Inbox above DMs (Angel, 2026-09-14): what needs you comes before what
+  // someone said to you.
   { id: "inbox", label: "Inbox", icon: InboxIcon },
-  { id: "cal", label: "Cal", icon: Calendar },
+  { id: "comms", label: "DMs", icon: Messages },
+  { id: "cal", label: "Calendar", icon: Calendar },
+  // Files earned the first level on usage (Angel, 2026-09-14). It reuses
+  // the imported documents prototype, which `?view=files` already aliases.
+  { id: "files", label: "Files", icon: Folders },
   { id: "hub", label: "Tools", icon: HubIcon },
 ]
 
 const PANEL_TITLES: Record<NavSectionId, string> = {
   home: "Home",
-  comms: "Comms",
+  comms: "DMs",
   inbox: "Inbox",
   cal: "Calendar",
+  files: "Files",
   hub: "Tools",
+}
+
+/**
+ * Which canvas each rail section owns. Before 2026-09-14 only Home and Cal
+ * touched the URL, so clicking Messages, Inbox or Tools swapped the panel
+ * and left the canvas on whatever was there — Angel: "cuando pulsas en
+ * cualquiera de los elementos del primer nivel de navegación, la parte de
+ * layout del content debería cambiar siempre".
+ */
+const SECTION_VIEW: Record<NavSectionId, string | null> = {
+  home: null,
+  comms: "messages",
+  inbox: "inbox",
+  cal: "calendar",
+  files: "files",
+  hub: "tools",
+}
+
+/**
+ * Module names the rail shortens: a 56px button cannot hold "Time
+ * tracking", and the second level says the full name anyway.
+ */
+const RAIL_MODULE_LABELS: Record<string, string> = {
+  "Time tracking": "Tracking",
+  "Talent analytics": "Analytics",
+  "Device catalog": "Devices",
+  "Platform IT": "IT",
+}
+
+const railLabel = (label: string) => RAIL_MODULE_LABELS[label] ?? label
+
+const VIEW_SECTION: Record<string, NavSectionId> = Object.fromEntries(
+  Object.entries(SECTION_VIEW)
+    .filter(([, view]) => view !== null)
+    .map(([id, view]) => [view as string, id as NavSectionId])
+)
+
+/** Sections whose panel IS the section — collapsing it leaves nothing
+ *  behind, so they do not offer it (Angel, 2026-09-14). */
+const CAN_COLLAPSE: Record<NavSectionId, boolean> = {
+  home: true,
+  comms: false,
+  inbox: false,
+  cal: true,
+  files: true,
+  hub: true,
 }
 
 function readSection(): NavSectionId {
@@ -147,11 +198,6 @@ function readSection(): NavSectionId {
   return RAIL_SECTIONS.some((s) => s.id === stored)
     ? (stored as NavSectionId)
     : "home"
-}
-
-function readPanelOpen(): boolean {
-  if (typeof window === "undefined") return true
-  return window.localStorage.getItem(NAV_OPEN_KEY) !== "closed"
 }
 
 function NavRow({
@@ -178,7 +224,6 @@ function NavRow({
   return (
     <button
       onClick={onClick}
-      data-icon-motion={motionKeyFor(icon)}
       className={`f0c-pressable flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-2 text-left ${
         active
           ? "bg-f1-background-secondary"
@@ -203,17 +248,34 @@ function NavRow({
   )
 }
 
+/**
+ * The line between a panel's fixed rows and its flexible list (Angel,
+ * 2026-09-14: "me falta un separador horizontal que separe los elementos
+ * fijos de elementos flexibles"). Same token and height as `MenuDivider`,
+ * but not that component: its negative margins are cut for a popover's
+ * 4px padding and bleed inside the panel's 12px one.
+ */
+function PanelDivider() {
+  // Full bleed: `-mx-3` cancels the panel body's own px-3 so the line runs
+  // edge to edge, from the rail to the panel's far side (Angel,
+  // 2026-09-14) rather than floating inside the text column.
+  return <div className="-mx-3 h-px shrink-0 bg-f1-border-secondary" />
+}
+
 /** Collapsible section header ("Pinned ⌄", "Canales ⌄"…). */
 function SidebarGroup({
   label,
   trailing,
+  defaultOpen = true,
   children,
 }: {
   label: string
   trailing?: React.ReactNode
+  /** "Pinned" starts closed: its rows are already on the rail. */
+  defaultOpen?: boolean
   children: React.ReactNode
 }) {
-  const [groupOpen, setGroupOpen] = useState(true)
+  const [groupOpen, setGroupOpen] = useState(defaultOpen)
   return (
     // No gap: the frame's bundle puts its Items straight under the 32px
     // Section header (2945:793556 — a plain flex-col, items at y=32).
@@ -227,7 +289,7 @@ function SidebarGroup({
             than `w-full` so a trailing control still sits beside it. */}
         <button
           onClick={() => setGroupOpen(!groupOpen)}
-          className="f0c-pressable flex flex-1 cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary"
+          className="f0c-pressable flex flex-1 cursor-pointer select-none items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary"
         >
           {label}
           {/* Icon swap, not a rotate class — F0Icon drops className. */}
@@ -539,14 +601,8 @@ function RecentsControl({
 function HomePanelBody() {
   const profile = useProfile()
   const { conversations, activeId } = useConversations()
-  // Sub-screens live in the URL (?view=policies) so back/forward and
-  // deep links behave; an open conversation always wins the canvas.
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
-  const openScreen = (screen: string | null) => {
-    goHome()
-    setSearchParams(screen ? { view: screen } : {})
-  }
   const [recentsFilter, setRecentsFilter] =
     useState<RecentsFilter>(readRecentsFilter)
 
@@ -580,39 +636,46 @@ function HomePanelBody() {
   return (
     <div className="flex h-full min-h-0 flex-col px-3 pb-3">
       <div className="home-panel-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+        {/* Routines and AI Activity are back under New chat (Angel,
+            2026-09-15): what One runs for you belongs beside the place
+            you talk to it, not inside the Tools catalog. All three sit in
+            ONE group, so the spacing between them is even, and the
+            divider is the one every other panel draws between its fixed
+            rows and its list. */}
         <div className="flex flex-col gap-0.5">
           <NavRow
             icon={Plus}
-            label="New"
+            label="New chat"
             onClick={() => {
               // A clean canvas, not just a change of view (per Oskar).
-              // Home owns the widgets stack and lives outside this tree, so
-              // this goes through the same channel the reply-driven windows
-              // use. Collapse first: on a module screen the widgets are
-              // unmounted, so they close instantly and Home is reached with
-              // the stack already empty.
+              // Home owns the widgets stack and lives outside this tree,
+              // so this goes through the same channel the reply-driven
+              // windows use.
               requestWindowsCollapse()
-              openScreen(null)
+              goHome()
+              setSearchParams({})
             }}
           />
-          {/* Agents is GONE from this panel (per Oskar, 2026-09-09) — the
-            row and the group below it. Reports stays admin-only, so the
-            employee panel is New / Routines / Files. */}
-          <NavRow icon={Clock} label="Routines" />
-          {/* Reports is NOT the Insights widget (per Oskar, 2026-08-31):
-            Insights tells you about your own activity, Reports is for
-            reports you build yourself with One. It used to open the
-            Insights widget, which demoed the wrong concept — so it is
-            visual-only like Agents and Routines until a Reports surface
-            is designed. */}
-          {profile === "admin" && <NavRow icon={Graph} label="Reports" />}
           <NavRow
-            icon={HardDrive}
-            label="Files"
-            active={activeId === null && view === "policies"}
-            onClick={() => openScreen("policies")}
+            icon={BackgroundTasks}
+            label="Routines"
+            active={view === "routines"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "routines" })
+            }}
+          />
+          <NavRow
+            icon={Feed}
+            label="AI Activity"
+            active={view === "ai-activity"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "ai-activity" })
+            }}
           />
         </div>
+        <PanelDivider />
         {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}
@@ -723,17 +786,17 @@ function UnreadBadge({ count }: { count: number }) {
 /** A conversation row. Clicking opens it as a window in the left-hand
  *  stack, and the row carries NavRow's selected state while it is open. */
 function ChatRow({
-  id,
   avatar,
   label,
   unread,
   active,
+  onOpen,
 }: {
-  id: ChatId
   avatar: React.ReactNode
   label: string
   unread?: number
   active: boolean
+  onOpen: () => void
 }) {
   return (
     <SectionRow
@@ -742,7 +805,7 @@ function ChatRow({
       bold={unread !== undefined}
       trailing={unread !== undefined && <UnreadBadge count={unread} />}
       active={active}
-      onClick={() => requestChat(id)}
+      onClick={onOpen}
     />
   )
 }
@@ -753,12 +816,18 @@ function ChatRow({
  *  the chat WINDOWS render from the same data, so a row and its window
  *  can never disagree about a title, an emoji or an unread count. */
 function CommsPanelBody() {
-  const openChats = useOpenChats()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openChat = searchParams.get("chat")
   const row = (chat: Chat) => (
     <ChatRow
       key={chat.id}
-      id={chat.id}
-      active={openChats.includes(chat.id)}
+      active={openChat === chat.id}
+      onOpen={() => {
+        // On the canvas, replacing the empty state — not a window docked
+        // beside it (Angel, 2026-09-14).
+        goHome()
+        setSearchParams({ view: "messages", chat: chat.id })
+      }}
       avatar={
         chat.kind === "channel" ? (
           <SectionEmoji emoji={chat.emoji ?? "\u{1F4AC}"} />
@@ -783,9 +852,13 @@ function CommsPanelBody() {
           are visual-only, exactly like the rows they replace: the frame
           gives them no destination and neither exists as a surface. */}
       <div className="flex flex-col gap-0.5">
-        <NavRow icon={Plus} label="New chat" />
+        {/* "New message", not "New chat" (Angel, 2026-09-14): Home's own
+            New starts a conversation with One, and two "new chat"s in one
+            navigation meant two different things. */}
+        <NavRow icon={Plus} label="New message" />
         <NavRow icon={Headset} label="Meetings" />
       </div>
+      <PanelDivider />
       <SidebarGroup label="Chats directos">
         {DIRECT_CHATS.map(row)}
       </SidebarGroup>
@@ -812,69 +885,64 @@ function CommsPanelBody() {
 }
 
 /**
- * A row in the Inbox nav (Figma 2621:28151). Measured off the frame at
- * its 419px width: the row is 66 tall, the 20px selector sits at x=12,
- * the 32px avatar (with its 16px module badge) at x=44, and the text
- * column at x=88. Title and subtitle are BOTH 14/20 — the subtitle is
- * separated by colour, not size.
- *
- * Rows are divided by an edge-to-edge hairline, so the padding lives on
- * the row rather than on the list.
+ * The Inbox presets, under the panel's search (Angel, 2026-09-14: the
+ * Bell folded in here, and the kinds became "preset buttons arriba…
+ * debajo de Search"). The selection lives in the URL because the panel and
+ * the canvas list are sibling trees — the same channel every other
+ * nav→canvas decision in this prototype travels through.
  */
-function InboxPanelRow({ item, active }: { item: InboxTask; active: boolean }) {
-  const [done, setDone] = useState(false)
+function InboxPresets({
+  preset,
+  counts,
+  onPick,
+}: {
+  preset: InboxPreset
+  counts: Record<InboxPreset, number>
+  onPick: (next: InboxPreset) => void
+}) {
+  const options: { id: InboxPreset; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "request", label: "Requests" },
+    { id: "notification", label: "Notifications" },
+  ]
   return (
-    <div
-      className={`flex h-[66px] w-full items-center gap-3 border-0 border-b border-solid border-f1-border-secondary px-3 ${
-        active ? "bg-f1-background-secondary" : ""
-      }`}
-    >
-      <F0Checkbox
-        checked={done}
-        onCheckedChange={setDone}
-        title={done ? `Reopen "${item.title}"` : `Complete "${item.title}"`}
-        hideLabel
-      />
-      <div className="shrink-0">
-        <F0AvatarPerson
-          firstName={item.avatarSeed}
-          lastName="."
-          src={avatarFor(item.avatarSeed)}
-          size="md"
-          badge={{ type: "module", module: item.module }}
+    <div className="flex shrink-0 gap-1.5 overflow-visible px-3 pb-2">
+      {options.map((option) => (
+        <PresetChip
+          key={option.id}
+          label={option.label}
+          number={counts[option.id]}
+          selected={preset === option.id}
+          onClick={() => onPick(option.id)}
         />
-      </div>
-      {/* The row body opens the ticket; the checkbox beside it stays its
-          own control, so ticking one off never opens it. */}
-      <button
-        onClick={() => requestChat(`ticket:${item.id}`)}
-        className={`flex min-w-0 flex-1 cursor-pointer flex-col items-start text-left ${
-          done ? "opacity-50" : ""
-        }`}
-      >
-        <span className="w-full truncate text-base font-medium text-f1-foreground">
-          {item.title}
-        </span>
-        <span className="w-full truncate text-base text-f1-foreground-secondary">
-          {item.meta}
-        </span>
-      </button>
+      ))}
     </div>
   )
 }
 
-function InboxPanelBody() {
+function InboxPanelBody({ preset }: { preset: InboxPreset }) {
   const profile = useProfile()
-  const open = useOpenChats()
   // Same resolutions the canvas list reads, so the two cannot drift.
   const needsYou = useNeedsYou()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openItem = searchParams.get("item")
   return (
-    <div className="flex flex-col">
-      {openInboxTasks(profile, needsYou.cleared).map((item) => (
-        <InboxPanelRow
+    <div className="flex flex-col gap-0.5 px-1.5 pb-2">
+      {openInboxTasks(profile, needsYou.cleared, preset).map((item) => (
+        <InboxRow
           key={item.id}
           item={item}
-          active={open.includes(`ticket:${item.id}`)}
+          active={openItem === item.id}
+          onOpen={() => {
+            // The canvas, not a docked window: the panel is the list and
+            // the content side is what you picked from it.
+            goHome()
+            setSearchParams(
+              preset === "all"
+                ? { view: "inbox", item: item.id }
+                : { view: "inbox", preset, item: item.id }
+            )
+          }}
         />
       ))}
     </div>
@@ -949,194 +1017,121 @@ function AbsenceFilterRow({ label }: { label: string }) {
 }
 
 /** Hub section — every module, grouped by intention-level category. */
+
 /**
- * One glyph per Hub label, shared by both profiles so the same module
- * never changes icon between them.
- *
- * Where the employee frame (2712:430800) NAMES its icon layers, that name
- * wins — it is ground truth from the design system, and it corrects four
- * of the guesses the admin Hub shipped with when 2639:49719 turned out to
- * export no per-icon assets (Workplaces was Building, Handbook File,
- * Software Code, Purchasing ShoppingCart, Projects Briefcase).
- *
- * INFERRED, still: Planning wants `HeadcountPlanning`, which f0 has no
- * equivalent for — `Organization` is the closest. Equipment, Payroll,
- * Recruitment, Sales, Treasury and Accounting are admin-only rows the
- * employee frame never shows, so they keep their earlier matches.
+ * A Tools row: `NavRow`'s look plus the hover "⋮" that pins it to the
+ * first level. A clickable DIV rather than a NavRow because `RowOptions`
+ * is a button and `NavRow` is a button — nesting the two is invalid
+ * markup and the inner click stops being reliable. `RecentRow` solved
+ * this first; this is its shell with a module row inside.
  */
-export const HUB_ICONS: Record<string, IconType> = {
-  Absences: PalmTree,
-  // ICON GAP: the frame draws a coin with a currency symbol and f0 has
-  // no coin — all 256 app icons were checked, in both worktrees. `Balance`
-  // is weighing scales; it is the incumbent and it renders, but it is the
-  // wrong shape. Either accept the scales or ask f0 for a Coin.
-  Accounting: Balance,
-  Benefits: Present,
-  Billing: Receipt,
-  Compensation: ChartPie,
-  // The frame's shopfront-with-awning: `Marketplace`'s second path IS
-  // that awning.
-  "Device catalog": Marketplace,
-  Documents: Folders,
-  Engagement: MessageHeart,
-  Equipment: Laptop,
-  Handbook: Folder,
-  Hours: Timer,
-  // Was "Sales" in the IT group, renamed on Oskar's word to break the
-  // collision with Finance's Sales. `Archive` is a lidded crate.
-  Inventory: Archive,
-  Kudos: Heart,
-  Learning: AcademicCap,
-  // Same glyph as "People" on purpose: it is the same row renamed and the
-  // same screen behind it.
-  Organization: People,
-  // `MoneyBag`, not `Money`: the frame draws a cinched bag with a
-  // currency glyph, while `Money` is an upright banknote with a second
-  // note behind it. The old Hub's choice predates this frame.
-  Payroll: MoneyBag,
-  Payslips: DollarBill,
-  People: People,
-  Performance: ChartLine,
-  // `ChartPie` — a donut with its top-right quadrant offset, i.e. the
-  // frame's exploded pie segment. It was `Organization`, an ORG-CHART
-  // glyph, which is no longer what this row draws (and is now Workflows).
-  Planning: ChartPie,
-  // f0's `HardDrive`, which the Files row also carries — different panels,
-  // and it is the glyph the frame draws for both.
-  "Platform IT": HardDrive,
-  // `UserProtected`, not `Shield`: the frame draws a shield with a person
-  // inside, which is exactly this icon.
-  Policies: UserProtected,
-  Projects: Suitcase,
-  Purchasing: Basket,
-  Recruitment: SearchPerson,
-  Sales: Handshake,
-  Shifts: Schedule,
-  Software: Computer,
-  // `Building`'s geometry is an isometric cube (M5 8L12 12M12 20V12),
-  // which is the frame's 3D box for Spaces — f0 has no cube glyph.
-  Spaces: Building,
-  Spend: Wallet,
-  Spending: Wallet,
-  // `BarGraph` is bars INSIDE a rounded rect (rect x=4 y=6 w=16 h=12
-  // rx=3), which is what the frame draws; `ChartVerticalBars` is bare
-  // bars with no container.
-  "Talent analytics": BarGraph,
-  // `CheckCircleLine`, the STROKED circle+check. `CheckCircle` is the
-  // solid variant (a filled disc with the check knocked out) and would
-  // have been the only filled glyph in an outline panel.
-  Tickets: CheckCircleLine,
-  Training: BookOpen,
-  Treasury: Bank,
-  "Time off": PalmTree,
-  "Time tracking": Timer,
-  // `Organization` is the only glyph here built from stroked nodes
-  // joined by connectors — the frame's small node graph. `Split` is a
-  // branching flow with arrowheads, which is a different idea.
-  Workflows: Organization,
-  Workplaces: Office,
+function HubRow({
+  label,
+  active,
+  onOpen,
+}: {
+  label: string
+  active: boolean
+  onOpen: () => void
+}) {
+  const profile = useProfile()
+  const pins = useRailPins(profile)
+  const pinned = pins.includes(label)
+  const full = pins.length >= RAIL_PIN_LIMIT
+  return (
+    <div
+      onClick={onOpen}
+      className={`f0c-pressable group flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-1 ${
+        active
+          ? "bg-f1-background-secondary"
+          : "hover:bg-f1-background-secondary"
+      }`}
+    >
+      {HUB_ICONS[label] && (
+        <F0Icon icon={HUB_ICONS[label]} size="md" color="default" />
+      )}
+      <span className="flex-1 truncate text-base font-medium text-f1-foreground">
+        {label}
+      </span>
+      {/* A pin, not a "⋮" (Angel, 2026-09-14): pinning is the only thing
+          this menu ever held, so the row offers it directly. Visible
+          while pinned, on hover otherwise — and inert, with a reason, at
+          the cap. */}
+      <button
+        onClick={(event) => {
+          event.stopPropagation()
+          if (pinned) unpinFromRail(profile, label)
+          else if (!full) pinToRail(profile, label)
+        }}
+        aria-pressed={pinned}
+        aria-label={
+          pinned
+            ? `Remove ${label} from the sidebar`
+            : full
+              ? `Sidebar is full (${RAIL_PIN_LIMIT} pinned)`
+              : `Pin ${label} to the sidebar`
+        }
+        title={
+          pinned
+            ? "Remove from sidebar"
+            : full
+              ? `Sidebar is full (${RAIL_PIN_LIMIT} pinned)`
+              : "Pin to sidebar"
+        }
+        className={`f0c-pressable flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-[6px] transition-opacity duration-100 hover:bg-f1-background-secondary-hover ${
+          pinned
+            ? ""
+            : `[@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 ${full ? "cursor-default opacity-40" : ""}`
+        }`}
+      >
+        <F0Icon
+          icon={pinned ? PushPinSolid : PushPin}
+          size="sm"
+          color="secondary"
+        />
+      </button>
+    </div>
+  )
 }
-
-export type HubGroup = { label: string; items: string[] }
-
-/**
- * Figma 2945:795787 — SIX groups, replacing the five of 2639:49719.
- *
- * Read off the frame's own render, since Dev Mode would only hand back
- * metadata for this node: Company loses People/Workplaces/Equipment/
- * Software/Handbook for Organization/Documents/Policies/Tickets/Spaces/
- * Kudos, Work and Pay merge into Operations, Talent gains Talent
- * analytics, and "Gestion de IT" and "More" are new.
- *
- * THREE things the mock says that this does not copy verbatim:
- *   - "Engagment" is still the frame's typo; the spelling decision was
- *     already recorded here and stands.
- *   - "Sales" appeared TWICE, in IT and in Finance, which collide on one
- *     `?view=sales`. Oskar: the IT one is "Inventory".
- *   - "Gestion de IT" is the only Spanish group label, and unaccented.
- *     Kept exactly as drawn — renaming a designer's label is their call.
- */
-export const ADMIN_HUB: HubGroup[] = [
-  {
-    label: "Company",
-    // "Organization" is the row that used to read "People", and it still
-    // points at that screen — PeopleScreen IS Organization › People
-    // (Figma 2730:459215). Without that mapping the prototype's one real
-    // Hub destination would lose its only entry point in this panel.
-    items: [
-      "Organization",
-      "Documents",
-      "Policies",
-      "Tickets",
-      "Spaces",
-      "Kudos",
-    ],
-  },
-  {
-    label: "Operations",
-    items: [
-      "Time tracking",
-      "Time off",
-      "Shifts",
-      "Projects",
-      "Benefits",
-      "Payroll",
-    ],
-  },
-  {
-    label: "Talent",
-    items: [
-      "Talent analytics",
-      "Performance",
-      "Recruitment",
-      "Engagement",
-      "Training",
-    ],
-  },
-  {
-    label: "Gestion de IT",
-    items: ["Device catalog", "Inventory", "Platform IT"],
-  },
-  {
-    label: "Finance",
-    items: ["Planning", "Spending", "Treasury", "Sales", "Accounting"],
-  },
-  { label: "More", items: ["Billing", "Workflows"] },
-]
-
-/**
- * Figma 2712:430800 — the employee's Hub. It is the admin's with the
- * administering stripped out (no Payroll, Recruitment, Shifts, Equipment,
- * Sales, Treasury, Accounting) and a new PERSONAL group on top holding
- * the four things an employee opens about themselves. Software moves from
- * Company to Finance.
- */
-export const EMPLOYEE_HUB: HubGroup[] = [
-  {
-    label: "Personal",
-    items: ["Hours", "Absences", "Payslips", "Learning"],
-  },
-  { label: "Company", items: ["People", "Workplaces", "Handbook"] },
-  { label: "Work", items: ["Time off", "Time tracking", "Projects"] },
-  { label: "Pay", items: ["Compensation", "Benefits"] },
-  { label: "Talent", items: ["Performance", "Engagement", "Training"] },
-  {
-    label: "Finance",
-    items: ["Planning", "Spend", "Purchasing", "Software"],
-  },
-]
 
 function HubPanelBody() {
   const profile = useProfile()
-  const groups = profile === "employee" ? EMPLOYEE_HUB : ADMIN_HUB
-  // Same URL-driven navigation the Home panel's Files row uses.
+  const plan = usePlan()
+  // The panel shows what the company HAS, so it agrees with the rail:
+  // under a small plan the promoted modules and these rows are the same
+  // list, read from the same place.
+  const groups = filterHub(
+    profile === "employee" ? EMPLOYEE_HUB : ADMIN_HUB,
+    PLAN_MODULES[plan]
+  )
+  // Same URL-driven navigation the Home panel's rows use.
   // `goHome()` first because an open conversation still owns the FLOOR —
   // the window lands over it either way, but leaving the thread mounted
   // under a freshly opened module reads as two unrelated things.
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
+  const pins = useRailPins(profile)
   return (
     <div className="flex flex-col gap-3 px-3 pb-1.5">
+      {/* What you pinned, gathered at the top — collapsed, because those
+          rows are already one click away on the rail (Angel,
+          2026-09-14). They keep their place in their own group below:
+          this is a shortcut, not a move. */}
+      {pins.length > 0 && (
+        <SidebarGroup label="Pinned" defaultOpen={false}>
+          {pins.map((label) => (
+            <HubRow
+              key={label}
+              label={label}
+              active={view === hubSlug(label)}
+              onOpen={() => {
+                goHome()
+                setSearchParams({ view: hubSlug(label) })
+              }}
+            />
+          ))}
+        </SidebarGroup>
+      )}
       {groups.map((group) => (
         <SidebarGroup key={group.label} label={group.label}>
           {group.items.map((label) => {
@@ -1149,16 +1144,15 @@ function HubPanelBody() {
             // with nothing designed lands on ModuleScreen and says so.
             const screen = hubSlug(label)
             return (
-              <NavRow
+              <HubRow
                 key={label}
-                icon={HUB_ICONS[label]}
                 label={label}
                 // No `activeId === null` term any more: the module is a
                 // WINDOW now, so an open conversation on the floor does
                 // not take the canvas from it — both are on screen, and
                 // dimming the row would say otherwise.
                 active={view === screen}
-                onClick={() => {
+                onOpen={() => {
                   // The rail is "take me here", so it clears the floor.
                   // The window's own "+" does not: there you are opening
                   // another tab of something already on top of One.
@@ -1174,46 +1168,139 @@ function HubPanelBody() {
   )
 }
 
-/** One 48px rail item: 32px icon button + 9px label (Figma 2621:22827). */
+/**
+ * Files section — the imported documents prototype's own pages. `?view=
+ * files` already resolves to it through `hasImportedScreen`'s alias, and
+ * its routes define these three children, so this panel is a real second
+ * level with no new canvas behind it.
+ */
+function FilesPanelBody() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = searchParams.get("page") ?? ""
+  const view = searchParams.get("view")
+  const open = (next: string) => {
+    goHome()
+    setSearchParams(next ? { view: "files", page: next } : { view: "files" })
+  }
+  const openView = (next: string) => {
+    goHome()
+    setSearchParams({ view: next })
+  }
+  return (
+    <div className="flex flex-col gap-3 px-3 pb-1.5">
+      {/* Two destinations only (Angel, 2026-09-15): Templates, Artifacts,
+          Reports and Trash left the panel, and the reports themselves now
+          sit in the library below like any other file. */}
+      <div className="flex flex-col gap-0.5">
+        <NavRow
+          icon={Folders}
+          label="All files"
+          active={view === "files" && page === ""}
+          onClick={() => open("")}
+        />
+        <NavRow
+          icon={UserProtected}
+          label="Policies"
+          active={view === "policies"}
+          onClick={() => openView("policies")}
+        />
+      </div>
+      <PanelDivider />
+      {/* The library's own root under the line, so the panel is a way IN
+          to the files rather than only a list of places. Same fixture the
+          Library screen reads, so the two cannot disagree. */}
+      <div className="flex flex-col gap-0.5">
+        {libraryTree().map((node) => (
+          <NavRow
+            key={node.id}
+            icon={node.kind === "folder" ? Folder : Files}
+            label={node.name}
+            active={page === `library/${node.id}`}
+            onClick={() =>
+              open(node.kind === "folder" ? `library/${node.id}` : "")
+            }
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * One rail item: a 56x56 target carrying a 24px glyph over a 10px label.
+ *
+ * Grew from the frame's 48px rail on 2026-09-14 (Angel: "la haría más
+ * ancha, y los botones más grandes… el usuario tocará esos botones
+ * muchísimas veces cada día… tiraría min 44x44 y que cualquier lugar del
+ * botón, incluso más allá de la zona que cambia en estado de hover").
+ * So the tint moved from the inner 32px pill ONTO the button: what you
+ * can click and what lights up are now the same rectangle, label
+ * included.
+ */
 function RailItem({
   icon,
+  filled,
   label,
   active,
   onClick,
+  trailing,
 }: {
   icon: IconType
+  /** The solid counterpart, shown while the item is active. */
+  filled?: IconType
   label: string
   active: boolean
   onClick: () => void
+  /** Absolutely-positioned extras (the pinned rows' "⋮"). */
+  trailing?: React.ReactNode
 }) {
   return (
-    <button
-      onClick={onClick}
-      aria-label={label}
-      aria-current={active ? "true" : undefined}
-      data-icon-motion={motionKeyFor(icon)}
-      className="group flex w-full cursor-pointer flex-col items-center gap-0.5"
-    >
-      <span
-        className={`flex size-8 items-center justify-center rounded-[10px] ${
-          active
-            ? "bg-f1-background-secondary"
-            : "group-hover:bg-f1-background-secondary"
-        }`}
+    <div className="relative flex w-full">
+      <button
+        onClick={onClick}
+        aria-label={label}
+        aria-current={active ? "true" : undefined}
+        className="f0c-pressable group flex w-full cursor-pointer flex-col items-center gap-1 py-2"
       >
-        {/* Every rail glyph is the SAME weight in the design (Figma
-            2694:55571 — all six export as #011637, the active one
-            included): `foreground/default/secondary` composites to
-            rgb(99,112,132) over the rail, which is f0's `icon` DEFAULT
-            token (rgb(99,110,131)), not `icon-secondary` (rgb(162,172,190))
-            — that was the washed-out look Oskar flagged. Active is
-            distinguished by its pill background alone. */}
-        <F0Icon icon={icon} size="md" color="default" />
-      </span>
-      <span className="w-full truncate text-center text-[9px] font-medium leading-3 text-f1-foreground-secondary">
-        {label}
-      </span>
-    </button>
+        {/* The tint is a 36x36 SQUARE around the glyph, not the whole
+            button (Angel, 2026-09-14). Measured off Slack's own rail,
+            which is the reference he named: 70px rail, 52x68 buttons,
+            36x36 icon chip at radius 8, a 20px glyph inside it, and an
+            11/12 label 4px below. The button stays the target — the
+            chip is only what lights up. */}
+        <span
+          className={`flex size-9 items-center justify-center rounded-lg ${
+            active
+              ? "bg-f1-background-secondary text-f1-icon-bold"
+              : "group-hover:bg-f1-background-secondary"
+          }`}
+        >
+          {/* Every rail glyph is the SAME weight in the design (Figma
+              2694:55571 — all six export as #011637, the active one
+              included): `foreground/default/secondary` composites to
+              rgb(99,112,132) over the rail, which is f0's `icon` DEFAULT
+              token (rgb(99,110,131)), not `icon-secondary` (rgb(162,172,190))
+              — that was the washed-out look Oskar flagged. Active is
+              distinguished by its chip background alone. */}
+          {/* 24px, not f0's 20: at 20 the drawn glyph is barely 12px
+              inside a 36px chip, which is what made the rail read small
+              beside Slack's. Filled when active, outline otherwise —
+              see `filledRailIcons`. */}
+          {/* Bold when active, inherited from the chip: F0Icon's own
+              color prop compiles a class out of f0's dist, which this
+              prototype's Tailwind pass never scans. */}
+          <F0Icon
+            icon={filled && active ? filled : icon}
+            size="lg"
+            color={active ? "currentColor" : "default"}
+          />
+        </span>
+        <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
+          {label}
+        </span>
+      </button>
+      {trailing}
+    </div>
   )
 }
 
@@ -1234,11 +1321,10 @@ function RailIconButton({
       aria-label={label}
       aria-current={active ? "page" : undefined}
       onClick={onClick}
-      data-icon-motion={motionKeyFor(icon)}
-      className={`f0c-pressable flex size-8 cursor-pointer items-center justify-center rounded-[10px] hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
+      className={`f0c-pressable flex size-9 cursor-pointer items-center justify-center rounded-lg hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
     >
-      {/* Same token as the section items above — see RailItem. */}
-      <F0Icon icon={icon} size="md" color="default" />
+      {/* Same token and size as the section items above — see RailItem. */}
+      <F0Icon icon={icon} size="lg" color="default" />
     </button>
   )
 }
@@ -1249,21 +1335,52 @@ export function HomeNav() {
   // /p/home, so navigating to the root leaves it altogether.
   const [searchParams, setSearchParams] = useSearchParams()
   const [section, setSection] = useState<NavSectionId>(readSection)
-  const [panelOpen, setPanelOpen] = useState<boolean>(readPanelOpen)
+  const panelOpen = useNavPanelOpen()
+  const setPanelOpen = setNavPanelOpen
   const rootRef = useRef<HTMLDivElement>(null)
   const view = searchParams.get("view")
-  const utilityView =
-    view === "marketplace" || view === "settings" || view === "notifications"
-      ? view
-      : null
+  // Notifications and Marketplace left the rail on 2026-09-14, so Settings
+  // is the only utility with a view of its own.
+  const utilityView = view === "settings" ? view : null
   const onboarding = useOnboarding(profile)
+  const plan = usePlan()
+  const pins = useRailPins(profile)
+  const contracted = hubLabels(
+    filterHub(
+      profile === "employee" ? EMPLOYEE_HUB : ADMIN_HUB,
+      PLAN_MODULES[plan]
+    )
+  )
+  /**
+   * A company with a handful of modules does not need a door called
+   * "Tools" in front of them (Angel, 2026-09-14) — the rail simply IS the
+   * catalog, and pinning is suppressed because there is nothing left to
+   * promote.
+   */
+  const promoted =
+    contracted.length > 0 && contracted.length <= RAIL_PROMOTE_MAX
+      ? contracted
+      : null
+  const railSections = promoted
+    ? RAIL_SECTIONS.filter((s) => s.id !== "hub")
+    : RAIL_SECTIONS
+  const railPins = promoted ? [] : pins
   const panelVisible =
     panelOpen &&
     !utilityView &&
     (onboarding.screen === "complete" ||
       onboarding.screen === "tour" ||
       onboarding.hidden)
-  const activeSection = utilityView ?? section
+  // The URL wins over the persisted section: a deep link, browser-back or
+  // a pinned module must light the item it actually landed on — and NO
+  // view at all means the canvas is Home, whatever section the panel was
+  // left on (otherwise a reload lit Calendar over a Home canvas).
+  const activeSection =
+    utilityView ??
+    (view ? VIEW_SECTION[view] : "home") ??
+    // With no panel there is no section either: a module opened from the
+    // rail lights its own pin, not the section it came from.
+    (panelVisible ? section : undefined)
 
   // Welcome hides the secondary menu. Keep its underlying state closed too,
   // so Show me around only reveals it after the visitor clicks a rail item.
@@ -1274,10 +1391,33 @@ export function HomeNav() {
     }
   }, [onboarding.screen, onboarding.hidden])
 
-  // Browser back to Calendar restores its rail selection as well as its page.
+  // Remember the open DM while you are in it, so the rail can restore it.
   useEffect(() => {
-    if (view === "calendar") setSection("cal")
+    const chat = searchParams.get("chat")
+    if (view === "messages" && chat)
+      window.localStorage.setItem(LAST_CHAT_KEY, chat)
+  }, [view, searchParams])
+
+  // Browser back restores the rail selection as well as the page — for
+  // every section now, not just Calendar.
+  useEffect(() => {
+    const restored = view ? VIEW_SECTION[view] : "home"
+    if (restored) setSection(restored)
+    // Home arrives collapsed, always (Angel, 2026-09-15): its canvas is
+    // the composer, and the chat history behind it is opt-in through the
+    // navbar's expand button. Keyed on `view`, so expanding it by hand
+    // does not re-trigger this.
+    if (restored === "home") setPanelOpen(false)
   }, [view])
+
+  // A section that cannot be collapsed must not load collapsed: a stored
+  // "closed" plus a stored "inbox" would open with no way back to a panel.
+  useEffect(() => {
+    if (!CAN_COLLAPSE[section] && !panelOpen) {
+      setPanelOpen(true)
+      window.localStorage.setItem(NAV_OPEN_KEY, "open")
+    }
+  }, [section, panelOpen])
 
   // NEVER call toggleSidebar here: the ONE chat forces the xl breakpoint,
   // so under 1440px the FrameProvider treats the viewport as small and
@@ -1301,38 +1441,66 @@ export function HomeNav() {
 
   const persist = (nextSection: NavSectionId, nextOpen: boolean) => {
     window.localStorage.setItem(NAV_SECTION_KEY, nextSection)
-    window.localStorage.setItem(NAV_OPEN_KEY, nextOpen ? "open" : "closed")
+    setPanelOpen(nextOpen)
   }
 
   const pickSection = (id: NavSectionId) => {
     if (onboarding.screen !== "complete" && onboarding.screen !== "tour")
       updateOnboarding(profile, { hidden: true })
-    // Re-clicking the active section toggles the panel; anything else
-    // switches (and reopens if collapsed).
-    const nextOpen =
-      onboarding.screen === "tour"
-        ? true
-        : !utilityView && id === section
-          ? !panelOpen
-          : true
+    // Re-clicking the active section does NOT collapse the panel (Angel,
+    // 2026-09-14): a first-level item means "take me here", and hiding
+    // the second level on a second click made the rail feel like a
+    // toggle. Collapse is the header button's job, and only where that
+    // button exists. Home is the exception: it opens collapsed, and the
+    // navbar's expand button is what reveals its history.
+    const nextOpen = id !== "home"
+    setAnimateWidth(false)
+    jumpLayout()
     setSection(id)
     setPanelOpen(nextOpen)
     persist(id, nextOpen)
-    // Cal is the one section that is also a DESTINATION: the frame shows
-    // its panel beside the week grid, not beside Home (Figma 2621:29173).
-    // Comms/Inbox/Hub stay side panels and leave the canvas alone.
-    if (id === "home") {
-      requestChatsClose()
-      goHome()
+    // EVERY section is a destination now (Angel, 2026-09-14). Clicking
+    // Home still closes the chats column, because Home is the floor
+    // rather than a screen; everything else is one `?view=` away, which
+    // is also the way back after closing a section's window with its own
+    // ✕ while staying in the section.
+    if (id === "home") requestChatsClose()
+    goHome()
+    const nextView = SECTION_VIEW[id]
+    if (!nextView) {
       setSearchParams({})
-    } else if (id === "cal") {
-      // Also the way back if you closed the calendar WINDOW with its own
-      // ✕ while staying in this section: the rail row is still lit and
-      // the panel is still open, so clicking it has to reopen the window
-      // rather than be a no-op.
-      goHome()
-      setSearchParams({ view: "calendar" })
+      return
     }
+    const lastChat =
+      id === "comms" ? window.localStorage.getItem(LAST_CHAT_KEY) : null
+    const known =
+      lastChat &&
+      [...DIRECT_CHATS, ...CHANNEL_CHATS].some((c) => c.id === lastChat)
+    setSearchParams(
+      known && lastChat
+        ? { view: nextView, chat: lastChat }
+        : { view: nextView }
+    )
+  }
+
+  /**
+   * A module opened from the RAIL is a destination of its own, so it
+   * takes the whole content area with no second level behind it (Angel,
+   * 2026-09-14: clicking a pinned item "shouldn't open a secondary
+   * sidebar for tools"). Opening the same module from the Tools panel
+   * keeps that panel, because there you are browsing the catalog.
+   */
+  const openModule = (label: string) => {
+    jumpLayout()
+    goHome()
+    setSearchParams({ view: hubSlug(label) })
+    // The section moves to `hub` as well as closing the panel: leaving it
+    // on Inbox or DMs meant the "never load collapsed" guard for those
+    // two immediately re-opened the panel you had just left (Angel,
+    // 2026-09-14 — Inbox stayed open behind Tracking).
+    setSection("hub")
+    setPanelOpen(false)
+    persist("hub", false)
   }
 
   /**
@@ -1343,46 +1511,129 @@ export function HomeNav() {
    */
   const panelWidth = section === "inbox" ? 419 : section === "cal" ? 293 : 240
 
+  // True only while the last change was the panel opening or closing.
+  const [animateWidth, setAnimateWidth] = useState(false)
+
+  /**
+   * Killing the panel's own width transition was not enough: the CANVAS
+   * carries a 420ms width transition of its own (for the chat's side
+   * mode), and a section switch changes the width available to it, so
+   * the content edge kept sliding. This flags the body for one frame and
+   * `agent-entry.css` suppresses every transition under it — which is
+   * the only channel available, since the canvas is a sibling tree.
+   */
+  const jumpLayout = () => {
+    document.body.setAttribute("data-nav-instant", "")
+    // Long enough to outlast the shell's own 420ms transitions: the
+    // canvas, the composer and the widget rail all re-measure AFTER the
+    // commit (ResizeObserver), so a two-frame flag let the late ones
+    // ease into place — which is the spring he kept seeing.
+    window.clearTimeout(instantTimer.current)
+    instantTimer.current = window.setTimeout(
+      () => document.body.removeAttribute("data-nav-instant"),
+      480
+    )
+  }
+  const instantTimer = useRef(0)
+  const lastSection = useRef(section)
+  useEffect(() => {
+    if (lastSection.current !== section) {
+      lastSection.current = section
+      setAnimateWidth(false)
+    }
+  }, [section])
+
+  const rawPreset = searchParams.get("preset")
+  const inboxPreset: InboxPreset =
+    rawPreset === "request" || rawPreset === "notification" ? rawPreset : "all"
+  const needsYou = useNeedsYou()
+  const presetCounts = inboxPresetCounts(profile, needsYou.cleared)
+
   const collapse = () => {
+    window.clearTimeout(instantTimer.current)
+    document.body.removeAttribute("data-nav-instant")
+    setAnimateWidth(true)
     setPanelOpen(false)
     persist(section, false)
   }
 
   return (
-    <div ref={rootRef} data-home-nav className="flex h-full min-h-0">
-      {/* Fixed 48px icon rail. */}
+    <div ref={rootRef} data-home-nav className="relative flex h-full min-h-0">
+      {/* Slack's rail geometry, which is the reference Angel named:
+          70px wide, 8px of top padding, 52x68 buttons 12px apart, and a
+          36x36 icon chip that is the only thing carrying the hover or
+          active background. 68 wide with 56px buttons, and NO gap
+          between items (Angel, 2026-09-14) — the chips already carry
+          their own 8px of breathing room top and bottom, and Slack's
+          extra 12 made the column read as six separate things. */}
       <div
         data-home-rail
-        className="flex w-12 shrink-0 flex-col items-center overflow-y-auto"
+        // The hairline belongs BETWEEN the two sidebars, so with no panel
+        // beside it there is nothing to separate (Angel, 2026-09-14).
+        data-panel={panelVisible ? "open" : "closed"}
+        className="flex w-[68px] shrink-0 flex-col items-center overflow-y-auto pt-2"
       >
         {/* Figma 2621:22835 — f0's AvatarCompany in its with-logo variant
-            (24px). The logo file is f0's own storybook asset, re-exported
-            from fixtures; without `src` this falls back to initials. */}
+            (24px). It is the entity SWITCHER since 2026-09-14: the pattern
+            people already look for, and the same rows the profile menu
+            shows. */}
         <div className="flex h-[60px] shrink-0 items-center justify-center">
-          <CompanyLogo />
+          <CompanySwitcher />
         </div>
-        <div className="flex w-full flex-col gap-2 px-1.5">
-          {RAIL_SECTIONS.map((s) => (
+        <div className="flex w-full flex-col px-1.5">
+          {/* Tools is the drawer everything else came out of, so it sits
+              at the bottom of the list whatever is pinned above it
+              (Angel, 2026-09-14). */}
+          {railSections
+            .filter((s) => s.id !== "hub")
+            .map((s) => (
+              <RailItem
+                key={s.id}
+                icon={s.icon}
+                filled={FILLED_RAIL_ICONS[s.id]}
+                label={s.label}
+                active={s.id === activeSection}
+                onClick={() => pickSection(s.id)}
+              />
+            ))}
+          {/* The modules this company actually has, in place of a generic
+              "Tools" door. */}
+          {promoted?.map((label) => (
             <RailItem
-              key={s.id}
-              icon={s.icon}
-              label={s.label}
-              active={s.id === activeSection}
-              onClick={() => pickSection(s.id)}
+              key={label}
+              icon={HUB_ICONS[label] ?? HubIcon}
+              label={railLabel(label)}
+              active={view === hubSlug(label)}
+              onClick={() => openModule(label)}
             />
           ))}
+          {railPins.map((label) => (
+            <RailItem
+              key={label}
+              icon={HUB_ICONS[label] ?? HubIcon}
+              label={railLabel(label)}
+              active={view === hubSlug(label)}
+              onClick={() => openModule(label)}
+            />
+          ))}
+          {railSections
+            .filter((s) => s.id === "hub")
+            .map((s) => (
+              <RailItem
+                key={s.id}
+                icon={s.icon}
+                filled={FILLED_RAIL_ICONS[s.id]}
+                label={s.label}
+                active={s.id === activeSection}
+                onClick={() => pickSection(s.id)}
+              />
+            ))}
         </div>
-        {/* Utility actions follow the reference menu order. */}
-        <div className="mt-auto flex flex-col items-center gap-0.5 pb-3 pt-2">
-          <RailIconButton
-            icon={Marketplace}
-            label="Marketplace"
-            active={activeSection === "marketplace"}
-            onClick={() => {
-              goHome()
-              setSearchParams({ view: "marketplace" })
-            }}
-          />
+        {/* Marketplace moved into Tools and Notifications into the Inbox,
+            so what is left down here is Settings and you. Help lives in
+            the profile menu as "Get help". */}
+        <div className="mt-auto flex flex-col items-center gap-1 pb-3 pt-2">
+          <RailClockIn />
           <RailIconButton
             icon={Settings}
             label="Settings"
@@ -1392,19 +1643,7 @@ export function HomeNav() {
               setSearchParams({ view: "settings" })
             }}
           />
-          <RailIconButton
-            icon={Bell}
-            label="Notifications"
-            active={activeSection === "notifications"}
-            onClick={() => {
-              goHome()
-              setSearchParams({ view: "notifications" })
-            }}
-          />
-          <RailHelpMenu />
-          <span className="pt-1.5">
-            <RailPersonalMenu />
-          </span>
+          <RailPersonalMenu />
         </div>
       </div>
 
@@ -1412,7 +1651,13 @@ export function HomeNav() {
       <div
         data-home-panel
         data-nav-section={section}
-        className="f0c-ease-out h-full shrink-0 overflow-hidden transition-[width] duration-200 motion-reduce:transition-none"
+        className={`f0c-ease-out h-full shrink-0 overflow-hidden motion-reduce:transition-none ${
+          // Collapsing animates; switching section does NOT (Angel,
+          // 2026-09-14: "should change size instantly when moving between
+          // first level items") — a 419px Inbox easing out of a 240px
+          // Home reads as the panel resizing rather than as a new one.
+          animateWidth ? "transition-[width] duration-200" : ""
+        }`}
         style={{ width: panelVisible ? panelWidth : 0 }}
         ref={(node) => {
           // Keep the collapsed panel out of the tab order.
@@ -1424,7 +1669,7 @@ export function HomeNav() {
             while the wrapper animates open or shut. */}
         <div className="flex h-full flex-col" style={{ width: panelWidth }}>
           <div className="flex h-[60px] shrink-0 items-center justify-between pl-3 pr-2">
-            <span className="truncate text-base font-medium text-f1-foreground">
+            <span className="select-none truncate text-base font-medium text-f1-foreground">
               {PANEL_TITLES[section]}
             </span>
             {/* gap-1 and size="md": the frame's navbar right group is
@@ -1433,31 +1678,21 @@ export function HomeNav() {
                 against each other. The 60px header is unchanged: 14 + 32
                 + 14 is exactly what it was built for. */}
             <div className="flex shrink-0 items-center gap-1">
+              {/* Activity left this header on 2026-09-14 and became a row
+                  in the panel below (Angel: "me chirría el botón de
+                  analytics ahí arriba"). */}
               {section === "home" && (
-                <>
-                  <F0Button
-                    label="Activity"
-                    icon={ChartLine}
-                    hideLabel
-                    variant="ghost"
-                    size="md"
-                    onClick={() => {
-                      goHome()
-                      setSearchParams({ view: "activity" })
-                    }}
-                  />
-                  <F0Button
-                    label="Preferences"
-                    icon={Settings}
-                    hideLabel
-                    variant="ghost"
-                    size="md"
-                    onClick={() => {
-                      goHome()
-                      setSearchParams({ view: "preferences" })
-                    }}
-                  />
-                </>
+                <F0Button
+                  label="Preferences"
+                  icon={Settings}
+                  hideLabel
+                  variant="ghost"
+                  size="md"
+                  onClick={() => {
+                    goHome()
+                    setSearchParams({ view: "preferences" })
+                  }}
+                />
               )}
               {/* The Inbox header carries TWO controls beside the collapse
                   button now — a funnel added on Oskar's word (Figma
@@ -1496,20 +1731,37 @@ export function HomeNav() {
                   label="Comms settings"
                 />
               )}
-              <F0Button
-                variant="ghost"
-                size="md"
-                icon={PanelCollapse}
-                hideLabel
-                label="Collapse panel"
-                onClick={collapse}
-              />
+              {/* Messages and Inbox ARE their panel — collapsing one
+                  leaves a rail pointing at nothing (Angel, 2026-09-14). */}
+              {CAN_COLLAPSE[section] && (
+                <F0Button
+                  variant="ghost"
+                  size="md"
+                  icon={PanelCollapse}
+                  hideLabel
+                  label="Collapse panel"
+                  onClick={collapse}
+                />
+              )}
             </div>
           </div>
           {/* SearchBar ships its own px-3 wrapper + bottom margin. The
               Cal frame has no search under its header — its only field is
               the people picker inside "Meet with". */}
           {section !== "cal" && <SearchBar placeholder="Search…" />}
+          {section === "inbox" && (
+            <InboxPresets
+              preset={inboxPreset}
+              counts={presetCounts}
+              onPick={(next) =>
+                setSearchParams(
+                  next === "all"
+                    ? { view: "inbox" }
+                    : { view: "inbox", preset: next }
+                )
+              }
+            />
+          )}
           <div
             className={`home-panel-scroll min-h-0 flex-1 ${section === "home" ? "overflow-hidden" : "overflow-y-auto"}`}
           >
@@ -1518,9 +1770,11 @@ export function HomeNav() {
             ) : section === "comms" ? (
               <CommsPanelBody />
             ) : section === "inbox" ? (
-              <InboxPanelBody />
+              <InboxPanelBody preset={inboxPreset} />
             ) : section === "cal" ? (
               <CalPanelBody />
+            ) : section === "files" ? (
+              <FilesPanelBody />
             ) : (
               <HubPanelBody />
             )}

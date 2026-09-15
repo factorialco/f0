@@ -15,11 +15,6 @@ export function HomeSuggestion({
   onClick: () => void
 }) {
   return (
-    <F0Button
-      label={label}
-      variant={variant}
-      size={size}
-      onClick={onClick}
-    />
+    <F0Button label={label} variant={variant} size={size} onClick={onClick} />
   )
 }

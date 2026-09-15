@@ -35,7 +35,10 @@ export function SectionTabs() {
   if (!rows) return null
   const active = rest.join("/") || "overview"
   return (
-    <F0Box paddingTop="none" paddingBottom={slug === "spending" ? "none" : "md"}>
+    <F0Box
+      paddingTop="none"
+      paddingBottom={slug === "spending" ? "none" : "md"}
+    >
       <Tabs
         key={active}
         activeTabId={active}

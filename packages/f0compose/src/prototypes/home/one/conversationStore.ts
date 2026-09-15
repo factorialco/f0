@@ -205,6 +205,8 @@ type ConversationState = {
   insightsId?: string
 }
 
+import { seedConversations } from "./seedConversations"
+
 const STORAGE_KEY = "f0compose:home:conversations"
 
 /** Recents survives reloads; the active conversation intentionally
@@ -213,7 +215,18 @@ function loadPersisted(): Conversation[] {
   if (typeof window === "undefined") return []
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
+    // First run: a few threads already behind you, so the Home panel has
+    // a history to show (Angel, 2026-09-14). Written through immediately,
+    // so deleting one sticks like any other.
+    if (!raw) {
+      const seeded = seedConversations(Date.now())
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+      } catch {
+        // Persistence is best-effort; the seed still shows this session.
+      }
+      return seeded
+    }
     const parsed = JSON.parse(raw) as Conversation[]
     // A reload can interrupt a pending reply — never rehydrate a stuck
     // spinner or a half-streamed reasoning block. Conversations persisted
@@ -1854,21 +1867,51 @@ export function resumeHomeSetup(
 }
 export function startHomeFocusEdit(profile: ProfileId) {
   const saved = homeSetupFor(profile)?.homeSetup ?? initialSetup(profile)
-  const setup: HomeSetup = { ...saved, purpose: "focus", step: "priorities", paused: false }
+  const setup: HomeSetup = {
+    ...saved,
+    purpose: "focus",
+    step: "priorities",
+    paused: false,
+  }
   const id = `c${nextId++}`
   emit({
     ...state,
     activeId: id,
-    conversations: [{
-      id, title: "Edit my Home focus", thinking: true, lastActiveAt: Date.now(),
-      homeSetup: setup,
-      messages: [{ id: `m${nextId++}`, role: "user", content: "Help me update what One focuses on in my Home." }],
-    }, ...state.conversations],
+    conversations: [
+      {
+        id,
+        title: "Edit my Home focus",
+        thinking: true,
+        lastActiveAt: Date.now(),
+        homeSetup: setup,
+        messages: [
+          {
+            id: `m${nextId++}`,
+            role: "user",
+            content: "Help me update what One focuses on in my Home.",
+          },
+        ],
+      },
+      ...state.conversations,
+    ],
   })
-  setTimeout(() => streamTurn(id, [
-    { id: `m${nextId++}`, role: "assistant", content: "Let’s adjust your Home focus. I’ve selected your current preferences below." },
-    homeQuestion(setup),
-  ], () => {}), THINK_MS)
+  setTimeout(
+    () =>
+      streamTurn(
+        id,
+        [
+          {
+            id: `m${nextId++}`,
+            role: "assistant",
+            content:
+              "Let’s adjust your Home focus. I’ve selected your current preferences below.",
+          },
+          homeQuestion(setup),
+        ],
+        () => {}
+      ),
+    THINK_MS
+  )
   return id
 }
 
@@ -2013,12 +2056,16 @@ function answerHomeSetup(id: string, answer: string) {
     refreshHome(setup.profile)
   if (setup.purpose === "focus" && result.artifact?.kind === "briefing") {
     const home = homeSetupFor(setup.profile)
-    if (home) patchConversation(home.id, c => ({
-      ...c,
-      homeSetup: { ...result.setup, purpose: undefined, paused: true },
-      messages: c.messages.map(m => m.homeArtifact?.kind === "briefing"
-        ? { ...m, homeArtifact: result.artifact } : m),
-    }))
+    if (home)
+      patchConversation(home.id, (c) => ({
+        ...c,
+        homeSetup: { ...result.setup, purpose: undefined, paused: true },
+        messages: c.messages.map((m) =>
+          m.homeArtifact?.kind === "briefing"
+            ? { ...m, homeArtifact: result.artifact }
+            : m
+        ),
+      }))
   }
   if (result.widgets) changeWidgets(setup.profile, result.widgets)
   if (result.undo && !undoWidgets(setup.profile))

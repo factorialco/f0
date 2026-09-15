@@ -1,145 +1,75 @@
-import { F0AvatarPerson, F0Button, F0Icon } from "@factorialco/f0-react"
-import {
-  Comment,
-  EyeVisible,
-  Paperclip,
-  Pin,
-  Reaction,
-} from "@factorialco/f0-react/icons/app"
+import type { CommunityPostProps } from "@factorialco/f0-react/dist/experimental"
+
+import { F0AvatarPerson, F0Button } from "@factorialco/f0-react"
+import { CommunityPost } from "@factorialco/f0-react/dist/experimental"
+import { Paperclip, Pin, Reaction } from "@factorialco/f0-react/icons/app"
 import { useState } from "react"
 
 import { avatarFor } from "@/fixtures/helpers"
 
 import { aliciaAvatar } from "../fixtures"
-import { COMMUNITY_POSTS, type CommunityPost } from "./communityPosts"
+import {
+  COMMUNITY_POSTS,
+  type CommunityPost as PostData,
+} from "./communityPosts"
 
-function ReactionPill({
-  emoji,
-  count,
-  /** You reacted with this one — f0's critical token, as in the frame. */
-  highlighted = false,
-}: {
-  emoji: string
-  count: number
-  highlighted?: boolean
-}) {
-  return (
-    <button
-      className={`flex items-center gap-1 rounded-full border border-solid px-2 py-0.5 text-base font-medium ${
-        highlighted
-          ? "border-f1-border-critical text-f1-foreground-critical"
-          : "border-f1-border-secondary text-f1-foreground-secondary"
-      }`}
-    >
-      <span>{emoji}</span>
-      {count}
-    </button>
-  )
+/**
+ * The Communities widget, rendered by f0's OWN `CommunityPost` (Angel,
+ * 2026-09-15: the widgets were hand-copied from production and the
+ * paddings had drifted). Production's Communities spec hands its posts to
+ * the same component, so the card, its header, media box, reactions row
+ * and counters are production's, not a lookalike.
+ */
+
+/** "2 days ago" / "1 week ago" back into a date the component can format. */
+function postedAt(posted: string): Date {
+  const amount = Number(posted.match(/\d+/)?.[0] ?? 0)
+  const days = /week/.test(posted) ? amount * 7 : amount
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 }
 
-/** Reactions, views and comments come from the POST — they used to be
- *  hardcoded here, which meant every post in the feed claimed the same
- *  12 ❤️ and the same 14 views. */
-function PostFooter({ post }: { post: CommunityPost }) {
-  return (
-    <div className="flex w-full items-center justify-between gap-2">
-      <div className="flex min-w-0 flex-wrap items-center gap-1">
-        {post.reactions.map((reaction) => (
-          <ReactionPill
-            key={reaction.emoji}
-            emoji={reaction.emoji}
-            count={reaction.count}
-            highlighted={reaction.mine}
-          />
-        ))}
-        <button
-          aria-label="Add a reaction"
-          className="flex items-center rounded-full border border-solid border-f1-border-secondary px-2 py-1"
-        >
-          <F0Icon icon={Reaction} size="sm" color="secondary" />
-        </button>
-      </div>
-      <div className="flex shrink-0 items-center gap-3 text-base text-f1-foreground-secondary">
-        <span className="flex items-center gap-1">
-          <F0Icon icon={EyeVisible} size="sm" color="secondary" />
-          {post.views}
-        </span>
-        <span className="flex items-center gap-1">
-          <F0Icon icon={Comment} size="sm" color="secondary" />
-          {post.comments}
-        </span>
-      </div>
-    </div>
-  )
+export function Post({ post }: { post: PostData }) {
+  return <CommunityPost {...toWidgetPost(post)} />
 }
 
-export function Post({ post }: { post: CommunityPost }) {
-  return (
-    <div className="flex flex-col gap-2 border-0 border-t border-solid border-f1-border-secondary px-3 py-4">
-      <PostHeader
-        seed={post.seed}
-        name={post.author}
-        meta={`in ${post.community} · ${post.posted}`}
-      />
-      {post.image && (
-        // The 3:2 box is reserved before the image lands, so a slow load
-        // does not shove the whole feed down as it arrives.
-        <img
-          src={post.image}
-          alt=""
-          loading="lazy"
-          className="aspect-[3/2] w-full rounded-lg bg-f1-background-secondary object-cover"
-        />
-      )}
-      {post.title && (
-        <span className="text-lg font-semibold text-f1-foreground">
-          {post.title}
-        </span>
-      )}
-      <p className="text-base text-f1-foreground">{post.body}</p>
-      <PostFooter post={post} />
-    </div>
-  )
-}
-
-function PostHeader({
-  seed,
-  name,
-  meta,
-}: {
-  seed: string
-  name: string
-  meta: string
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <F0AvatarPerson
-        firstName={name}
-        lastName="."
-        src={avatarFor(seed)}
-        size="md"
-      />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="text-base font-semibold text-f1-foreground">
-          {name}
-        </span>
-        <span className="truncate text-base text-f1-foreground-secondary">
-          {meta}
-        </span>
-      </div>
-    </div>
-  )
+function toWidgetPost(post: PostData): CommunityPostProps {
+  const [firstName, ...rest] = post.author.split(" ")
+  return {
+    id: post.id,
+    author: {
+      firstName,
+      lastName: rest.join(" "),
+      avatarUrl: avatarFor(post.seed),
+    },
+    group: { title: post.community, onClick: () => {} },
+    createdAt: postedAt(post.posted),
+    title: post.title ?? post.body,
+    description: post.title ? `<p>${post.body}</p>` : undefined,
+    mediaUrl: post.image,
+    counters: {
+      views: String(post.views),
+      comments: String(post.comments),
+    },
+    reactions: {
+      items: post.reactions.map((reaction) => ({
+        emoji: reaction.emoji,
+        initialCount: reaction.count,
+        hasReacted: reaction.mine,
+      })),
+    },
+    inLabel: "in",
+    comment: { label: "Comment", onClick: () => {} },
+    onClick: () => {},
+  }
 }
 
 export function CommunitiesWindow() {
   const [draft, setDraft] = useState("")
 
   return (
-    // No horizontal padding on the root: post dividers must run
-    // edge-to-edge across the window; each block carries its own px.
-    <div className="flex flex-col">
-      {/* Composer — Post stays primary/disabled until there's a draft */}
-      <div className="flex flex-col gap-2 px-3 pb-4 pt-1">
+    <div className="flex flex-col gap-4 p-3">
+      {/* Composer: Post stays disabled until there is a draft. */}
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <F0AvatarPerson
             firstName="Alicia"
@@ -189,7 +119,7 @@ export function CommunitiesWindow() {
       </div>
 
       {COMMUNITY_POSTS.map((post) => (
-        <Post key={post.id} post={post} />
+        <CommunityPost key={post.id} {...toWidgetPost(post)} />
       ))}
     </div>
   )

@@ -11,7 +11,6 @@
  * `F0AvatarFile`, which draws the file-type glyph — so no icon mapping is needed.
  */
 
-
 /**
  * The file types the widget shows — a subset of F0's `FILE_TYPES`, kept as plain
  * string literals here (not imported) so this module stays F0-free. Each maps to
@@ -20,7 +19,12 @@
 export type DocumentFileType = "pdf" | "doc" | "excel" | "ppt" | "image" | "csv"
 
 /** What happened to the document last — becomes the "{Verb} by {who}" subtitle. */
-export type DocumentAction = "edited" | "signed" | "shared" | "commented" | "uploaded"
+export type DocumentAction =
+  | "edited"
+  | "signed"
+  | "shared"
+  | "commented"
+  | "uploaded"
 
 export interface DocumentRecord {
   id: string
@@ -44,12 +48,54 @@ export interface DocumentRecord {
  * `F0AvatarFile` glyphs read distinctly, newest first.
  */
 export const documentRecords: DocumentRecord[] = [
-  { id: "d1", name: "Q3 Team Objectives.docx", fileType: "doc", action: "edited", actorId: "you", when: "2h ago" },
-  { id: "d2", name: "Employment Contract.pdf", fileType: "pdf", action: "signed", actorId: "you", when: "Yesterday" },
-  { id: "d3", name: "Expense Report – July.xlsx", fileType: "excel", action: "shared", actorId: "emp-005", when: "2 days ago" },
-  { id: "d4", name: "Onboarding Deck.pptx", fileType: "ppt", action: "commented", actorId: "emp-004", when: "4 days ago" },
-  { id: "d5", name: "Remote Work Policy.pdf", fileType: "pdf", action: "uploaded", actorId: "emp-002", when: "Last week" },
-  { id: "d6", name: "Team Offsite.jpg", fileType: "image", action: "shared", actorId: "emp-009", when: "Last week" },
+  {
+    id: "d1",
+    name: "Q3 Team Objectives.docx",
+    fileType: "doc",
+    action: "edited",
+    actorId: "you",
+    when: "2h ago",
+  },
+  {
+    id: "d2",
+    name: "Employment Contract.pdf",
+    fileType: "pdf",
+    action: "signed",
+    actorId: "you",
+    when: "Yesterday",
+  },
+  {
+    id: "d3",
+    name: "Expense Report – July.xlsx",
+    fileType: "excel",
+    action: "shared",
+    actorId: "emp-005",
+    when: "2 days ago",
+  },
+  {
+    id: "d4",
+    name: "Onboarding Deck.pptx",
+    fileType: "ppt",
+    action: "commented",
+    actorId: "emp-004",
+    when: "4 days ago",
+  },
+  {
+    id: "d5",
+    name: "Remote Work Policy.pdf",
+    fileType: "pdf",
+    action: "uploaded",
+    actorId: "emp-002",
+    when: "Last week",
+  },
+  {
+    id: "d6",
+    name: "Team Offsite.jpg",
+    fileType: "image",
+    action: "shared",
+    actorId: "emp-009",
+    when: "Last week",
+  },
 ]
 
 /**
@@ -70,4 +116,3 @@ export interface Document {
   actionLabel: string
   when: string
 }
-

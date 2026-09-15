@@ -171,7 +171,10 @@ export function questionFor(setup: HomeSetup): {
       }
     case "complete":
       if (setup.purpose === "focus")
-        return { text: "Your Home focus is saved.", options: ["Back to my home"] }
+        return {
+          text: "Your Home focus is saved.",
+          options: ["Back to my home"],
+        }
       if (setup.purpose)
         return {
           text: "What would you like to do next?",

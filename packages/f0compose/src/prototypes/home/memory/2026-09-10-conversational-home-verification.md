@@ -1,6 +1,7 @@
 # Conversational home: implementation and verification
 
 ## Target and preservation
+
 - Actual checkout: `/Users/jonathan.centeno/code/f0-home-first-version`.
 - Branch: `codex/home-first-version`; HEAD remains `78067a6dd186e1cbb7ec7f5d3918d8dbf98691f9`.
 - URL: http://127.0.0.1:5180/p/home. Server started from this checkout because the supplied URL initially refused connections. Final route check: HTTP 200.
@@ -9,6 +10,7 @@
 - HomeNav's only edit exports its existing RecentRow for reuse. Navigation behavior is unchanged. HomeV2 remains separate and untouched.
 
 ## Implemented
+
 - One original conversation stores the interview, questions, answers, profile-specific preferences, routine/report drafts and confirmations. No alternative chat/transcript and no actual model invocation.
 - Initial personal-agent question appears automatically; original composer and F0 quick replies both work. Answered questions remain visible.
 - Briefing examples reuse original NeedsYouItem and Communities content, plus the RecruitmentWindow adaptation and data from PR #48. Personal focus shows the existing payslip UI.
@@ -20,6 +22,7 @@
 - Compact history disclosure reuses original RecentRow, allowing employee profiles to reach history without changing the approved admin-only Recents sidebar.
 
 ## Browser verification (real UI, 1280×720)
+
 1. Captured approved starting layout: original lower composer, rail, Clock in + Communities.
 2. Typed `Quiero priorizar la contratación de mi equipo` in the original textarea. Verified original question, user answer, recruitment/task/publication preview and next question.
 3. Selected personal preview then `Solo esta vez`; returning briefing retained recruitment. A copy ambiguity was corrected, then the transition's returned persisted preview was checked with assertions.
@@ -34,6 +37,7 @@
 12. Switched through the existing Preferences UI to admin. Final browser shows Alicia's first interview question, original composer and default Clock in + Communities; completed employee journey remains saved.
 
 ## Technical verification
+
 - `pnpm tsc`: passes.
 - `pnpm check src/prototypes/home`: 195 files, no issues.
 - `git diff --check`: passes.
@@ -41,17 +45,20 @@
 - No automated integration test claims: persistence and cross-surface behavior were exercised in the browser.
 
 ## Failures, causes and reusable rules
+
 - F0Select passed superficial rendering but crashed when its menu opened (`Maximum update depth exceeded`) in the loaded F0 bundle. Underlying F0 cause not established; no shared dependency was changed. Removed that new dependency from this feature and reused the original RecentRow instead. Rule: read types/stories, but still exercise opening/selecting in the actual loaded version; compilation is insufficient.
 - RecentRow inside F0Card rendered but clicking its text/row failed. Reproduced with accessibility click and pointer click. Removing the card wrapper, leaving original rows inside F0Box, restored selection. The containing card interfered with the row's interaction. Rule: reuse complete interaction patterns in a compatible container, not just their appearance.
 - A one-off preview originally reappeared next to language about future visits. Stored preference was correct but the UI could imply the wrong agreement. Follow-up now displays the actually retained future-visit preview. Rule: verify displayed agreement matches persisted semantics.
 - Employee navigation intentionally lacks Recents in the approved base. Solved with a header disclosure using the existing history rows, not by redesigning the sidebar.
 
 ## Explicit limits and next work
+
 This is a bounded, scripted visual prototype with local browser persistence. Free text recognises the documented intents and otherwise explains the supported scope; it is not a language model or a production personal agent. No actual source connections, scheduling, approvals, messages, reports backend or notifications run. Only one routine and one report per profile are modelled. Reload retains widget selection, not resized geometry. Source-review timing and report measurements are simulated; no freshness claims about real systems.
 
 Not ported: PR #48 NeedsYouFocus dialog infrastructure, richer TeamStatus/Expenses flows, full report builder/chart exploration, arbitrary routine schedules/conditions interpreted by a model, full catalogue of additionally authorised widgets. Existing underlying fixture copy remains partly English. These are subsequent extensions, not missing hidden implementations.
 
 ## Agent-learning status
+
 These findings are documented in project memory and were applied to this iteration through narrow reuse, profile-scoped agreements and browser verification. The separate agent being built in parallel was NOT edited or updated. Incorporation into that agent remains a separate action.
 
 Skills used/read: f0-prototype, f0-design, F0 component patterns/types/stories, factorial-skills, factorial-f0, factorial-skill-tracking, systematic-debugging. Decision-first-development was consulted; the user's explicit detailed direction authorised proceeding without another definition/approval round. No Jira, Notion or PR mutations require remote skill tracking.

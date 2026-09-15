@@ -1,17 +1,17 @@
-import { F0Button, F0Icon } from "@factorialco/f0-react";
-import { CheckCircle, ChevronRight } from "@factorialco/f0-react/icons/app";
-import { useEffect, useState } from "react";
+import { F0Button, F0Icon } from "@factorialco/f0-react"
+import { CheckCircle, ChevronRight } from "@factorialco/f0-react/icons/app"
+import { useEffect, useState } from "react"
 
-import type { NeedsYouTask } from "./fixtures";
-import type { TaskPhase } from "./needsYouStore";
+import type { NeedsYouTask } from "./fixtures"
+import type { TaskPhase } from "./needsYouStore"
 
-import { ChatSpinner } from "./one/chat-spinner/ChatSpinner";
+import { ChatSpinner } from "./one/chat-spinner/ChatSpinner"
 
 // The cascade is a first-paint welcome, not a navigation transition.
 // Opening and closing a conversation, leaving ?view=policies and the nav
 // "New" action all remount this list, and the stagger must not replay
 // every time (Emil: Home is seen dozens of times a day).
-let hasEnteredOnce = false;
+let hasEnteredOnce = false
 
 /**
  * A "Needs you" row (Figma 2621:23747, redesigned 2026-08-29): 48px tall
@@ -45,24 +45,24 @@ export function NeedsYouItem({
   phase,
   surface = "tertiary",
 }: {
-  task: NeedsYouTask;
-  surface?: "primary" | "tertiary";
+  task: NeedsYouTask
+  surface?: "primary" | "tertiary"
   /** Position in the list — drives the staggered entrance animation. */
-  index?: number;
-  onOpen?: (task: NeedsYouTask) => void;
+  index?: number
+  onOpen?: (task: NeedsYouTask) => void
   /** Set while One is closing this row itself. */
-  phase?: TaskPhase;
+  phase?: TaskPhase
 }) {
-  const [animate] = useState(() => !hasEnteredOnce);
+  const [animate] = useState(() => !hasEnteredOnce)
   useEffect(() => {
-    hasEnteredOnce = true;
-  }, []);
-  const busy = phase !== undefined;
-  const finished = phase?.kind === "done" || phase?.kind === "exiting";
+    hasEnteredOnce = true
+  }, [])
+  const busy = phase !== undefined
+  const finished = phase?.kind === "done" || phase?.kind === "exiting"
   const step =
     phase?.kind === "thinking"
       ? phase.steps[Math.min(phase.visible, phase.steps.length) - 1]
-      : undefined;
+      : undefined
   return (
     // The slot owns the row's bottom spacing so a collapsing row takes
     // the gap with it — see .f0c-row-slot.
@@ -144,13 +144,13 @@ export function NeedsYouItem({
               hideLabel
               label={`Open "${task.title}"`}
               onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                onOpen?.(task);
+                event.stopPropagation()
+                onOpen?.(task)
               }}
             />
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }

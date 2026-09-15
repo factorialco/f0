@@ -1,11 +1,10 @@
+import { F0Checkbox } from "@factorialco/f0-react"
 // Vendored F0 component; provenance and bounded compatibility changes: REFERENCE.md.
 import { forwardRef } from "react"
 
-import { F0Checkbox } from "@factorialco/f0-react"
-import { cn, focusRing } from "../classNames"
-
 import type { ClarifyingOption, ClarifyingSelectionMode } from "../types"
 
+import { cn, focusRing } from "../classNames"
 import { RadioIndicator } from "./RadioIndicator"
 
 interface OptionRowProps {
@@ -20,10 +19,7 @@ interface OptionRowProps {
 }
 
 export const OptionRow = forwardRef<HTMLDivElement, OptionRowProps>(
-  (
-    { option, isSelected, mode, isTabStop, onToggle, onKeyNavigate },
-    ref
-  ) => {
+  ({ option, isSelected, mode, isTabStop, onToggle, onKeyNavigate }, ref) => {
     if (mode === "single") {
       return (
         <div

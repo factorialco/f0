@@ -27,6 +27,42 @@ export type HelpRow =
       href?: string
       onClick?: () => void
     }
+/**
+ * The legal-entity radio list. Extracted on 2026-09-14 so the rail's own
+ * company switcher and this menu render the identical rows — Angel asked
+ * for the selector in both places, and two copies would have drifted.
+ */
+export function EntityRows({
+  entities,
+  selected,
+  onSelect,
+}: {
+  entities: Entity[]
+  selected: string
+  onSelect: (id: string) => void
+}) {
+  return (
+    <>
+      {entities.map((entity) => (
+        <button
+          key={entity.id}
+          type="button"
+          role="menuitemradio"
+          aria-checked={entity.id === selected}
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-base font-medium text-f1-foreground hover:bg-f1-background-hover"
+          onClick={() => onSelect(entity.id)}
+        >
+          <F0AvatarCompany name={entity.name} src={entity.src} size="xs" />
+          <span className="min-w-0 flex-1 truncate">{entity.name}</span>
+          {entity.id === selected && (
+            <F0Icon icon={Check} size="sm" color="info" />
+          )}
+        </button>
+      ))}
+    </>
+  )
+}
+
 export function ProfileMenu({
   accountEmail,
   entities,
@@ -132,28 +168,11 @@ export function ProfileMenu({
                 <div className="p-2 text-sm font-medium text-f1-foreground-secondary">
                   {accountEmail}
                 </div>
-                {entities.map((entity) => (
-                  <button
-                    key={entity.id}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={entity.id === selectedEntity}
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-base font-medium text-f1-foreground hover:bg-f1-background-hover"
-                    onClick={() => onSelectEntity(entity.id)}
-                  >
-                    <F0AvatarCompany
-                      name={entity.name}
-                      src={entity.src}
-                      size="xs"
-                    />
-                    <span className="min-w-0 flex-1 truncate">
-                      {entity.name}
-                    </span>
-                    {entity.id === selectedEntity && (
-                      <F0Icon icon={Check} size="sm" color="info" />
-                    )}
-                  </button>
-                ))}
+                <EntityRows
+                  entities={entities}
+                  selected={selectedEntity}
+                  onSelect={onSelectEntity}
+                />
                 <div
                   role="separator"
                   className="my-1 h-px bg-f1-border-secondary"
@@ -215,6 +234,24 @@ export function ProfileMenu({
                     )
                   })
                 )}
+                {/* Help left the rail on 2026-09-14 (Angel: "saca el ? de
+                    ahí y ponlo dentro del perfil en un Get help") — the
+                    established pattern, and one less glyph in the rail.
+                    Expanded, it becomes the menu's one nested row; the
+                    submenu panel below already knows how to draw it. */}
+                {!collapsed && (
+                  <>
+                    <div
+                      role="separator"
+                      className="my-1 h-px bg-f1-border-secondary"
+                    />
+                    {row(
+                      "help",
+                      <Question width={20} height={20} className="shrink-0" />,
+                      labels.help
+                    )}
+                  </>
+                )}
               </div>
               {sub ? (
                 <div
@@ -264,6 +301,11 @@ export function ProfileMenu({
                             className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-base font-medium text-f1-foreground hover:bg-f1-background-hover"
                             onClick={() => {
                               setOpen(false)
+                              // `onClick` was dropped here until the tour
+                              // rows moved into this menu — href-only rows
+                              // never noticed, the tour ones would have
+                              // silently done nothing.
+                              r.onClick?.()
                               if (r.href) window.open(r.href, "_blank")
                             }}
                           >

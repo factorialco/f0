@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react"
+
 import type { ProfileId } from "../profileStore"
 
 import {
@@ -7,8 +8,7 @@ import {
   type WindowId,
 } from "../windows/types"
 
-const key = (profile: ProfileId) =>
-  `f0compose:home:fixed-widgets:${profile}`
+const key = (profile: ProfileId) => `f0compose:home:fixed-widgets:${profile}`
 export const WIDGET_CHANGE_EVENT = "home:fixed-widgets-change"
 const PREFERENCES_CHANGED = "home:widget-preferences-changed"
 export function readWidgets(profile: ProfileId): WindowId[] {

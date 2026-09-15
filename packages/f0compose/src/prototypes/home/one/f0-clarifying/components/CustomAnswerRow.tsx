@@ -3,10 +3,10 @@ import type { Ref } from "react"
 
 import { F0Checkbox } from "@factorialco/f0-react"
 import { useI18n } from "@factorialco/f0-react/dist/ai"
-import { cn } from "../classNames"
 
 import type { ClarifyingSelectionMode } from "../types"
 
+import { cn } from "../classNames"
 import { RadioIndicator } from "./RadioIndicator"
 
 interface CustomAnswerRowProps {

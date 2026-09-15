@@ -16,9 +16,8 @@ import {
 import { Pencil } from "@factorialco/f0-react/icons/app"
 /** Ported from irene-mallafre/factorial-ai, f7405eb; see IMPORT.md.
  * Original sections and state operations retained; controls use real F0. */
-import { useContext, useState } from "react"
+import { useState } from "react"
 
-import { AgentEntryContext, AskFactorialAction } from "../AskFactorial"
 import figmaLogo from "../onboarding/assets/figma.svg"
 import githubLogo from "../onboarding/assets/github.svg"
 import googleLogo from "../onboarding/assets/google-drive.png"
@@ -246,7 +245,6 @@ function Behaviour() {
 
 export function PreferencesScreen() {
   const [tab, setTab] = useState("connections")
-  const one = useContext(AgentEntryContext)
   return (
     <Page
       header={
@@ -263,7 +261,6 @@ export function PreferencesScreen() {
                 breadcrumbs={[{ id: "preferences", label: "Preferences" }]}
               />
             </F0Box>
-            <AskFactorialAction onClick={one.open} />
           </F0Box>
           <Tabs
             secondary={false}

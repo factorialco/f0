@@ -1,7 +1,6 @@
+import { useI18n } from "@factorialco/f0-react/dist/ai"
 // Vendored F0 component; provenance and bounded compatibility changes: REFERENCE.md.
 import { useRef } from "react"
-
-import { useI18n } from "@factorialco/f0-react/dist/ai"
 
 import type { ClarifyingQuestionState } from "./types"
 

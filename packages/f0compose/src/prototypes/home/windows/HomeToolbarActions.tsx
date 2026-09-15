@@ -1,11 +1,12 @@
-import { F0Button } from "@factorialco/f0-react";
-import { Pencil } from "@factorialco/f0-react/icons/app";
-import { forwardRef, type SVGProps } from "react";
-import { PanelCollapse } from "../PanelCollapse";
-import { SidePanelIcon } from "./PanelIcons";
-import { useProfile } from "../profileStore";
-import { resumeHomeSetup } from "../one/conversationStore";
-import { useWidgetCollapse } from "./widgetCollapse";
+import { F0Button } from "@factorialco/f0-react"
+import { Pencil } from "@factorialco/f0-react/icons/app"
+import { forwardRef, type SVGProps } from "react"
+
+import { resumeHomeSetup } from "../one/conversationStore"
+import { PanelCollapse } from "../PanelCollapse"
+import { useProfile } from "../profileStore"
+import { SidePanelIcon } from "./PanelIcons"
+import { useWidgetCollapse } from "./widgetCollapse"
 
 // Existing sidebar glyph mirrored for the right-hand panel. The installed
 // F0 icon set has no sidebar-collapse glyph (see PanelCollapse.tsx).
@@ -18,19 +19,19 @@ export const RightPanelCollapse = forwardRef<
     ref={ref}
     className={`${className ?? ""} -scale-x-100`}
   />
-));
-export const RightPanelExpand = SidePanelIcon;
+))
+export const RightPanelExpand = SidePanelIcon
 
 export function HomeToolbarActions({
   openWindows,
   showEdit = true,
 }: {
-  openWindows: string[];
-  showEdit?: boolean;
+  openWindows: string[]
+  showEdit?: boolean
 }) {
-  const profile = useProfile();
-  const { collapsed, setCollapsed } = useWidgetCollapse(profile);
-  const expanded = openWindows.some((id) => !collapsed.includes(id));
+  const profile = useProfile()
+  const { collapsed, setCollapsed } = useWidgetCollapse(profile)
+  const expanded = openWindows.some((id) => !collapsed.includes(id))
   return (
     <div className="flex items-center gap-1" data-home-toolbar-actions>
       {showEdit && (
@@ -53,11 +54,11 @@ export function HomeToolbarActions({
             setCollapsed(
               expanded
                 ? [...new Set([...collapsed, ...openWindows])]
-                : collapsed.filter((id) => !openWindows.includes(id)),
+                : collapsed.filter((id) => !openWindows.includes(id))
             )
           }
         />
       )}
     </div>
-  );
+  )
 }

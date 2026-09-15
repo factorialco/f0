@@ -22,6 +22,7 @@ Browser verified: real navigation across all four steps, keyboard activation, pa
 ## Handoff to the parallel conversational Home
 
 `onboarding/state.ts` exposes `getOnboarding`, `useOnboarding`, `updateOnboarding` and `reopenOnboarding`.
+
 - `screen`: welcome / tour / preferences / connections / complete.
 - `tourStep`, `tourPaused`: navigation progress and pause state.
 - `selected`: personal / team / work.
@@ -36,6 +37,7 @@ Merge onboarding files, the small Home entry gate, nav/help hooks, Preferences c
 ## Components and assets
 
 All new screen composition uses F0Box, F0Heading, F0Text, F0Button and F0OneIcon, with existing F0 tokens. The clarifying panel is the already-vendored F0 panel; optional labels and default-preferences action preserve prior behaviour for all callers. Connections is exported from PreferencesScreen, not duplicated. Logo assets:
+
 - Google Drive: official `https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png`.
 - Slack: existing monorepo `frontend/src/assets/images/appStore/icons/slack.svg`.
 - Notion/Jira: existing prototype assets.

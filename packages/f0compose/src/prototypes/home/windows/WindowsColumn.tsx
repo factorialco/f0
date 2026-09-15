@@ -1,10 +1,10 @@
-import type { WindowId, WindowsState } from "./types"
-import type { PanelSpec } from "./WindowStack"
 import { F0Button } from "@factorialco/f0-react"
 import { Comment } from "@factorialco/f0-react/icons/app"
-import { askWidget } from "../home-widgets/askWidget"
-import { WidgetRail } from "./WidgetRail"
 
+import type { WindowId, WindowsState } from "./types"
+import type { PanelSpec } from "./WindowStack"
+
+import { askWidget } from "../home-widgets/askWidget"
 import {
   PayslipWindow,
   HolidaysWindow,
@@ -20,6 +20,7 @@ import { FloatingWindow } from "./FloatingWindow"
 import { InboxWindow } from "./InboxWindow"
 import { InsightsWindow } from "./InsightsWindow"
 import { PreviewWindow } from "./PreviewWindow"
+import { WidgetRail } from "./WidgetRail"
 import { animateWindowClose as animateClose } from "./windowMotion"
 import { MaximizedWindow as GenericMaximizedWindow } from "./WindowStack"
 
@@ -102,12 +103,7 @@ export function widgetSpec(
   id: WindowId,
   onToggleFloat?: (id: WindowId) => void
 ): PanelSpec {
-  const {
-    title,
-    content: Content,
-    autoHeight,
-    canFloat,
-  } = windowRegistry[id]
+  const { title, content: Content, autoHeight, canFloat } = windowRegistry[id]
   return {
     title,
     content: <Content />,
@@ -169,11 +165,7 @@ export function WindowsColumn({
   onClose: (id: WindowId) => void
   onToggleMaximized: (id: WindowId) => void
   onSetColumnWidth: (width: number) => void
-  onResizeBetween: (
-    idx: number,
-    deltaWeight: number,
-    pair: WindowId[]
-  ) => void
+  onResizeBetween: (idx: number, deltaWeight: number, pair: WindowId[]) => void
   onResizeColumnsBetween: (
     idx: number,
     deltaWeight: number,
@@ -216,7 +208,7 @@ export function FloatingWidgets({
               key={id}
               title={title}
               width={floatingWidth ?? 188}
-              anchorSelector="[data-home-clockin-button]"
+              anchorSelector="[data-home-clockin-rail], [data-home-clockin-button]"
               onDock={() => onToggleFloat(id)}
               onClose={() => onClose(id)}
             >

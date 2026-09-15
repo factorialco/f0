@@ -9,9 +9,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
     const page = await browser.newPage({
       viewport: { width: 1800, height: 1100 },
     })
-    await page.goto(
-      process.env.HOME_QA_URL || "http://127.0.0.1:5181/p/home"
-    )
+    await page.goto(process.env.HOME_QA_URL || "http://127.0.0.1:5181/p/home")
     await page.waitForTimeout(2300)
     async function check(label) {
       await page.waitForTimeout(500)
@@ -31,19 +29,16 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
     await page
       .getByRole("button", { name: "Expand all widgets", exact: true })
       .click()
-    if (!(await check("expanded question")))
-      throw Error("Expanded detached")
+    if (!(await check("expanded question"))) throw Error("Expanded detached")
     await page.getByRole("button", { name: "Cancel", exact: true }).click()
     await page
       .getByRole("button", { name: "Collapse all widgets", exact: true })
       .click()
-    if (!(await check("collapsed composer")))
-      throw Error("Composer detached")
+    if (!(await check("collapsed composer"))) throw Error("Composer detached")
     await page
       .getByRole("button", { name: "Expand all widgets", exact: true })
       .click()
-    if (!(await check("expanded composer")))
-      throw Error("Composer detached")
+    if (!(await check("expanded composer"))) throw Error("Composer detached")
   } finally {
     await browser.close()
   }

@@ -13,6 +13,14 @@
 [data-hybrid-canvas] {
   width: 100%;
   transition:
+    opacity 280ms ease,
+    visibility 420ms;
+}
+/* Width eases ONLY while the conversation panel is sharing the canvas.
+   Navigation must never animate it (Angel, 2026-09-14). */
+[data-hybrid-root][data-mode="side"] [data-hybrid-canvas],
+[data-hybrid-root][data-mode="focus"] [data-hybrid-canvas] {
+  transition:
     width 420ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 280ms ease,
     visibility 420ms;
@@ -234,12 +242,21 @@
   height: 0;
 }
 
-/* Full-width application content; agent entry lives in the header. */
+/* Full-width application content; agent entry lives in the header. The
+   !important block near the end of this file is what actually paints
+   these — this stays in step with it so the fallback is not a lie. */
 [data-hybrid-root],
 [data-hybrid-work] {
-  background: hsl(var(--page));
+  background: #f7f7f7;
 }
 [data-hybrid-canvas] {
+  transition:
+    opacity 280ms ease,
+    visibility 420ms,
+    border-radius 420ms;
+}
+[data-hybrid-root][data-mode="side"] [data-hybrid-canvas],
+[data-hybrid-root][data-mode="focus"] [data-hybrid-canvas] {
   transition:
     width 420ms cubic-bezier(0.22, 1, 0.36, 1),
     height 420ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -256,7 +273,11 @@
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: hsl(var(--neutral-0));
+  /* The sheet tone, one point under white (Angel, 2026-09-15: "there was
+     a 99L background color for the content"). What made module screens
+     read as a white slab was f0's own `bg-f1-special-page`, which is pure
+     white and is cleared separately; the sheet itself belongs here. */
+  background: #fcfcfc;
 }
 [data-hybrid-dock] {
   position: absolute;
@@ -267,7 +288,7 @@
   pointer-events: none;
 }
 [data-hybrid-target] {
-  height: 196px;
+  height: 156px;
 }
 [data-hybrid-root]:not([data-view="home"]) [data-hybrid-target],
 [data-hybrid-root]:not([data-view="home"])[data-mode="expanded"]
@@ -288,7 +309,7 @@
   -webkit-mask-image: none !important;
 }
 [data-hybrid-composer] {
-  height: var(--composer-height, 176px);
+  height: var(--composer-height, 128px);
   transition:
     transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
     width 420ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -357,22 +378,36 @@
   border-radius: 0 !important;
 }
 
-/* Shared F0 secondary surface for navigation, canvas and One. */
+/* The AppShell's ground, Angel's value: #F7F7F7 for the sidebars AND for
+   the page behind the content, with white sheets floating on it. See
+   FULL_BLEED_CSS in Home.tsx. */
 [data-home-nav],
-[data-home-rail],
-[data-home-panel],
+[data-home-rail] {
+  background: #f5f5f5 !important;
+}
+/* Alone, the rail rejoins the ground: the darker tone is there to sit
+   BEHIND a second level, and with nothing beside it it just reads as a
+   stripe (Angel, 2026-09-14). */
+[data-home-rail][data-panel="closed"] {
+  background: #f7f7f7 !important;
+}
+/* The second sidebar and the surface behind the content sit a point
+   above the rail (Angel, 2026-09-14). */
+[data-home-panel] {
+  background: #f7f7f7 !important;
+}
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
-  background:
-    linear-gradient(hsl(var(--neutral-10)), hsl(var(--neutral-10))),
-    hsl(var(--neutral-0)) !important;
+  background: #f7f7f7 !important;
 }
+
 [data-home-panel],
 .dark [data-home-panel] {
   box-shadow: none !important;
   border-right: 0 !important;
 }
+/* Dark: the same three tiers, rebuilt from f0's dark tokens. */
 .dark [data-home-nav],
 .dark [data-home-rail],
 .dark [data-home-panel],
@@ -383,15 +418,16 @@
     linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
 }
 
-/* The navigation panel supplies the divider beside the full-width content. */
-body:has([data-hybrid-root][data-view="home"]) [data-home-panel],
-body:has([data-hybrid-root][data-view="activity"]) [data-home-panel],
-[data-home-panel][data-nav-section="hub"] {
-  box-shadow: inset -1px 0 0 hsl(var(--neutral-10)) !important;
-}
+/* No divider between the panel and the content any more: with the two on
+   different tiers, a neutral-10 seam is darker than either side of it. */
 
-/* Embedded F0 pages share the canvas without their own outer ring. */
+/* Embedded F0 pages share the canvas without their own outer ring, and
+   without their own GROUND: `bg-f1-special-page` is pure white, which is
+   what the monolith gives a module screen, and against this canvas it
+   reads as a slab that should not be there (Angel, 2026-09-15). Only the
+   layout ground is cleared; buttons, cards and tags keep their white. */
 [data-hybrid-canvas] .bg-f1-special-page {
+  background: transparent !important;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -481,14 +517,147 @@ body:has([data-hybrid-root]:not([data-view="home"])) main#content {
 body:has([data-hybrid-root]:not([data-view="home"])) [data-home-panel] {
   box-shadow: none !important;
 }
-[data-hybrid-root]:not([data-view="home"]):not([data-view="widgets"])
-  [data-hybrid-work] {
+[data-hybrid-root]:not([data-view="widgets"]) [data-hybrid-work] {
   padding: 4px 4px 4px 0;
   box-sizing: border-box;
 }
-[data-hybrid-root]:not([data-view="home"]):not([data-view="widgets"])
-  [data-hybrid-canvas] {
+[data-hybrid-root]:not([data-view="widgets"]) [data-hybrid-canvas] {
   border: 1px solid hsl(var(--neutral-10));
   border-radius: 16px;
-  @apply shadow-md;
+  /* Barely there: one point of lightness separates the sheet from the
+     ground, so the shadow only has to hint at the edge (Angel,
+     2026-09-14 — shadow-md was too strong for that). */
+  box-shadow: 0 1px 3px 0 rgba(13, 22, 37, 0.03);
+}
+/* Home sits in the same white sheet as Inbox, Calendar and the modules
+   (Angel, 2026-09-14: "ahora está flotando free"). Its canvas keeps its
+   own scroller and its in-flow composer, so only the surface changes. */
+[data-hybrid-root][data-view="home"] [data-hybrid-canvas] {
+  background: #fcfcfc;
+  overflow: hidden;
+}
+body:has([data-hybrid-root][data-view="home"]) main#content,
+body:has([data-hybrid-root][data-view="home"]) main#content > div,
+[data-hybrid-root][data-view="home"],
+[data-hybrid-root][data-view="home"] [data-hybrid-work] {
+  overflow: visible;
+}
+
+/* One frame with no motion at all, set by the nav while it swaps
+   sections: the second level must change size instantly (Angel,
+   2026-09-14), and the canvas's own width transition was animating the
+   space the panel gave back. */
+body[data-nav-instant] *,
+body[data-nav-instant] *::before,
+body[data-nav-instant] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+/* The shell's content column does not ease with CSS: the frame runs a
+   FLIP on it, writing an inline `translate3d(...) scale(x,1)` every frame
+   (measured 2026-09-15), which no `transition: none` can reach. Pinning
+   the transform while the flag is up is the only way the switch lands
+   instantly: an !important rule outranks the inline one. The direct
+   child is pinned too, because the FLIP writes an INVERSE scale there
+   (scale(1.61,1) against main's scale(0.62,1)) and killing only half of
+   the pair leaves the content stretching on its own. */
+body[data-nav-instant] main#content,
+body[data-nav-instant] main#content > * {
+  transform: none !important;
+}
+
+/* The recommendation row glides instead of jumping, and each pill fades
+   as it nears the chevron (the opacity itself is set per item in
+   HomeRecommendationCarousel, which cannot use a mask without killing the
+   pills' backdrop blur). */
+.home-recommendations {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.home-recommendations::-webkit-scrollbar {
+  display: none;
+}
+.home-recommendations > div > * {
+  transition: opacity 420ms ease-out;
+}
+
+/* The clock is running: the dot breathes once every two seconds, which
+   is slow enough to read as "time is passing" rather than as an alert. */
+@keyframes home-clock-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+.home-clock-dot {
+  animation: home-clock-pulse 2s ease-in-out infinite;
+}
+/* The halo breathes against the core, a beat behind it, which is what
+   gives the mark its "still running" feel. */
+@keyframes home-clock-halo {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.05;
+    transform: scale(1.45);
+  }
+}
+.home-clock-halo {
+  animation: home-clock-halo 2s ease-in-out infinite;
+}
+/* The same breathing dot inside the clock-in card, a size down, and the
+   ring with its counter dialled back to 90% (Angel, 2026-09-15). */
+[data-home-floating] .aspect-square.h-4 {
+  height: 12px;
+  width: 12px;
+  animation: home-clock-pulse 2s ease-in-out infinite;
+}
+[data-home-floating] .h-40.w-40 {
+  transform: scale(0.9);
+}
+
+/* Dark keeps the ramp the light hexes describe: the ground is f0's dark
+   base and the sheets are lifted off it by --page. */
+.dark [data-hybrid-canvas] {
+  background:
+    linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
+}
+
+/* The conversation panel parks 40px outside the frame while it is closed,
+   ready to slide in. That used to be clipped by its ancestors — the Home
+   sheet made them overflow:visible, and the overhang turned into a page
+   scrollbar (Angel, 2026-09-14). `clip` on one axis stops it without
+   creating a scroll container, so the sheet's shadow still shows. */
+body:has([data-hybrid-root]) main#content,
+body:has([data-hybrid-root]) main#content > div {
+  /* !important because the Home sheet's own `overflow: visible` rule
+     carries an attribute selector and would otherwise win the shorthand
+     back. */
+  overflow-x: clip !important;
+}
+
+/* f0's own shell paints #F5F6F8 behind everything, which showed through
+   between screens as a colder grey than ours (Angel, 2026-09-14). The
+   page's base is the second sidebar's tone now, so nothing underneath
+   can read as a different surface. */
+#f0-layout {
+  background: #f7f7f7 !important;
+}
+.dark #f0-layout {
+  background: hsl(var(--neutral-0)) !important;
+}
+
+/* The nav paints above the canvas so the panel's way-back button, which
+   hangs off the rail's right edge, is not covered by the content sheet. */
+[data-hybrid-root] [data-home-nav] {
+  position: relative;
+  z-index: 20;
 }

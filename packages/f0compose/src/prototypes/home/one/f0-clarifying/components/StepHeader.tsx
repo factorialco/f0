@@ -1,12 +1,12 @@
 // Vendored F0 component; provenance and bounded compatibility changes: REFERENCE.md.
 import { F0Button } from "@factorialco/f0-react"
+import { OneEllipsis } from "@factorialco/f0-react"
+import { useI18n } from "@factorialco/f0-react/dist/ai"
 import {
   ChevronLeft,
   ChevronRight,
   Cross,
 } from "@factorialco/f0-react/icons/app"
-import { OneEllipsis } from "@factorialco/f0-react"
-import { useI18n } from "@factorialco/f0-react/dist/ai"
 
 interface StepHeaderProps {
   question: string

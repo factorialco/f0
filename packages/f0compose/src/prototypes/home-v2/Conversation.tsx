@@ -104,7 +104,9 @@ export function Transcript({
                   topics={entry.blocks}
                   compact={index === 0}
                   previewGrid={index === 0}
-                  pin={index > 0 && index === history.length - 1 ? pin : undefined}
+                  pin={
+                    index > 0 && index === history.length - 1 ? pin : undefined
+                  }
                   pinned={pinned}
                   onOpen={onOpen}
                 />

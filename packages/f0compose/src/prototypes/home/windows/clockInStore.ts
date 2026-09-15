@@ -50,3 +50,29 @@ export function toggleClockIn() {
 export function useClockInPending(): boolean {
   return useClockIn().clockedInAt === null
 }
+
+/**
+ * The rail's running timer asks for the clock-in card, and Home (a
+ * sibling tree) is the one holding the widget stack, so the request
+ * travels as a counter: every click bumps it, Home reacts to the change.
+ */
+let widgetRequests = 0
+const requestListeners = new Set<() => void>()
+
+export function requestClockInWidget() {
+  widgetRequests += 1
+  requestListeners.forEach((listener) => listener())
+}
+
+export function useClockInWidgetRequests(): number {
+  return useSyncExternalStore(
+    (listener) => {
+      requestListeners.add(listener)
+      return () => {
+        requestListeners.delete(listener)
+      }
+    },
+    () => widgetRequests,
+    () => widgetRequests
+  )
+}
