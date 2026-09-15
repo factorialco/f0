@@ -23,6 +23,7 @@ import { suggestionFor, pageReading, type Presentation } from "./agentEntryData"
 import { AgentEntryContext } from "./AskFactorial"
 import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
+import { useHomeScrolled } from "./homeScrollStore"
 import { HomeSuggestion } from "./HomeSuggestion"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import { ClarifyPanel } from "./one/ClarifyPanel"
@@ -86,6 +87,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
   }, [activeConversation?.id, profile])
 
   const onboarding = useOnboarding(profile)
+  const homeScrolled = useHomeScrolled()
   const suggestReport = !view && onboarding.suggestReport
   const suggestion = suggestionFor(null, profile)
   const [writing, setWriting] = useState(false)
@@ -274,7 +276,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
   return (
     <AgentEntryContext.Provider
       value={{
-        visible: !!view,
+        // On a screen the switch is always there; on Home it appears
+        // once the composer has scrolled away (Angel, 2026-09-15).
+        visible: !!view || homeScrolled,
         open: () => {
           setMode("side")
           setNotice("")

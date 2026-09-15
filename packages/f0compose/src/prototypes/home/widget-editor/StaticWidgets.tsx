@@ -8,8 +8,6 @@ import { useSearchParams } from "react-router-dom"
 import { useProfile } from "../profileStore"
 import { useHomePreparing } from "../setup/homeGeneration"
 import { useFixedWidgets } from "../setup/widgetPreferences"
-import { HomeToolbarActions } from "../windows/HomeToolbarActions"
-import { useWidgetCollapse } from "../windows/widgetCollapse"
 import { WidgetRail } from "../windows/WidgetRail"
 import { windowRegistry } from "../windows/WindowsColumn"
 import { isBuiltin, readSelection, useWidgetCatalog } from "./model"
@@ -26,24 +24,18 @@ export function StaticWidgets({
   const catalog = useWidgetCatalog(profile)
   const [, setParams] = useSearchParams()
   const ids = readSelection(profile).personal
-  const { collapsed } = useWidgetCollapse(profile)
-  const hasExpanded = ids.some((id) => !collapsed.includes(id))
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
       <div className="flex min-h-0 flex-col">
         {/* The controls sit ON TOP of the widgets, not in a gutter beside
             them (Angel, 2026-09-14) — they act on the column, so they
             belong over it. */}
-        <div className="flex shrink-0 items-center justify-end whitespace-nowrap pt-3">
-          <F0Button
-            label="Edit widgets"
-            icon={Pencil}
-            hideLabel={!hasExpanded && ids.length > 0}
-            variant="ghost"
-            size="md"
-            onClick={() => setParams({ view: "widgets" })}
-          />
-          {onCloseConversation && (
+        {/* Only the conversation's ✕ survives up here (Angel,
+            2026-09-15): editing the widgets and collapsing the column
+            were two controls hanging over a column that already has its
+            own footer button. */}
+        {onCloseConversation && (
+          <div className="flex shrink-0 items-center justify-end whitespace-nowrap pt-3">
             <F0Button
               label="Close conversation"
               icon={Cross}
@@ -52,9 +44,8 @@ export function StaticWidgets({
               size="md"
               onClick={onCloseConversation}
             />
-          )}
-          <HomeToolbarActions openWindows={ids} showEdit={false} />
-        </div>
+          </div>
+        )}
         <div className="min-h-0 flex-1">
           <WidgetRail
             items={ids}

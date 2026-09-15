@@ -59,6 +59,7 @@ import {
   type ProfilePerson,
 } from "./fixtures"
 import { HomeNav } from "./HomeNav"
+import { setHomeScrolled, useHomeScrolled } from "./homeScrollStore"
 import { ImportedHubScreen, hasImportedScreen } from "./hub/ImportedHubScreen"
 import { ToolsScreen } from "./hub/ToolsScreen"
 import { HybridHome } from "./HybridHome"
@@ -1020,8 +1021,39 @@ function HomeNavbar({
             />
           </div>
         )}
-        <AskFactorialButton />
+        <OneSwitchSlot />
       </div>
+    </div>
+  )
+}
+
+/**
+ * f0's One switch in the navbar. On a screen it is simply there; on Home
+ * it arrives once the composer has scrolled away, dropping in from the
+ * top (Angel, 2026-09-15) — which is why it is mounted a frame before it
+ * is shown, since a transition needs something to travel from.
+ */
+function OneSwitchSlot() {
+  const scrolled = useHomeScrolled()
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    if (!scrolled) {
+      setShown(false)
+      return
+    }
+    const frame = requestAnimationFrame(() => setShown(true))
+    return () => cancelAnimationFrame(frame)
+  }, [scrolled])
+  return (
+    <div
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "none" : "translateY(-14px)",
+        transition:
+          "opacity 140ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+    >
+      <AskFactorialButton />
     </div>
   )
 }
@@ -1270,6 +1302,7 @@ function HomeCanvas() {
     const follow = () => {
       const offset = scroller.scrollTop
       setAtTop(offset < 8)
+      setHomeScrolled(offset)
       // Gone by the time the digest has climbed into place.
       if (backdrop && pinned.current > 0)
         backdrop.style.opacity = String(
@@ -1288,6 +1321,7 @@ function HomeCanvas() {
       if (screen) screen.style.height = ""
       if (digest) digest.style.marginTop = ""
       if (backdrop) backdrop.style.opacity = ""
+      setHomeScrolled(0)
     }
   }, [homeLanding])
   /**
