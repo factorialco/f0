@@ -1338,7 +1338,9 @@ function RailItem({
             you ARE is branded. */}
         <span
           className={`flex size-9 items-center justify-center rounded-lg ${
-            active ? "f0c-rail-active" : "group-hover:bg-f1-background-secondary"
+            active
+              ? "bg-f1-background-accent text-f1-icon-accent"
+              : "group-hover:bg-f1-background-secondary"
           }`}
         >
           {/* Every rail glyph is the SAME weight in the design (Figma
