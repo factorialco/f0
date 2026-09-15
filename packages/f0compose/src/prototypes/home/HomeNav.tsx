@@ -253,7 +253,10 @@ function NavRow({
  * 4px padding and bleed inside the panel's 12px one.
  */
 function PanelDivider() {
-  return <div className="mx-1.5 h-px shrink-0 bg-f1-border-secondary" />
+  // Full bleed: `-mx-3` cancels the panel body's own px-3 so the line runs
+  // edge to edge, from the rail to the panel's far side (Angel,
+  // 2026-09-14) rather than floating inside the text column.
+  return <div className="-mx-3 h-px shrink-0 bg-f1-border-secondary" />
 }
 
 /** Collapsible section header ("Pinned ⌄", "Canales ⌄"…). */
