@@ -575,6 +575,17 @@ function chartSkeleton(config: DashboardChartConfig) {
  *
  * @internal Exported for unit tests — not part of the package's public API.
  */
+/**
+ * Reference lines travel with the data, and only bar and line charts draw
+ * them. Spread into whichever props are being built, so the branches that do
+ * not support them simply never call it.
+ */
+function referenceLineProps(
+  data: DashboardChartData
+): Pick<DashboardChartData, "referenceLines"> {
+  return data.referenceLines ? { referenceLines: data.referenceLines } : {}
+}
+
 export function buildChartProps(
   item: DashboardChartItem,
   data: DashboardChartData,
@@ -641,6 +652,7 @@ export function buildChartProps(
         ...config,
         ...shared,
         ...(orientation ? { orientation } : {}),
+        ...referenceLineProps(data),
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
@@ -649,6 +661,7 @@ export function buildChartProps(
       return {
         ...config,
         ...shared,
+        ...referenceLineProps(data),
         categories: adapted.categories ?? [],
         series: adapted.series,
       } as F0DataChartProps
@@ -757,6 +770,7 @@ function buildNativeChartProps(
         ...(chart.type === "bar"
           ? { showLabels: chart.showLabels ?? true }
           : {}),
+        ...referenceLineProps(data),
         categories,
         series,
       } as F0DataChartProps
