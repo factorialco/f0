@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { Search } from "../Search"
 
-const SUGGESTIONS = [
+const PLACEHOLDERS = [
   'Try "Hired in the last 6 months"',
   'Try "Ended agreements in Madrid"',
   'Try "Waiters hired more than 3 years ago"',
@@ -34,18 +34,18 @@ export const Default: Story = {
 }
 
 /**
- * Focusing the empty field offers example queries; they disappear as soon as
- * there is text to match against.
+ * An idle field cycles example queries every few seconds, so the kind of thing
+ * worth asking is visible without a panel in the way. The rotation stops the
+ * moment the field is focused.
  */
-export const WithSuggestions: Story = {
+export const WithRotatingPlaceholder: Story = {
   render: function Render() {
     const [value, setValue] = useState<string | undefined>()
     return (
       <Search
         value={value}
         onChange={setValue}
-        suggestions={SUGGESTIONS}
-        placeholderRotation={SUGGESTIONS}
+        placeholderRotation={PLACEHOLDERS}
         onSubmit={(query) => setValue(query)}
       />
     )

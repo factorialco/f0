@@ -40,10 +40,8 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
-  /** Fired when the query is submitted — Enter, or picking a suggestion. */
+  /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
-  /** Example queries offered while the input is focused and empty. */
-  suggestions?: string[]
   /** Placeholders cycled while the field sits idle and empty. */
   placeholderRotation?: string[]
   /** Holds the in-input searching state while a submitted query resolves. */
@@ -72,7 +70,6 @@ interface SearchProps {
  */
 export type SearchPresentation = Pick<
   SearchProps,
-  | "suggestions"
   | "placeholderRotation"
   | "onSubmit"
   | "status"
@@ -94,26 +91,6 @@ const LOAD_MORE_SCROLL_MARGIN = 56
 // Long enough to read a whole example query before it is swapped out.
 const PLACEHOLDER_ROTATION_MS = 4000
 
-// Matches the MotionConfig transition below, so anything that should land after
-// the field has finished widening can wait exactly that long.
-const EXPAND_DURATION_MS = 200
-
-/**
- * Splits a suggestion into what has already been typed and what it adds, so the
- * completion is what stands out — the typed half is already on screen above.
- */
-const renderCompletion = (suggestion: string, typed: string | undefined) => {
-  if (!typed || !suggestion.toLowerCase().startsWith(typed.toLowerCase())) {
-    return suggestion
-  }
-  return (
-    <>
-      {suggestion.slice(0, typed.length)}
-      <span className="font-semibold">{suggestion.slice(typed.length)}</span>
-    </>
-  )
-}
-
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
     <F0Icon icon={Spinner} className="animate-spin" />
@@ -133,7 +110,6 @@ export const Search = ({
   loadingMore = false,
   onLoadMore,
   onSubmit,
-  suggestions,
   placeholderRotation,
   status = "idle",
   onCancel,
@@ -162,17 +138,6 @@ export const Search = ({
   // An in-flight query holds the field open: collapsing would hide the spinner
   // and the only affordance to abort it.
   const expanded = open || searching
-  const suggestionItems = suggestions ?? []
-  // Suggestions track what is being typed, so the list completes the query
-  // instead of only offering a starting point. Preview results win when there
-  // are any: those are records, these are just phrasings.
-  const suggestionsVisible =
-    open &&
-    showResults &&
-    !searching &&
-    !resultsVisible &&
-    suggestionItems.length > 0
-
   const rotation = placeholderRotation ?? []
   const placeholder =
     rotation.length > 0
@@ -263,15 +228,10 @@ export const Search = ({
   const handleOpen = () => {
     if (!open) {
       setOpen(true)
+      setActiveIndex(-1)
       setTimeout(() => {
         inputRef.current?.focus()
       }, 0)
-      setTimeout(() => {
-        setShowResults(true)
-        // Nothing is pre-selected on an empty field, so a stray Enter cannot
-        // fire an example the user never picked.
-        setActiveIndex(-1)
-      }, EXPAND_DURATION_MS)
     }
   }
 
@@ -304,37 +264,6 @@ export const Search = ({
     }
   }
 
-  /** Arrows and Enter, while the example queries are the thing being driven. */
-  const handleSuggestionsKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault()
-      setActiveIndex((index) =>
-        index < suggestionItems.length - 1 ? index + 1 : index
-      )
-      return
-    }
-
-    if (e.key === "ArrowUp") {
-      e.preventDefault()
-      setActiveIndex((index) => (index > 0 ? index - 1 : 0))
-      return
-    }
-
-    if (e.key === "Enter") {
-      e.preventDefault()
-      // Only a row the user actually moved to wins over what they typed.
-      const suggestion =
-        activeIndex >= 0 ? suggestionItems[activeIndex] : undefined
-      if (suggestion) {
-        submitQuery(suggestion)
-        return
-      }
-      if (text) {
-        submitQuery(text)
-      }
-    }
-  }
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!open) {
       if (e.key === "Enter" || e.key === " ") {
@@ -352,11 +281,6 @@ export const Search = ({
       } else {
         handleClear()
       }
-      return
-    }
-
-    if (suggestionsVisible) {
-      handleSuggestionsKeyDown(e)
       return
     }
 
@@ -531,33 +455,6 @@ export const Search = ({
                 </motion.div>
               </motion.div>
             )}
-            {suggestionsVisible ? (
-              <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-full min-w-[248px] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-1 pb-1 shadow-md">
-                <li className="rounded-[10px] p-2 text-sm text-f1-foreground-secondary">
-                  {i18n.t("collections.search.suggestionsHeader")}
-                </li>
-                {suggestionItems.map((suggestion, index) => (
-                  <li key={suggestion}>
-                    <button
-                      ref={index === activeIndex ? activeItemRef : null}
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onMouseEnter={() => setActiveIndex(index)}
-                      onClick={() => submitQuery(suggestion)}
-                      className={cn(
-                        "flex w-full items-center rounded-[10px] p-2 text-left hover:bg-f1-background-hover",
-                        index === activeIndex && "bg-f1-background-hover",
-                        focusRing()
-                      )}
-                    >
-                      <span className="truncate text-base font-normal text-f1-foreground">
-                        {renderCompletion(suggestion, text)}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
             {resultsVisible ? (
               <ul
                 className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
