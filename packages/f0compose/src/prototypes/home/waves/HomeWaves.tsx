@@ -33,7 +33,7 @@ export function HomeWaves() {
         fogDepth={34}
         detail="medium"
         brightness={1.5}
-        opacity={0.27}
+        opacity={0.16}
         mouseInteraction
         parallaxStrength={0.51}
         grain

@@ -1400,6 +1400,10 @@ function HomeCanvas() {
         ref={shellRef}
         className="relative flex min-w-0 flex-1 overflow-hidden"
       >
+        {/* The backdrop spans the WHOLE canvas, widget column included
+            (Angel, 2026-09-14): the widgets float on it as cards, they do
+            not cut it off. Behind everything, deaf to the pointer. */}
+        {homeLanding && <HomeWaves />}
         {/* Left-hand Comms stack — conversations opened from the nav. Same
           window system as the widgets, mirrored (Figma 2707:406513). */}
         <ChatsColumn
@@ -1480,9 +1484,6 @@ function HomeCanvas() {
               fullWidthView ? "" : activeConversation ? "px-4" : "px-4 pt-6"
             }`}
           >
-            {/* The backdrop: radical waves dissolving into the page's own
-                ground, behind everything and deaf to the pointer. */}
-            {homeLanding && <HomeWaves />}
             {/* Home's composer sits on the VIEWPORT's midline with the
                 content under it (Angel, 2026-09-14). Two flex-1 siblings
                 — this spacer above, the content scroller below — always
