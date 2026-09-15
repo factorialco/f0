@@ -89,7 +89,7 @@ export type SearchPresentation = Pick<
 const LOAD_MORE_SCROLL_MARGIN = 56
 
 // Long enough to read a whole example query before it is swapped out.
-const PLACEHOLDER_ROTATION_MS = 4000
+const PLACEHOLDER_ROTATION_MS = 2000
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
