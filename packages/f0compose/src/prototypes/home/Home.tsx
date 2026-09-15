@@ -507,7 +507,7 @@ const FULL_BLEED_CSS = `
      sheet is transparent and the bar sits on the page itself. */
   main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] thead th,
   main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] .f0c-canvas-surface {
-    background: #fafafa;
+    background: #fcfcfc;
   }
 
   .f0c-window-overlay {

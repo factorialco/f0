@@ -273,11 +273,11 @@
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  /* The PAGE tone, not a white sheet (Angel, 2026-09-15): the imported
-     module screens carry production's default white, so a white ground
-     under them flattened every data collection into the page. White is
-     for what floats on top of this. */
-  background: #fafafa;
+  /* The sheet tone, one point under white (Angel, 2026-09-15: "there was
+     a 99L background color for the content"). What made module screens
+     read as a white slab was f0's own `bg-f1-special-page`, which is pure
+     white and is cleared separately; the sheet itself belongs here. */
+  background: #fcfcfc;
 }
 [data-hybrid-dock] {
   position: absolute;
