@@ -135,7 +135,13 @@ const FULL_BLEED_CSS = `
   [data-widget-draggable="true"] [role="article"] > :first-child button { cursor: pointer; }
   [data-widget-overlay="true"] { cursor: grabbing; transform: scale(1.02); }
   [data-widget-overlay="true"] [role="article"] { box-shadow: 0 8px 24px hsl(var(--neutral-20)); }
-  [data-home-input-surface] { transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1); }
+  [data-home-input-surface] {
+    transition: height 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    /* A whisper of lift off the dotted backdrop (Angel, 2026-09-14) —
+       enough to separate the input from the grid, not enough to read as
+       a floating card. */
+    box-shadow: 0 1px 2px 0 rgba(13, 22, 37, 0.04), 0 6px 20px -6px rgba(13, 22, 37, 0.06);
+  }
   @media (prefers-reduced-motion: reduce) {
     [data-hybrid-composer], [data-home-input-surface] { transition: none !important; }
   }
