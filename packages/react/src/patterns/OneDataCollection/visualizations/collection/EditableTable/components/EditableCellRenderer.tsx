@@ -4,6 +4,7 @@ import type { CellRendererProps } from "../../Table/types"
 import { editableCellMap, typingEditTypes } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
 import type { EditableTableColumnDefinition } from "../types"
+import type { EditableTableCellEditType } from "./cells"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**
@@ -30,6 +31,94 @@ function getCellValue<R extends RecordType>(
   }
 
   return ""
+}
+
+/**
+ * Number/money columns can opt into committing on blur instead of the
+ * default debounce (see numberConfig.commitOn). Typing cells debounce the
+ * parent notification so it fires once when the user stops typing;
+ * discrete cells (select, date...) commit immediately.
+ */
+function getEditBehavior<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+>(
+  cellEditType: EditableTableCellEditType | undefined,
+  editableColumn: EditableTableColumnDefinition<R, Sortings, Summaries>
+) {
+  const commitOn =
+    (cellEditType === "number" || cellEditType === "money") &&
+    editableColumn.numberConfig?.commitOn === "blur"
+      ? ("blur" as const)
+      : undefined
+
+  const debounce =
+    commitOn !== "blur" &&
+    cellEditType !== undefined &&
+    typingEditTypes.has(cellEditType)
+
+  return { commitOn, debounce }
+}
+
+function createCellChangeHandler<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+>({
+  editableColumn,
+  localItem,
+  debounce,
+  commitOn,
+  handleCellChange,
+  batchCellChanges,
+}: {
+  editableColumn: EditableTableColumnDefinition<R, Sortings, Summaries>
+  localItem: R
+  debounce: boolean
+  commitOn: "blur" | undefined
+  handleCellChange: (
+    columnId: string,
+    value: unknown,
+    options: { debounce: boolean; commitOn?: "blur" }
+  ) => void
+  batchCellChanges: (
+    updates: Record<string, unknown>,
+    options: { debounce: boolean; commitOn?: "blur" }
+  ) => void
+}) {
+  return (
+    value: string | string[] | null,
+    context?: { selectedItem?: RecordType }
+  ) => {
+    if (editableColumn.id === undefined) {
+      return
+    }
+
+    const formula = editableColumn.formula
+    if (!formula) {
+      handleCellChange(editableColumn.id, value, { debounce, commitOn })
+      return
+    }
+
+    const formulaUpdates: Record<string, unknown> = {}
+    formula({
+      value,
+      item: localItem,
+      selectedItem: context?.selectedItem,
+      setCellValue: (columnId, nextValue) => {
+        formulaUpdates[columnId] = nextValue
+      },
+    })
+
+    batchCellChanges(
+      {
+        [editableColumn.id]: value,
+        ...formulaUpdates,
+      },
+      { debounce, commitOn }
+    )
+  }
 }
 
 /**
@@ -79,52 +168,16 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
-  // Number/money columns can opt into committing on blur instead of the
-  // default debounce (see numberConfig.commitOn).
-  const commitOn =
-    (cellEditType === "number" || cellEditType === "money") &&
-    editableColumn.numberConfig?.commitOn === "blur"
-      ? ("blur" as const)
-      : undefined
+  const { commitOn, debounce } = getEditBehavior(cellEditType, editableColumn)
 
-  // Typing cells debounce the parent notification so it fires once when the
-  // user stops typing; discrete cells (select, date...) commit immediately.
-  const debounce =
-    commitOn !== "blur" &&
-    cellEditType !== undefined &&
-    typingEditTypes.has(cellEditType)
-
-  const onChange = (
-    value: string | string[] | null,
-    context?: { selectedItem?: RecordType }
-  ) => {
-    if (editableColumn.id !== undefined) {
-      const formula = editableColumn.formula
-
-      if (formula) {
-        const formulaUpdates: Record<string, unknown> = {}
-
-        formula({
-          value,
-          item: localItem,
-          selectedItem: context?.selectedItem,
-          setCellValue: (columnId, nextValue) => {
-            formulaUpdates[columnId] = nextValue
-          },
-        })
-
-        batchCellChanges(
-          {
-            [editableColumn.id]: value,
-            ...formulaUpdates,
-          },
-          { debounce, commitOn }
-        )
-      } else {
-        handleCellChange(editableColumn.id, value, { debounce, commitOn })
-      }
-    }
-  }
+  const onChange = createCellChangeHandler({
+    editableColumn,
+    localItem,
+    debounce,
+    commitOn,
+    handleCellChange,
+    batchCellChanges,
+  })
 
   if (hasId && cellEditType) {
     const CellComponent = editableCellMap[cellEditType]
