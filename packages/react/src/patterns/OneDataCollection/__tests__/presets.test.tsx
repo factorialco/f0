@@ -77,11 +77,13 @@ const visualizations = [
  */
 function Harness({
   presets,
+  defaultPresetId,
   id = "presets-test/v1",
   onState,
   urlSync = false,
 }: {
   presets?: PresetsDefinition<typeof filters>
+  defaultPresetId?: string
   id?: string
   onState?: (state: {
     filters: unknown
@@ -97,6 +99,7 @@ function Harness({
     sortings,
     grouping,
     presets,
+    defaultPresetId,
     dataAdapter: { fetchData: async () => ({ records }) },
   })
 
@@ -308,6 +311,44 @@ describe("OneDataCollection - presets", () => {
       expect(chip()).not.toHaveClass("bg-f1-background-selected-secondary")
     )
     expect(screen.getAllByText("Save view").length).toBeGreaterThan(0)
+  })
+
+  it("opens on the preset named by defaultPresetId, selected and applied", async () => {
+    const devPresets: PresetsDefinition<typeof filters> = [
+      { id: "dev-eng", label: "Eng team", filter: { department: ["eng"] } },
+    ]
+    const onState = vi.fn()
+    renderHarness({ presets: devPresets, defaultPresetId: "dev-eng", onState })
+
+    const chip = () =>
+      screen
+        .getAllByText("Eng team")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+
+    await waitFor(() =>
+      expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
+    )
+    await waitFor(() =>
+      expect(onState).toHaveBeenCalledWith(
+        expect.objectContaining({ filters: { department: ["eng"] } })
+      )
+    )
+  })
+
+  it("ignores a defaultPresetId that names no preset", async () => {
+    const devPresets: PresetsDefinition<typeof filters> = [
+      { id: "dev-eng", label: "Eng team", filter: { department: ["eng"] } },
+    ]
+    renderHarness({ presets: devPresets, defaultPresetId: "dev-sales" })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    const chip = screen
+      .getAllByText("Eng team")
+      .find((el) => !el.closest('[aria-hidden="true"]'))!
+      .closest("label")!
+    expect(chip).not.toHaveClass("bg-f1-background-selected-secondary")
   })
 
   it("de-selects a developer preset (offering 'Save view') when the view is edited", async () => {
