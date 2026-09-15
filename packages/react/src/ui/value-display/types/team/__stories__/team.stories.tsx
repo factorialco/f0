@@ -8,8 +8,7 @@ const meta = {
     layout: "padded",
     docs: {
       description: {
-        component:
-          "Renders a team avatar with name. Supports the same badge system as the person type.",
+        component: "Renders a team avatar with name.",
       },
       source: {
         code: null,
@@ -33,6 +32,104 @@ export const TeamType: Story = {
           src: item.teamLogo,
         },
       }),
+    },
+  },
+}
+
+export const TeamTypeWithLongName: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      teamName: "Engineering Department for International Product Operations",
+    },
+    property: {
+      label: "Team",
+      render: (item) => ({
+        type: "team",
+        value: {
+          name: item.teamName,
+          src: item.teamLogo,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Inside a fixed-width column, a name wider than the cell truncates with an ellipsis and shows the full name in a tooltip on hover, instead of clipping mid-character.",
+      },
+    },
+  },
+}
+
+export const TeamTypeWithLines: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      teamName: "Engineering Department for International Product Operations",
+    },
+    property: {
+      label: "Team",
+      render: (item) => ({
+        type: "team",
+        value: {
+          name: item.teamName,
+          src: item.teamLogo,
+          lines: 2,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`lines` raises the cap: the name wraps up to two lines and only truncates past that. The avatar stays on the first line.",
+      },
+    },
+  },
+}
+
+export const TeamTypeWithFullName: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      teamName: "Engineering Department for International Product Operations",
+    },
+    property: {
+      label: "Team",
+      render: (item) => ({
+        type: "team",
+        value: {
+          name: item.teamName,
+          src: item.teamLogo,
+          full: true,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`full` removes the cap entirely: the name wraps as far as it needs and nothing is hidden, so there is no ellipsis and no tooltip to recover.",
+      },
     },
   },
 }

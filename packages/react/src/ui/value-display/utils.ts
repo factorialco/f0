@@ -158,3 +158,19 @@ import DOMPurify from "dompurify"
 export function stripHtmlTags(html: string): string {
   return DOMPurify.sanitize(html, { ALLOWED_TAGS: [] })
 }
+
+/**
+ * Resolves the `lines`/`full` truncation knobs shared by the avatar cell types
+ * Defaults to a single truncated line; `wraps` is what callers align on
+ */
+export function resolveNameClamp(args: { lines?: number; full?: true }): {
+  lines: number
+  full: boolean
+  wraps: boolean
+} {
+  const full = args.full === true
+  // Ignored when `full` — OneEllipsis skips clamping entirely once disabled.
+  const lines = full ? 1 : (args.lines ?? 1)
+
+  return { lines, full, wraps: full || lines > 1 }
+}
