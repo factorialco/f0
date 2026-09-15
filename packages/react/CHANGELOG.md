@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.103.0](https://github.com/factorialco/f0/compare/f0-react-v6.102.0...f0-react-v6.103.0) (2026-09-15)
+
+
+### Features
+
+* **OneDataCollection:** let a visualization override its switcher icon ([#5523](https://github.com/factorialco/f0/issues/5523)) ([1d7633e](https://github.com/factorialco/f0/commit/1d7633ef8e1193c27c0e601ee5d8c8a2ec67bebf))
+
 ## [6.102.0](https://github.com/factorialco/f0/compare/f0-react-v6.101.2...f0-react-v6.102.0) (2026-09-15)
 
 
