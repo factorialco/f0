@@ -1603,9 +1603,12 @@ function HomeCanvas() {
             className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center"
             style={{
               opacity: atTop ? 1 : 0,
-              transform: atTop ? "none" : "translateY(8px)",
+              transform: atTop ? "none" : "translateY(12px)",
+              // Snappier (Angel, 2026-09-15): an expo-out that spends
+              // almost all of its travel in the first half, so the button
+              // is there before you have finished scrolling home.
               transition:
-                "opacity 260ms ease-out, transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+                "opacity 140ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
             <div className={atTop ? "pointer-events-auto" : ""}>
