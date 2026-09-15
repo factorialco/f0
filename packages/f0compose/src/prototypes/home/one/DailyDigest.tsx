@@ -60,14 +60,10 @@ const BOXES: {
 export function DailyDigest() {
   return (
     <>
-      {/* The gap that keeps the digest off the first screen lives OUTSIDE
-          the section: inside it, scrolling to the digest landed on 42vh of
-          its own padding (Angel, 2026-09-15). */}
-      <div aria-hidden className="h-[42vh] w-full shrink-0" />
       <section
         data-home-digest
         aria-label="Daily digest"
-        className="flex w-[712px] max-w-full shrink-0 flex-col gap-4 pb-16"
+        className="flex w-[712px] max-w-full shrink-0 flex-col gap-4 pb-16 pt-10"
       >
         <header className="flex flex-col gap-1">
           <h2 className="text-2xl font-semibold text-f1-foreground">

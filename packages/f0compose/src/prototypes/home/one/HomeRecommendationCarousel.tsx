@@ -113,7 +113,7 @@ export function HomeRecommendationCarousel({
   }
 
   return (
-    <div className="mt-3 flex w-[712px] max-w-full items-center gap-2">
+    <div className="flex w-[712px] max-w-full items-center gap-2">
       {pinned}
       {/* Clock-in is its own control, not a recommendation, so the two
           groups are split the way f0's headers split theirs. */}

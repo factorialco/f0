@@ -1214,44 +1214,19 @@ function HomeCanvas() {
   const homeLanding = showPromptBar && (!activeConversation || homeSession)
 
   /**
-   * The composer sits OUTSIDE the scroller so it can hold the midline,
-   * which also meant it stayed put while the digest scrolled past it
-   * (Angel, 2026-09-15). Binding it to the scroll offset gives it the
-   * behaviour it would have had in flow: it rides up and out of the way,
-   * fading as it goes. Written straight to the node, so a scroll never
-   * costs a React render.
+   * The digest button is a hint that there IS more below, so it belongs
+   * only at the very top (Angel, 2026-09-15).
    */
   const scrollerRef = useRef<HTMLDivElement>(null)
-  const promptBarRef = useRef<HTMLDivElement>(null)
-  const spacerRef = useRef<HTMLDivElement>(null)
+  const [atTop, setAtTop] = useState(true)
   useEffect(() => {
     const scroller = scrollerRef.current
-    const bar = promptBarRef.current
-    if (!scroller || !bar) return
-    // The spacer above the composer is what centres it, and it is also
-    // what keeps the digest penned into the bottom half. Both it and the
-    // composer are pulled up by the scroll, so the whole canvas reads as
-    // one scrolling page.
-    const spacer = spacerRef.current
-    const room = spacer?.getBoundingClientRect().height ?? 0
-    const follow = () => {
-      const offset = scroller.scrollTop
-      const lift = Math.min(offset, room)
-      bar.style.transform = offset ? `translateY(${-offset}px)` : ""
-      bar.style.opacity = String(Math.max(0, 1 - offset / 220))
-      bar.style.pointerEvents = offset > 200 ? "none" : ""
-      scroller.style.marginTop = lift ? `${-lift}px` : ""
-    }
+    if (!scroller) return
+    const follow = () => setAtTop(scroller.scrollTop < 8)
     follow()
     scroller.addEventListener("scroll", follow, { passive: true })
-    return () => {
-      scroller.removeEventListener("scroll", follow)
-      scroller.style.marginTop = ""
-      bar.style.transform = ""
-      bar.style.opacity = ""
-      bar.style.pointerEvents = ""
-    }
-  }, [homeLanding, showPromptBar])
+    return () => scroller.removeEventListener("scroll", follow)
+  }, [homeLanding])
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
@@ -1558,7 +1533,7 @@ function HomeCanvas() {
         {/* The digest stands on its own at the foot of the canvas, out of
             the recommendation row (Angel, 2026-09-15). Absolutely placed,
             so the composer keeps the midline it is centred on. */}
-        {homeLanding && (
+        {homeLanding && atTop && (
           <div className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center">
             <div className="pointer-events-auto">
               <DailyDigestButton />
@@ -1650,8 +1625,8 @@ function HomeCanvas() {
                 — this spacer above, the content scroller below — always
                 split the leftover room equally, so the input stays
                 centred however long the briefing runs. */}
-            {showPromptBar && (
-              <div ref={spacerRef} className="order-1 w-full flex-1" />
+            {showPromptBar && !homeLanding && (
+              <div className="order-1 w-full flex-1" />
             )}
             <div
               ref={scrollerRef}
@@ -1663,14 +1638,31 @@ function HomeCanvas() {
                   : "home-canvas-scroll overflow-y-auto"
               }`}
             >
-              {/* The recommendations live in the SCROLLER, not beside the
-                  composer: the composer is centred between two flex-1
-                  siblings, so anything sharing its slot would push it off
-                  the midline as the list grows (Angel, 2026-09-15). Here
-                  they hang under it and scroll. */}
+              {/* ONE scrolling parent on the landing (Angel, 2026-09-15):
+                  the input, the recommendations and the digest are all in
+                  here, so a wheel anywhere moves the lot. The first block
+                  is a full screen with its contents centred, which is what
+                  puts the composer on the midline at rest and the digest
+                  exactly one screen down. */}
               {homeLanding ? (
                 <>
-                  <HomeRecommendations />
+                  <div className="relative flex min-h-full w-full flex-col items-center justify-center">
+                    <div
+                      data-home-promptbar
+                      className="relative z-10 w-[712px] max-w-full shrink-0"
+                    >
+                      <div data-hybrid-target />
+                    </div>
+                    {/* Hung off the midline rather than stacked under the
+                        input: in the flow its height would push the input
+                        off centre, and the input owns the midline (Angel,
+                        2026-09-15). 84px = half the sheet plus the 20px
+                        gap. It scrolls with this block like everything
+                        else. */}
+                    <div className="absolute inset-x-0 top-1/2 mt-[84px] flex justify-center">
+                      <HomeRecommendations />
+                    </div>
+                  </div>
                   <DailyDigest />
                 </>
               ) : activeConversation ? (
@@ -1758,10 +1750,11 @@ function HomeCanvas() {
                 </div>
               )}
             </div>
-            {/* The Home composer slot must not reserve space on module pages. */}
-            {showPromptBar && (
+            {/* The Home composer slot must not reserve space on module
+                pages, and on the LANDING it lives inside the scroller
+                instead (see below). */}
+            {showPromptBar && !homeLanding && (
               <div
-                ref={promptBarRef}
                 data-home-promptbar
                 className="relative z-10 order-2 w-[712px] max-w-full shrink-0"
               >
