@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.102.0](https://github.com/factorialco/f0/compare/f0-react-v6.101.2...f0-react-v6.102.0) (2026-09-15)
+
+
+### Features
+
+* **F0LocationInput:** add F0LocationInput component ([#5408](https://github.com/factorialco/f0/issues/5408)) ([981bfb6](https://github.com/factorialco/f0/commit/981bfb636a3b240b74f94453bca89be29cd08ac3))
+
 ## [6.101.2](https://github.com/factorialco/f0/compare/f0-react-v6.101.1...f0-react-v6.101.2) (2026-09-15)
 
 
