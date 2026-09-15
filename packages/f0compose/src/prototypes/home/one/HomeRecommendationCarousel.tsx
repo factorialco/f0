@@ -8,13 +8,13 @@ import { OneHomeRecommendation } from "./OneHomeRecommendation"
 
 /**
  * The recommendations as a one-line carousel under the composer (Angel,
- * 2026-09-15). The row is masked on the right, so an item is already at
- * zero opacity by the time it reaches the chevron; the left edge only
- * fades while the queue is actually turning, since at rest the first pill
- * starts at the input's own left edge.
+ * 2026-09-15). The row is masked on the RIGHT only, so an item is already
+ * at zero opacity by the time it reaches the chevron; the left edge never
+ * fades, because the row always starts on a whole pill.
  *
  * Turning is a ROTATION, not a scroll: the right chevron sends the first
- * item to the back of the queue, so the row can never run out. Each turn
+ * item to the back of the queue and the left one brings it round again,
+ * so the row can never run out. Each turn
  * is a FLIP — the track is animated by the outgoing item's own width,
  * then the order is committed with the transition off, so the swap is
  * invisible.
@@ -45,8 +45,6 @@ export function HomeRecommendationCarousel({
   const [order, setOrder] = useState(items)
   const [shift, setShift] = useState(0)
   const [animating, setAnimating] = useState(false)
-  /** The left chevron only exists once there is something behind you. */
-  const [turned, setTurned] = useState(false)
   const trackRef = useRef<HTMLDivElement>(null)
   const busy = useRef(false)
 
@@ -61,7 +59,6 @@ export function HomeRecommendationCarousel({
   const next = () => {
     if (busy.current || order.length < 2) return
     busy.current = true
-    setTurned(true)
     setAnimating(true)
     setShift(-widthOf(0))
     window.setTimeout(() => {
@@ -93,25 +90,26 @@ export function HomeRecommendationCarousel({
     })
   }
 
-  // The left fade belongs to the TURN: a standing one would eat into the
-  // first pill, which sits at the input's left edge (Angel, 2026-09-15).
-  const mask = animating
-    ? "linear-gradient(to right, transparent 0px, black 28px, black calc(100% - 96px), transparent 100%)"
-    : "linear-gradient(to right, black 0px, black calc(100% - 96px), transparent 100%)"
+  // Right edge only: the row always starts ON an item, so a left fade
+  // would be eating into a pill that is simply there (Angel, 2026-09-15).
+  const mask =
+    "linear-gradient(to right, black 0px, black calc(100% - 96px), transparent 100%)"
 
   return (
     <div className="flex w-[712px] max-w-full items-center gap-2">
       {pinned}
-      {turned && (
-        <F0Button
-          variant="outline"
-          size="md"
-          icon={ChevronLeft}
-          hideLabel
-          label="Previous recommendations"
-          onClick={previous}
-        />
-      )}
+      {/* Clock-in is its own control, not a recommendation, so the two
+          groups are split the way f0's headers split theirs: a 16px
+          hairline (Angel, 2026-09-15). */}
+      {pinned && <div className="mx-1 h-4 w-px bg-f1-border-secondary" />}
+      <F0Button
+        variant="outline"
+        size="md"
+        icon={ChevronLeft}
+        hideLabel
+        label="Previous recommendations"
+        onClick={previous}
+      />
       <div
         className="min-w-0 flex-1 overflow-hidden"
         style={{ maskImage: mask, WebkitMaskImage: mask }}
