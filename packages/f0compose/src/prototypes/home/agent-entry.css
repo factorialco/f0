@@ -247,7 +247,7 @@
    these — this stays in step with it so the fallback is not a lie. */
 [data-hybrid-root],
 [data-hybrid-work] {
-  background: #f7f7f7;
+  background: #fafafa;
 }
 [data-hybrid-canvas] {
   transition:
@@ -378,14 +378,18 @@
    the page behind the content, with white sheets floating on it. See
    FULL_BLEED_CSS in Home.tsx. */
 [data-home-nav],
-[data-home-rail],
-[data-home-panel] {
+[data-home-rail] {
   background: #f7f7f7 !important;
+}
+/* The second sidebar and the surface behind the content sit a point
+   above the rail (Angel, 2026-09-14). */
+[data-home-panel] {
+  background: #fafafa !important;
 }
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
-  background: #f7f7f7 !important;
+  background: #fafafa !important;
 }
 
 [data-home-panel],
