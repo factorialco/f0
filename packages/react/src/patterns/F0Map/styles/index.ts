@@ -1,6 +1,8 @@
 import type { F0MapProvider } from "../providers/names"
 import darkStyle from "./f0-dark.json"
 import lightStyle from "./f0-light.json"
+import googleDarkStyle from "./google-dark.json"
+import googleLightStyle from "./google-light.json"
 
 /**
  * A light/dark style pair for one engine. `light` and `dark` are deliberately
@@ -27,5 +29,22 @@ export const f0MapStyles: F0MapStyle = {
   light: lightStyle,
   dark: darkStyle,
 }
+
+/**
+ * The same f0 tokens in Google's styling model, which is far coarser: no
+ * per-layer control, no zoom-dependent or data-driven stylers, and no way to
+ * add a layer its basemap omits. 14 of the flavor's 25 cartographic roles have
+ * an expression; the rest keep Google's own colours. The two maps do not match,
+ * and both track the tokens.
+ */
+export const googleMapStyles: F0MapStyle = {
+  provider: "google",
+  light: googleLightStyle,
+  dark: googleDarkStyle,
+}
+
+/** The look an engine gets when the consumer names no style. */
+export const defaultMapStyle = (provider: F0MapProvider): F0MapStyle =>
+  provider === "google" ? googleMapStyles : f0MapStyles
 
 export type { F0MapProvider }

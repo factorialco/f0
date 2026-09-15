@@ -37,5 +37,5 @@ export { F0MapList } from "./components/F0MapList"
 export type { F0MapListProps } from "./components/F0MapList"
 /** f0-themed style pair (light + dark), its provider-tagged type, and the
  * provider identity the tag draws from. */
-export { f0MapStyles } from "./styles"
+export { f0MapStyles, googleMapStyles, defaultMapStyle } from "./styles"
 export type { F0MapStyle, F0MapProvider } from "./styles"
