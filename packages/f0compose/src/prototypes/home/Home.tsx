@@ -82,6 +82,9 @@ import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
+import { toggleClockIn, useClockInWidgetRequests } from "./windows/clockInStore"
+import { ClockInWindow } from "./windows/ClockInWindow"
+import { FloatingWindow } from "./windows/FloatingWindow"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
 import { useWindows } from "./windows/useWindows"
 import { useWidgetCollapse } from "./windows/widgetCollapse"
@@ -1013,6 +1016,34 @@ function HomeNavbar({
 }
 
 /**
+ * The row under the composer. Clocking in confirms itself and leaves, and
+ * the digest steps up into the primary slot behind it (Angel,
+ * 2026-09-15).
+ */
+function HomeRecommendations() {
+  const [clockedIn, setClockedIn] = useState(false)
+  return (
+    <div className="flex flex-wrap items-center gap-2 px-1">
+      {!clockedIn && (
+        <OneHomeRecommendation
+          variant="primary"
+          icon={SolidPlay}
+          label="Clock-in"
+          dismissOnClick
+          onClick={toggleClockIn}
+          onDismissed={() => setClockedIn(true)}
+        />
+      )}
+      <OneHomeRecommendation
+        variant={clockedIn ? "primary" : "outline"}
+        icon={Feed}
+        label="Get daily digest"
+      />
+    </div>
+  )
+}
+
+/**
  * The "how was your day" avatar, mirroring f0's F0AvatarPulse (not exported
  * from the dist bundles): a waving hand greets first, then the avatar with
  * the reaction badge springs in.
@@ -1102,6 +1133,17 @@ function HomeCanvas() {
   )
   const windows = useWindows()
   const chats = useChats()
+  // The rail's running timer lives in the nav's tree and cannot reach
+  // this one, so it bumps a counter and each bump toggles the clock-in
+  // card beside it (Angel, 2026-09-15). The widgets column is the static
+  // rail now, with no floating stack of its own, so the card is mounted
+  // here directly.
+  const clockInRequests = useClockInWidgetRequests()
+  const [clockInCard, setClockInCard] = useState(false)
+  useEffect(() => {
+    if (clockInRequests === 0) return
+    setClockInCard((open) => !open)
+  }, [clockInRequests])
   const { conversations, activeId } = useConversations()
   // Sub-screens have distinct URLs (?view=policies); an open conversation
   // always takes the canvas over the screen.
@@ -1647,24 +1689,23 @@ function HomeCanvas() {
                 <div data-hybrid-target />
                 {/* What One suggests you do next, under the input rather
                     than inside it (Angel, 2026-09-15). */}
-                {homeLanding && (
-                  <div className="flex flex-wrap items-center gap-2 px-1">
-                    <OneHomeRecommendation
-                      variant="primary"
-                      icon={SolidPlay}
-                      label="Clock-in"
-                    />
-                    <OneHomeRecommendation
-                      variant="outline"
-                      icon={Feed}
-                      label="Get daily digest"
-                    />
-                  </div>
-                )}
+                {homeLanding && <HomeRecommendations />}
               </div>
             )}
           </div>
         </div>
+
+        {clockInCard && (
+          <FloatingWindow
+            title="Clock in"
+            width={240}
+            anchorSelector="[data-home-clockin-rail]"
+            onDock={() => setClockInCard(false)}
+            onClose={() => setClockInCard(false)}
+          >
+            <ClockInWindow />
+          </FloatingWindow>
+        )}
 
         {/* Right-hand window stack — pushes the canvas, Claude-Code style. */}
         {/* Clock in is the one widget that floats instead of maximizing

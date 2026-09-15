@@ -86,6 +86,7 @@ import {
   useRailPins,
 } from "./railPinsStore"
 import { COMMUNITIES } from "./windows/communityPosts"
+import { RailClockIn } from "./windows/RailClockIn"
 
 /**
  * Home's navigation (Figma 2621:22725, "Home - Vision"): a FIXED 48px
@@ -1639,6 +1640,7 @@ export function HomeNav() {
               setSearchParams({ view: "settings" })
             }}
           />
+          <RailClockIn />
           <RailPersonalMenu />
         </div>
       </div>

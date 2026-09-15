@@ -40,11 +40,18 @@ export function FloatingWindow({
 
   // Position before paint, or the card flashes at 0,0 for a frame.
   useLayoutEffect(() => {
-    const anchor = document
-      .querySelector(anchorSelector)
-      ?.getBoundingClientRect()
+    const anchorEl = document.querySelector(anchorSelector)
+    const anchor = anchorEl?.getBoundingClientRect()
     const GAP = 8
     if (anchor) {
+      // Hanging under a navbar button, but BESIDE a rail one: the rail is
+      // a narrow column at the screen edge, so a card under its timer
+      // would fall off the bottom and cover the profile menu (Angel,
+      // 2026-09-15 — "opens the widget for clock-in next to it").
+      if (anchorEl?.matches("[data-home-clockin-rail]")) {
+        setPos({ x: anchor.right + GAP, y: anchor.top })
+        return
+      }
       setPos({ x: anchor.right - width, y: anchor.bottom + GAP })
       return
     }
@@ -52,6 +59,17 @@ export function FloatingWindow({
     // in the top-right corner rather than at the origin.
     setPos({ x: window.innerWidth - width - GAP, y: GAP })
   }, [anchorSelector, width])
+
+  // The rail anchor sits at the BOTTOM of the screen, so a card hung at
+  // its top would run off the edge. Measured once it is on screen, since
+  // the height is the content's (Angel, 2026-09-15).
+  useLayoutEffect(() => {
+    const card = cardRef.current?.getBoundingClientRect()
+    if (!card || !pos) return
+    const GAP = 8
+    const maxY = window.innerHeight - card.height - GAP
+    if (pos.y > maxY) setPos({ x: pos.x, y: Math.max(GAP, maxY) })
+  }, [pos])
 
   const startDrag = (e: React.PointerEvent) => {
     // Let the header's buttons keep their clicks.

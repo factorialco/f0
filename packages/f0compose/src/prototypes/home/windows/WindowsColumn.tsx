@@ -208,7 +208,7 @@ export function FloatingWidgets({
               key={id}
               title={title}
               width={floatingWidth ?? 188}
-              anchorSelector="[data-home-clockin-button]"
+              anchorSelector="[data-home-clockin-rail], [data-home-clockin-button]"
               onDock={() => onToggleFloat(id)}
               onClose={() => onClose(id)}
             >

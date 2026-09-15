@@ -552,8 +552,12 @@ body[data-nav-instant] *::after {
    FLIP on it, writing an inline `translate3d(...) scale(x,1)` every frame
    (measured 2026-09-15), which no `transition: none` can reach. Pinning
    the transform while the flag is up is the only way the switch lands
-   instantly: an !important rule outranks the inline one. */
-body[data-nav-instant] main#content {
+   instantly: an !important rule outranks the inline one. The direct
+   child is pinned too, because the FLIP writes an INVERSE scale there
+   (scale(1.61,1) against main's scale(0.62,1)) and killing only half of
+   the pair leaves the content stretching on its own. */
+body[data-nav-instant] main#content,
+body[data-nav-instant] main#content > * {
   transform: none !important;
 }
 
