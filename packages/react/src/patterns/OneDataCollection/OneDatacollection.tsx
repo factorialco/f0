@@ -1768,6 +1768,7 @@ const OneDataCollectionComp = <
                 ) : null}
                 {search ? (
                   <Search
+                    {...source.searchOptions}
                     onChange={setCurrentSearch}
                     value={currentSearch}
                     results={searchPreview.results}

@@ -19,6 +19,7 @@ import {
   SecondaryActionsDefinition,
   UpsellActionDefinitionFn,
 } from "../../actions"
+import type { SearchOptions } from "../../components/Search/Search"
 import { ItemActionsDefinition } from "../../item-actions"
 import {
   NavigationFiltersDefinition,
@@ -200,6 +201,9 @@ export type DataCollectionSourceDefinition<
 
   /** Rich search preview shown in the shared header search (all visualizations). */
   searchPreview?: SearchPreview<R>
+
+  /** Presentation of the shared header search (suggestions, submit, status). */
+  searchOptions?: SearchOptions
 }
 
 /**

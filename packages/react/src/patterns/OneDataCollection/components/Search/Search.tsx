@@ -52,6 +52,15 @@ interface SearchProps {
   onCancel?: () => void
 }
 
+/**
+ * The presentational half of the search a consumer can drive: everything the
+ * natural-language flow needs to render, with none of the parsing behind it.
+ */
+export type SearchOptions = Pick<
+  SearchProps,
+  "suggestions" | "placeholderRotation" | "onSubmit" | "status" | "onCancel"
+>
+
 // Trigger the next page when the user scrolls within this many px of the bottom.
 const LOAD_MORE_SCROLL_MARGIN = 56
 
