@@ -1,3 +1,5 @@
+import type { IconType } from "@factorialco/f0-react"
+
 import {
   F0AvatarPerson,
   F0Button,
@@ -9,11 +11,19 @@ import {
   F0AvatarModule,
 } from "@factorialco/f0-react/dist/experimental"
 import {
+  Calendar,
+  ChartLine,
+  CheckCircleLine,
+  DollarBill,
   Ellipsis,
   Feed,
+  File,
+  PalmTree,
   Reaction,
+  Receipt,
   Settings,
   SolidPlay,
+  Timer,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
@@ -1020,10 +1030,24 @@ function HomeNavbar({
  * the digest steps up into the primary slot behind it (Angel,
  * 2026-09-15).
  */
+/** What a Factorial user actually opens Home to do, in the order the day
+ *  tends to need them. Clock-in leads and is the only one that acts. */
+const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
+  { icon: Feed, label: "View daily digest" },
+  { icon: Timer, label: "Review this week's timesheet" },
+  { icon: CheckCircleLine, label: "Approve 3 pending time off requests" },
+  { icon: PalmTree, label: "Request time off for the Easter break" },
+  { icon: Calendar, label: "See who is off this week" },
+  { icon: DollarBill, label: "Download my August payslip" },
+  { icon: Receipt, label: "Submit last week's expenses" },
+  { icon: File, label: "Sign my updated contract annex" },
+  { icon: ChartLine, label: "Finish my performance review" },
+]
+
 function HomeRecommendations() {
   const [clockedIn, setClockedIn] = useState(false)
   return (
-    <div className="flex flex-wrap items-center gap-2 px-1">
+    <div className="flex flex-col items-start gap-1.5 px-1 pt-1">
       {!clockedIn && (
         <OneHomeRecommendation
           variant="primary"
@@ -1034,11 +1058,15 @@ function HomeRecommendations() {
           onDismissed={() => setClockedIn(true)}
         />
       )}
-      <OneHomeRecommendation
-        variant={clockedIn ? "primary" : "outline"}
-        icon={Feed}
-        label="View daily digest"
-      />
+      {RECOMMENDATIONS.map((item, index) => (
+        <OneHomeRecommendation
+          key={item.label}
+          // Once the clock is running the digest is what leads the list.
+          variant={clockedIn && index === 0 ? "primary" : "ghost"}
+          icon={item.icon}
+          label={item.label}
+        />
+      ))}
     </div>
   )
 }

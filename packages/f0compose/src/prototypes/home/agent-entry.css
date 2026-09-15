@@ -421,8 +421,13 @@
 /* No divider between the panel and the content any more: with the two on
    different tiers, a neutral-10 seam is darker than either side of it. */
 
-/* Embedded F0 pages share the canvas without their own outer ring. */
+/* Embedded F0 pages share the canvas without their own outer ring, and
+   without their own GROUND: `bg-f1-special-page` is pure white, which is
+   what the monolith gives a module screen, and against this canvas it
+   reads as a slab that should not be there (Angel, 2026-09-15). Only the
+   layout ground is cleared; buttons, cards and tags keep their white. */
 [data-hybrid-canvas] .bg-f1-special-page {
+  background: transparent !important;
   border: 0;
   border-radius: 0;
   box-shadow: none;
