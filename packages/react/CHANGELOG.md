@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.0.0](https://github.com/factorialco/f0/compare/f0-react-v6.106.2...f0-react-v7.0.0) (2026-09-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **F0Chat:** unship the community demo copy ([#5555](https://github.com/factorialco/f0/issues/5555))
+
+### Code Refactoring
+
+* **F0Chat:** unship the community demo copy ([#5555](https://github.com/factorialco/f0/issues/5555)) ([d209829](https://github.com/factorialco/f0/commit/d209829251965d8ade7270140d16823b582bf21d))
+
 ## [6.106.2](https://github.com/factorialco/f0/compare/f0-react-v6.106.1...f0-react-v6.106.2) (2026-09-15)
 
 
