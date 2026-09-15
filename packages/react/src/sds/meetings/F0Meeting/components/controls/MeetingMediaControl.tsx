@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { type F0MeetingAction, type F0MeetingLocalSource } from "../../types"
 
 export type MeetingMediaControlProps = {
@@ -73,7 +72,7 @@ export const MeetingMediaControl = ({
         <F0Icon icon={icon} size={compact ? "sm" : "md"} color="bold" />
       </button>
 
-      {canPick && (
+      {canPick ? (
         <>
           <span aria-hidden className="w-px shrink-0 bg-f1-border-secondary" />
           <DropdownMenu>
@@ -102,9 +101,9 @@ export const MeetingMediaControl = ({
                   {/* The check keeps its slot on every row, so the labels stay
                       in one column instead of shifting as the choice moves. */}
                   <span className="flex w-4 shrink-0 justify-center">
-                    {device.id === source.selectedDeviceId && (
+                    {device.id === source.selectedDeviceId ? (
                       <F0Icon icon={Check} size="sm" />
-                    )}
+                    ) : null}
                   </span>
                   {device.isDefault
                     ? `${device.label} · ${i18n.meeting.systemDefault}`
@@ -114,7 +113,7 @@ export const MeetingMediaControl = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </>
-      )}
+      ) : null}
     </div>
   )
 }

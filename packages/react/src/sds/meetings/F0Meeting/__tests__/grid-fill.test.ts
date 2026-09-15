@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   DEFAULT_ASPECT_RATIO,
   TILE_ASPECT_MAX,
@@ -63,7 +62,9 @@ describe("the grid leaves no hole", () => {
     // the alternative is `object-cover` taking the sides off someone's head.
     const [, single] = solve(3, WIDE).rowSpecs
     expect(single).toBeDefined()
-    if (!single) return
+    if (!single) {
+      return
+    }
     expect(single.tileWidth / single.tileHeight).toBeCloseTo(TILE_ASPECT_MAX, 5)
     expect(single.tileWidth).toBeLessThan(WIDE.width)
   })

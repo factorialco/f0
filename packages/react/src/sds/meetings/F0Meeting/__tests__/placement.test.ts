@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { type F0WindowPlacement } from "../types"
 import {
   applyResize,
@@ -113,7 +112,13 @@ describe("applyResize", () => {
   const rect = { x: 400, y: 300, width: 400, height: 300 }
 
   it("grows from the south-east without moving the origin", () => {
-    const next = applyResize(rect, "se", 50, 40, VIEWPORT)
+    const next = applyResize({
+      rect,
+      handle: "se",
+      deltaX: 50,
+      deltaY: 40,
+      viewport: VIEWPORT,
+    })
     expect(next.x).toBe(rect.x)
     expect(next.y).toBe(rect.y)
     expect(next.width).toBe(450)
@@ -121,7 +126,13 @@ describe("applyResize", () => {
   })
 
   it("moves the origin when dragging the north-west", () => {
-    const next = applyResize(rect, "nw", -50, -40, VIEWPORT)
+    const next = applyResize({
+      rect,
+      handle: "nw",
+      deltaX: -50,
+      deltaY: -40,
+      viewport: VIEWPORT,
+    })
     expect(next.width).toBe(450)
     expect(next.height).toBe(340)
     expect(next.x).toBe(350)
@@ -129,7 +140,13 @@ describe("applyResize", () => {
   })
 
   it("stops at the minimum instead of sliding the window", () => {
-    const next = applyResize(rect, "nw", 5000, 5000, VIEWPORT)
+    const next = applyResize({
+      rect,
+      handle: "nw",
+      deltaX: 5000,
+      deltaY: 5000,
+      viewport: VIEWPORT,
+    })
     expect(next.width).toBe(WINDOW_MIN_WIDTH)
     expect(next.height).toBe(WINDOW_MIN_HEIGHT)
     expect(next.x + next.width).toBeCloseTo(rect.x + rect.width, 5)

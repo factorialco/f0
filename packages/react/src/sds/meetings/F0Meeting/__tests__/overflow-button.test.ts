@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
-
-import { type F0MeetingAction } from "../types"
 import { collapseActions } from "../components/controls/collapse-actions"
+import { type F0MeetingAction } from "../types"
 
 const action = (
   id: string,

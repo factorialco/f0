@@ -1,12 +1,10 @@
 import { act } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { MockChatAppProvider } from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { isCallMessage, type F0ChatCall } from "@/sds/chat/F0Chat/types"
 import { renderHook } from "@/testing/test-utils"
-
 import { GROUP_ARRIVAL_MS, useMockHuddle } from "../mocks/useMockHuddle"
 
 /** Just past the nth arrival. */

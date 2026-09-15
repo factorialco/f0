@@ -1,12 +1,10 @@
 import { act } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { MockChatAppProvider } from "@/sds/chat/F0Chat/mocks/MockChatApp"
-import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { SEEDS } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { isCallMessage, type F0ChatCall } from "@/sds/chat/F0Chat/types"
 import { renderHook } from "@/testing/test-utils"
-
 import { useMockHuddle } from "../mocks/useMockHuddle"
 
 /** The first DM seed — huddles are 1:1 only. */

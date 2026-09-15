@@ -16,9 +16,13 @@ const FRAME_BUDGET_MS = 80
 
 const tick = (now: number): void => {
   rafId = requestAnimationFrame(tick)
-  if (now - lastTick < FRAME_BUDGET_MS) return
+  if (now - lastTick < FRAME_BUDGET_MS) {
+    return
+  }
   lastTick = now
-  for (const painter of painters) painter(now)
+  for (const painter of painters) {
+    painter(now)
+  }
 }
 
 /**
@@ -53,7 +57,9 @@ export const createStreamBinding =
   (element) => {
     element.srcObject = stream
     return () => {
-      if (element.srcObject === stream) element.srcObject = null
+      if (element.srcObject === stream) {
+        element.srcObject = null
+      }
     }
   }
 
@@ -79,7 +85,9 @@ const paintSynthetic = (
   now: number
 ): void => {
   const context = canvas.getContext("2d")
-  if (!context) return
+  if (!context) {
+    return
+  }
   const { width, height } = canvas
 
   context.fillStyle = `hsl(${hue}, 32%, 22%)`
@@ -119,17 +127,23 @@ export const createSyntheticVideoBinding = (
   participant: { id: string; name: string },
   { animated = true }: SyntheticVideoOptions = {}
 ): F0MeetingBinding | undefined => {
-  if (typeof document === "undefined") return undefined
+  if (typeof document === "undefined") {
+    return undefined
+  }
   const canvas = document.createElement("canvas") as CaptureCanvas
   canvas.width = 640
   canvas.height = 360
-  if (!canCapture(canvas)) return undefined
+  if (!canCapture(canvas)) {
+    return undefined
+  }
 
   const hue = Math.round(hashId(participant.id) * 360)
   paintSynthetic(canvas, participant.name, hue, 0)
 
   const stream = canvas.captureStream?.(animated ? 12 : 0)
-  if (!stream) return undefined
+  if (!stream) {
+    return undefined
+  }
 
   const bind = createStreamBinding(stream)
 
@@ -155,19 +169,27 @@ export const createSyntheticVideoBinding = (
 export const createScreenShareBinding = ():
   | { binding: F0MeetingBinding; width: number; height: number }
   | undefined => {
-  if (typeof document === "undefined") return undefined
+  if (typeof document === "undefined") {
+    return undefined
+  }
   const canvas = document.createElement("canvas") as CaptureCanvas
   canvas.width = 1680
   canvas.height = 720
-  if (!canCapture(canvas)) return undefined
+  if (!canCapture(canvas)) {
+    return undefined
+  }
 
   const stream = canvas.captureStream?.(12)
-  if (!stream) return undefined
+  if (!stream) {
+    return undefined
+  }
   const bind = createStreamBinding(stream)
 
   const paint = (now: number): void => {
     const context = canvas.getContext("2d")
-    if (!context) return
+    if (!context) {
+      return
+    }
     context.fillStyle = "#0f172a"
     context.fillRect(0, 0, canvas.width, canvas.height)
     const offset = (now / 40) % 34
@@ -226,9 +248,13 @@ export const createClipVideoBinding = (
   { poster, fallback }: ClipVideoOptions = {}
 ): F0MeetingBinding => {
   return (element) => {
-    if (!(element instanceof HTMLVideoElement)) return () => {}
+    if (!(element instanceof HTMLVideoElement)) {
+      return () => {}
+    }
 
-    if (poster) element.poster = poster
+    if (poster) {
+      element.poster = poster
+    }
     element.src = url
     element.loop = true
     element.muted = true
@@ -243,11 +269,15 @@ export const createClipVideoBinding = (
       void element.play().catch(() => {})
     }
     element.addEventListener("loadedmetadata", seek)
-    if (element.readyState >= 1) seek()
+    if (element.readyState >= 1) {
+      seek()
+    }
 
     let releaseFallback: (() => void) | undefined
     const onError = (): void => {
-      if (releaseFallback || !fallback) return
+      if (releaseFallback || !fallback) {
+        return
+      }
       // Clear the dead source first: leaving it set keeps the poster and the
       // error state on an element the fallback is about to drive.
       element.removeAttribute("poster")
@@ -289,7 +319,9 @@ export type EchoSource = {
  * is what makes the mock worth developing against.
  */
 export const createEchoSource = (stream: MediaStream): EchoSource | null => {
-  if (typeof document === "undefined") return null
+  if (typeof document === "undefined") {
+    return null
+  }
 
   const video = document.createElement("video")
   video.srcObject = stream
@@ -308,9 +340,13 @@ export const createEchoSource = (stream: MediaStream): EchoSource | null => {
       const canvas = document.createElement("canvas") as CaptureCanvas
       canvas.width = 480
       canvas.height = 270
-      if (!canCapture(canvas)) return undefined
+      if (!canCapture(canvas)) {
+        return undefined
+      }
       const out = canvas.captureStream?.(12)
-      if (!out) return undefined
+      if (!out) {
+        return undefined
+      }
 
       const seed = hashId(participantId)
       const hue = Math.round(seed * 300)
@@ -321,7 +357,9 @@ export const createEchoSource = (stream: MediaStream): EchoSource | null => {
 
       const paint = (): void => {
         const context = canvas.getContext("2d")
-        if (!context || video.readyState < 2) return
+        if (!context || video.readyState < 2) {
+          return
+        }
         const sourceWidth = video.videoWidth / zoom
         const sourceHeight = video.videoHeight / zoom
         context.filter = `hue-rotate(${hue}deg) saturate(1.15)`
@@ -349,7 +387,9 @@ export const createEchoSource = (stream: MediaStream): EchoSource | null => {
       }
     },
     dispose: () => {
-      for (const dispose of disposers) dispose()
+      for (const dispose of disposers) {
+        dispose()
+      }
     },
   }
 }

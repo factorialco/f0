@@ -1,8 +1,6 @@
 import { act } from "react"
 import { describe, expect, it } from "vitest"
-
 import { renderHook } from "@/testing/test-utils"
-
 import { useMockRoomChat } from "../mocks/useMockRoomChat"
 
 describe("useMockRoomChat", () => {

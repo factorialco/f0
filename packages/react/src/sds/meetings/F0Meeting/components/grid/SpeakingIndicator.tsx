@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-
 import { useMeetingSignal } from "../../providers/useMeetingSignal"
 
 const BAR_WEIGHTS = [0.45, 0.8, 1, 0.8, 0.45]

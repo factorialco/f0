@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   DEFAULT_ASPECT_RATIO,
   TILE_ASPECT_MAX,
@@ -173,7 +172,9 @@ describe("layoutGrid", () => {
     for (const row of rows.values()) {
       const first = row[0]
       const last = row[row.length - 1]
-      if (!first || !last) continue
+      if (!first || !last) {
+        continue
+      }
       const leftGap = first.x
       const rightGap = 900 - (last.x + last.width)
       expect(leftGap).toBeCloseTo(rightGap, 5)
@@ -185,7 +186,9 @@ describe("layoutGrid", () => {
     const rects = layoutGrid(solution, BOX, 16)
     const first = rects[0]
     expect(first).toBeDefined()
-    if (!first) return
+    if (!first) {
+      return
+    }
     expect(first.y).toBeCloseTo(BOX.height - (first.y + first.height), 5)
   })
 })

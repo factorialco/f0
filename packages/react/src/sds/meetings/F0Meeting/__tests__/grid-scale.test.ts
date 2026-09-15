@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { GAP_REGULAR, gapForTile, radiusForTile } from "../layout/constants"
 
 describe("gap and radius follow the tile", () => {
@@ -16,11 +15,15 @@ describe("gap and radius follow the tile", () => {
     const radii = widths.map(radiusForTile)
 
     gaps.forEach((gap, index) => {
-      if (index === 0) return
+      if (index === 0) {
+        return
+      }
       expect(gap).toBeGreaterThanOrEqual(gaps[index - 1] as number)
     })
     radii.forEach((radius, index) => {
-      if (index === 0) return
+      if (index === 0) {
+        return
+      }
       expect(radius).toBeGreaterThanOrEqual(radii[index - 1] as number)
     })
   })

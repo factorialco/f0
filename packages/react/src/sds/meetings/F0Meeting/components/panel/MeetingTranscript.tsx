@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
 import { type F0MeetingTranscriptSegment } from "../../types"
 
@@ -17,7 +15,9 @@ export type MeetingTranscriptProps = {
  */
 const timeOf = (iso: string) => {
   const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return ""
+  if (Number.isNaN(date.getTime())) {
+    return ""
+  }
   return new Intl.DateTimeFormat(undefined, {
     hour: "2-digit",
     minute: "2-digit",
@@ -46,7 +46,9 @@ export const MeetingTranscript = ({ segments }: MeetingTranscriptProps) => {
   // down while they are reading earlier lines is the classic transcript bug.
   useEffect(() => {
     const element = scrollRef.current
-    if (!element || !pinnedToBottom.current) return
+    if (!element || !pinnedToBottom.current) {
+      return
+    }
     element.scrollTop = element.scrollHeight
   }, [segments])
 

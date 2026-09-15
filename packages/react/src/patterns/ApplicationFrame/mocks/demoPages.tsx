@@ -1,8 +1,7 @@
 import { useMemo } from "react"
-
 import { F0Card } from "@/components/F0Card"
-import * as Icons from "@/icons/app"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import * as Icons from "@/icons/app"
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { TwoColumnLayout } from "@/layouts/TwoColumnLayout"
 import {
@@ -541,7 +540,7 @@ export const DemoPage = ({ path }: { path: string }) => {
           {/* The page header keeps its own One switch: that is how the AI chat
               opens, and it is the same control on every page of the product. */}
           <PageHeader module={{ ...page.module, href: page.root }} />
-          {page.tabs && <Tabs tabs={page.tabs} />}
+          {page.tabs ? <Tabs tabs={page.tabs} /> : null}
         </>
       }
     >

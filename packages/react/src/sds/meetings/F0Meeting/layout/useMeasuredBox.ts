@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { round4 } from "../utils/aspect"
 
 export type MeasuredBox = { width: number; height: number }
@@ -18,12 +17,16 @@ export const useMeasuredBox = <T extends HTMLElement>(): [
 
   useEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     let frame = 0
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0]
-      if (!entry) return
+      if (!entry) {
+        return
+      }
       const { width, height } = entry.contentRect
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {

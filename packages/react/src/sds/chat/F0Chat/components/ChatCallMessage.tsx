@@ -1,9 +1,7 @@
 import { type ReactNode } from "react"
-
 import { F0MeetingCard } from "@/experimental/F0MeetingCard"
 import { type MeetingState } from "@/experimental/F0MeetingCard/types"
 import { useI18n } from "@/lib/providers/i18n"
-
 import {
   type F0ChatCall,
   type F0ChatCallState,

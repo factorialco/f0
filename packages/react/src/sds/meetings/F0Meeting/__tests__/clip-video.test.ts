@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { createClipVideoBinding } from "../mocks/canvasVideo"
 
 const video = () => document.createElement("video")

@@ -1,11 +1,9 @@
 import { memo } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { Desktop, MicrophoneNegative, PushPin, PushPinSolid } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { cellRadiusStyle } from "../../layout/constants"
 import { type F0MeetingTile } from "../../layout/tiles"
 import { ConnectionQualityBars } from "./ConnectionQualityBars"
@@ -88,11 +86,11 @@ const ParticipantTileBase = ({
             // the thumbnails look like a different component.
             <F0Avatar avatar={participant.avatar} size="lg" />
           ) : null}
-          {isInvited && !compact && (
+          {isInvited && !compact ? (
             <span className="max-w-full truncate text-base text-f1-foreground-inverse-secondary">
               {i18n.meeting.waitingToJoin}
             </span>
-          )}
+          ) : null}
         </div>
       )}
 
@@ -100,7 +98,7 @@ const ParticipantTileBase = ({
           plate. Over the dark placeholder there is nothing to fight and the
           same plate reads as a smudge, so the text stands on its own. Its
           children inherit the colour from here. */}
-      {!isInvited && (
+      {!isInvited ? (
         <div
           className={cn(
             "absolute left-3 top-3 flex items-center gap-1.5 overflow-hidden rounded-lg text-f1-foreground-inverse",
@@ -111,7 +109,7 @@ const ParticipantTileBase = ({
             compact ? "left-1.5 top-1.5 px-2 py-1" : "px-3 py-2"
           )}
         >
-          {!compact && (
+          {!compact ? (
             // `min-w-0` is what lets the truncation actually happen: a flex
             // child will not shrink below its content width without it, so a
             // long name would spill out of the chip instead of ellipsing.
@@ -120,7 +118,7 @@ const ParticipantTileBase = ({
                 ? `${label} · ${i18n.meeting.sharingScreen}`
                 : label}
             </span>
-          )}
+          ) : null}
           {isScreenShare ? (
             <F0Icon icon={Desktop} size="sm" />
           ) : isMuted ? (
@@ -132,20 +130,18 @@ const ParticipantTileBase = ({
             />
           )}
         </div>
-      )}
+      ) : null}
 
-      {!isInvited && (
+      {!isInvited ? (
         <div className="absolute bottom-3 right-3 text-f1-foreground-inverse">
           <ConnectionQualityBars
             participantId={participant.id}
             label={i18n.meeting.weakConnection}
           />
         </div>
-      )}
+      ) : null}
 
-      {canFocus && !isInvited && (
-        // Present on thumbnails too, so moving the spotlight is one click on
-        // the person you want rather than unpinning the current one first.
+      {canFocus && !isInvited ? (
         <button
           type="button"
           onClick={() => onToggleFocus?.(tile.key)}
@@ -170,7 +166,7 @@ const ParticipantTileBase = ({
               : i18n.meeting.pinParticipant}
           </span>
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -51,7 +51,9 @@ export const useMockRoomChat = (
   const send = useCallback(
     (text: string) => {
       const trimmed = text.trim()
-      if (!trimmed) return
+      if (!trimmed) {
+        return
+      }
       setSent((current) => [
         ...current,
         {

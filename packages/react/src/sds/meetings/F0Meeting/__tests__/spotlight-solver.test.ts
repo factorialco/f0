@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   STRIP_MAX_TILES,
   TILE_ASPECT_MAX,
@@ -101,7 +100,7 @@ describe("solveSpotlight strip", () => {
       height: 210,
       spotlightRange: RANGE,
     })
-    expect(strip.length).toBe(1)
+    expect(strip).toHaveLength(1)
     expect(stripOverflow).toBe(0)
   })
 
@@ -122,7 +121,7 @@ describe("solveSpotlight strip", () => {
       spotlightRange: RANGE,
     })
 
-    expect(strip.length).toBe(STRIP_MAX_TILES)
+    expect(strip).toHaveLength(STRIP_MAX_TILES)
     expect(stripOverflow).toBe(44 - STRIP_MAX_TILES)
     expect(strip[0]?.width).toBeGreaterThan(160)
   })

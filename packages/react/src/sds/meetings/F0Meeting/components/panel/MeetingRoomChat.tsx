@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { ArrowUp } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import {
   useF0MeetingRoster,
   useF0MeetingStable,
@@ -25,7 +23,9 @@ export type MeetingRoomChatProps = {
 
 const timeOf = (iso: string) => {
   const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return ""
+  if (Number.isNaN(date.getTime())) {
+    return ""
+  }
   return new Intl.DateTimeFormat(undefined, {
     hour: "2-digit",
     minute: "2-digit",
@@ -54,12 +54,16 @@ export const MeetingRoomChat = ({ messages, onSend }: MeetingRoomChatProps) => {
 
   useEffect(() => {
     const element = scrollRef.current
-    if (element) element.scrollTop = element.scrollHeight
+    if (element) {
+      element.scrollTop = element.scrollHeight
+    }
   }, [messages])
 
   const submit = () => {
     const text = draft.trim()
-    if (!text) return
+    if (!text) {
+      return
+    }
     onSend(text)
     setDraft("")
   }

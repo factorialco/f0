@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { ParticipantTile } from "../components/grid/ParticipantTile"
 import { resolveAutoFocus } from "../layout/auto-focus"
 import { buildTiles } from "../layout/tiles"
@@ -39,7 +37,9 @@ const renderTile = (participant: F0MeetingParticipant) => {
     setCameraEnabled: () => {},
   }
   const tile = buildTiles([participant])[0]
-  if (!tile) throw new Error("no tile")
+  if (!tile) {
+    throw new Error("no tile")
+  }
 
   zeroRender(
     <F0MeetingProvider runtime={runtime}>

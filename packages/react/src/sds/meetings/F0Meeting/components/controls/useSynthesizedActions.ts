@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import {
   CameraPlus,
   Desktop,
@@ -13,7 +12,6 @@ import {
   VideoRecorderNegative,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import {
   useF0MeetingRoster,
   useF0MeetingStable,
@@ -47,14 +45,22 @@ const permissionMessage = (
  * remove it by id, but the bar draws it as the chevron half of the control it
  * configures rather than as a separate button — see `MeetingMediaControl`.
  */
-const settingsAction = (
-  id: string,
-  source: F0MeetingLocalSource | undefined,
-  label: string,
-  icon: F0MeetingAction["icon"],
+const settingsAction = ({
+  id,
+  source,
+  label,
+  icon,
+  priority,
+}: {
+  id: string
+  source: F0MeetingLocalSource | undefined
+  label: string
+  icon: F0MeetingAction["icon"]
   priority: number
-): F0MeetingAction | null => {
-  if (!source?.devices?.length || !source.selectDevice) return null
+}): F0MeetingAction | null => {
+  if (!source?.devices?.length || !source.selectDevice) {
+    return null
+  }
   return {
     id,
     label,
@@ -119,14 +125,16 @@ export const useSynthesizedActions = (
       group: "media",
     })
 
-    const microphoneSettings = settingsAction(
-      "core:microphoneSettings",
-      localMedia.microphone,
-      i18n.meeting.selectMicrophone,
-      Settings,
-      70
-    )
-    if (microphoneSettings) actions.push(microphoneSettings)
+    const microphoneSettings = settingsAction({
+      id: "core:microphoneSettings",
+      source: localMedia.microphone,
+      label: i18n.meeting.selectMicrophone,
+      icon: Settings,
+      priority: 70,
+    })
+    if (microphoneSettings) {
+      actions.push(microphoneSettings)
+    }
 
     const cameraReason = permissionMessage(localMedia.camera.permission, {
       blocked: i18n.meeting.cameraBlocked,
@@ -152,14 +160,16 @@ export const useSynthesizedActions = (
       group: "media",
     })
 
-    const cameraSettings = settingsAction(
-      "core:cameraSettings",
-      localMedia.camera,
-      i18n.meeting.selectCamera,
-      CameraPlus,
-      65
-    )
-    if (cameraSettings) actions.push(cameraSettings)
+    const cameraSettings = settingsAction({
+      id: "core:cameraSettings",
+      source: localMedia.camera,
+      label: i18n.meeting.selectCamera,
+      icon: CameraPlus,
+      priority: 65,
+    })
+    if (cameraSettings) {
+      actions.push(cameraSettings)
+    }
 
     if (stable.hasScreenShare) {
       const sharing = Boolean(localMedia.screenShare?.enabled)

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { fitToContent } from "../MeetingOneSwitch"
 
 /** The frame's content box. It INCLUDES the chat's width — see the fn's docs. */

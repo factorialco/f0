@@ -1,5 +1,4 @@
 import { useCallback, useSyncExternalStore } from "react"
-
 import { type F0MeetingSignal } from "../types"
 import { useF0MeetingRoster } from "./F0MeetingProvider"
 import { EMPTY_SIGNAL } from "./MeetingSignalStore"

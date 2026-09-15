@@ -1,5 +1,4 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-
 import { type F0MeetingRoomInfo, type F0MeetingStatus } from "../types"
 
 export type MockPerson = {

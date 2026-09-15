@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { F0MeetingRoom } from "../F0MeetingRoom"
 import { F0MeetingProvider } from "../providers/F0MeetingProvider"
 import { MeetingSurfaceProvider } from "../providers/MeetingSurfaceProvider"

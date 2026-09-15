@@ -42,7 +42,9 @@ export const resolveAutoFocus = ({
   const nextSeen = new Set(shareKeys.filter((key) => seenShareKeys.has(key)))
 
   if (intent.type === "pinned" && liveKeys.has(intent.key)) {
-    for (const key of shareKeys) nextSeen.add(key)
+    for (const key of shareKeys) {
+      nextSeen.add(key)
+    }
     return { focusKey: intent.key, seenShareKeys: nextSeen, clearIntent: false }
   }
 

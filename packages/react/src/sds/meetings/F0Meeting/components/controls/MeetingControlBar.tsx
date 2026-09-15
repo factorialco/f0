@@ -1,5 +1,4 @@
 import { Fragment, useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import {
   Dropdown,
@@ -8,7 +7,6 @@ import {
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useMeasuredBox } from "../../layout/useMeasuredBox"
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
@@ -85,7 +83,9 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
         {visible.map((action) => {
           // A picker never renders on its own: it is the chevron half of the
           // control it configures, drawn by that control below.
-          if (PICKER_IDS.has(action.id)) return null
+          if (PICKER_IDS.has(action.id)) {
+            return null
+          }
 
           if (action.id === "core:microphone" || action.id === "core:camera") {
             const isMicrophone = action.id === "core:microphone"
@@ -129,7 +129,7 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
             always there and usually empty is a control that teaches you to
             ignore it — and the empty state it used to need ("No more actions")
             is gone with it. */}
-        {!isMinimized && overflow.length > 0 && (
+        {!isMinimized && overflow.length > 0 ? (
           <Dropdown items={overflow.map(toDropdownItem)} align="end">
             <F0Button
               variant="ghost"
@@ -139,7 +139,7 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
               label={i18n.meeting.moreActions}
             />
           </Dropdown>
-        )}
+        ) : null}
       </div>
     </div>
   )

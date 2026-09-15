@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-
 import { createMeetingSignalStore } from "../providers/MeetingSignalStore"
 import {
   type F0MeetingBinding,
@@ -15,10 +13,6 @@ import {
   type F0MeetingTranscriptSegment,
 } from "../types"
 import {
-  applyTranscriptSegment,
-  createTranscriptDriver,
-} from "./mockTranscript"
-import {
   createClipVideoBinding,
   createEchoSource,
   createScreenShareBinding,
@@ -26,9 +20,13 @@ import {
   createSyntheticVideoBinding,
   type EchoSource,
 } from "./canvasVideo"
-import { hashId } from "./rng"
 import { createMockAudioEngine, type MockAudioEngine } from "./mockAudio"
 import { type MockMeetingSeed, type MockPerson } from "./mockSeeds"
+import {
+  applyTranscriptSegment,
+  createTranscriptDriver,
+} from "./mockTranscript"
+import { hashId } from "./rng"
 
 type MemberState = MockPerson & {
   /** Bumped whenever the source is genuinely republished. */
@@ -95,11 +93,15 @@ const FALLBACK_CAMERAS: F0MeetingDevice[] = [
 
 const permissionFromError = (error: unknown): F0MeetingPermission => {
   const name = error instanceof DOMException ? error.name : ""
-  if (name === "NotAllowedError" || name === "SecurityError") return "denied"
+  if (name === "NotAllowedError" || name === "SecurityError") {
+    return "denied"
+  }
   if (name === "NotFoundError" || name === "OverconstrainedError") {
     return "unavailable"
   }
-  if (name === "NotReadableError" || name === "AbortError") return "in-use"
+  if (name === "NotReadableError" || name === "AbortError") {
+    return "in-use"
+  }
   return "denied"
 }
 
@@ -189,7 +191,9 @@ export const useMockMeetingRuntime = (
   // leave every later huddle stuck on the "ended" screen.
   const roomIdRef = useRef(seed.room.id)
   useEffect(() => {
-    if (roomIdRef.current === seed.room.id) return
+    if (roomIdRef.current === seed.room.id) {
+      return
+    }
     roomIdRef.current = seed.room.id
     setStatus(seed.startStatus ?? "connected")
     setErrorMessage(undefined)
@@ -206,7 +210,9 @@ export const useMockMeetingRuntime = (
   membersRef.current = members
 
   useEffect(() => {
-    if (seed.audio === false) return
+    if (seed.audio === false) {
+      return
+    }
     const engine = createMockAudioEngine(signalsRef.current, seed.seed ?? 7)
     audioRef.current = engine
     setAudioBlocked(engine.blocked())
@@ -216,7 +222,9 @@ export const useMockMeetingRuntime = (
     // later and nobody ever spoke in it.
     // A scripted room already knows who talks when; letting the director run
     // too would mean two things fighting over the floor.
-    if (!seed.script) engine.runDirector(() => memberIdsRef.current)
+    if (!seed.script) {
+      engine.runDirector(() => memberIdsRef.current)
+    }
 
     // Keep asking. Sampled once at mount, the "Click to enable sound" prompt
     // could never appear BEFORE the browser unblocked the context on your first
@@ -232,10 +240,14 @@ export const useMockMeetingRuntime = (
 
   useEffect(() => {
     const engine = audioRef.current
-    if (!engine) return
+    if (!engine) {
+      return
+    }
     members.forEach((member, index) => {
       // Someone who has not joined yet has no voice to synthesize.
-      if (member.presence === "invited") return
+      if (member.presence === "invited") {
+        return
+      }
       engine.add(member.id, index)
       engine.setMuted(member.id, Boolean(member.muted))
     })
@@ -252,7 +264,9 @@ export const useMockMeetingRuntime = (
 
   useEffect(() => {
     const script = seed.script
-    if (!script || script.lines.length === 0) return
+    if (!script || script.lines.length === 0) {
+      return
+    }
 
     setScriptChat([])
     scriptTextRef.current = new Map()
@@ -262,8 +276,11 @@ export const useMockMeetingRuntime = (
     // `audio: false` (and jsdom) still needs the rings and the transcript.
     const publish = (ids: string[]): void => {
       const engine = audioRef.current
-      if (engine) engine.setSpeaking(ids)
-      else signalsRef.current.setSpeaking(ids)
+      if (engine) {
+        engine.setSpeaking(ids)
+      } else {
+        signalsRef.current.setSpeaking(ids)
+      }
     }
 
     const runsUntil = script.lines.reduce(
@@ -288,7 +305,9 @@ export const useMockMeetingRuntime = (
         (member) => member.presence !== "invited"
       )
       if (started === null) {
-        if (others.length === 0) return
+        if (others.length === 0) {
+          return
+        }
         started = Date.now()
       }
 
@@ -300,11 +319,15 @@ export const useMockMeetingRuntime = (
 
       const speaking: string[] = []
       for (const line of script.lines) {
-        if (!line.say) continue
+        if (!line.say) {
+          continue
+        }
         // Someone who has not arrived cannot be speaking. Their line is skipped
         // outright rather than queued: a transcript that attributes sentences to
         // an empty tile is worse than a shorter conversation.
-        if (!inTheRoom(line.participantId)) continue
+        if (!inTheRoom(line.participantId)) {
+          continue
+        }
         if (elapsed >= line.at && elapsed < line.at + line.durationMs) {
           speaking.push(line.participantId)
           scriptTextRef.current.set(line.participantId, line.say)
@@ -313,7 +336,9 @@ export const useMockMeetingRuntime = (
       publish(speaking)
 
       script.lines.forEach((line, index) => {
-        if (!line.chat || firedChat.has(index) || elapsed < line.at) return
+        if (!line.chat || firedChat.has(index) || elapsed < line.at) {
+          return
+        }
         firedChat.add(index)
         setScriptChat((current) => [
           ...current,
@@ -342,7 +367,9 @@ export const useMockMeetingRuntime = (
   // real adapter sees it too: the server transcribes whoever holds the floor
   // and the client only learns about segments.
   useEffect(() => {
-    if (seed.transcript === false) return
+    if (seed.transcript === false) {
+      return
+    }
     const signals = signalsRef.current
     const driver = createTranscriptDriver(
       (segment) =>
@@ -359,7 +386,9 @@ export const useMockMeetingRuntime = (
         }
       }
       for (const id of speaking) {
-        if (!next.includes(id)) driver.stop(id)
+        if (!next.includes(id)) {
+          driver.stop(id)
+        }
       }
       speaking = next
     })
@@ -379,7 +408,9 @@ export const useMockMeetingRuntime = (
   useEffect(() => {
     const engine = audioRef.current
     const stream = localMicStreamRef.current
-    if (!engine || !stream || localMuted) return
+    if (!engine || !stream || localMuted) {
+      return
+    }
     engine.monitor(seed.me.id, stream)
     return () => engine.unmonitor(seed.me.id)
   }, [localGeneration, localMuted, seed.me.id, seed.audio])
@@ -389,9 +420,13 @@ export const useMockMeetingRuntime = (
   const bindingFor = useCallback(
     (key: string, create: () => F0MeetingBinding | undefined) => {
       const cached = bindingsRef.current.get(key)
-      if (cached) return cached
+      if (cached) {
+        return cached
+      }
       const created = create()
-      if (created) bindingsRef.current.set(key, created)
+      if (created) {
+        bindingsRef.current.set(key, created)
+      }
       return created
     },
     []
@@ -435,7 +470,7 @@ export const useMockMeetingRuntime = (
               // Spread the starting points so the same file reads as different
               // people rather than a wall of identical frames.
               offset * 60,
-              { ...(synthetic() ? { fallback: synthetic() } : {}) }
+              synthetic() ? { fallback: synthetic() } : {}
             )
           }
         }
@@ -493,7 +528,9 @@ export const useMockMeetingRuntime = (
   useEffect(() => {
     void readDevices()
     const media = navigator.mediaDevices
-    if (!media?.addEventListener) return
+    if (!media?.addEventListener) {
+      return
+    }
     const onChange = () => void readDevices()
     media.addEventListener("devicechange", onChange)
     return () => media.removeEventListener("devicechange", onChange)
@@ -640,7 +677,9 @@ export const useMockMeetingRuntime = (
       // No display capture here (older browser, or a test environment). The
       // synthetic 21:9 canvas still exercises the layout.
       const synthetic = createScreenShareBinding()
-      if (synthetic) setLocalShare({ ...synthetic, generation })
+      if (synthetic) {
+        setLocalShare({ ...synthetic, generation })
+      }
       return
     }
 
@@ -650,7 +689,9 @@ export const useMockMeetingRuntime = (
         audio: false,
       })
       const track = stream.getVideoTracks()[0]
-      if (!track) return
+      if (!track) {
+        return
+      }
 
       displayStreamRef.current = stream
       // The browser's own "Stop sharing" bar ends the track without going
@@ -862,7 +903,9 @@ export const useMockMeetingRuntime = (
         setLocalCamera(enabled)
       },
       setScreenShareEnabled: (enabled) => {
-        if (enabled) return startLocalScreenShare()
+        if (enabled) {
+          return startLocalScreenShare()
+        }
         stopLocalScreenShare()
       },
       // No `setHandRaised`: capability-by-presence is how the contract removes
@@ -941,7 +984,9 @@ export const useMockMeetingRuntime = (
       toggleMute: (id) =>
         setMembers((current) =>
           current.map((member) => {
-            if (member.id !== id) return member
+            if (member.id !== id) {
+              return member
+            }
             const muted = !member.muted
             audioRef.current?.setMuted(id, muted)
             return { ...member, muted }
@@ -962,8 +1007,11 @@ export const useMockMeetingRuntime = (
         setStatus("error")
       },
       denyPermission: (kind) => {
-        if (kind === "camera") setCameraPermission("denied")
-        else setMicrophonePermission("denied")
+        if (kind === "camera") {
+          setCameraPermission("denied")
+        } else {
+          setMicrophonePermission("denied")
+        }
       },
       setQuality: (id, quality) => {
         signalsRef.current.setQuality(id, quality)
@@ -991,10 +1039,14 @@ export const useMockMeetingRuntime = (
   /* ---------------- ambient churn ---------------- */
 
   useEffect(() => {
-    if (!seed.churnEveryMs) return
+    if (!seed.churnEveryMs) {
+      return
+    }
     const interval = setInterval(() => {
       setMembers((current) => {
-        if (current.length === 0) return current
+        if (current.length === 0) {
+          return current
+        }
         const index = Math.floor(current.length / 2)
         return current.map((member, position) =>
           position === index

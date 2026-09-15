@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { formatDuration } from "../../utils/format-duration"
 
 /**
@@ -10,15 +9,21 @@ export const MeetingTimer = ({ startedAt }: { startedAt?: string }) => {
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
-    if (!startedAt) return
+    if (!startedAt) {
+      return
+    }
     const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [startedAt])
 
-  if (!startedAt) return null
+  if (!startedAt) {
+    return null
+  }
 
   const start = Date.parse(startedAt)
-  if (Number.isNaN(start)) return null
+  if (Number.isNaN(start)) {
+    return null
+  }
 
   return (
     <span className="tabular-nums" data-testid="meeting-timer">

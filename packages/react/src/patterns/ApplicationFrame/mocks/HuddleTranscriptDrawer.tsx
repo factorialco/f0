@@ -43,14 +43,14 @@ export const HuddleTranscriptDrawer = ({
         className="flex flex-col gap-5"
         data-testid="huddle-transcript-drawer"
       >
-        {summary && (
+        {summary ? (
           <div className="flex flex-col gap-1.5">
             <p className="text-sm font-medium text-f1-foreground-secondary">
               Summary
             </p>
             <p className="text-base text-f1-foreground">{summary}</p>
           </div>
-        )}
+        ) : null}
 
         <div className="flex flex-col gap-1.5">
           <p className="text-sm font-medium text-f1-foreground-secondary">

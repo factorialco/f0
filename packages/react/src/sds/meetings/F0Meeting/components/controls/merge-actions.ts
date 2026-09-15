@@ -45,30 +45,46 @@ export const mergeActions = (
 
   for (const { id } of core) {
     const action = byId.get(id)
-    if (action) merged.push(action)
+    if (action) {
+      merged.push(action)
+    }
     // Keep host additions next to the group they declared.
     for (const extra of appended) {
       const resolved = byId.get(extra.id)
-      if (!resolved || merged.includes(resolved)) continue
-      if (extra.group && extra.group === action?.group) merged.push(resolved)
+      if (!resolved || merged.includes(resolved)) {
+        continue
+      }
+      if (extra.group && extra.group === action?.group) {
+        merged.push(resolved)
+      }
     }
   }
 
   for (const extra of appended) {
     const resolved = byId.get(extra.id)
-    if (resolved && !merged.includes(resolved)) merged.push(resolved)
+    if (resolved && !merged.includes(resolved)) {
+      merged.push(resolved)
+    }
   }
 
   const visible = merged.filter((action) => !action.hidden)
-  if (order.length === 0) return visible
+  if (order.length === 0) {
+    return visible
+  }
 
   const rank = new Map(order.map((id, index) => [id, index]))
   return [...visible].sort((a, b) => {
     const rankA = rank.get(a.id)
     const rankB = rank.get(b.id)
-    if (rankA === undefined && rankB === undefined) return 0
-    if (rankA === undefined) return 1
-    if (rankB === undefined) return -1
+    if (rankA === undefined && rankB === undefined) {
+      return 0
+    }
+    if (rankA === undefined) {
+      return 1
+    }
+    if (rankB === undefined) {
+      return -1
+    }
     return rankA - rankB
   })
 }

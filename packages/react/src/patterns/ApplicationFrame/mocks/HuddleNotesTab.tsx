@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useMemo, useRef } from "react"
-
 import {
   F0NotesTextEditor,
   type F0NotesTextEditorHandle,
@@ -49,7 +48,9 @@ export const HuddleNotesTab = ({
   // exactly — so dropping the call into the notes is a mapping, not a feature.
   const insertTranscript = useCallback(() => {
     const finals = transcript.filter((segment) => segment.isFinal)
-    if (finals.length === 0) return
+    if (finals.length === 0) {
+      return
+    }
 
     const speakerIds = [...new Set(finals.map((s) => s.participantId))]
     editor.current?.insertTranscript(

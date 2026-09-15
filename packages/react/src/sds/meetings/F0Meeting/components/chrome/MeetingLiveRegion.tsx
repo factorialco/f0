@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 
 const THROTTLE_MS = 2000
@@ -17,12 +16,16 @@ export const MeetingLiveRegion = () => {
   const pendingRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!liveMessage) return
+    if (!liveMessage) {
+      return
+    }
 
     const flush = (): void => {
       const message = pendingRef.current
       pendingRef.current = null
-      if (message === null) return
+      if (message === null) {
+        return
+      }
       lastAtRef.current = Date.now()
       setAnnounced(message)
     }

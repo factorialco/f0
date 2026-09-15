@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { resolveAutoFocus } from "../layout/auto-focus"
 import { type F0MeetingTile } from "../layout/tiles"
 import { type F0MeetingParticipant } from "../types"

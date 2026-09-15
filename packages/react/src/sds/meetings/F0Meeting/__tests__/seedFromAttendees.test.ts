@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { seedFromAttendees } from "../mocks/mockSeeds"
 
 const ME = { id: "me", name: "Jordan Avery" }

@@ -1,14 +1,12 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { F0MeetingProvider } from "@/sds/meetings/F0Meeting"
 import {
   type F0MeetingRuntime,
   type F0MeetingTranscriptSegment,
 } from "@/sds/meetings/F0Meeting/types"
 import { render } from "@/testing/test-utils"
-
 import { HuddleNotesTab } from "../mocks/HuddleNotesTab"
 
 const insertTranscript = vi.fn()

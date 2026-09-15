@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-
 import { useMeasuredBox } from "./layout/useMeasuredBox"
 import { useMeetingSurface } from "./providers/MeetingSurfaceProvider"
 
@@ -25,7 +24,9 @@ export const F0MeetingSlot = () => {
 
   useEffect(() => {
     const element = ref.current
-    if (!element || box.width <= 0 || box.height <= 0) return
+    if (!element || box.width <= 0 || box.height <= 0) {
+      return
+    }
     const bounds = element.getBoundingClientRect()
     setInlineRect({
       x: bounds.left,

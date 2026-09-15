@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   DEFAULT_ASPECT_RATIO,
   TILE_ASPECT_MAX,

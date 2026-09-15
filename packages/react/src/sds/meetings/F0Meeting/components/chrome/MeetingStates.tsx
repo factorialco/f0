@@ -2,12 +2,11 @@ import { F0Icon } from "@/components/F0Icon"
 import { Spinner } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import {
+  useF0Meeting,
   useF0MeetingRoster,
   useF0MeetingStable,
 } from "../../providers/F0MeetingProvider"
-import { useF0Meeting } from "../../providers/F0MeetingProvider"
 
 const Centered = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-f1-foreground">
@@ -33,7 +32,7 @@ export const MeetingEnded = () => {
   return (
     <Centered>
       <p className="text-base font-medium">{i18n.meeting.ended}</p>
-      {hasReconnect && (
+      {hasReconnect ? (
         <button
           type="button"
           onClick={reconnect}
@@ -44,7 +43,7 @@ export const MeetingEnded = () => {
         >
           {i18n.meeting.rejoin}
         </button>
-      )}
+      ) : null}
     </Centered>
   )
 }
@@ -59,7 +58,7 @@ export const MeetingError = () => {
       <p className="text-base font-medium">
         {runtime.errorMessage ?? i18n.meeting.connectionLost}
       </p>
-      {hasReconnect && (
+      {hasReconnect ? (
         <button
           type="button"
           onClick={reconnect}
@@ -70,7 +69,7 @@ export const MeetingError = () => {
         >
           {i18n.meeting.rejoin}
         </button>
-      )}
+      ) : null}
     </Centered>
   )
 }
@@ -98,7 +97,9 @@ export const AudioUnlockPrompt = () => {
   const i18n = useI18n()
   const { localMedia } = useF0MeetingRoster()
 
-  if (!localMedia.audioBlocked || !localMedia.unlockAudio) return null
+  if (!localMedia.audioBlocked || !localMedia.unlockAudio) {
+    return null
+  }
 
   return (
     <button
@@ -119,7 +120,9 @@ export const RecordingBanner = () => {
   const i18n = useI18n()
   const { recording } = useF0MeetingRoster()
 
-  if (!recording?.active) return null
+  if (!recording?.active) {
+    return null
+  }
 
   return (
     <div

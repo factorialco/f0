@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   DEFAULT_ASPECT_RATIO,
   TILE_ASPECT_MAX,
@@ -104,7 +103,9 @@ describe("grid capacity", () => {
       // The chip takes the last thumbnail's slot rather than being appended
       // past the edge, which is where it used to land.
       const slot = solution.strip[Math.max(0, solution.strip.length - 1)]
-      if (!slot) continue
+      if (!slot) {
+        continue
+      }
       expect(slot.x + slot.width).toBeLessThanOrEqual(box.width + 0.001)
       expect(slot.y + slot.height).toBeLessThanOrEqual(box.height + 0.001)
     }
@@ -144,7 +145,9 @@ describe("grid capacity", () => {
           width,
           height
         )
-        if (fallsBackToGrid) continue
+        if (fallsBackToGrid) {
+          continue
+        }
         // A "+1" costs the same slot as the tile it hides and says less.
         expect(chipStandsFor).not.toBe(1)
       }

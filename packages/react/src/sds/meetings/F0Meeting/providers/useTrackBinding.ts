@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef } from "react"
-
 import { type F0MeetingTrack } from "../types"
 import { useF0MeetingBindings } from "./F0MeetingProvider"
 
@@ -20,9 +19,13 @@ export const useTrackBinding = <T extends HTMLMediaElement>(
 
   useLayoutEffect(() => {
     const element = ref.current
-    if (!element || !bindingKey) return
+    if (!element || !bindingKey) {
+      return
+    }
     const binding = bindingsRef.current.get(bindingKey)
-    if (!binding) return
+    if (!binding) {
+      return
+    }
     return binding(element)
   }, [bindingKey, bindingsRef])
 

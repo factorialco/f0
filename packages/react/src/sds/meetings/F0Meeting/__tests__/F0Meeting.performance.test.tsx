@@ -1,10 +1,8 @@
 import { act } from "react"
 import { describe, expect, it } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
-import { SpeakingIndicator } from "../components/grid/SpeakingIndicator"
 import { ParticipantTile } from "../components/grid/ParticipantTile"
+import { SpeakingIndicator } from "../components/grid/SpeakingIndicator"
 import { buildTiles } from "../layout/tiles"
 import { F0MeetingProvider } from "../providers/F0MeetingProvider"
 import { createMeetingSignalStore } from "../providers/MeetingSignalStore"

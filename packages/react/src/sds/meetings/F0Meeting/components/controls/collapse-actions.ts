@@ -49,10 +49,16 @@ const widthOf = (
   action: F0MeetingAction,
   present: ReadonlySet<string>
 ): number => {
-  if (PICKER_IDS.has(action.id)) return 0
-  if (action.id === "core:leave") return LEAVE_SIZE
+  if (PICKER_IDS.has(action.id)) {
+    return 0
+  }
+  if (action.id === "core:leave") {
+    return LEAVE_SIZE
+  }
   const picker = PAIRED_PICKER[action.id]
-  if (picker) return present.has(picker) ? MEDIA_CONTROL_SIZE : ACTION_SIZE
+  if (picker) {
+    return present.has(picker) ? MEDIA_CONTROL_SIZE : ACTION_SIZE
+  }
   return ACTION_SIZE
 }
 
@@ -64,7 +70,9 @@ const measure = (
   const widths = actions
     .map((action) => widthOf(action, present))
     .filter((width) => width > 0)
-  if (widths.length === 0) return 0
+  if (widths.length === 0) {
+    return 0
+  }
   return (
     widths.reduce((total, width) => total + width, 0) +
     ACTION_GAP * (widths.length - 1)
@@ -113,7 +121,9 @@ export const collapseActions = (
 
   const ranked = [...applicable].sort((a, b) => {
     const pinned = Number(Boolean(b.pinned)) - Number(Boolean(a.pinned))
-    if (pinned !== 0) return pinned
+    if (pinned !== 0) {
+      return pinned
+    }
     return (b.priority ?? DEFAULT_PRIORITY) - (a.priority ?? DEFAULT_PRIORITY)
   })
 
@@ -122,13 +132,19 @@ export const collapseActions = (
   const kept = new Set<string>()
   const chosen: F0MeetingAction[] = []
   for (const action of ranked) {
-    if (PICKER_IDS.has(action.id)) continue
+    if (PICKER_IDS.has(action.id)) {
+      continue
+    }
     const candidate = [...chosen, action]
-    if (measure(candidate, present) > budget && !action.pinned) continue
+    if (measure(candidate, present) > budget && !action.pinned) {
+      continue
+    }
     chosen.push(action)
     kept.add(action.id)
     const picker = PAIRED_PICKER[action.id]
-    if (picker && present.has(picker)) kept.add(picker)
+    if (picker && present.has(picker)) {
+      kept.add(picker)
+    }
   }
 
   return {

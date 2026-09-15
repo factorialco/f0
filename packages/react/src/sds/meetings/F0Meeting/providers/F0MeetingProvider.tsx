@@ -7,7 +7,6 @@ import {
   useRef,
   type ReactNode,
 } from "react"
-
 import {
   type F0MeetingBinding,
   type F0MeetingCapabilities,
@@ -101,7 +100,9 @@ const useStableCapabilities = (
       previous.canMuteOthers === capabilities.canMuteOthers &&
       previous.canRemoveParticipants === capabilities.canRemoveParticipants &&
       previous.canModerate === capabilities.canModerate)
-  if (!same) previousRef.current = capabilities
+  if (!same) {
+    previousRef.current = capabilities
+  }
   return same ? previous : capabilities
 }
 
@@ -126,11 +127,15 @@ export const F0MeetingProvider = ({
   for (const participant of runtime.participants) {
     for (const track of participant.tracks) {
       seen.add(track.bindingKey)
-      if (track.binding) bindings.set(track.bindingKey, track.binding)
+      if (track.binding) {
+        bindings.set(track.bindingKey, track.binding)
+      }
     }
   }
   for (const key of bindings.keys()) {
-    if (!seen.has(key)) bindings.delete(key)
+    if (!seen.has(key)) {
+      bindings.delete(key)
+    }
   }
 
   const capabilities = useStableCapabilities(runtime.capabilities)

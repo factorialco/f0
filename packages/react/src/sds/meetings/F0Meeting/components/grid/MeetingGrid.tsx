@@ -1,8 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
+import { resolveAutoFocus } from "../../layout/auto-focus"
 import {
   DEFAULT_ASPECT_RATIO,
   SPEAKER_PROMOTION_HOLD_MS,
@@ -14,15 +13,14 @@ import {
   minTileHeightFor,
   minTileWidthFor,
 } from "../../layout/constants"
-import { resolveAutoFocus } from "../../layout/auto-focus"
 import { layoutGrid, solveGrid } from "../../layout/grid-solver"
 import { reorderForSpeakers } from "../../layout/speaker-order"
 import { solveSpotlight } from "../../layout/spotlight-solver"
 import { buildTiles, type F0MeetingTile } from "../../layout/tiles"
 import { useMeasuredBox } from "../../layout/useMeasuredBox"
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
-import { useMeetingSpeakers } from "../../providers/useMeetingSignal"
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
+import { useMeetingSpeakers } from "../../providers/useMeetingSignal"
 import { type F0Rect } from "../../types"
 import {
   tileEnterTransition,
@@ -92,7 +90,9 @@ export const MeetingGrid = () => {
 
   useEffect(() => {
     const now = Date.now()
-    for (const id of speakers) lastSpokenAtRef.current[id] = now
+    for (const id of speakers) {
+      lastSpokenAtRef.current[id] = now
+    }
   }, [speakers])
 
   const focus = useMemo(
@@ -107,7 +107,9 @@ export const MeetingGrid = () => {
   seenShareKeysRef.current = focus.seenShareKeys
 
   useEffect(() => {
-    if (focus.clearIntent) setFocusIntent({ type: "auto" })
+    if (focus.clearIntent) {
+      setFocusIntent({ type: "auto" })
+    }
   }, [focus.clearIntent, setFocusIntent])
 
   const handleToggleFocus = useCallback(
@@ -349,7 +351,7 @@ export const MeetingGrid = () => {
           </motion.div>
         ))}
 
-        {layout.overflowRect && layout.overflow.length > 0 && (
+        {layout.overflowRect && layout.overflow.length > 0 ? (
           <motion.div
             key="meeting-overflow"
             className="absolute left-0 top-0"
@@ -370,7 +372,7 @@ export const MeetingGrid = () => {
               radius={layout.overflowRadius}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   )

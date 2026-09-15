@@ -65,6 +65,8 @@ export const tileAspectRatio = (
   fallback: number
 ): number => {
   const { width, height } = tile.track ?? {}
-  if (tile.kind === "screenShare" && width && height) return width / height
+  if (tile.kind === "screenShare" && width && height) {
+    return width / height
+  }
   return fallback
 }

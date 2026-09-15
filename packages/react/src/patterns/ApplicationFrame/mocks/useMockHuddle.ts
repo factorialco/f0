@@ -1,9 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
-import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { ME as CHAT_ME, SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { type F0ChatCall, type F0ChatUser } from "@/sds/chat/F0Chat/types"
 import { seedFromAttendees } from "@/sds/meetings/F0Meeting/mocks/mockSeeds"
 import {
@@ -14,7 +13,6 @@ import {
   type F0MeetingRuntime,
   type F0MeetingTranscriptSegment,
 } from "@/sds/meetings/F0Meeting/types"
-
 import { HUDDLE_CLIPS } from "./huddleClips"
 import { HUDDLE_SCRIPT, resolveScript, resolveSummary } from "./huddleScript"
 
@@ -142,7 +140,9 @@ export const useMockHuddle = ({
     (patch: Omit<F0ChatCall, "id" | "startedAt" | "startedBy">) => {
       const id = callIdRef.current
       const startedAt = startedAtRef.current
-      if (!convId || !id || !startedAt) return
+      if (!convId || !id || !startedAt) {
+        return
+      }
       // Whoever started it keeps having started it. Reading the phase here made
       // an incoming call claim you started it the moment you answered.
       const startedBy =
@@ -298,7 +298,9 @@ export const useMockHuddle = ({
   // Ringing: the item appears as soon as the phase flips, so the card and the
   // room open together. DMs only — a group never passes through here.
   useEffect(() => {
-    if (phase !== "outgoing" && phase !== "incoming") return
+    if (phase !== "outgoing" && phase !== "incoming") {
+      return
+    }
     const isIncoming = phase === "incoming"
     const caller = others[0]
     write({
@@ -317,7 +319,9 @@ export const useMockHuddle = ({
   // The other side picks up. Only for an outgoing DM: an incoming one waits for
   // YOU, and joining it is what moves it along.
   useEffect(() => {
-    if (phase !== "outgoing") return
+    if (phase !== "outgoing") {
+      return
+    }
     const timer = setTimeout(() => {
       answeredRef.current = true
       setPhase("live")
@@ -326,7 +330,9 @@ export const useMockHuddle = ({
   }, [phase])
 
   useEffect(() => {
-    if (phase !== "live") return
+    if (phase !== "live") {
+      return
+    }
     write({
       state: "live",
       participants: [
@@ -355,8 +361,12 @@ export const useMockHuddle = ({
    * before you answered, so the seed put them there.
    */
   useEffect(() => {
-    if (phase !== "live" || direction === "incoming") return
-    if (others.length === 0) return
+    if (phase !== "live" || direction === "incoming") {
+      return
+    }
+    if (others.length === 0) {
+      return
+    }
 
     const arrived = (id: string): void => {
       answeredRef.current = true

@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Tabs, type TabItem } from "@/patterns/Navigation/Tabs"
-
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 import { type F0MeetingSidePanel } from "../../types"
 
@@ -55,10 +53,14 @@ export const MeetingSidePanel = ({ panel }: MeetingSidePanelProps) => {
   // Opening a panel that nothing focuses leaves the keyboard where it was, on
   // a control that is now behind an overlay.
   useEffect(() => {
-    if (isSidePanelOpen) closeRef.current?.focus()
+    if (isSidePanelOpen) {
+      closeRef.current?.focus()
+    }
   }, [isSidePanelOpen])
 
-  if (!isSidePanelOpen || tabs.length === 0) return null
+  if (!isSidePanelOpen || tabs.length === 0) {
+    return null
+  }
 
   return (
     <aside

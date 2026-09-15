@@ -1,9 +1,7 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { render } from "@/testing/test-utils"
-
 import { F0OneSwitch } from "../F0OneSwitch"
 
 describe("F0OneSwitch, controlled", () => {

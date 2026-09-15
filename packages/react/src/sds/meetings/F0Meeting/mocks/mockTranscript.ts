@@ -59,9 +59,13 @@ export const createTranscriptDriver = (
 
   const emit = (participantId: string, isFinal: boolean) => {
     const utterance = open.get(participantId)
-    if (!utterance) return
+    if (!utterance) {
+      return
+    }
     const words = utterance.words.slice(0, utterance.spoken)
-    if (words.length === 0 && !isFinal) return
+    if (words.length === 0 && !isFinal) {
+      return
+    }
     onSegment({
       id: utterance.id,
       participantId,
@@ -72,7 +76,9 @@ export const createTranscriptDriver = (
   }
 
   const start = (participantId: string, text?: string) => {
-    if (disposed || open.has(participantId)) return
+    if (disposed || open.has(participantId)) {
+      return
+    }
     const phrase =
       text ?? (PHRASES[Math.floor(random() * PHRASES.length)] as string)
     const utterance = {
@@ -84,9 +90,13 @@ export const createTranscriptDriver = (
     open.set(participantId, utterance)
 
     const tick = () => {
-      if (disposed) return
+      if (disposed) {
+        return
+      }
       const current = open.get(participantId)
-      if (!current) return
+      if (!current) {
+        return
+      }
       current.spoken = Math.min(current.words.length, current.spoken + 2)
       emit(participantId, false)
       if (current.spoken < current.words.length) {
@@ -98,7 +108,9 @@ export const createTranscriptDriver = (
 
   const stop = (participantId: string) => {
     const utterance = open.get(participantId)
-    if (!utterance) return
+    if (!utterance) {
+      return
+    }
     window.clearTimeout(utterance.timer)
     // Whatever was said lands whole: a turn that ends early still produces a
     // complete sentence rather than a truncated one.
@@ -128,7 +140,9 @@ export const applyTranscriptSegment = (
   segment: F0MeetingTranscriptSegment
 ): F0MeetingTranscriptSegment[] => {
   const index = segments.findIndex((existing) => existing.id === segment.id)
-  if (index === -1) return [...segments, segment]
+  if (index === -1) {
+    return [...segments, segment]
+  }
   const next = [...segments]
   next[index] = segment
   return next

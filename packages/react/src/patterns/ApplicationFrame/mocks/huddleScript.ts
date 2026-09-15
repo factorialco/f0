@@ -162,7 +162,9 @@ export const resolveScript = (
     if (line.speaker === "me") {
       participantId = meId
     } else {
-      if (otherIds.length === 0) return []
+      if (otherIds.length === 0) {
+        return []
+      }
       participantId = otherIds[line.speaker % otherIds.length] as string
     }
     const text = line.say ?? line.chat ?? ""
@@ -185,8 +187,12 @@ export const resolveSummary = (
 ): string => {
   const first = (name: string) => name.split(/\s+/)[0] ?? name
   return summary.replace(/\{(me|\d+)\}/g, (_match, key: string) => {
-    if (key === "me") return first(meName)
-    if (otherNames.length === 0) return first(meName)
+    if (key === "me") {
+      return first(meName)
+    }
+    if (otherNames.length === 0) {
+      return first(meName)
+    }
     const name = otherNames[Number(key) % otherNames.length]
     return name ? first(name) : first(meName)
   })

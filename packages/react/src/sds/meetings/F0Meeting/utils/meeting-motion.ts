@@ -1,5 +1,4 @@
 import { type Transition } from "motion/react"
-
 import { EASE_OUT_SWIFT } from "@/lib/motion/f0-motion"
 
 /**

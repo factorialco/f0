@@ -42,12 +42,16 @@ export type MockAudioEngine = {
 type AudioContextConstructor = new () => AudioContext
 
 const getAudioContext = (): AudioContext | null => {
-  if (typeof window === "undefined") return null
+  if (typeof window === "undefined") {
+    return null
+  }
   const candidate =
     window.AudioContext ??
     (window as unknown as { webkitAudioContext?: AudioContextConstructor })
       .webkitAudioContext
-  if (!candidate) return null
+  if (!candidate) {
+    return null
+  }
   try {
     return new candidate()
   } catch {
@@ -161,8 +165,8 @@ export const createMockAudioEngine = (
   const rms = (analyser: AnalyserNode, buffer: Uint8Array<ArrayBuffer>) => {
     analyser.getByteTimeDomainData(buffer)
     let sum = 0
-    for (let index = 0; index < buffer.length; index++) {
-      const value = ((buffer[index] ?? 128) - 128) / 128
+    for (const sample of buffer) {
+      const value = (sample - 128) / 128
       sum += value * value
     }
     return Math.min(1, Math.sqrt(sum / buffer.length) * 3)
@@ -170,7 +174,9 @@ export const createMockAudioEngine = (
 
   const scheduleSyllables = (): void => {
     syllableTimer = setInterval(() => {
-      if (!context) return
+      if (!context) {
+        return
+      }
       for (const [id, voice] of voices) {
         const active = speakers.has(id) && !voice.muted
         const target = active ? 0.25 + random() * 0.55 : 0
@@ -216,12 +222,19 @@ export const createMockAudioEngine = (
         }
         monitorRuns.set(id, run)
 
-        if (run.talking === monitoredSpeaking.has(id)) continue
-        if (run.talking) monitoredSpeaking.add(id)
-        else monitoredSpeaking.delete(id)
+        if (run.talking === monitoredSpeaking.has(id)) {
+          continue
+        }
+        if (run.talking) {
+          monitoredSpeaking.add(id)
+        } else {
+          monitoredSpeaking.delete(id)
+        }
         changed = true
       }
-      if (changed) publishSpeakers()
+      if (changed) {
+        publishSpeakers()
+      }
     }, 50)
   }
 
@@ -232,7 +245,9 @@ export const createMockAudioEngine = (
    */
   const runDirector = (ids: () => string[]): void => {
     const next = (): void => {
-      if (disposed) return
+      if (disposed) {
+        return
+      }
       const candidates = ids()
       if (candidates.length === 0) {
         turnTimer = setTimeout(next, 1000)
@@ -241,10 +256,14 @@ export const createMockAudioEngine = (
 
       speakers.clear()
       const primary = candidates[Math.floor(random() * candidates.length)]
-      if (primary) speakers.add(primary)
+      if (primary) {
+        speakers.add(primary)
+      }
       if (random() < 0.15 && candidates.length > 1) {
         const other = candidates[Math.floor(random() * candidates.length)]
-        if (other) speakers.add(other)
+        if (other) {
+          speakers.add(other)
+        }
       }
       publishSpeakers()
 
@@ -266,9 +285,13 @@ export const createMockAudioEngine = (
    * carries a script or it doesn't, and the runtime only starts one of the two.
    */
   const setSpeaking = (ids: readonly string[]): void => {
-    if (disposed) return
+    if (disposed) {
+      return
+    }
     speakers.clear()
-    for (const id of ids) speakers.add(id)
+    for (const id of ids) {
+      speakers.add(id)
+    }
     publishSpeakers()
   }
 
@@ -279,7 +302,9 @@ export const createMockAudioEngine = (
     monitors.get(participantId)?.source.disconnect()
     monitors.delete(participantId)
     monitorRuns.delete(participantId)
-    if (monitoredSpeaking.delete(participantId)) publishSpeakers()
+    if (monitoredSpeaking.delete(participantId)) {
+      publishSpeakers()
+    }
   }
 
   return {
@@ -287,7 +312,9 @@ export const createMockAudioEngine = (
     runDirector,
     setSpeaking,
     monitor: (participantId, stream) => {
-      if (!context || stream.getAudioTracks().length === 0) return
+      if (!context || stream.getAudioTracks().length === 0) {
+        return
+      }
       unmonitor(participantId)
       const source = context.createMediaStreamSource(stream)
       const analyser = context.createAnalyser()
@@ -310,7 +337,9 @@ export const createMockAudioEngine = (
     },
     setMuted: (participantId, muted) => {
       const voice = voices.get(participantId)
-      if (voice) voice.muted = muted
+      if (voice) {
+        voice.muted = muted
+      }
     },
     blocked: () => context?.state === "suspended",
     unlock: async () => {
@@ -318,9 +347,15 @@ export const createMockAudioEngine = (
     },
     dispose: () => {
       disposed = true
-      if (turnTimer) clearTimeout(turnTimer)
-      if (syllableTimer) clearInterval(syllableTimer)
-      if (levelTimer) clearInterval(levelTimer)
+      if (turnTimer) {
+        clearTimeout(turnTimer)
+      }
+      if (syllableTimer) {
+        clearInterval(syllableTimer)
+      }
+      if (levelTimer) {
+        clearInterval(levelTimer)
+      }
       voices.clear()
       void context?.close()
     },

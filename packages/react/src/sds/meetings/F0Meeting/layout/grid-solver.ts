@@ -112,7 +112,9 @@ export const solveGrid = ({
 
     for (let rows = 1; rows <= remaining; rows++) {
       const rowHeight = (height - gap * (rows - 1)) / rows
-      if (rowHeight <= 0) continue
+      if (rowHeight <= 0) {
+        continue
+      }
 
       const counts = distribute(remaining, rows)
       const specs: GridRow[] = []
@@ -146,7 +148,9 @@ export const solveGrid = ({
         shape += Math.abs(Math.log(tile.aspect / preferredAspect))
       }
 
-      if (!viable || !worst) continue
+      if (!viable || !worst) {
+        continue
+      }
 
       // The minimum belongs INSIDE the search, not after it.
       //
@@ -181,7 +185,9 @@ export const solveGrid = ({
     }
 
     // `best` is now the best VIABLE split, so there is nothing left to check.
-    if (best) return best
+    if (best) {
+      return best
+    }
     // No split of this many clears the floor: one more participant moves to the
     // overflow chip, re-solve.
     remaining--

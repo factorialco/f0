@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { render, screen, userEvent } from "@/testing/test-utils"
-
 import { type F0ChatCall, type F0ChatCallState } from "../../types"
 import { ChatCallMessage } from "../ChatCallMessage"
 

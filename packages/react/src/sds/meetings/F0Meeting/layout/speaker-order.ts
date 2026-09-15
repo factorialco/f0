@@ -30,7 +30,9 @@ export const reorderForSpeakers = ({
   now,
   holdMs,
 }: SpeakerOrderInput): F0MeetingTile[] => {
-  if (tiles.length <= pageSize || speakerIds.length === 0) return tiles
+  if (tiles.length <= pageSize || speakerIds.length === 0) {
+    return tiles
+  }
 
   const speaking = new Set(speakerIds)
   const visible = tiles.slice(0, pageSize)
@@ -39,7 +41,9 @@ export const reorderForSpeakers = ({
   const promotable = hidden.filter(
     (tile) => tile.kind === "camera" && speaking.has(tile.participant.id)
   )
-  if (promotable.length === 0) return tiles
+  if (promotable.length === 0) {
+    return tiles
+  }
 
   const result = [...visible]
   const displaced: F0MeetingTile[] = []
@@ -62,13 +66,17 @@ export const reorderForSpeakers = ({
       )
 
     const target = eligible[0]
-    if (!target) break
+    if (!target) {
+      break
+    }
 
     displaced.push(target.tile)
     result[target.index] = candidate
   }
 
-  if (displaced.length === 0) return tiles
+  if (displaced.length === 0) {
+    return tiles
+  }
 
   const promotedKeys = new Set(result.map((tile) => tile.key))
   const rest = [

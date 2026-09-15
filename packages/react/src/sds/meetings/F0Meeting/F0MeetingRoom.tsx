@@ -1,7 +1,5 @@
 import { useMemo } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { MeetingAudioRenderer } from "./components/audio/MeetingAudioRenderer"
 import {
   AudioUnlockPrompt,
@@ -16,8 +14,7 @@ import { mergeActions } from "./components/controls/merge-actions"
 import { useSynthesizedActions } from "./components/controls/useSynthesizedActions"
 import { MeetingGrid } from "./components/grid/MeetingGrid"
 import { MeetingSidePanel } from "./components/panel/MeetingSidePanel"
-import { useF0MeetingRoster } from "./providers/F0MeetingProvider"
-import { useF0Meeting } from "./providers/F0MeetingProvider"
+import { useF0Meeting, useF0MeetingRoster } from "./providers/F0MeetingProvider"
 import { useMeetingSurface } from "./providers/MeetingSurfaceProvider"
 import { type F0MeetingActionsProp, type F0MeetingSidePanel } from "./types"
 
@@ -54,9 +51,15 @@ export const F0MeetingRoom = ({
     [coreActions, hostActions, actionOrder]
   )
 
-  if (status === "connecting" || status === "idle") return <MeetingConnecting />
-  if (status === "error") return <MeetingError />
-  if (status === "disconnected") return <MeetingEnded />
+  if (status === "connecting" || status === "idle") {
+    return <MeetingConnecting />
+  }
+  if (status === "error") {
+    return <MeetingError />
+  }
+  if (status === "disconnected") {
+    return <MeetingEnded />
+  }
 
   const isCompact = effectiveMode === "minimized"
   const isFullscreen = effectiveMode === "fullscreen"
@@ -64,7 +67,7 @@ export const F0MeetingRoom = ({
   return (
     <div className="relative flex h-full w-full flex-col">
       {overlay}
-      {status === "reconnecting" && <ReconnectingBanner />}
+      {status === "reconnecting" ? <ReconnectingBanner /> : null}
       <RecordingBanner />
       <AudioUnlockPrompt />
 
@@ -80,10 +83,12 @@ export const F0MeetingRoom = ({
         {/* Fullscreen only: the panel is 420px wide, which in a side panel or a
             floating window would leave the video a sliver. `core:chat` carries
             the same restriction, so the control and the surface agree. */}
-        {sidePanel && isFullscreen && <MeetingSidePanel panel={sidePanel} />}
+        {sidePanel && isFullscreen ? (
+          <MeetingSidePanel panel={sidePanel} />
+        ) : null}
       </div>
 
-      {!isCompact && <MeetingControlBar actions={resolvedActions} />}
+      {!isCompact ? <MeetingControlBar actions={resolvedActions} /> : null}
 
       {/* Mounted once, outside the grid, so pagination and layout changes can
           never interrupt someone mid-sentence. */}

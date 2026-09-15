@@ -421,7 +421,9 @@ export const useMockChatStore = (): MockChatAppValue => {
           call,
         }
         const index = s.messages.findIndex((message) => message.id === call.id)
-        if (index === -1) return { ...s, messages: [...s.messages, item] }
+        if (index === -1) {
+          return { ...s, messages: [...s.messages, item] }
+        }
         const messages = [...s.messages]
         messages[index] = item
         return { ...s, messages }

@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { Desktop, Ellipsis, Record, Settings } from "@/icons/app"
-
 import { F0Meeting } from "../F0Meeting"
 import { F0MeetingRoom } from "../F0MeetingRoom"
 import { type MockMeetingSeed } from "../mocks/mockSeeds"

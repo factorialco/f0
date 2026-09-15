@@ -4,7 +4,6 @@ import { MicrophoneNegative, VideoRecorderNegative } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-
 import { cellRadiusStyle } from "../../layout/constants"
 import { type F0MeetingTile } from "../../layout/tiles"
 
@@ -41,7 +40,9 @@ export const OverflowTile = ({
 }) => {
   const i18n = useI18n()
 
-  if (tiles.length === 0) return null
+  if (tiles.length === 0) {
+    return null
+  }
 
   return (
     <HoverCard openDelay={120} closeDelay={100}>
@@ -72,11 +73,11 @@ export const OverflowTile = ({
             >
               +{tiles.length}
             </span>
-            {!compact && (
+            {!compact ? (
               <span className="sr-only">
                 {i18n.t("meeting.morePeople", { count: String(tiles.length) })}
               </span>
-            )}
+            ) : null}
           </button>
         </div>
       </HoverCardTrigger>
@@ -96,22 +97,22 @@ export const OverflowTile = ({
               key={tile.key}
               className="flex items-center gap-2 rounded-md px-1 py-1"
             >
-              {tile.participant.avatar && (
+              {tile.participant.avatar ? (
                 <F0Avatar avatar={tile.participant.avatar} size="xs" />
-              )}
+              ) : null}
               <span className="min-w-0 flex-1 truncate text-sm">
                 {tile.participant.name}
               </span>
-              {isMuted(tile) && (
+              {isMuted(tile) ? (
                 <F0Icon icon={MicrophoneNegative} size="sm" color="secondary" />
-              )}
-              {!hasLiveCamera(tile) && (
+              ) : null}
+              {!hasLiveCamera(tile) ? (
                 <F0Icon
                   icon={VideoRecorderNegative}
                   size="sm"
                   color="secondary"
                 />
-              )}
+              ) : null}
             </li>
           ))}
         </ul>

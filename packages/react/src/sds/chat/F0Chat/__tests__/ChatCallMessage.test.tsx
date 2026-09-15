@@ -1,9 +1,7 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { render } from "@/testing/test-utils"
-
 import { ChatCallMessage } from "../components/ChatCallMessage"
 import { type F0ChatCall, type F0ChatUser } from "../types"
 

@@ -97,7 +97,9 @@ export const settlePlacement = (
 export const isWindowPlacement = (
   value: unknown
 ): value is F0WindowPlacement => {
-  if (typeof value !== "object" || value === null) return false
+  if (typeof value !== "object" || value === null) {
+    return false
+  }
   const candidate = value as Record<string, unknown>
   return (
     typeof candidate.corner === "string" &&
@@ -128,15 +130,23 @@ export const resizeHandles = {
 export type ResizeHandleId = keyof typeof resizeHandles
 
 /** Applies a pointer delta to a rect for the given handle, honouring minimums. */
-export const applyResize = (
-  rect: F0Rect,
-  handle: ResizeHandleId,
-  deltaX: number,
-  deltaY: number,
-  viewport: Viewport,
+export const applyResize = ({
+  rect,
+  handle,
+  deltaX,
+  deltaY,
+  viewport,
   minWidth = WINDOW_MIN_WIDTH,
-  minHeight = WINDOW_MIN_HEIGHT
-): F0Rect => {
+  minHeight = WINDOW_MIN_HEIGHT,
+}: {
+  rect: F0Rect
+  handle: ResizeHandleId
+  deltaX: number
+  deltaY: number
+  viewport: Viewport
+  minWidth?: number
+  minHeight?: number
+}): F0Rect => {
   const spec = resizeHandles[handle]
   const width = clamp(
     rect.width + spec.dw * deltaX,

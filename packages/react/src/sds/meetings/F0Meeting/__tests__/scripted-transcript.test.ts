@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
-import { type F0MeetingTranscriptSegment } from "../types"
 import { createTranscriptDriver } from "../mocks/mockTranscript"
+import { type F0MeetingTranscriptSegment } from "../types"
 
 describe("createTranscriptDriver, scripted", () => {
   beforeEach(() => vi.useFakeTimers())
@@ -40,7 +39,9 @@ describe("createTranscriptDriver, scripted", () => {
     // Monotonic: each revision is at least as long as the one before it.
     interim.forEach((segment, index) => {
       const previous = interim[index - 1]
-      if (!previous) return
+      if (!previous) {
+        return
+      }
       expect(segment.text.length).toBeGreaterThanOrEqual(previous.text.length)
     })
   })

@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { Microphone, Phone, VideoRecorder } from "@/icons/app"
-
 import {
   ACTION_GAP,
   ACTION_SIZE,

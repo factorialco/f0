@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react"
-
 import { type F0Rect } from "../types"
 import { clamp } from "../utils/aspect"
 import { applyResize, type ResizeHandleId } from "./placement"
@@ -64,7 +63,9 @@ export const useWindowGestures = ({
       cancelAnimationFrame(frameRef.current)
       frameRef.current = requestAnimationFrame(() => {
         const element = elementRef.current
-        if (!element) return
+        if (!element) {
+          return
+        }
         element.style.left = `${rect.x}px`
         element.style.top = `${rect.y}px`
         element.style.width = `${rect.width}px`
@@ -76,7 +77,9 @@ export const useWindowGestures = ({
 
   const begin = useCallback(
     (event: React.PointerEvent, handle: ResizeHandleId | null) => {
-      if (!enabled || event.button !== 0) return
+      if (!enabled || event.button !== 0) {
+        return
+      }
       if (
         handle === null &&
         (event.target as HTMLElement).closest("[data-f0-no-drag]")
@@ -103,7 +106,9 @@ export const useWindowGestures = ({
   const move = useCallback(
     (event: React.PointerEvent) => {
       const gesture = gestureRef.current
-      if (!gesture || gesture.pointerId !== event.pointerId) return
+      if (!gesture || gesture.pointerId !== event.pointerId) {
+        return
+      }
 
       const deltaX = event.clientX - gesture.startX
       const deltaY = event.clientY - gesture.startY
@@ -111,7 +116,9 @@ export const useWindowGestures = ({
       // A few pixels of slop tells a drag from a click, so a plain click on the
       // header cannot nudge the window.
       if (!gesture.moved) {
-        if (Math.hypot(deltaX, deltaY) < DRAG_THRESHOLD) return
+        if (Math.hypot(deltaX, deltaY) < DRAG_THRESHOLD) {
+          return
+        }
         gesture.moved = true
         onStart()
       }
@@ -139,15 +146,15 @@ export const useWindowGestures = ({
                 )
               ),
             }
-          : applyResize(
-              gesture.origin,
-              gesture.handle,
+          : applyResize({
+              rect: gesture.origin,
+              handle: gesture.handle,
               deltaX,
               deltaY,
-              view,
-              WINDOW_MIN_WIDTH,
-              WINDOW_MIN_HEIGHT
-            )
+              viewport: view,
+              minWidth: WINDOW_MIN_WIDTH,
+              minHeight: WINDOW_MIN_HEIGHT,
+            })
 
       gesture.latest = next
       paint(next)
@@ -158,13 +165,20 @@ export const useWindowGestures = ({
   const end = useCallback(
     (event: React.PointerEvent) => {
       const gesture = gestureRef.current
-      if (!gesture || gesture.pointerId !== event.pointerId) return
+      if (!gesture || gesture.pointerId !== event.pointerId) {
+        return
+      }
       gestureRef.current = null
       cancelAnimationFrame(frameRef.current)
 
-      if (!gesture.moved) return
-      if (gesture.handle !== null) onResize(gesture.latest)
-      else onSettle(gesture.latest)
+      if (!gesture.moved) {
+        return
+      }
+      if (gesture.handle !== null) {
+        onResize(gesture.latest)
+      } else {
+        onSettle(gesture.latest)
+      }
     },
     [onSettle, onResize]
   )
@@ -172,11 +186,15 @@ export const useWindowGestures = ({
   const cancel = useCallback(
     (event: React.PointerEvent) => {
       const gesture = gestureRef.current
-      if (!gesture || gesture.pointerId !== event.pointerId) return
+      if (!gesture || gesture.pointerId !== event.pointerId) {
+        return
+      }
       gestureRef.current = null
       cancelAnimationFrame(frameRef.current)
       paint(gesture.origin)
-      if (gesture.moved) onSettle(gesture.origin)
+      if (gesture.moved) {
+        onSettle(gesture.origin)
+      }
     },
     [paint, onSettle]
   )

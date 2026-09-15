@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { ParticipantTile } from "../components/grid/ParticipantTile"
 import { buildTiles } from "../layout/tiles"
 import { F0MeetingProvider } from "../providers/F0MeetingProvider"
@@ -52,7 +50,9 @@ const renderTile = (participant: F0MeetingParticipant) => {
     setCameraEnabled: () => {},
   }
   const tile = buildTiles([participant])[0]
-  if (!tile) throw new Error("no tile")
+  if (!tile) {
+    throw new Error("no tile")
+  }
 
   zeroRender(
     <F0MeetingProvider runtime={runtime}>
@@ -64,7 +64,9 @@ const renderTile = (participant: F0MeetingParticipant) => {
 
   const element = screen.getByTestId("meeting-participant-tile")
   const chip = screen.getByText(/Ada/).parentElement
-  if (!chip) throw new Error("no name chip")
+  if (!chip) {
+    throw new Error("no name chip")
+  }
   return { element, chip, video: element.querySelector("video") }
 }
 

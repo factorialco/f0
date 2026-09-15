@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { applyTranscriptSegment } from "../mocks/mockTranscript"
 import { type F0MeetingTranscriptSegment } from "../types"
 

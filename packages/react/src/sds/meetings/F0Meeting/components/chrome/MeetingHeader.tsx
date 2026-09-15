@@ -1,6 +1,5 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
-
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 import { MeetingModeSwitch } from "./MeetingModeSwitch"
@@ -43,11 +42,11 @@ export const MeetingHeader = ({ extra }: { extra?: React.ReactNode }) => {
             </span>
           ) : null}
           <span className="truncate text-base font-medium">{room.title}</span>
-          {isMinimized && (
+          {isMinimized ? (
             <span className="shrink-0 text-f1-foreground-secondary tabular-nums">
               <MeetingTimer startedAt={room.startedAt} />
             </span>
-          )}
+          ) : null}
         </span>
       )}
 

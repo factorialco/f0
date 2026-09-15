@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   HUDDLE_SCRIPT,
   resolveScript,
@@ -20,7 +19,9 @@ describe("huddleScript", () => {
     const spoken = HUDDLE_SCRIPT.lines.filter((line) => line.say)
     spoken.forEach((line, index) => {
       const next = spoken[index + 1]
-      if (!next) return
+      if (!next) {
+        return
+      }
       const ends = line.at + speechDurationMs(line.say as string)
       expect(next.at).toBeGreaterThanOrEqual(ends)
     })

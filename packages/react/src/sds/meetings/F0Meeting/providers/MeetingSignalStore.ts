@@ -79,7 +79,9 @@ export const createMeetingSignalStore = (): MeetingSignalStore => {
       set.add(listener)
       return () => {
         set.delete(listener)
-        if (set.size === 0) listeners.delete(participantId)
+        if (set.size === 0) {
+          listeners.delete(participantId)
+        }
       }
     },
 
@@ -109,17 +111,23 @@ export const createMeetingSignalStore = (): MeetingSignalStore => {
       const changed =
         next.length !== speakers.length ||
         next.some((id, index) => id !== speakers[index])
-      if (!changed) return
+      if (!changed) {
+        return
+      }
 
       const previous = new Set(speakers)
       const current = new Set(next)
       speakers = next
 
       for (const id of previous) {
-        if (!current.has(id)) update(id, { isSpeaking: false })
+        if (!current.has(id)) {
+          update(id, { isSpeaking: false })
+        }
       }
       for (const id of current) {
-        if (!previous.has(id)) update(id, { isSpeaking: true })
+        if (!previous.has(id)) {
+          update(id, { isSpeaking: true })
+        }
       }
 
       speakerListeners.forEach((listener) => listener())

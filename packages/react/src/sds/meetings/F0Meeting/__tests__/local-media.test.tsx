@@ -1,8 +1,6 @@
 import { act } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { renderHook } from "@/testing/test-utils"
-
 import { soloSeed } from "../mocks/mockSeeds"
 import { useMockMeetingRuntime } from "../mocks/useMockMeetingRuntime"
 

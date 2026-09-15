@@ -99,12 +99,11 @@ import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { MeetingRoomChat, MeetingTranscript } from "@/sds/meetings/F0Meeting"
 import { type MockScriptChatMessage } from "@/sds/meetings/F0Meeting/mocks/useMockMeetingRuntime"
 import { useMockRoomChat } from "@/sds/meetings/F0Meeting/mocks/useMockRoomChat"
-
-import { ApplicationFrame, type ApplicationFrameProps } from "."
 import { DemoPage } from "./mocks/demoPages"
 import { HuddleNotesTab } from "./mocks/HuddleNotesTab"
 import { HuddleTranscriptDrawer } from "./mocks/HuddleTranscriptDrawer"
 import { useMockHuddle } from "./mocks/useMockHuddle"
+import { ApplicationFrame, type ApplicationFrameProps } from "."
 
 /**
  * Mock people database for @mention search and entity resolution in Storybook.
@@ -839,7 +838,9 @@ const WithFakeRouter = ({
         {...props}
         onClick={(event) => {
           props.onClick?.(event)
-          if (!props.href || props.href.startsWith("#")) return
+          if (!props.href || props.href.startsWith("#")) {
+            return
+          }
           event.preventDefault()
           setPath(props.href)
         }}
@@ -1241,7 +1242,9 @@ const WithHuddle = ({
   const roomTitle = runtime?.room.title ?? "Huddle"
 
   const sidePanel = useMemo(() => {
-    if (!activeConvId) return undefined
+    if (!activeConvId) {
+      return undefined
+    }
     return {
       defaultTabId: "chat",
       tabs: [

@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-
 import { useMeetingSignal } from "../../providers/useMeetingSignal"
 import { type F0MeetingConnectionQuality } from "../../types"
 
@@ -23,7 +22,9 @@ export const ConnectionQualityBars = ({
   const { quality } = useMeetingSignal(participantId)
   const level = LEVELS[quality]
 
-  if (quality === "excellent") return null
+  if (quality === "excellent") {
+    return null
+  }
 
   return (
     <div className="flex items-end gap-[2px]" role="img" aria-label={label}>

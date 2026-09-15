@@ -33,11 +33,11 @@ export const MeetingNotes = ({ value, onChange }: MeetingNotesProps) => {
           focusRing()
         )}
       />
-      {readOnly && (
+      {readOnly ? (
         <p className="text-sm text-f1-foreground-secondary">
           {i18n.meeting.notesReadOnly}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }
