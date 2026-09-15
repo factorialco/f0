@@ -275,7 +275,7 @@ describe("Select", () => {
     }
   })
 
-  it("sizes the dropdown to its content when fitContentWidth is set", async () => {
+  it("sizes the dropdown to its content without exceeding the available width", async () => {
     const user = userEvent.setup()
     render(
       <F0Select
@@ -290,6 +290,9 @@ describe("Select", () => {
 
     const content = getSelectContent()
     expect(content.className).toContain("w-max")
+    expect(content.className).toContain(
+      "max-w-[var(--radix-select-content-available-width)]"
+    )
     expect(content.className).not.toContain("min-w-80")
   })
 
