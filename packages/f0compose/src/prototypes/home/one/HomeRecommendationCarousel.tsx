@@ -26,6 +26,8 @@ export type Recommendation = {
 }
 
 /** Between the pills themselves (Angel, 2026-09-15). */
+/** How long a chevron's glide is assumed to take. */
+const TURN_MS = 600
 const GAP = 2
 /** Kept clear on the right, so nothing is legible under the chevron. */
 const CHEVRON_ROOM = 12
@@ -45,7 +47,8 @@ export function HomeRecommendationCarousel({
   const [canGoBack, setCanGoBack] = useState(false)
   /** Where the row is heading, so spammed clicks keep stepping. */
   const target = useRef(0)
-  const settle = useRef(0)
+  /** When the last chevron glide started. */
+  const gliding = useRef(0)
   const [atEnd, setAtEnd] = useState(false)
 
   const sync = () => {
@@ -53,16 +56,14 @@ export function HomeRecommendationCarousel({
     const track = trackRef.current
     if (!view || !track) return
     const left = view.scrollLeft
-    // Only the ARRIVAL at zero is delayed: the button appears the moment
-    // you move, and leaves once the row has settled back home, so it does
-    // not vanish mid-glide and shunt the row sideways (Angel,
-    // 2026-09-15).
-    if (left > 0) {
-      window.clearTimeout(settle.current)
-      setCanGoBack(true)
-    } else {
-      window.clearTimeout(settle.current)
-      settle.current = window.setTimeout(() => setCanGoBack(false), 260)
+    // While a chevron's glide is in flight the button follows the row's
+    // DESTINATION, so pressing back to the start collapses it in step
+    // with the scroll instead of waiting for it to land (Angel,
+    // 2026-09-15). A hand-driven scroll has no destination, so there it
+    // simply follows the position.
+    if (performance.now() - gliding.current > TURN_MS) {
+      target.current = left
+      setCanGoBack(left > 0)
     }
     setAtEnd(left >= view.scrollWidth - view.clientWidth - 1)
     const edge = view.clientWidth - CHEVRON_ROOM
@@ -107,6 +108,8 @@ export function HomeRecommendationCarousel({
       0,
       Math.min(max, stop ?? (direction === 1 ? max : 0))
     )
+    setCanGoBack(target.current > 0)
+    gliding.current = performance.now()
     view.scrollTo({ left: target.current })
   }
 
