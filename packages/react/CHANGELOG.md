@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.106.0](https://github.com/factorialco/f0/compare/f0-react-v6.105.0...f0-react-v6.106.0) (2026-09-15)
+
+
+### Features
+
+* **F0Chat:** community channels — a feed of posts in the panel ([#5409](https://github.com/factorialco/f0/issues/5409)) ([1570cc7](https://github.com/factorialco/f0/commit/1570cc7fdc56cf2ae907f38431d24aba7e179880))
+
 ## [6.105.0](https://github.com/factorialco/f0/compare/f0-react-v6.104.0...f0-react-v6.105.0) (2026-09-15)
 
 
