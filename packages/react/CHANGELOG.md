@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.103.1](https://github.com/factorialco/f0/compare/f0-react-v6.103.0...f0-react-v6.103.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **F0AiChatUsageLimitsButton:** match the usage ring proportions to Figma ([#5541](https://github.com/factorialco/f0/issues/5541)) ([84770b8](https://github.com/factorialco/f0/commit/84770b87f6c7ab8663bedefed107c95409860e1e))
+
 ## [6.103.0](https://github.com/factorialco/f0/compare/f0-react-v6.102.0...f0-react-v6.103.0) (2026-09-15)
 
 
