@@ -193,7 +193,14 @@ export type FieldType =
 // Re-export field types and configs
 // ============================================================================
 
-export type { F0FieldInlineConfig, F0FieldInlineProp } from "./inline/types"
+export type {
+  F0FieldChangeRequest,
+  F0FieldChangeResolution,
+  F0FieldInlineConfig,
+  F0FieldInlineProp,
+  F0FieldPendingChange,
+  F0FieldRequestChange,
+} from "./inline/types"
 export type { F0TextConfig, F0TextField } from "./text/types"
 export type { F0NumberConfig, F0NumberField } from "./number/types"
 export type { F0DurationConfig, F0DurationField } from "./duration/types"

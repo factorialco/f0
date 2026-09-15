@@ -977,6 +977,20 @@ export const defaultTranslations = {
       yes: "Yes",
       no: "No",
     },
+    /** The ask a detail row offers a reader who may not change the value. */
+    requestChange: {
+      title: "Request a change to {{label}}",
+      description:
+        "This goes to whoever administers this record. They can apply it or turn it down.",
+      currentLabel: "It says now",
+      newLabel: "It should say",
+      reasonLabel: "Why (optional)",
+      reasonPlaceholder: "Anything that helps them decide",
+      submit: "Send request",
+      pending: "Requested: {{value}}",
+      approve: "Approve",
+      decline: "Decline",
+    },
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",

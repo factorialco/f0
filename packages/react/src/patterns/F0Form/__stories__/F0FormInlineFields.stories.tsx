@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0FormField } from "@/patterns/F0FormField"
-import type { F0Field } from "../fields/types"
+import type { F0Field, F0FieldRequestChange } from "../fields/types"
 
 const fields = {
   text: {
@@ -24,6 +24,11 @@ const fields = {
     label: "Date",
     placeholder: "no date",
   },
+  contract: {
+    id: "contractStart",
+    type: "text",
+    label: "Contract start date",
+  },
   select: {
     id: "contract",
     type: "select",
@@ -40,6 +45,7 @@ type RowProps = {
   value?: unknown
   copyable?: boolean
   readonly?: boolean
+  requestChange?: F0FieldRequestChange
 }
 
 /**
@@ -52,9 +58,13 @@ function FieldRow({
   value: initialValue,
   copyable,
   readonly,
+  requestChange,
 }: RowProps) {
   const [value, setValue] = useState(initialValue)
-  const inline = copyable || readonly ? { copyable, readonly } : true
+  const inline =
+    copyable || readonly || requestChange
+      ? { copyable, readonly, requestChange }
+      : true
 
   return (
     <div className="flex w-[560px] items-center border-0 border-b border-solid border-f1-border-secondary py-1">
@@ -272,6 +282,105 @@ export const DetailRowEmpty: Story = {
   },
 }
 
+/** Someone who may read the contract start date but not set it. */
+export const DetailRowRequestChange: Story = {
+  // The dialog portals to the body, and the Docs page renders every story at
+  // once, so it would float over the whole page.
+  tags: ["!autodocs"],
+  args: {
+    field: fields.contract,
+    value: "01 Jan 2024",
+    readonly: true,
+    requestChange: { onSubmit: fn() },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await step("Offer somewhere to go instead of an editor", () => {
+      expect(
+        canvas.queryByRole("button", { name: /Edit/ })
+      ).not.toBeInTheDocument()
+      expect(
+        canvas.getByRole("button", {
+          name: "Request a change to Contract start date",
+        })
+      ).toBeInTheDocument()
+    })
+
+    await step("Ask about the value as it stands", async () => {
+      // Tab to the value first: the action is `pointer-events-none` until the
+      // row is engaged, and focus is the half of that reveal a play function
+      // can drive for real. Clicking it cold fails with "pointer-events: none",
+      // which is the rule working, not a broken test.
+      await userEvent.tab()
+      await userEvent.click(
+        canvas.getByRole("button", {
+          name: "Request a change to Contract start date",
+        })
+      )
+
+      const dialog = await body.findByRole("dialog")
+      expect(dialog).toHaveTextContent("It says now")
+      expect(dialog).toHaveTextContent("01 Jan 2024")
+    })
+
+    await step(
+      "Hold the request back until it says something new",
+      async () => {
+        const send = body.getByRole("button", { name: "Send request" })
+        expect(send).toBeDisabled()
+
+        await userEvent.type(
+          body.getByRole("textbox", { name: "It should say" }),
+          "01 Feb 2024"
+        )
+        expect(send).toBeEnabled()
+
+        await userEvent.click(send)
+        expect(args.requestChange?.onSubmit).toHaveBeenCalledWith({
+          from: "01 Jan 2024",
+          to: "01 Feb 2024",
+          reason: undefined,
+        })
+      }
+    )
+  },
+}
+
+/** Whoever administers the record, looking at a change someone asked for. */
+export const DetailRowPendingChange: Story = {
+  args: {
+    field: fields.contract,
+    value: "01 Jan 2024",
+    readonly: true,
+    requestChange: {
+      onSubmit: fn(),
+      pending: { id: "req-1", to: "01 Feb 2024" },
+      onResolve: fn(),
+      canResolve: true,
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Say what was asked for, under the value it is about", () => {
+      expect(canvas.getByText("Requested: 01 Feb 2024")).toBeInTheDocument()
+      expect(
+        canvas.queryByRole("button", { name: /Request a change/ })
+      ).not.toBeInTheDocument()
+    })
+
+    await step("Let whoever can answer it answer it", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Approve" }))
+      expect(args.requestChange?.onResolve).toHaveBeenCalledWith(
+        "req-1",
+        "approved"
+      )
+    })
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({ width: "100%" }),
@@ -284,6 +393,23 @@ export const Snapshot: Story = {
       <FieldRow field={fields.number} value={37.5} />
       <FieldRow field={fields.date} value={new Date(2025, 8, 15)} />
       <FieldRow field={fields.select} value="part" />
+      <FieldRow
+        field={fields.contract}
+        value="01 Jan 2024"
+        readonly
+        requestChange={{ onSubmit: fn() }}
+      />
+      <FieldRow
+        field={fields.contract}
+        value="01 Jan 2024"
+        readonly
+        requestChange={{
+          onSubmit: fn(),
+          pending: { id: "req-1", to: "01 Feb 2024" },
+          onResolve: fn(),
+          canResolve: true,
+        }}
+      />
     </div>
   ),
 }

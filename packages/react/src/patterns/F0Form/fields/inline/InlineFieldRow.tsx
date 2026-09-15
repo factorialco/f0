@@ -8,7 +8,7 @@ import {
 } from "react"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import type { InputFieldSize } from "@/components/F0InputField"
-import { Check, ChevronDown, LayersFront, Pencil } from "@/icons/app"
+import { Check, ChevronDown, Comment, LayersFront, Pencil } from "@/icons/app"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
@@ -16,7 +16,8 @@ import { cn, focusRing } from "@/lib/utils"
 import { FORM_SIZE } from "../../constants"
 import type { F0Field } from "../types"
 import { formatFieldValue } from "./formatFieldValue"
-import type { F0FieldInlineConfig } from "./types"
+import { RequestChangeDialog } from "./RequestChangeDialog"
+import type { F0FieldInlineConfig, F0FieldRequestChange } from "./types"
 import { type InlineEditorOptions, useInlineField } from "./useInlineField"
 
 /**
@@ -221,6 +222,55 @@ const CopyAction = ({
   )
 }
 
+/**
+ * A request nobody has answered yet, under the value it is about. It carries
+ * its own resolution: whoever can answer approves or declines, and whoever
+ * asked withdraws.
+ */
+const PendingChange = ({
+  requestChange,
+}: {
+  requestChange: F0FieldRequestChange & {
+    pending: NonNullable<F0FieldRequestChange["pending"]>
+  }
+}) => {
+  const { t, forms, actions } = useI18n()
+  const { pending, onResolve, canResolve } = requestChange
+
+  const resolutions = canResolve
+    ? ([
+        ["approved", forms.requestChange.approve],
+        ["declined", forms.requestChange.decline],
+      ] as const)
+    : ([["cancelled", actions.cancel]] as const)
+
+  return (
+    <div
+      data-slot="pending-change"
+      className="flex items-center gap-2 rounded bg-f1-background-secondary px-1.5 py-0.5"
+    >
+      <span className="min-w-0 flex-1 truncate text-f1-foreground-secondary">
+        {t("forms.requestChange.pending", { value: pending.to })}
+      </span>
+      {onResolve
+        ? resolutions.map(([resolution, resolutionLabel]) => (
+            <button
+              key={resolution}
+              type="button"
+              onClick={() => onResolve(pending.id, resolution)}
+              className={cn(
+                "shrink-0 cursor-pointer rounded border-0 bg-transparent p-0 font-medium text-f1-foreground",
+                focusRing()
+              )}
+            >
+              {resolutionLabel}
+            </button>
+          ))
+        : null}
+    </div>
+  )
+}
+
 function rowClass({
   copied,
   interactive,
@@ -290,6 +340,7 @@ export function InlineFieldRow({
     editorContainerProps,
     setReadValue,
   } = useInlineField(field)
+  const [isRequesting, setIsRequesting] = useState(false)
 
   const text = formatFieldValue(field, value, i18n, locale)
   const { copied, copy } = useCopyToClipboard(text)
@@ -308,6 +359,13 @@ export function InlineFieldRow({
 
   const isEmpty = text === ""
   const canEdit = !config.readonly
+  const { requestChange } = config
+  const pending = requestChange?.pending
+  // One ask at a time: a request already on the record is the answer to
+  // "can I ask for this to change".
+  const canRequestChange = !!requestChange && !pending
+  const hasActions = canRequestChange || !!config.copyable
+
   const valueText = (
     <ValueText
       text={isEmpty ? (placeholder ?? field.placeholder ?? "") : text}
@@ -316,35 +374,61 @@ export function InlineFieldRow({
   )
 
   return (
-    <div
-      className={rowClass({
-        copied,
-        interactive: canEdit || !!config.copyable,
-        hasError: !!hasError,
-      })}
-      data-slot="inline-field-row"
-      data-testid="inline-field-row"
-    >
-      {canEdit ? (
-        <EditableValue
-          ref={setReadValue}
-          editLabel={i18n.t("inputs.edit", { label: field.label })}
-          editIcon={editIconFor(field)}
-          onEdit={startEditing}
-          pinned={copied}
-        >
-          {valueText}
-        </EditableValue>
-      ) : (
-        <ReadOnlyValue ref={setReadValue} label={field.label}>
-          {valueText}
-        </ReadOnlyValue>
-      )}
+    <div className="flex w-full flex-col gap-1">
+      <div
+        className={rowClass({
+          copied,
+          interactive: canEdit || hasActions,
+          hasError: !!hasError,
+        })}
+        data-slot="inline-field-row"
+        data-testid="inline-field-row"
+      >
+        {canEdit ? (
+          <EditableValue
+            ref={setReadValue}
+            editLabel={i18n.t("inputs.edit", { label: field.label })}
+            editIcon={editIconFor(field)}
+            onEdit={startEditing}
+            pinned={copied}
+          >
+            {valueText}
+          </EditableValue>
+        ) : (
+          <ReadOnlyValue ref={setReadValue} label={field.label}>
+            {valueText}
+          </ReadOnlyValue>
+        )}
 
-      {config.copyable ? (
-        <ActionStrip pinned={copied}>
-          <CopyAction label={field.label} copied={copied} onCopy={copy} />
-        </ActionStrip>
+        {hasActions ? (
+          <ActionStrip pinned={copied}>
+            {canRequestChange ? (
+              <IconAction
+                icon={Comment}
+                label={i18n.t("inputs.requestChange", { label: field.label })}
+                onClick={() => setIsRequesting(true)}
+                slot="request-change-affordance"
+              />
+            ) : null}
+            {config.copyable ? (
+              <CopyAction label={field.label} copied={copied} onCopy={copy} />
+            ) : null}
+          </ActionStrip>
+        ) : null}
+      </div>
+
+      {requestChange && pending ? (
+        <PendingChange requestChange={{ ...requestChange, pending }} />
+      ) : null}
+
+      {requestChange ? (
+        <RequestChangeDialog
+          isOpen={isRequesting}
+          onClose={() => setIsRequesting(false)}
+          label={field.label}
+          current={text}
+          onSubmit={requestChange.onSubmit}
+        />
       ) : null}
     </div>
   )
