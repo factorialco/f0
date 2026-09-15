@@ -83,6 +83,8 @@ export function useFileAttachments(
     maxFileSizeBytes: fileAttachments?.maxFileSizeBytes,
     getFileExpiry: fileAttachments?.getFileExpiry,
     validateFiles,
+    onSubmitBlocked: () =>
+      showTransientError(translation.ai.fileUploadBlockedSubmit),
     uploadErrorMessage: translation.ai.fileUploadError,
     onError,
   })
@@ -161,6 +163,8 @@ export function useFileAttachments(
     updateValueForScope: composerFiles.updateValueForScope,
     paste: composerFiles.paste,
     submit: composerFiles.submit,
+    isSubmitting: composerFiles.isSubmitting,
+    isQueued: composerFiles.isQueued,
     attachedFiles,
     fileInputRef,
     onUploadFiles,

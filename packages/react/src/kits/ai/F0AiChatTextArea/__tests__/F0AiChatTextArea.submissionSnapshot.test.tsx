@@ -29,3 +29,83 @@ describe("F0AiChatTextArea submission snapshot", () => {
     expect(textarea).toHaveValue("second")
   })
 })
+
+it.each(["clarification", "busy", "before-submit"])(
+  "rechecks %s before accepting a queued upload",
+  async (gate) => {
+    let finish!: (
+      files: { url: string; filename: string; mimetype: string }[]
+    ) => void
+    const upload = () =>
+      new Promise<{ url: string; filename: string; mimetype: string }[]>(
+        (resolve) => {
+          finish = resolve
+        }
+      )
+    const onSubmit = vi.fn()
+    const props = { onSubmit, fileAttachments: { onUploadFiles: upload } }
+    const { rerender } = render(<F0AiChatTextArea {...props} />)
+    const textarea = screen.getByRole("textbox")
+    fireEvent.change(textarea, { target: { value: "Summarize" } })
+    const file = new File(["pdf"], "document.pdf", { type: "application/pdf" })
+    fireEvent.paste(textarea, {
+      clipboardData: { files: [file], getData: () => "" },
+    })
+    await waitFor(() => expect(finish).toBeDefined())
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }))
+    rerender(
+      <F0AiChatTextArea
+        {...props}
+        clarifyingUI={
+          gate === "clarification" ? <div>Clarifying</div> : undefined
+        }
+        inProgress={gate === "busy"}
+        onBeforeSubmit={
+          gate === "before-submit" ? async () => false : undefined
+        }
+      />
+    )
+    await act(async () => {
+      finish([{ url: "prepared", filename: file.name, mimetype: file.type }])
+    })
+    expect(onSubmit).not.toHaveBeenCalled()
+    rerender(<F0AiChatTextArea {...props} />)
+    expect(screen.getByRole("textbox")).toHaveValue("Summarize")
+  }
+)
+
+it("uses current context and quote when draining an upload", async () => {
+  let finish!: (
+    files: { url: string; filename: string; mimetype: string }[]
+  ) => void
+  const upload = () =>
+    new Promise<{ url: string; filename: string; mimetype: string }[]>(
+      (resolve) => {
+        finish = resolve
+      }
+    )
+  const onSubmit = vi.fn()
+  const props = { onSubmit, fileAttachments: { onUploadFiles: upload } }
+  const { rerender } = render(
+    <F0AiChatTextArea
+      {...props}
+      pendingContext={{ label: "Old context", context: "old" }}
+      pendingQuote={{ text: "Old quote" }}
+    />
+  )
+  const textarea = screen.getByRole("textbox")
+  fireEvent.change(textarea, { target: { value: "Summarize" } })
+  const file = new File(["pdf"], "document.pdf", { type: "application/pdf" })
+  fireEvent.paste(textarea, {
+    clipboardData: { files: [file], getData: () => "" },
+  })
+  await waitFor(() => expect(finish).toBeDefined())
+  fireEvent.click(screen.getByRole("button", { name: /send message/i }))
+  rerender(<F0AiChatTextArea {...props} />)
+  await act(async () => {
+    finish([{ url: "prepared", filename: file.name, mimetype: file.type }])
+  })
+  expect(onSubmit).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({ text: "Summarize", context: null, quote: null })
+  )
+})
