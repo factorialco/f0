@@ -93,32 +93,38 @@ function TableSkeleton({ columns = 5 }: TableSkeletonProps) {
         setIsScrolledRight: () => {},
       }}
     >
-      <TableRoot
-        className="cursor-progress"
-        role="presentation"
-        aria-hidden="true"
-      >
-        <TableHeader>
-          <TableRow>
-            {Array.from({ length: columns }).map((_, i) => (
-              <TableHead key={`skeleton-header-${i}`}>
-                <Skeleton className="h-4 w-[80px]" />
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from({ length: 5 }).map((_, rowIndex) => (
-            <TableRow key={`skeleton-row-${rowIndex}`}>
-              {Array.from({ length: columns }).map((_, colIndex) => (
-                <TableCell key={`skeleton-cell-${rowIndex}-${colIndex}`}>
+      {/* Mirrors TableBase's scroll container so a wide skeleton (many
+          columns) scrolls within its own bounds instead of overflowing
+          past the parent card, which has no clipping wrapper while this
+          initial-loading state is shown. */}
+      <div className="relative h-full w-full overflow-auto">
+        <TableRoot
+          className="cursor-progress"
+          role="presentation"
+          aria-hidden="true"
+        >
+          <TableHeader>
+            <TableRow>
+              {Array.from({ length: columns }).map((_, i) => (
+                <TableHead key={`skeleton-header-${i}`}>
                   <Skeleton className="h-4 w-[80px]" />
-                </TableCell>
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </TableRoot>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, rowIndex) => (
+              <TableRow key={`skeleton-row-${rowIndex}`}>
+                {Array.from({ length: columns }).map((_, colIndex) => (
+                  <TableCell key={`skeleton-cell-${rowIndex}-${colIndex}`}>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </TableRoot>
+      </div>
     </TableContext.Provider>
   )
 }
