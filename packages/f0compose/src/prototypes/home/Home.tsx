@@ -144,10 +144,12 @@ const FULL_BLEED_CSS = `
   /* THREE AppShell backgrounds, Angel's own values (2026-09-14). They
      are close on purpose: the ramp says which layer is which, it is not
      a contrast device.
-       ground    #FAFAFA  hsl(0 0% 98%) — sidebars AND the page behind
-                          the content
-       floating  #FFFFFF  plus a secondary border and a shadow, so it
-                          reads as ABOVE the ground
+       ground    #F7F7F7  hsl(0 0% 97%) — sidebars AND the surface behind
+                          the content sheet
+       sheet     #FCFCFC  hsl(0 0% 99%) — the content itself, with a
+                          secondary border and a shadow
+       cards     #FFFFFF  widgets, windows and menus, one step above the
+                          sheet they sit on
      One ground, not two (Angel, 2026-09-14): with every view now sitting
      in a white sheet, a second near-grey behind it was a difference you
      could see but not name.
@@ -155,9 +157,9 @@ const FULL_BLEED_CSS = `
      (--neutral-5 composites to #F5F6F8, a cool cast he did not ask for)
      and because a surface painted with alpha compounds when stacked.
      Every one of them has its .dark counterpart below. */
-  .f0c-surface-chrome { background: #fafafa; }
-  .f0c-surface-page { background: #fafafa; }
-  main#content { padding: 0 !important; background: #fafafa; }
+  .f0c-surface-chrome { background: #f7f7f7; }
+  .f0c-surface-page { background: #f7f7f7; }
+  main#content { padding: 0 !important; background: #f7f7f7; }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
@@ -170,7 +172,7 @@ const FULL_BLEED_CSS = `
      panel needs none: the tonal step to the page does that job. */
   [data-home-rail],
   [data-home-panel] {
-    background: #fafafa;
+    background: #f7f7f7;
   }
   [data-home-rail] {
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
@@ -179,7 +181,7 @@ const FULL_BLEED_CSS = `
   /* The split conversation panel sits on the ground like everything
      else; its own cards are what float. */
   [data-one-panel] {
-    background: #fafafa;
+    background: #f7f7f7;
   }
   /* Dark: the light hexes above have no dark pair, so the same THREE
      tiers are rebuilt from f0's dark tokens — sidebars the base, page the
@@ -422,11 +424,11 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: #fafafa; }
+  .f0c-canvas-surface { background: #f7f7f7; }
   /* Home is a white sheet now like every other view, so its sticky
      greeting bar takes the sheet rather than the page tone — otherwise it
      reads as a grey band behind "Welcome to your new Home". */
-  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: hsl(var(--neutral-0)); }
+  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: #fcfcfc; }
   .dark [data-hybrid-root][data-view="home"] .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -440,7 +442,7 @@ const FULL_BLEED_CSS = `
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: #fafafa; }
+  main#content thead th { background: #f7f7f7; }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -462,7 +464,7 @@ const FULL_BLEED_CSS = `
      sheet is transparent and the bar sits on the page itself. */
   main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] thead th,
   main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] .f0c-canvas-surface {
-    background: hsl(var(--neutral-0));
+    background: #fcfcfc;
   }
 
   .f0c-window-overlay {
