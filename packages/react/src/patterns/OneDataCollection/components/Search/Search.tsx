@@ -42,6 +42,13 @@ interface SearchProps {
   onLoadMore?: () => void
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
+  /**
+   * Label for the button that sends the query, shown while one is being
+   * written. Naming what is on the other end is the consumer's to say — and
+   * without it the only way to learn the field does more than filter is to
+   * press Enter and find out.
+   */
+  submitLabel?: string
   /** Placeholders cycled while the field sits idle and empty. */
   placeholderRotation?: string[]
   /** Holds the in-input searching state while a submitted query resolves. */
@@ -72,6 +79,7 @@ export type SearchPresentation = Pick<
   SearchProps,
   | "placeholderRotation"
   | "onSubmit"
+  | "submitLabel"
   | "status"
   | "onCancel"
   | "displayValue"
@@ -90,6 +98,67 @@ const LOAD_MORE_SCROLL_MARGIN = 56
 
 // Long enough to read a whole example query before it is swapped out.
 const PLACEHOLDER_ROTATION_MS = 2000
+
+/**
+ * Cycles the example queries while the field has nothing in it. The examples
+ * only show once the field is open, so pausing on focus would mean they never
+ * visibly changed; typing is what stops them, since the text is then the
+ * user's own.
+ */
+const useRotatingPlaceholder = (
+  rotation: string[] | undefined,
+  paused: boolean,
+  fallback: string
+) => {
+  const [index, setIndex] = useState(0)
+  const examples = rotation ?? []
+  const count = examples.length
+
+  useEffect(() => {
+    if (count < 2 || paused) {
+      return
+    }
+    const timer = setInterval(() => {
+      setIndex((current) => (current + 1) % count)
+    }, PLACEHOLDER_ROTATION_MS)
+    return () => clearInterval(timer)
+  }, [count, paused])
+
+  return examples[index % Math.max(count, 1)] ?? fallback
+}
+
+/** The round clear affordance, shared by the open field and its collapsed form. */
+const DismissButton = ({
+  label,
+  hidden,
+  onDismiss,
+}: {
+  label: string
+  hidden?: boolean
+  onDismiss: () => void
+}) => (
+  <motion.div
+    tabIndex={0}
+    className={cn(
+      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
+      hidden && "hidden",
+      focusRing()
+    )}
+    onClick={(e) => {
+      e.stopPropagation()
+      onDismiss()
+    }}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        onDismiss()
+      }
+    }}
+    role="button"
+    aria-label={label}
+  >
+    <F0Icon icon={CrossedCircle} size="md" color="secondary" />
+  </motion.div>
+)
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
@@ -110,6 +179,7 @@ export const Search = ({
   loadingMore = false,
   onLoadMore,
   onSubmit,
+  submitLabel,
   placeholderRotation,
   status = "idle",
   onCancel,
@@ -119,7 +189,6 @@ export const Search = ({
   const [open, setOpen] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
-  const [placeholderIndex, setPlaceholderIndex] = useState(0)
   const uniqueId = useId()
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -138,11 +207,13 @@ export const Search = ({
   // An in-flight query holds the field open: collapsing would hide the spinner
   // and the only affordance to abort it.
   const expanded = open || searching
-  const rotation = placeholderRotation ?? []
-  const placeholder =
-    rotation.length > 0
-      ? (rotation[placeholderIndex % rotation.length] ?? i18n.actions.search)
-      : i18n.actions.search
+  // A query is being written: not yet sent, not yet resolved.
+  const composing = Boolean(submitLabel && text && !displayValue && !searching)
+  const placeholder = useRotatingPlaceholder(
+    placeholderRotation,
+    Boolean(text) || searching,
+    i18n.actions.search
+  )
 
   const handleResultsScroll = (e: React.UIEvent<HTMLUListElement>) => {
     if (!hasMore || loadingMore || !onLoadMore) {
@@ -156,20 +227,6 @@ export const Search = ({
       onLoadMore()
     }
   }
-
-  // Cycle the example placeholders while the field has nothing in it. It only
-  // shows once the field is open, so pausing on focus would mean it never
-  // visibly changed; typing is what stops it, since the text is then the
-  // user's own.
-  useEffect(() => {
-    if (rotation.length < 2 || text || searching) {
-      return
-    }
-    const timer = setInterval(() => {
-      setPlaceholderIndex((index) => (index + 1) % rotation.length)
-    }, PLACEHOLDER_ROTATION_MS)
-    return () => clearInterval(timer)
-  }, [rotation.length, text, searching])
 
   // Highlight the first row whenever results change, so a plain Enter jumps to
   // the top match without the user having to arrow down or click first.
@@ -370,28 +427,39 @@ export const Search = ({
                       onKeyDown={handleKeyDown}
                     />
                   )}
-                  <motion.div
-                    tabIndex={0}
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full",
-                      focusRing()
-                    )}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleClearOrCancel()
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        handleClearOrCancel()
-                      }
-                    }}
-                    role="button"
-                    aria-label={
-                      searching ? i18n.actions.cancel : i18n.actions.clear
-                    }
-                  >
-                    <F0Icon icon={CrossedCircle} size="md" color="secondary" />
-                  </motion.div>
+                  {composing ? (
+                    <motion.button
+                      type="button"
+                      layout
+                      className={cn(
+                        "flex shrink-0 items-center gap-1 rounded-md bg-f1-background-secondary px-2 py-0.5 text-sm text-f1-foreground",
+                        "transition-colors hover:bg-f1-background-hover",
+                        focusRing()
+                      )}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (text) {
+                          submitQuery(text)
+                        }
+                      }}
+                    >
+                      {submitLabel}
+                      <span
+                        aria-hidden
+                        className="text-f1-foreground-secondary"
+                      >
+                        ↵
+                      </span>
+                    </motion.button>
+                  ) : null}
+                  <DismissButton
+                    label={searching ? i18n.actions.cancel : i18n.actions.clear}
+                    hidden={composing}
+                    onDismiss={handleClearOrCancel}
+                  />
                 </motion.div>
               </motion.div>
             ) : (
@@ -428,30 +496,10 @@ export const Search = ({
                       >
                         {text}
                       </motion.div>
-                      <motion.div
-                        tabIndex={0}
-                        className={cn(
-                          "flex h-5 w-5 items-center justify-center rounded-full",
-                          focusRing()
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleClear()
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            handleClear()
-                          }
-                        }}
-                        role="button"
-                        aria-label={i18n.actions.clear}
-                      >
-                        <F0Icon
-                          icon={CrossedCircle}
-                          size="md"
-                          color="secondary"
-                        />
-                      </motion.div>
+                      <DismissButton
+                        label={i18n.actions.clear}
+                        onDismiss={handleClear}
+                      />
                     </div>
                   ) : null}
                 </motion.div>
