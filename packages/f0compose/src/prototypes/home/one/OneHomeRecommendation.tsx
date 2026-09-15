@@ -32,12 +32,18 @@ export function OneHomeRecommendation({
   onClick?: () => void
 }) {
   return (
-    <F0Button
-      variant={BUTTON_VARIANT[variant]}
-      size="md"
-      icon={icon}
-      label={label}
-      onClick={onClick}
-    />
+    // 400px backdrop blur under every weight (Angel, 2026-09-15), on a
+    // wrapper because F0Button takes no className. `rounded` matches the
+    // md button exactly, so the blurred plate is the pill and not a
+    // square behind it.
+    <span className="inline-flex rounded backdrop-blur-[400px]">
+      <F0Button
+        variant={BUTTON_VARIANT[variant]}
+        size="md"
+        icon={icon}
+        label={label}
+        onClick={onClick}
+      />
+    </span>
   )
 }
