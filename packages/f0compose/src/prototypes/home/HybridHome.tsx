@@ -102,7 +102,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
     document.addEventListener("pointerdown", outside)
     return () => document.removeEventListener("pointerdown", outside)
   }, [writing])
-  const expandedComposer = !view && !writing && (suggestReport || homeLanding)
+  // Only the report nudge makes the sheet taller now: with the standing
+  // suggestion gone the extra row was empty space above the placeholder
+  // (Angel, 2026-09-15).
+  const expandedComposer = !view && !writing && suggestReport
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
   const showSuggestions = !view && homeLanding && !writing
@@ -200,7 +203,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
             open && mode === "side" ? target.width - 28 : 780,
             target.width - (view ? 24 : 0)
           )
-      const height = asking ? panelHeight : compact ? 40 : 168
+      const height = asking ? panelHeight : compact ? 40 : view ? 168 : 128
       const x = target.left - parent.left + (target.width - width) / 2
       const y = target.bottom - parent.top - height - (compact ? 4 : 8)
       floating.style.setProperty("--composer-x", `${x}px`)
@@ -446,7 +449,11 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   borderColor="default"
                   borderRadius="xl"
                 >
-                  {!view && questionReady && (homeLanding || suggestReport) && (
+                  {/* The standing "Help me get these tasks done" chip is
+                      gone (Angel, 2026-09-14) — the input opens empty.
+                      The report nudge still appears when onboarding asks
+                      for it. */}
+                  {!view && questionReady && suggestReport && (
                     <div
                       className="flex gap-1"
                       data-hybrid-suggestions

@@ -261,7 +261,7 @@ export function PreferencesScreen() {
                 breadcrumbs={[{ id: "preferences", label: "Preferences" }]}
               />
             </F0Box>
-            </F0Box>
+          </F0Box>
           <Tabs
             secondary={false}
             activeTabId={tab}

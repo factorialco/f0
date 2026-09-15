@@ -13,6 +13,7 @@ Consulted: local Widget source/stories/types, F0Box source/stories/types, Tabs s
 ## Verification
 
 Observed in an isolated in-app browser at localhost:5181, separate from the user's 127.0.0.1 origin:
+
 - Home has no Home/Edit context toolbar or per-widget collapse/maximize/close controls. A single Edit widgets button opens the full editor.
 - Search filters the catalog; custom widget added only after topic, context, format and custom name confirmation. Preview shows a simulated metric for the selected topic.
 - Save confirmation appears; saved custom selection survives reload. Removing and discarding restores the selected widget. Removing all selected widgets shows the F0 empty state.
@@ -24,7 +25,6 @@ Technical checks: TypeScript, legacy prototype checker, guided Home/routine/repo
 
 Skill attribution for any later PR update: factorial-f0, f0-prototype, f0-design, systematic-debugging. Existing legacy Composer rejects direct zod imports in prototypes, so catalog validation follows its existing plain TypeScript convention rather than changing framework policy.
 
-
 ## Visual refinement request
 
 - Changed the bottom Edit widgets action to native F0Button outline/md; removed its dashed enclosing border. Browser verified native 32px height, borderless parent, and editor opens.
@@ -32,7 +32,6 @@ Skill attribution for any later PR update: factorial-f0, f0-prototype, f0-design
 - Typecheck and the 230-file prototype check pass.
 - Pending user decision: extend native F0Dialog options for 4px inset/embedded editor behavior and F0ActionBar for a preview anchor. Existing fullscreen Dialog uses inset-6, and ActionBar measures global #content; neither exposes the requested option. No F0 library modifications made.
 - Catalog alternatives presented: compose F0 icon/text/button rows (closest visual match) or WidgetSimpleListItem (whole-row interaction, no labeled action slot). Existing catalog remains until selection.
-
 
 ## Approved visual refinement completed
 
@@ -43,6 +42,7 @@ Local dependencies and generated component registry were isolated from their pre
 Browser QA on isolated localhost:5181: measured modal inset exactly 4px top/right/bottom; bar horizontal center delta 0px with sidebar expanded, collapsed, and One open. Native modal radius/shadow visually inspected. Shift+Tab from New widget reaches Save changes; next Shift+Tab reaches Discard, Enter successfully discards. Save changes shows Changes saved and clears action bar. New widget opens original One question; cancelled during QA. User origin 127.0.0.1 inspected read-only to confirm successful updated render; user question left unanswered.
 
 Quality Gate Results
+
 - Format: PASS (2624 source files checked).
 - TypeScript: PASS (F0 library and Home application).
 - Lint: command PASS on affected component paths; installed oxlint reports zero configured rules, so this is not substantive lint coverage.
@@ -55,7 +55,6 @@ Quality Gate Results
 
 No GitHub push, merge or publication performed.
 
-
 ## Shared background and catalog feedback
 
 Applied authorized follow-up with existing F0 components only (no new library modifications): catalog groups added widgets first for the active scope, shows a tick at rest, and reveals Add/Remove on pointer entry or keyboard focus. Action width is reserved to avoid shifting titles. Search preserves grouping. Secondary F0 Tabs removes the active underline without custom tab controls.
@@ -66,7 +65,6 @@ Removed WidgetEditor mount-time resumeWidgetCreation. HybridHome no longer auto-
 
 Verified on isolated localhost: initial entry closed; New widget opens; pending-flow reload closed; closing and reopening editor with pending flow closed; New widget resumes pending flow. User origin untouched. Checked selected-first ordering separately for Personal/Employees, tick/action idle state, keyboard reveal/remove/add and search. Browser screenshots verify shared background and no active tab underline. Pure hover-only automation unavailable in this CUA locator surface; pointer entry during click and keyboard focus behavior were observed. Typecheck, 230-file prototype checks and diff whitespace validation pass.
 
-
 ## Screenshot polish
 
 Removed the extra widget tabs wrapper padding/border and scoped existing secondary Tabs list to transparent with 8px native vertical inset; retained the pill and keyboard focus semantics. Editor content's sidebar separator is suppressed only while editing; existing Home sidebar divider remains. Applied the existing F0 shadow token recipe to the native dialog surface.
@@ -74,7 +72,6 @@ Removed the extra widget tabs wrapper padding/border and scoped existing seconda
 Row action area now reserves 80px width and 24px height for tick, empty and button states. Labels simplified to Add/Remove. Browser measured all row positions/heights before and after revealing Remove unchanged; Add likewise retained y=286 and height=48. Native modal shadow computed rgba(13,22,38,.08) 0px 4px 20px, tabs background transparent. Screenshot with navigation expanded reviewed. Typecheck and 230-file static checks pass.
 
 Org chart investigation: monorepo OrgChartPage delegates v3 to OrgChartGraphPage/F0Graph. F0Graph source found in /Users/jonathan.centeno/code/f0-pr-4510/packages/react/src/patterns/F0Graph/components/F0GraphView/F0GraphView.tsx: uses @xyflow/react Background, Dots variant, size4, BACKGROUND_DOT_GAP and --f0-graph-bg-dot. Current branch does not include F0Graph or an independent background component. Asked user to approve extraction of the reusable F0 background before making that change; no extraction or lookalike created yet.
-
 
 ## Container root-cause correction and approved primary tabs
 

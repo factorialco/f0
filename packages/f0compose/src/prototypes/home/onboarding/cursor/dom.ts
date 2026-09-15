@@ -1,10 +1,10 @@
 export type ElementPosition =
-  | 'center'
-  | 'left'
-  | 'right'
-  | 'right-outside'
-  | 'left-outside'
-  | 'bottom-outside'
+  | "center"
+  | "left"
+  | "right"
+  | "right-outside"
+  | "left-outside"
+  | "bottom-outside"
 
 // How far BELOW the target's bottom edge 'bottom-outside' parks the tip. Sized to
 // clear a table header (h-11) and land in the upper part of the row beneath it,
@@ -13,7 +13,7 @@ const BOTTOM_OUTSIDE_OFFSET_PX = 16
 
 export function getCoordinates(
   element: HTMLElement,
-  position: ElementPosition = 'center'
+  position: ElementPosition = "center"
 ): { x: number; y: number } {
   const rect = element.getBoundingClientRect()
 
@@ -27,16 +27,16 @@ export function getCoordinates(
   let x = rect.left + rect.width / 2
   let y = rect.top + rect.height / 2
   switch (position) {
-    case 'center':
+    case "center":
       x = rect.left + rect.width / 2
       break
-    case 'left':
+    case "left":
       x = rect.left + rect.width * 0.2
       break
-    case 'right':
+    case "right":
       x = rect.left + rect.width * 0.8
       break
-    case 'right-outside':
+    case "right-outside":
       // Tip sits just past the right edge AND near the bottom of the
       // element. The cursor body extends down-right from its tip, so
       // anchoring the tip at the bottom-right corner pushes the body
@@ -45,7 +45,7 @@ export function getCoordinates(
       x = rect.right + 6
       y = rect.bottom - 4
       break
-    case 'left-outside':
+    case "left-outside":
       // Mirror of 'right-outside' for elements pinned to the far-right of
       // the viewport (e.g. controls inside the One panel), where a
       // right-outside pointer would land off-screen. Tip sits just past the
@@ -53,7 +53,7 @@ export function getCoordinates(
       x = rect.left - 6
       y = rect.bottom - 4
       break
-    case 'bottom-outside':
+    case "bottom-outside":
       // Same horizontal placement as 'right-outside', but the tip drops BELOW
       // the element instead of stopping at its bottom edge. For a stable anchor
       // that sits above the thing the step is really about — a column header

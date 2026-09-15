@@ -1,7 +1,5 @@
 import type { IconType } from "@factorialco/f0-react"
 
-import { BackgroundTasks } from "../navigation/localIcons"
-
 import {
   AcademicCap,
   Archive,
@@ -39,6 +37,8 @@ import {
   UserProtected,
   Wallet,
 } from "@factorialco/f0-react/icons/app"
+
+import { BackgroundTasks } from "../navigation/localIcons"
 
 /**
  * The Tools catalog: which modules exist, how they group, and which glyph

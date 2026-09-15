@@ -1867,21 +1867,51 @@ export function resumeHomeSetup(
 }
 export function startHomeFocusEdit(profile: ProfileId) {
   const saved = homeSetupFor(profile)?.homeSetup ?? initialSetup(profile)
-  const setup: HomeSetup = { ...saved, purpose: "focus", step: "priorities", paused: false }
+  const setup: HomeSetup = {
+    ...saved,
+    purpose: "focus",
+    step: "priorities",
+    paused: false,
+  }
   const id = `c${nextId++}`
   emit({
     ...state,
     activeId: id,
-    conversations: [{
-      id, title: "Edit my Home focus", thinking: true, lastActiveAt: Date.now(),
-      homeSetup: setup,
-      messages: [{ id: `m${nextId++}`, role: "user", content: "Help me update what One focuses on in my Home." }],
-    }, ...state.conversations],
+    conversations: [
+      {
+        id,
+        title: "Edit my Home focus",
+        thinking: true,
+        lastActiveAt: Date.now(),
+        homeSetup: setup,
+        messages: [
+          {
+            id: `m${nextId++}`,
+            role: "user",
+            content: "Help me update what One focuses on in my Home.",
+          },
+        ],
+      },
+      ...state.conversations,
+    ],
   })
-  setTimeout(() => streamTurn(id, [
-    { id: `m${nextId++}`, role: "assistant", content: "Let’s adjust your Home focus. I’ve selected your current preferences below." },
-    homeQuestion(setup),
-  ], () => {}), THINK_MS)
+  setTimeout(
+    () =>
+      streamTurn(
+        id,
+        [
+          {
+            id: `m${nextId++}`,
+            role: "assistant",
+            content:
+              "Let’s adjust your Home focus. I’ve selected your current preferences below.",
+          },
+          homeQuestion(setup),
+        ],
+        () => {}
+      ),
+    THINK_MS
+  )
   return id
 }
 
@@ -2026,12 +2056,16 @@ function answerHomeSetup(id: string, answer: string) {
     refreshHome(setup.profile)
   if (setup.purpose === "focus" && result.artifact?.kind === "briefing") {
     const home = homeSetupFor(setup.profile)
-    if (home) patchConversation(home.id, c => ({
-      ...c,
-      homeSetup: { ...result.setup, purpose: undefined, paused: true },
-      messages: c.messages.map(m => m.homeArtifact?.kind === "briefing"
-        ? { ...m, homeArtifact: result.artifact } : m),
-    }))
+    if (home)
+      patchConversation(home.id, (c) => ({
+        ...c,
+        homeSetup: { ...result.setup, purpose: undefined, paused: true },
+        messages: c.messages.map((m) =>
+          m.homeArtifact?.kind === "briefing"
+            ? { ...m, homeArtifact: result.artifact }
+            : m
+        ),
+      }))
   }
   if (result.widgets) changeWidgets(setup.profile, result.widgets)
   if (result.undo && !undoWidgets(setup.profile))

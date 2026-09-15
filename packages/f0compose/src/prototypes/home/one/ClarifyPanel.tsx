@@ -1,13 +1,15 @@
 import { useState } from "react"
-import { useHomeRefreshing } from "../setup/homeRefresh"
-import { useProfile } from "../profileStore"
-import { F0ClarifyingPanel } from "./f0-clarifying/F0ClarifyingPanel"
+
 import type { ClarifyingQuestionState } from "./f0-clarifying/types"
+
+import { useProfile } from "../profileStore"
+import { useHomeRefreshing } from "../setup/homeRefresh"
 import {
   answerQuestion,
   skipQuestion,
   type ChatMessage,
 } from "./conversationStore"
+import { F0ClarifyingPanel } from "./f0-clarifying/F0ClarifyingPanel"
 
 /** State adapter only. Layout, options, custom answer and keyboard behavior
  * come from the complete F0 standalone panel, not a recreated question card. */
@@ -75,9 +77,6 @@ export function ClarifyPanel({
     },
   }
   return (
-    <F0ClarifyingPanel
-      clarifyingQuestion={state}
-      isSubmitDisabled={loading}
-    />
+    <F0ClarifyingPanel clarifyingQuestion={state} isSubmitDisabled={loading} />
   )
 }

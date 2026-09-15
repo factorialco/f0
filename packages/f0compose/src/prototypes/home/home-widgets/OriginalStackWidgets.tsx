@@ -1,4 +1,5 @@
-import { upcomingShifts } from "./shifts"
+import type { ReactNode } from "react"
+
 import {
   F0AvatarFile,
   F0AvatarDate,
@@ -16,14 +17,11 @@ import {
   SearchPerson,
   Video,
 } from "@factorialco/f0-react/icons/app"
-import type { ReactNode } from "react"
+
 import { recordFor, type WidgetRecord } from "./catalog"
-import {
-  candidates,
-  phaseLabel,
-  type RecruitmentPhase,
-} from "./recruitment"
 import { documentRecords } from "./documents"
+import { candidates, phaseLabel, type RecruitmentPhase } from "./recruitment"
+import { upcomingShifts } from "./shifts"
 
 // PR #48 WidgetListItem's static row composition. The existing WindowStack owns
 // the outer widget, title, resizing and close controls; no nested card or chat.
@@ -57,12 +55,7 @@ function PersonalSummary({ record }: { record: WidgetRecord }) {
       <F0Text content={record.caption} variant="description" />
       <F0TagStatus text={record.status} variant="neutral" />
       {record.rows.map((row) => (
-        <F0Box
-          key={row.title}
-          display="flex"
-          flexDirection="column"
-          gap="sm"
-        >
+        <F0Box key={row.title} display="flex" flexDirection="column" gap="sm">
           <F0Text content={row.title} variant="label" />
           <F0Text content={row.detail} variant="description" />
         </F0Box>
@@ -101,10 +94,7 @@ export function RecruitmentWindow({
             title={c.name}
             subtitle={phaseLabel(c.phase)}
             end={
-              <F0TagStatus
-                text={c.status.text}
-                variant={c.status.variant}
-              />
+              <F0TagStatus text={c.status.text} variant={c.status.variant} />
             }
           />
         ))}
@@ -118,10 +108,7 @@ export function DocumentsWindow() {
         <ReferenceRow
           key={d.id}
           avatar={
-            <F0AvatarFile
-              file={{ name: d.name, type: d.fileType }}
-              size="lg"
-            />
+            <F0AvatarFile file={{ name: d.name, type: d.fileType }} size="lg" />
           }
           title={d.name}
           subtitle={`${d.action} · ${d.when}`}

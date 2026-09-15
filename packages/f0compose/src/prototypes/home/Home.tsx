@@ -51,6 +51,7 @@ import { HybridHome } from "./HybridHome"
 import { InboxScreen } from "./inbox/InboxScreen"
 import { ModuleScreen } from "./ModuleScreen"
 import { PersonalPreferencesScreen } from "./navigation/PreferencesScreen"
+import { setNavPanelOpen, useNavPanelOpen } from "./navPanelStore"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import { Onboarding } from "./onboarding/Onboarding"
@@ -62,6 +63,7 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
+import { PanelExpand } from "./PanelCollapse"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { PreferencesScreen } from "./preferences/PreferencesScreen"
@@ -71,11 +73,11 @@ import { GuidedHome } from "./setup/HomeArtifacts"
 import { HomeBackdrop } from "./waves/HomeBackdrop"
 import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
-import { useWidgetCollapse } from "./windows/widgetCollapse"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
 import { useWindows } from "./windows/useWindows"
+import { useWidgetCollapse } from "./windows/widgetCollapse"
 import {
   animateWindowClose,
   CANVAS_MIN_WIDTH,
@@ -901,9 +903,22 @@ function HomeNavbar({
   /** The section's own glyph, so the button says where it goes back to. */
 }) {
   const [, setParams] = useSearchParams()
+  const navPanelOpen = useNavPanelOpen()
   return (
     <div className="flex w-full items-center justify-between p-[14px]">
       <div className="flex min-w-0 items-center gap-2">
+        {/* The way back to the second level: with no panel there is no
+            header to hold its own toggle (Angel, 2026-09-14). */}
+        {!navPanelOpen && (
+          <F0Button
+            variant="ghost"
+            size="md"
+            icon={PanelExpand}
+            hideLabel
+            label="Expand panel"
+            onClick={() => setNavPanelOpen(true)}
+          />
+        )}
         {conversationTitle ? (
           <span className="flex min-w-0 items-center gap-2">
             {conversationEmoji && (
@@ -1127,9 +1142,7 @@ function HomeCanvas() {
    */
   const homeSession =
     !!activeConversation?.homeBriefing ||
-    !!(
-      activeConversation?.homeSetup && !activeConversation.homeSetup.purpose
-    )
+    !!(activeConversation?.homeSetup && !activeConversation.homeSetup.purpose)
   const homeLanding = showPromptBar && (!activeConversation || homeSession)
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
@@ -1567,8 +1580,7 @@ function HomeCanvas() {
                 <InboxScreen />
               ) : screenView === "tools" ? (
                 <ToolsScreen />
-              ) : screenView === "activity" ||
-                screenView === "ai-activity" ? (
+              ) : screenView === "activity" || screenView === "ai-activity" ? (
                 <ActivityScreen />
               ) : screenView === "agents" ? (
                 <AgentsScreen />
@@ -1619,7 +1631,7 @@ function HomeCanvas() {
             {showPromptBar && (
               <div
                 data-home-promptbar
-                className="relative order-2 z-10 w-[712px] max-w-full shrink-0"
+                className="relative z-10 order-2 w-[712px] max-w-full shrink-0"
               >
                 <div data-hybrid-target />
               </div>

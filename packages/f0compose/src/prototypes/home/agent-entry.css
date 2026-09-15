@@ -284,7 +284,7 @@
   pointer-events: none;
 }
 [data-hybrid-target] {
-  height: 196px;
+  height: 156px;
 }
 [data-hybrid-root]:not([data-view="home"]) [data-hybrid-target],
 [data-hybrid-root]:not([data-view="home"])[data-mode="expanded"]
@@ -305,7 +305,7 @@
   -webkit-mask-image: none !important;
 }
 [data-hybrid-composer] {
-  height: var(--composer-height, 176px);
+  height: var(--composer-height, 128px);
   transition:
     transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
     width 420ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -407,7 +407,6 @@
 .dark [data-home-nav],
 .dark [data-home-rail],
 .dark [data-home-panel],
-
 .dark [data-hybrid-root],
 .dark [data-hybrid-work],
 .dark [data-hybrid-chat] {
@@ -575,4 +574,11 @@ body:has([data-hybrid-root]) main#content > div {
 }
 .dark #f0-layout {
   background: hsl(var(--neutral-0)) !important;
+}
+
+/* The nav paints above the canvas so the panel's way-back button, which
+   hangs off the rail's right edge, is not covered by the content sheet. */
+[data-hybrid-root] [data-home-nav] {
+  position: relative;
+  z-index: 20;
 }

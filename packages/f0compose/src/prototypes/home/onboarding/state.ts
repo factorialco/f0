@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react"
+
 import type { ProfileId } from "../profileStore"
 
 export type OnboardingState = {

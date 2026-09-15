@@ -13,14 +13,24 @@
  */
 
 /** The status-tag variants F0's `F0TagStatus` accepts (the full `statuses` set). */
-export type RecruitmentStatusVariant = "neutral" | "info" | "positive" | "warning" | "critical"
+export type RecruitmentStatusVariant =
+  | "neutral"
+  | "info"
+  | "positive"
+  | "warning"
+  | "critical"
 
 /**
  * A stage of the hiring pipeline, declared earliest → latest. The key drives the
  * leading avatar icon (mapped in the widget); `phaseLabel` spells it out for the
  * row's description line.
  */
-export type RecruitmentPhase = "applied" | "screening" | "interview" | "assessment" | "offer"
+export type RecruitmentPhase =
+  | "applied"
+  | "screening"
+  | "interview"
+  | "assessment"
+  | "offer"
 
 /**
  * The phase spelled out — the row's description. Deterministic (same phase → same
@@ -56,11 +66,36 @@ export interface CandidateRecord {
  * warning / critical / positive) so the trailing tags show their full range.
  */
 export const candidateRecords: CandidateRecord[] = [
-  { id: "c1", name: "Nadia Rahman", phase: "applied", status: { text: "New", variant: "info" } },
-  { id: "c2", name: "Tomás Rivera", phase: "screening", status: { text: "Scheduled", variant: "neutral" } },
-  { id: "c3", name: "Wei Zhang", phase: "interview", status: { text: "In progress", variant: "warning" } },
-  { id: "c4", name: "Fatima El-Amin", phase: "assessment", status: { text: "Action needed", variant: "critical" } },
-  { id: "c5", name: "Jonas Weber", phase: "offer", status: { text: "Offer accepted", variant: "positive" } },
+  {
+    id: "c1",
+    name: "Nadia Rahman",
+    phase: "applied",
+    status: { text: "New", variant: "info" },
+  },
+  {
+    id: "c2",
+    name: "Tomás Rivera",
+    phase: "screening",
+    status: { text: "Scheduled", variant: "neutral" },
+  },
+  {
+    id: "c3",
+    name: "Wei Zhang",
+    phase: "interview",
+    status: { text: "In progress", variant: "warning" },
+  },
+  {
+    id: "c4",
+    name: "Fatima El-Amin",
+    phase: "assessment",
+    status: { text: "Action needed", variant: "critical" },
+  },
+  {
+    id: "c5",
+    name: "Jonas Weber",
+    phase: "offer",
+    status: { text: "Offer accepted", variant: "positive" },
+  },
 ]
 
 /** The candidates the widget renders, in row order. */

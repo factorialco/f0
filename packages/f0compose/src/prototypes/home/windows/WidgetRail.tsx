@@ -1,5 +1,4 @@
-import { RightPanelCollapse, RightPanelExpand } from "./HomeToolbarActions";
-import { F0Button } from "@factorialco/f0-react";
+import { F0Button } from "@factorialco/f0-react"
 import {
   Comment,
   ChartLine,
@@ -7,7 +6,7 @@ import {
   SearchPerson,
   File,
   Sparkles,
-} from "@factorialco/f0-react/icons/app";
+} from "@factorialco/f0-react/icons/app"
 import {
   useEffect,
   useLayoutEffect,
@@ -15,13 +14,16 @@ import {
   useState,
   type ComponentProps,
   type ReactNode,
-} from "react";
-import { useProfile } from "../profileStore";
-import { useWidgetCollapse } from "./widgetCollapse";
-import { railPanelTop } from "./railGeometry";
-import { useHomeRefreshing, HomeLoadingSkeleton } from "../setup/homeRefresh";
-import { WindowPanel, WindowStack, type PanelSpec } from "./WindowStack";
-import type { WindowId } from "./types";
+} from "react"
+
+import type { WindowId } from "./types"
+
+import { useProfile } from "../profileStore"
+import { useHomeRefreshing, HomeLoadingSkeleton } from "../setup/homeRefresh"
+import { RightPanelCollapse, RightPanelExpand } from "./HomeToolbarActions"
+import { railPanelTop } from "./railGeometry"
+import { useWidgetCollapse } from "./widgetCollapse"
+import { WindowPanel, WindowStack, type PanelSpec } from "./WindowStack"
 
 // PR48 useWidgetRail: vertical cards, catalog glyphs, same widget render in
 // a preview outside the scrolling strip. Existing stack still owns the cards.
@@ -29,45 +31,45 @@ export function WidgetRail(
   props:
     | ComponentProps<typeof WindowStack<WindowId>>
     | {
-        items: string[];
-        titleFor: (id: string) => string;
-        renderWidget: (id: string) => ReactNode;
-        footer: (collapsed: boolean) => ReactNode;
-      },
+        items: string[]
+        titleFor: (id: string) => string
+        renderWidget: (id: string) => ReactNode
+        footer: (collapsed: boolean) => ReactNode
+      }
 ) {
-  const staticCards = "items" in props;
-  const columnWidth = staticCards ? 384 : props.state.columnWidth;
-  const profile = useProfile();
-  const { collapsed, toggleCollapsed } = useWidgetCollapse(profile);
-  const loading = useHomeRefreshing(profile);
-  const [peek, setPeek] = useState<{ id: string; top: number } | null>(null);
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>>();
-  const root = useRef<HTMLDivElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
-  const [previewHeight, setPreviewHeight] = useState(0);
+  const staticCards = "items" in props
+  const columnWidth = staticCards ? 384 : props.state.columnWidth
+  const profile = useProfile()
+  const { collapsed, toggleCollapsed } = useWidgetCollapse(profile)
+  const loading = useHomeRefreshing(profile)
+  const [peek, setPeek] = useState<{ id: string; top: number } | null>(null)
+  const leaveTimer = useRef<ReturnType<typeof setTimeout>>()
+  const root = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [previewHeight, setPreviewHeight] = useState(0)
   useLayoutEffect(() => {
-    if (!previewRef.current) return;
+    if (!previewRef.current) return
     const observer = new ResizeObserver(([entry]) =>
-      setPreviewHeight(entry.contentRect.height),
-    );
-    observer.observe(previewRef.current);
-    return () => observer.disconnect();
-  }, [peek?.id]);
-  useEffect(() => () => clearTimeout(leaveTimer.current), []);
+      setPreviewHeight(entry.contentRect.height)
+    )
+    observer.observe(previewRef.current)
+    return () => observer.disconnect()
+  }, [peek?.id])
+  useEffect(() => () => clearTimeout(leaveTimer.current), [])
   const docked = staticCards
     ? props.items
-    : props.state.open.filter((id) => !props.state.floating.includes(id));
-  const folded = docked.filter((id) => collapsed.includes(id));
-  const expanded = docked.filter((id) => !collapsed.includes(id));
-  const width = (expanded.length ? columnWidth : 0) + (folded.length ? 56 : 0);
+    : props.state.open.filter((id) => !props.state.floating.includes(id))
+  const folded = docked.filter((id) => collapsed.includes(id))
+  const expanded = docked.filter((id) => !collapsed.includes(id))
+  const width = (expanded.length ? columnWidth : 0) + (folded.length ? 56 : 0)
   const closePeek = () => {
-    leaveTimer.current = setTimeout(() => setPeek(null), 180);
-  };
-  const holdPeek = () => clearTimeout(leaveTimer.current);
+    leaveTimer.current = setTimeout(() => setPeek(null), 180)
+  }
+  const holdPeek = () => clearTimeout(leaveTimer.current)
   const spec = (id: WindowId, preview = false): PanelSpec => {
     if (staticCards)
-      throw new Error("Window specs belong to the original stack");
-    const original = props.specFor(id);
+      throw new Error("Window specs belong to the original stack")
+    const original = props.specFor(id)
     return {
       ...original,
       content: (
@@ -83,15 +85,15 @@ export function WidgetRail(
             variant="ghost"
             size="md"
             onClick={() => {
-              toggleCollapsed(id);
-              setPeek(null);
+              toggleCollapsed(id)
+              setPeek(null)
             }}
           />
         </>
       ),
-    };
-  };
-  if (!docked.length) return staticCards ? <>{props.footer(false)}</> : null;
+    }
+  }
+  if (!docked.length) return staticCards ? <>{props.footer(false)}</> : null
   return (
     <div
       ref={root}
@@ -143,14 +145,14 @@ export function WidgetRail(
             <div
               key={id}
               onMouseEnter={(event) => {
-                holdPeek();
+                holdPeek()
                 const top =
                   event.currentTarget.getBoundingClientRect().top -
-                  (root.current?.getBoundingClientRect().top ?? 0);
+                  (root.current?.getBoundingClientRect().top ?? 0)
                 setPeek({
                   id,
                   top,
-                });
+                })
               }}
               onMouseLeave={closePeek}
               data-widget-anchor={id}
@@ -162,8 +164,8 @@ export function WidgetRail(
                 size="lg"
                 variant="outline"
                 onClick={() => {
-                  toggleCollapsed(id);
-                  setPeek(null);
+                  toggleCollapsed(id)
+                  setPeek(null)
                 }}
               />
             </div>
@@ -198,42 +200,42 @@ export function WidgetRail(
               totalWeight={1}
               hugsContent
               onClose={() => {
-                props.onClose(peek.id as WindowId);
-                setPeek(null);
+                props.onClose(peek.id as WindowId)
+                setPeek(null)
               }}
               onToggleMaximized={() => {
-                props.onToggleMaximized(peek.id as WindowId);
-                setPeek(null);
+                props.onToggleMaximized(peek.id as WindowId)
+                setPeek(null)
               }}
             />
           )}
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export function widgetGlyph(id: string) {
-  if (id === "recruitment") return SearchPerson;
-  if (id === "documents") return File;
+  if (id === "recruitment") return SearchPerson
+  if (id === "documents") return File
   if (["shifts", "holidays", "events", "clockin"].includes(id))
-    return CalendarArrowRight;
-  if (id === "communities") return Comment;
-  if (id === "celebrations") return Sparkles;
-  return ChartLine;
+    return CalendarArrowRight
+  if (id === "communities") return Comment
+  if (id === "celebrations") return Sparkles
+  return ChartLine
 }
 
 function WidgetContent({
   loading,
   children,
 }: {
-  loading: boolean;
-  children: ReactNode;
+  loading: boolean
+  children: ReactNode
 }) {
-  const [opening, setOpening] = useState(true);
+  const [opening, setOpening] = useState(true)
   useEffect(() => {
-    const timer = setTimeout(() => setOpening(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
-  return loading || opening ? <HomeLoadingSkeleton /> : <>{children}</>;
+    const timer = setTimeout(() => setOpening(false), 600)
+    return () => clearTimeout(timer)
+  }, [])
+  return loading || opening ? <HomeLoadingSkeleton /> : <>{children}</>
 }

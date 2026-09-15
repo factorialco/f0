@@ -59,8 +59,7 @@ export function useActivitySource(
               (row) =>
                 (!filters.status?.length ||
                   filters.status.includes(row.status)) &&
-                (!filters.owner?.length ||
-                  filters.owner.includes(row.owner)) &&
+                (!filters.owner?.length || filters.owner.includes(row.owner)) &&
                 (!search ||
                   `${row.title} ${row.detail} ${row.owner}`
                     .toLowerCase()

@@ -1,5 +1,5 @@
-import { type ElementPosition, getCoordinates } from './dom'
-import './cursor.css'
+import { type ElementPosition, getCoordinates } from "./dom"
+import "./cursor.css"
 
 declare global {
   interface Window {
@@ -9,10 +9,10 @@ declare global {
 
 export function getCursor(): HTMLElement {
   if (!window.cursor) {
-    const cursor = document.createElement('div')
-    cursor.className = 'tour-cursor tour-cursor-idle tour-cursor-hidden'
-    cursor.setAttribute('aria-hidden', 'true')
-    cursor.setAttribute('role', 'presentation')
+    const cursor = document.createElement("div")
+    cursor.className = "tour-cursor tour-cursor-idle tour-cursor-hidden"
+    cursor.setAttribute("aria-hidden", "true")
+    cursor.setAttribute("role", "presentation")
     document.body.appendChild(cursor)
     window.cursor = cursor
   }
@@ -32,41 +32,41 @@ const TOOLTIP_BOTTOM_MARGIN_PX = 16
 // When a step pins the tooltip side (TourStep.tooltipSide / tooltipVerticalSide),
 // it overrides the auto edge-flip below. Reset whenever a tooltip is
 // hidden/replaced.
-let forcedTooltipSide: 'left' | 'right' | null = null
-let forcedVerticalSide: 'top' | 'bottom' | null = null
+let forcedTooltipSide: "left" | "right" | null = null
+let forcedVerticalSide: "top" | "bottom" | null = null
 
 // Toggle the flip-left + flip-top classes. Uses the step-forced side when set,
 // otherwise auto-flips based on the cursor's position. Called on every cursor
 // move so the placement always matches the current position.
 function updateTooltipSide(cursor: HTMLElement, x: number, y: number): void {
   const flipLeft = forcedTooltipSide
-    ? forcedTooltipSide === 'left'
+    ? forcedTooltipSide === "left"
     : x + TOOLTIP_RIGHT_SPACE_PX > window.innerWidth
-  cursor.classList.toggle('tour-cursor-flip-left', flipLeft)
+  cursor.classList.toggle("tour-cursor-flip-left", flipLeft)
 
   // Vertical auto-flip: measure the live tooltip so a tall tooltip (title +
   // description + button) near the bottom edge flips above, while a short one
   // in the same spot doesn't flip needlessly.
-  const tooltip = cursor.querySelector<HTMLElement>('.tour-cursor-tooltip')
+  const tooltip = cursor.querySelector<HTMLElement>(".tour-cursor-tooltip")
   if (!tooltip) return
   const tooltipHeight = tooltip.getBoundingClientRect().height
   const flipTop = forcedVerticalSide
-    ? forcedVerticalSide === 'top'
+    ? forcedVerticalSide === "top"
     : y + tooltipHeight + TOOLTIP_BOTTOM_MARGIN_PX > window.innerHeight
-  cursor.classList.toggle('tour-cursor-tooltip-top', flipTop)
+  cursor.classList.toggle("tour-cursor-tooltip-top", flipTop)
 }
 
 export function showCursor(): void {
   const cursor = getCursor()
-  cursor.classList.remove('tour-cursor-hidden')
+  cursor.classList.remove("tour-cursor-hidden")
 }
 
 export function hideCursor(): void {
   const cursor = getCursor()
-  cursor.classList.add('tour-cursor-hidden')
-  cursor.classList.remove('tour-cursor-clicking')
-  cursor.classList.remove('tour-cursor-point-left')
-  cursor.classList.add('tour-cursor-idle')
+  cursor.classList.add("tour-cursor-hidden")
+  cursor.classList.remove("tour-cursor-clicking")
+  cursor.classList.remove("tour-cursor-point-left")
+  cursor.classList.add("tour-cursor-idle")
   hideTooltipFromCursor()
 }
 
@@ -77,10 +77,13 @@ export type TooltipExtras = {
   /** Clickable action buttons, rendered left to right (label + optional icon kind
    *  — the engine wires the clicks). `kind` only selects the leading icon
    *  ('finish' renders none); behavior lives in the engine. */
-  buttons?: Array<{ label: string; kind?: 'next' | 'download' | 'copy' | 'finish' | 'navigate' }>
+  buttons?: Array<{
+    label: string
+    kind?: "next" | "download" | "copy" | "finish" | "navigate"
+  }>
   /** 'top' renders the tooltip ABOVE the cursor instead of below (for targets
    *  near the bottom edge where a below-cursor tooltip would be clipped). */
-  verticalSide?: 'top' | 'bottom'
+  verticalSide?: "top" | "bottom"
 }
 
 /**
@@ -92,29 +95,31 @@ export type TooltipExtras = {
  * buttons: an arrow next to "Next" restates the label, and at xs size the icon
  * crowds a control whose whole job is to be unobtrusive next to the tooltip copy.
  */
-function createTooltipButtonIcon(kind: 'download' | 'copy' | 'check'): SVGSVGElement {
-  const NS = 'http://www.w3.org/2000/svg'
-  const svg = document.createElementNS(NS, 'svg')
-  svg.setAttribute('viewBox', '0 0 24 24')
-  svg.setAttribute('fill', 'none')
-  svg.setAttribute('stroke', 'currentColor')
-  svg.setAttribute('stroke-width', '2')
-  svg.setAttribute('stroke-linecap', 'round')
-  svg.setAttribute('stroke-linejoin', 'round')
-  svg.setAttribute('aria-hidden', 'true')
+function createTooltipButtonIcon(
+  kind: "download" | "copy" | "check"
+): SVGSVGElement {
+  const NS = "http://www.w3.org/2000/svg"
+  const svg = document.createElementNS(NS, "svg")
+  svg.setAttribute("viewBox", "0 0 24 24")
+  svg.setAttribute("fill", "none")
+  svg.setAttribute("stroke", "currentColor")
+  svg.setAttribute("stroke-width", "2")
+  svg.setAttribute("stroke-linecap", "round")
+  svg.setAttribute("stroke-linejoin", "round")
+  svg.setAttribute("aria-hidden", "true")
   const paths =
-    kind === 'download'
-      ? ['M12 3v12', 'M7 12l5 5 5-5', 'M4 20h16']
-      : kind === 'check'
-        ? ['M20 6 9 17l-5-5']
+    kind === "download"
+      ? ["M12 3v12", "M7 12l5 5 5-5", "M4 20h16"]
+      : kind === "check"
+        ? ["M20 6 9 17l-5-5"]
         : // copy: front sheet + back sheet
           [
-            'M9 9h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z',
-            'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
+            "M9 9h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z",
+            "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1",
           ]
   for (const d of paths) {
-    const path = document.createElementNS(NS, 'path')
-    path.setAttribute('d', d)
+    const path = document.createElementNS(NS, "path")
+    path.setAttribute("d", d)
     svg.appendChild(path)
   }
   return svg
@@ -131,7 +136,7 @@ function createTooltipButtonIcon(kind: 'download' | 'copy' | 'check'): SVGSVGEle
  */
 export function showTooltipOnCursor(
   text: string,
-  side?: 'left' | 'right',
+  side?: "left" | "right",
   extras?: TooltipExtras
 ): void {
   const cursor = getCursor()
@@ -142,17 +147,17 @@ export function showTooltipOnCursor(
   forcedTooltipSide = side ?? null
   forcedVerticalSide = extras?.verticalSide ?? null
 
-  const tooltip = document.createElement('div')
-  tooltip.className = 'tour-cursor-tooltip'
+  const tooltip = document.createElement("div")
+  tooltip.className = "tour-cursor-tooltip"
 
-  const title = document.createElement('div')
-  title.className = 'tour-cursor-tooltip-title'
+  const title = document.createElement("div")
+  title.className = "tour-cursor-tooltip-title"
   title.textContent = text
   tooltip.appendChild(title)
 
   if (extras?.description) {
-    const desc = document.createElement('div')
-    desc.className = 'tour-cursor-tooltip-desc'
+    const desc = document.createElement("div")
+    desc.className = "tour-cursor-tooltip-desc"
     desc.textContent = extras.description
     tooltip.appendChild(desc)
   }
@@ -160,35 +165,35 @@ export function showTooltipOnCursor(
   if (extras?.buttons?.length) {
     // Row wrapper so multiple buttons sit side by side; a single button looks
     // identical to before because the row shrinks to it.
-    const row = document.createElement('div')
-    row.className = 'tour-cursor-tooltip-btns'
+    const row = document.createElement("div")
+    row.className = "tour-cursor-tooltip-btns"
     extras.buttons.forEach((spec, index) => {
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.className = 'tour-cursor-tooltip-btn'
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "tour-cursor-tooltip-btn"
       // Index, not label: the engine looks buttons up positionally so two buttons
       // with the same label still wire independently.
       button.dataset.tourBtnIndex = String(index)
       // Advancing kinds ('next' / 'navigate' / 'finish') are plain text buttons;
       // only the side actions carry a glyph, where the icon says something the
       // label doesn't (this downloads / this copies rather than advances).
-      const kind = spec.kind ?? 'next'
-      if (kind === 'download' || kind === 'copy') {
+      const kind = spec.kind ?? "next"
+      if (kind === "download" || kind === "copy") {
         button.appendChild(createTooltipButtonIcon(kind))
       }
       // First button is the primary action; anything after it is secondary and
       // renders ghost (no border or fill), so a two-button row reads as one
       // choice with an alternative instead of two equal-weight buttons.
       if (index > 0) {
-        button.classList.add('tour-cursor-tooltip-btn--ghost')
+        button.classList.add("tour-cursor-tooltip-btn--ghost")
       }
-      const label = document.createElement('span')
+      const label = document.createElement("span")
       label.textContent = spec.label
       // The label is swapped in place to acknowledge a copy (see
       // flashTooltipButtonDone). Without a live region that swap is silent to a
       // screen reader — the button's accessible name changes, which is not an
       // announcement. Polite, because it must not interrupt the step's own text.
-      label.setAttribute('aria-live', 'polite')
+      label.setAttribute("aria-live", "polite")
       button.appendChild(label)
       row.appendChild(button)
     })
@@ -242,18 +247,18 @@ export function flashTooltipButtonDone(
   doneLabel?: string,
   durationMs = 1200
 ): void {
-  const label = button.querySelector('span')
-  const icon = button.querySelector('svg')
+  const label = button.querySelector("span")
+  const icon = button.querySelector("svg")
 
   if (doneLabel && label) {
     if (!originalButtonLabels.has(button)) {
-      originalButtonLabels.set(button, label.textContent ?? '')
+      originalButtonLabels.set(button, label.textContent ?? "")
     }
     label.textContent = doneLabel
-    icon?.replaceWith(createTooltipButtonIcon('check'))
+    icon?.replaceWith(createTooltipButtonIcon("check"))
   }
 
-  button.classList.add('tour-cursor-tooltip-btn--done')
+  button.classList.add("tour-cursor-tooltip-btn--done")
 
   const pending = doneResetTimers.get(button)
   if (pending !== undefined) window.clearTimeout(pending)
@@ -262,7 +267,7 @@ export function flashTooltipButtonDone(
     button,
     window.setTimeout(() => {
       doneResetTimers.delete(button)
-      button.classList.remove('tour-cursor-tooltip-btn--done')
+      button.classList.remove("tour-cursor-tooltip-btn--done")
 
       const original = originalButtonLabels.get(button)
       if (original === undefined || !label) return
@@ -270,7 +275,7 @@ export function flashTooltipButtonDone(
       originalButtonLabels.delete(button)
       // Rebuilt from the button's own kind, not remembered: the copy glyph is
       // the only one this state replaces.
-      button.querySelector('svg')?.replaceWith(createTooltipButtonIcon('copy'))
+      button.querySelector("svg")?.replaceWith(createTooltipButtonIcon("copy"))
     }, durationMs)
   )
 }
@@ -293,9 +298,12 @@ export function hideTooltipFromCursor(): void {
   forcedTooltipSide = null
   forcedVerticalSide = null
   const cursor = getCursor()
-  cursor.classList.remove('tour-cursor-tooltip-above', 'tour-cursor-tooltip-left')
-  cursor.classList.remove('tour-cursor-tooltip-top')
-  const existing = cursor.querySelector('.tour-cursor-tooltip')
+  cursor.classList.remove(
+    "tour-cursor-tooltip-above",
+    "tour-cursor-tooltip-left"
+  )
+  cursor.classList.remove("tour-cursor-tooltip-top")
+  const existing = cursor.querySelector(".tour-cursor-tooltip")
   if (existing) existing.remove()
 }
 
@@ -309,35 +317,39 @@ export function hideTooltipFromCursor(): void {
  */
 function updateTooltipOrientation(x: number, y: number): void {
   const cursor = getCursor()
-  const tooltip = cursor.querySelector<HTMLElement>('.tour-cursor-tooltip')
+  const tooltip = cursor.querySelector<HTMLElement>(".tour-cursor-tooltip")
   if (!tooltip) return
 
   const margin = 8
   // Default placement, from cursor.css: the cursor box is translated
   // (-8, -11) from its (x, y) anchor and the tooltip sits at (top: 14,
   // left: 48) inside it → the tooltip's viewport origin ≈ (x + 40, y + 3).
-  const overflowsBottom = y + 3 + tooltip.offsetHeight > window.innerHeight - margin
-  const overflowsRight = x + 40 + tooltip.offsetWidth > window.innerWidth - margin
-  cursor.classList.toggle('tour-cursor-tooltip-above', overflowsBottom)
-  cursor.classList.toggle('tour-cursor-tooltip-left', overflowsRight)
+  const overflowsBottom =
+    y + 3 + tooltip.offsetHeight > window.innerHeight - margin
+  const overflowsRight =
+    x + 40 + tooltip.offsetWidth > window.innerWidth - margin
+  cursor.classList.toggle("tour-cursor-tooltip-above", overflowsBottom)
+  cursor.classList.toggle("tour-cursor-tooltip-left", overflowsRight)
 }
 
 export async function animateCursorMove(
   element: HTMLElement,
-  position: ElementPosition = 'center',
+  position: ElementPosition = "center",
   speed = 3
 ): Promise<void> {
   const targetPos = getCoordinates(element, position)
   const cursor = getCursor()
   // Mirror the arrow to point toward the element when parked on its left.
-  cursor.classList.toggle('tour-cursor-point-left', position === 'left-outside')
+  cursor.classList.toggle("tour-cursor-point-left", position === "left-outside")
   const prevPos = getCoordinates(cursor)
 
-  const distance = Math.sqrt((targetPos.x - prevPos.x) ** 2 + (targetPos.y - prevPos.y) ** 2)
+  const distance = Math.sqrt(
+    (targetPos.x - prevPos.x) ** 2 + (targetPos.y - prevPos.y) ** 2
+  )
   const duration = Math.pow(distance, 0.25) / speed
 
-  cursor.classList.remove('tour-cursor-idle')
-  cursor.style.setProperty('--tour-cursor-move-duration', `${duration}s`)
+  cursor.classList.remove("tour-cursor-idle")
+  cursor.style.setProperty("--tour-cursor-move-duration", `${duration}s`)
   cursor.style.left = `${targetPos.x}px`
   cursor.style.top = `${targetPos.y}px`
   // Orient against the destination right away so the tooltip is already
@@ -345,7 +357,7 @@ export async function animateCursorMove(
   updateTooltipOrientation(targetPos.x, targetPos.y)
   updateTooltipSide(cursor, targetPos.x, targetPos.y)
   await new Promise<void>((resolve) => setTimeout(resolve, duration * 1000))
-  cursor.classList.add('tour-cursor-idle')
+  cursor.classList.add("tour-cursor-idle")
 }
 
 /**
@@ -374,7 +386,10 @@ export function pinCursorToElement(
   let stopped = false
   let timer = 0
   // Keep the arrow mirrored while pinned to a left-parked target.
-  getCursor().classList.toggle('tour-cursor-point-left', position === 'left-outside')
+  getCursor().classList.toggle(
+    "tour-cursor-point-left",
+    position === "left-outside"
+  )
   // Seed from the current anchor so only a *subsequent* shift repositions.
   const seed = getCoordinates(element, position)
   let lastX = seed.x
@@ -387,11 +402,14 @@ export function pinCursorToElement(
     // an equivalent node re-renders into place.
     if (document.body.contains(element)) {
       const { x, y } = getCoordinates(element, position)
-      if (Math.abs(x - lastX) > DRIFT_THRESHOLD_PX || Math.abs(y - lastY) > DRIFT_THRESHOLD_PX) {
+      if (
+        Math.abs(x - lastX) > DRIFT_THRESHOLD_PX ||
+        Math.abs(y - lastY) > DRIFT_THRESHOLD_PX
+      ) {
         lastX = x
         lastY = y
         const cursor = getCursor()
-        cursor.style.setProperty('--tour-cursor-move-duration', '0.25s')
+        cursor.style.setProperty("--tour-cursor-move-duration", "0.25s")
         cursor.style.left = `${x}px`
         cursor.style.top = `${y}px`
         updateTooltipOrientation(x, y)
@@ -408,7 +426,7 @@ export function pinCursorToElement(
   }
 
   timer = window.setTimeout(tick, POLL_MS)
-  signal.addEventListener('abort', stop, { once: true })
+  signal.addEventListener("abort", stop, { once: true })
   return stop
 }
 

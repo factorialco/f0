@@ -9,9 +9,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
     const page = await browser.newPage({
       viewport: { width: 1800, height: 1100 },
     })
-    await page.goto(
-      process.env.HOME_QA_URL || "http://127.0.0.1:5181/p/home"
-    )
+    await page.goto(process.env.HOME_QA_URL || "http://127.0.0.1:5181/p/home")
     await page.waitForTimeout(2300)
     async function check(label) {
       await page.waitForTimeout(500)
@@ -25,9 +23,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
     async function motion(label) {
       const samples = await page.evaluate(async (label) => {
         const rows = []
-        const button = document.querySelector(
-          '[aria-label="' + label + '"]'
-        )
+        const button = document.querySelector('[aria-label="' + label + '"]')
         button.click()
         for (let i = 0; i < 35; i++) {
           await new Promise(requestAnimationFrame)
@@ -57,9 +53,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright")
     await motion("Collapse all widgets")
     await motion("Expand all widgets")
     if (
-      (await page
-        .locator("[data-hybrid-composer] textarea")
-        .inputValue()) !== "Keep this draft"
+      (await page.locator("[data-hybrid-composer] textarea").inputValue()) !==
+      "Keep this draft"
     )
       throw Error("Lost draft")
   } finally {

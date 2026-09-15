@@ -113,7 +113,7 @@ Four corrections after he saw it running:
   to Slack's.
 - **"Messages" → "DMs"**, his word, Slack's word.
 - **Filled glyphs for the active item** (`navigation/filledRailIcons.tsx`). f0
-  ships no filled set for these — `icons/app` has seven one-off *Filled/Solid
+  ships no filled set for these — `icons/app` has seven one-off \*Filled/Solid
   icons and none of them is Home, Inbox, Calendar, Folders or Hub — and the
   prototype allowlist forbids importing another pack, so each one is f0's OWN
   outline redrawn solid: same 24 viewBox, same silhouette, same radii, interior

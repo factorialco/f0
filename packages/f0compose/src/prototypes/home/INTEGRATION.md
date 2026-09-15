@@ -62,10 +62,8 @@ Integrated original composer in Home content flow with the parallel module-slot 
 
 The approved local iteration replaces Home's widget rail controls and toolbar Edit with a static widget column and a dedicated `?view=widgets` editor. Personal selection and employee defaults are separate drafts with Save/Discard. New widget reuses HybridHome, conversationStore and the existing F0ClarifyingPanel. The old chat-to-widget selection and New-chat collapse behavior are superseded. See [implementation and verification](memory/2026-09-11-widget-editor-plan.md). Local preview stays on port 5181; no push or merge performed in this iteration.
 
-
 ### Widget editor visual refinements
 
 The editor now uses the native F0Dialog with opt-in embedded and compactInset behavior (4px top/right/bottom). The labeled header action opens One. Catalog rows compose F0 primitives without a collection enclosure. F0ActionBar accepts a positioned, non-scrolling anchor and portals inside it, keeping save/discard within the dialog keyboard scope. Preview scrolling belongs to an inner child. New component options and stories/tests live in packages/react; all changes remain local pending publication. See memory/2026-09-11-widget-editor-plan.md for measurements and validation limits.
-
 
 Widget catalog refinements: selected items sort first and use ticks at rest; Add/Remove actions appear on pointer entry or keyboard focus. One now opens only through New widget in the editor, including when resuming an unfinished creation. Navigation and One share the composited F0 secondary background; Calendar and widgets continue using the same HybridHome One surface.

@@ -373,7 +373,10 @@ export function GradientWaves({
       gl.uniform1f(loc.uGrain, p.grain ? 1 : 0)
       gl.uniform1f(loc.uGrainIntensity, p.grainIntensity)
       gl.uniform1f(loc.uParallax, p.parallaxStrength)
-      gl.uniform1i(loc.uEnableMouse, p.mouseInteraction && !reduced.matches ? 1 : 0)
+      gl.uniform1i(
+        loc.uEnableMouse,
+        p.mouseInteraction && !reduced.matches ? 1 : 0
+      )
       const tx = p.mouseInteraction ? target[0] : 0.5
       const ty = p.mouseInteraction ? target[1] : 0.5
       current[0] += 0.05 * (tx - current[0])
@@ -392,7 +395,8 @@ export function GradientWaves({
     }
 
     const play = () => {
-      if (visible && pageVisible && raf === 0) raf = requestAnimationFrame(frame)
+      if (visible && pageVisible && raf === 0)
+        raf = requestAnimationFrame(frame)
     }
     const pause = () => {
       if (raf !== 0) {

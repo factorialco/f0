@@ -8,7 +8,9 @@ import { documents } from "./reference/prototypes/documents/mocks/documents"
  * disagree about what exists.
  */
 export function libraryTree() {
-  const root = documents.filter((node) => !node.deleted && node.parentId === null)
+  const root = documents.filter(
+    (node) => !node.deleted && node.parentId === null
+  )
   const folders = root.filter((node) => node.kind === "folder")
   const files = root.filter((node) => node.kind !== "folder")
   return [...folders, ...files]

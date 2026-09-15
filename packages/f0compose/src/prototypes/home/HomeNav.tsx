@@ -1,5 +1,4 @@
 import {
-  Chip,
   F0AvatarPerson,
   F0Checkbox,
   F0Button,
@@ -60,9 +59,11 @@ import { hubSlug } from "./hub/hubSlug"
 import { libraryTree } from "./hub/libraryTree"
 import { InboxRow } from "./inbox/InboxRow"
 import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
+import { PresetChip } from "./inbox/PresetChip"
 import { MenuDivider, MenuRow } from "./MenuRow"
 import { FILLED_RAIL_ICONS } from "./navigation/filledRailIcons"
 import { CompanySwitcher, RailPersonalMenu } from "./navigation/RailMenus"
+import { setNavPanelOpen, useNavPanelOpen } from "./navPanelStore"
 import { useNeedsYou } from "./needsYouStore"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
 import {
@@ -109,6 +110,9 @@ type NavSectionId = "home" | "comms" | "inbox" | "cal" | "files" | "hub"
 
 const NAV_SECTION_KEY = "f0compose:home:nav-section"
 const NAV_OPEN_KEY = "f0compose:home:nav-open"
+/** The last DM read, so leaving DMs and coming back reopens it rather
+ *  than dropping you on the empty state (Angel, 2026-09-15). */
+const LAST_CHAT_KEY = "f0compose:home:last-chat"
 
 /**
  * The labels changed on 2026-09-14, the ids did not (Angel: "cambiaría
@@ -193,16 +197,6 @@ function readSection(): NavSectionId {
   return RAIL_SECTIONS.some((s) => s.id === stored)
     ? (stored as NavSectionId)
     : "home"
-}
-
-function readPanelOpen(): boolean {
-  if (typeof window === "undefined") return true
-  const stored = window.localStorage.getItem(NAV_OPEN_KEY)
-  // Home opens with no second level (Angel, 2026-09-14): the canvas is
-  // the composer, and the panel holds only the history behind it. Every
-  // other section still arrives open, and once you open Home's it stays.
-  if (stored === null) return readSection() !== "home"
-  return stored !== "closed"
 }
 
 function NavRow({
@@ -294,7 +288,7 @@ function SidebarGroup({
             than `w-full` so a trailing control still sits beside it. */}
         <button
           onClick={() => setGroupOpen(!groupOpen)}
-          className="f0c-pressable flex flex-1 cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary"
+          className="f0c-pressable flex flex-1 cursor-pointer select-none items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary"
         >
           {label}
           {/* Icon swap, not a rotate class — F0Icon drops className. */}
@@ -888,10 +882,11 @@ function InboxPresets({
   return (
     <div className="flex shrink-0 gap-1.5 overflow-x-auto px-3 pb-2">
       {options.map((option) => (
-        <Chip
+        <PresetChip
           key={option.id}
-          label={`${option.label} ${counts[option.id]}`}
-          variant={preset === option.id ? "selected" : "default"}
+          label={option.label}
+          number={counts[option.id]}
+          selected={preset === option.id}
           onClick={() => onPick(option.id)}
         />
       ))}
@@ -1297,9 +1292,7 @@ function RailItem({
             color={active ? "currentColor" : "default"}
           />
         </span>
-        <span
-          className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary"
-        >
+        <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
           {label}
         </span>
       </button>
@@ -1339,7 +1332,8 @@ export function HomeNav() {
   // /p/home, so navigating to the root leaves it altogether.
   const [searchParams, setSearchParams] = useSearchParams()
   const [section, setSection] = useState<NavSectionId>(readSection)
-  const [panelOpen, setPanelOpen] = useState<boolean>(readPanelOpen)
+  const panelOpen = useNavPanelOpen()
+  const setPanelOpen = setNavPanelOpen
   const rootRef = useRef<HTMLDivElement>(null)
   const view = searchParams.get("view")
   // Notifications and Marketplace left the rail on 2026-09-14, so Settings
@@ -1394,11 +1388,23 @@ export function HomeNav() {
     }
   }, [onboarding.screen, onboarding.hidden])
 
+  // Remember the open DM while you are in it, so the rail can restore it.
+  useEffect(() => {
+    const chat = searchParams.get("chat")
+    if (view === "messages" && chat)
+      window.localStorage.setItem(LAST_CHAT_KEY, chat)
+  }, [view, searchParams])
+
   // Browser back restores the rail selection as well as the page — for
   // every section now, not just Calendar.
   useEffect(() => {
     const restored = view ? VIEW_SECTION[view] : "home"
     if (restored) setSection(restored)
+    // Home arrives collapsed, always (Angel, 2026-09-15): its canvas is
+    // the composer, and the chat history behind it is opt-in through the
+    // navbar's expand button. Keyed on `view`, so expanding it by hand
+    // does not re-trigger this.
+    if (restored === "home") setPanelOpen(false)
   }, [view])
 
   // A section that cannot be collapsed must not load collapsed: a stored
@@ -1432,7 +1438,7 @@ export function HomeNav() {
 
   const persist = (nextSection: NavSectionId, nextOpen: boolean) => {
     window.localStorage.setItem(NAV_SECTION_KEY, nextSection)
-    window.localStorage.setItem(NAV_OPEN_KEY, nextOpen ? "open" : "closed")
+    setPanelOpen(nextOpen)
   }
 
   const pickSection = (id: NavSectionId) => {
@@ -1442,8 +1448,9 @@ export function HomeNav() {
     // 2026-09-14): a first-level item means "take me here", and hiding
     // the second level on a second click made the rail feel like a
     // toggle. Collapse is the header button's job, and only where that
-    // button exists.
-    const nextOpen = true
+    // button exists. Home is the exception: it opens collapsed, and the
+    // navbar's expand button is what reveals its history.
+    const nextOpen = id !== "home"
     setAnimateWidth(false)
     jumpLayout()
     setSection(id)
@@ -1457,7 +1464,20 @@ export function HomeNav() {
     if (id === "home") requestChatsClose()
     goHome()
     const nextView = SECTION_VIEW[id]
-    setSearchParams(nextView ? { view: nextView } : {})
+    if (!nextView) {
+      setSearchParams({})
+      return
+    }
+    const lastChat =
+      id === "comms" ? window.localStorage.getItem(LAST_CHAT_KEY) : null
+    const known =
+      lastChat &&
+      [...DIRECT_CHATS, ...CHANNEL_CHATS].some((c) => c.id === lastChat)
+    setSearchParams(
+      known && lastChat
+        ? { view: nextView, chat: lastChat }
+        : { view: nextView }
+    )
   }
 
   /**
@@ -1535,7 +1555,7 @@ export function HomeNav() {
   }
 
   return (
-    <div ref={rootRef} data-home-nav className="flex h-full min-h-0">
+    <div ref={rootRef} data-home-nav className="relative flex h-full min-h-0">
       {/* Slack's rail geometry, which is the reference Angel named:
           70px wide, 8px of top padding, 52x68 buttons 12px apart, and a
           36x36 icon chip that is the only thing carrying the hover or
@@ -1645,7 +1665,7 @@ export function HomeNav() {
             while the wrapper animates open or shut. */}
         <div className="flex h-full flex-col" style={{ width: panelWidth }}>
           <div className="flex h-[60px] shrink-0 items-center justify-between pl-3 pr-2">
-            <span className="truncate text-base font-medium text-f1-foreground">
+            <span className="select-none truncate text-base font-medium text-f1-foreground">
               {PANEL_TITLES[section]}
             </span>
             {/* gap-1 and size="md": the frame's navbar right group is
