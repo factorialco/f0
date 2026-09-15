@@ -69,7 +69,9 @@ import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { GuidedHome } from "./setup/HomeArtifacts"
 import { HomeWaves } from "./waves/HomeWaves"
+import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
+import { useWidgetCollapse } from "./windows/widgetCollapse"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
@@ -1272,6 +1274,18 @@ function HomeCanvas() {
    */
   const rightRef = useRef<HTMLDivElement>(null)
   const [rightMeasured, setRightMeasured] = useState(0)
+  /**
+   * Folded, the widget column is a 64px strip of mostly empty rail — and
+   * pushing the canvas aside for it left the composer sitting visibly
+   * left of centre (Angel, 2026-09-14). Folded it FLOATS over the canvas
+   * instead, so the input centres on the whole sheet and the little rail
+   * buttons ride on the backdrop; expanded it pushes as before.
+   */
+  const widgetIds = readSelection(profile).personal
+  const { collapsed: collapsedWidgets } = useWidgetCollapse(profile)
+  const widgetsFolded =
+    widgetIds.length === 0 ||
+    widgetIds.every((id) => collapsedWidgets.includes(id))
   useLayoutEffect(() => {
     const el = rightRef.current
     if (!el) return
@@ -1281,7 +1295,7 @@ function HomeCanvas() {
     ro.observe(el)
     return () => ro.disconnect()
   })
-  const rightWidth = hideWidgets ? 0 : rightMeasured || 384
+  const rightWidth = hideWidgets || widgetsFolded ? 0 : rightMeasured || 384
   const leftWidth = stackWidth(chats.state)
   const room = shellWidth - CANVAS_MIN_WIDTH
   const soloOverflows = (width: number) => shellWidth > 0 && width > room
@@ -1601,7 +1615,14 @@ function HomeCanvas() {
           (per Oskar) — its card lives outside the column, over the
           canvas, hanging from the navbar button that opened it. */}
         {!hideWidgets && (
-          <div ref={rightRef} className="flex h-full min-h-0 shrink-0">
+          <div
+            ref={rightRef}
+            className={
+              widgetsFolded
+                ? "absolute right-0 top-0 z-10 flex h-full min-h-0"
+                : "flex h-full min-h-0 shrink-0"
+            }
+          >
             <StaticWidgets
               onCloseConversation={
                 activeConversation && !activeConversation.homeBriefing

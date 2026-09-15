@@ -120,8 +120,10 @@ const NAV_OPEN_KEY = "f0compose:home:nav-open"
  */
 const RAIL_SECTIONS: { id: NavSectionId; label: string; icon: IconType }[] = [
   { id: "home", label: "Home", icon: HomeIcon },
-  { id: "comms", label: "DMs", icon: Messages },
+  // Inbox above DMs (Angel, 2026-09-14): what needs you comes before what
+  // someone said to you.
   { id: "inbox", label: "Inbox", icon: InboxIcon },
+  { id: "comms", label: "DMs", icon: Messages },
   { id: "cal", label: "Calendar", icon: Calendar },
   // Files earned the first level on usage (Angel, 2026-09-14). It reuses
   // the imported documents prototype, which `?view=files` already aliases.
