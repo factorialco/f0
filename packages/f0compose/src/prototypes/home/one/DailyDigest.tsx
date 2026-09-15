@@ -1,6 +1,5 @@
 import {
   CalendarEventList,
-  Widget,
   WidgetInboxList,
   WidgetSimpleList,
 } from "@factorialco/f0-react/dist/experimental"
@@ -11,6 +10,7 @@ import { useProfile } from "../profileStore"
 import { Post } from "../windows/CommunitiesWindow"
 import { COMMUNITY_POSTS } from "../windows/communityPosts"
 import { homeEvents } from "../windows/EventsWindow"
+import { HomeWidget } from "./digest/HomeWidget"
 
 /**
  * The digest, a screen below the composer (Angel, 2026-09-15): the same
@@ -66,9 +66,12 @@ export function DailyDigest() {
         </p>
       </header>
 
-      <Widget
-        header={{ title: "Needs you", count: tasks.length }}
-        action={{ label: "Go to Inbox", onClick: () => {} }}
+      <HomeWidget
+        title="Needs you"
+        count={tasks.length}
+        link={{ title: "Go to Inbox" }}
+        actions={[{ label: "Mark all as read" }, { label: "Remove widget" }]}
+        action={{ label: "Go to Inbox" }}
       >
         <WidgetInboxList
           showAllItems
@@ -79,42 +82,47 @@ export function DailyDigest() {
             module: task.module,
           }))}
         />
-      </Widget>
+      </HomeWidget>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Widget
+        <HomeWidget
           fullHeight
-          header={{ title: "Events" }}
-          // The way out is a FOOTER button, not an icon in the header:
+          title="Events"
+          // The way out is a FOOTER button and the way IN is the title:
           // f0's SlotWidget states the rule, and the header's corner
           // belongs to the widget's own menu.
-          action={{ label: "Go to Calendar", onClick: () => {} }}
+          link={{ title: "Go to Calendar" }}
+          actions={[{ label: "Configure widget" }, { label: "Remove widget" }]}
+          action={{ label: "Go to Calendar" }}
         >
           <CalendarEventList
             events={homeEvents.slice(0, MAX_EVENTS)}
             showAllItems
           />
-        </Widget>
-        <Widget
+        </HomeWidget>
+        <HomeWidget
           fullHeight
-          header={{
-            title: "Open positions",
-            count: OPEN_POSITIONS.reduce((total, row) => total + row.count, 0),
-          }}
-          action={{ label: "Go to Recruitment", onClick: () => {} }}
+          title="Open positions"
+          count={OPEN_POSITIONS.reduce((total, row) => total + row.count, 0)}
+          link={{ title: "Go to Recruitment" }}
+          actions={[{ label: "Remove widget" }]}
+          action={{ label: "Go to Recruitment" }}
         >
           <WidgetSimpleList
             showAllItems
             items={OPEN_POSITIONS.slice(0, MAX_LOCATIONS)}
           />
-        </Widget>
+        </HomeWidget>
       </div>
 
-      <Widget
-        header={{ title: "Community posts", link: { title: "Communities" } }}
+      <HomeWidget
+        title="Community posts"
+        link={{ title: "Go to Communities" }}
+        actions={[{ label: "Remove widget" }]}
+        action={{ label: "Go to Communities" }}
       >
         <Post post={COMMUNITY_POSTS[1]} />
-      </Widget>
+      </HomeWidget>
     </section>
   )
 }

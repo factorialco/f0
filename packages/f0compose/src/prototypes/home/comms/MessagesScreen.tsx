@@ -18,7 +18,7 @@ export function MessagesScreen() {
     return (
       <div className="flex h-full w-full flex-1 items-center justify-center p-6">
         <p className="text-base text-f1-foreground-secondary">
-          Select a conversation to read it.
+          Select a conversation to read it
         </p>
       </div>
     )

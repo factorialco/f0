@@ -22,7 +22,7 @@ export function InboxScreen() {
   return (
     <div className="flex h-full w-full flex-1 items-center justify-center p-6">
       <p className="text-base text-f1-foreground-secondary">
-        Select an item to read it.
+        Select an item to read it
       </p>
     </div>
   )
