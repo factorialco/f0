@@ -1,4 +1,4 @@
-import { u as W, v as je, x as Ge, n as $, y as Xe, z as Ze, A as qe, B as Ye, E as Je, G as Qe, H as et, J as tt, K as nt, L as rt, M as at, N as ot, O as ye, Q as st, R as Ce, l as it, U as ct, V as lt, W as ut, w as dt, s as ft } from "./F0CanvasPanel-CELmZbZx.js";
+import { u as W, x as je, y as Xe, o as $, z as Ge, A as Ze, B as qe, E as Ye, G as Je, H as Qe, J as et, K as tt, L as nt, M as rt, N as at, O as ot, Q as ye, R as st, U as Ce, l as it, V as ct, W as lt, X as ut, w as dt, t as ft } from "./F0CanvasPanel-C-1T9ELl.js";
 import { jsxs as S, jsx as c } from "react/jsx-runtime";
 import { forwardRef as re, useId as mt, useState as x, useRef as F, useEffect as N, useMemo as J, useCallback as T } from "react";
 import { d as H, f as ue } from "./tooltip-CMBdJvJA.js";
@@ -234,7 +234,7 @@ function Et({
     d.preventDefault(), u[g]?.focus();
   };
   return /* @__PURE__ */ S(je, { open: o, onOpenChange: s, children: [
-    /* @__PURE__ */ c(Ge, { asChild: !0, children: /* @__PURE__ */ c(
+    /* @__PURE__ */ c(Xe, { asChild: !0, children: /* @__PURE__ */ c(
       $,
       {
         variant: "ghost",
@@ -246,7 +246,7 @@ function Et({
       }
     ) }),
     /* @__PURE__ */ c(
-      Xe,
+      Ge,
       {
         container: a.current,
         side: "top",
@@ -663,11 +663,11 @@ function Mt({
   onToggleMute: B,
   onVolumeChange: j,
   onPlaybackRateChange: K,
-  onToggleFullscreen: G,
+  onToggleFullscreen: X,
   onToggleCaptions: _,
   onToggleAudioDescription: U,
   onSeek: Y,
-  download: X
+  download: G
 }) {
   const { t: p } = W(), I = g && w.length <= 1, z = l && M.length <= 1, V = Rt({
     audioLanguages: E.length,
@@ -791,15 +791,15 @@ function Mt({
             onAudioDescriptionOff: D
           }
         ) : null,
-        X ? /* @__PURE__ */ c(
+        G ? /* @__PURE__ */ c(
           $,
           {
             variant: "ghost",
             size: "sm",
             hideLabel: !0,
             icon: it,
-            label: X.label,
-            onClick: X.onClick
+            label: G.label,
+            onClick: G.onClick
           }
         ) : null,
         /* @__PURE__ */ c(
@@ -810,7 +810,7 @@ function Mt({
             hideLabel: !0,
             icon: r ? ct : lt,
             label: p(r ? "videoPlayer.exitFullscreen" : "videoPlayer.enterFullscreen"),
-            onClick: G
+            onClick: X
           }
         )
       ]
@@ -1101,14 +1101,14 @@ function Bt(e) {
       return;
     const D = () => m(!0), R = () => m(!1), B = () => m(!1), j = () => {
       b(i.volume), A(i.muted);
-    }, K = () => f(i.duration || 0), G = () => {
+    }, K = () => f(i.duration || 0), X = () => {
       xt(i.playbackRate) && w(i.playbackRate);
     }, _ = () => {
       const U = performance.now();
       U - o.current >= bt && (o.current = U, y(i.currentTime));
     };
-    return i.addEventListener("play", D), i.addEventListener("pause", R), i.addEventListener("ended", B), i.addEventListener("volumechange", j), i.addEventListener("loadedmetadata", K), i.addEventListener("ratechange", G), i.addEventListener("timeupdate", _), i.readyState >= 1 && i.duration && f(i.duration), () => {
-      i.removeEventListener("play", D), i.removeEventListener("pause", R), i.removeEventListener("ended", B), i.removeEventListener("volumechange", j), i.removeEventListener("loadedmetadata", K), i.removeEventListener("ratechange", G), i.removeEventListener("timeupdate", _);
+    return i.addEventListener("play", D), i.addEventListener("pause", R), i.addEventListener("ended", B), i.addEventListener("volumechange", j), i.addEventListener("loadedmetadata", K), i.addEventListener("ratechange", X), i.addEventListener("timeupdate", _), i.readyState >= 1 && i.duration && f(i.duration), () => {
+      i.removeEventListener("play", D), i.removeEventListener("pause", R), i.removeEventListener("ended", B), i.removeEventListener("volumechange", j), i.removeEventListener("loadedmetadata", K), i.removeEventListener("ratechange", X), i.removeEventListener("timeupdate", _);
     };
   }, [a]);
   const O = T(() => {
@@ -1211,16 +1211,16 @@ function Wt({
     () => Z(R, r)
   ), K = R.some(
     (L) => L.locale === B
-  ) ? B : Z(R, r), G = ee(
+  ) ? B : Z(R, r), X = ee(
     s?.descriptions,
     K
   ), _ = ee(
     s?.describedSrc,
     K
-  ), [U, Y] = x(!1), X = U && _ ? _ : v, p = Bt(X), I = Ut(p.videoElement, D), z = It(p.videoElement, {
+  ), [U, Y] = x(!1), G = U && _ ? _ : v, p = Bt(G), I = Ut(p.videoElement, D), z = It(p.videoElement, {
     enabled: U,
     describedSrc: _,
-    descriptions: G
+    descriptions: X
   }), V = T(() => {
     const L = p.videoRef.current;
     if (!L)
@@ -1315,7 +1315,7 @@ function Wt({
             draggable: !1,
             onContextMenu: Be,
             onClick: p.togglePlay,
-            src: X,
+            src: G,
             poster: t,
             crossOrigin: I.needsCrossOrigin || z.needsCrossOrigin ? "anonymous" : void 0,
             onLoadedData: () => p.setVideoLoaded(!0),
