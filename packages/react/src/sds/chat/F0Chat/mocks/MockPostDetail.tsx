@@ -16,11 +16,11 @@ import {
   Sparkles,
   CrossedCircle,
 } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { isVideo } from "@/sds/Home/Communities/Post/CommunityPost/video"
 import { Reactions } from "@/sds/social/Reactions"
+import { mockCopy } from "./mockCopy"
 import { MockPostAcknowledgeBar } from "./MockPostAcknowledgeBar"
 import { MockPostComments } from "./MockPostComments"
 import { type MockPostDetailProps } from "./mockPostDetailTypes"
@@ -59,7 +59,6 @@ export const MockPostDetail = ({
   searchMembers,
   onDismissAttempt,
 }: MockPostDetailProps): ReactNode => {
-  const i18n = useI18n()
   const locale = useDateFnsLocale()
   const commentInputRef = useRef<HTMLDivElement>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -72,39 +71,37 @@ export const MockPostDetail = ({
     const items: DropdownItem[] = []
     if (onEdit) {
       items.push({
-        label: i18n.t("communities.detail.edit"),
+        label: mockCopy.detail.edit,
         icon: Pencil,
         onClick: onEdit,
       })
     }
     if (onToggleComments) {
       items.push({
-        label: i18n.t(
-          interactionsOn
-            ? "communities.detail.turnInteractionsOff"
-            : "communities.detail.turnInteractionsOn"
-        ),
+        label: interactionsOn
+          ? mockCopy.detail.turnInteractionsOff
+          : mockCopy.detail.turnInteractionsOn,
         icon: CrossedCircle,
         onClick: () => void onToggleComments(),
       })
     }
     if (onOpenInsights) {
       items.push({
-        label: i18n.t("communities.detail.insights"),
+        label: mockCopy.detail.insights,
         icon: Sparkles,
         onClick: onOpenInsights,
       })
     }
     if (onDelete) {
       items.push({
-        label: i18n.t("communities.detail.delete"),
+        label: mockCopy.detail.delete,
         icon: Delete,
         critical: true,
         onClick: () => setConfirmingDelete(true),
       })
     }
     return items
-  }, [i18n, interactionsOn, onEdit, onToggleComments, onOpenInsights, onDelete])
+  }, [interactionsOn, onEdit, onToggleComments, onOpenInsights, onDelete])
 
   const canManage = post.canManage !== false && menuItems.length > 0
   const hasVideoCover = !!post.mediaUrl && isVideo(post.mediaUrl)
@@ -139,7 +136,7 @@ export const MockPostDetail = ({
                 size="md"
                 hideLabel
                 icon={EllipsisHorizontal}
-                label={i18n.t("communities.detail.postActions")}
+                label={mockCopy.detail.postActions}
               />
             </Dropdown>
           </div>
@@ -303,11 +300,10 @@ const DeletePostDialog = ({
   onCancel: () => void
   onConfirm: () => void | Promise<void>
 }): ReactNode => {
-  const i18n = useI18n()
   return (
     <div
       role="alertdialog"
-      aria-label={i18n.t("communities.detail.delete")}
+      aria-label={mockCopy.detail.delete}
       // `fixed`, not `absolute`: the post is as tall as it is, and a
       // confirmation centred in a long article lands off-screen.
       className={cn(
@@ -316,22 +312,22 @@ const DeletePostDialog = ({
     >
       <div className="flex w-full max-w-sm flex-col gap-3 rounded-xl bg-f1-background p-5 shadow-lg">
         <p className="text-lg font-medium text-f1-foreground">
-          {i18n.t("communities.detail.delete")}
+          {mockCopy.detail.delete}
         </p>
         <p className="text-sm text-f1-foreground-secondary">
-          {i18n.t("communities.detail.deleteDescription")}
+          {mockCopy.detail.deleteDescription}
         </p>
         <div className="flex justify-end gap-2 pt-1">
           <F0Button
             variant="outline"
             size="md"
-            label={i18n.t("communities.composer.cancel")}
+            label={mockCopy.composer.cancel}
             onClick={onCancel}
           />
           <F0Button
             variant="critical"
             size="md"
-            label={i18n.t("communities.detail.proceed")}
+            label={mockCopy.detail.proceed}
             onClick={() => void onConfirm()}
           />
         </div>

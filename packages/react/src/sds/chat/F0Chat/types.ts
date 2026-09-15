@@ -563,9 +563,11 @@ export type F0ChatPost = {
    */
   author?: F0ChatUser
   /**
-   * Whether the current user wrote it. Feeds the default edit/delete policy in
-   * `postActions` — NOT any alignment: a post is never tinted "mine", it takes
-   * the full width for everyone.
+   * Whether the current user wrote it. F0 reads nothing from it — `postActions`
+   * is entirely the host's, and there is no default edit/delete policy. It is
+   * here so a consumer can ask "mine?" across the whole `F0ChatItem` union
+   * without narrowing first. NOT alignment: a post is never tinted "mine", it
+   * takes the full width for everyone.
    */
   isMine?: boolean
   /** One-line headline, always visible (the card clamps it to two lines). */
@@ -677,25 +679,6 @@ export type F0ChatPostRequiredAction = {
   completedAt?: string
 }
 
-/** A comment on a post. */
-export type F0ChatPostComment = {
-  id: string
-  author: F0ChatUser
-  /** Sanitized HTML — comments carry mentions, so they are not plain text. */
-  text: string
-  createdAt: string
-  /** Whether the current user may edit or delete it. */
-  isMine?: boolean
-}
-
-/** One entry of "who has opened this post". */
-export type F0ChatPostVisit = {
-  id: string
-  /** Absent when the host cannot resolve the visitor — rendered as "Anonymous". */
-  author?: F0ChatUser
-  createdAt: string
-}
-
 /** Anything that can appear in the transcript, oldest → newest. */
 export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage | F0ChatPost
 
@@ -732,7 +715,12 @@ export type F0ChatPostAction = {
 }
 
 /**
- * What the post composer produces — the whole form, not a subset.
+ * What a post composer produces.
+ *
+ * F0's own built-in dialog fills only `title`, `description` and `mentions` —
+ * the rest is the contract a HOST's composer fills when it answers
+ * `composePost`, and the shape `createPost` will grow into. All of it is
+ * optional, so neither side has to know about the other's fields.
  *
  * Files go RAW, un-uploaded: a post's media belongs in its own storage rather
  * than the chat's attachment bucket, so reusing `uploadFiles` would leave it in

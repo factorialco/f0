@@ -5,11 +5,11 @@ import { useCallback, useMemo, useState, type ReactNode } from "react"
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { LinkProvider } from "@/lib/linkHandler"
-import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { Page } from "@/patterns/Navigation/Page"
 import { F0Toast } from "@/ui/Toast"
 import { isPost, type F0ChatCreatePostInput, type F0ChatPost } from "../types"
+import { fill, mockCopy } from "./mockCopy"
 import { MockPostComposer } from "./MockPostComposer"
 import { type MockPostDraft } from "./mockPostComposerTypes"
 import { MockPostDetail } from "./MockPostDetail"
@@ -208,7 +208,6 @@ const ScheduledPreviewPage = ({
   postId: string
 }): ReactNode => {
   const app = useMockChatApp()
-  const i18n = useI18n()
   const locale = useDateFnsLocale()
   const seed = SEED_BY_ID.get(convId)
   const scheduled = (app.scheduled[convId] ?? []).find(
@@ -271,10 +270,10 @@ const ScheduledPreviewPage = ({
           owed on this post. */}
       <F0ActionBar
         isOpen
-        label={i18n.t("chat.community.publishesAt", { when })}
+        label={fill(mockCopy.shelf.publishesAt, { when })}
         primaryActions={[
           {
-            label: i18n.t("chat.community.publishNow"),
+            label: mockCopy.shelf.publishNow,
             onClick: () => {
               app.publishScheduledNow(convId, postId)
               app.closeSurface()
@@ -283,11 +282,11 @@ const ScheduledPreviewPage = ({
         ]}
         secondaryActions={[
           {
-            label: i18n.t("communities.composer.editPost"),
+            label: mockCopy.composer.editPost,
             onClick: () => app.openComposerSurface(convId, postId),
           },
           {
-            label: i18n.t("chat.community.cancelScheduled"),
+            label: mockCopy.shelf.cancelScheduled,
             onClick: () => {
               app.cancelScheduled(convId, postId)
               app.closeSurface()
@@ -314,7 +313,6 @@ const PostBreadcrumb = ({
   title: string
   onHome: () => void
 }): ReactNode => {
-  const i18n = useI18n()
   return (
     <LinkProvider
       component={(props, ref) => (
@@ -331,7 +329,7 @@ const PostBreadcrumb = ({
       <PageHeader
         module={{
           id: "home",
-          name: i18n.t("communities.detail.home"),
+          name: mockCopy.detail.home,
           href: "/",
         }}
         breadcrumbs={[{ id: "post", label: title }]}
@@ -379,7 +377,6 @@ const ComposerPage = ({
   onNotice: (message: string) => void
 }): ReactNode => {
   const app = useMockChatApp()
-  const i18n = useI18n()
   const searchMembers = useSeedMembers(convId)
 
   const editing = postId
@@ -457,7 +454,7 @@ const ComposerPage = ({
             publishedAt: editingScheduled.at,
           })
           app.closeSurface()
-          onNotice(i18n.t("communities.composer.scheduledSuccess"))
+          onNotice(mockCopy.composer.scheduledSuccess)
           return
         }
         if (editing) {
@@ -495,7 +492,7 @@ const ComposerPage = ({
           publishedAt: at,
         })
         app.closeSurface()
-        onNotice(i18n.t("communities.composer.scheduledSuccess"))
+        onNotice(mockCopy.composer.scheduledSuccess)
       }}
       onSaveDraft={async (draft) => {
         await app.publishPost(draft.communityId ?? convId, {
@@ -503,7 +500,7 @@ const ComposerPage = ({
           publishedAt: null,
         })
         app.closeSurface()
-        onNotice(i18n.t("communities.composer.draftSuccess"))
+        onNotice(mockCopy.composer.draftSuccess)
       }}
       onCancel={app.closeSurface}
     />

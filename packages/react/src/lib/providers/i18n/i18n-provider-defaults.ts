@@ -400,9 +400,6 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    // How long the turn has been thinking, shown beside the step that is
-    // running. Two keys rather than one unbounded second count, because "137s"
-    // reads badly past a couple of minutes — the consumer picks.
     thinkingElapsedSeconds: "{{seconds}}s",
     thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
     attribution: "Suggested by One",
@@ -485,12 +482,6 @@ export const defaultTranslations = {
       exporting: "Exporting…",
     },
     dashboardItem: {
-      /**
-       * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-       * override it — factorial renders it as plain "Ask" for the widget and
-       * insight-card buttons). This menu entry needs the product name spelled
-       * out, so it owns its own key.
-       */
       askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
@@ -573,8 +564,6 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
-    // Shown where the composer would be on a read-only channel. Hosts that can
-    // name the poster override it per channel (`channel.readOnlyNotice`).
     readOnly: "You can't send messages in this conversation",
     online: "Online",
     muted: "Muted",
@@ -582,8 +571,6 @@ export const defaultTranslations = {
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
-    // The picker lives in F0Chat and is used only while having a conversation;
-    // everywhere else in the product keeps the emoji-mart one.
     emojiPicker: {
       search: "Search emoji",
       frequentlyUsed: "Frequently used",
@@ -607,7 +594,6 @@ export const defaultTranslations = {
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
     removeNamedFile: "Remove {{name}}",
-    // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
     messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
@@ -618,8 +604,6 @@ export const defaultTranslations = {
     transcriptionError: "Couldn't transcribe the audio. Try again.",
     sent: "Sent",
     read: "Read",
-    // Plural shape (one/other) so other languages can diverge — selected by the
-    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
     readBy: {
       one: "Read by {{count}}",
       other: "Read by {{count}}",
@@ -631,26 +615,19 @@ export const defaultTranslations = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
-    // Shared-location attachments (map preview card + reply quote descriptor).
     location: "Location",
-    // Voice notes (mic in the composer records + sends audio, no transcript).
     voiceNote: "Voice note",
     sendVoiceNote: "Send voice note",
     sendingVoiceNote: "Sending voice note…",
-    // Delivery-state indicators beside your own bubble (icon labels + the
-    // failed message's reduced actions menu).
     sending: "Sending…",
     notSent: "Not sent",
     retry: "Retry",
     moreActions: "Message actions",
-    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
     pin: "Pin",
     unpin: "Unpin",
     info: "Info",
     viewProfile: "View profile",
-    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
-    // for a group-wide ping (localize the word, e.g. es "aquí").
     mentionEveryone: "here",
     mentionEveryoneDescription: "Notify everyone in this group",
     reply: "Reply",
@@ -658,16 +635,12 @@ export const defaultTranslations = {
     download: "Download",
     downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
-    // Editing your own message (within the edit window). `editing` heads the
-    // composer chip; `edited` is the muted marker after an edited message body.
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
-    // Shown as the quoted sender's name when the replied-to message is your own.
     you: "You",
-    // In-chat image lightbox.
     openImage: "Open image",
     imagePreview: "Image preview",
     closePreview: "Close",
@@ -678,8 +651,6 @@ export const defaultTranslations = {
     documentPreview: "Document preview",
     videoPlayerLabel: "Video player: {{name}}",
     loadingVideo: "Loading video: {{name}}",
-    // Attachment previews in reply quotes + the composer chip (a lone file shows
-    // its real name instead of a count).
     photo: "Photo",
     photoCount: {
       one: "{{count}} photo",
@@ -695,12 +666,6 @@ export const defaultTranslations = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
-    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
-    // are replaced with React nodes (`@name` hover-card chips) by the component
-    // via token split — NOT through `t(key, args)`, whose interpolation is
-    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
-    // @Raúl" / "…and 5 more") so every language words the conjunction its own
-    // way. Plural shape mirrors `readBy`.
     system: {
       memberAdded: {
         one: "{{members}} was added to the group",
@@ -714,7 +679,6 @@ export const defaultTranslations = {
         one: "{{members}} left the group",
         other: "{{members}} left the group",
       },
-      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
       membersWithLast: "{{names}} and {{last}}",
       membersWithMore: "{{names}} and {{count}} more",
     },
@@ -734,23 +698,15 @@ export const defaultTranslations = {
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
     loadingOlder: "Loading earlier messages…",
-    // ── Community channels ───────────────────────────────────────────────
-    // A community's items are posts, so every surface that counts or names
-    // them says "post" rather than "message". Same plural shape as `readBy`.
     newPosts: "New posts",
     newPostsCount: {
       one: "{{count}} new post",
       other: "{{count}} new posts",
     },
-    // `UnreadBadge`'s accessible name. It used to be an English literal built
-    // in the component; these are the same two sentences, translatable.
     unreadMentionCount: {
       one: "{{count}} unread, mentions you",
       other: "{{count}} unread, mentions you",
     },
-    // The post card's own chrome. `in` joins the author to the community
-    // ("Marcus Bell in Company news") and is a separate key because the word
-    // order around a name is not the same in every language.
     post: {
       in: "in",
       comment: "Comment",
@@ -764,9 +720,6 @@ export const defaultTranslations = {
       },
     },
     community: {
-      // Where the composer would be, for a reader who cannot publish. Hosts
-      // that can name who CAN post override it per channel
-      // (`channel.readOnlyNotice`) — this is only the generic fallback.
       readOnly: "You can't post in this community",
       writePost: "Write a post…",
       newPost: "New post",
@@ -775,177 +728,21 @@ export const defaultTranslations = {
       postBodyPlaceholder: "Share something with the community…",
       publish: "Publish",
       cancel: "Cancel",
-      // Confirmation for dismissing a composer with text in it. A post is a
-      // page of writing, so it does not vanish on a stray Escape.
       discardTitle: "Discard this post?",
       discardDescription: "What you've written won't be saved.",
       discard: "Discard",
       keepEditing: "Keep editing",
       publishError: "Couldn't publish this post",
-      emptyTitle: "No posts yet",
-      emptyDescription: "Posts shared in this community will appear here.",
-      emptyDescriptionCanPost: "Be the first to post here.",
-      // ── The shelf: pinned posts ───────────────────────────────────────
-      // `pinnedPost` is the card's own badge; the rest is the shelf's chip,
-      // its segment and its list.
       pinnedPost: "Pinned post",
       pinnedPosts: "Pinned",
-      pinnedPostsCount: {
-        one: "{{count}} pinned post",
-        other: "{{count}} pinned posts",
-      },
-      pinPost: "Pin post",
       unpinPost: "Unpin post",
       goToPost: "Go to post",
-      noPinnedPosts: "No pinned posts",
-      noPinnedPostsDescription:
-        "Pin a post and it stays at the top of this community.",
-      // ── The shelf: scheduled posts ────────────────────────────────────
       scheduledPosts: "Scheduled",
-      scheduledPostsCount: {
-        one: "{{count}} scheduled post",
-        other: "{{count}} scheduled posts",
-      },
       scheduledEvent: "Event",
-      /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
-      publishesAt: "Publishes {{when}}",
-      noScheduledPosts: "Nothing scheduled",
-      noScheduledPostsDescription:
-        "Posts you schedule will wait here until their time.",
-      scheduledActions: "Scheduled post actions",
-      publishNow: "Publish now",
-      cancelScheduled: "Cancel",
-      // ── The shelf: your own drafts ────────────────────────────────────
       draftPosts: "Drafts",
-      draftPostsCount: {
-        one: "{{count}} draft",
-        other: "{{count}} drafts",
-      },
-      /** Where a scheduled row prints its date, a draft prints this. */
       draftUntitled: "Untitled post",
       draftSavedAt: "Saved {{when}}",
-      publishDraft: "Publish",
-      deleteDraft: "Delete draft",
-      // The shelf itself.
       shelfLabel: "Pinned, scheduled and draft posts",
-    },
-  },
-  // ── Communities: the post composer and the post detail ────────────────────
-  // These two screens are replicas of the product's own `/dashboard/post/new`
-  // and `/communities/post/:id`, so the copy is the product's, word for word.
-  // They live outside `chat` because neither screen belongs to the chat — the
-  // chat is only one of the places they open from.
-  communities: {
-    composer: {
-      createPost: "Create post",
-      createEvent: "Create event",
-      editPost: "Edit post",
-      basicInformation: "Basic information",
-      postSettings: "Post settings",
-      // Cover
-      postCover: "Post cover",
-      addMedia: "Drag and drop or click here",
-      addMediaSubtitle: "any image, video or GIF",
-      addMediaSize: "1200x600px",
-      deletePhoto: "Delete photo",
-      deleteVideo: "Delete video",
-      coverActions: "Cover options",
-      // Title + body
-      title: "Title",
-      titlePlaceholder: "e.g. World Mental Health Day",
-      description: "Description",
-      descriptionPlaceholder: "Share what's special about it",
-      attachmentsSizePerPost: "Up to 150 MB in attachments per post",
-      previousAttachments: "Previously added attachments",
-      // Event
-      isEventLabel: "This is an event",
-      isEventDescription:
-        "Select this to include a date, time, and location for this event.",
-      eventStartDate: "Event start date",
-      eventStartTime: "Start time",
-      eventLocation: "Event location",
-      eventLocationPlaceholder: "Where will this take place?",
-      // Required action
-      requireAction: "Require action",
-      requireActionDescription:
-        "Select how you want to track that users have taken the required action",
-      actionType: "Action type",
-      actionTypePlaceholder: "Select action type",
-      actionTypeAcknowledge: "Acknowledge post",
-      actionTypeAcknowledgeDescription:
-        "Employees read and acknowledge the post",
-      actionTypeWatchVideo: "Watch video",
-      actionTypeWatchVideoDescription: "Employees watch the entire video",
-      actionTypeClickedLink: "Clicked a link",
-      actionTypeClickedLinkDescription:
-        "Employees click the first link in the post",
-      actionTypeComingSoon: "Coming soon",
-      // Publish / schedule / draft
-      continue: "Continue",
-      publishTitle: "Publish",
-      publishDescription:
-        "When publishing the post, it will be visible in the dashboard of each employee.",
-      publish: "Publish",
-      selectCommunity: "Select community",
-      allowCommentsAndReactions: "Allow comments and reactions.",
-      sendEmailNotification: "Send email notification",
-      schedulePost: "Schedule post",
-      scheduleDate: "Date",
-      scheduleTime: "Time",
-      confirm: "Confirm",
-      cancel: "Cancel",
-      saveAsDraft: "Save as draft",
-      save: "Save",
-      // Validation + outcomes. `cantBeEmpty` reads as a sentence fragment
-      // because the product renders it after the field's own name.
-      cantBeEmpty: "can't be empty",
-      invalidInput: "Invalid input. Only alphanumeric characters are allowed",
-      publishedSuccess: "The post has been published",
-      scheduledSuccess: "The post has been scheduled",
-      draftSuccess: "The post has been saved as draft",
-      publishError: "There was an error creating the post, please try again.",
-    },
-    detail: {
-      postActions: "Post actions",
-      edit: "Edit post",
-      delete: "Delete post",
-      deleteDescription:
-        "Are you sure you want to delete this post? This action cannot be undone.",
-      proceed: "Proceed",
-      turnInteractionsOff: "Turn comments and reactions off",
-      turnInteractionsOn: "Turn comments and reactions on",
-      insights: "Insights",
-      // Visits
-      visits: {
-        one: "Visit",
-        other: "Visits",
-      },
-      postViews: "Post views",
-      anonymous: "Anonymous",
-      // Comments
-      comments: {
-        one: "{{count}} comment",
-        other: "{{count}} comments",
-      },
-      commentPlaceholder: "Click here to write a comment...",
-      submit: "Submit",
-      deleteComment: "Delete comment",
-      deleteCommentDescription:
-        "Are you sure you want to delete this comment? This action cannot be undone.",
-      editComment: "Edit",
-      // Acknowledge
-      acknowledgeRequired: "Post acknowledgement required",
-      acknowledge: "I acknowledge",
-      acknowledgeLater: "Acknowledge later",
-      acknowledgedOn: "Acknowledged on {{date}}, at {{time}}",
-      closePostTitle: "Close post?",
-      closePostDescription:
-        "You haven't acknowledged this post yet. You can acknowledge it later.",
-      closePost: "Close post",
-      continueReading: "Continue reading",
-      close: "Close",
-      // The first crumb of an open post — the product's "Inicio".
-      home: "Home",
     },
   },
   dataChart: {
@@ -1280,19 +1077,14 @@ export const defaultTranslations = {
     stepOf: "Step {{current}} of {{total}}",
   },
   widgets: {
-    /** Turns a widget over to read what it is telling you (Home's `info`). */
     whatThisMeans: "What this info means?",
-    /** The button on that other side, which turns it back. */
     gotIt: "Got it",
-    /** The widget menu's own items, and the dialogs they open. */
     editParams: "Edit params",
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
     configureWidget: "Configure {{title}}",
-    /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
-    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
     cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {

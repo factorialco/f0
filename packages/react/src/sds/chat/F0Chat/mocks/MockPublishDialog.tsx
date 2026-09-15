@@ -1,8 +1,8 @@
 import { type ReactNode } from "react"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Select } from "@/components/F0Select"
-import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { mockCopy } from "./mockCopy"
 import { type MockCommunityOption } from "./mockPostComposerTypes"
 
 /**
@@ -38,32 +38,30 @@ export const PublishDialog = ({
   onPublish: () => void
   onClose: () => void
 }): ReactNode => {
-  const i18n = useI18n()
-
   return (
     <F0Dialog
       isOpen
       onClose={onClose}
       width="sm"
-      title={i18n.t("communities.composer.publishTitle")}
-      description={i18n.t("communities.composer.publishDescription")}
+      title={mockCopy.composer.publishTitle}
+      description={mockCopy.composer.publishDescription}
       primaryAction={{
-        label: i18n.t("communities.composer.publish"),
+        label: mockCopy.composer.publish,
         onClick: onPublish,
         // No community, no post — the one thing this dialog exists to collect.
         disabled: submitting || !communityId,
         loading: submitting,
       }}
       secondaryAction={{
-        label: i18n.t("communities.composer.cancel"),
+        label: mockCopy.composer.cancel,
         onClick: onClose,
         disabled: submitting,
       }}
     >
       <div className="flex flex-col gap-4">
         <F0Select
-          label={i18n.t("communities.composer.selectCommunity")}
-          placeholder={i18n.t("communities.composer.selectCommunity")}
+          label={mockCopy.composer.selectCommunity}
+          placeholder={mockCopy.composer.selectCommunity}
           value={communityId ?? undefined}
           onChange={onCommunityChange}
           disabled={submitting}
@@ -74,13 +72,13 @@ export const PublishDialog = ({
           }))}
         />
         <F0Checkbox
-          title={i18n.t("communities.composer.allowCommentsAndReactions")}
+          title={mockCopy.composer.allowCommentsAndReactions}
           checked={allowCommentsAndReactions}
           onCheckedChange={onAllowInteractionsChange}
           disabled={submitting}
         />
         <F0Checkbox
-          title={i18n.t("communities.composer.sendEmailNotification")}
+          title={mockCopy.composer.sendEmailNotification}
           checked={sendNotifications}
           onCheckedChange={onSendNotificationsChange}
           disabled={submitting}

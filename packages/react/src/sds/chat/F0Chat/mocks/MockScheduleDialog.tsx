@@ -2,8 +2,8 @@ import { useState, type ReactNode } from "react"
 import { F0DatePicker } from "@/components/F0DatePicker"
 import { F0Select } from "@/components/F0Select"
 import { F0TextInput } from "@/components/F0TextInput"
-import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { mockCopy } from "./mockCopy"
 import { type MockCommunityOption } from "./mockPostComposerTypes"
 import {
   asDayValue,
@@ -36,7 +36,6 @@ export const ScheduleDialog = ({
   onConfirm: (at: string) => void
   onClose: () => void
 }): ReactNode => {
-  const i18n = useI18n()
   const now = new Date()
   const [date, setDate] = useState<Date | undefined>(now)
   const [time, setTime] = useState(timeOf(now))
@@ -48,9 +47,9 @@ export const ScheduleDialog = ({
       isOpen
       onClose={onClose}
       width="sm"
-      title={i18n.t("communities.composer.schedulePost")}
+      title={mockCopy.composer.schedulePost}
       primaryAction={{
-        label: i18n.t("communities.composer.confirm"),
+        label: mockCopy.composer.confirm,
         onClick: () => {
           if (!date) {
             return
@@ -61,15 +60,15 @@ export const ScheduleDialog = ({
         loading: submitting,
       }}
       secondaryAction={{
-        label: i18n.t("communities.composer.cancel"),
+        label: mockCopy.composer.cancel,
         onClick: onClose,
         disabled: submitting,
       }}
     >
       <div className="flex flex-col gap-4">
         <F0Select
-          label={i18n.t("communities.composer.selectCommunity")}
-          placeholder={i18n.t("communities.composer.selectCommunity")}
+          label={mockCopy.composer.selectCommunity}
+          placeholder={mockCopy.composer.selectCommunity}
           value={communityId ?? undefined}
           onChange={onCommunityChange}
           disabled={submitting}
@@ -81,7 +80,7 @@ export const ScheduleDialog = ({
         <div className="flex items-end gap-4">
           <div className="flex-1">
             <F0DatePicker
-              label={i18n.t("communities.composer.scheduleDate")}
+              label={mockCopy.composer.scheduleDate}
               value={date ? asDayValue(date) : undefined}
               onChange={(next) => setDate(dayValueOf(next) ?? undefined)}
               minDate={now}
@@ -92,7 +91,7 @@ export const ScheduleDialog = ({
           <div className="flex-1">
             <F0TextInput
               type="time"
-              label={i18n.t("communities.composer.scheduleTime")}
+              label={mockCopy.composer.scheduleTime}
               value={time}
               onChange={setTime}
               disabled={submitting}

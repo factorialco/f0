@@ -18,15 +18,17 @@ import {
   type F0ChatItem,
   type F0ChatMessage,
   type F0ChatPost,
-  type F0ChatPostComment,
   type F0ChatPostEvent,
   type F0ChatPostRequiredAction,
   type F0ChatReaction,
-  type F0ChatPostVisit,
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
 import { demoChance, demoDelay } from "./demoTiming"
+import {
+  type F0ChatPostComment,
+  type F0ChatPostVisit,
+} from "./mockPostDetailTypes"
 import {
   type ConvState,
   ME,

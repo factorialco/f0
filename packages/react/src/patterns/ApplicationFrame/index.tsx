@@ -106,7 +106,6 @@ function _ApplicationFrame({
             {
               id: AI_VIEW_ID,
               side: ai.side ?? sidePanel?.side ?? "right",
-              render: () => <F0AiChat />,
             },
           ]
         : []),
