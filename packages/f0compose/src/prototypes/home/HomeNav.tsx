@@ -1335,7 +1335,7 @@ function RailItem({
         <span
           className={`flex size-9 items-center justify-center rounded-lg ${
             active
-              ? "bg-f1-background-secondary"
+              ? "bg-f1-background-secondary text-f1-icon-bold"
               : "group-hover:bg-f1-background-secondary"
           }`}
         >
@@ -1350,10 +1350,13 @@ function RailItem({
               inside a 36px chip, which is what made the rail read small
               beside Slack's. Filled when active, outline otherwise —
               see `filledRailIcons`. */}
+          {/* Bold when active, inherited from the chip: F0Icon's own
+              color prop compiles a class out of f0's dist, which this
+              prototype's Tailwind pass never scans. */}
           <F0Icon
             icon={filled && active ? filled : icon}
             size="lg"
-            color="default"
+            color={active ? "currentColor" : "default"}
           />
         </span>
         <span
