@@ -5,21 +5,20 @@ import { GradientWaves } from "./GradientWaves"
  * Factorial's ramp — his example's roles kept, its colours swapped for
  * ours.
  *
- * All three steps of radical, darkest furthest away:
- *
- *   horizon  #9C112F  radical 70, the deep haze the waves fade into
+ *   horizon  #FCFCFC  the content sheet itself, so the field has no
+ *                     edge — it simply stops being visible
  *   wave     #C11538  radical 60, the rolling bodies
  *   crest    #E61942  radical 50, the nearest crests
  *
- * The layer is oversized and pulled up so the horizon lands a quarter
- * down the canvas: the composer floats ON the wash rather than capping
- * it.
+ * The layer matches the canvas exactly: oversizing it to move the
+ * horizon also stretched the shader's aspect, which is what made the
+ * waves read as too big and off-centre.
  */
 export function HomeWaves() {
   return (
-    <div className="pointer-events-none absolute inset-x-0 -top-[88%] z-0 h-[188%]">
+    <div className="pointer-events-none absolute inset-0 z-0">
       <GradientWaves
-        horizonColor="#9C112F"
+        horizonColor="#FCFCFC"
         waveColor="#C11538"
         crestColor="#E61942"
         speed={0.1}
@@ -30,8 +29,8 @@ export function HomeWaves() {
         turbulence={12.5}
         tilt={1.3}
         zoom={0.85}
-        height={5.2}
-        fogDepth={15}
+        height={2.2}
+        fogDepth={34}
         detail="medium"
         brightness={1.5}
         opacity={0.27}
