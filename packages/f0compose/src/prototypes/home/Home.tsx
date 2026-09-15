@@ -8,7 +8,14 @@ import {
   Breadcrumbs,
   F0AvatarModule,
 } from "@factorialco/f0-react/dist/experimental"
-import { Ellipsis, Reaction, Settings } from "@factorialco/f0-react/icons/app"
+import {
+  Ellipsis,
+  PalmTree,
+  Reaction,
+  Settings,
+  Sparkles,
+  Timer,
+} from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -63,6 +70,7 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
+import { OneHomeRecommendation } from "./one/OneHomeRecommendation"
 import { PanelExpand } from "./PanelCollapse"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
@@ -1638,6 +1646,27 @@ function HomeCanvas() {
                 className="relative z-10 order-2 w-[712px] max-w-full shrink-0"
               >
                 <div data-hybrid-target />
+                {/* What One suggests you do next, under the input rather
+                    than inside it (Angel, 2026-09-15). */}
+                {homeLanding && (
+                  <div className="flex flex-wrap items-center gap-2 px-1">
+                    <OneHomeRecommendation
+                      variant="primary"
+                      icon={Sparkles}
+                      label="Summarise my week"
+                    />
+                    <OneHomeRecommendation
+                      variant="outline"
+                      icon={Timer}
+                      label="Review pending hours"
+                    />
+                    <OneHomeRecommendation
+                      variant="ghost"
+                      icon={PalmTree}
+                      label="Request time off"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
