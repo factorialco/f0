@@ -27,6 +27,28 @@ const icons: Record<string, IconType> = {
   dark: Appearance,
   system: Desktop,
 }
+
+/**
+ * The value the grouping stories start out with.
+ *
+ * Grouping sorts the first page by the group field, so a record with a low id
+ * is not on it — the trigger has no label for the selection and falls back to
+ * "…". `defaultItem` is how a consumer names a pre-selected value the first
+ * page does not carry, so the stories that ship with one selected pass it.
+ */
+const GROUPED_PRESELECTED_VALUE = "42"
+
+const groupedPreselectedItem = () => {
+  const item = mockItems.find((i) => i.value === GROUPED_PRESELECTED_VALUE)
+  return item
+    ? {
+        value: item.value,
+        label: item.label,
+        avatar: item.avatar,
+        description: item.description,
+      }
+    : undefined
+}
 const items = [
   {
     id: "light",
@@ -814,7 +836,10 @@ export const WithDataSourceGrouping: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    // Without this the trigger reads "…": grouping sorts the first page by the
+    // group field, so this record is not in it and there is no label to show.
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -896,7 +921,8 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
