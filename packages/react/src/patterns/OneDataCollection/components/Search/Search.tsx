@@ -322,9 +322,15 @@ export const Search = ({
 
     if (e.key === "Enter") {
       e.preventDefault()
-      const suggestion = suggestionItems[activeIndex]
+      // Only a row the user actually moved to wins over what they typed.
+      const suggestion =
+        activeIndex >= 0 ? suggestionItems[activeIndex] : undefined
       if (suggestion) {
         submitQuery(suggestion)
+        return
+      }
+      if (text) {
+        submitQuery(text)
       }
     }
   }
@@ -363,7 +369,7 @@ export const Search = ({
     // consumer — the caller decides what to do with it.
     if (e.key === "Enter" && text) {
       e.preventDefault()
-      onSubmit?.(text)
+      submitQuery(text)
     }
   }
 
@@ -429,7 +435,7 @@ export const Search = ({
                       onChange={(e) => {
                         onChange(e.target.value)
                         setShowResults(true)
-                        setActiveIndex(0)
+                        setActiveIndex(-1)
                       }}
                       className="h-full w-full appearance-none rounded border-none bg-f1-background py-2 pl-7 text-base text-f1-foreground"
                       initial={{ opacity: 0 }}
