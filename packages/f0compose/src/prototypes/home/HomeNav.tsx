@@ -9,19 +9,17 @@ import {
 import { SearchBar } from "@factorialco/f0-react/dist/experimental"
 import {
   Calendar,
-  ChartLine,
   Check,
   ChevronDown,
   ChevronRight,
-  Clock,
   Comment,
   Delete,
   Ellipsis,
+  Feed,
   Files,
   Filter,
   Folder,
   Folders,
-  Graph,
   Headset,
   Messages,
   Office,
@@ -60,8 +58,9 @@ import {
 import { hubSlug } from "./hub/hubSlug"
 import { InboxRow } from "./inbox/InboxRow"
 import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
-import { MenuDivider, MenuRow, MenuSurface } from "./MenuRow"
+import { MenuDivider, MenuRow } from "./MenuRow"
 import { FILLED_RAIL_ICONS } from "./navigation/filledRailIcons"
+import { BackgroundTasks } from "./navigation/localIcons"
 import { CompanySwitcher, RailPersonalMenu } from "./navigation/RailMenus"
 import { useNeedsYou } from "./needsYouStore"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
@@ -591,66 +590,6 @@ function RecentsControl({
   )
 }
 
-/**
- * The Home panel's "New ⌄": a named row with a chevron, because the one
- * thing it used to say was the one thing it could not answer — new what.
- * Conversation is the only live destination; Routine and Report follow
- * the panel's existing convention for undesigned surfaces.
- */
-function NewMenu({ onConversation }: { onConversation: () => void }) {
-  const buttonRef = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
-
-  const toggle = () => {
-    const rect = buttonRef.current?.getBoundingClientRect()
-    if (!rect) return
-    setPos((open) => (open ? null : { left: rect.left, top: rect.bottom + 4 }))
-  }
-
-  const menu = pos && (
-    <>
-      <div className="fixed inset-0 z-40" onClick={() => setPos(null)} />
-      <div
-        className="fixed z-50"
-        style={{ left: pos.left, top: pos.top, transformOrigin: "top left" }}
-      >
-        <MenuSurface className="w-[200px]">
-          <MenuRow
-            icon={<F0Icon icon={Comment} size="md" color="default" />}
-            label="Conversation"
-            onClick={() => {
-              setPos(null)
-              onConversation()
-            }}
-          />
-          <MenuRow
-            icon={<F0Icon icon={Clock} size="md" color="default" />}
-            label="Routine"
-            onClick={() => setPos(null)}
-          />
-          <MenuRow
-            icon={<F0Icon icon={Graph} size="md" color="default" />}
-            label="Report"
-            onClick={() => setPos(null)}
-          />
-        </MenuSurface>
-      </div>
-    </>
-  )
-
-  return (
-    <div ref={buttonRef} className="flex w-full">
-      {menu && createPortal(menu, document.body)}
-      <NavRow
-        icon={Plus}
-        label="New"
-        onClick={toggle}
-        trailing={<F0Icon icon={ChevronDown} size="xs" color="default" />}
-      />
-    </div>
-  )
-}
-
 /** Home section (Figma 2621:23055): quick actions + Pinned + the live
  *  Recents (wired to conversations started from the ONE prompt bar). */
 function HomePanelBody() {
@@ -698,32 +637,16 @@ function HomePanelBody() {
     <div className="flex h-full min-h-0 flex-col px-3 pb-3">
       <div className="home-panel-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
         <div className="flex flex-col gap-0.5">
-          {/* "New" on its own said nothing (Angel, 2026-09-14: "New what?
-              Le falta un nombre, o si esto debería abrir un select…
-              pondría un chevron a la derecha"), and it starts three
-              different things, so it is a menu now. */}
-          <NewMenu
-            onConversation={() => {
-              // A clean canvas, not just a change of view (per Oskar).
-              // Home owns the widgets stack and lives outside this tree, so
-              // this goes through the same channel the reply-driven windows
-              // use. Collapse first: on a module screen the widgets are
-              // unmounted, so they close instantly and Home is reached with
-              // the stack already empty.
-              requestWindowsCollapse()
-              openScreen(null)
-            }}
-          />
           {/* Agents is GONE from this panel (per Oskar, 2026-09-09) — the
             row and the group below it. */}
-          <NavRow icon={Clock} label="Routines" />
+          <NavRow icon={BackgroundTasks} label="Routines" />
           {/* Activity left the panel HEADER on 2026-09-14 (Angel: "me
             chirría el botón de analytics ahí arriba"). It is a row now,
             beside the other things One keeps for you — and not folded
             into Artifacts, because it is a log of what One DID, not
             something it produced. */}
           <NavRow
-            icon={ChartLine}
+            icon={Feed}
             label="Activity"
             active={activeId === null && view === "activity"}
             onClick={() => openScreen("activity")}
@@ -741,6 +664,22 @@ function HomePanelBody() {
           />
         </div>
         <PanelDivider />
+        {/* "New chat", not a "New ⌄" menu (Angel, 2026-09-14) — one thing,
+            named, and sitting where what it creates will land. */}
+        <NavRow
+          icon={Plus}
+          label="New chat"
+          onClick={() => {
+            // A clean canvas, not just a change of view (per Oskar).
+            // Home owns the widgets stack and lives outside this tree, so
+            // this goes through the same channel the reply-driven windows
+            // use. Collapse first: on a module screen the widgets are
+            // unmounted, so they close instantly and Home is reached with
+            // the stack already empty.
+            requestWindowsCollapse()
+            openScreen(null)
+          }}
+        />
         {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}

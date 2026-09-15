@@ -11,9 +11,8 @@ import {
   Page,
   PageHeader,
 } from "@factorialco/f0-react/dist/experimental"
-import { useCallback, useContext, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
-import { AgentEntryContext, AskFactorialAction } from "../AskFactorial"
 import { activityListOptions } from "./activityListOptions"
 import { type ActivityRecord } from "./model"
 import { advanceReview, resolveActivity, useActivity } from "./state"
@@ -38,7 +37,6 @@ function ActivityList({
 }
 
 export function ActivityScreen() {
-  const one = useContext(AgentEntryContext)
   const rows = useActivity()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
@@ -75,7 +73,6 @@ export function ActivityScreen() {
               breadcrumbs={[{ id: "activity", label: "Activity" }]}
             />
           </F0Box>
-          <AskFactorialAction onClick={one.open} />
         </F0Box>
       }
     >

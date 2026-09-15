@@ -67,7 +67,7 @@ import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
-import { HomeSessionBar, GuidedHome } from "./setup/HomeArtifacts"
+import { GuidedHome } from "./setup/HomeArtifacts"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
@@ -1461,10 +1461,22 @@ function HomeCanvas() {
               // turn away from the navbar for no reason. The greeting
               // canvas still wants it — that one is a page, not a thread.
               fullWidthView ? "" : activeConversation ? "px-4" : "px-4 pt-6"
+            } ${
+              // Home centres its content and its composer as ONE block
+              // (Angel, 2026-09-14: the input "should be centered in the
+              // middle of the screen"). With the greeting gone there is
+              // nothing pinning the column to the top, and an input on
+              // the floor of an empty canvas read as a leftover.
+              showPromptBar ? "justify-center" : ""
             }`}
           >
             <div
-              className={`flex min-h-0 w-full min-w-0 flex-1 flex-col items-center ${
+              className={`flex min-h-0 w-full min-w-0 flex-col items-center ${
+                // On Home the content takes only the room it needs, so
+                // the block it forms with the composer can sit in the
+                // middle; everywhere else it still fills the canvas.
+                showPromptBar ? "max-h-full flex-none" : "flex-1"
+              } ${
                 fullWidthView
                   ? "overflow-hidden"
                   : "home-canvas-scroll overflow-y-auto"
@@ -1477,9 +1489,6 @@ function HomeCanvas() {
                   role="region"
                   aria-label="Conversation"
                 >
-                  <div className="f0c-canvas-surface sticky top-0 z-10 mx-auto w-[712px] max-w-full">
-                    <HomeSessionBar conversation={activeConversation} />
-                  </div>
                   {activeConversation.homeBriefing ||
                   (activeConversation.homeSetup &&
                     !activeConversation.homeSetup.purpose) ? (

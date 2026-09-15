@@ -30,8 +30,11 @@ export function StaticWidgets({
   const hasExpanded = ids.some((id) => !collapsed.includes(id))
   return (
     <div className="flex h-full min-h-0 shrink-0" data-static-widgets>
-      <div className="relative w-8 shrink-0">
-        <div className="absolute right-0 top-3 z-10 flex items-start whitespace-nowrap">
+      <div className="flex min-h-0 flex-col">
+        {/* The controls sit ON TOP of the widgets, not in a gutter beside
+            them (Angel, 2026-09-14) — they act on the column, so they
+            belong over it. */}
+        <div className="flex shrink-0 items-center justify-end whitespace-nowrap pt-3">
           <F0Button
             label="Edit widgets"
             icon={Pencil}
@@ -52,8 +55,6 @@ export function StaticWidgets({
           )}
           <HomeToolbarActions openWindows={ids} showEdit={false} />
         </div>
-      </div>
-      <div className="flex min-h-0 flex-col">
         <div className="min-h-0 flex-1">
           <WidgetRail
             items={ids}
