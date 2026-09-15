@@ -71,6 +71,7 @@ import {
   goHome,
   openConversation,
   renameConversation,
+  requestWindowsCollapse,
   useConversations,
   type Conversation,
 } from "./one/conversationStore"
@@ -605,6 +606,7 @@ function RecentsControl({
 function HomePanelBody() {
   const profile = useProfile()
   const { conversations, activeId } = useConversations()
+  const [, setSearchParams] = useSearchParams()
   const [recentsFilter, setRecentsFilter] =
     useState<RecentsFilter>(readRecentsFilter)
 
@@ -638,9 +640,22 @@ function HomePanelBody() {
   return (
     <div className="flex h-full min-h-0 flex-col px-3 pb-3">
       <div className="home-panel-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-        {/* Only the chats you have had (Angel, 2026-09-14). Routines and
-            Activity are in Tools › AI, Artifacts in Files, and a new chat
-            starts from the composer that is already on screen. */}
+        {/* New chat on top, then the chats you have had (Angel,
+            2026-09-14). Routines and Activity are in Tools › AI,
+            Artifacts in Files. */}
+        <NavRow
+          icon={Plus}
+          label="New chat"
+          onClick={() => {
+            // A clean canvas, not just a change of view (per Oskar).
+            // Home owns the widgets stack and lives outside this tree, so
+            // this goes through the same channel the reply-driven windows
+            // use.
+            requestWindowsCollapse()
+            goHome()
+            setSearchParams({})
+          }}
+        />
         {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}

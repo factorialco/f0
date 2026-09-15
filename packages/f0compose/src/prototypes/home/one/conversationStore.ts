@@ -205,6 +205,8 @@ type ConversationState = {
   insightsId?: string
 }
 
+import { seedConversations } from "./seedConversations"
+
 const STORAGE_KEY = "f0compose:home:conversations"
 
 /** Recents survives reloads; the active conversation intentionally
@@ -213,7 +215,18 @@ function loadPersisted(): Conversation[] {
   if (typeof window === "undefined") return []
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
+    // First run: a few threads already behind you, so the Home panel has
+    // a history to show (Angel, 2026-09-14). Written through immediately,
+    // so deleting one sticks like any other.
+    if (!raw) {
+      const seeded = seedConversations(Date.now())
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+      } catch {
+        // Persistence is best-effort; the seed still shows this session.
+      }
+      return seeded
+    }
     const parsed = JSON.parse(raw) as Conversation[]
     // A reload can interrupt a pending reply — never rehydrate a stuck
     // spinner or a half-streamed reasoning block. Conversations persisted

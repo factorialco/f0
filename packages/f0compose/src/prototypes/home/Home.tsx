@@ -68,7 +68,7 @@ import { PreferencesScreen } from "./preferences/PreferencesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { GuidedHome } from "./setup/HomeArtifacts"
-import { HomeWaves } from "./waves/HomeWaves"
+import { HomeBackdrop } from "./waves/HomeBackdrop"
 import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { useWidgetCollapse } from "./windows/widgetCollapse"
@@ -1418,7 +1418,7 @@ function HomeCanvas() {
         {/* The backdrop spans the WHOLE canvas, widget column included
             (Angel, 2026-09-14): the widgets float on it as cards, they do
             not cut it off. Behind everything, deaf to the pointer. */}
-        {homeLanding && <HomeWaves />}
+        {homeLanding && <HomeBackdrop />}
         {/* Left-hand Comms stack — conversations opened from the nav. Same
           window system as the widgets, mirrored (Figma 2707:406513). */}
         <ChatsColumn
