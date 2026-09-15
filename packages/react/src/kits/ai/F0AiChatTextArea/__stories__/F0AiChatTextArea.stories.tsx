@@ -21,7 +21,6 @@ import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
-  AiChatFileIntake,
   F0AiChatWelcomeCard,
   PendingContext,
   PendingQuote,
@@ -37,6 +36,10 @@ import type {
   AiChatTextAreaUsageLimits,
   F0AiChatTextAreaSubmitPayload,
 } from "../types"
+import {
+  partialUploadRecoveryStory,
+  preparedFileIntakeStory,
+} from "./F0AiChatTextArea.uploadLifecycle"
 
 const ROTATING_PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",
@@ -397,7 +400,7 @@ const Wrapper = ({
   })
 
   return (
-    <div className="flex flex-col gap-4 w-[640px]">
+    <div className="flex w-[640px] flex-col gap-4">
       <F0AiChatTextArea
         draftKey={draftKey}
         ref={composerRef}
@@ -443,8 +446,8 @@ const Wrapper = ({
       />
       {submissions.length > 0 ? (
         <div className="rounded-md border border-f1-border p-3 text-sm">
-          <div className="font-medium pb-2">Last submission</div>
-          <pre className="text-xs whitespace-pre-wrap">
+          <div className="pb-2 font-medium">Last submission</div>
+          <pre className="whitespace-pre-wrap text-xs">
             {JSON.stringify(submissions[submissions.length - 1], null, 2)}
           </pre>
         </div>
@@ -475,6 +478,18 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
 }
 
+export const PartialUploadRecovery: Story = {
+  tags: ["upload-lifecycle"],
+  render: partialUploadRecoveryStory.render,
+  play: partialUploadRecoveryStory.play,
+}
+
+export const PreparedFileIntake: Story = {
+  tags: ["upload-lifecycle"],
+  render: preparedFileIntakeStory.render,
+  play: preparedFileIntakeStory.play,
+}
+
 export const DraftScopes: Story = {
   render: () => {
     const [scope, setScope] = useState("first")
@@ -494,8 +509,6 @@ export const DraftScopes: Story = {
   },
 }
 
-// Interactive story to inspect the textarea ↔ clarifying panel transition.
-// Click "Trigger clarifying mode" to see the swap animation.
 export const TransitionDemo: Story = {
   render: () => {
     const ref = useRef<HTMLDivElement>(null)
@@ -507,10 +520,10 @@ export const TransitionDemo: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 w-[640px]">
+      <div className="flex w-[640px] flex-col gap-4">
         <button
           onClick={toggle}
-          className="self-start rounded border border-f1-border bg-f1-background px-3 py-1.5 text-sm font-medium text-f1-foreground hover:bg-f1-background-hover transition-colors"
+          className="self-start rounded border border-f1-border bg-f1-background px-3 py-1.5 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover"
         >
           {clarifyingQuestion
             ? "← Volver al textarea"
@@ -533,10 +546,6 @@ export const TransitionDemo: Story = {
   },
 }
 
-// The composer with no inset of its own, for hosts that already own the
-// spacing (a home hero, a card). The dashed frame stands in for that host:
-// note the field now runs edge to edge, and the focus glow needs the host to
-// leave it a few pixels of room and not clip overflow.
 export const NoPadding: Story = {
   args: {
     padding: "none",
@@ -582,7 +591,7 @@ export const WithFooter: Story = {
     isWelcomeScreen: true,
     fullscreen: true,
     footer: (
-      <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
+      <p className="text-center text-sm font-medium text-f1-foreground-tertiary">
         Powered by Factorial AI · v0.1.0
       </p>
     ),
@@ -594,7 +603,7 @@ export const WithDisclaimerAndFooter: Story = {
     disclaimer: DISCLAIMER,
     isWelcomeScreen: true,
     footer: (
-      <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
+      <p className="text-center text-sm font-medium text-f1-foreground-tertiary">
         Powered by Factorial AI · v0.1.0
       </p>
     ),
@@ -607,7 +616,7 @@ export const FullscreenWelcome: Story = {
     isWelcomeScreen: true,
     fullscreen: true,
     footer: (
-      <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
+      <p className="text-center text-sm font-medium text-f1-foreground-tertiary">
         Powered by Factorial AI · v0.1.0
       </p>
     ),
@@ -985,145 +994,5 @@ export const Everything: Story = {
     disclaimer: DISCLAIMER,
     initialPendingContext: PENDING_CONTEXT,
     initialPendingQuote: PENDING_QUOTE,
-  },
-}
-
-export const PartialUploadRecovery: Story = {
-  tags: ["upload-lifecycle"],
-  render: () => {
-    const intake = useRef<AiChatFileIntake | null>(null)
-    const composer = useRef<HTMLDivElement>(null)
-    const failed = useRef(false)
-    const [attempts, setAttempts] = useState<string[]>([])
-    return (
-      <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          onClick={() =>
-            void intake
-              .current?.([
-                new globalThis.File(["good"], "good.pdf", {
-                  type: "application/pdf",
-                }),
-                new globalThis.File(["retry"], "retry.pdf", {
-                  type: "application/pdf",
-                }),
-              ])
-              .catch(() => undefined)
-          }
-        >
-          Prepare two files
-        </button>
-        <output aria-label="Upload attempts">{attempts.join(", ")}</output>
-        <F0AiChatTextArea
-          ref={composer}
-          onStop={() => {}}
-          onSubmit={() => {}}
-          onProcessFilesRef={(handler) => {
-            intake.current = handler
-          }}
-          fileAttachments={{
-            onUploadFiles: async (files) => {
-              setAttempts((current) => [...current, files[0].name])
-              if (files[0].name === "retry.pdf" && !failed.current) {
-                failed.current = true
-                throw new Error("Offline")
-              }
-              return files.map((file) => ({
-                url: "https://example.com/" + file.name,
-                filename: file.name,
-                mimetype: file.type,
-              }))
-            },
-          }}
-        />
-      </div>
-    )
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Prepare two files" })
-    )
-    const retry = await canvas.findByRole("button", {
-      name: /retry.*retry.pdf/i,
-    })
-    await userEvent.click(retry)
-    await waitFor(() =>
-      expect(canvas.getByLabelText("Upload attempts")).toHaveTextContent(
-        "good.pdf, retry.pdf, retry.pdf"
-      )
-    )
-    await waitFor(() =>
-      expect(
-        canvas.queryByRole("button", { name: /retry.*retry.pdf/i })
-      ).not.toBeInTheDocument()
-    )
-  },
-}
-
-export const PreparedFileIntake: Story = {
-  tags: ["upload-lifecycle"],
-  render: () => {
-    const intake = useRef<AiChatFileIntake | null>(null)
-    const composer = useRef<HTMLDivElement>(null)
-    const file = useRef(
-      new globalThis.File(["prepared"], "prepared.pdf", {
-        type: "application/pdf",
-      })
-    )
-    const [accepted, setAccepted] = useState(false)
-    return (
-      <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          onClick={() =>
-            void intake
-              .current?.([file.current], {
-                preparedFiles: [
-                  {
-                    url: "https://example.com/prepared.pdf",
-                    filename: "prepared.pdf",
-                    mimetype: "application/pdf",
-                  },
-                ],
-                onPrepared: () => {
-                  setAccepted(true)
-                  return accepted
-                },
-              })
-              .catch(() => undefined)
-          }
-        >
-          {accepted ? "Accept prepared file" : "Adopt prepared file"}
-        </button>
-        <F0AiChatTextArea
-          ref={composer}
-          onStop={() => {}}
-          onSubmit={() => {}}
-          onProcessFilesRef={(handler) => {
-            intake.current = handler
-          }}
-          fileAttachments={{
-            onUploadFiles: async () => {
-              throw new Error("Adoption must not upload")
-            },
-          }}
-        />
-      </div>
-    )
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Adopt prepared file" })
-    )
-    await canvas.findByText("prepared.pdf")
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Accept prepared file" })
-    )
-    await waitFor(() =>
-      expect(canvas.queryByText("prepared.pdf")).not.toBeInTheDocument()
-    )
   },
 }
