@@ -180,7 +180,11 @@ export function DotGrid({
         const dx = dot.x - pointer.x
         const dy = dot.y - pointer.y
         const dist = Math.hypot(dx, dy)
-        const t = dist > p.proximity ? 0 : 1 - dist / p.proximity
+        // Eased, not linear: a straight ramp meant even the closest dot
+        // sat halfway between the two colours, so the tint never read as
+        // radical (Angel, 2026-09-14).
+        const falloff = dist > p.proximity ? 0 : 1 - dist / p.proximity
+        const t = Math.pow(falloff, 0.55)
         const r = Math.round(base[0] + (active[0] - base[0]) * t)
         const g = Math.round(base[1] + (active[1] - base[1]) * t)
         const b = Math.round(base[2] + (active[2] - base[2]) * t)

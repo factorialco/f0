@@ -10,7 +10,18 @@ import { DotGrid } from "./DotGrid"
  */
 export function HomeBackdrop() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0">
+    <div
+      className="pointer-events-none absolute inset-0 z-0"
+      style={{
+        // Densest around the composer, gone by the edges (Angel,
+        // 2026-09-14): the grid is there to give the input a place to
+        // sit, not to tile the whole sheet.
+        maskImage:
+          "radial-gradient(60% 55% at 50% 50%, black 0%, black 30%, transparent 100%)",
+        WebkitMaskImage:
+          "radial-gradient(60% 55% at 50% 50%, black 0%, black 30%, transparent 100%)",
+      }}
+    >
       <DotGrid
         dotSize={3}
         gap={26}

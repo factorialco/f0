@@ -237,7 +237,13 @@ const FULL_BLEED_CSS = `
      The !important flags are needed throughout this block: f0 styles the
      form with Tailwind utilities that win over these selectors in
      practice, and the component exposes no className to do it properly. */
-  [data-one-composer] form { transition: border-color 140ms ease; }
+  [data-one-composer] form {
+    transition: border-color 140ms ease;
+    /* At rest the border is f0's DEFAULT (Angel, 2026-09-14) — the
+       composer sits on a patterned backdrop now, and a secondary edge
+       disappeared into the dots. */
+    border-color: hsl(var(--neutral-30)) !important;
+  }
   /* Gated to fine pointers: a touch tap fires :hover and would leave the
      composer stuck a step darker until the next tap elsewhere. */
   @media (hover: hover) and (pointer: fine) {
