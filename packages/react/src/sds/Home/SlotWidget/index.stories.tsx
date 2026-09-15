@@ -681,17 +681,19 @@ export const SegmentedDescriptions: Story = {
 }
 
 /**
- * THE SECOND LINE, READABLE IN FULL. `describeOnHover` puts each row's
- * description in a tooltip as well as drawing it — for a list whose second line
- * carries facts a reader acts on and cannot always fit them. Hover the first
- * row: the ellipsis is not the end of what it had to say.
+ * WHAT THE ROW HAD NO ROOM FOR. A row's `tooltipDescription` is its own line of
+ * plain text, drawn as a tooltip over the whole row — hover the first two.
  *
- * Unlike `compact`, which trades the line for the tooltip, this costs the row
- * nothing — the parts stay drawn and the critical one stays red. The last row
- * has nothing to say and so opens no tooltip; an empty one would be a promise
- * of information that isn't there.
+ * Written separately rather than repeating the second line, which is the point:
+ * the line states the facts you triage by ("2 days overdue · €1,240"), the
+ * tooltip the fuller thing it abbreviates. Unlike `compact`, which trades the
+ * line away to get a tooltip, this costs the row nothing — the parts stay drawn
+ * and the critical one stays red.
+ *
+ * The last row wrote none and so hovers silently; an empty tooltip would be a
+ * promise of information that isn't there.
  */
-export const DescribeOnHover: Story = {
+export const TooltipDescriptions: Story = {
   args: {
     header: { title: "Needs you", count: 3 },
     slots: [
@@ -699,7 +701,6 @@ export const DescribeOnHover: Story = {
         {
           left: "icon",
           descriptionOptional: true,
-          describeOnHover: true,
           clickBehavior: "link",
         },
         [
@@ -709,8 +710,9 @@ export const DescribeOnHover: Story = {
             description: [
               { text: "2 days overdue", critical: true },
               { text: "€1,240 for flights" },
-              { text: "Submitted by Ada Lovelace" },
             ],
+            tooltipDescription:
+              "Flights and two nights in Berlin for the Q3 partner summit, submitted by Ada Lovelace on 12 September",
             avatar: { icon: Receipt, color: "viridian" },
             href: "/expenses/1",
           },
@@ -718,6 +720,8 @@ export const DescribeOnHover: Story = {
             id: "short",
             title: "Client dinner",
             description: [{ text: "€82" }],
+            tooltipDescription:
+              "Dinner with the Meridian account team after the renewal call",
             avatar: { icon: Receipt, color: "purple" },
             href: "/expenses/2",
           },
