@@ -1551,6 +1551,11 @@ const F0SelectComponent = forwardRef(function Select<
                     // both put two icons 4px apart on one trigger. Options keep
                     // their icons for the rows regardless.
                     hideItemIcon={!!icon}
+                    // `withTriggerTooltip` below already wraps this whole
+                    // trigger in a tooltip that reads out the label and the
+                    // full selection. A second one on the clipped text would
+                    // share the hover target and fight it — see the prop.
+                    noTooltip
                   />
                 ) : null}
               </button>

@@ -23,13 +23,37 @@ type SelectValueProps = {
    * trigger. Options keep their icons for the rows either way.
    */
   hideItemIcon?: boolean
+  /**
+   * Whether to leave the clipped-text tooltip out.
+   *
+   * Set when the TRIGGER already carries a tooltip of its own — the `field`
+   * variant wraps it in one that spells out the field's label and the whole
+   * selection. Both then hang off the same hover target, and Radix closes every
+   * open tooltip whenever another opens, so the two took turns on a single
+   * hover: one bubble appeared, flashed out as the other opened, and the
+   * selection was read back twice. The trigger's tooltip already says
+   * everything this one would, so this is the one that goes.
+   *
+   * The `inline` variant has no trigger tooltip, so there it stays: it is the
+   * only way back to text the layout has cut off.
+   */
+  noTooltip?: boolean
 }
 
-function SelectedCount({ count }: { count: number }) {
+function SelectedCount({
+  count,
+  noTooltip,
+}: {
+  count: number
+  noTooltip?: boolean
+}) {
   const i18n = useI18n()
   return (
     <div className="flex w-full items-center gap-1 text-left">
-      <OneEllipsis className="min-w-0 flex-1 text-f1-foreground">
+      <OneEllipsis
+        className="min-w-0 flex-1 text-f1-foreground"
+        noTooltip={noTooltip}
+      >
         {`${count} ${count === 1 ? i18n.status.selected.singular : i18n.status.selected.plural}`.toLowerCase()}
       </OneEllipsis>
     </div>
@@ -39,9 +63,11 @@ function SelectedCount({ count }: { count: number }) {
 function MultiSelectDisplay({
   selection,
   totalSelectedCount,
+  noTooltip,
 }: {
   selection: F0SelectItemObject<string>[]
   totalSelectedCount: number
+  noTooltip?: boolean
 }) {
   const labels = selection.map((item) => item.selectedLabel ?? item.label)
   const { allFit, containerRef } = useLabelsOverflow(labels)
@@ -49,7 +75,7 @@ function MultiSelectDisplay({
   if (!allFit) {
     return (
       <div ref={containerRef} className="flex w-full items-center text-left">
-        <SelectedCount count={totalSelectedCount} />
+        <SelectedCount count={totalSelectedCount} noTooltip={noTooltip} />
       </div>
     )
   }
@@ -74,7 +100,11 @@ function SelectedMultiple({
   selection,
   totalSelectedCount,
   allSelected,
-}: Pick<SelectValueProps, "selection" | "totalSelectedCount" | "allSelected">) {
+  noTooltip,
+}: Pick<
+  SelectValueProps,
+  "selection" | "totalSelectedCount" | "allSelected" | "noTooltip"
+>) {
   const i18n = useI18n()
   const selectedCount = totalSelectedCount ?? selection.length
 
@@ -85,7 +115,10 @@ function SelectedMultiple({
   if (allSelected === true) {
     return (
       <div className="flex w-full items-center gap-1 text-left">
-        <OneEllipsis className="min-w-0 flex-1 text-f1-foreground">
+        <OneEllipsis
+          className="min-w-0 flex-1 text-f1-foreground"
+          noTooltip={noTooltip}
+        >
           {`${i18n.status.selected.all} (${selectedCount})`}
         </OneEllipsis>
       </div>
@@ -93,13 +126,14 @@ function SelectedMultiple({
   }
 
   if (selection.length === 0 && selectedCount > 0) {
-    return <SelectedCount count={selectedCount} />
+    return <SelectedCount count={selectedCount} noTooltip={noTooltip} />
   }
 
   return (
     <MultiSelectDisplay
       selection={selection}
       totalSelectedCount={selectedCount}
+      noTooltip={noTooltip}
     />
   )
 }
@@ -109,7 +143,14 @@ function SelectedMultiple({
  */
 export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
   function SelectValue(
-    { selection, multiple, totalSelectedCount, allSelected, hideItemIcon },
+    {
+      selection,
+      multiple,
+      totalSelectedCount,
+      allSelected,
+      hideItemIcon,
+      noTooltip,
+    },
     ref
   ) {
     if (multiple) {
@@ -118,6 +159,7 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
           selection={selection}
           totalSelectedCount={totalSelectedCount}
           allSelected={allSelected}
+          noTooltip={noTooltip}
         />
       )
     }
@@ -130,6 +172,7 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
           <OneEllipsis
             tag="span"
             className="text-left text-f1-foreground-secondary"
+            noTooltip={noTooltip}
           >
             ...
           </OneEllipsis>
@@ -168,7 +211,11 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
             <F0Icon icon={selectedItem.icon} />
           </div>
         ) : null}
-        <OneEllipsis tag="span" className="text-left text-f1-foreground">
+        <OneEllipsis
+          tag="span"
+          className="text-left text-f1-foreground"
+          noTooltip={noTooltip}
+        >
           {/* `selectedLabel` when the item carries one: out here there is no
               group header or sibling to read the row's short label against. */}
           {selectedItem.selectedLabel ?? selectedItem.label}
