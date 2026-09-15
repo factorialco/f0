@@ -1147,6 +1147,7 @@ function HomeCanvas() {
   )
   const windows = useWindows()
   const chats = useChats()
+
   // The rail's running timer lives in the nav's tree and cannot reach
   // this one, so it bumps a counter and each bump toggles the clock-in
   // card beside it (Angel, 2026-09-15). The widgets column is the static
@@ -1211,6 +1212,46 @@ function HomeCanvas() {
     !!activeConversation?.homeBriefing ||
     !!(activeConversation?.homeSetup && !activeConversation.homeSetup.purpose)
   const homeLanding = showPromptBar && (!activeConversation || homeSession)
+
+  /**
+   * The composer sits OUTSIDE the scroller so it can hold the midline,
+   * which also meant it stayed put while the digest scrolled past it
+   * (Angel, 2026-09-15). Binding it to the scroll offset gives it the
+   * behaviour it would have had in flow: it rides up and out of the way,
+   * fading as it goes. Written straight to the node, so a scroll never
+   * costs a React render.
+   */
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const promptBarRef = useRef<HTMLDivElement>(null)
+  const spacerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    const bar = promptBarRef.current
+    if (!scroller || !bar) return
+    // The spacer above the composer is what centres it, and it is also
+    // what keeps the digest penned into the bottom half. Both it and the
+    // composer are pulled up by the scroll, so the whole canvas reads as
+    // one scrolling page.
+    const spacer = spacerRef.current
+    const room = spacer?.getBoundingClientRect().height ?? 0
+    const follow = () => {
+      const offset = scroller.scrollTop
+      const lift = Math.min(offset, room)
+      bar.style.transform = offset ? `translateY(${-offset}px)` : ""
+      bar.style.opacity = String(Math.max(0, 1 - offset / 220))
+      bar.style.pointerEvents = offset > 200 ? "none" : ""
+      scroller.style.marginTop = lift ? `${-lift}px` : ""
+    }
+    follow()
+    scroller.addEventListener("scroll", follow, { passive: true })
+    return () => {
+      scroller.removeEventListener("scroll", follow)
+      scroller.style.marginTop = ""
+      bar.style.transform = ""
+      bar.style.opacity = ""
+      bar.style.pointerEvents = ""
+    }
+  }, [homeLanding, showPromptBar])
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
@@ -1609,8 +1650,11 @@ function HomeCanvas() {
                 — this spacer above, the content scroller below — always
                 split the leftover room equally, so the input stays
                 centred however long the briefing runs. */}
-            {showPromptBar && <div className="order-1 w-full flex-1" />}
+            {showPromptBar && (
+              <div ref={spacerRef} className="order-1 w-full flex-1" />
+            )}
             <div
+              ref={scrollerRef}
               className={`flex min-h-0 w-full min-w-0 flex-1 flex-col items-center ${
                 showPromptBar ? "order-3" : ""
               } ${
@@ -1717,6 +1761,7 @@ function HomeCanvas() {
             {/* The Home composer slot must not reserve space on module pages. */}
             {showPromptBar && (
               <div
+                ref={promptBarRef}
                 data-home-promptbar
                 className="relative z-10 order-2 w-[712px] max-w-full shrink-0"
               >
