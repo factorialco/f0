@@ -15,12 +15,17 @@
  *   3. Untranslated copy — the branch must not add user-visible string literals
  *      that bypass the i18n layer (check-untranslated-copy.ts, same policy in
  *      CI). Its own escape hatch is the inline `i18n-exempt` comment.
+ *   4. Inline styles — the branch must not add `style={...}` props or `<style>`
+ *      elements; styling comes from Tailwind classes (check-inline-styles.ts,
+ *      same policy in CI). Its own escape hatch is the inline `styles-exempt`
+ *      comment. `src/ui/` is out of scope.
  *
  * Escape hatches (e.g. pushing WIP to a personal branch):
  *   F0_SKIP_PREFLIGHT=1 git push          # skip every check once
  *   SKIP_RED_GREEN=1 git push             # skip only the bugfix gate
  *   SKIP_NEW_COMPONENT_DOD=1 git push     # skip only the new-component gate
  *   SKIP_UNTRANSLATED_COPY=1 git push     # skip only the i18n gate
+ *   SKIP_INLINE_STYLES=1 git push         # skip only the inline-styles gate
  *
  * The CI gates still run on the PR (with the `skip-red-green` /
  * `skip-new-component-dod` labels as their escape hatches), so skipping here
@@ -38,6 +43,7 @@ import {
   overlayFilesFrom,
   redGreenVerdict,
 } from "./check-bugfix-red-green"
+import { runGate as inlineStylesGate } from "./check-inline-styles"
 import {
   checkNewComponents,
   gatherSignals,
@@ -123,6 +129,14 @@ function checkUntranslatedCopy(): boolean {
   return ok
 }
 
+function checkInlineStyles(): boolean {
+  const ok = inlineStylesGate()
+  if (!ok) {
+    consola.log("  To push anyway (e.g. WIP): SKIP_INLINE_STYLES=1 git push")
+  }
+  return ok
+}
+
 function main(): void {
   if (process.env.F0_SKIP_PREFLIGHT === "1") {
     consola.warn("F0_SKIP_PREFLIGHT=1 — skipping pre-push preflight.")
@@ -165,6 +179,12 @@ function main(): void {
     consola.warn("SKIP_UNTRANSLATED_COPY=1 — skipping the i18n copy gate.")
   } else {
     ok = checkUntranslatedCopy() && ok
+  }
+
+  if (process.env.SKIP_INLINE_STYLES === "1") {
+    consola.warn("SKIP_INLINE_STYLES=1 — skipping the inline-styles gate.")
+  } else {
+    ok = checkInlineStyles() && ok
   }
 
   process.exit(ok ? 0 : 1)
