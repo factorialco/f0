@@ -69,8 +69,8 @@ export const F0AiChatUsageLimitsButton = ({
             aria-haspopup="dialog"
             className={cn(
               "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-transparent p-0",
-              "hover:bg-f1-background-secondary",
-              open && "bg-f1-background-secondary",
+              "hover:bg-f1-background-secondary-hover",
+              open && "bg-f1-background-secondary-hover",
               focusRing()
             )}
           >
