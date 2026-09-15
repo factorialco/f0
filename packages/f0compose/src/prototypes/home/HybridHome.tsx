@@ -376,7 +376,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking ? "auto" : expandedComposer ? 216 : 168,
+                        height: asking ? "auto" : expandedComposer ? 192 : 144,
                         transition:
                           "height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
                       }

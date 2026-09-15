@@ -10,11 +10,10 @@ import {
 } from "@factorialco/f0-react/dist/experimental"
 import {
   Ellipsis,
-  PalmTree,
+  Feed,
   Reaction,
   Settings,
-  Sparkles,
-  Timer,
+  SolidPlay,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
@@ -1652,18 +1651,13 @@ function HomeCanvas() {
                   <div className="flex flex-wrap items-center gap-2 px-1">
                     <OneHomeRecommendation
                       variant="primary"
-                      icon={Sparkles}
-                      label="Summarise my week"
+                      icon={SolidPlay}
+                      label="Clock-in"
                     />
                     <OneHomeRecommendation
                       variant="outline"
-                      icon={Timer}
-                      label="Review pending hours"
-                    />
-                    <OneHomeRecommendation
-                      variant="ghost"
-                      icon={PalmTree}
-                      label="Request time off"
+                      icon={Feed}
+                      label="Get daily digest"
                     />
                   </div>
                 )}
