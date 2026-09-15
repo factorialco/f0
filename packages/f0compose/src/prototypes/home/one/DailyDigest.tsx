@@ -57,7 +57,7 @@ export function DailyDigest() {
       aria-label="Daily digest"
       className="flex w-[712px] max-w-full shrink-0 flex-col gap-4 pb-16 pt-10"
     >
-      <header className="flex flex-col gap-1">
+      <header className="mb-6 flex flex-col gap-1">
         <h2 className="text-2xl font-semibold text-f1-foreground">
           Daily digest
         </h2>

@@ -1797,10 +1797,14 @@ function HomeCanvas() {
                   <div ref={pinRef} className="w-full shrink-0">
                     <div
                       ref={firstScreenRef}
-                      // No min-height here: at 100% of the pinned box it would be as
-                      // tall as the box and could never stick. Its height is
-                      // measured to one viewport instead.
-                      className="sticky top-0 flex w-full flex-col items-center justify-center"
+                      // No min-height here: at 100% of the pinned box it
+                      // would be as tall as the box and could never
+                      // stick. Its height is measured to one viewport
+                      // instead. The top padding is the floating navbar's
+                      // own height: the input centres in the room you can
+                      // actually see, not under the bar (Angel,
+                      // 2026-09-15).
+                      className="sticky top-0 flex w-full flex-col items-center justify-center pt-[60px]"
                     >
                       <div
                         data-home-promptbar
