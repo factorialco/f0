@@ -1100,6 +1100,19 @@ function HomeCanvas() {
   // Only Home owns an in-flow composer slot. Module chats use HybridHome’s side panel.
   const showPromptBar = screenView === null
   /**
+   * Landing on Home is JUST the composer (Angel, 2026-09-14: "remove the
+   * things below, leave just the chat there"). The briefing and the
+   * Needs-you list are what One produces once you ask it something — on
+   * arrival they were answering a question nobody had asked yet.
+   * A real thread still renders: that IS the chat.
+   */
+  const homeSession =
+    !!activeConversation?.homeBriefing ||
+    !!(
+      activeConversation?.homeSetup && !activeConversation.homeSetup.purpose
+    )
+  const homeLanding = showPromptBar && (!activeConversation || homeSession)
+  /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
    * 2026-09-08: "al entrar en cualquier seccion y abrir una ventana,
@@ -1481,7 +1494,7 @@ function HomeCanvas() {
                   : "home-canvas-scroll overflow-y-auto"
               }`}
             >
-              {activeConversation ? (
+              {homeLanding ? null : activeConversation ? (
                 <div
                   data-home-inline-conversation
                   className="flex w-full min-w-0 flex-col"
