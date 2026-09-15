@@ -24,9 +24,18 @@
  * Usage:
  *   tsx .scripts/check-lint-debt.ts             # gate over src/ (exit 1 on drift)
  *   tsx .scripts/check-lint-debt.ts src/a.tsx   # gate over these files only
+ *   tsx .scripts/check-lint-debt.ts --changed   # gate over what the branch touched
  *   tsx .scripts/check-lint-debt.ts --verbose   # + every warning
  *   tsx .scripts/check-lint-debt.ts --json      # machine-readable
  *   tsx .scripts/check-lint-debt.ts --update    # rewrite the baseline
+ *
+ * CI runs `--changed`, not the whole tree. A full run judges a PR against a
+ * baseline that main has moved under: a run only becomes stale, never wrong, but
+ * a PR merges on the merge ref CI last saw, so debt added or fixed on main after
+ * that point lands unmeasured and the next PR to run a full gate fails for code
+ * it never opened. Scoping to the branch's own files removes that class of
+ * failure without losing anything, since a file can only gain debt by being
+ * edited.
  *
  * The pre-commit hook passes the staged paths, the same way the format and lint
  * hooks do. It cannot ask git itself: a git hook runs with GIT_DIR and
@@ -151,6 +160,60 @@ export function lintablePaths(paths: string[]): string[] {
   return paths
     .map((path) => toPosix(path))
     .filter((path) => path.startsWith("src/") && LINTED_EXTENSIONS.test(path))
+}
+
+/**
+ * Of the paths handed in, the ones to lint and the ones to judge. They differ
+ * for a deleted file: oxlint cannot read it, but its baseline entry still has to
+ * go, and only a comparison that knows the file was in scope asks for that.
+ */
+export function selectPaths(paths: string[]): {
+  scope: string[]
+  toLint: string[]
+} {
+  const scope = lintablePaths(paths)
+  return {
+    scope,
+    toLint: scope.filter((file) => existsSync(resolve(PKG_DIR, file))),
+  }
+}
+
+/**
+ * The ref `--changed` diffs against. A `pull_request` checkout is the merge
+ * commit, whose first parent is the exact main tip the branch was merged with,
+ * so it needs no fetch beyond `fetch-depth: 2`. Anywhere else there is no merge
+ * commit and origin/main is the useful answer.
+ */
+function baseRef(): string {
+  if (process.env.BASE_REF) {
+    return process.env.BASE_REF
+  }
+  const head = spawnSync("git", ["rev-list", "--parents", "-n", "1", "HEAD"], {
+    cwd: PKG_DIR,
+    encoding: "utf-8",
+  })
+  const parents = head.stdout.trim().split(" ").length - 1
+  return parents > 1 ? "HEAD^1" : "origin/main"
+}
+
+/**
+ * Paths under src/ the branch touched, package-relative. Against the working
+ * tree rather than HEAD: in CI the two are the same, and locally it means the
+ * edit you are about to commit counts.
+ */
+function changedFiles(): string[] {
+  const base = baseRef()
+  const result = spawnSync(
+    "git",
+    ["diff", "--name-only", "--relative", base, "--", "src"],
+    { cwd: PKG_DIR, encoding: "utf-8" }
+  )
+  if (result.status !== 0) {
+    throw new Error(
+      `git diff against ${base} failed. Is the history deep enough?\n${result.stderr}`
+    )
+  }
+  return result.stdout.split("\n").filter(Boolean).map(toPosix)
 }
 
 /**
@@ -355,7 +418,8 @@ function reportFixed(result: CheckResult): boolean {
  * `blockOnFixed` says whether a debt REDUCTION should fail. It must in CI,
  * which is what forces the baseline to shrink with the fix. In the pre-commit
  * hook it must not: blocking a commit for improving the code is the wrong
- * lesson, and CI asks for the same update anyway.
+ * lesson, and CI asks for the same update anyway. CI runs `--changed`, so the
+ * reductions it can see are the branch's own.
  */
 export function reportResult(
   errors: Finding[],
@@ -382,16 +446,32 @@ function main(): void {
   const wants = (flag: string) => flags.has(flag)
   const given = args.filter((arg) => !arg.startsWith("--"))
 
-  const scope = given.length > 0 ? lintablePaths(given) : undefined
-  if (scope && scope.length === 0) {
-    consola.success("Lint debt: none of those paths are linted.")
+  const changed = wants("--changed")
+  if (changed && given.length > 0) {
+    consola.error("--changed takes no paths.")
+    process.exit(1)
+  }
+
+  const selection =
+    changed || given.length > 0
+      ? selectPaths(changed ? changedFiles() : given)
+      : undefined
+  if (selection && selection.scope.length === 0) {
+    consola.success(
+      changed
+        ? "Lint debt: the branch touches no linted file."
+        : "Lint debt: none of those paths are linted."
+    )
     process.exit(0)
   }
 
-  const { errors, warnings } = runOxlint(scope ?? ["src/"])
+  const { errors, warnings } =
+    selection && selection.toLint.length === 0
+      ? { errors: [], warnings: [] }
+      : runOxlint(selection ? selection.toLint : ["src/"])
 
   if (wants("--update")) {
-    if (scope) {
+    if (selection) {
       consola.error("--update needs the whole tree; drop the paths.")
       process.exit(1)
     }
@@ -407,7 +487,7 @@ function main(): void {
     process.exit(errors.length > 0 ? 1 : 0)
   }
 
-  const result = check(warnings, readBaseline(), scope)
+  const result = check(warnings, readBaseline(), selection?.scope)
 
   if (wants("--json")) {
     consola.log(JSON.stringify({ errors, ...result }, null, 2))
@@ -421,7 +501,11 @@ function main(): void {
     printFindings(warnings)
   }
 
-  process.exit(reportResult(errors, result, { blockOnFixed: !scope }) ? 0 : 1)
+  process.exit(
+    reportResult(errors, result, { blockOnFixed: changed || !selection })
+      ? 0
+      : 1
+  )
 }
 
 // Run as a CLI only when invoked directly (not when imported by tests).
