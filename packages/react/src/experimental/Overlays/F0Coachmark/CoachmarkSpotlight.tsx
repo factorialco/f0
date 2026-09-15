@@ -140,6 +140,13 @@ type CoachmarkSpotlightProps = {
   container?: HTMLElement | null
   /** A pointer landing anywhere on the page while the coachmark is up. */
   onOutsideInteraction: () => void
+  /**
+   * `true` while the coachmark has stood down for a dialog: the dim goes and
+   * the shield stops swallowing presses, since the page below now belongs to
+   * the dialog. Hidden rather than unmounted so the light does not travel back
+   * to its target — scroll included — when the dialog closes.
+   */
+  suspended?: boolean
 }
 
 /**
@@ -160,6 +167,7 @@ export const CoachmarkSpotlight = ({
   target,
   container,
   onOutsideInteraction,
+  suspended = false,
 }: CoachmarkSpotlightProps) => {
   const rect = useTargetRect(target)
   const radius = useLitRadius(target)
@@ -209,10 +217,17 @@ export const CoachmarkSpotlight = ({
       // says everything there is to read here.
       aria-hidden
       data-f0-coachmark-blocker
-      // `z-[1249]`: just under the panel's own `z-50` (1250 in the f0 scale,
-      // see core's tailwind config), so the shield covers the app and nothing
-      // else — the panel it belongs to still paints over it.
-      className="fixed inset-0 z-[1249] cursor-default"
+      // `z-[1239]`: just under the panel's own `z-[1240]`, so the shield
+      // covers the app and nothing else — the panel it belongs to still paints
+      // over it, and the dialog layer above (`z-50`, 1250) over both.
+      //
+      // `invisible` also takes it out of hit-testing, which is the half that
+      // matters: a shield that swallowed the press meant for the dialog it is
+      // standing down for would be worse than one that merely showed.
+      className={cn(
+        "fixed inset-0 z-[1239] cursor-default",
+        suspended && "invisible"
+      )}
       // Pointer DOWN rather than click: it is the press that has to be
       // swallowed, before the page under it can take focus or start a drag.
       onPointerDown={(event) => {

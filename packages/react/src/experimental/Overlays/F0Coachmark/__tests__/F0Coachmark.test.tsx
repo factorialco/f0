@@ -86,7 +86,23 @@ describe("F0Coachmark panel", () => {
   it("shows the step indicator when it is given one", async () => {
     renderPanel({ step: { current: 2, total: 3 } })
 
+    // The count is what a screen reader gets: it cannot see how many circles
+    // there are, and the circles are hidden from it for the same reason.
     expect(await screen.findByText("2/3")).toBeInTheDocument()
+  })
+
+  it("draws one dot per step, marking the current one", async () => {
+    // The dots are what a sighted reader actually sees, and the "2/3" above is
+    // visually hidden — without this, deleting the dots outright would leave
+    // every indicator assertion in the suite still passing.
+    renderPanel({ step: { current: 2, total: 3 } })
+    const dialog = await screen.findByRole("dialog")
+
+    const dots = dialog.querySelectorAll("[aria-hidden].rounded-full")
+    expect(dots).toHaveLength(3)
+    expect(dots[1]).toHaveClass("text-f1-foreground-inverse")
+    expect(dots[0]).not.toHaveClass("text-f1-foreground-inverse")
+    expect(dots[2]).not.toHaveClass("text-f1-foreground-inverse")
   })
 
   it("calls onClose from the close button and onAction from the action", async () => {
