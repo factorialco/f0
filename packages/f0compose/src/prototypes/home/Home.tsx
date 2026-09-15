@@ -905,8 +905,12 @@ function HomeNavbar({
   const [, setParams] = useSearchParams()
   const navPanelOpen = useNavPanelOpen()
   return (
+    // min-h-8 on the cluster, so the bar is 60px tall whether or not the
+    // expand button is mounted: without it the row collapsed to its
+    // padding with the panel open, and the centred composer jumped 16px
+    // on every toggle (Angel, 2026-09-15).
     <div className="flex w-full items-center justify-between p-[14px]">
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-h-8 min-w-0 items-center gap-2">
         {/* The way back to the second level: with no panel there is no
             header to hold its own toggle (Angel, 2026-09-14). */}
         {!navPanelOpen && (
