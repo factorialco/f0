@@ -11,6 +11,10 @@ interface DateFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+  /** Mounts the picker with its calendar already up — what an inline row does on activation. */
+  open?: boolean
+  /** Told when the calendar closes, which is how an inline row knows the date is text again. */
+  onOpenChange?: (open: boolean) => void
 }
 
 /**
@@ -48,6 +52,8 @@ export function DateFieldRenderer({
   error,
   loading,
   status,
+  open,
+  onOpenChange,
 }: DateFieldRendererProps) {
   // Convert form Date value to DatePickerValue for the picker
   // Form value may be null (used instead of undefined to prevent
@@ -75,10 +81,11 @@ export function DateFieldRenderer({
   // stale value and flag a valid date as invalid. Deferring lets the input's
   // blur (onChange) commit first, so validation runs against the final value.
   // (Enter and calendar selection already commit before closing, so they work.)
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
       setTimeout(() => formField.onBlur(), 0)
     }
+    onOpenChange?.(isOpen)
   }
 
   return (
@@ -93,6 +100,7 @@ export function DateFieldRenderer({
       clearable={field.clearable}
       value={pickerValue}
       onChange={handleChange}
+      open={open}
       onOpenChange={handleOpenChange}
       size={FORM_SIZE}
       hideLabel

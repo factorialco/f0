@@ -37,6 +37,7 @@ import type { F0TextareaConfig } from "./fields/textarea/types"
 import type {
   F0BaseFieldDisabledProp,
   F0BaseFieldRenderIfProp,
+  F0FieldInlineProp,
 } from "./fields/types"
 
 /**
@@ -212,6 +213,20 @@ export interface F0BaseConfig {
    * field-specific configuration (e.g. data source, options) or a custom component.
    */
   customFieldName?: string
+  /**
+   * Renders the field as a record detail row: the value reads as text where a
+   * read-only row would print it, hovering reveals what can be done with it,
+   * and activating it swaps in the field's own editor.
+   *
+   * `true` is the plain row; the object form adds the copy action and marks the
+   * value as one this reader cannot change.
+   * @example
+   * employeeNumber: f0FormField.text({
+   *   label: "Employee number",
+   *   inline: { copyable: true },
+   * })
+   */
+  inline?: F0FieldInlineProp
 }
 
 // Re-export field-specific config types

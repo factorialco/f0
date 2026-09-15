@@ -1,6 +1,7 @@
 import { ZodTypeAny } from "zod"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import type { F0FieldAlert } from "../f0Schema"
+import type { F0FieldInlineProp } from "./inline/types"
 
 // ============================================================================
 // Base RenderIf Condition Types
@@ -146,6 +147,15 @@ export interface F0BaseField {
    * Used with the form-level `renderCustomField` callback.
    */
   customFieldName?: string
+  /**
+   * Renders the field as a record detail row: the value reads as text where a
+   * read-only row would print it, hovering reveals what can be done with it,
+   * and activating it swaps in the field's own editor.
+   *
+   * `true` is the plain row; the object form adds the copy action and marks the
+   * value as one this reader cannot change.
+   */
+  inline?: F0FieldInlineProp
 }
 
 /**
@@ -183,6 +193,7 @@ export type FieldType =
 // Re-export field types and configs
 // ============================================================================
 
+export type { F0FieldInlineConfig, F0FieldInlineProp } from "./inline/types"
 export type { F0TextConfig, F0TextField } from "./text/types"
 export type { F0NumberConfig, F0NumberField } from "./number/types"
 export type { F0DurationConfig, F0DurationField } from "./duration/types"

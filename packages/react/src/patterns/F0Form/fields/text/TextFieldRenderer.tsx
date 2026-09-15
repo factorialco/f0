@@ -12,6 +12,8 @@ interface TextFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+  /** Mounts the input focused — what an inline row needs when it swaps the editor in. */
+  autoFocus?: boolean
 }
 
 const DEFAULT_PLACEHOLDERS: Partial<
@@ -29,6 +31,7 @@ export function TextFieldRenderer({
   error,
   loading,
   status,
+  autoFocus,
 }: TextFieldRendererProps) {
   const inputType = field.inputType ?? "text"
   const placeholder =
@@ -50,6 +53,7 @@ export function TextFieldRenderer({
       loading={loading}
       icon={icon}
       clearable={field.clearable}
+      autoFocus={autoFocus}
     />
   )
 }

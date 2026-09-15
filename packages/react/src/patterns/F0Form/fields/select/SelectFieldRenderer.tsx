@@ -12,6 +12,10 @@ interface SelectFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+  /** Mounts the select with its dropdown already up — what an inline row does on activation. */
+  open?: boolean
+  /** Told when the dropdown closes, which is how an inline row knows the value is text again. */
+  onOpenChange?: (open: boolean) => void
 }
 
 /**
@@ -23,6 +27,8 @@ function SelectWithOptions({
   error,
   loading,
   status,
+  open,
+  onOpenChange,
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     options: NonNullable<F0SelectField["options"]>
@@ -44,6 +50,8 @@ function SelectWithOptions({
     loading,
     size: FORM_SIZE,
     hideLabel: true as const,
+    open,
+    onOpenChange,
   }
 
   if (field.multiple) {
@@ -99,6 +107,8 @@ function SelectWithSource({
   error,
   loading,
   status,
+  open,
+  onOpenChange,
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     source: NonNullable<F0SelectField["source"]>
@@ -122,6 +132,8 @@ function SelectWithSource({
     loading,
     size: FORM_SIZE,
     hideLabel: true as const,
+    open,
+    onOpenChange,
   }
 
   if (field.multiple) {

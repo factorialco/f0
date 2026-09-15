@@ -38,6 +38,18 @@ export interface RenderFieldInputOptions {
   initialFiles?: InitialFile[]
   /** Whether the form is loading async defaultValues */
   isFormLoading?: boolean
+  /**
+   * Inline detail-row plumbing. The row swaps the editor in when someone
+   * activates it, so the editor has to arrive ready to use: focused, and for
+   * the types whose editor is a popup, already open. `onOpenChange` is how the
+   * row learns the popup closed and the value is text again.
+   *
+   * Only the types an inline row supports forward these — text and number take
+   * `autoFocus`; date and select take `open`/`onOpenChange`.
+   */
+  autoFocus?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 /**
@@ -53,6 +65,9 @@ export function renderFieldInput({
   values,
   initialFiles,
   isFormLoading,
+  autoFocus,
+  open,
+  onOpenChange,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
@@ -80,6 +95,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          autoFocus={autoFocus}
         />
       )
     case "number":
@@ -89,6 +105,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          autoFocus={autoFocus}
         />
       )
     case "duration":
@@ -116,6 +133,8 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          open={open}
+          onOpenChange={onOpenChange}
         />
       )
     case "checkbox":
@@ -145,6 +164,8 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          open={open}
+          onOpenChange={onOpenChange}
         />
       )
     case "time":

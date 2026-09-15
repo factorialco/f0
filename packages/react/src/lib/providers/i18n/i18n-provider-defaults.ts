@@ -972,6 +972,11 @@ export const defaultTranslations = {
       removeErrorTitle: "Remove failed",
     },
     moreInformation: "More information",
+    /** What a field value reads as in a detail row that has no editor open. */
+    inline: {
+      yes: "Yes",
+      no: "No",
+    },
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",

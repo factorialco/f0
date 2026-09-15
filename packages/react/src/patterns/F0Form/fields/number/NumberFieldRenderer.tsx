@@ -11,6 +11,8 @@ interface NumberFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+  /** Mounts the input focused — what an inline row needs when it swaps the editor in. */
+  autoFocus?: boolean
 }
 
 /**
@@ -22,6 +24,7 @@ export function NumberFieldRenderer({
   error,
   loading,
   status,
+  autoFocus,
 }: NumberFieldRendererProps) {
   return (
     <F0NumberInput
@@ -44,6 +47,7 @@ export function NumberFieldRenderer({
       status={status}
       loading={loading}
       clearable={field.clearable}
+      autoFocus={autoFocus}
     />
   )
 }
