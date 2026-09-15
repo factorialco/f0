@@ -67,6 +67,10 @@ const LOAD_MORE_SCROLL_MARGIN = 56
 // Long enough to read a whole example query before it is swapped out.
 const PLACEHOLDER_ROTATION_MS = 4000
 
+// Matches the MotionConfig transition below, so anything that should land after
+// the field has finished widening can wait exactly that long.
+const EXPAND_DURATION_MS = 200
+
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
     <F0Icon icon={Spinner} className="animate-spin" />
@@ -138,14 +142,14 @@ export const Search = ({
   // Cycle the example placeholders only while the field is idle — a typed value
   // or an in-flight query owns the text instead.
   useEffect(() => {
-    if (rotation.length < 2 || value || searching) {
+    if (rotation.length < 2 || value || searching || open) {
       return
     }
     const timer = setInterval(() => {
       setPlaceholderIndex((index) => (index + 1) % rotation.length)
     }, PLACEHOLDER_ROTATION_MS)
     return () => clearInterval(timer)
-  }, [rotation.length, value, searching])
+  }, [rotation.length, value, searching, open])
 
   // Highlight the first row whenever results change, so a plain Enter jumps to
   // the top match without the user having to arrow down or click first.
@@ -205,10 +209,15 @@ export const Search = ({
   const handleOpen = () => {
     if (!open) {
       setOpen(true)
-      setShowResults(true)
       setTimeout(() => {
         inputRef.current?.focus()
       }, 0)
+      setTimeout(() => {
+        setShowResults(true)
+        // Nothing is pre-selected on an empty field, so a stray Enter cannot
+        // fire an example the user never picked.
+        setActiveIndex(-1)
+      }, EXPAND_DURATION_MS)
     }
   }
 
@@ -476,12 +485,11 @@ export const Search = ({
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => submitQuery(suggestion)}
                       className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-f1-background-secondary",
+                        "flex w-full items-center rounded-lg px-2 py-2 text-left hover:bg-f1-background-secondary",
                         index === activeIndex && "bg-f1-background-secondary",
                         focusRing()
                       )}
                     >
-                      <F0Icon icon={SearchIcon} size="md" color="secondary" />
                       <span className="truncate text-sm text-f1-foreground">
                         {suggestion}
                       </span>
