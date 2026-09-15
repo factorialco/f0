@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
-const VIEWBOX_SIZE = 20
-const STROKE_WIDTH = 2.5
+const VIEWBOX_SIZE = 14
+const STROKE_WIDTH = 2.31
 
 export type UsageRingTone = "default" | "exhausted" | "unlimited"
 
@@ -21,7 +21,7 @@ export const UsageRing = ({ percentage, tone }: UsageRingProps) => {
   return (
     <svg
       viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
-      className="h-5 w-5 -rotate-90"
+      className="h-3.5 w-3.5 -rotate-90"
       aria-hidden="true"
       focusable="false"
     >
