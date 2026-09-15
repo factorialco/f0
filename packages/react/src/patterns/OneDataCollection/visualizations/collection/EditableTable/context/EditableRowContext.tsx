@@ -171,7 +171,9 @@ export function EditableRowProvider<R extends RecordType>({
       return
     }
 
-    if (pending.timer) clearTimeout(pending.timer)
+    if (pending.timer) {
+      clearTimeout(pending.timer)
+    }
     pendingRef.current = null
     save(pending.previousValues)
   }
@@ -214,7 +216,9 @@ export function EditableRowProvider<R extends RecordType>({
     // from before the first keystroke so the reported change covers the
     // whole typing session, not just the last keystroke.
     const pending = pendingRef.current
-    if (pending?.timer) clearTimeout(pending.timer)
+    if (pending?.timer) {
+      clearTimeout(pending.timer)
+    }
 
     // Once any change in this row is waiting for an explicit flush (e.g. a
     // commitOn: "blur" column), keep the whole row deferred so another
