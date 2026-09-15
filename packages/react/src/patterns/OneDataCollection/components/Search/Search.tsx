@@ -157,17 +157,19 @@ export const Search = ({
     }
   }
 
-  // Cycle the example placeholders only while the field is idle — a typed value
-  // or an in-flight query owns the text instead.
+  // Cycle the example placeholders while the field has nothing in it. It only
+  // shows once the field is open, so pausing on focus would mean it never
+  // visibly changed; typing is what stops it, since the text is then the
+  // user's own.
   useEffect(() => {
-    if (rotation.length < 2 || value || searching || open) {
+    if (rotation.length < 2 || text || searching) {
       return
     }
     const timer = setInterval(() => {
       setPlaceholderIndex((index) => (index + 1) % rotation.length)
     }, PLACEHOLDER_ROTATION_MS)
     return () => clearInterval(timer)
-  }, [rotation.length, value, searching, open])
+  }, [rotation.length, text, searching])
 
   // Highlight the first row whenever results change, so a plain Enter jumps to
   // the top match without the user having to arrow down or click first.
