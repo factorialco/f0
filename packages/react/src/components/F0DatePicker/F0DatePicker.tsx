@@ -192,6 +192,9 @@ export function F0DatePicker(props: F0DatePickerProps) {
         placeholder={inputProps.placeholder}
         size={inputProps.size}
         readonly={inputProps.readonly}
+        error={inputProps.error}
+        status={inputProps.status}
+        hint={inputProps.hint}
         value={granularity.toString(
           localValue?.value,
           i18n,

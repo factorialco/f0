@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, screen, userEvent, within } from "storybook/test"
+import { InputFieldStatus } from "@/components/F0InputField/types"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0DatePicker } from ".."
 import { DatePickerValue } from "../types"
@@ -21,12 +22,20 @@ function DateRow({
   value: initialValue = detailRowDate,
   readonly,
   onRequestChange,
+  required,
+  clearable,
+  status,
+  hint,
 }: {
   label?: string
   placeholder?: string
   value?: DatePickerValue
   readonly?: boolean
   onRequestChange?: () => void
+  required?: boolean
+  clearable?: boolean
+  status?: InputFieldStatus
+  hint?: string
 }) {
   const [value, setValue] = useState<DatePickerValue | undefined>(initialValue)
 
@@ -41,6 +50,10 @@ function DateRow({
           value={value}
           readonly={readonly}
           onRequestChange={onRequestChange}
+          required={required}
+          clearable={clearable}
+          status={status}
+          hint={hint}
           onChange={setValue}
         />
       </div>
@@ -182,6 +195,31 @@ export const DetailRowReadOnly: Story = {
   },
 }
 
+/**
+ * A save that failed has to stay legible after the row goes back to text, so
+ * `status`, `error` and `hint` render under the value in both states.
+ */
+export const DetailRowWithStatus: Story = {
+  args: {
+    status: { type: "error", message: "Could not save. Try again." },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Say what went wrong while the row reads as text", () => {
+      expect(canvas.getByText("Could not save. Try again.")).toBeVisible()
+      expect(
+        canvas.getByRole("button", { name: "Edit Date" })
+      ).toBeInTheDocument()
+    })
+  },
+}
+
+/** A hint sits under the value the same way, when there is no error to show. */
+export const DetailRowWithHint: Story = {
+  args: { hint: "Used by reports that select people by years of service" },
+}
+
 /** With no date set, the row falls back to its `placeholder`. */
 export const DetailRowEmpty: Story = {
   args: { value: undefined, placeholder: "no date" },
@@ -197,6 +235,8 @@ export const Snapshot: Story = {
       <DateRow readonly onRequestChange={fn()} />
       <DateRow readonly />
       <DateRow value={undefined} placeholder="no date" />
+      <DateRow status={{ type: "error", message: "Could not save" }} />
+      <DateRow hint="Used by years-of-service reports" />
     </div>
   ),
 }

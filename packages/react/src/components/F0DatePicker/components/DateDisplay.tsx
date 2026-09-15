@@ -1,6 +1,7 @@
 import { forwardRef } from "react"
 import { F0Icon } from "@/components/F0Icon"
-import { InputFieldSize } from "@/components/F0InputField"
+import { InputFieldProps, InputFieldSize } from "@/components/F0InputField"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Comment } from "@/icons/app"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useI18n } from "@/lib/providers/i18n"
@@ -16,7 +17,7 @@ type DateDisplayProps = {
   readonly?: boolean
   onEdit: () => void
   onRequestChange?: () => void
-}
+} & Pick<InputFieldProps<string>, "error" | "status" | "hint">
 
 /**
  * Matched to `inputFieldVariants` so the row does not resize when the date
@@ -55,6 +56,9 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
       readonly,
       onEdit,
       onRequestChange,
+      error,
+      status,
+      hint,
     },
     ref
   ) => {
@@ -71,6 +75,17 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
     const canEdit = !readonly
 
     const calendarIcon = getFieldInputIcon("date")
+
+    // Same precedence F0InputField applies, so a row says the same thing
+    // whether it is being read or edited. A failed save has to survive the trip
+    // back to text — that is the whole reason these reach the read state.
+    const resolvedStatus = error
+      ? {
+          type: "error" as const,
+          message: typeof error === "string" ? error : undefined,
+        }
+      : (status ??
+        (hint ? { type: "default" as const, message: hint } : undefined))
 
     const valueText = (
       <span
@@ -150,7 +165,12 @@ const DateDisplay = forwardRef<HTMLDivElement, DateDisplayProps>(
       )
     })()
 
-    return <div ref={ref}>{row}</div>
+    return (
+      <div ref={ref} className="flex flex-col gap-1">
+        {row}
+        <InputMessages status={resolvedStatus} />
+      </div>
+    )
   }
 )
 

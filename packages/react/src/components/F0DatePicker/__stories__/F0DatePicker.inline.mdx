@@ -37,7 +37,7 @@ Who may do what comes from two props, both meant to be passed conditionally from
 />
 ```
 
-The inline variant drops the field chrome: `size`, `disabled`, `clearable`, `hideLabel`, `labelIcon`, `transparent`, `required`, `loading`, `error`, `status` and `hint` are typed `never`, so passing one is a compile error rather than a silent no-op.
+The inline variant keeps the props a record row still needs — `required`, `clearable`, `error`, `status` and `hint` — and drops the rest of the field chrome. `size`, `disabled`, `hideLabel`, `labelIcon`, `transparent`, `loading`, `open` and `showIcon` are typed `never`, so passing one is a compile error rather than a silent no-op.
 
 <Canvas of={Stories.DetailRowRequestChange} />
 
@@ -92,6 +92,20 @@ The inline variant drops the field chrome: `size`, `disabled`, `clearable`, `hid
 - Editing is a detour, not a state the caller owns. Activating the row opens the picker; committing a date or dismissing the calendar puts it back to text. `onModeChange` reports both transitions for a caller that wants to pin a hover state or log the interaction, but nothing needs to be wired for the swap to work.
 - The read and edit states are both 32px, taken from the same `inputFieldVariants` sizing the input uses, so a column of rows does not shift when one of them opens.
 - The action is kept in the DOM at `opacity-0` rather than unmounted, so Tab reaches it. Where there is no hover to reveal it with — a touch screen — it shows unconditionally.
+
+### Validation and messages
+
+`status`, `error` and `hint` render under the value in **both** states, not just while the input is up. A row returns to text as soon as the calendar closes, so a message that only appeared during editing would vanish exactly when the reader needs it.
+
+Precedence matches the default variant: `error` wins over `status`, which wins over `hint`.
+
+<Canvas of={Stories.DetailRowWithStatus} />
+
+<Canvas of={Stories.DetailRowWithHint} />
+
+`required` rejects clearing the date, and `clearable` adds the clear button while the input is up. Both apply to editing only — a row being read has nothing to clear.
+
+Note that `F0InputField` signals an invalid value through the field's border alone: it sets no `aria-invalid`, and a boolean `error` carries no message. Pass `error` as a string, or use `status`, so the reason is announced rather than only coloured.
 
 ### Usage examples
 

@@ -163,6 +163,70 @@ describe("F0DatePicker inline variant", () => {
     })
   })
 
+  describe("validation and messaging", () => {
+    it("rejects clearing a required date", async () => {
+      const user = userEvent.setup()
+      renderInline({ required: true, clearable: true })
+
+      await user.click(screen.getByRole("button", { name: "Edit Date" }))
+      await user.clear(screen.getByRole("textbox"))
+      await user.tab()
+
+      // F0InputField signals invalidity through the wrapper's border alone —
+      // it sets no `aria-invalid`, and a boolean `error` carries no message,
+      // so the border class is the only thing there is to assert.
+      // Scoped to the row's own wrapper: the open calendar renders a second
+      // one, so a bare getByTestId matches twice.
+      const field = screen
+        .getByRole("textbox")
+        .closest("[data-testid='input-field-wrapper']")
+
+      expect(field).toHaveClass("border-f1-border-critical-bold")
+    })
+
+    it("offers the clear button while editing", async () => {
+      const user = userEvent.setup()
+      renderInline({ clearable: true })
+
+      await user.click(screen.getByRole("button", { name: "Edit Date" }))
+
+      expect(screen.getByTestId("clear-button")).toBeInTheDocument()
+    })
+
+    it("keeps an error visible once the row goes back to text", () => {
+      renderInline({ status: { type: "error", message: "Could not save" } })
+
+      expect(screen.getByText("Could not save")).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Edit Date" })
+      ).toBeInTheDocument()
+    })
+
+    it("reads a hint below the value", () => {
+      renderInline({ hint: "Used by years-of-service reports" })
+
+      expect(
+        screen.getByText("Used by years-of-service reports")
+      ).toBeInTheDocument()
+    })
+
+    it("lets error override hint, as the field does", () => {
+      renderInline({ hint: "A hint", error: "Could not save" })
+
+      expect(screen.getByText("Could not save")).toBeInTheDocument()
+      expect(screen.queryByText("A hint")).not.toBeInTheDocument()
+    })
+
+    it("shows the message on a readonly row too", () => {
+      renderInline({
+        readonly: true,
+        status: { type: "warning", message: "Pending approval" },
+      })
+
+      expect(screen.getByText("Pending approval")).toBeInTheDocument()
+    })
+  })
+
   describe("without a date", () => {
     it("falls back to the translated empty label", () => {
       renderInline({ value: undefined })

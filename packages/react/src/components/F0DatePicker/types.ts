@@ -46,7 +46,16 @@ export type F0DatePickerDefaultProps = F0DatePickerSharedProps &
   } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 export type F0DatePickerInlineProps = F0DatePickerSharedProps &
-  Pick<InputFieldProps<string>, "label" | "placeholder"> & {
+  Pick<
+    InputFieldProps<string>,
+    | "label"
+    | "placeholder"
+    | "required"
+    | "clearable"
+    | "error"
+    | "status"
+    | "hint"
+  > & {
     /**
      * Borderless presentation for a date embedded in a record row: the value
      * sits where a read-only row would print it, and the calendar arrives only
@@ -75,14 +84,9 @@ export type F0DatePickerInlineProps = F0DatePickerSharedProps &
     className?: never
     hideLabel?: never
     labelIcon?: never
-    clearable?: never
     transparent?: never
-    required?: never
     loading?: never
     disabled?: never
-    error?: never
-    status?: never
-    hint?: never
   }
 
 export type F0DatePickerProps =
