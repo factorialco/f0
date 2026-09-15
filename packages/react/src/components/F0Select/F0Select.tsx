@@ -1063,6 +1063,31 @@ const F0SelectComponent = forwardRef(function Select<
     return ["", "pl-5", "pl-10", "pl-16", "pl-20"][Math.min(steps, 4)]
   }, [])
 
+  /**
+   * A group's records as rows, indented to their depth and keyed under the
+   * group so two groups holding the same option stay distinct.
+   *
+   * Collapsible rows clear their own group's chevron, so they sit one step
+   * further in than the header they belong to.
+   */
+  const buildRows = useCallback(
+    (
+      records: ActualRecordType[],
+      keyPrefix: string,
+      depth: number,
+      seenTagTypes: Set<string>
+    ): VirtualItem[] => {
+      const indent = indentClass(collapsible ? depth + 1 : depth)
+
+      return getItems(records, seenTagTypes).map((vi) => ({
+        ...vi,
+        key: `${keyPrefix}:${vi.key}`,
+        item: indent ? <div className={indent}>{vi.item}</div> : vi.item,
+      }))
+    },
+    [collapsible, getItems, indentClass]
+  )
+
   const buildGroupItems = useCallback(
     (
       groups: GroupRecord<ActualRecordType>[],
@@ -1106,43 +1131,59 @@ const F0SelectComponent = forwardRef(function Select<
          * A group with sub-groups shows those instead of its records: its
          * `records` are the union of theirs, so rendering both would list every
          * option twice.
+         *
+         * `ownRecords` is the exception — the records that belong to this group
+         * and to none of its sub-groups, because they have no value at the next
+         * level. They are NOT in any sub-group, so they go first, as this
+         * group's own rows, above the headings that follow.
          */
         if (group.subGroups?.length) {
           items.push(
+            ...buildRows(
+              group.ownRecords ?? [],
+              `${group.key}:own`,
+              depth,
+              seenTagTypes
+            ),
             ...buildGroupItems(group.subGroups, depth + 1, seenTagTypes)
           )
           continue
         }
 
-        // Collapsible rows clear their own group's chevron, so they sit one
-        // step further in than the header they belong to.
-        const rowIndent = indentClass(collapsible ? depth + 1 : depth)
-        items.push(
-          ...getItems(group.records, seenTagTypes).map((vi) => ({
-            ...vi,
-            key: `${group.key}:${vi.key}`,
-            item: rowIndent ? (
-              <div className={rowIndent}>{vi.item}</div>
-            ) : (
-              vi.item
-            ),
-          }))
-        )
+        items.push(...buildRows(group.records, group.key, depth, seenTagTypes))
       }
 
       return items
     },
-    [collapsible, getItems, indentClass, openGroups, setGroupOpen]
+    [buildRows, collapsible, openGroups, setGroupOpen]
   )
 
   const items: VirtualItem[] = useMemo(() => {
     const seenTagTypes = new Set<string>()
 
     if (data.type === "grouped") {
-      return buildGroupItems(data.groups, 0, seenTagTypes)
+      /**
+       * The records belonging to no group lead the list, as plain rows with no
+       * heading over them — they have nothing to be filed under, and putting
+       * them last would read as a trailing group whose name went missing.
+       */
+      return [
+        ...getItems(data.ungroupedRecords ?? [], seenTagTypes).map((vi) => ({
+          ...vi,
+          key: `ungrouped:${vi.key}`,
+        })),
+        ...buildGroupItems(data.groups, 0, seenTagTypes),
+      ]
     }
     return getItems(data.records, seenTagTypes)
-  }, [data.records, data.type, data.groups, getItems, buildGroupItems])
+  }, [
+    data.records,
+    data.type,
+    data.groups,
+    data.ungroupedRecords,
+    getItems,
+    buildGroupItems,
+  ])
 
   const handleScrollBottom = () => {
     loadMore()
