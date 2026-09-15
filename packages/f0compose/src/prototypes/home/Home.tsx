@@ -1090,6 +1090,7 @@ function HomeCanvas() {
   const fullWidthView =
     screenView === "preferences" ||
     screenView === "activity" ||
+    screenView === "ai-activity" ||
     screenView === "calendar" ||
     // The three screens the rail's own sections landed on since
     // 2026-09-14: each scrolls its own content.
@@ -1551,7 +1552,8 @@ function HomeCanvas() {
                 <InboxScreen />
               ) : screenView === "tools" ? (
                 <ToolsScreen />
-              ) : screenView === "activity" ? (
+              ) : screenView === "activity" ||
+                screenView === "ai-activity" ? (
                 <ActivityScreen />
               ) : screenView === "agents" ? (
                 <AgentsScreen />

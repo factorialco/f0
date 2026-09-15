@@ -1,5 +1,7 @@
 import type { IconType } from "@factorialco/f0-react"
 
+import { BackgroundTasks } from "../navigation/localIcons"
+
 import {
   AcademicCap,
   Archive,
@@ -14,6 +16,7 @@ import {
   CheckCircleLine,
   Computer,
   DollarBill,
+  Feed,
   Folder,
   Folders,
   Handshake,
@@ -79,6 +82,9 @@ export const HUB_ICONS: Record<string, IconType> = {
   Marketplace: Marketplace,
   Documents: Folders,
   Engagement: MessageHeart,
+  // The AI group (Angel, 2026-09-14): what One runs, and what it did.
+  Routines: BackgroundTasks,
+  "AI Activity": Feed,
   Equipment: Laptop,
   Handbook: Folder,
   Hours: Timer,
@@ -157,6 +163,10 @@ export type HubGroup = { label: string; items: string[] }
  *     Kept exactly as drawn — renaming a designer's label is their call.
  */
 export const ADMIN_HUB: HubGroup[] = [
+  // AI leads the catalog: it is the part of Factorial that acts on its
+  // own, and it came out of the Home panel to sit with everything else
+  // you can open (Angel, 2026-09-14).
+  { label: "AI", items: ["Routines", "AI Activity"] },
   {
     label: "Company",
     // "Organization" is the row that used to read "People", and it still
@@ -208,6 +218,7 @@ export const ADMIN_HUB: HubGroup[] = [
  * Company to Finance.
  */
 export const EMPLOYEE_HUB: HubGroup[] = [
+  { label: "AI", items: ["Routines", "AI Activity"] },
   {
     label: "Personal",
     items: ["Hours", "Absences", "Payslips", "Learning"],

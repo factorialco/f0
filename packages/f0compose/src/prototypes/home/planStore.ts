@@ -23,8 +23,10 @@ export const PLAN_LABELS: Record<PlanId, string> = {
 /** `null` means everything. Labels match the Tools catalog exactly. */
 export const PLAN_MODULES: Record<PlanId, string[] | null> = {
   full: null,
-  time: ["Time tracking", "Time off", "Shifts", "Marketplace"],
+  time: ["Routines", "AI Activity", "Time tracking", "Time off", "Shifts", "Marketplace"],
   "time-people": [
+    "Routines",
+    "AI Activity",
     "Time tracking",
     "Time off",
     "Shifts",

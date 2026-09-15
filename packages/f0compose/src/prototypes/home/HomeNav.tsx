@@ -15,11 +15,12 @@ import {
   Comment,
   Delete,
   Ellipsis,
-  Feed,
   Files,
   Filter,
   Folder,
+  Archive,
   Folders,
+  Graph,
   Headset,
   Messages,
   Office,
@@ -56,11 +57,11 @@ import {
   hubLabels,
 } from "./hub/hubCatalog"
 import { hubSlug } from "./hub/hubSlug"
+import { libraryTree } from "./hub/libraryTree"
 import { InboxRow } from "./inbox/InboxRow"
 import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
 import { MenuDivider, MenuRow } from "./MenuRow"
 import { FILLED_RAIL_ICONS } from "./navigation/filledRailIcons"
-import { BackgroundTasks } from "./navigation/localIcons"
 import { CompanySwitcher, RailPersonalMenu } from "./navigation/RailMenus"
 import { useNeedsYou } from "./needsYouStore"
 import { useOnboarding, updateOnboarding } from "./onboarding/state"
@@ -70,7 +71,6 @@ import {
   goHome,
   openConversation,
   renameConversation,
-  requestWindowsCollapse,
   useConversations,
   type Conversation,
 } from "./one/conversationStore"
@@ -196,7 +196,12 @@ function readSection(): NavSectionId {
 
 function readPanelOpen(): boolean {
   if (typeof window === "undefined") return true
-  return window.localStorage.getItem(NAV_OPEN_KEY) !== "closed"
+  const stored = window.localStorage.getItem(NAV_OPEN_KEY)
+  // Home opens with no second level (Angel, 2026-09-14): the canvas is
+  // the composer, and the panel holds only the history behind it. Every
+  // other section still arrives open, and once you open Home's it stays.
+  if (stored === null) return readSection() !== "home"
+  return stored !== "closed"
 }
 
 function NavRow({
@@ -600,14 +605,6 @@ function RecentsControl({
 function HomePanelBody() {
   const profile = useProfile()
   const { conversations, activeId } = useConversations()
-  // Sub-screens live in the URL (?view=policies) so back/forward and
-  // deep links behave; an open conversation always wins the canvas.
-  const [searchParams, setSearchParams] = useSearchParams()
-  const view = searchParams.get("view")
-  const openScreen = (screen: string | null) => {
-    goHome()
-    setSearchParams(screen ? { view: screen } : {})
-  }
   const [recentsFilter, setRecentsFilter] =
     useState<RecentsFilter>(readRecentsFilter)
 
@@ -641,50 +638,9 @@ function HomePanelBody() {
   return (
     <div className="flex h-full min-h-0 flex-col px-3 pb-3">
       <div className="home-panel-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-        <div className="flex flex-col gap-0.5">
-          {/* Agents is GONE from this panel (per Oskar, 2026-09-09) — the
-            row and the group below it. */}
-          <NavRow icon={BackgroundTasks} label="Routines" />
-          {/* Activity left the panel HEADER on 2026-09-14 (Angel: "me
-            chirría el botón de analytics ahí arriba"). It is a row now,
-            beside the other things One keeps for you — and not folded
-            into Artifacts, because it is a log of what One DID, not
-            something it produced. */}
-          <NavRow
-            icon={Feed}
-            label="Activity"
-            active={activeId === null && view === "activity"}
-            onClick={() => openScreen("activity")}
-          />
-          {/* Was "Files" pointing at Policies, with a visual-only
-            "Reports" row above it. Both are Artifacts now (Angel,
-            2026-09-14): what One produces for you, documents and
-            analytics in one place, while the Files MODULE lives on the
-            rail. */}
-          <NavRow
-            icon={Folder}
-            label="Artifacts"
-            active={activeId === null && view === "artifacts"}
-            onClick={() => openScreen("artifacts")}
-          />
-        </div>
-        <PanelDivider />
-        {/* "New chat", not a "New ⌄" menu (Angel, 2026-09-14) — one thing,
-            named, and sitting where what it creates will land. */}
-        <NavRow
-          icon={Plus}
-          label="New chat"
-          onClick={() => {
-            // A clean canvas, not just a change of view (per Oskar).
-            // Home owns the widgets stack and lives outside this tree, so
-            // this goes through the same channel the reply-driven windows
-            // use. Collapse first: on a module screen the widgets are
-            // unmounted, so they close instantly and Home is reached with
-            // the stack already empty.
-            requestWindowsCollapse()
-            openScreen(null)
-          }}
-        />
+        {/* Only the chats you have had (Angel, 2026-09-14). Routines and
+            Activity are in Tools › AI, Artifacts in Files, and a new chat
+            starts from the composer that is already on screen. */}
         {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}
@@ -1190,45 +1146,68 @@ function FilesPanelBody() {
     goHome()
     setSearchParams(next ? { view: "files", page: next } : { view: "files" })
   }
+  const openView = (next: string) => {
+    goHome()
+    setSearchParams({ view: next })
+  }
   return (
     <div className="flex flex-col gap-3 px-3 pb-1.5">
-      <div className="flex flex-col gap-0.5">
-        {/* Visual-only, like the Routines and Meetings rows: the imported
-            prototype owns the real upload flow. */}
-        <NavRow icon={Plus} label="New folder" />
-        <NavRow icon={Files} label="Upload" />
-      </div>
-      <PanelDivider />
+      {/* The destinations first (Angel, 2026-09-14) — everything Files can
+          show you, Artifacts included now that it lives here. */}
       <div className="flex flex-col gap-0.5">
         <NavRow
           icon={Folders}
-          label="Library"
-          active={page === ""}
+          label="All files"
+          active={view === "files" && page === ""}
           onClick={() => open("")}
         />
         <NavRow
           icon={Folder}
           label="Templates"
-          active={page === "templates"}
+          active={view === "files" && page === "templates"}
           onClick={() => open("templates")}
         />
-        <NavRow
-          icon={Delete}
-          label="Trash"
-          active={page === "trash"}
-          onClick={() => open("trash")}
-        />
-        {/* Policies came over from Tools (Angel, 2026-09-14): same kind of
-            thing as Library and Templates, so it lives beside them. */}
         <NavRow
           icon={UserProtected}
           label="Policies"
           active={view === "policies"}
-          onClick={() => {
-            goHome()
-            setSearchParams({ view: "policies" })
-          }}
+          onClick={() => openView("policies")}
         />
+        <NavRow
+          icon={Archive}
+          label="Artifacts"
+          active={view === "artifacts"}
+          onClick={() => openView("artifacts")}
+        />
+        <NavRow
+          icon={Graph}
+          label="Reports"
+          active={view === "reports"}
+          onClick={() => openView("reports")}
+        />
+        <NavRow
+          icon={Delete}
+          label="Trash"
+          active={view === "files" && page === "trash"}
+          onClick={() => open("trash")}
+        />
+      </div>
+      <PanelDivider />
+      {/* The library's own root under the line, so the panel is a way IN
+          to the files rather than only a list of places. Same fixture the
+          Library screen reads, so the two cannot disagree. */}
+      <div className="flex flex-col gap-0.5">
+        {libraryTree().map((node) => (
+          <NavRow
+            key={node.id}
+            icon={node.kind === "folder" ? Folder : Files}
+            label={node.name}
+            active={page === `library/${node.id}`}
+            onClick={() =>
+              open(node.kind === "folder" ? `library/${node.id}` : "")
+            }
+          />
+        ))}
       </div>
     </div>
   )
