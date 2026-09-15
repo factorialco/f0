@@ -1833,7 +1833,7 @@ const OneDataCollectionComp = <
               </div>
             </OneFilterPicker>
             {source.searchPresentation?.note ? (
-              <p className="mt-2 text-sm text-f1-foreground-secondary">
+              <p className="mt-2 text-base font-medium text-f1-foreground">
                 {source.searchPresentation.note}
               </p>
             ) : null}

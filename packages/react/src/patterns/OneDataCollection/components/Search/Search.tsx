@@ -505,8 +505,8 @@ export const Search = ({
               </motion.div>
             )}
             {suggestionsVisible ? (
-              <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-full min-w-[248px] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
-                <li className="px-2 py-1.5 text-sm text-f1-foreground-secondary">
+              <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-full min-w-[248px] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-1 pb-1 shadow-md">
+                <li className="rounded-[10px] p-2 text-sm text-f1-foreground-secondary">
                   {i18n.t("collections.search.suggestionsHeader")}
                 </li>
                 {suggestionItems.map((suggestion, index) => (
@@ -518,12 +518,12 @@ export const Search = ({
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => submitQuery(suggestion)}
                       className={cn(
-                        "flex w-full items-center rounded-lg px-2 py-2 text-left hover:bg-f1-background-secondary",
-                        index === activeIndex && "bg-f1-background-secondary",
+                        "flex w-full items-center rounded-[10px] p-2 text-left hover:bg-f1-background-hover",
+                        index === activeIndex && "bg-f1-background-hover",
                         focusRing()
                       )}
                     >
-                      <span className="truncate text-sm text-f1-foreground">
+                      <span className="truncate text-base text-f1-foreground">
                         {suggestion}
                       </span>
                     </button>
