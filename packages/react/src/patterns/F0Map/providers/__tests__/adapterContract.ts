@@ -124,6 +124,26 @@ export const mapAdapterContractCases: ContractCase[] = [
     },
   },
   {
+    name: "leaves the container's other children alone on destroy",
+    run: ({ adapter, container, becomeReady }) => {
+      becomeReady()
+      // The container is the consumer's, not the engine's: it holds the skip
+      // link, the live region, the controls and the list. An engine with no
+      // teardown API of its own must still not take them with it.
+      const sibling = document.createElement("p")
+      sibling.textContent = "not the engine's"
+      container.appendChild(sibling)
+
+      const element = marker("HQ")
+      adapter.addDomMarker(element, BARCELONA)
+
+      adapter.destroy()
+
+      expect(sibling.isConnected).toBe(true)
+      expect(element.isConnected).toBe(false)
+    },
+  },
+  {
     name: "frames every coordinate it is given, losing no vertex",
     run: ({ adapter, becomeReady, framedCoordinates }) => {
       becomeReady()

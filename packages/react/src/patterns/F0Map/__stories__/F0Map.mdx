@@ -168,6 +168,30 @@ spin). It re-projects live if the prop changes. See the `Globe` story.
 
 ---
 
+## Engines
+
+`F0Map` renders through one of two engines. `maplibre` is the default because
+its OpenFreeMap tiles are keyless: a design-system default cannot depend on
+someone having registered a billing account.
+
+Set it once for the whole app rather than per map:
+
+```tsx
+<F0Provider map={{ provider: "google", config: { apiKey } }}>
+```
+
+|                                        | `maplibre`               | `google`                               |
+| -------------------------------------- | ------------------------ | -------------------------------------- |
+| API key                                | none                     | required                               |
+| Billing                                | none                     | per map load                           |
+| Globe projection                       | yes                      | no                                     |
+| Coupled fly-to (pan + zoom in one arc) | yes                      | no - it pans and zooms, without an arc |
+| Cartography                            | generated from f0 tokens | not yet themed (see FCT-63109)         |
+
+A style carries the engine it was written for. Handing a `maplibre` style to a
+`google` map renders nothing, so the mismatch is ignored and logged rather than
+passed through - pass no `mapStyle` to get an engine's default look.
+
 ## Guidelines
 
 ### When to use
@@ -262,17 +286,18 @@ Clustering is automatic (no prop) - see [Clustering](#clustering).
 
 ### Presentation & interaction
 
-| Prop                  | Type                        | Default         | Description                                               |
-| --------------------- | --------------------------- | --------------- | --------------------------------------------------------- |
-| `mapStyle`            | `F0MapStyle`                | f0 styles       | Light/dark style pair override.                           |
-| `interactive`         | `boolean`                   | `true`          | Allow pan/zoom.                                           |
-| `gestureHandling`     | `"cooperative" \| "greedy"` | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe). |
-| `fullScreen`          | `boolean`                   | `false`         | `false` frames as a card; `true` is edge-to-edge.         |
-| `projection`          | `"mercator" \| "globe"`     | `"mercator"`    | `"globe"` renders the world as a 3D sphere.               |
-| `showControls`        | `boolean`                   | `true`          | Show the locate / fit / zoom toolbar (when interactive).  |
-| `showCurrentLocation` | `boolean`                   | `false`         | Show the "you are here" dot when location is granted.     |
-| `loading`             | `boolean`                   | `false`         | Show the skeleton instead of the map.                     |
-| `ariaLabel`           | `string`                    | `"Map"` (i18n)  | Accessible name for the map region.                       |
+| Prop                  | Type                        | Default          | Description                                               |
+| --------------------- | --------------------------- | ---------------- | --------------------------------------------------------- |
+| `provider`            | `"maplibre" \| "google"`    | app / `maplibre` | Rendering engine. See [Engines](#engines).                |
+| `mapStyle`            | `F0MapStyle`                | f0 styles        | Light/dark style pair override, tagged with its engine.   |
+| `interactive`         | `boolean`                   | `true`           | Allow pan/zoom.                                           |
+| `gestureHandling`     | `"cooperative" \| "greedy"` | `"cooperative"`  | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe). |
+| `fullScreen`          | `boolean`                   | `false`          | `false` frames as a card; `true` is edge-to-edge.         |
+| `projection`          | `"mercator" \| "globe"`     | `"mercator"`     | `"globe"` renders the world as a 3D sphere.               |
+| `showControls`        | `boolean`                   | `true`           | Show the locate / fit / zoom toolbar (when interactive).  |
+| `showCurrentLocation` | `boolean`                   | `false`          | Show the "you are here" dot when location is granted.     |
+| `loading`             | `boolean`                   | `false`          | Show the skeleton instead of the map.                     |
+| `ariaLabel`           | `string`                    | `"Map"` (i18n)   | Accessible name for the map region.                       |
 
 ### Imperative handle (`ref`)
 

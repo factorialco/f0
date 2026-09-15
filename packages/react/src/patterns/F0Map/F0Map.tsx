@@ -10,7 +10,7 @@ import {
 import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
-import { useMapProvider } from "@/lib/providers/map"
+import { useMapProvider, useMapProviderConfig } from "@/lib/providers/map"
 import { cn } from "@/lib/utils"
 import {
   F0MapControls,
@@ -262,6 +262,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
 ) {
   const i18n = useI18n()
   const engine = useMapProvider(provider)
+  const engineConfig = useMapProviderConfig()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const adapterRef = useRef<MapAdapter | null>(null)
   const [adapterInstance, setAdapterInstance] = useState<MapAdapter | null>(
@@ -288,7 +289,27 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // Theme always follows the app: the nearest `.dark` ancestor, observed live so
   // a theme toggle restyles the map without a reload (see the style-swap effect).
   const isDark = isDarkContext
-  const style = isDark ? mapStyle.dark : mapStyle.light
+  // The provider tag is only worth carrying if something reads it: a style is
+  // an engine's own shape, so handing it to a different engine renders nothing
+  // and explains nothing. Falls back to that engine's default look.
+  const styleMatchesEngine = mapStyle.provider === engine
+  const style = styleMatchesEngine
+    ? isDark
+      ? mapStyle.dark
+      : mapStyle.light
+    : undefined
+  const warnedStyleRef = useRef(false)
+  useEffect(() => {
+    if (styleMatchesEngine || warnedStyleRef.current) {
+      return
+    }
+    warnedStyleRef.current = true
+    console.warn(
+      `F0Map: ignoring a "${mapStyle.provider}" mapStyle on the "${engine}" ` +
+        `engine - the shapes are not interchangeable. Pass a "${engine}" ` +
+        `style, or none for its default look.`
+    )
+  }, [styleMatchesEngine, mapStyle.provider, engine])
 
   // Selection (controlled when the prop is set - `null` means "none selected",
   // not "uncontrolled" - internal state only mutates when uncontrolled).
@@ -414,6 +435,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // down on toggle), so it reads the current style and viewport through refs.
   const styleRef = useRef(style)
   styleRef.current = style
+  // Read, never depended on: the registry loads an engine once, so a consumer
+  // rebuilding this object every render must not tear the map down.
+  const engineConfigRef = useRef(engineConfig)
+  engineConfigRef.current = engineConfig
   const appliedStyleRef = useRef<unknown>(null)
   const viewportRef = useRef(initialViewport ?? DEFAULT_VIEWPORT)
 
@@ -435,7 +460,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     let cancelled = false
     const teardowns: (() => void)[] = []
 
-    void loadMapAdapterFactory(engine)
+    void loadMapAdapterFactory(engine, engineConfigRef.current)
       .then((createAdapter) => {
         if (cancelled) {
           return
