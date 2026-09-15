@@ -3,6 +3,7 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { type F0ChatMention, type F0ChatUser } from "../types"
+import { fill, mockCopy } from "./mockCopy"
 import { MockPostComment } from "./MockPostComment"
 import { type MockPostThread } from "./mockPostDetailTypes"
 import { splitName } from "./mockPostUtils"
@@ -76,12 +77,12 @@ export const MockPostComments = forwardRef<
   }
 
   return (
-    <section aria-label={i18n.t("communities.detail.postViews")}>
+    <section aria-label={mockCopy.detail.postViews}>
       <p className="text-lg font-semibold text-f1-foreground">
-        {i18n.t(
+        {fill(
           comments.totalCount === 1
-            ? "communities.detail.comments.one"
-            : "communities.detail.comments.other",
+            ? mockCopy.detail.comments.one
+            : mockCopy.detail.comments.other,
           { count: comments.totalCount }
         )}
       </p>
@@ -101,8 +102,8 @@ export const MockPostComments = forwardRef<
           <div className="flex min-w-0 flex-1 flex-col gap-3 rounded-lg bg-f1-background-secondary px-4 py-3">
             <textarea
               ref={inputRef}
-              aria-label={i18n.t("communities.detail.commentPlaceholder")}
-              placeholder={i18n.t("communities.detail.commentPlaceholder")}
+              aria-label={mockCopy.detail.commentPlaceholder}
+              placeholder={mockCopy.detail.commentPlaceholder}
               value={draft}
               disabled={saving}
               onChange={(event) => setDraft(event.target.value)}
@@ -112,7 +113,7 @@ export const MockPostComments = forwardRef<
               <F0Button
                 variant="outline"
                 size="md"
-                label={i18n.t("communities.detail.submit")}
+                label={mockCopy.detail.submit}
                 onClick={() => void submit()}
                 disabled={saving || draft.trim().length === 0}
               />

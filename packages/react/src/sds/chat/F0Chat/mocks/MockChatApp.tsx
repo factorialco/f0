@@ -42,6 +42,7 @@ import {
 import { stripHtml } from "../utils/posts"
 import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 import { demoDelay } from "./demoTiming"
+import { mockCopy } from "./mockCopy"
 import {
   type Seed,
   ME,
@@ -344,7 +345,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
               id: "pin",
               label: post.pinnedAt
                 ? i18n.t("chat.community.unpinPost")
-                : i18n.t("chat.community.pinPost"),
+                : mockCopy.shelf.pinPost,
               icon: post.pinnedAt ? PushPinSolid : PushPin,
               onClick: () => app.togglePostPin(convId, post.id),
             },
@@ -356,13 +357,13 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
             ...pin,
             {
               id: "edit",
-              label: i18n.t("communities.composer.editPost"),
+              label: mockCopy.composer.editPost,
               icon: Pencil,
               onClick: () => app.openComposerSurface(convId, post.id),
             },
             {
               id: "delete",
-              label: i18n.t("communities.detail.delete"),
+              label: mockCopy.detail.delete,
               icon: Delete,
               critical: true,
               onClick: () => app.deletePost(convId, post.id),
@@ -393,19 +394,19 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (post: F0ChatScheduledPost): F0ChatShelfAction[] => [
       {
         id: "publish-now",
-        label: i18n.t("chat.community.publishNow"),
+        label: mockCopy.shelf.publishNow,
         icon: Megaphone,
         onClick: () => app.publishScheduledNow(convId, post.id),
       },
       {
         id: "edit",
-        label: i18n.t("communities.composer.editPost"),
+        label: mockCopy.composer.editPost,
         icon: Pencil,
         onClick: () => app.openComposerSurface(convId, post.id),
       },
       {
         id: "cancel",
-        label: i18n.t("chat.community.cancelScheduled"),
+        label: mockCopy.shelf.cancelScheduled,
         icon: Delete,
         critical: true,
         onClick: () => app.cancelScheduled(convId, post.id),
@@ -427,13 +428,13 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
         id: "publish",
         // "Publish", not "Publish now": there is no later for it to be moved
         // forward from.
-        label: i18n.t("chat.community.publishDraft"),
+        label: mockCopy.shelf.publishDraft,
         icon: Megaphone,
         onClick: () => app.publishScheduledNow(convId, post.id),
       },
       {
         id: "delete",
-        label: i18n.t("chat.community.deleteDraft"),
+        label: mockCopy.shelf.deleteDraft,
         icon: Delete,
         critical: true,
         onClick: () => app.cancelScheduled(convId, post.id),

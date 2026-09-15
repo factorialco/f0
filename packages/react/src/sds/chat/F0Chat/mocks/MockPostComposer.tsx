@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState, type ReactNode } from "react"
 import { Calendar, FileFilled } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { mockCopy } from "./mockCopy"
 import {
   type MockPostComposerProps,
   type MockPostDraft,
@@ -107,7 +107,6 @@ export const MockPostComposer = ({
   searchMembers,
   requiredActionsEnabled = false,
 }: MockPostComposerProps): ReactNode => {
-  const i18n = useI18n()
   const { formRef, submit } = useF0Form()
   const [publishOpen, setPublishOpen] = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
@@ -154,13 +153,12 @@ export const MockPostComposer = ({
   const schema = useMemo(
     () =>
       postFormSchema({
-        t: i18n.t,
         communities,
         variant,
         requiredActionsEnabled,
         mentionsConfig,
       }),
-    [i18n, communities, variant, requiredActionsEnabled, mentionsConfig]
+    [communities, variant, requiredActionsEnabled, mentionsConfig]
   )
 
   const defaultValues = useMemo<PostFormValues>(() => {
@@ -199,7 +197,7 @@ export const MockPostComposer = ({
   const formDefinition = useF0FormDefinition({
     name: "community-post",
     schema,
-    sections: postSections(i18n.t),
+    sections: postSections,
     defaultValues,
     // Reached only once the schema is satisfied, which is what lets the header
     // open the publish step on a form it already knows is valid.
@@ -271,7 +269,7 @@ export const MockPostComposer = ({
   const scheduleItem = onSchedule
     ? {
         value: "schedule",
-        label: i18n.t("communities.composer.schedulePost"),
+        label: mockCopy.composer.schedulePost,
         icon: Calendar,
         onClick: () => setScheduleOpen(true),
       }
@@ -279,7 +277,7 @@ export const MockPostComposer = ({
   const draftItem = canDraft
     ? {
         value: "draft",
-        label: i18n.t("communities.composer.saveAsDraft"),
+        label: mockCopy.composer.saveAsDraft,
         icon: FileFilled,
         onClick: () => runWithValidation("draft"),
       }
@@ -310,15 +308,15 @@ export const MockPostComposer = ({
       // A stray click beside the dialog must not bin a half-written post. The
       // close button and Escape still work.
       dismissOnInteractOutside={false}
-      title={i18n.t(
+      title={
         mode === "edit"
-          ? "communities.composer.editPost"
+          ? mockCopy.composer.editPost
           : variant === "event"
-            ? "communities.composer.createEvent"
-            : "communities.composer.createPost"
-      )}
+            ? mockCopy.composer.createEvent
+            : mockCopy.composer.createPost
+      }
       primaryAction={{
-        label: i18n.t("communities.composer.continue"),
+        label: mockCopy.composer.continue,
         onClick: () => runWithValidation("publish"),
         disabled: submitting,
       }}

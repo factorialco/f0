@@ -3,8 +3,10 @@
 import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import {
   createContext,
+  type Dispatch,
   type FC,
   type PropsWithChildren,
+  type SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -273,13 +275,34 @@ export const SidePanelProvider: FC<
   }, [open, setLayoutRaw])
 
   const [side_, setSide] = useState<"left" | "right">(side)
-  const [contentSide, setContentSide] = useState<"left" | "right">(
-    initialContentSide ?? side
+  /**
+   * Derived, not captured. `contentSide` comes from the first available view's
+   * `side`, and availability is a permission or a feature flag — it flips from
+   * false to true when the fetch behind it resolves. Held in `useState` the
+   * prop was read once, so a view that became available a moment later left
+   * hosted content docked on the wrong edge for the rest of the session.
+   *
+   * The override still wins when it is set: `setPanelContentSide` is public API
+   * and predates the panel being its own thing.
+   */
+  const [contentSideOverride, setContentSideOverride] = useState<
+    "left" | "right" | null
+  >(null)
+  const contentSide = contentSideOverride ?? initialContentSide ?? side_
+  const setContentSide = useCallback<
+    Dispatch<SetStateAction<"left" | "right">>
+  >(
+    (action) =>
+      setContentSideOverride((previous) =>
+        typeof action === "function"
+          ? action(previous ?? initialContentSide ?? side)
+          : action
+      ),
+    [initialContentSide, side]
   )
 
   const value = useMemo<SidePanelContextValue>(
     () => ({
-      views,
       hasAvailableView,
       open,
       setOpen,
@@ -308,7 +331,6 @@ export const SidePanelProvider: FC<
       setShouldPlayEntranceAnimation,
     }),
     [
-      views,
       hasAvailableView,
       open,
       setOpen,
@@ -345,7 +367,6 @@ export const SidePanelProvider: FC<
  * rather than a Proxy, so it can be spread like the live value.
  */
 const NO_SIDE_PANEL: SidePanelContextValue = Object.freeze({
-  views: EMPTY_VIEWS,
   hasAvailableView: false,
   open: false,
   setOpen: noop,

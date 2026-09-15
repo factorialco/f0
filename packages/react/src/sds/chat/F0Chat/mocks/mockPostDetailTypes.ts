@@ -1,10 +1,30 @@
-import {
-  type F0ChatMention,
-  type F0ChatPost,
-  type F0ChatPostComment,
-  type F0ChatPostVisit,
-  type F0ChatUser,
-} from "../types"
+import { type F0ChatMention, type F0ChatPost, type F0ChatUser } from "../types"
+
+/**
+ * A comment on a post, and one entry of "who has opened this post".
+ *
+ * They live with the demo rather than in the shipped types because f0 has no
+ * surface for either: `openPost` hands navigation to the host and hears nothing
+ * back, so no field of `F0ChatRuntime` or `F0ChatPost` is typed with them and a
+ * host could not supply one if it wanted to. Publishing a contract nothing can
+ * satisfy claims a seam that isn't there.
+ */
+export type F0ChatPostComment = {
+  id: string
+  author: F0ChatUser
+  /** Sanitized HTML — comments carry mentions, so they are not plain text. */
+  text: string
+  createdAt: string
+  /** Whether the current user may edit or delete it. */
+  isMine?: boolean
+}
+
+export type F0ChatPostVisit = {
+  id: string
+  /** Absent when the host cannot resolve the visitor — rendered as "Anonymous". */
+  author?: F0ChatUser
+  createdAt: string
+}
 
 /**
  * The post's comments, as a page rather than the whole thread — the same

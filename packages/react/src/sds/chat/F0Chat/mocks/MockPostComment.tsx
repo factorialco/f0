@@ -6,9 +6,9 @@ import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
 import { Delete, EllipsisHorizontal, Pencil } from "@/icons/app"
 import { getAgo } from "@/lib/date"
-import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
-import { type F0ChatPostComment } from "../types"
+import { mockCopy } from "./mockCopy"
+import { type F0ChatPostComment } from "./mockPostDetailTypes"
 import { splitName } from "./mockPostUtils"
 
 /**
@@ -28,7 +28,6 @@ export const MockPostComment = ({
   onEdit?: (id: string, text: string) => void | Promise<void>
   onDelete?: (id: string) => void | Promise<void>
 }): ReactNode => {
-  const i18n = useI18n()
   const locale = useDateFnsLocale()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(comment.text)
@@ -42,7 +41,7 @@ export const MockPostComment = ({
     ...(onEdit
       ? [
           {
-            label: i18n.t("communities.detail.editComment"),
+            label: mockCopy.detail.editComment,
             icon: Pencil,
             onClick: () => {
               setDraft(comment.text)
@@ -54,7 +53,7 @@ export const MockPostComment = ({
     ...(onDelete
       ? [
           {
-            label: i18n.t("communities.detail.deleteComment"),
+            label: mockCopy.detail.deleteComment,
             icon: Delete,
             critical: true,
             onClick: () => setConfirmingDelete(true),
@@ -91,7 +90,7 @@ export const MockPostComment = ({
         {editing ? (
           <div className="flex flex-col gap-2 rounded-lg bg-f1-background-secondary px-4 py-3">
             <textarea
-              aria-label={i18n.t("communities.detail.editComment")}
+              aria-label={mockCopy.detail.editComment}
               value={draft}
               autoFocus
               disabled={busy}
@@ -102,14 +101,14 @@ export const MockPostComment = ({
               <F0Button
                 variant="outline"
                 size="sm"
-                label={i18n.t("communities.composer.cancel")}
+                label={mockCopy.composer.cancel}
                 onClick={() => setEditing(false)}
                 disabled={busy}
               />
               <F0Button
                 variant="default"
                 size="sm"
-                label={i18n.t("communities.composer.save")}
+                label={mockCopy.composer.save}
                 onClick={() => void save()}
                 disabled={busy || draft.trim().length === 0}
               />
@@ -127,7 +126,7 @@ export const MockPostComment = ({
                   size="sm"
                   hideLabel
                   icon={EllipsisHorizontal}
-                  label={i18n.t("communities.detail.postActions")}
+                  label={mockCopy.detail.postActions}
                 />
               </Dropdown>
             ) : null}
@@ -143,27 +142,27 @@ export const MockPostComment = ({
       {confirmingDelete && onDelete ? (
         <div
           role="alertdialog"
-          aria-label={i18n.t("communities.detail.deleteComment")}
+          aria-label={mockCopy.detail.deleteComment}
           className="fixed inset-0 z-40 flex items-center justify-center bg-f1-background-overlay p-6"
         >
           <div className="flex w-full max-w-sm flex-col gap-3 rounded-xl bg-f1-background p-5 shadow-lg">
             <p className="text-lg font-medium text-f1-foreground">
-              {i18n.t("communities.detail.deleteComment")}
+              {mockCopy.detail.deleteComment}
             </p>
             <p className="text-sm text-f1-foreground-secondary">
-              {i18n.t("communities.detail.deleteCommentDescription")}
+              {mockCopy.detail.deleteCommentDescription}
             </p>
             <div className="flex justify-end gap-2 pt-1">
               <F0Button
                 variant="outline"
                 size="md"
-                label={i18n.t("communities.composer.cancel")}
+                label={mockCopy.composer.cancel}
                 onClick={() => setConfirmingDelete(false)}
               />
               <F0Button
                 variant="critical"
                 size="md"
-                label={i18n.t("communities.detail.proceed")}
+                label={mockCopy.detail.proceed}
                 onClick={() => {
                   setConfirmingDelete(false)
                   void onDelete(comment.id)

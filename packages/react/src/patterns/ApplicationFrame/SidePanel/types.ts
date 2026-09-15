@@ -28,21 +28,19 @@ export type SidePanelContent = {
  * communications and no assistant got no panel.
  */
 export type SidePanelViewDefinition = {
+  /**
+   * Names the claim on the panel — `"ai"` is f0's own. Host bookkeeping: the
+   * panel never looks a view up by it, and the id it restores on reload is the
+   * CONTENT's, not this one.
+   */
   id: string
   /** Can this view occupy the panel at all? @default true */
   available?: boolean
   /** Edge this view docks to. Falls back to the panel's `side`. */
   side?: "left" | "right"
-  /**
-   * Static renderer, for views that own their whole surface (the AI chat).
-   * Omit for views whose content is pushed at runtime via `present()`.
-   */
-  render?: () => React.ReactNode
 }
 
 export type SidePanelContextValue = {
-  /** Every view declared for this frame, in declaration order. */
-  views: SidePanelViewDefinition[]
   /**
    * Whether anything can occupy the panel. False means the panel does not
    * exist: no chrome, no reserved width, no DOM.

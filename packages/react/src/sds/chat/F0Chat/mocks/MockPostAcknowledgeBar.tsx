@@ -1,9 +1,9 @@
 import { format } from "date-fns"
 import { useState, type ReactNode } from "react"
 import { F0ActionBar } from "@/components/F0ActionBar"
-import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { type F0ChatPostRequiredAction } from "../types"
+import { fill, mockCopy } from "./mockCopy"
 
 /**
  * "You have to confirm you read this."
@@ -22,7 +22,6 @@ export const MockPostAcknowledgeBar = ({
   onAcknowledge?: () => void | Promise<void>
   onLater?: () => void
 }): ReactNode => {
-  const i18n = useI18n()
   const locale = useDateFnsLocale()
   const [pendingRequest, setPendingRequest] = useState(false)
 
@@ -42,11 +41,11 @@ export const MockPostAcknowledgeBar = ({
   }
 
   const label = isCompleted
-    ? i18n.t("communities.detail.acknowledgedOn", {
+    ? fill(mockCopy.detail.acknowledgedOn, {
         date: format(new Date(completedAt), "PPP", { locale }),
         time: format(new Date(completedAt), "HH:mm"),
       })
-    : i18n.t("communities.detail.acknowledgeRequired")
+    : mockCopy.detail.acknowledgeRequired
 
   return (
     <F0ActionBar
@@ -58,7 +57,7 @@ export const MockPostAcknowledgeBar = ({
           ? undefined
           : [
               {
-                label: i18n.t("communities.detail.acknowledge"),
+                label: mockCopy.detail.acknowledge,
                 onClick: () => void acknowledge(),
               },
             ]
@@ -68,7 +67,7 @@ export const MockPostAcknowledgeBar = ({
           ? undefined
           : [
               {
-                label: i18n.t("communities.detail.acknowledgeLater"),
+                label: mockCopy.detail.acknowledgeLater,
                 onClick: onLater,
               },
             ]
