@@ -8,6 +8,36 @@ import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
 import { DateInput } from "./components/DateInput"
 import { DatePickerValue, F0DatePickerProps } from "./types"
 
+/**
+ * A value in its granularity's range — the only shape the picker compares, so
+ * anything entering its state passes through here first.
+ */
+function toSafeDatePickerRange(
+  value: DatePickerValue | undefined,
+  defaultGranularity: NavigationGranularityKey
+): DatePickerValue | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  const granularity = resolveGranularityDefinition(
+    value.granularity || defaultGranularity
+  )
+  const range = granularity.toRange(
+    granularity.calendarMode === "range"
+      ? value.value
+      : (value.value?.from ?? undefined)
+  )
+
+  // Normalize { value: undefined } to undefined so isSameDatePickerValue
+  // correctly detects "no change" on subsequent blur events after a clear.
+  if (!range) {
+    return undefined
+  }
+
+  return { value: range, granularity: value.granularity }
+}
+
 export function F0DatePicker({
   onChange,
   value,
@@ -21,7 +51,14 @@ export function F0DatePicker({
   selectOnCellOnly,
   ...inputProps
 }: F0DatePickerProps) {
-  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
+  // Seeded from the prop, not empty-then-filled by the effect below: an empty
+  // first paint puts F0InputField's placeholder over the value for a frame, and
+  // axe samples that fade as a contrast failure. Normalised on the way in,
+  // because a value the picker has not put in its granularity's range reads as
+  // a change the moment the calendar reports its selection, which closes it.
+  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
+    () => toSafeDatePickerRange(value, granularities[0] ?? "day")
+  )
   const [isOpen, setIsOpen] = useState(open)
 
   useEffect(() => {
@@ -49,27 +86,9 @@ export function F0DatePicker({
    * Returns a value range in the correct granularity
    */
   const toSafeRange = useCallback(
-    (value: DatePickerValue | undefined) => {
-      if (!value) {
-        return undefined
-      }
-
-      const granularity = getGranularity(value.granularity)
-      const range = granularity.toRange(
-        granularity.calendarMode === "range"
-          ? value.value
-          : (value.value?.from ?? undefined)
-      )
-
-      // Normalize { value: undefined } to undefined so isSameDatePickerValue
-      // correctly detects "no change" on subsequent blur events after a clear.
-      if (!range) {
-        return undefined
-      }
-
-      return { value: range, granularity: value.granularity }
-    },
-    [getGranularity]
+    (value: DatePickerValue | undefined) =>
+      toSafeDatePickerRange(value, defaultGranularity),
+    [defaultGranularity]
   )
 
   const granularity = useMemo(() => {
