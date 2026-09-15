@@ -1,7 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-
 import { forwardRef, useEffect, useState, type SVGProps } from "react"
-
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type IconType } from "@/components/F0Icon"
 import { Calendar, Clock } from "@/icons/app"
 import {
@@ -13,9 +11,8 @@ import {
   within,
   zeroRender,
 } from "@/testing/test-utils"
-
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
-import { NewHomeLayout } from "./index"
+import { NewHomeLayout } from "."
 
 /**
  * The layout decides everything responsive from its OWN measured width, so these
@@ -25,7 +22,7 @@ import { NewHomeLayout } from "./index"
 let layoutWidth = 1400
 
 /** Every live ResizeObserver callback, so a test can act like the box resized. */
-let resizeCallbacks: Array<() => void> = []
+let resizeCallbacks: (() => void)[] = []
 
 /**
  * Resizes the layout the way the window does: the new width is what
@@ -686,6 +683,69 @@ describe("NewHomeLayout", () => {
     })
   })
 
+  /**
+   * The main column's FOOTNOTE — a sentence at the foot of the column that is
+   * not a widget. What these tests pin is its POSITION: under every widget the
+   * column is drawing and above the offer to add another, whichever of those
+   * two the layout is currently doing. What the string itself may say is
+   * `Footnote`'s own test.
+   */
+  describe("mainFootnote", () => {
+    /** Whether `later` comes after `earlier` in the document. */
+    const comesAfter = (earlier: Element, later: Element) =>
+      Boolean(
+        earlier.compareDocumentPosition(later) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+      )
+
+    /**
+     * The three things whose order is the whole point: the last widget the main
+     * column draws, the footnote, and that column's own add placeholder. The
+     * main column comes before the rail in the document, so the FIRST
+     * placeholder is this column's.
+     */
+    const footOfColumn = (lastWidget: string) => ({
+      widget: screen.getAllByText(lastWidget)[0]!,
+      footnote: screen.getByText(/footnote/),
+      add: screen.getAllByRole("button", { name: "Add widget" })[0]!,
+    })
+
+    test("sits under the main column's widgets and over the add placeholder", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("left-a")],
+        mainFootnote: "footnote",
+      })
+      const foot = footOfColumn("left-a")
+
+      expect(comesAfter(foot.widget, foot.footnote)).toBe(true)
+      expect(comesAfter(foot.footnote, foot.add)).toBe(true)
+    })
+
+    test("stays at the foot when the rail's widgets fold into the column", () => {
+      renderLayout(700, {
+        leftWidgets: [widget("left-a")],
+        mainFootnote: "footnote",
+      })
+      // Stacked, the loose pin (`events`) is the column's last widget — the
+      // footnote still comes after it, and the placeholder after the footnote.
+      const foot = footOfColumn("events")
+
+      expect(comesAfter(foot.widget, foot.footnote)).toBe(true)
+      expect(comesAfter(foot.footnote, foot.add)).toBe(true)
+    })
+
+    test("draws the string's markdown link as a link", () => {
+      renderLayout(1400, {
+        mainFootnote: "You can [go back](/home?legacy=1) any time.",
+      })
+
+      expect(screen.getByRole("link", { name: "go back" })).toHaveAttribute(
+        "href",
+        "/home?legacy=1"
+      )
+    })
+  })
+
   describe("stacked, below md", () => {
     test("drops the rail entirely — not even the strip", () => {
       renderLayout(700)
@@ -872,17 +932,20 @@ describe("NewHomeLayout", () => {
     /** A strip with more glyphs than fit: 2000px of them in a 500px column. */
     const overflowing = () => {
       const heights = { scrollHeight: 2000, clientHeight: 500 }
-      for (const prop of METRICS)
+      for (const prop of METRICS) {
         Object.defineProperty(HTMLElement.prototype, prop, {
           configurable: true,
           get: () => heights[prop],
         })
+      }
     }
 
     // Back to jsdom's own (on `Element`, which HTMLElement inherits from), so the
     // test below sees a strip that fits.
     afterEach(() => {
-      for (const prop of METRICS) delete HTMLElement.prototype[prop]
+      for (const prop of METRICS) {
+        Reflect.deleteProperty(HTMLElement.prototype, prop)
+      }
     })
 
     test("masks the bottom while glyphs are cut off there, and the top once scrolled", () => {

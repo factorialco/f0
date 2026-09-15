@@ -29,7 +29,9 @@ export function useScrollFade(fade: number = SCROLL_FADE_PX) {
   const [ends, setEnds] = useState({ top: false, bottom: false })
 
   useEffect(() => {
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const read = () => {
       // A pixel of slack: fractional scroll offsets and zoom leave sub-pixel
@@ -49,7 +51,9 @@ export function useScrollFade(fade: number = SCROLL_FADE_PX) {
     const observer =
       typeof ResizeObserver === "function" ? new ResizeObserver(read) : null
     observer?.observe(el)
-    if (el.firstElementChild) observer?.observe(el.firstElementChild)
+    if (el.firstElementChild) {
+      observer?.observe(el.firstElementChild)
+    }
 
     return () => {
       el.removeEventListener("scroll", read)
@@ -58,7 +62,9 @@ export function useScrollFade(fade: number = SCROLL_FADE_PX) {
   }, [el])
 
   const style = useMemo<CSSProperties>(() => {
-    if (!ends.top && !ends.bottom) return {}
+    if (!ends.top && !ends.bottom) {
+      return {}
+    }
     const from = ends.top ? `transparent 0, black ${fade}px` : "black 0"
     const to = ends.bottom
       ? `black calc(100% - ${fade}px), transparent 100%`

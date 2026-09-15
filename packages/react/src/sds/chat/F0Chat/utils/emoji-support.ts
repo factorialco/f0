@@ -68,7 +68,9 @@ const draw = (
 const isBlank = (pixels: Uint8ClampedArray): boolean => {
   // Alpha channel only — a glyph that drew anything at all has a non-zero one.
   for (let i = 3; i < pixels.length; i += 4) {
-    if (pixels[i] !== 0) return false
+    if (pixels[i] !== 0) {
+      return false
+    }
   }
   return true
 }
@@ -77,15 +79,21 @@ const looksIdentical = (
   a: Uint8ClampedArray,
   b: Uint8ClampedArray
 ): boolean => {
-  if (a.length !== b.length) return false
+  if (a.length !== b.length) {
+    return false
+  }
   for (let i = 0; i < a.length; i += 1) {
-    if (a[i] !== b[i]) return false
+    if (a[i] !== b[i]) {
+      return false
+    }
   }
   return true
 }
 
 const createProbe = (): Probe | null => {
-  if (typeof document === "undefined") return null
+  if (typeof document === "undefined") {
+    return null
+  }
 
   try {
     const canvas = document.createElement("canvas")
@@ -96,7 +104,9 @@ const createProbe = (): Probe | null => {
     // running during render meant an environment with no canvas took the whole
     // picker down rather than falling back to showing every emoji.
     const context = canvas.getContext("2d", { willReadFrequently: true })
-    if (!context) return null
+    if (!context) {
+      return null
+    }
 
     context.font = PROBE_FONT
     context.textBaseline = "top"
@@ -116,8 +126,12 @@ const createProbe = (): Probe | null => {
 
 const canDraw = (probe: Probe, emoji: string): boolean => {
   const pixels = draw(probe.context, emoji)
-  if (isBlank(pixels)) return false
-  if (looksIdentical(pixels, probe.notdefPixels)) return false
+  if (isBlank(pixels)) {
+    return false
+  }
+  if (looksIdentical(pixels, probe.notdefPixels)) {
+    return false
+  }
   return (
     probe.context.measureText(emoji).width <=
     probe.singleGlyphWidth * SINGLE_GLYPH_WIDTH_TOLERANCE
@@ -135,7 +149,9 @@ let cached: number | null = null
  * render fine.
  */
 export const detectMaxEmojiVersion = (): number => {
-  if (cached !== null) return cached
+  if (cached !== null) {
+    return cached
+  }
 
   const probe = createProbe()
   if (!probe) {
@@ -147,7 +163,9 @@ export const detectMaxEmojiVersion = (): number => {
   // reporting the highest that happens to pass.
   let supported = PROBES[0].version
   for (const { version, emoji } of PROBES) {
-    if (!canDraw(probe, emoji)) break
+    if (!canDraw(probe, emoji)) {
+      break
+    }
     supported = version
   }
 

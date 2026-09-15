@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 
 // ---------------------------------------------------------------------------
@@ -61,9 +60,11 @@ vi.mock("../utils/useContainerSize", () => ({
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
-    series: Array<{ areaStyle?: unknown }>
+    series: { areaStyle?: unknown }[]
     legend?: { show?: boolean }
     xAxis: { axisLabel: { show: boolean } }
     yAxis: { axisLabel: { show: boolean } }

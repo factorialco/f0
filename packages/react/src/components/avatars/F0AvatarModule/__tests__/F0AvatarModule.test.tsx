@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { F0AvatarModule } from "../F0AvatarModule"
 
 describe("F0AvatarModule", () => {

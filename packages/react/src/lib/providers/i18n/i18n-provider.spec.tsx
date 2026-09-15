@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
-
+import type { ReactElement } from "react"
+import { assertType, describe, expect, it } from "vitest"
 import { aiTranslations } from "@/kits/ai/F0AiChat"
-
 import { I18nProvider, TranslationsType, useI18n } from "./i18n-provider"
 import { defaultTranslations } from "./i18n-provider-defaults"
 
@@ -141,21 +140,21 @@ describe("I18nProvider", () => {
 
   // Type tests - these will fail at compile time if types are wrong
   it.skip("maintains type safety for translation overrides", () => {
-    render(
+    assertType<ReactElement>(
       // @ts-expect-error - Invalid translation key should be caught by TypeScript
       <I18nProvider translations={{ invalidKey: "test" }}>
         <div />
       </I18nProvider>
     )
 
-    render(
+    assertType<ReactElement>(
       // @ts-expect-error - Missing required translation keys should be caught by TypeScript
       <I18nProvider translations={{}}>
         <div />
       </I18nProvider>
     )
 
-    render(
+    assertType<ReactElement>(
       // @ts-expect-error - Translations are required
       <I18nProvider>
         <div />

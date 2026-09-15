@@ -8,7 +8,6 @@ import {
   useRef,
   type ReactNode,
 } from "react"
-
 import {
   type F0ChatCapabilities,
   type F0ChatChannelType,
@@ -141,7 +140,9 @@ const useStableCapabilities = (
       previous.canViewInfo === capabilities.canViewInfo &&
       previous.canEditMessage === capabilities.canEditMessage &&
       previous.canDeleteMessage === capabilities.canDeleteMessage)
-  if (!same) previousRef.current = capabilities
+  if (!same) {
+    previousRef.current = capabilities
+  }
   return same ? previous : capabilities
 }
 
@@ -205,12 +206,16 @@ export const F0ChatProvider = ({
         count: number
       ): Promise<F0ChatUser[]> => {
         const currentRuntime = runtimeRef.current
-        if (!currentRuntime.loadReactionUsers) return Promise.resolve([])
+        if (!currentRuntime.loadReactionUsers) {
+          return Promise.resolve([])
+        }
 
         const keyPrefix = `${currentRuntime.channel.id}\u0000${messageId}\u0000${emoji}\u0000`
         const key = `${keyPrefix}${count}`
         const cached = reactionUsersCacheRef.current.get(key)
-        if (cached) return cached
+        if (cached) {
+          return cached
+        }
 
         for (const cachedKey of reactionUsersCacheRef.current.keys()) {
           if (cachedKey.startsWith(keyPrefix)) {
@@ -248,7 +253,9 @@ export const F0ChatProvider = ({
     // never runs and the microphone keeps recording.
     const call = (run: (events: F0ChatEvents) => void): void => {
       const events = eventsRef.current
-      if (!events) return
+      if (!events) {
+        return
+      }
       try {
         run(events)
       } catch (error) {

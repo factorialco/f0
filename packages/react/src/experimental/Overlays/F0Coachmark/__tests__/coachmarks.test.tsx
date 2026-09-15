@@ -1,14 +1,12 @@
 import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   screen,
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { CoachmarkProvider } from "../CoachmarkProvider"
 import { coachmarks } from "../imperative"
 
@@ -57,6 +55,29 @@ describe("coachmarks API", () => {
       expect(dialog).toHaveAccessibleName("Filters got smarter")
       expect(dialog).toHaveAccessibleDescription(
         "Stack filters on jobs and candidates."
+      )
+    })
+
+    it("takes any CSS selector — an id, a class, an attribute", async () => {
+      render(
+        <CoachmarkProvider>
+          <button className="js-filters">Filters</button>
+          <button data-add-widget="right">Add widget</button>
+        </CoachmarkProvider>
+      )
+
+      open({ targetElement: ".js-filters", title: "By class" })
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("By class")
+      )
+
+      coachmarks.closeAll()
+      open({
+        targetElement: '[data-add-widget="right"]',
+        title: "By attribute",
+      })
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("By attribute")
       )
     })
 
@@ -120,7 +141,7 @@ describe("coachmarks API", () => {
         return (
           <CoachmarkProvider>
             <button onClick={() => setMounted(true)}>Mount target</button>
-            {mounted && <button id="late">Late</button>}
+            {mounted ? <button id="late">Late</button> : null}
           </CoachmarkProvider>
         )
       }
@@ -148,7 +169,7 @@ describe("coachmarks API", () => {
             <button onClick={() => setMounted((value) => !value)}>
               Toggle target
             </button>
-            {mounted && <button id="toggling">Toggling</button>}
+            {mounted ? <button id="toggling">Toggling</button> : null}
           </CoachmarkProvider>
         )
       }

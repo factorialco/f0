@@ -1,7 +1,6 @@
 import type { ForwardRefExoticComponent, RefAttributes } from "react"
 import type { ColorValue } from "react-native"
-import type { SvgProps } from "react-native-svg"
-import type { Svg } from "react-native-svg"
+import type { Svg, SvgProps } from "react-native-svg"
 import type { VariantProps } from "tailwind-variants"
 
 import type { iconVariants } from "./F0Icon.styles"

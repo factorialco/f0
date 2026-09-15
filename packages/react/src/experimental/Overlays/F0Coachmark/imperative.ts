@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid"
-
 import { coachmarkStore } from "./store"
 import type {
   CoachmarkId,
@@ -11,7 +10,9 @@ import type {
 const isDev = process.env.NODE_ENV !== "production"
 
 const warn = (message: string) => {
-  if (isDev) console.warn(`[f0] ${message}`)
+  if (isDev) {
+    console.warn(`[f0] ${message}`)
+  }
 }
 
 const warnIfNoProvider = (method: string) => {
@@ -66,6 +67,7 @@ export const resolveSteps = (options: CoachmarkOptions): CoachmarkStep[] => {
         action: step.action,
         targetElement,
         arrow: step.arrow ?? options.arrow,
+        focusTarget: step.focusTarget ?? options.focusTarget,
         side: step.side ?? options.side,
         align: step.align ?? options.align,
         sideOffset: step.sideOffset ?? options.sideOffset,
@@ -90,8 +92,11 @@ const open = (options: CoachmarkOptions): CoachmarkId => {
   coachmarkStore.addItem({
     id,
     steps,
+    onEnd: options.onEnd,
     onDismiss: options.onDismiss,
     onComplete: options.onComplete,
+    overlay: options.overlay,
+    skipAfterOutsideClicks: options.skipAfterOutsideClicks,
   })
 
   return id

@@ -1,7 +1,5 @@
-import { useEffect, useRef } from "react"
-
 import { Reorder, useDragControls } from "motion/react"
-
+import { useEffect, useRef } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
@@ -10,7 +8,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
-
 import { SortAndHideListItem } from "./types"
 
 const isLocked = (item: SortAndHideListItem) =>
@@ -108,7 +105,7 @@ const Item = ({
 
   const content = (
     <div className={classes}>
-      {(allowSorting || item.showLockState) && (
+      {allowSorting || item.showLockState ? (
         <div
           className={cn(
             "flex shrink-0 items-center justify-center text-f1-icon",
@@ -152,7 +149,7 @@ const Item = ({
             <F0Icon icon={LockLocked} size="sm" />
           )}
         </div>
-      )}
+      ) : null}
       <span
         className={cn(
           "flex-1 min-w-0",
@@ -161,13 +158,13 @@ const Item = ({
       >
         <OneEllipsis>{item.label}</OneEllipsis>
       </span>
-      {(showLock || showRemove) && (
+      {showLock || showRemove ? (
         <div
           data-column-actions
           className="shrink-0 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
         >
           <div className="flex items-center">
-            {showLock && (
+            {showLock ? (
               <span
                 onKeyDown={trackKeyboardActivation}
                 onPointerDown={() => {
@@ -192,8 +189,8 @@ const Item = ({
                   }}
                 />
               </span>
-            )}
-            {showRemove && (
+            ) : null}
+            {showRemove ? (
               <ButtonInternal
                 variant="ghost"
                 size="sm"
@@ -203,12 +200,12 @@ const Item = ({
                 label={i18n.collections.table.settings.removeColumn}
                 onClick={() => onRemove?.(item)}
               />
-            )}
+            ) : null}
           </div>
         </div>
-      )}
-      {allowHiding &&
-        (item.disabledReason ? (
+      ) : null}
+      {allowHiding ? (
+        item.disabledReason ? (
           // Locked by the caller (e.g. no permission): forced OFF + disabled,
           // with the reason in a tooltip. The switch is wrapped in a span so the
           // tooltip still triggers on hover — a disabled control fires no pointer
@@ -231,7 +228,8 @@ const Item = ({
             hideLabel
             disabled={!item.canHide || locked}
           />
-        ))}
+        )
+      ) : null}
     </div>
   )
 

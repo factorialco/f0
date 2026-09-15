@@ -21,6 +21,9 @@ export const emitReactionToggle = (
   const removing =
     message.reactions?.some((r) => r.emoji === emoji && r.reactedByMe) === true
 
-  if (removing) emit.onReactionRemoved(payload)
-  else emit.onReactionAdded(payload)
+  if (removing) {
+    emit.onReactionRemoved(payload)
+  } else {
+    emit.onReactionAdded(payload)
+  }
 }

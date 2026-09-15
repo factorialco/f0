@@ -1,17 +1,15 @@
 import { describe, expect, test, vi } from "vitest"
 import { z } from "zod"
-
 import { Calendar, Clock, File } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import {
   EVENT_LIST_GAP,
   homeSlot,
   type HomeWidgetItem,
   type WidgetParams,
 } from "../slotRenderers"
-import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
+import { WidgetCatalog, type WidgetCatalogGroup } from "."
 
 const GROUPS: WidgetCatalogGroup[] = [
   { id: "time", label: "Time & attendance", module: "time-tracking" },
@@ -51,7 +49,9 @@ const listed = () =>
  */
 const boxAround = (a: HTMLElement, b: HTMLElement) => {
   let node: HTMLElement | null = a
-  while (node && !node.contains(b)) node = node.parentElement
+  while (node && !node.contains(b)) {
+    node = node.parentElement
+  }
   return node
 }
 

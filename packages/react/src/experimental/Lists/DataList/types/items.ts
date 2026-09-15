@@ -1,7 +1,5 @@
 import type { ReactElement } from "react"
-
 import type { IconType } from "@/components/F0Icon"
-
 import type { ActionType } from "./actions"
 
 export type DataListProps = {

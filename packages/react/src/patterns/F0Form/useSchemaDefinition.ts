@@ -1,16 +1,5 @@
 import { useMemo } from "react"
 import { z, ZodRawShape, ZodTypeAny } from "zod"
-
-import type { F0Field } from "./fields/types"
-import type { F0FormSchema } from "./types"
-import type {
-  F0SectionConfig,
-  FieldItem,
-  FormDefinitionItem,
-  RowDefinition,
-  SectionDefinition,
-} from "./types"
-
 import {
   F0FieldConfig,
   F0FieldType,
@@ -23,6 +12,15 @@ import { extractNumberConstraints } from "./fields/number/schema"
 import { isFieldRequired } from "./fields/schema"
 import { inferInputType } from "./fields/text/schema"
 import { extractTextareaConstraints } from "./fields/textarea/schema"
+import type { F0Field } from "./fields/types"
+import type {
+  F0FormSchema,
+  F0SectionConfig,
+  FieldItem,
+  FormDefinitionItem,
+  RowDefinition,
+  SectionDefinition,
+} from "./types"
 
 /**
  * Internal representation of a parsed field with its schema and config
@@ -373,7 +371,9 @@ function groupFieldsIntoRows(
   const processedIndices = new Set<number>()
 
   for (let i = 0; i < fields.length; i++) {
-    if (processedIndices.has(i)) continue
+    if (processedIndices.has(i)) {
+      continue
+    }
 
     const field = fields[i]
     const rowId = field.config.row

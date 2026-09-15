@@ -42,9 +42,13 @@ export const F0Checkbox = React.memo(function F0Checkbox({
   const isChecked = indeterminate ? true : checked
 
   const handlePress = useCallback(() => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     const next = !checked
-    if (!isControlled) setInternalChecked(next)
+    if (!isControlled) {
+      setInternalChecked(next)
+    }
     onValueChange?.(next)
   }, [disabled, onValueChange, checked, isControlled])
 

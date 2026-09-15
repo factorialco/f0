@@ -1,10 +1,8 @@
 import type { Viewport } from "@xyflow/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRenderHook } from "@/testing/test-utils"
-
-import type { PositionedNode, ViewportInset } from "../../types"
 import { FIT_VIEW_PADDING_TIGHT } from "../../constants"
+import type { PositionedNode, ViewportInset } from "../../types"
 import { useGraphViewport } from "../useGraphViewport"
 
 // Spy React Flow instance + store so we can assert on the camera calls without a

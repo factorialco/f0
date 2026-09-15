@@ -748,6 +748,12 @@ export type F0ChatRuntime = {
    */
   maxFileSizeBytes?: number
   /**
+   * Maximum number of characters allowed in a message. The composer keeps an
+   * oversized draft in place and shows its existing validation banner instead
+   * of calling `sendMessage`. Omit for no limit.
+   */
+  maxMessageCharacters?: number
+  /**
    * Optional voice dictation — same signature as the AI chat (streams partials).
    * Not part of the Stream transport; a host wires it to its own speech service
    * (the Stream adapter omits it, so the mic button stays hidden there).

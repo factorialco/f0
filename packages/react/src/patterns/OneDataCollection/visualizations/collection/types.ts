@@ -1,13 +1,15 @@
+import { IconType } from "@/components/F0Icon"
+import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import type {
   FiltersDefinition,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-
-import { IconType } from "@/components/F0Icon"
-import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
-import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-
 import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
+import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "../../item-actions"
+import { NavigationFiltersDefinition } from "../../navigationFilters/types"
+import { SummariesDefinition } from "../../summary"
 import type {
   GroupingDefinition,
   OnLoadDataCallback,
@@ -17,13 +19,8 @@ import type { CardVisualizationOptions } from "./Card"
 import type { EditableTableVisualizationOptions } from "./EditableTable"
 import type { GraphVisualizationOptions } from "./Graph/types"
 import type { KanbanVisualizationOptions } from "./Kanban"
-import type { TableVisualizationOptions } from "./Table"
-
-import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "../../item-actions"
-import { NavigationFiltersDefinition } from "../../navigationFilters/types"
-import { SummariesDefinition } from "../../summary"
 import { ListVisualizationOptions } from "./List/types"
+import type { TableVisualizationOptions } from "./Table"
 
 /**
  * Optional per-visualization filter and preset overrides.
@@ -185,17 +182,15 @@ export type VisualizationProps<
   Grouping extends GroupingDefinition<Record>,
 > = {
   /** Array of available visualization configurations */
-  visualizations?: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations?: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
 }
 
 /**

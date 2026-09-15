@@ -1,7 +1,6 @@
 import { fireEvent, render } from "@testing-library/react"
 import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { ResizeHandle } from "../ResizeHandle"
 
 const noop = () => {}

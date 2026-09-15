@@ -1,20 +1,18 @@
 import { Editor, useEditorState } from "@tiptap/react"
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
 import { Toolbar } from "@/components/RichText/internal"
-import { Check, Cross, Microphone, Paperclip, TextSize } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import {
   AIEnhanceMenu,
   EnhanceActivator,
 } from "@/components/RichText/internal/Enhance"
 import type { UseEnhanceReturn } from "@/components/RichText/internal/Enhance"
+import { Check, Cross, Microphone, Paperclip, TextSize } from "@/icons/app"
 import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/RecordingWaveform"
 import { type RecorderStatus } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { cn } from "@/lib/utils"
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import { primaryActionType, secondaryActionsType } from "../../utils/types"
 import { ActionsMenu } from "./ActionsMenu"
@@ -128,7 +126,7 @@ const Footer = ({
       {/* Always second, right after the toolbar button: while transcribing
           this button shows the spinner exactly where the recording confirm
           (✓) button was. */}
-      {canRecord && (
+      {canRecord ? (
         <F0Button
           label={i18n.ai.recordAudio}
           hideLabel
@@ -141,9 +139,9 @@ const Footer = ({
           }}
           loading={recordingStatus === "transcribing"}
         />
-      )}
+      ) : null}
 
-      {canUseFiles && (
+      {canUseFiles ? (
         <F0Button
           icon={Paperclip}
           onClick={handleFileClick}
@@ -152,9 +150,9 @@ const Footer = ({
           variant="outline"
           disabled={disableButtons}
         />
-      )}
+      ) : null}
 
-      {enhance.config && !isFullscreen && (
+      {enhance.config && !isFullscreen ? (
         <EnhanceActivator
           enhance={enhance}
           disabled={disableButtons}
@@ -164,13 +162,13 @@ const Footer = ({
           onOpenChange={setEnhanceMenuOpen}
           hideReviewPanel
         />
-      )}
+      ) : null}
 
-      {maxCharacters && !useLittleMode && (
+      {maxCharacters && !useLittleMode ? (
         <p className="text-sm font-normal text-f1-foreground-secondary">
           {characterCount}/{maxCharacters}
         </p>
-      )}
+      ) : null}
     </>
   )
 
@@ -224,7 +222,7 @@ const Footer = ({
       {/* The footer content disappears while a footer-initiated enhance is in
           flight; during review the menu shows up in its place, spanning the
           whole footer width without a border. */}
-      {hideFooterContent && enhance.isAcceptChangesOpen && (
+      {hideFooterContent && enhance.isAcceptChangesOpen ? (
         <div className="absolute inset-x-0 inset-y-0 z-20 flex items-center">
           <AIEnhanceMenu
             onSelect={() => {}}
@@ -236,14 +234,14 @@ const Footer = ({
             onRetry={enhance.retryChanges}
           />
         </div>
-      )}
+      ) : null}
       <div
         className={cn(
           "relative flex flex-grow items-center gap-2",
           hideFooterContent && "invisible"
         )}
       >
-        {!isFullscreen && (
+        {!isFullscreen ? (
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: isToolbarOpen ? "100%" : 0 }}
@@ -286,9 +284,9 @@ const Footer = ({
               />
             </div>
           </motion.div>
-        )}
+        ) : null}
 
-        {!isFullscreen && (
+        {!isFullscreen ? (
           <motion.div
             className="flex items-center gap-2"
             initial={{ opacity: 1 }}
@@ -304,14 +302,14 @@ const Footer = ({
             {renderToolbarButton()}
             {renderActionButtons()}
           </motion.div>
-        )}
+        ) : null}
 
-        {isFullscreen && (
+        {isFullscreen ? (
           <div className="flex items-center gap-2">
-            {!isToolbarOpen && renderToolbarButton()}
+            {!isToolbarOpen ? renderToolbarButton() : null}
             {renderActionButtons()}
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className={cn("contents", hideFooterContent && "invisible")}>

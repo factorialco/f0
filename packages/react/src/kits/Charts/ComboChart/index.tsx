@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartConfig,
   ChartContainer,
@@ -20,7 +19,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -44,7 +42,9 @@ const createScatter = (categoryKey: string) => {
     }
 
     const getScatterValue = () => {
-      if (!payload) return "-"
+      if (!payload) {
+        return "-"
+      }
 
       if (payload[categoryKey] !== undefined) {
         return payload[categoryKey]
@@ -136,10 +136,10 @@ type ChartDataPoint<K extends ChartConfig> = {
   }
 }
 
-type ActivePayload<K> = Array<{
+type ActivePayload<K> = {
   name: keyof K
   value: number
-}>
+}[]
 
 type ChartTypeConfig<K extends ChartConfig> = {
   categories: keyof K | (keyof K)[]
@@ -273,17 +273,17 @@ const _ComboChart = <K extends ChartConfig>(
           onClick(chartData)
         }}
       >
-        {!hideTooltip && (
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
             }
           />
-        )}
-        {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
+        ) : null}
+        {!hideGrid ? <CartesianGrid {...cartesianGridProps()} /> : null}
 
-        {leftAxisCharts.length > 0 && (
+        {leftAxisCharts.length > 0 ? (
           <YAxis
             {...yAxisProps(yAxis)}
             tick
@@ -306,9 +306,9 @@ const _ComboChart = <K extends ChartConfig>(
                 : undefined
             }
           />
-        )}
+        ) : null}
 
-        {rightAxisCharts.length > 0 && (
+        {rightAxisCharts.length > 0 ? (
           <YAxis
             {...yAxisProps(yAxis)}
             yAxisId="right"
@@ -335,7 +335,7 @@ const _ComboChart = <K extends ChartConfig>(
                 : undefined
             }
           />
-        )}
+        ) : null}
         <XAxis
           {...xAxisProps(xAxis)}
           hide={xAxis?.hide}
@@ -367,7 +367,7 @@ const _ComboChart = <K extends ChartConfig>(
                       >
                         {payload.value}
                       </text>
-                      {!!value && (
+                      {value ? (
                         <text
                           x={0}
                           y={0}
@@ -377,7 +377,7 @@ const _ComboChart = <K extends ChartConfig>(
                         >
                           {normalizedValue}
                         </text>
-                      )}
+                      ) : null}
                     </g>
                   )
                 }
@@ -470,7 +470,7 @@ const _ComboChart = <K extends ChartConfig>(
             shape={createScatter(String(category))}
           />
         ))}
-        {legend && (
+        {legend ? (
           <ChartLegend
             content={<ChartLegendContent nameKey="label" />}
             align={"center"}
@@ -478,7 +478,7 @@ const _ComboChart = <K extends ChartConfig>(
             layout="vertical"
             className={"flex-row items-start gap-4 pr-3 pt-2"}
           />
-        )}
+        ) : null}
       </ComposedChart>
     </ChartContainer>
   )

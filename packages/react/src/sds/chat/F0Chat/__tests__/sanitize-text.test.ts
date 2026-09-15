@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { sanitizeDisplayText } from "../utils/sanitize-text"
 
 // A pool of combining marks (strikethrough overlay, cyrillic millions sign,

@@ -1,16 +1,13 @@
 import { screen } from "@testing-library/react"
 import { PresenceContext } from "motion/react"
 import { describe, expect, it, vi } from "vitest"
-
+import { TableContext } from "@/experimental/OneTable/utils/TableContext"
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
-
-import { TextCell } from "@/ui/value-display/types/text"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { TableContext } from "@/experimental/OneTable/utils/TableContext"
 import { zeroRender as render } from "@/testing/test-utils"
-
+import { TextCell } from "@/ui/value-display/types/text"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
 import { Row } from "../components/Row"
@@ -26,9 +23,11 @@ type Person = { id: number; name: string }
 
 const ana: Person = { id: 1, name: "Ana" }
 
-const columns: ReadonlyArray<
-  TableColumnDefinition<Person, SortingsDefinition, SummariesDefinition>
-> = [{ label: "name", render: (item: Person) => item.name }]
+const columns: readonly TableColumnDefinition<
+  Person,
+  SortingsDefinition,
+  SummariesDefinition
+>[] = [{ label: "name", render: (item: Person) => item.name }]
 
 const source = {
   selectable: (item: Person) => item.id,

@@ -1,12 +1,10 @@
 import { z } from "zod"
-
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
 import type { NewColor } from "@/components/tags/F0TagDot"
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import type { ConfirmDialogOptions } from "@/lib/providers/dialogs-alike/types"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
-
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
@@ -252,7 +250,7 @@ export interface F0EntitiesListOptions<T = EntitiesListItem> {
    * editing per row; with more than 2 it shows/hides the per-row edit
    * (pencil) action that opens the edit dialog.
    */
-  editableIds?: Array<string | number>
+  editableIds?: (string | number)[]
   /**
    * Restricts which items can be removed, matched against each item's `id`
    * property. The remove counterpart to {@link editableIds}, and independent
@@ -262,7 +260,7 @@ export interface F0EntitiesListOptions<T = EntitiesListItem> {
    * this list shows no remove action (`list-view`) / no remove button
    * (`editable-table`).
    */
-  removableIds?: Array<string | number>
+  removableIds?: (string | number)[]
   /** Minimum number of rows required (defaults to 1 unless the field is optional) */
   minItems?: number
   /** Maximum number of rows allowed. When reached the add button is hidden. */
@@ -365,9 +363,9 @@ export type F0EntitiesListField = F0BaseField & {
   /** User-facing text (add button, dialog description/title) */
   labels?: F0EntitiesListLabels
   /** Ids of the items that can be edited (matched against `item.id`) */
-  editableIds?: Array<string | number>
+  editableIds?: (string | number)[]
   /** Ids of the items that can be removed (matched against `item.id`) */
-  removableIds?: Array<string | number>
+  removableIds?: (string | number)[]
   /** Maximum number of rows allowed */
   maxItems?: number
   /** Per-column presentation options, keyed by item-schema property name */

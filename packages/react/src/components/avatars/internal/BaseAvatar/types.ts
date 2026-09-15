@@ -1,5 +1,4 @@
 import { ReactElement } from "react"
-
 import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { F0IconProps, IconType } from "@/components/F0Icon"
 import { InternalAvatarProps } from "@/ui/Avatar"

@@ -1,5 +1,4 @@
 import { ComponentProps } from "react"
-
 import type {
   ChartContainer,
   LineChartConfig,

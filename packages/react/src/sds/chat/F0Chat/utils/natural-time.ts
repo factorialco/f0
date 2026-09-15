@@ -46,8 +46,12 @@ export function formatRelativeDay(
   locale?: string
 ): string {
   const days = calendarDaysApart(date, now)
-  if (days <= 0) return labels.today
-  if (days === 1) return labels.yesterday
+  if (days <= 0) {
+    return labels.today
+  }
+  if (days === 1) {
+    return labels.yesterday
+  }
   if (days < 7) {
     return new Intl.DateTimeFormat(locale, { weekday: "long" }).format(date)
   }

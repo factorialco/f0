@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { RecordType } from "@/hooks/datasource"
 import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
@@ -48,13 +47,13 @@ export type GraphVisualizationOptions<
    * toggle to show/hide each metadata column (like configuring table columns).
    * Values are tag `column` keys (or `type` when a tag has no `column`).
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  nodeTagTypes?: readonly F0GraphNodeTagColumn[]
   /** Friendly labels per tag column, shown in the metadata visibility toggle. */
   nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>
   /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[]
   /** Tag columns that are always visible and cannot be hidden in the settings. */
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  pinnedTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Tag columns the actor is not allowed to see, mapped to the reason. Each is
    * still listed in the settings but with its toggle forced OFF and disabled,

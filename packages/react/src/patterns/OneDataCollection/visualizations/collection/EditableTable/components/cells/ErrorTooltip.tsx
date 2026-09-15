@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
 import { useCallback, useEffect, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { AlertCircle } from "@/icons/app"
 import {
@@ -19,13 +18,17 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
   const [open, setOpen] = useState(false)
 
   const handleFocusCapture = useCallback(() => {
-    if (message) setOpen(true)
+    if (message) {
+      setOpen(true)
+    }
   }, [message])
 
   const handleBlurCapture = useCallback(() => setOpen(false), [])
 
   useEffect(() => {
-    if (!message) setOpen(false)
+    if (!message) {
+      setOpen(false)
+    }
   }, [message])
 
   return (
@@ -41,7 +44,7 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
               {children}
             </div>
           </TooltipTrigger>
-          {message && (
+          {message ? (
             <TooltipContent
               side="top"
               className="border-black/10 flex items-center gap-1 bg-[#fff] shadow-md"
@@ -51,7 +54,7 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
                 {message}
               </span>
             </TooltipContent>
-          )}
+          ) : null}
         </Tooltip>
       </TooltipProvider>
     </div>

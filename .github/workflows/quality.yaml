@@ -74,6 +74,13 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
+      # Rules with too many hits to fix at once run as warnings (the RATCHET
+      # group in .oxlintrc.json). This compares them per file against
+      # .scripts/lint-debt.json, a baseline that may only shrink, so a PR
+      # cannot add to the debt. A step here rather than its own job: the job
+      # has already installed and built core, which is most of the cost.
+      - name: Check the PR adds no lint debt
+        run: pnpm --filter @factorialco/f0-react run check:lint-debt
       - name: Check no CSS custom properties are animated through motion
         run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts
   lint-react-native:

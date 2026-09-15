@@ -1,5 +1,4 @@
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
-
 import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import {
@@ -32,10 +31,12 @@ export type Tag = (typeof tags)[number]
 const DEFAULT_TOOLTIP_DELAY_MS = 700
 
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
-  if (!element) return false
+  if (!element) {
+    return false
+  }
   if (lines > 1) {
     // For multi-line, check if content height exceeds line-clamp height
-    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight)
+    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight, 10)
     return element.scrollHeight > lineHeight * lines
   }
   // For single line, check if content width exceeds container width
@@ -79,10 +80,14 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
     const [hasEllipsis, setHasEllipsis] = useState(false)
 
     useEffect(() => {
-      if (!ref || typeof ref !== "object" || disabled) return
+      if (!ref || typeof ref !== "object" || disabled) {
+        return
+      }
 
       const element = ref.current
-      if (!element) return
+      if (!element) {
+        return
+      }
 
       /**
        * Finds the ellipsis state of the element and sets the state and emits the change

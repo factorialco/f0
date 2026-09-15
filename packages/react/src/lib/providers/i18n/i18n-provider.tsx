@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, ReactNode, useContext, useMemo } from "react"
-
 import {
   defaultTranslations,
   TranslationKey,
@@ -59,7 +58,9 @@ const withDefaults = <T extends Record<string, unknown>>(
 
   for (const [key, value] of Object.entries(overrides)) {
     // An explicit `undefined` means "not translated", not "erase the default".
-    if (value === undefined) continue
+    if (value === undefined) {
+      continue
+    }
 
     const fallback = merged[key]
     merged[key] =

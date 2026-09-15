@@ -1,10 +1,8 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { addDays } from "date-fns"
-
 import { granularityDefinitions } from "@/components/OneCalendar/granularities/index"
-
-import { ExampleComponent } from "../mockData"
 import { payrollPeriods } from "@/lib/storybook-utils/payrollPeriods"
+import { ExampleComponent } from "../mockData"
 
 const meta = {
   title: "Data Collection/Navigation Filters",

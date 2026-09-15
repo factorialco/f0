@@ -43,7 +43,9 @@ export const Icon = forwardRef<Svg, IconProps>(function Icon(
   { size = "md", icon, className, testID, ...props },
   ref
 ) {
-  if (!icon) return null
+  if (!icon) {
+    return null
+  }
 
   // Apply UniWind interop to the icon if not already applied
   const Component = applyIconInterop(icon)

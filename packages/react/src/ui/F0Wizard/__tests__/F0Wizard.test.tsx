@@ -1,8 +1,7 @@
-import React from "react"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import { describe, expect, it, vi } from "vitest"
 import userEvent from "@testing-library/user-event"
-
+import React from "react"
+import { describe, expect, it, vi } from "vitest"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import { F0Wizard } from "../F0Wizard"
 import type { F0WizardStep } from "../types"
 

@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { F0Button } from "@/components/F0Button"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
@@ -10,9 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/ui/collapsible"
-
 import { F0AccordionItem } from "../types"
-
 import { AccordionActions } from "./AccordionActions"
 
 interface AccordionItemProps {
@@ -52,7 +49,7 @@ export const AccordionItem = ({
             </button>
           </CollapsibleTrigger>
           <div className="flex items-center gap-2 py-3 pl-2 pr-4">
-            {hasActions && <AccordionActions actions={item.actions!} />}
+            {hasActions ? <AccordionActions actions={item.actions!} /> : null}
             <CollapsibleTrigger asChild>
               <F0Button
                 variant="outline"
@@ -65,7 +62,7 @@ export const AccordionItem = ({
           </div>
         </div>
         <AnimatePresence initial={false}>
-          {open && (
+          {open ? (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -79,7 +76,7 @@ export const AccordionItem = ({
                 </div>
               </CollapsibleContent>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </Collapsible>

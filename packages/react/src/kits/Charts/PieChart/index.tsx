@@ -1,6 +1,5 @@
 import { ComponentProps, ForwardedRef } from "react"
 import { Cell, Label, Pie, PieChart as PieChartPrimitive } from "recharts"
-
 import {
   ChartContainer,
   ChartLegend,
@@ -8,7 +7,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig } from "../utils/types"
@@ -59,12 +57,12 @@ export const _PieChart = (
       style={{ height: 380 }}
     >
       <PieChartPrimitive accessibilityLayer margin={{ left: 0, right: 0 }}>
-        {sum !== 0 && (
+        {sum !== 0 ? (
           <ChartTooltip
             isAnimationActive={false}
             content={<ChartTooltipContent yAxisFormatter={tickFormatter} />}
           />
-        )}
+        ) : null}
         <Pie
           isAnimationActive={false}
           nameKey={"label"}

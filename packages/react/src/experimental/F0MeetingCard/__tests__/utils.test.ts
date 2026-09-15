@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   getDayKind,
   getDurationMinutes,
@@ -245,13 +244,13 @@ describe("getDurationMinutes", () => {
     ).toBe(23)
     expect(
       getDurationMinutes(new Date("2026-03-12T09:00:00Z"), undefined)
-    ).toBe(undefined)
+    ).toBeUndefined()
     expect(
       getDurationMinutes(
         new Date("2026-03-12T09:00:00Z"),
         new Date("2026-03-12T09:00:00Z")
       )
-    ).toBe(undefined)
+    ).toBeUndefined()
   })
 })
 

@@ -1,23 +1,19 @@
 import { useMemo, useState } from "react"
-
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import type { RecordType } from "@/hooks/datasource"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
-import type { RecordType } from "@/hooks/datasource"
-
-import { OneDataCollection } from "@/patterns/OneDataCollection"
-import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-
+import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import type {
   DashboardCollectionItem,
   DashboardItemFiltersConfig,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
-
-import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
@@ -65,7 +61,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [filtersKey, itemFiltersKey]
   )
-  const source = useDataCollectionSource<RecordType>(sourceDefinition, [
+  const source = useDataCollectionSource(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
   ])
@@ -90,11 +86,11 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     ) as
       | {
           options?: {
-            columns?: Array<{
+            columns?: {
               id?: string
               label?: string
               render?: (item: RecordType) => unknown
-            }>
+            }[]
           }
         }
       | undefined
@@ -167,7 +163,9 @@ export function CollectionItem<Filters extends FiltersDefinition>({
               JSON.stringify(prev?.hidden) === JSON.stringify(next?.hidden)
             const sameOrder =
               JSON.stringify(prev?.order) === JSON.stringify(next?.order)
-            if (sameHidden && sameOrder) return prev
+            if (sameHidden && sameOrder) {
+              return prev
+            }
             return next
           })
         }}

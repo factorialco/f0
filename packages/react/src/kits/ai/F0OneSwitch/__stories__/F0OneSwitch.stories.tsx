@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
-
 import { F0OneSwitch } from "../F0OneSwitch"
 
 const meta: Meta<typeof F0OneSwitch> = {

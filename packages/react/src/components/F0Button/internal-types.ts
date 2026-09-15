@@ -6,7 +6,6 @@ import {
   ButtonType,
   NavTarget,
 } from "@/ui/Action"
-
 import { ButtonSize } from "./types"
 
 export type { ButtonType }
@@ -57,9 +56,7 @@ export type ButtonInternalProps = Pick<
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (
-      event: React.MouseEvent<HTMLElement, MouseEvent>
-    ) => void | Promise<unknown>
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>
     /**
      * The title of the button.
      */

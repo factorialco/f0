@@ -1,11 +1,9 @@
 import * as React from "react"
 import { useMemo } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle } from "@/icons/app"
 import { cn } from "@/lib/utils.ts"
 import { Checkbox } from "@/ui/checkbox"
-
 import { useSelectContext } from "../SelectContext.tsx"
 import * as SelectPrimitive from "./radix-ui"
 

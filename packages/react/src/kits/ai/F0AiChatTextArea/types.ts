@@ -1,5 +1,4 @@
 import type { ReactNode, RefObject } from "react"
-
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
@@ -13,6 +12,13 @@ import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../F0AiChat/types"
+import type { F0AiChatUsageLimitsButtonProps } from "../F0AiChatUsageLimits/types"
+
+export type AiChatTextAreaUsageLimits = Pick<
+  F0AiChatUsageLimitsButtonProps,
+  "usage" | "error" | "onOpenChange"
+>
+
 export type AttachedFile = {
   id: string
   file: File
@@ -117,6 +123,9 @@ export type F0AiChatTextAreaProps = {
    * the welcome screen of the fullscreen layout to give the footer room.
    */
   disclaimer?: AiChatDisclaimer
+
+  /** Usage ring at the right end of the disclaimer row; the text then aligns left. */
+  usageLimits?: AiChatTextAreaUsageLimits
 
   /**
    * Optional footer (e.g. powered-by, legal copy) rendered below the

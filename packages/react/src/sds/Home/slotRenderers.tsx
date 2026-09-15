@@ -1,7 +1,5 @@
 import { type CSSProperties, ReactNode, useState } from "react"
-
 import { type z } from "zod"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
@@ -16,9 +14,7 @@ import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
 import { type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { cn } from "@/lib/utils"
-import { Counter } from "@/ui/Counter"
-import { Skeleton } from "@/ui/skeleton"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   CalendarEvent,
   type CalendarEventProps,
@@ -27,17 +23,19 @@ import {
   IndicatorsList,
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
+import { cn } from "@/lib/utils"
 import { type F0FormSchema } from "@/patterns/F0Form"
-
+import { Counter } from "@/ui/Counter"
+import { Skeleton } from "@/ui/skeleton"
+import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
 import {
   descriptionText,
   HomeListItem,
   type DescriptionPart,
   type HomeListItemAction,
 } from "./HomeListItem"
-import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
+import { useHomeWidgetTracking } from "./tracking"
 
 /**
  * The item-churn animation, re-exported so a BESPOKE renderer draws its items
@@ -226,7 +224,9 @@ const hexChannels = (hex: string): string | undefined => {
           .map((digit) => digit + digit)
           .join("")
       : digits
-  if (!/^[0-9a-f]{6}$/i.test(full)) return undefined
+  if (!/^[0-9a-f]{6}$/i.test(full)) {
+    return undefined
+  }
   const value = parseInt(full, 16)
   return `${(value >> 16) & 255} ${(value >> 8) & 255} ${value & 255}`
 }
@@ -246,8 +246,9 @@ const LIST_ICON_TINT_CUSTOM = cn(
 const listIconTint = (
   color: ListIconColor
 ): { className: string; style?: CSSProperties } | undefined => {
-  if (!color.startsWith("#"))
+  if (!color.startsWith("#")) {
     return { className: LIST_ICON_TINT[color as ListIconPaletteColor] }
+  }
 
   const channels = hexChannels(color)
   return channels
@@ -390,7 +391,7 @@ type Demanded<T, Optional> = Optional extends true ? Partial<T> : T
 type ListRightData<R, Optional> = R extends "counter"
   ? Demanded<{ count: number }, Optional>
   : R extends `${infer T extends F0AvatarListProps["type"]}-list`
-    ? Demanded<{ avatars: Array<AvatarData<T>> }, Optional> & {
+    ? Demanded<{ avatars: AvatarData<T>[] }, Optional> & {
         remainingCount?: number
       }
     : R extends AvatarVariant["type"]
@@ -478,7 +479,7 @@ export type ListItem<S extends ListSchema = ListSchema> = {
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
 export interface ListParams<S extends ListSchema = ListSchema> {
   schema: S
-  items: Array<ListItem<S>>
+  items: ListItem<S>[]
 }
 
 /**
@@ -549,7 +550,7 @@ export const homeSlot = <V extends keyof HomeSlotParamsMap>(
  */
 export const listSlot = <const S extends ListSchema>(
   schema: S,
-  items: Array<ListItem<S>>,
+  items: ListItem<S>[],
   options?: SlotOptions
 ): HomeWidgetSlot => ({
   visualization: "list",
@@ -609,7 +610,7 @@ export type HomeWidgetChrome = Pick<
  */
 export interface WidgetHeaderSelect {
   /** What the reader can switch between. The first one is the default. */
-  options: Array<{ value: string; label: string; icon?: IconType }>
+  options: { value: string; label: string; icon?: IconType }[]
   /** Which one the card starts on. Defaults to the first option. */
   value?: string
   /** The trigger names the selection, so this is what says what KIND it is. */
@@ -702,7 +703,9 @@ export const resolveWidgetHeader = (
   header: HomeWidgetHeader | undefined,
   params: WidgetParams = {}
 ): WidgetProps["header"] => {
-  if (!header) return undefined
+  if (!header) {
+    return undefined
+  }
   const { title, info, ...rest } = header
   const from = <T,>(value: FromWidgetParams<T> | undefined) =>
     typeof value === "function"
@@ -992,27 +995,31 @@ const listLeft = (
   row: ListRow,
   avatarSize: AvatarSize & ListGlyphSize
 ) => {
-  if (left === "module" && row.module)
+  if (left === "module" && row.module) {
     return { left: <F0AvatarModule module={row.module} size={avatarSize} /> }
-  if (left === "alert" && row.alert)
+  }
+  if (left === "alert" && row.alert) {
     return { left: <F0AvatarAlert type={row.alert} size={avatarSize} /> }
+  }
   // A TINTED icon is the Home kit's own glyph, so it goes in as a node. An icon
   // row without a `color` — or with one that cannot be parsed — falls through to
   // the plain `F0AvatarIcon` below.
   if (left === "icon" && row.avatar?.icon && row.avatar.color) {
     const tint = listIconTint(row.avatar.color)
-    if (tint)
+    if (tint) {
       return {
         left: (
           <ListIconGlyph icon={row.avatar.icon} tint={tint} size={avatarSize} />
         ),
       }
+    }
   }
-  if (left && row.avatar)
+  if (left && row.avatar) {
     return {
       avatar: { type: left, ...row.avatar } as AvatarVariant,
       avatarSize,
     }
+  }
   return {}
 }
 
@@ -1027,10 +1034,13 @@ const listRight = (
   row: ListRow,
   avatarSize: "sm" | "md"
 ): ReactNode => {
-  if (!right) return undefined
-  if (right === "counter")
+  if (!right) {
+    return undefined
+  }
+  if (right === "counter") {
     return row.count != null ? <Counter value={row.count} /> : undefined
-  if (right.endsWith("-list"))
+  }
+  if (right.endsWith("-list")) {
     return row.avatars && row.avatars.length > 0 ? (
       <F0AvatarList
         type={right.slice(0, -"-list".length) as F0AvatarListProps["type"]}
@@ -1044,6 +1054,7 @@ const listRight = (
         remainingCount={row.remainingCount}
       />
     ) : undefined
+  }
   return row.rightAvatar ? (
     <F0Avatar
       avatar={{ type: right, ...row.rightAvatar } as AvatarVariant}
@@ -1081,6 +1092,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const { schema, items } = params
   const allRows = items as ListRow[]
   const [expanded, setExpanded] = useState(false)
+  const { reportAction, reportItemActivate } = useHomeWidgetTracking()
   // ASKED, not measured: the slot is built before the frame renders but drawn
   // inside it, so the card it landed in is the one thing it can only learn from
   // context. `false` for a list rendered outside a `Widget`.
@@ -1109,7 +1121,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       {/* Keyed by the row's OWN id, so a row that goes away is the one that
           animates out and the rest close the gap. */}
       <HomeSlotItems>
-        {rows.map(({ href, description, ...row }) => {
+        {rows.map(({ href, description, ...row }, index) => {
           // A compact row hides its second line and offers it on hover
           // instead — as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
           // segmented description arrives dot-joined and untinted. Computed
@@ -1128,6 +1140,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
               right={listRight(schema.right, row, rightAvatarSize)}
               actions={row.actions}
               href={schema.clickBehavior === "link" ? href : undefined}
+              onActivate={() => reportItemActivate(row.id, index + 1)}
             />
           )
           return (
@@ -1161,7 +1174,14 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
             }
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              // Reported on the way OUT of the cap only: collapsing the list
+              // again is not a reader reaching for more.
+              if (!expanded) {
+                reportAction("view-more")
+              }
+              setExpanded(!expanded)
+            }}
           />
         </div>
       ) : null}

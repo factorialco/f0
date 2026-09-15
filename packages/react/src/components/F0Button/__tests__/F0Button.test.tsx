@@ -1,11 +1,9 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { Add } from "@/icons/app"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
+import { F0Button } from ".."
 import { ButtonInternal } from "../internal"
-import { F0Button } from "../index"
 
 describe("F0Button", () => {
   it("should call the onClick handler when clicked", async () => {

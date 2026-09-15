@@ -1,28 +1,25 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import type {
   GroupingDefinition,
   GroupingState,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
-import { TextCell } from "@/ui/value-display/types/text"
-import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionData"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   BaseFetchOptions,
   FiltersDefinition,
   PaginatedFetchOptions,
   PaginationType,
 } from "@/hooks/datasource"
+import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionData"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { zeroRender as render, zeroRenderHook } from "@/testing/test-utils"
-
+import { TextCell } from "@/ui/value-display/types/text"
+import { TableCollection } from ".."
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { TableCollection } from "../index"
 import type { TableColumnDefinition } from "../types"
 
 vi.mock("../../property", () => ({
@@ -86,7 +83,9 @@ const createTestSource = (
   setIsLoading: vi.fn(),
   dataAdapter: {
     fetchData: async ({ filters: _filters }: BaseFetchOptions<TestFilters>) => {
-      if (error) throw error
+      if (error) {
+        throw error
+      }
       return { records: data }
     },
   },
@@ -96,7 +95,7 @@ const createTestSource = (
 
 class MockIntersectionObserver implements IntersectionObserver {
   root: Document | Element | null = null
-  rootMargin: string = ``
+  rootMargin = ``
   thresholds: readonly number[] = []
 
   disconnect = vi.fn()
@@ -2194,13 +2193,11 @@ describe("TableCollection", () => {
       salary?: number | null | string
     }
 
-    const summaryColumns: ReadonlyArray<
-      TableColumnDefinition<
-        SummaryPerson,
-        SortingsDefinition,
-        SummaryTestDefinitions
-      >
-    > = [
+    const summaryColumns: readonly TableColumnDefinition<
+      SummaryPerson,
+      SortingsDefinition,
+      SummaryTestDefinitions
+    >[] = [
       { label: "name", render: (item: SummaryPerson) => item.name },
       { label: "email", render: (item: SummaryPerson) => item.email },
       {
@@ -2343,13 +2340,11 @@ describe("TableCollection", () => {
                 ...summaryColumns[2],
                 summaryPlaceholder: "COLUMN",
               },
-            ] as ReadonlyArray<
-              TableColumnDefinition<
-                SummaryPerson,
-                SortingsDefinition,
-                SummaryTestDefinitions
-              >
-            >
+            ] as readonly TableColumnDefinition<
+              SummaryPerson,
+              SortingsDefinition,
+              SummaryTestDefinitions
+            >[]
           }
           source={createSummarySource({ salarySummary: null })}
           onSelectItems={vi.fn()}
@@ -3322,7 +3317,7 @@ describe("TableCollection", () => {
       })
       await user.click(engineeringHeading)
 
-      expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+      expect(onSelectItems.mock.calls).toHaveLength(callCountAfterRender)
     })
   })
 

@@ -1,9 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { TestProviders } from "@/testing/test-utils"
-
 import type { ClarifyingStep } from "../MockAiChatRuntime"
 import {
   MockAiChatRuntimeProvider,

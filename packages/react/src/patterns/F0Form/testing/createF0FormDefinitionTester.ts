@@ -1,7 +1,5 @@
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
-
 import type { F0FormSchema } from "../types"
-
 import {
   createF0FormTester,
   type CreateF0FormTesterOptions,

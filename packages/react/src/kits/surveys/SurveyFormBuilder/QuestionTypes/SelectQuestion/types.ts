@@ -1,5 +1,5 @@
-import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams, SelectQuestionOption } from "../../types"
+import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 
 export type SelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   options: SelectQuestionOption[]

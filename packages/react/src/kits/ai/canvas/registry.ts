@@ -11,6 +11,8 @@ export function useCanvasEntity(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): CanvasEntityDefinition<any> | undefined {
   const canvasEntities = useCanvasEntities()
-  if (!type || !canvasEntities) return undefined
+  if (!type || !canvasEntities) {
+    return undefined
+  }
   return canvasEntities[type]
 }

@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { type F0ChatMessage } from "../../types"
 import { formatClock } from "../../utils/natural-time"
 import { ChatMessageMeta } from "../ChatMessageMeta"

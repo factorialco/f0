@@ -19,10 +19,10 @@ export const HighlightText = ({
     )
   }
 
-  if (text.toLowerCase().indexOf(search.toLowerCase()) === -1) {
+  if (!text.toLowerCase().includes(search.toLowerCase())) {
     if (
-      searchKeys.find(
-        (el) => el.toLowerCase().indexOf(search.toLowerCase().trim()) >= 0
+      searchKeys.find((el) =>
+        el.toLowerCase().includes(search.toLowerCase().trim())
       )
     ) {
       search = text.split(" ")[0]

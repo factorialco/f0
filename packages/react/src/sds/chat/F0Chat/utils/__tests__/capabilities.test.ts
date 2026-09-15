@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { chatPermission, type F0ChatPermission } from "../capabilities"
 
 const PERMISSIONS: F0ChatPermission[] = [

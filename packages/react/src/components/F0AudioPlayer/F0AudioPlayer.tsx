@@ -1,9 +1,7 @@
 import { cva } from "cva"
 import { forwardRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { AudioScrubber } from "./components/AudioScrubber"
 import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackTime } from "./components/PlaybackTime"
@@ -89,14 +87,14 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
         />
 
         {/* Inline audio-language picker when several dubbed tracks are given. */}
-        {audioLang.languages.length > 1 && audioLang.activeLocale && (
+        {audioLang.languages.length > 1 && audioLang.activeLocale ? (
           <LanguageSelect
             value={audioLang.activeLocale}
             options={audioLang.languages}
             onChange={changeAudioLanguage}
             kind={i18n.audioPlayer.audio}
           />
-        )}
+        ) : null}
       </div>
     )
   }

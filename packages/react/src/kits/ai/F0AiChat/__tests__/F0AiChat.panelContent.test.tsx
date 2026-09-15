@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest"
-
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { HostedPanelWindow } from "../components/layout/HostedPanelWindow"
 import { F0AiChat } from "../F0AiChat"
 import {

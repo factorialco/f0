@@ -1,9 +1,7 @@
 import { baseColors } from "@factorialco/f0-core"
 import { forwardRef } from "react"
-
 import { BaseTag } from "@/components/tags/internal/BaseTag"
 import { useTextFormatEnforcer } from "@/lib/text"
-
 import type { Props } from "./types"
 
 export const F0TagDot = forwardRef<HTMLDivElement, Props>(
@@ -19,7 +17,9 @@ export const F0TagDot = forwardRef<HTMLDivElement, Props>(
         ? `hsl(${baseColors[props.color][50]})`
         : "customColor" in props && props.customColor
 
-    if (!dotColor) return null
+    if (!dotColor) {
+      return null
+    }
 
     return (
       <BaseTag

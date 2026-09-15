@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { bubbleCornerClass, ChatBubble } from "../components/ChatBubble"
 import { type F0ChatMessage } from "../types"
 import { formatClock } from "../utils/natural-time"
@@ -27,25 +25,23 @@ const makeMessage = (body: string): F0ChatMessage => ({
 })
 
 describe("ChatBubble emoji rendering", () => {
-  it("renders a plain message as text with no emoji image", () => {
-    render(<ChatBubble message={makeMessage("hello world")} isMine={false} />)
-    expect(screen.getByText("hello world")).toBeInTheDocument()
-    expect(screen.queryByRole("img")).not.toBeInTheDocument()
-  })
-
-  it("leaves an emoji in the body as text for the OS to draw", () => {
-    render(<ChatBubble message={makeMessage("hi 👋 there")} isMine={false} />)
-    // The glyph stays in the text content — no <img>, no network request, and
-    // the reader gets the emoji their own machine draws.
-    expect(screen.getByText("hi 👋 there")).toBeInTheDocument()
-    expect(screen.queryByRole("img")).not.toBeInTheDocument()
-  })
-
-  it("keeps multi-codepoint sequences intact", () => {
-    // A ZWJ family and a skin-tone modifier both survive as single characters:
-    // splitting them is what produces the "man + woman + girl + boy" render.
-    render(<ChatBubble message={makeMessage("👨‍👩‍👧‍👦 ship it 👋🏽")} isMine={false} />)
-    expect(screen.getByText("👨‍👩‍👧‍👦 ship it 👋🏽")).toBeInTheDocument()
+  // The body stays in the text content — no <img>, no network request, and the
+  // reader gets the emoji their own machine draws. A ZWJ family and a skin-tone
+  // modifier both survive as single characters: splitting them is what produces
+  // the "man + woman + girl + boy" render.
+  it.each([
+    {
+      name: "renders a plain message as text with no emoji image",
+      body: "hello world",
+    },
+    {
+      name: "leaves an emoji in the body as text for the OS to draw",
+      body: "hi 👋 there",
+    },
+    { name: "keeps multi-codepoint sequences intact", body: "👨‍👩‍👧‍👦 ship it 👋🏽" },
+  ])("$name", ({ body }) => {
+    render(<ChatBubble message={makeMessage(body)} isMine={false} />)
+    expect(screen.getByText(body)).toBeInTheDocument()
     expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
 })

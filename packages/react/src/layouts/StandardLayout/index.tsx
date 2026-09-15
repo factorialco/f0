@@ -1,10 +1,8 @@
 import { cva, type VariantProps } from "cva"
 import React from "react"
-
 import { Component } from "@/lib/component/component"
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
-
 import { LayoutProvider } from "../LayoutProvider"
 
 export interface StandardLayoutProps extends VariantProps<

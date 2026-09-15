@@ -20,7 +20,9 @@ export const useIsDarkContext = (): {
   const containerRef = useCallback((element: HTMLDivElement | null) => {
     observerRef.current?.disconnect()
     observerRef.current = null
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     const refresh = () => setIsDark(element.closest(".dark") !== null)
     refresh()

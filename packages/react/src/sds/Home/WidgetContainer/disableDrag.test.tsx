@@ -1,11 +1,8 @@
-import { beforeEach, describe, expect, test } from "vitest"
-
 import { useEffect } from "react"
-
+import { beforeEach, describe, expect, test } from "vitest"
 import { Calendar, Clock } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
-
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 
 const widget = (id: string) => ({
   id,

@@ -40,7 +40,7 @@ export type F0TagListProps<T extends TagType> = {
   /**
    * Array of tag data corresponding to the specified type.
    */
-  tags: Array<TagTypeMapping[T]>
+  tags: TagTypeMapping[T][]
 
   /**
    * The maximum number of tags to display.

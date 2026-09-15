@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react"
-
 import { RecordType } from "./types/records.typings"
 import { GroupRecord } from "./useData"
+
+/**
+ * Every group in the tree, parents before their children. Open/closed state is
+ * keyed by group key alone, and a nested group's key is as much a key as a
+ * top-level one — so the whole tree has to be seeded, not just its first level.
+ */
+const flattenGroups = <R extends RecordType>(
+  groups: GroupRecord<R>[]
+): GroupRecord<R>[] =>
+  groups.flatMap((group) => [group, ...flattenGroups(group.subGroups ?? [])])
 
 const computeDefaultOpenGroups = <R extends RecordType>(
   groups: GroupRecord<R>[],
   defaultOpenGroups: boolean | GroupRecord<R>["key"][]
 ): Record<string, boolean> =>
-  groups.reduce(
-    (acc, group) => {
-      acc[group.key] =
-        typeof defaultOpenGroups === "boolean"
-          ? defaultOpenGroups
-          : defaultOpenGroups.includes(group.key)
-      return acc
-    },
-    {} as Record<string, boolean>
-  )
+  flattenGroups(groups).reduce<Record<string, boolean>>((acc, group) => {
+    acc[group.key] =
+      typeof defaultOpenGroups === "boolean"
+        ? defaultOpenGroups
+        : defaultOpenGroups.includes(group.key)
+    return acc
+  }, {})
 
 export const useGroups = <R extends RecordType>(
   groups: GroupRecord<R>[],
@@ -26,13 +32,26 @@ export const useGroups = <R extends RecordType>(
     computeDefaultOpenGroups(groups, defaultOpenGroups)
   )
 
+  const groupKeys = flattenGroups(groups)
+    .map((group) => group.key)
+    .join("|")
+
   useEffect(() => {
     const defaultValue = computeDefaultOpenGroups(groups, defaultOpenGroups)
-    if (Object.values(defaultValue).length > 0) {
-      setOpenGroups(defaultValue)
+    if (Object.values(defaultValue).length === 0) {
+      return
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on deep changes
-  }, [JSON.stringify(groups), JSON.stringify(defaultOpenGroups)])
+
+    setOpenGroups((prev) =>
+      Object.fromEntries(
+        Object.entries(defaultValue).map(([key, isOpen]) => [
+          key,
+          prev[key] ?? isOpen,
+        ])
+      )
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupKeys, JSON.stringify(defaultOpenGroups)])
 
   const setGroupOpen = (key: string, open: boolean) => {
     setOpenGroups((prev) => ({ ...prev, [key]: open }))

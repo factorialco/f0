@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, within } from "storybook/test"
-
-import { Switch } from "./index"
+import { Switch } from "."
 
 const meta = {
   component: Switch,

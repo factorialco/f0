@@ -30,10 +30,10 @@ export const Blend: React.FC<{
 }> = ({ orientation = "vertical", limit = 600, children }) => (
   <div
     style={{
-      maskImage: `linear-gradient(to ${orientation == "vertical" ? "bottom" : "right"}, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) calc(min(100% - ${limit}px, 100%)), rgba(0, 0, 0, 0) 100%)`,
+      maskImage: `linear-gradient(to ${orientation === "vertical" ? "bottom" : "right"}, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) calc(min(100% - ${limit}px, 100%)), rgba(0, 0, 0, 0) 100%)`,
     }}
     className={
-      orientation == "horizontal" ? "w-full overflow-hidden" : "w-auto"
+      orientation === "horizontal" ? "w-full overflow-hidden" : "w-auto"
     }
   >
     {children}

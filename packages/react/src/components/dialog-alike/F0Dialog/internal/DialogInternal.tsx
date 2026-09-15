@@ -1,8 +1,8 @@
 import { FC, useEffect, useMemo, useState } from "react"
-
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"
+import { NotificationCloseButton } from "../../common/NotificationCloseButton"
 import { DialogWrapper } from "../../common/Wrapper"
 import { DialogInternalProps } from "./internal-types"
 
@@ -26,6 +26,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   variant = "default",
   type = "default",
   container,
+  dismissable = false,
 }) => {
   const [localIsOpen, setLocalIsOpen] = useState(isOpen)
 
@@ -36,7 +37,10 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   const _memoizedDialogLayout = useMemo(() => {
     return (
       <>
-        {variant !== "notification" && (
+        {variant === "notification" && dismissable ? (
+          <NotificationCloseButton disabled={disableClose} />
+        ) : null}
+        {variant !== "notification" ? (
           <Header
             title={title}
             description={description}
@@ -47,7 +51,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
             setActiveTabId={setActiveTabId}
             disableClose={disableClose}
           />
-        )}
+        ) : null}
         <Content disableContentPadding={disableContentPadding ?? false}>
           {children}
         </Content>
@@ -75,6 +79,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
     secondaryAction,
     variant,
     type,
+    dismissable,
   ])
 
   return (

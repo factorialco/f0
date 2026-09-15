@@ -6,9 +6,8 @@ import {
   startOfWeek,
 } from "date-fns"
 import { describe, expect, it } from "vitest"
-
+import { createWeekGranularity, weekGranularity } from ".."
 import { WeekStartDay } from "../../../types"
-import { createWeekGranularity, weekGranularity } from "../index"
 
 describe("weekGranularity", () => {
   // January 15, 2024 is a Monday (week 3 of 2024)

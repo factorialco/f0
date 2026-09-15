@@ -1,17 +1,16 @@
 import { Fragment, ReactNode, useState } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { ChevronRight } from "@/icons/app"
-import { isExternalHref, Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
-import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
 import {
   DropdownInternal,
   type DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
+import { ChevronRight } from "@/icons/app"
+import { isExternalHref, Link } from "@/lib/linkHandler"
+import { cn } from "@/lib/utils"
 
 /**
  * One of a row's hover actions: a button at the row's right that acts on THAT
@@ -222,6 +221,16 @@ export interface HomeListItemProps {
   href?: string
   /** A trailing chevron. Off — the row's link affordance is the row itself. */
   showChevron?: boolean
+  /**
+   * Called when the row is activated, ALONGSIDE the navigation its `href`
+   * performs — it neither replaces nor gates it, so a middle-click or a
+   * modified click still behaves like the link it is.
+   *
+   * The Home's analytics seam, wired by the `list` slot from the layout's
+   * `tracking` prop. NOT a click behavior: a row's only one is still its
+   * `href`, which is why this is not part of the row DATA a host writes.
+   */
+  onActivate?: () => void
 }
 
 export function HomeListItem({
@@ -238,6 +247,7 @@ export function HomeListItem({
   unread = false,
   href,
   showChevron = false,
+  onActivate,
 }: HomeListItemProps) {
   const hasActions = Boolean(actions?.length)
   // The card the row landed in — the row's controls step up with it.
@@ -354,6 +364,7 @@ export function HomeListItem({
   const row = href ? (
     <Link
       href={href}
+      onClick={onActivate}
       className={cn(className, "no-underline")}
       {...(isExternalHref(href) ? { target: "_blank", rel: "noreferrer" } : {})}
     >
@@ -363,7 +374,9 @@ export function HomeListItem({
     <div className={className}>{content}</div>
   )
 
-  if (!hasActions) return row
+  if (!hasActions) {
+    return row
+  }
 
   return (
     <div className="group relative">
@@ -387,8 +400,9 @@ export function HomeListItem({
             />
           )
 
-          if (!action.items)
+          if (!action.items) {
             return <Fragment key={action.label}>{button}</Fragment>
+          }
 
           return (
             <DropdownInternal

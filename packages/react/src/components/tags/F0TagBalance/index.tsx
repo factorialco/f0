@@ -1,5 +1,4 @@
 import { withDataTestId } from "@/lib/data-testid"
-
 import { F0TagBalance as _F0TagBalance } from "./F0TagBalance"
 
 export type {

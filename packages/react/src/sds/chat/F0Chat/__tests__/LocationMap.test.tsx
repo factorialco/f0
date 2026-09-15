@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, waitFor } from "@/testing/test-utils"
-
 import LocationMap from "../components/LocationMap"
 
 // maplibre-gl needs WebGL (absent in jsdom) — stub the Map class, recording

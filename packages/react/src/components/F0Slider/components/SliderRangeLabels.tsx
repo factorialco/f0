@@ -7,7 +7,9 @@ export const SliderRangeLabels = ({
   minLabel,
   maxLabel,
 }: SliderRangeLabelsProps) => {
-  if (!minLabel && !maxLabel) return null
+  if (!minLabel && !maxLabel) {
+    return null
+  }
 
   return (
     <div

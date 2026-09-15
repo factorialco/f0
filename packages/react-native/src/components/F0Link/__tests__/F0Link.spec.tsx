@@ -147,6 +147,7 @@ describe("F0Link", () => {
   it("falls back to href in accessibilityLabel when text is not plain", () => {
     render(
       <F0Link href="https://factorialhr.com">
+        {/* oxlint-disable-next-line react/jsx-no-useless-fragment -- a child with no text is what this test covers */}
         <React.Fragment />
       </F0Link>
     )
@@ -158,6 +159,7 @@ describe("F0Link", () => {
   it("falls back to 'Link' in accessibilityLabel when there is no text or href", () => {
     render(
       <F0Link>
+        {/* oxlint-disable-next-line react/jsx-no-useless-fragment -- a child with no text is what this test covers */}
         <React.Fragment />
       </F0Link>
     )

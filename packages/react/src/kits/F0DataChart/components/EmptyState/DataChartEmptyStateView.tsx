@@ -1,7 +1,5 @@
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0DataChartEmptyStateProps, F0DataChartProps } from "../../types"
-
 import { DataChartEmptyState } from "./EmptyState"
 
 interface DataChartEmptyStateViewProps {
@@ -24,7 +22,9 @@ export const DataChartEmptyStateView = ({
 }: DataChartEmptyStateViewProps) => {
   const i18n = useI18n()
 
-  if (emptyState?.render) return <>{emptyState.render()}</>
+  if (emptyState?.render) {
+    return <>{emptyState.render()}</>
+  }
 
   const defaults = i18n.dataChart.emptyState
 

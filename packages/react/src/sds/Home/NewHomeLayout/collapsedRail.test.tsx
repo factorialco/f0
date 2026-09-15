@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
-
 import { Calendar, Clock } from "@/icons/app"
 import {
   act,
@@ -9,13 +8,12 @@ import {
   waitFor,
   zeroRender,
 } from "@/testing/test-utils"
-
 import { type HomeWidgetItem } from "../slotRenderers"
-import { NewHomeLayout } from "./index"
+import { NewHomeLayout } from "."
 
 let layoutWidth = 1400
 
-let resizeCallbacks: Array<(entries: ResizeObserverEntry[]) => void> = []
+let resizeCallbacks: ((entries: ResizeObserverEntry[]) => void)[] = []
 
 const resizeLayoutTo = (width: number) => {
   layoutWidth = width

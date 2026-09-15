@@ -9,7 +9,6 @@ import React, {
   useState,
 } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { useNavigation } from "@/lib/linkHandler"
 
 const PREFERRED_INITIAL_STATE_KEY = "one_sidebar_locked"
@@ -74,7 +73,9 @@ export function FrameProvider({ children }: FrameProviderProps) {
       }
     ) => {
       setIsLastToggleInvokedByUser(isInvokedByUser ?? true)
-      if (isSmallScreen) setVisible(!visible)
+      if (isSmallScreen) {
+        setVisible(!visible)
+      }
       setLocked(!locked)
     },
     [isSmallScreen, visible, locked, setLocked, setVisible]
@@ -82,7 +83,9 @@ export function FrameProvider({ children }: FrameProviderProps) {
 
   const handlePointerMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
-      if (isSmallScreen) return
+      if (isSmallScreen) {
+        return
+      }
 
       if (e.clientX < 32) {
         setVisible(true)
@@ -97,11 +100,17 @@ export function FrameProvider({ children }: FrameProviderProps) {
 
   const sidebarState: SidebarState = useMemo(() => {
     if (isSmallScreen) {
-      if (visible) return "unlocked"
+      if (visible) {
+        return "unlocked"
+      }
       return "hidden"
     }
-    if (!locked && !visible) return "hidden"
-    if (!locked && visible) return "unlocked"
+    if (!locked && !visible) {
+      return "hidden"
+    }
+    if (!locked && visible) {
+      return "unlocked"
+    }
     return "locked"
   }, [isSmallScreen, visible, locked])
 

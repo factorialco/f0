@@ -1,8 +1,8 @@
 import type { CandidateProfile } from "./entities/candidate/types"
 import type { ExpenseProfile } from "./entities/expense/types"
 import type { JobPostingProfile } from "./entities/jobPosting/types"
-import type { RequisitionProfile } from "./entities/requisition/types"
 import type { PersonProfile } from "./entities/person/types"
+import type { RequisitionProfile } from "./entities/requisition/types"
 import type { VacancyProfile } from "./entities/vacancy/types"
 
 /**

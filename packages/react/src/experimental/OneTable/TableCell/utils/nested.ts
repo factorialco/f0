@@ -25,14 +25,13 @@ export const getNestedMarginLeft = ({
 
 export const getNestedMarginLeftForLoadMore = ({
   depth,
-  isDetailedVariant,
 }: {
   depth: number
   isDetailedVariant: boolean
 }) => {
   return getNestedMarginLeft({
     depth,
-    padding: isDetailedVariant ? -BUTTON_PADDING : -BUTTON_PADDING,
+    padding: -BUTTON_PADDING,
   })
 }
 

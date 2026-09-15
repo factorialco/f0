@@ -15,10 +15,17 @@ import type { F0DataChartProps } from "../types"
 export function isDataChartEmpty(props: F0DataChartProps): boolean {
   switch (props.type) {
     case "bar":
-    case "line": {
-      const series = props.series
-      if (!Array.isArray(series) || series.length === 0) return true
-      // Empty when every series has no data points at all.
+    case "line":
+    case "radar":
+    case "scatter": {
+      const series:
+        | ReadonlyArray<{ data?: unknown[] } | undefined>
+        | undefined = props.series
+      if (!Array.isArray(series) || series.length === 0) {
+        return true
+      }
+      // Empty when every series has no data points at all. A point at the
+      // origin is a legitimate coordinate, so only the absence of points counts.
       return series.every(
         (s) => !s || !Array.isArray(s.data) || s.data.length === 0
       )
@@ -28,13 +35,6 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
       const series = props.series
       return !series || !Array.isArray(series.data) || series.data.length === 0
     }
-    case "radar": {
-      const series = props.series
-      if (!Array.isArray(series) || series.length === 0) return true
-      return series.every(
-        (s) => !s || !Array.isArray(s.data) || s.data.length === 0
-      )
-    }
     case "gauge": {
       // No value at all → empty. `0` is a legitimate gauge state.
       return props.value == null
@@ -42,15 +42,6 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
     case "heatmap": {
       const data = props.data
       return !Array.isArray(data) || data.length === 0
-    }
-    case "scatter": {
-      const series = props.series
-      if (!Array.isArray(series) || series.length === 0) return true
-      // A point at the origin is a legitimate coordinate, so only the absence
-      // of points counts as empty.
-      return series.every(
-        (s) => !s || !Array.isArray(s.data) || s.data.length === 0
-      )
     }
     default:
       return true

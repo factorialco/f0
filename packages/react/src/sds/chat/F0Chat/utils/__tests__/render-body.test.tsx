@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import {
   type MentionToken,
   renderBodyWithLinks,
   renderBodyWithMentions,
 } from "../render-body"
+import { sanitizeDisplayText } from "../sanitize-text"
 
 describe("renderBodyWithMentions", () => {
   it("returns the plain body when there are no mentions", () => {
@@ -27,6 +26,26 @@ describe("renderBodyWithMentions", () => {
     const chip = screen.getByText("@Ana")
     expect(chip).toBeInTheDocument()
     expect(chip.className).toContain("text-f1-foreground-secondary")
+  })
+
+  // The composer's overlay has to paint a mention identically, and it is the
+  // side that cannot carry a weight: a `<textarea>` lays its whole run out at
+  // one weight, so a heavier mention there pushes the caret off the glyphs
+  // (#5274 measured 1.250px worst delta and 44/48 indices off, versus 0.023px
+  // without it). Parity is therefore met here, by this side staying unweighted.
+  it("gives the chip no font-weight, so the composer can match it exactly", () => {
+    const tokens: MentionToken[] = [
+      {
+        name: "Ana",
+        isSelf: false,
+        isEveryone: false,
+        user: { id: "1", name: "Ana" },
+      },
+    ]
+    zeroRender(<div>{renderBodyWithMentions("hi @Ana!", tokens)}</div>)
+    expect(screen.getByText("@Ana").className).not.toMatch(
+      /\bfont-(thin|extralight|light|medium|semibold|bold|extrabold|black)\b/
+    )
   })
 
   it("renders a self / everyone mention with accessible neutral emphasis", () => {
@@ -55,6 +74,60 @@ describe("renderBodyWithMentions", () => {
     ]
     zeroRender(<div>{renderBodyWithMentions("hey @Ana María", tokens)}</div>)
     expect(screen.getByText("@Ana María")).toBeInTheDocument()
+  })
+
+  // Ranges are taken from the raw body before each rendered slice is composed,
+  // so a name carrying the decomposed spelling must match without losing its
+  // original boundaries.
+  // Escapes, not literal characters: the two spellings are the point here and
+  // are indistinguishable on screen.
+  it("chips a name whose accent is stored decomposed", () => {
+    const decomposed = "Garci\u0301a"
+    const composed = "Garc\u00EDa"
+    const tokens: MentionToken[] = [
+      {
+        name: decomposed,
+        isSelf: false,
+        isEveryone: false,
+        user: { id: "1", name: decomposed },
+      },
+    ]
+    zeroRender(
+      <div>{renderBodyWithMentions(`hi @${decomposed}!`, tokens)}</div>
+    )
+    expect(screen.getByText(`@${composed}`).className).toContain(
+      "text-f1-foreground-secondary"
+    )
+  })
+
+  it("keeps a profile mention when display sanitization strips a bidi control", () => {
+    const tokens: MentionToken[] = [
+      {
+        name: "Ana",
+        isSelf: false,
+        isEveryone: false,
+        user: { id: "1", name: "Ana", profileHref: "/people/ana" },
+      },
+    ]
+
+    zeroRender(<div>{renderBodyWithMentions("hi @A\u202Ena!", tokens)}</div>)
+
+    expect(screen.getByRole("link", { name: "@Ana" })).toHaveAttribute(
+      "href",
+      "/people/ana"
+    )
+  })
+
+  it("keeps a mention when display sanitization caps combining marks", () => {
+    const name = `A${"\u0301".repeat(4)}na`
+    const bodyName = `A${"\u0301".repeat(6)}na`
+    const tokens: MentionToken[] = [{ name, isSelf: false, isEveryone: false }]
+
+    zeroRender(<div>{renderBodyWithMentions(`hi @${bodyName}!`, tokens)}</div>)
+
+    expect(screen.getByText(sanitizeDisplayText(`@${name}`))).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
   })
 })
 

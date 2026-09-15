@@ -1,18 +1,20 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
-import type { ClarifyingQuestionState } from "./types"
-
 import { ConfirmFooter } from "./components/ConfirmFooter"
 import { OptionsList } from "./components/OptionsList"
 import { StepHeader } from "./components/StepHeader"
+import type { ClarifyingQuestionState } from "./types"
 
-// One easing / duration shared by every animation in the panel.
+// Curva compartida por el panel. Ojo: OptionsList usa la suya para el
+// escalonado de las opciones, que es una entrada y pide otra curva.
 const EASE = "easeOut" as const
-const DURATION = 0.3
+// Asimétricas a propósito: la salida es el sistema respondiendo y va rápida,
+// la entrada es lo que el usuario va a leer. Con mode="wait" se serializan, así
+// que lo que se percibe es la suma.
+const FADE_IN = 0.15
+const FADE_OUT = 0.1
 
 interface F0ClarifyingPanelProps {
   clarifyingQuestion: ClarifyingQuestionState
@@ -100,12 +102,16 @@ const F0ClarifyingPanelContent = ({
   const isSubmitBlocked = isSubmitDisabled === true && isFinalStep
 
   const handleConfirm = () => {
-    if (isSubmitBlocked) return
+    if (isSubmitBlocked) {
+      return
+    }
     confirm()
   }
 
   const handleSkip = () => {
-    if (isSubmitBlocked) return
+    if (isSubmitBlocked) {
+      return
+    }
     skip()
   }
 
@@ -150,7 +156,8 @@ const F0ClarifyingPanelContent = ({
     }
   }
 
-  const fadeDuration = shouldReduceMotion ? 0 : DURATION / 2
+  const fadeIn = shouldReduceMotion ? 0 : FADE_IN
+  const fadeOut = shouldReduceMotion ? 0 : FADE_OUT
 
   return (
     <div className="flex flex-col" onKeyDown={handleKeyDown}>
@@ -158,11 +165,15 @@ const F0ClarifyingPanelContent = ({
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentStepIndex}
-            className="flex flex-col gap-3"
+            // Este gap es el aire bajo la pregunta: separa el enunciado de las
+            // opciones.
+            className="flex flex-col gap-2"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: fadeDuration, ease: EASE }}
+            animate={{
+              opacity: 1,
+              transition: { duration: fadeIn, ease: EASE },
+            }}
+            exit={{ opacity: 0, transition: { duration: fadeOut, ease: EASE } }}
           >
             <StepHeader
               question={question}

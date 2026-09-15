@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest"
-
 import { IconType } from "@/components/F0Icon"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useVisualizationMeta } from "../useVisualizationMeta"
 
 // A stand-in IconType value; the resolver only compares identity.

@@ -7,7 +7,9 @@ export function useConfetti(shouldReduceMotion: boolean) {
 
   const handleMouseEnter = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas) {
+      return
+    }
 
     const myConfetti = confetti.create(canvas, {
       resize: true,

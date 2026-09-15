@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-
 import { type ButtonToggleColor } from "@/components/F0ButtonToggle"
 import {
   type ButtonToggleGroupSize,
@@ -8,7 +7,6 @@ import {
 } from "@/components/F0ButtonToggleGroup"
 import { pulseIcon, pulses, type Pulse } from "@/lib/mood"
 import { cn } from "@/lib/utils"
-
 import type { F0ENPSButtonProps } from "./types"
 
 /**

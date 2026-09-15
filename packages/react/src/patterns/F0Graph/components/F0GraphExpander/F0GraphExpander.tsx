@@ -1,8 +1,6 @@
 import { forwardRef } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0GraphExpanderProps } from "./types"
 
 // Rendered with the shared neutral F0 button. The native button is the single

@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { MoneyCell } from "../components/cells/MoneyCell"
 
 const numberCellProps = vi.hoisted(() => vi.fn())

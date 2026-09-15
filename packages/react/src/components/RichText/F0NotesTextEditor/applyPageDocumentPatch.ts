@@ -1,6 +1,5 @@
 import { Fragment, Slice } from "@tiptap/pm/model"
 import type { Editor, JSONContent } from "@tiptap/react"
-
 import {
   getBlockById,
   isBlockNodeType,

@@ -1,8 +1,6 @@
 import type { IconType, F0IconProps } from "@/components/F0Icon"
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
-
 import type { SummariesDefinition } from "../../../../../summary"
-
 import { EditableTableColumnDefinition } from "../../types"
 
 /**

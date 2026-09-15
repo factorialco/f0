@@ -1,7 +1,6 @@
 import { Fragment } from "react"
-
-import { Skeleton } from "@/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
 export interface F0AccordionSkeletonProps {
   items?: number
@@ -21,7 +20,9 @@ export const F0AccordionSkeleton = ({
     >
       {Array.from({ length: items }).map((_, index) => (
         <Fragment key={index}>
-          {index > 0 && <div className="h-px w-full bg-f1-border-secondary" />}
+          {index > 0 ? (
+            <div className="h-px w-full bg-f1-border-secondary" />
+          ) : null}
           <div className="flex items-center gap-3 px-4 py-3">
             <Skeleton className="h-4 flex-1 max-w-48" />
             <Skeleton className="ml-auto h-7 w-7 shrink-0 rounded" />

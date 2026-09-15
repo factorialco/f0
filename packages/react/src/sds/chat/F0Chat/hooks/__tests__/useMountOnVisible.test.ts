@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useMountOnVisible } from "../useMountOnVisible"
 
 let observers: {

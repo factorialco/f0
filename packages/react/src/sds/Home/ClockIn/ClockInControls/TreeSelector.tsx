@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import type { IconType } from "@/components/F0Icon"
 import { F0Select } from "@/components/F0Select"
 import type { DataSourceDefinition } from "@/hooks/datasource"
@@ -233,7 +232,9 @@ export function TreeSelector({
       option: { value: string } | undefined,
       _checked: boolean
     ) => {
-      if (!option) onChange?.("")
+      if (!option) {
+        onChange?.("")
+      }
     },
     disabled,
   }

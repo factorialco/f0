@@ -8,19 +8,17 @@ import {
   vi,
   type MockInstance,
 } from "vitest"
-
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import {
   DataCollectionStorage,
   DataCollectionStorageHandler,
 } from "@/lib/providers/datacollection/types"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
-
-import { useDataCollectionStorage } from "../useDataCollectionStorage"
 import {
   DataCollectionStorageFeaturesDefinition,
   FeatureProviders,
 } from "../types"
+import { useDataCollectionStorage } from "../useDataCollectionStorage"
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -465,5 +463,74 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
     for (const call of setSpy.mock.calls) {
       expect(call[0]).toBe("key-b/v1")
     }
+  })
+})
+
+describe("useDataCollectionStorage — the selected view", () => {
+  // The views themselves are always persisted; which one is active belongs with
+  // them, so a consumer that allowlists only its filters still gets both.
+  const features: DataCollectionStorageFeaturesDefinition = ["filters"]
+
+  const providersWith = (
+    value: string | undefined,
+    setValue: (value: string | undefined) => void
+  ) =>
+    ({
+      selectedPresetId: { value, setValue },
+    }) as unknown as AnyFeatureProviders
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it("restores it, despite the consumer's features listing neither it nor the views", async () => {
+    const { handler, resolveGet } = createDeferredHandler()
+    const setValue = vi.fn()
+
+    zeroRenderHook(
+      () =>
+        useDataCollectionStorage(
+          "test/v1",
+          features,
+          providersWith(undefined, setValue)
+        ),
+      { wrapper: wrapperWith(handler) }
+    )
+
+    await act(async () => {
+      resolveGet({ selectedPresetId: "mine" })
+    })
+    await flushMicrotasks()
+
+    expect(setValue).toHaveBeenCalledWith("mine")
+  })
+
+  it("persists it", async () => {
+    const { handler, resolveGet, state } = createDeferredHandler()
+
+    zeroRenderHook(
+      () =>
+        useDataCollectionStorage(
+          "test/v1",
+          features,
+          providersWith("mine", vi.fn())
+        ),
+      { wrapper: wrapperWith(handler) }
+    )
+
+    await act(async () => {
+      resolveGet({})
+    })
+    await flushMicrotasks()
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+
+    expect(state.value.selectedPresetId).toBe("mine")
   })
 })

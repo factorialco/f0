@@ -1,6 +1,5 @@
 import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
 let mockReducedMotion = false

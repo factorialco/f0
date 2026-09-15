@@ -7,15 +7,12 @@ import {
   useState,
 } from "react"
 import { Observable } from "zen-observable-ts"
-
+import { getValueByPath } from "@/lib/objectPaths"
+import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { getValueByPath } from "@/lib/objectPaths"
-import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-
 import {
   BaseFetchOptions,
   GroupingDefinition,
@@ -87,7 +84,125 @@ export interface UseDataOptions<
  */
 export const GROUP_ID_SYMBOL = Symbol("groupId")
 export type WithGroupId<RecordType> = RecordType & {
-  [GROUP_ID_SYMBOL]: unknown | undefined
+  [GROUP_ID_SYMBOL]: unknown
+}
+
+type GroupIdCache<R extends RecordType> = {
+  field: string | undefined
+  entries: WeakMap<R, WithGroupId<R>>
+}
+
+/**
+ * Decorates records with their group id, reusing the object built for a record
+ * the last time it was seen. A page append rebuilds the array but keeps the
+ * objects of the records already loaded, and the table's row memo compares on
+ * those objects: decorating each record afresh would re-render every row
+ * already on screen.
+ */
+const decorateWithGroupId = <R extends RecordType>(
+  records: R[],
+  field: string,
+  cacheRef: { current: GroupIdCache<R> }
+): WithGroupId<R>[] => {
+  const cache = cacheRef.current
+  if (cache.field !== field) {
+    cache.field = field
+    cache.entries = new WeakMap()
+  }
+
+  return records.map((record) => {
+    const cached = cache.entries.get(record)
+    if (cached) {
+      return cached
+    }
+
+    const decorated = {
+      ...record,
+      [GROUP_ID_SYMBOL]: getValueByPath(record, field) || undefined,
+    }
+    cache.entries.set(record, decorated)
+    return decorated
+  })
+}
+
+/**
+ * Joins a nested group's key to its parent's. Sub-group keys have to be unique
+ * across the whole tree — "Barcelona" under Engineering and "Barcelona" under
+ * Sales are two different groups, and everything downstream (open/closed state,
+ * selection) addresses a group by its key alone. A unit separator keeps the key
+ * unambiguous without colliding with anything that can appear in a field value.
+ */
+export const GROUP_KEY_SEPARATOR = "\u001F"
+
+type GroupByFieldConfig = {
+  label: (
+    groupId: unknown,
+    filters: FiltersState<FiltersDefinition>
+  ) => string | Promise<string>
+  itemCount?: (
+    groupId: unknown,
+    filters: FiltersState<FiltersDefinition>
+  ) => number | undefined | Promise<number | undefined>
+}
+
+/**
+ * Cuts `records` by the first of `fields`, then each of those buckets by the
+ * next, down the list.
+ *
+ * The records are already in hand — these levels are a client-side split of a
+ * group the first level produced — so a sub-group's count is its own length.
+ * The definition's `itemCount` answers a question about a whole field ("how
+ * many people are in Barcelona"), which is not the question a nested header
+ * asks ("how many of THIS team's people are in Barcelona"), and is left to the
+ * top level where it does answer it.
+ */
+const buildSubGroups = <R extends RecordType>({
+  records,
+  parentKey,
+  fields,
+  groupByConfig,
+  filters,
+}: {
+  records: R[]
+  parentKey: string
+  fields: string[]
+  groupByConfig: Record<string, GroupByFieldConfig>
+  filters: FiltersState<FiltersDefinition>
+}): GroupRecord<R>[] => {
+  const [field, ...remainingFields] = fields
+  const config = groupByConfig[field]
+
+  const buckets = new Map<string, R[]>()
+  for (const record of records) {
+    // Same normalization the top level applies, so an empty value lands in the
+    // same bucket at every depth.
+    const groupKey = String(getValueByPath(record, field) || undefined)
+    const bucket = buckets.get(groupKey)
+    if (bucket) {
+      bucket.push(record)
+    } else {
+      buckets.set(groupKey, [record])
+    }
+  }
+
+  return Array.from(buckets.entries()).map(([groupKey, groupRecords]) => {
+    const key = `${parentKey}${GROUP_KEY_SEPARATOR}${groupKey}`
+    return {
+      key,
+      label: config.label(groupKey as unknown, filters),
+      itemCount: groupRecords.length,
+      records: groupRecords,
+      ...(remainingFields.length > 0 && {
+        subGroups: buildSubGroups({
+          records: groupRecords,
+          parentKey: key,
+          fields: remainingFields,
+          groupByConfig,
+          filters,
+        }),
+      }),
+    }
+  })
 }
 
 /**
@@ -137,6 +252,13 @@ export type GroupRecord<RecordType> = {
   label: string | Promise<string>
   itemCount: number | undefined | Promise<number | undefined>
   records: RecordType[]
+  /**
+   * The next grouping level cut out of `records`, present only when the
+   * grouping state asked for one (`thenBy`). `records` stays complete either
+   * way, so a renderer that ignores this field shows exactly what it showed
+   * before nesting existed.
+   */
+  subGroups?: GroupRecord<RecordType>[]
 }
 
 export type Data<R extends RecordType> = {
@@ -480,7 +602,9 @@ export function useData<
       isLoadingMoreRef.current = false
       // Stamp the rendered records with the query they answer. Batched with
       // the setters above, so this costs no extra render.
-      if (query !== undefined) setCommittedQuery(query)
+      if (query !== undefined) {
+        setCommittedQuery(query)
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -497,42 +621,35 @@ export function useData<
     ]
   )
 
+  const groupIdCacheRef = useRef<GroupIdCache<R>>({
+    field: undefined,
+    entries: new WeakMap(),
+  })
+
   const data = useMemo(() => {
-    // if (hasLanes) return { type: "flat" as const, records: [] }
-    // Add the groupId to the data if grouping is enabled
-    const data: WithGroupId<R>[] = rawData.map((record) => ({
-      ...record,
-      [GROUP_ID_SYMBOL]:
-        (currentGrouping?.field &&
-          getValueByPath(record, currentGrouping.field as string)) ||
-        undefined,
-    }))
+    const groupingField = currentGrouping?.field as string | undefined
+    const groupByConfig = grouping?.groupBy as
+      | Record<string, GroupByFieldConfig | undefined>
+      | undefined
+    const isGrouped =
+      !!groupingField && !!groupByConfig && !!groupByConfig[groupingField]
 
     /**
      * Grouped data
      */
-    if (
-      currentGrouping &&
-      currentGrouping.field &&
-      grouping &&
-      (grouping.groupBy as Record<string, unknown>)[
-        currentGrouping.field as string
-      ]
-    ) {
+    if (isGrouped) {
+      const data = decorateWithGroupId(rawData, groupingField, groupIdCacheRef)
       const groupedData = groupBy(data, GROUP_ID_SYMBOL)
-      const fieldName = currentGrouping.field as string
-      const groupConfig = (grouping.groupBy as Record<string, unknown>)[
-        fieldName
-      ] as {
-        label: (
-          groupId: unknown,
-          filters: FiltersState<FiltersDefinition>
-        ) => string | Promise<string>
-        itemCount?: (
-          groupId: unknown,
-          filters: FiltersState<FiltersDefinition>
-        ) => number | undefined | Promise<number | undefined>
-      }
+      const groupConfig = groupByConfig[groupingField] as GroupByFieldConfig
+
+      /**
+       * The levels nested under the first one. A level naming a field the
+       * definition doesn't declare is dropped instead of throwing: `thenBy` can
+       * outlive a definition change, and losing a level beats losing the list.
+       */
+      const subFields = (currentGrouping?.thenBy ?? [])
+        .map((level) => String(level.field))
+        .filter((field) => !!groupByConfig[field])
 
       return {
         type: "grouped" as const,
@@ -546,6 +663,18 @@ export function useData<
               mergedFilters
             ),
             records: groupRecords,
+            ...(subFields.length > 0 && {
+              subGroups: buildSubGroups({
+                records: groupRecords,
+                parentKey: groupKey,
+                fields: subFields,
+                groupByConfig: groupByConfig as Record<
+                  string,
+                  GroupByFieldConfig
+                >,
+                filters: mergedFilters,
+              }),
+            }),
           })
         ),
       }
@@ -554,6 +683,12 @@ export function useData<
     /**
      * Flat data
      */
+    // The group id is only ever read from a grouped result, so ungrouped
+    // records are handed through untouched. Decorating them would give every
+    // record a new identity on each run of this memo, which is what the row
+    // memo downstream compares on.
+    const data = rawData as WithGroupId<R>[]
+
     return {
       type: "flat" as const,
       records: data,
@@ -597,7 +732,7 @@ export function useData<
     currentPage?: number
     appendMode?: boolean
     cursor?: string | null
-    search?: string | undefined
+    search?: string
   }
 
   const fetchDataAndUpdate = useCallback(
@@ -630,6 +765,15 @@ export function useData<
                   field: currentGrouping.field as string,
                   order: currentGrouping.order ?? "asc",
                 },
+                // The nested levels too, outermost first. Grouping asks the
+                // adapter to sort so a group's records arrive contiguous; a
+                // second level needs the same of its parent's records, or the
+                // sub-groups come out in whatever order the rows happened to
+                // arrive in.
+                ...(currentGrouping.thenBy ?? []).map((level) => ({
+                  field: level.field as string,
+                  order: level.order ?? "asc",
+                })),
               ]
             : []),
         ]
@@ -670,8 +814,8 @@ export function useData<
           // Use appropriate pagination type based on dataAdapter configuration
           return dataAdapter.fetchData({
             ...baseFetchOptions,
-            pagination: {
-              ...(dataAdapter.paginationType === "pages"
+            pagination:
+              dataAdapter.paginationType === "pages"
                 ? {
                     currentPage,
                     perPage: perPageValue,
@@ -681,8 +825,7 @@ export function useData<
                       cursor,
                       perPage: perPageValue,
                     }
-                  : {}),
-            },
+                  : {},
           }) as PromiseOrObservable<ResultType>
         }
 
@@ -765,7 +908,9 @@ export function useData<
   const loadMore = useCallback(
     () => {
       const currentPaginationInfo = paginationInfoRef.current
-      if (!currentPaginationInfo || isLoading || isLoadingMore) return
+      if (!currentPaginationInfo || isLoading || isLoadingMore) {
+        return
+      }
 
       if (!isInfiniteScrollPagination(currentPaginationInfo)) {
         console.warn(
@@ -808,7 +953,9 @@ export function useData<
 
   useEffect(
     () => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       if (!isLoadingMoreRef.current) {
         // Page-based reuse: when only the page size shrank (same filters /
         // sortings / search) and page 1 already holds at least that many

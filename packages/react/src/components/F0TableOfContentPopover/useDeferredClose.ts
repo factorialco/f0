@@ -33,7 +33,9 @@ export function useDeferredClose(
    * installed (meaning the caller should suppress the close for now).
    */
   const deferClose = useCallback((): boolean => {
-    if (!document.querySelector(MENU_SELECTOR)) return false
+    if (!document.querySelector(MENU_SELECTOR)) {
+      return false
+    }
 
     teardown()
 

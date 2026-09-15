@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -7,7 +6,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { ChatVideoAttachment } from "../components/ChatVideoAttachment"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
@@ -52,21 +50,21 @@ vi.mock("@/components/F0VideoPlayer", () => ({
       data-silent={silent}
     >
       <video data-testid="mock-video-media">
-        {content?.captions && (
+        {content?.captions ? (
           <track
             data-testid="mock-video-captions"
             kind="captions"
             src="captions.vtt"
           />
-        )}
+        ) : null}
       </video>
       <button type="button">Play</button>
       <button type="button">Enter fullscreen</button>
-      {download && (
+      {download ? (
         <button type="button" onClick={download.onClick}>
           {download.label}
         </button>
-      )}
+      ) : null}
     </div>
   ),
 }))

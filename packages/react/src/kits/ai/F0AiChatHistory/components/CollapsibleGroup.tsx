@@ -1,12 +1,10 @@
 import { useCallback, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronUp } from "@/icons/app"
 import ChevronDown from "@/icons/app/ChevronDown"
 import { cn, focusRing } from "@/lib/utils"
-
-import type { ChatThread } from "../useChatHistory"
 import type { ThreadActionHandlers } from "../types"
+import type { ChatThread } from "../useChatHistory"
 import { ThreadItem } from "./ThreadItem"
 
 interface CollapsibleGroupProps extends ThreadActionHandlers {
@@ -61,7 +59,7 @@ export function CollapsibleGroup({
           size="xs"
         />
       </div>
-      {expanded && (
+      {expanded ? (
         <div className="flex flex-col">
           {threads.map((thread) => (
             <ThreadItem
@@ -75,7 +73,7 @@ export function CollapsibleGroup({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

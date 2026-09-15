@@ -1,10 +1,8 @@
 import { Dispatch, useEffect, useState } from "react"
-
 import { DataAttributes } from "@/global.types"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
-
 import { F0Icon } from "../../../components/F0Icon"
 import { Upsell } from "../../../icons/app"
 import { Link, useNavigation } from "../../../lib/linkHandler"
@@ -41,7 +39,9 @@ export const BaseTabs: React.FC<TabsProps> = ({
   )
 
   useEffect(() => {
-    if (activeTabId) onChangeActiveTabId?.(activeTabId)
+    if (activeTabId) {
+      onChangeActiveTabId?.(activeTabId)
+    }
   }, [onChangeActiveTabId, activeTabId])
 
   const { isActive } = useNavigation()
@@ -87,13 +87,13 @@ export const BaseTabs: React.FC<TabsProps> = ({
               asChild
             >
               <Link role="link" {...props}>
-                {props.variant === "upsell" && (
+                {props.variant === "upsell" ? (
                   <F0Icon
                     icon={Upsell}
                     size="md"
                     className="mr-1 text-[hsl(var(--promote-50))]"
                   />
-                )}
+                ) : null}
                 {label}
               </Link>
             </TabNavigationLink>

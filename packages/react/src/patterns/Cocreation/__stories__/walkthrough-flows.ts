@@ -3,9 +3,8 @@
 // page (index.mdx) and the Walkthrough page (creation-with-ai.mdx) — edit the
 // list here and both pages stay in sync.
 
-import type { FeatureCardProps } from "~/docs/components/FeatureCard"
-
 import { Comment, CreditCard, Menu, Messages, Wallet } from "@/icons/app"
+import type { FeatureCardProps } from "~/docs/components/FeatureCard"
 
 export const WALKTHROUGH_FLOW_FEATURES: FeatureCardProps[] = [
   {

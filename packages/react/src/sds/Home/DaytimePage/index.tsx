@@ -1,15 +1,14 @@
 import { cva, type VariantProps } from "cva"
 import { ComponentProps } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import Menu from "@/icons/app/Menu"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { F0AvatarPulse } from "@/sds/Home/F0AvatarPulse"
 
 const daytimePageVariants = cva({
@@ -66,10 +65,10 @@ function _DaytimePage({
       } bg-f1-special-page shadow`}
     >
       <div className={daytimePageVariants({ period })} />
-      {header && (
+      {header ? (
         <div className="flex flex-row items-center justify-between pr-6 @container">
           <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-page">
-            {(isSmallScreen || sidebarState === "hidden") && (
+            {isSmallScreen || sidebarState === "hidden" ? (
               <F0Button
                 variant="ghost"
                 onClick={() => toggleSidebar()}
@@ -77,7 +76,7 @@ function _DaytimePage({
                 icon={Menu}
                 hideLabel
               />
-            )}
+            ) : null}
             <div
               className={cn(
                 "flex flex-row items-center",
@@ -116,7 +115,7 @@ function _DaytimePage({
                   {header.title}
                 </p>
 
-                {header.description && (
+                {header.description ? (
                   <p
                     className={cn(
                       isSmallScreen ? "text-md" : "text-lg",
@@ -125,16 +124,16 @@ function _DaytimePage({
                   >
                     {header.description}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
           <div>
-            {!hideOneSwitch && <F0OneSwitch />}
+            {!hideOneSwitch ? <F0OneSwitch /> : null}
             <OnePromotionSwitch />
           </div>
         </div>
-      )}
+      ) : null}
       <div
         className={cn(
           "isolate flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden [&>*]:flex-1",

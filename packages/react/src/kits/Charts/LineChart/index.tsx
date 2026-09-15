@@ -6,14 +6,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   LineChartConfig,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -65,22 +63,22 @@ export const _LineChart = <K extends LineChartConfig>(
         data={preparedData}
         margin={{ left: yAxis && !yAxis.hide ? 0 : 12, right: 12 }}
       >
-        {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
-        {!xAxis?.hide && <XAxis {...xAxisProps(xAxis)} />}
-        {!yAxis?.hide && (
+        {!hideGrid ? <CartesianGrid {...cartesianGridProps()} /> : null}
+        {!xAxis?.hide ? <XAxis {...xAxisProps(xAxis)} /> : null}
+        {!yAxis?.hide ? (
           <YAxis
             {...yAxisProps(yAxis)}
             width={yAxis.width ?? maxLabelWidth + 20}
           />
-        )}
-        {!hideTooltip && (
+        ) : null}
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }
           />
-        )}
+        ) : null}
         {lines.map((line, index) => (
           <Line
             key={line}

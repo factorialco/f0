@@ -1,12 +1,9 @@
 import { lazy, Suspense, type ReactNode, useState } from "react"
-
 import { F0FileItem } from "@/components/F0FileItem"
-import { Download } from "@/icons/app"
-import { SolidPlay } from "@/icons/app"
+import { Download, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { formatFileSize } from "../utils/attachments"
@@ -127,7 +124,7 @@ export const ChatVideoAttachment = ({
         >
           <SolidPlay className="size-6" />
         </span>
-        {sizeLabel && (
+        {sizeLabel ? (
           <span
             className={cn(
               "absolute bottom-2 left-2 rounded-full px-2 py-0.5 text-sm font-medium text-f1-foreground-inverse",
@@ -137,7 +134,7 @@ export const ChatVideoAttachment = ({
           >
             {sizeLabel}
           </span>
-        )}
+        ) : null}
       </div>
 
       <div
@@ -163,11 +160,11 @@ export const ChatVideoAttachment = ({
 
       {/* Above the player shell so the time stays readable over the poster, and
           hidden on hover so it never fights the player's own bottom controls. */}
-      {meta && (
+      {meta ? (
         <span className="pointer-events-none absolute inset-0 z-20 opacity-100 transition-opacity duration-150 group-hover/video:opacity-0 motion-reduce:transition-none">
           {meta}
         </span>
-      )}
+      ) : null}
 
       <figcaption className="sr-only">{file.name}</figcaption>
     </figure>

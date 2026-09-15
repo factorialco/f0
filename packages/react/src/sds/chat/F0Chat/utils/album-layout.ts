@@ -56,7 +56,9 @@ export const singlePhotoRatio = (width?: number, height?: number): number =>
 export const albumCells = (
   images: readonly { width?: number; height?: number }[]
 ): AlbumCell[] => {
-  if (images.length === 0) return []
+  if (images.length === 0) {
+    return []
+  }
 
   if (images.length === 1) {
     return [

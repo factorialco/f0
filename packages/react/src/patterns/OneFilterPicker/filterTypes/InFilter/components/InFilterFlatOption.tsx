@@ -2,7 +2,6 @@
 
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
-
 import { InFilterOptionItem } from "../types"
 import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
 

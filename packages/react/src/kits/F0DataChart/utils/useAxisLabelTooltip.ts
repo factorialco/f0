@@ -1,6 +1,5 @@
 import type * as echarts from "echarts"
 import { type RefObject, useEffect } from "react"
-
 import type { ChartTheme } from "./theme"
 
 // Shared offscreen canvas used to measure label text widths. Created lazily
@@ -8,7 +7,9 @@ import type { ChartTheme } from "./theme"
 let measureCtx: CanvasRenderingContext2D | null | undefined
 
 function getMeasureContext(): CanvasRenderingContext2D | null {
-  if (measureCtx !== undefined) return measureCtx
+  if (measureCtx !== undefined) {
+    return measureCtx
+  }
   if (typeof document === "undefined") {
     measureCtx = null
     return null
@@ -43,7 +44,9 @@ function isLabelTruncated(
   fallbackFont: string
 ): boolean {
   const ctx = getMeasureContext()
-  if (!ctx) return false
+  if (!ctx) {
+    return false
+  }
   ctx.font = font
   const primary = ctx.measureText(text).width
   ctx.font = fallbackFont
@@ -71,7 +74,9 @@ export function useAxisLabelTooltip(
   useEffect(() => {
     const chart = chartRef.current
     const container = containerRef.current
-    if (!chart || !container) return
+    if (!chart || !container) {
+      return
+    }
 
     const labelFont = `${theme.textStyle.fontWeight} ${theme.textStyle.fontSize}px ${theme.textStyle.fontFamily}`
     const labelFontFallback = `${theme.textStyle.fontWeight} ${theme.textStyle.fontSize}px sans-serif`
@@ -79,15 +84,18 @@ export function useAxisLabelTooltip(
     let overlay: HTMLDivElement | null = null
 
     function getOverlay(): HTMLDivElement {
-      if (overlay) return overlay
+      if (overlay) {
+        return overlay
+      }
       overlay = document.createElement("div")
+      const padding = theme.tooltip.padding.map((p) => `${p}px`).join(" ")
       overlay.style.cssText = [
         "position: absolute",
         "pointer-events: none",
         "z-index: 9999",
         "opacity: 0",
         "transition: opacity 0.15s",
-        `padding: ${theme.tooltip.padding.map((p) => `${p}px`).join(" ")}`,
+        `padding: ${padding}`,
         `border-radius: ${theme.tooltip.borderRadius}px`,
         `border: 1px solid ${theme.colors.borderSecondary}`,
         `box-shadow: ${theme.tooltip.boxShadow}`,
@@ -158,7 +166,9 @@ export function useAxisLabelTooltip(
           }
         | undefined
       const maxWidth = axis?.axisLabel?.width
-      if (typeof maxWidth !== "number") return
+      if (typeof maxWidth !== "number") {
+        return
+      }
 
       // Apply the axis formatter (if any) so we measure the text the user
       // actually sees, not the raw category value.
@@ -167,8 +177,11 @@ export function useAxisLabelTooltip(
       const displayed =
         typeof formatter === "function" ? formatter(rawValue) : rawValue
 
-      if (!isLabelTruncated(displayed, maxWidth, labelFont, labelFontFallback))
+      if (
+        !isLabelTruncated(displayed, maxWidth, labelFont, labelFontFallback)
+      ) {
         return
+      }
 
       showTooltip({
         value: displayed,
@@ -187,7 +200,9 @@ export function useAxisLabelTooltip(
       }
     }
 
-    if (typeof chart.on !== "function") return
+    if (typeof chart.on !== "function") {
+      return
+    }
 
     chart.on("mouseover", onMouseOver)
     chart.on("mouseout", onMouseOut)

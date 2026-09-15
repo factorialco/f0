@@ -69,7 +69,7 @@ export type F0FormEditableTableColumn<R extends RecordType> = Omit<
  */
 export type F0FormEditableTableProps<R extends RecordType> = {
   /** Column definitions (see {@link F0FormEditableTableColumn}). */
-  columns: ReadonlyArray<F0FormEditableTableColumn<R>>
+  columns: readonly F0FormEditableTableColumn<R>[]
   /**
    * Rows in display order. The table is controlled: edits, reorders and
    * removals are reported via callbacks and the parent updates `items`.

@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, userEvent, within } from "storybook/test"
-
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0InputField, INPUTFIELD_SIZES } from "../"
+import { F0InputField, INPUTFIELD_SIZES } from ".."
 
 const meta = {
   title: "Primitives/F0InputField",
@@ -207,7 +205,7 @@ export const Readonly: Story = {
   },
 }
 
-export const Error: Story = {
+const ErrorState: Story = {
   args: {
     ...Default.args,
     icon: Search,
@@ -392,3 +390,6 @@ export const Snapshot: Story = {
     )
   },
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

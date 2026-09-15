@@ -34,6 +34,7 @@ The project uses `oxfmt` configured via `.oxfmtrc.json` at the repo root. Key ru
 - Double quotes (`"singleQuote": false`)
 - 2-space indentation
 - Trailing commas where valid in ES5 (`"trailingComma": "es5"`)
+- Imports are sorted by the formatter (`experimentalSortImports`); do not hand-order them
 
 ### Monorepo Structure
 

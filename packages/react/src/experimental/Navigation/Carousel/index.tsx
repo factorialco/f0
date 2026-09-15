@@ -1,7 +1,6 @@
 import Autoplay from "embla-carousel-autoplay"
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures"
 import React from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
@@ -15,7 +14,6 @@ import {
   Carousel as ShadCarousel,
   type CarouselPaging,
 } from "@/ui/carousel"
-
 import { DynamicCarousel } from "./DynamicCarousel"
 import {
   type CarouselBreakpoints,
@@ -175,12 +173,12 @@ const _Carousel = ({
               )
             })}
           </CarouselContent>
-          {showArrows && !inRow && (
+          {showArrows && !inRow ? (
             <>
               <CarouselPrevious label={arrowLabels?.previous ?? "Previous"} />
               <CarouselNext label={arrowLabels?.next ?? "Next"} />
             </>
-          )}
+          ) : null}
         </div>
         {inRow ? (
           <CarouselControls labels={arrowLabels} showDots={showDots} />

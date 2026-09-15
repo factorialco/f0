@@ -1,12 +1,10 @@
 "use client"
 
 import { useCallback, useMemo, type ReactNode } from "react"
-
 import { BellOff, PalmTree } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
-
 import {
   isUserMessage,
   type F0ChatComposableAttachment,
@@ -55,11 +53,17 @@ export const resolveMockReactionUsers = (
   const message = messages.find(
     (item) => isUserMessage(item) && item.id === messageId
   )
-  if (!seed || !message || !isUserMessage(message)) return []
+  if (!seed || !message || !isUserMessage(message)) {
+    return []
+  }
 
   const reaction = message.reactions?.find((item) => item.emoji === emoji)
-  if (!reaction) return []
-  if (reaction.users?.length === reaction.count) return reaction.users
+  if (!reaction) {
+    return []
+  }
+  if (reaction.users?.length === reaction.count) {
+    return reaction.users
+  }
 
   return seed.participants.slice(0, reaction.count)
 }
@@ -159,7 +163,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   // groups. The current user is included (you can @-mention yourself).
   const searchMembers = useCallback(
     (query: string): Promise<F0ChatUser[]> => {
-      if (!seed) return Promise.resolve([])
+      if (!seed) {
+        return Promise.resolve([])
+      }
       const q = query.trim().toLowerCase()
       const matches = [...seed.participants, ME]
         .filter((p) =>

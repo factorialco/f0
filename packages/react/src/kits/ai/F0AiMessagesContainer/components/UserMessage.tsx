@@ -1,13 +1,10 @@
 import { type ReactNode, useEffect, useRef } from "react"
-
-import { F0Icon } from "@/components/F0Icon"
 import { F0FileItem } from "@/components/F0FileItem"
+import { F0Icon } from "@/components/F0Icon"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Reply } from "@/icons/app"
-
 import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
-
 import { ReplyPopover } from "./ReplyPopover"
 
 type UploadedFile = {
@@ -32,7 +29,9 @@ type MessagePart = MessageTextPart | MessageBinaryPart
 function getTextContent(
   content: string | MessagePart[] | undefined
 ): string | undefined {
-  if (typeof content === "string") return content
+  if (typeof content === "string") {
+    return content
+  }
   if (Array.isArray(content)) {
     // When multiple text parts exist (e.g. pending context + user text),
     // only show the last one — earlier parts are invisible context for the agent.
@@ -134,7 +133,9 @@ export const UserMessage = ({
   const bubbleRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current || !autoScrollIntoView) return
+    if (!ref.current || !autoScrollIntoView) {
+      return
+    }
 
     ref.current.scrollIntoView({
       behavior: "smooth",
@@ -162,11 +163,11 @@ export const UserMessage = ({
       ref={ref}
       className="my-4 flex w-full flex-col items-end gap-2 first:mt-0 last:mb-0"
     >
-      {quoteText && (
+      {quoteText ? (
         <ReplyQuoteBlock text={quoteText} renderMarkdown={renderMarkdown} />
-      )}
+      ) : null}
 
-      {uploadedFiles.length > 0 && (
+      {uploadedFiles.length > 0 ? (
         <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
           {uploadedFiles.map((file, index) => (
             <F0FileItem
@@ -176,15 +177,15 @@ export const UserMessage = ({
             />
           ))}
         </div>
-      )}
-      {hasVisibleText && (
+      ) : null}
+      {hasVisibleText ? (
         <div
           ref={bubbleRef}
           className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-xl bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
         >
           {(renderMarkdown ?? defaultMarkdownFallback)(content)}
         </div>
-      )}
+      ) : null}
       <ReplyPopover
         anchor={anchor}
         onReply={(text) => {

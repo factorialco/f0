@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { type F0ChatMessage } from "../../types"
 import {
   canEditAction,
@@ -80,7 +79,7 @@ describe("canEditAction", () => {
         attachments: [
           kind === "voice"
             ? { kind: "voice", url: "/note.mp3" }
-            : { kind: "card", title: "Give your team access" },
+            : { kind: "card", title: "Set up the chat for your company" },
         ],
       }
       expect(

@@ -1,5 +1,6 @@
 "use client"
 
+import "./F0PdfViewer.styles.css"
 import {
   type BaseSyntheticEvent,
   forwardRef,
@@ -11,14 +12,11 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-import { Skeleton } from "@/ui/skeleton"
 import { Document, Page, type PDFDocumentProxy } from "@/ui/pdf"
-
+import { Skeleton } from "@/ui/skeleton"
 import { PdfLoadingState } from "./components/PdfLoadingState"
 import { PdfToolbar } from "./components/PdfToolbar"
-import "./F0PdfViewer.styles.css"
 import { downloadPdf, printPdf } from "./pdfActions"
 import { ensurePdfWorker } from "./pdfWorker"
 import { fixedScales, nextScaleDown, nextScaleUp } from "./scales"
@@ -50,7 +48,9 @@ const PAGE_VIEWPORT_PADDING = 48
 export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
   (props, ref) => {
     const { kind = "pdf", mimeType, ...pdfProps } = props
-    if (kind === "pdf") return <PdfViewerBase ref={ref} {...pdfProps} />
+    if (kind === "pdf") {
+      return <PdfViewerBase ref={ref} {...pdfProps} />
+    }
 
     // PDF-only props are ignored for the other kinds — strip them so only
     // data attributes reach the DOM.
@@ -78,23 +78,23 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
         <Suspense
           fallback={<Skeleton className="h-full w-full rounded-none" />}
         >
-          {kind === "sheet" && (
+          {kind === "sheet" ? (
             <SheetViewer
               url={url}
               filename={filename}
               withCredentials={withCredentials}
               actions={actions}
             />
-          )}
-          {kind === "docx" && (
+          ) : null}
+          {kind === "docx" ? (
             <DocxViewer
               url={url}
               filename={filename}
               withCredentials={withCredentials}
               actions={actions}
             />
-          )}
-          {kind === "text" && (
+          ) : null}
+          {kind === "text" ? (
             <TextViewer
               url={url}
               name={filename ?? ""}
@@ -102,7 +102,7 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
               withCredentials={withCredentials}
               actions={actions}
             />
-          )}
+          ) : null}
         </Suspense>
       </div>
     )
@@ -184,7 +184,9 @@ const PdfViewerBase = forwardRef<
     (value: "page-width" | "page-fit") => {
       const metrics = pages[currentPage - 1]
       const container = containerRef.current
-      if (!metrics || !container) return
+      if (!metrics || !container) {
+        return
+      }
 
       const toolbarHeight = toolbarRef.current?.offsetHeight ?? 0
       const quarterTurned = rotation === 90 || rotation === 270
@@ -219,10 +221,14 @@ const PdfViewerBase = forwardRef<
   )
 
   const zoomTo = useCallback((value: number | undefined) => {
-    if (value === undefined) return
+    if (value === undefined) {
+      return
+    }
     setScale(value)
     const match = fixedScales.find((option) => Number(option) === value)
-    if (match) setSelectedScale(match)
+    if (match) {
+      setSelectedScale(match)
+    }
   }, [])
 
   const onZoomIn = useCallback(
@@ -256,13 +262,17 @@ const PdfViewerBase = forwardRef<
 
   const onContainerScroll = useCallback((event: BaseSyntheticEvent) => {
     const container = event.target
-    if (!(container instanceof HTMLElement)) return
+    if (!(container instanceof HTMLElement)) {
+      return
+    }
     const visiblePage = calculateVisiblePage(
       container,
       pageElements.current,
       toolbarRef.current?.offsetHeight ?? 0
     )
-    if (visiblePage) setCurrentPage(visiblePage)
+    if (visiblePage) {
+      setCurrentPage(visiblePage)
+    }
   }, [])
 
   const onPrint = useCallback(() => {
@@ -284,7 +294,9 @@ const PdfViewerBase = forwardRef<
   }, [page, goToPage])
 
   useEffect(() => {
-    if (currentPage > 0) onPageChange?.(currentPage)
+    if (currentPage > 0) {
+      onPageChange?.(currentPage)
+    }
   }, [currentPage, onPageChange])
 
   useEffect(() => {
@@ -306,7 +318,9 @@ const PdfViewerBase = forwardRef<
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const handleClick = (event: Event) => {
       const target = event.target
@@ -350,7 +364,7 @@ const PdfViewerBase = forwardRef<
           actions={actions}
         />
 
-        {url && (
+        {url ? (
           <Document
             file={file}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -362,50 +376,52 @@ const PdfViewerBase = forwardRef<
               />
             }
           >
-            {pdf &&
-              Array.from({ length: totalPages ?? 0 }).map((_, index) => {
-                const pageNumber =
-                  (pagesToDisplay.length > 0 ? pagesToDisplay[index] : index) +
-                  1
-                return (
-                  <div
-                    key={index}
-                    className="F0PdfViewer__page mx-auto w-fit px-4 pt-4 last:pb-4"
-                  >
-                    <Page
-                      className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
-                      pageNumber={pageNumber}
-                      scale={scale}
-                      rotate={rotation}
-                      loading={
-                        <Skeleton
-                          style={{
-                            width: pageSkeletonWidth,
-                            height: pageSkeletonHeight,
-                          }}
-                        />
-                      }
-                      renderForms
-                      renderTextLayer
-                      inputRef={(reference) => {
-                        pageElements.current[index] = reference
-                      }}
-                      onLoadSuccess={(loadedPage) => {
-                        setPages((current) => {
-                          const next = [...current]
-                          next[index] = {
-                            originalWidth: loadedPage.originalWidth,
-                            originalHeight: loadedPage.originalHeight,
-                          }
-                          return next
-                        })
-                      }}
-                    />
-                  </div>
-                )
-              })}
+            {pdf
+              ? Array.from({ length: totalPages ?? 0 }).map((_, index) => {
+                  const pageNumber =
+                    (pagesToDisplay.length > 0
+                      ? pagesToDisplay[index]
+                      : index) + 1
+                  return (
+                    <div
+                      key={index}
+                      className="F0PdfViewer__page mx-auto w-fit px-4 pt-4 last:pb-4"
+                    >
+                      <Page
+                        className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
+                        pageNumber={pageNumber}
+                        scale={scale}
+                        rotate={rotation}
+                        loading={
+                          <Skeleton
+                            style={{
+                              width: pageSkeletonWidth,
+                              height: pageSkeletonHeight,
+                            }}
+                          />
+                        }
+                        renderForms
+                        renderTextLayer
+                        inputRef={(reference) => {
+                          pageElements.current[index] = reference
+                        }}
+                        onLoadSuccess={(loadedPage) => {
+                          setPages((current) => {
+                            const next = [...current]
+                            next[index] = {
+                              originalWidth: loadedPage.originalWidth,
+                              originalHeight: loadedPage.originalHeight,
+                            }
+                            return next
+                          })
+                        }}
+                      />
+                    </div>
+                  )
+                })
+              : null}
           </Document>
-        )}
+        ) : null}
       </div>
     </div>
   )

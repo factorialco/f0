@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { forwardRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -8,7 +7,6 @@ import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Counter } from "@/ui/Counter"
-
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
 
@@ -64,7 +62,7 @@ const ButtonInternal = forwardRef<
   const [isHovered, setIsHovered] = useState(false)
 
   const handleClick = async (
-    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => {
     const result = onClick?.(event)
 
@@ -175,15 +173,15 @@ const ButtonInternal = forwardRef<
             (iconPosition === "right" ? "-mr-[3px]" : "-ml-[3px]")
         )}
       >
-        {iconPosition === "left" && iconNode}
-        {emoji && (
+        {iconPosition === "left" ? iconNode : null}
+        {emoji ? (
           <EmojiImage
             emoji={emoji}
             mode={emojiMode}
             size={size === "sm" ? "sm" : "md"}
             alt={""}
           />
-        )}
+        ) : null}
         {!shouldHideLabel ? (
           <OneEllipsis
             className={cn(
@@ -209,9 +207,9 @@ const ButtonInternal = forwardRef<
         ) : (
           <span className="sr-only">{buttonLabel}</span>
         )}
-        {iconPosition === "right" && iconNode}
+        {iconPosition === "right" ? iconNode : null}
         {append}{" "}
-        {hasCounter && (
+        {hasCounter ? (
           <span
             className={cn(
               "ml-1 inline-flex items-center",
@@ -222,7 +220,7 @@ const ButtonInternal = forwardRef<
           >
             <Counter value={counterValue} size={counterSize} type="default" />
           </span>
-        )}
+        ) : null}
       </div>
     </Action>
   )

@@ -1,11 +1,10 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Await } from "@/lib/Await"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import type { F0SelectItemObject } from "../types"
 
 export type SelectAllProps = {

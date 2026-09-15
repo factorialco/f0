@@ -22,10 +22,14 @@ export function useFontsReady(): boolean {
   )
 
   useEffect(() => {
-    if (ready) return
+    if (ready) {
+      return
+    }
     let cancelled = false
     document.fonts.ready.then(() => {
-      if (!cancelled) setReady(true)
+      if (!cancelled) {
+        setReady(true)
+      }
     })
     return () => {
       cancelled = true

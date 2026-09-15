@@ -1,9 +1,7 @@
 import { cva } from "cva"
 import { motion } from "motion/react"
 import { Ref, forwardRef, useId } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { F0OneIconProps } from "./types"
 
 const sizeVariants = cva({

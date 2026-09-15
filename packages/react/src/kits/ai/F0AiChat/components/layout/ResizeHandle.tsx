@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react"
-
 import { cn } from "@/lib/utils"
 
 export const ResizeHandle = ({
@@ -31,14 +30,16 @@ export const ResizeHandle = ({
     [setIsResizing]
   )
 
-  const handleDoubleClick = useCallback(async () => {
+  const handleDoubleClick = useCallback(() => {
     setIsResizing(true)
-    await onReset()
+    onReset()
     setIsResizing(false)
   }, [onReset, setIsResizing])
 
   useEffect(() => {
-    if (!isResizing) return
+    if (!isResizing) {
+      return
+    }
 
     // Pointer samples arrive faster than the screen repaints (120Hz trackpads),
     // and every one of them re-lays-out the whole panel — including a
@@ -48,7 +49,9 @@ export const ResizeHandle = ({
       frameRef.current = null
       const delta = pendingDeltaRef.current
       pendingDeltaRef.current = 0
-      if (delta !== 0) onResize(delta)
+      if (delta !== 0) {
+        onResize(delta)
+      }
     }
 
     const handleMouseMove = (e: MouseEvent) => {

@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { GranularityDefinition } from "../granularities/types"
 import { DateRangeComplete } from "../types"
 import { isActiveDate } from "../utils"

@@ -1,5 +1,3 @@
-import type { F0DataChartProps } from "./types"
-
 import { BarChart } from "./components/BarChart/BarChart"
 import { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"
 import { FunnelChart } from "./components/FunnelChart/FunnelChart"
@@ -9,6 +7,7 @@ import { LineChart } from "./components/LineChart/LineChart"
 import { PieChart } from "./components/PieChart/PieChart"
 import { RadarChart } from "./components/RadarChart/RadarChart"
 import { ScatterChart } from "./components/ScatterChart/ScatterChart"
+import type { F0DataChartProps } from "./types"
 import { isDataChartEmpty } from "./utils/isDataChartEmpty"
 
 export const F0DataChart = (props: F0DataChartProps) => {

@@ -6,19 +6,17 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { stripNativeTitle } from "@/lib/strip-native-title"
+import { Shortcut } from "@/ui/Shortcut"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { cn } from "../../../lib/utils"
-import { Shortcut } from "@/ui/Shortcut"
 
 /**
  * One bullet of a tooltip's list. The object form gets a semibold lead so a
@@ -79,7 +77,9 @@ export function TooltipInternal({
   }, [clearOpenTimeout])
 
   const scheduleOpen = useCallback(() => {
-    if (!hasContent) return
+    if (!hasContent) {
+      return
+    }
     onOpen?.()
     clearOpenTimeout()
     openTimeoutRef.current = setTimeout(() => setOpen(true), openDelayMs)
@@ -108,84 +108,88 @@ export function TooltipInternal({
     React.isValidElement(children) && children.type !== React.Fragment
 
   return (
-    <>
-      <TooltipProvider
-        delayDuration={openDelayMs}
-        disableHoverableContent={instant}
+    <TooltipProvider
+      delayDuration={openDelayMs}
+      disableHoverableContent={instant}
+    >
+      <TooltipPrimitive
+        open={hasContent && open}
+        onOpenChange={(nextOpen) => {
+          // We control when the tooltip opens so it doesn't show on mouse click
+          // focus/programmatic focus. Still allow Radix to request closing (e.g. escape).
+          if (!nextOpen) {
+            close()
+          }
+        }}
       >
-        <TooltipPrimitive
-          open={hasContent && open}
-          onOpenChange={(nextOpen) => {
-            // We control when the tooltip opens so it doesn't show on mouse click
-            // focus/programmatic focus. Still allow Radix to request closing (e.g. escape).
-            if (!nextOpen) close()
+        <TooltipTrigger
+          asChild
+          className="pointer-events-auto"
+          onPointerEnter={(e) => {
+            if (e.pointerType === "touch") {
+              return
+            }
+            scheduleOpen()
           }}
+          onPointerLeave={() => close()}
+          onPointerDown={() => close()}
+          onFocus={(e) => {
+            if (!hasContent) {
+              return
+            }
+            if (isFocusVisible(e.currentTarget)) {
+              onOpen?.()
+              setOpen(true)
+            } else {
+              // If focus comes from mouse/touch/programmatic focus, keep closed.
+              close()
+            }
+          }}
+          onBlur={() => close()}
         >
-          <TooltipTrigger
-            asChild
-            className="pointer-events-auto"
-            onPointerEnter={(e) => {
-              if (e.pointerType === "touch") return
-              scheduleOpen()
-            }}
-            onPointerLeave={() => close()}
-            onPointerDown={() => close()}
-            onFocus={(e) => {
-              if (!hasContent) return
-              if (isFocusVisible(e.currentTarget)) {
-                onOpen?.()
-                setOpen(true)
-              } else {
-                // If focus comes from mouse/touch/programmatic focus, keep closed.
-                close()
-              }
-            }}
-            onBlur={() => close()}
-          >
-            {slottableTrigger ? (
-              stripNativeTitle(children)
-            ) : (
-              <span className="inline-flex h-fit w-fit">{children}</span>
-            )}
-          </TooltipTrigger>
-          <TooltipContent
-            className={cn(
-              "max-w-xs",
-              shortcut && "pr-1.5",
-              instant && "pointer-events-none"
-            )}
-          >
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-2">
-                {label && <p className="font-semibold">{label}</p>}
-                {shortcut && <Shortcut keys={shortcut} variant="inverse" />}
-              </div>
-              {description && (
-                <p className="font-normal">{description.toString()}</p>
-              )}
-              {items && items.length > 0 && (
-                <ul className="m-0 flex list-disc flex-col gap-0.5 pl-4 font-normal">
-                  {items.map((item, index) => (
-                    <li
-                      key={`${index}-${typeof item === "string" ? item : item.title}`}
-                    >
-                      {typeof item === "string" ? (
-                        item
-                      ) : (
-                        <>
-                          <span className="font-semibold">{item.title}</span>
-                          {item.description && <> {item.description}</>}
-                        </>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+          {slottableTrigger ? (
+            stripNativeTitle(children)
+          ) : (
+            <span className="inline-flex h-fit w-fit">{children}</span>
+          )}
+        </TooltipTrigger>
+        <TooltipContent
+          className={cn(
+            "max-w-xs",
+            shortcut && "pr-1.5",
+            instant && "pointer-events-none"
+          )}
+        >
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-2">
+              {label ? <p className="font-semibold">{label}</p> : null}
+              {shortcut ? <Shortcut keys={shortcut} variant="inverse" /> : null}
             </div>
-          </TooltipContent>
-        </TooltipPrimitive>
-      </TooltipProvider>
-    </>
+            {description ? (
+              <p className="font-normal">{description.toString()}</p>
+            ) : null}
+            {items && items.length > 0 ? (
+              <ul className="m-0 flex list-disc flex-col gap-0.5 pl-4 font-normal">
+                {items.map((item, index) => (
+                  <li
+                    key={`${index}-${typeof item === "string" ? item : item.title}`}
+                  >
+                    {typeof item === "string" ? (
+                      item
+                    ) : (
+                      <>
+                        <span className="font-semibold">{item.title}</span>
+                        {item.description ? <> {item.description}</> : null}
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        </TooltipContent>
+      </TooltipPrimitive>
+    </TooltipProvider>
   )
 }
 

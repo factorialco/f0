@@ -7,7 +7,6 @@ import {
 } from "@tiptap/react"
 import { format } from "date-fns"
 import React, { useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
@@ -50,7 +49,9 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false)
   const data = node.attrs.data as TranscriptData
 
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
   const handleToggleCollapse = () => {
     const newState = !isOpen
@@ -122,20 +123,20 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
           </div>
         </div>
 
-        {isOpen && (
+        {isOpen ? (
           <div className="scrollbar-macos text-f1-text-primary flex max-h-[500px] flex-col gap-4 overflow-y-auto">
             {data.messages.map((message, index) => {
               const user = getUserById(message.userId)
               return (
                 <div key={index} className="flex flex-row gap-3">
-                  {user?.imageUrl && (
+                  {user?.imageUrl ? (
                     <F0AvatarPerson
                       size="xs"
                       src={user.imageUrl}
                       firstName={user.fullname}
                       lastName={""}
                     />
-                  )}
+                  ) : null}
                   <div className="flex flex-col">
                     <div className="flex items-baseline gap-2">
                       <span className="text-f1-text-primary font-medium">
@@ -151,7 +152,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
               )
             })}
           </div>
-        )}
+        ) : null}
       </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>
@@ -184,7 +185,9 @@ export const Transcript = Node.create({
           return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {}
+          if (!attributes.data) {
+            return {}
+          }
           return {
             "data-transcript": JSON.stringify(attributes.data),
           }
@@ -209,7 +212,9 @@ export const Transcript = Node.create({
 
   renderHTML({ HTMLAttributes, node }) {
     const data = node.attrs.data as TranscriptData
-    if (!data) return ["div"]
+    if (!data) {
+      return ["div"]
+    }
 
     return [
       "div",

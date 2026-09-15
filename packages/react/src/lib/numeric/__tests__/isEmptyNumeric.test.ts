@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import type { Numeric, NumericValue } from "../types"
-
 import { isEmptyNumeric } from "../utils/isEmptyNumeric"
 
 describe("isEmptyNumeric", () => {
@@ -17,50 +15,29 @@ describe("isEmptyNumeric", () => {
     })
 
     it("should act as type predicate for null", () => {
-      const value: Numeric = null
-      if (isEmptyNumeric(value)) {
-        // TypeScript should narrow to null | undefined
-        expect(value).toBeNull()
-      }
+      const values: Numeric[] = [null, 1]
+      // The filter callback only compiles if the predicate narrows the type.
+      const empty: (null | undefined)[] = values.filter(isEmptyNumeric)
+      expect(empty).toEqual([null])
     })
 
     it("should act as type predicate for undefined", () => {
-      const value: Numeric = undefined
-      if (isEmptyNumeric(value)) {
-        // TypeScript should narrow to null | undefined
-        expect(value).toBeUndefined()
-      }
+      const values: Numeric[] = [undefined, 1]
+      const empty: (null | undefined)[] = values.filter(isEmptyNumeric)
+      expect(empty).toEqual([undefined])
     })
   })
 
   describe("number values", () => {
-    it("should return false for zero", () => {
-      const result = isEmptyNumeric(0)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for positive numbers", () => {
-      const result = isEmptyNumeric(123.45)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for negative numbers", () => {
-      const result = isEmptyNumeric(-123.45)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for very small numbers", () => {
-      const result = isEmptyNumeric(0.0001)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for large numbers", () => {
-      const result = isEmptyNumeric(999999999.99)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for integers", () => {
-      const result = isEmptyNumeric(42)
+    it.each([
+      { name: "zero", value: 0 },
+      { name: "positive numbers", value: 123.45 },
+      { name: "negative numbers", value: -123.45 },
+      { name: "very small numbers", value: 0.0001 },
+      { name: "large numbers", value: 999999999.99 },
+      { name: "integers", value: 42 },
+    ])("should return false for $name", ({ value }) => {
+      const result = isEmptyNumeric(value)
       expect(result).toBe(false)
     })
   })
@@ -244,22 +221,25 @@ describe("isEmptyNumeric", () => {
 
   describe("type predicate behavior", () => {
     it("should narrow type correctly in conditional", () => {
-      const value: Numeric = null
-      if (isEmptyNumeric(value)) {
-        // Type should be narrowed to null | undefined
-        const test: null | undefined = value
-        expect(test).toBeNull()
+      const values: Numeric[] = [null, undefined, 42, { value: 1 }]
+      const narrowed: (null | undefined)[] = []
+      for (const value of values) {
+        if (isEmptyNumeric(value)) {
+          narrowed.push(value)
+        }
       }
+      expect(narrowed).toEqual([null, undefined])
     })
 
     it("should allow non-empty check after isEmptyNumeric", () => {
-      const value: Numeric = 42
-      if (!isEmptyNumeric(value)) {
-        // Type should be narrowed to exclude null | undefined
-        expect(typeof value === "number" || typeof value === "object").toBe(
-          true
-        )
+      const values: Numeric[] = [null, undefined, 42, { value: 1 }]
+      const nonEmpty: (number | NumericValue)[] = []
+      for (const value of values) {
+        if (!isEmptyNumeric(value)) {
+          nonEmpty.push(value)
+        }
       }
+      expect(nonEmpty).toEqual([42, { value: 1 }])
     })
   })
 })

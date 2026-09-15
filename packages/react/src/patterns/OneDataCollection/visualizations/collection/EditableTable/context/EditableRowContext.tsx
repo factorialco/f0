@@ -1,11 +1,8 @@
 "use client"
 
 import { createContext, useContext, useEffect, useRef, useState } from "react"
-
 import type { RecordType } from "@/hooks/datasource"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import type {
   EditableTableCellChanges,
   EditableTableOnCellChangeParams,
@@ -111,17 +108,24 @@ export function EditableRowProvider<R extends RecordType>({
   const setLoading = (columnIds: string[], loading: boolean) => {
     setCellLoading((prev) => {
       const next = { ...prev }
-      for (const id of columnIds) next[id] = loading
+      for (const id of columnIds) {
+        next[id] = loading
+      }
       return next
     })
   }
 
   const setErrors = (columnIds: string[], message?: string) => {
     setCellErrors((prev) => {
+      if (message === undefined) {
+        const cleared = new Set(columnIds)
+        return Object.fromEntries(
+          Object.entries(prev).filter(([id]) => !cleared.has(id))
+        )
+      }
       const next = { ...prev }
       for (const id of columnIds) {
-        if (message === undefined) delete next[id]
-        else next[id] = message
+        next[id] = message
       }
       return next
     })
@@ -163,7 +167,9 @@ export function EditableRowProvider<R extends RecordType>({
   /** Saves the pending change now instead of waiting for its timer. */
   const flushPending = () => {
     const pending = pendingRef.current
-    if (!pending) return
+    if (!pending) {
+      return
+    }
 
     if (pending.timer) clearTimeout(pending.timer)
     pendingRef.current = null
@@ -181,11 +187,15 @@ export function EditableRowProvider<R extends RecordType>({
     options?: CellChangeOptions
   ) => {
     const columnIds = Object.keys(updates)
-    if (columnIds.length === 0) return
+    if (columnIds.length === 0) {
+      return
+    }
 
     const previousItem = localItemRef.current
     const previousValues: Record<string, unknown> = {}
-    for (const id of columnIds) previousValues[id] = previousItem[id]
+    for (const id of columnIds) {
+      previousValues[id] = previousItem[id]
+    }
 
     // The local item always updates immediately so the cell stays responsive
     const updatedItem = { ...previousItem, ...updates } as R

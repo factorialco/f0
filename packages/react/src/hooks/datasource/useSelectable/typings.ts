@@ -25,11 +25,11 @@ export type SelectionStatus<
 > = {
   allChecked: boolean | "indeterminate"
   /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-  itemsStatus: ReadonlyArray<{ item: R; checked: boolean }>
+  itemsStatus: readonly { item: R; checked: boolean }[]
   /** All selected item IDs, including those not yet loaded */
-  selectedIds: ReadonlyArray<SelectionId>
-  checkedItems: ReadonlyArray<R>
-  uncheckedItems: ReadonlyArray<R>
+  selectedIds: readonly SelectionId[]
+  checkedItems: readonly R[]
+  uncheckedItems: readonly R[]
   groupsStatus: Record<string, boolean>
   filters: FiltersState<Filters>
   selectedCount: number
@@ -93,7 +93,7 @@ export type UseSelectableProps<
    * Selectable rows currently rendered (incl. nested children), so "select all"
    * reaches rows absent from `data.records`. Falls back to `data.records`.
    */
-  getRenderedSelectableEntries?: () => Array<[SelectionId, R]>
+  getRenderedSelectableEntries?: () => [SelectionId, R][]
   /**
    * Count of currently-rendered selectable rows (incl. nested children). Used
    * as the item total when it exceeds `paginationInfo.total`, so selection
@@ -105,8 +105,8 @@ export type UseSelectableProps<
 export type SelectionMeta<R extends RecordType> = {
   selectedItemsCount: number
   totalKnownItemsCount: number
-  checkedItems: ReadonlyArray<R>
-  uncheckedItems: ReadonlyArray<R>
+  checkedItems: readonly R[]
+  uncheckedItems: readonly R[]
 }
 
 export type UseSelectableReturn<

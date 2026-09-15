@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
-import { F0VersionHistory } from "../index"
+import { F0VersionHistory } from ".."
 import { Version } from "../types"
 
 const mockVersions: Version[] = [
@@ -94,7 +92,9 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => {
-    const [activeId, setActiveId] = useState<string | "current">("current")
+    const [activeId, setActiveId] = useState<"current" | (string & {})>(
+      "current"
+    )
 
     const versionsWithHandlers = mockVersions.map((version) => ({
       ...version,

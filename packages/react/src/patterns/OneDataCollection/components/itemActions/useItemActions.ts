@@ -1,11 +1,14 @@
 import { useState } from "react"
-
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   DropdownItem,
   DropdownItemSeparator,
 } from "@/experimental/Navigation/Dropdown/internal"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import {
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
+import { DataCollectionSourceDefinition } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   ActionDefinition,
   filterItemActions,
@@ -13,12 +16,7 @@ import {
 } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
-
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { actionsToDropdownItems } from "../../visualizations/collection/utils"
 
 type UseItemActionProps<
@@ -30,7 +28,8 @@ type UseItemActionProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataCollectionSource<
+  /** The definition, not the live source: a row holding the live one cannot memoize. */
+  source: DataCollectionSourceDefinition<
     R,
     Filters,
     Sortings,

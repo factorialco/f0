@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { dateToDisplayTime, displayTimeToDate } from "./utils"
 
 const at = (hours: number, minutes: number): Date => {

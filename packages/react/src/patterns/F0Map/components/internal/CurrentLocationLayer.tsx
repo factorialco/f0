@@ -1,7 +1,6 @@
 import { baseColors } from "@factorialco/f0-core"
 import type { GeoJSONSource, Map as MaplibreMap } from "maplibre-gl"
 import { useEffect, useRef } from "react"
-
 import { LINES_BOTTOM_LAYER_ID } from "../F0MapVectorLayer"
 
 // The "you are here" dot, drawn as a GL circle layer - NOT a DOM marker - so it
@@ -40,7 +39,9 @@ export const CurrentLocationLayer = ({
       geometry: { type: "Point" as const, coordinates: coordsRef.current },
     })
     const ensure = () => {
-      if (!map.isStyleLoaded() || map.getSource(SOURCE)) return
+      if (!map.isStyleLoaded() || map.getSource(SOURCE)) {
+        return
+      }
       map.addSource(SOURCE, { type: "geojson", data: data() })
       map.addLayer(
         {
@@ -64,7 +65,9 @@ export const CurrentLocationLayer = ({
       // A render can hand this effect a map that was just `remove()`d (its
       // replacement arrives on the next render); every style accessor throws
       // on it, so bail - the fresh map re-runs this effect from scratch.
-      if (!map.style) return
+      if (!map.style) {
+        return
+      }
       ensure()
       const source = map.getSource(SOURCE) as GeoJSONSource | undefined
       source?.setData(data())
@@ -81,15 +84,23 @@ export const CurrentLocationLayer = ({
       map.off("styledata", sync)
       // After `map.remove()` the style is gone and even `getLayer` throws
       // (it dereferences `map.style`), so bail before touching anything.
-      if (!map.style) return
-      if (map.getLayer(LAYER)) map.removeLayer(LAYER)
-      if (map.getSource(SOURCE)) map.removeSource(SOURCE)
+      if (!map.style) {
+        return
+      }
+      if (map.getLayer(LAYER)) {
+        map.removeLayer(LAYER)
+      }
+      if (map.getSource(SOURCE)) {
+        map.removeSource(SOURCE)
+      }
     }
   }, [map])
 
   // Follow coordinate updates. Same dead-map guard as `sync`.
   useEffect(() => {
-    if (!map.style) return
+    if (!map.style) {
+      return
+    }
     const source = map.getSource(SOURCE) as GeoJSONSource | undefined
     source?.setData({
       type: "Feature",

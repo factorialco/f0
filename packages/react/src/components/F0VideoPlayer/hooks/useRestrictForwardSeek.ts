@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { NATURAL_PROGRESS_DELTA, SEEK_EPSILON } from "../utils"
 
 export interface UseRestrictForwardSeekOptions {
@@ -43,10 +42,14 @@ export function useRestrictForwardSeek({
   }, [resetKey])
 
   useEffect(() => {
-    if (!video) return
+    if (!video) {
+      return
+    }
 
     const enforceClamp = () => {
-      if (!enabledRef.current) return
+      if (!enabledRef.current) {
+        return
+      }
       if (video.currentTime > maxWatchedTimeRef.current + SEEK_EPSILON) {
         video.currentTime = maxWatchedTimeRef.current
       }
@@ -98,7 +101,9 @@ export function useRestrictForwardSeek({
   }, [video])
 
   const clampSeek = useCallback((target: number): number => {
-    if (!enabledRef.current) return target
+    if (!enabledRef.current) {
+      return target
+    }
     return Math.min(target, maxWatchedTimeRef.current)
   }, [])
 

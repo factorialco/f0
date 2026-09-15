@@ -29,7 +29,9 @@ export function useHeaderActionsCollapse(
   const measure = useCallback(() => {
     const toolbar = toolbarRef.current
     const actions = actionsRef.current
-    if (!toolbar || !actions) return
+    if (!toolbar || !actions) {
+      return
+    }
 
     if (!collapsedRef.current) {
       naturalRef.current = actions.scrollWidth

@@ -1,5 +1,4 @@
 import { createContext, useContext } from "react"
-
 import { AiChatTranslations, AiChatTranslationsProviderProps } from "../types"
 
 export type { AiChatTranslations, AiChatTranslationsProviderProps }

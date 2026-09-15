@@ -1,10 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import avatar from "@storybook-static/avatars/person03.jpg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fn, within } from "storybook/test"
-
 import { Check, Placeholder } from "../../../icons/app"
-import { OnePersonListItem } from "./index"
+import { OnePersonListItem } from "."
 
 const meta = {
   title: "List/OnePersonListItem",

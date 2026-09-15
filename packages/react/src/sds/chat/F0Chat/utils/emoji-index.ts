@@ -67,7 +67,9 @@ export const EMOJI_INDEX: EmojiEntry[] = (
   Object.values(data.emojis) as EmojiMartEmoji[]
 ).flatMap((emoji, order) => {
   const native = emoji.skins[0]?.native
-  if (!native) return []
+  if (!native) {
+    return []
+  }
   const aliases = aliasesByEmoji.get(emoji.id) ?? []
   const keywords = emoji.keywords ?? []
   return [
@@ -161,9 +163,15 @@ const scoreCandidate = (
   ) {
     return 10
   }
-  if (emoji.normalizedKeywords.some((term) => term === query)) return 20
-  if (emoji.normalizedKeywords.some((term) => term.startsWith(query))) return 30
-  if (emoji.normalizedName.startsWith(query)) return 40
+  if (emoji.normalizedKeywords.some((term) => term === query)) {
+    return 20
+  }
+  if (emoji.normalizedKeywords.some((term) => term.startsWith(query))) {
+    return 30
+  }
+  if (emoji.normalizedName.startsWith(query)) {
+    return 40
+  }
   if (
     emoji.normalizedShortcodes.some((term) => term.includes(query)) ||
     emoji.normalizedKeywords.some((term) => term.includes(query)) ||
@@ -210,7 +218,9 @@ export const searchEmoji = (
   }
 
   const matches = EMOJI_INDEX.flatMap((emoji) => {
-    if (!withinVersion(emoji)) return []
+    if (!withinVersion(emoji)) {
+      return []
+    }
     const localized = localizedTerms?.get(emoji.hexcode)?.map(normalize)
     const score = scoreCandidate(emoji, query, localized)
     return score === null ? [] : [{ emoji, score }]

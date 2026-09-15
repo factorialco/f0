@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid"
-
 import { DialogId } from "../dialogs-alike/types"
 import { formOverlaysStore, FormOverlayRenderApi } from "./store"
 
@@ -49,7 +48,9 @@ export const mountFormOverlay = (
 ): DialogId => {
   const id = definition.id || nanoid()
   const dismiss = () => {
-    if (!dismissCallbacks.has(id)) return
+    if (!dismissCallbacks.has(id)) {
+      return
+    }
     dismissCallbacks.delete(id)
     definition.onDismiss?.()
     formOverlaysStore.removeItem(id)

@@ -1,13 +1,11 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   zeroRender as render,
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0AvatarList } from "../F0AvatarList"
 
 describe("F0AvatarList", () => {

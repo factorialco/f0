@@ -2,7 +2,6 @@ import "@testing-library/jest-dom/vitest"
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellRenderer } from "../components/EditableCellRenderer"
 import { EditableRowProvider } from "../context/EditableRowContext"
@@ -277,8 +276,9 @@ describe("EditableCellRenderer", () => {
       const input = screen.getByRole("textbox")
       await user.clear(input)
 
-      // Error message should appear after the change is processed
-      // This depends on how TextCell/Input displays errors
+      await waitFor(() => expect(onCellChange).toHaveBeenCalled())
+      // The message renders inline and in the error tooltip.
+      expect(await screen.findAllByText("Name is required")).not.toHaveLength(0)
     })
 
     it("does not debounce and only commits on blur for numberConfig.commitOn: 'blur'", async () => {

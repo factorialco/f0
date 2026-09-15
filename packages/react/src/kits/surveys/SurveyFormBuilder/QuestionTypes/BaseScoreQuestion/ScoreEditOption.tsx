@@ -1,8 +1,7 @@
+import "@/sds/social/Reactions/Picker/index.css"
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useEffect, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import "@/sds/social/Reactions/Picker/index.css"
 import { EmojiPicker } from "@/lib/EmojiPicker"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -29,11 +28,15 @@ export const ScoreEditOption = ({
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
 
   useEffect(() => {
-    if (disabled) setIsEmojiPickerOpen(false)
+    if (disabled) {
+      setIsEmojiPickerOpen(false)
+    }
   }, [disabled])
 
   const handleClick = () => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     onClick(value)
   }
 

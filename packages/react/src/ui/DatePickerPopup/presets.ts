@@ -1,7 +1,5 @@
 import { subDays, subMonths, subYears } from "date-fns"
-
 import { granularityDefinitions } from "@/components/OneCalendar/granularities"
-
 import { DatePreset } from "./types"
 
 export const predefinedPresets: Record<string, DatePreset> = {

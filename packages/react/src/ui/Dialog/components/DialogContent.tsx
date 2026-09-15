@@ -2,7 +2,6 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { forwardRef, useEffect, useState } from "react"
-
 import { cn } from "../../../lib/utils"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogPortal } from "./DialogPortal"
@@ -79,7 +78,9 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer, defaultContainerId])
 
-    if (container === undefined) return null
+    if (container === undefined) {
+      return null
+    }
 
     return (
       <DialogPortal container={container}>

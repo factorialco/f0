@@ -1,11 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-
 import { InputInternal } from "@/components/F0TextInput/internal"
 import { Equal, EqualApproximately } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { FilterTypeComponentProps } from "../types"
 
 export type SearchFilterOptions =

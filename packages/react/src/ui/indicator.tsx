@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { EmojiImage } from "@/lib/emojis"
-
 import { F0Icon, IconType } from "../components/F0Icon"
 import { cn } from "../lib/utils"
 
@@ -23,16 +21,16 @@ export const Indicator = forwardRef<HTMLDivElement, IndicatorProps>(
           >
             {label}
           </p>
-          {"icon" in props && props.icon && (
+          {"icon" in props && props.icon ? (
             <span className={cn("flex", color)}>
               <F0Icon icon={props.icon} />
             </span>
-          )}
-          {"emoji" in props && props.emoji && (
+          ) : null}
+          {"emoji" in props && props.emoji ? (
             <span className={cn("flex", color)}>
               <EmojiImage emoji={props.emoji} size="md" />
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     )

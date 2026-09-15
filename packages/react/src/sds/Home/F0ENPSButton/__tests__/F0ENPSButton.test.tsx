@@ -1,6 +1,5 @@
 import { forwardRef } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   act,
   fireEvent,
@@ -8,8 +7,7 @@ import {
   userEvent,
   zeroRender,
 } from "@/testing/test-utils"
-
-import { F0ENPSButton } from "../index"
+import { F0ENPSButton } from ".."
 
 const LABELS = {
   superNegative: "Very bad",

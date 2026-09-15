@@ -1,10 +1,8 @@
 import { type ReactNode } from "react"
-
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
@@ -55,7 +53,9 @@ export const ChatMessageAttachments = ({
   const { openImagePreview } = useChatImagePreview()
   const emit = useF0ChatEmit()
   const attachments = message.attachments
-  if (!attachments || attachments.length === 0) return null
+  if (!attachments || attachments.length === 0) {
+    return null
+  }
   const surfaceClassName = messageSurfaceColorClass(message.author, isMine)
 
   const {
@@ -186,7 +186,7 @@ export const ChatMessageAttachments = ({
         isMine ? "items-end" : "items-start"
       )}
     >
-      {images.length > 0 && (
+      {images.length > 0 ? (
         // The mosaic clips its own cells, so the cells carry no radius — the
         // interior seams stay square like WhatsApp's. The hairline lives on the
         // container for the same reason mobile puts it there: a mostly-white
@@ -202,7 +202,9 @@ export const ChatMessageAttachments = ({
         >
           {albumCells(images).map((cell, cellIndex, cells) => {
             const image = images[cell.index]
-            if (!image) return null
+            if (!image) {
+              return null
+            }
             const hostsMeta =
               metaHost === "image" && cellIndex === cells.length - 1
             return (
@@ -237,7 +239,7 @@ export const ChatMessageAttachments = ({
             )
           })}
         </div>
-      )}
+      ) : null}
       {videoFiles.map((file, i) => (
         <ChatVideoAttachment
           key={`${file.url}-${i}`}
@@ -285,7 +287,7 @@ export const ChatMessageAttachments = ({
       {cards.map((card, i) => (
         <ChatCardAttachment key={`${card.title}-${i}`} card={card} />
       ))}
-      {plainFiles.length > 0 && (
+      {plainFiles.length > 0 ? (
         // Files flow side by side and wrap, instead of stacking vertically.
         <div className={cn("flex flex-wrap gap-1", isMine && "justify-end")}>
           {plainFiles.map((file, i) => (
@@ -306,10 +308,10 @@ export const ChatMessageAttachments = ({
             />
           ))}
         </div>
-      )}
-      {metaHost === "below" && (
+      ) : null}
+      {metaHost === "below" ? (
         <ChatMessageMeta message={message} placement="below" />
-      )}
+      ) : null}
     </div>
   )
 }

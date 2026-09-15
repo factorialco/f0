@@ -16,7 +16,9 @@ const needsSeparator = (
   current: F0ChatItem,
   previous: F0ChatItem | undefined
 ): boolean => {
-  if (!previous) return true
+  if (!previous) {
+    return true
+  }
   return (
     calendarDaysApart(
       new Date(previous.createdAt),
@@ -72,9 +74,15 @@ export type FlattenedChat = {
 /** Two builds of the same key produce an equivalent row (same message object,
  * same flags) — safe to reuse the previous object so `memo` holds. */
 const sameRow = (a: ChatRow, b: ChatRow): boolean => {
-  if (a.type !== b.type) return false
-  if (a.type === "separator" && b.type === "separator") return a.at === b.at
-  if (a.type === "system" && b.type === "system") return a.message === b.message
+  if (a.type !== b.type) {
+    return false
+  }
+  if (a.type === "separator" && b.type === "separator") {
+    return a.at === b.at
+  }
+  if (a.type === "system" && b.type === "system") {
+    return a.message === b.message
+  }
   if (a.type === "message" && b.type === "message") {
     return (
       a.message === b.message &&
@@ -162,7 +170,9 @@ export function flattenChatRows(
       previousUser.author.id !== item.author.id
     if (!isFirstOfRun && lastMessageRowIndex >= 0) {
       const prevRow = rows[lastMessageRowIndex]
-      if (prevRow.type === "message") prevRow.isLastOfRun = false
+      if (prevRow.type === "message") {
+        prevRow.isLastOfRun = false
+      }
     }
 
     rows.push({
@@ -185,7 +195,9 @@ export function flattenChatRows(
   const rowCache = new Map<string, ChatRow>()
   for (let i = 0; i < rows.length; i++) {
     const previous = previousRows?.get(rows[i].key)
-    if (previous && sameRow(previous, rows[i])) rows[i] = previous
+    if (previous && sameRow(previous, rows[i])) {
+      rows[i] = previous
+    }
     rowCache.set(rows[i].key, rows[i])
   }
 
@@ -202,10 +214,14 @@ export function freshTailIds(
   messages: F0ChatItem[],
   prevLastId: string | null
 ): string[] {
-  if (prevLastId === null) return []
+  if (prevLastId === null) {
+    return []
+  }
   const fresh: string[] = []
   for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].id === prevLastId) return fresh.reverse()
+    if (messages[i].id === prevLastId) {
+      return fresh.reverse()
+    }
     fresh.push(messages[i].id)
   }
   // Previous tail not found: the loaded window was replaced, not appended to.

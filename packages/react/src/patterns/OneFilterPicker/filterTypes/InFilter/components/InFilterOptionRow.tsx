@@ -1,13 +1,11 @@
 "use client"
 
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, ChevronRight } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { InFilterOptionItem } from "../types"
 import { cacheLabel, cacheNestedLabel } from "../useLoadOptions"
 import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
@@ -24,6 +22,49 @@ export type InFilterOptionRowProps<T extends string> = {
   cacheKey: string
   searchTerm: string
   autoExpand: boolean
+}
+
+/**
+ * The chevron that opens a nested option, with a dot when the collapsed
+ * subtree holds a selection — otherwise there is nothing on screen to say so.
+ */
+const OptionExpandButton = ({
+  label,
+  expanded,
+  hasSelectedDescendant,
+  onToggle,
+}: {
+  /** The option's own label, which names the control. */
+  label: string
+  expanded: boolean
+  hasSelectedDescendant: boolean
+  onToggle: () => void
+}) => {
+  const i18n = useI18n()
+  const accessibleName = hasSelectedDescendant
+    ? `${label}. ${i18n.status.selected.singular}`
+    : label
+
+  return (
+    <div className="relative shrink-0">
+      <F0Button
+        variant="ghost"
+        size="sm"
+        onClick={onToggle}
+        icon={expanded ? ChevronDown : ChevronRight}
+        label={label}
+        aria-label={accessibleName}
+        aria-expanded={expanded}
+        hideLabel
+      />
+      {hasSelectedDescendant && !expanded ? (
+        <span
+          aria-hidden="true"
+          className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
+        />
+      ) : null}
+    </div>
+  )
 }
 
 export function InFilterOptionRow<T extends string>({
@@ -53,7 +94,9 @@ export function InFilterOptionRow<T extends string>({
 
   const handleToggleChild = useCallback(
     (childValue: T, childLabel: string) => {
-      if (!childFilterKey || !onFilterChange) return
+      if (!childFilterKey || !onFilterChange) {
+        return
+      }
       const isChildSelected = childValues.includes(childValue)
       if (!isChildSelected) {
         cacheLabel(cacheKey, childValue, childLabel)
@@ -88,30 +131,14 @@ export function InFilterOptionRow<T extends string>({
         className="flex flex-row items-center overflow-hidden min-w-0"
         style={{ paddingLeft: `${depth * 24}px` }}
       >
-        {hasChildren && (
-          <div className="relative shrink-0">
-            <F0Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setExpanded((prev) => !prev)}
-              icon={effectiveExpanded ? ChevronDown : ChevronRight}
-              label={expansionLabel}
-              aria-label={
-                hasDescendantSelected
-                  ? `${expansionLabel}. ${i18n.status.selected.singular}`
-                  : expansionLabel
-              }
-              aria-expanded={effectiveExpanded}
-              hideLabel
-            />
-            {hasDescendantSelected && !effectiveExpanded && (
-              <span
-                aria-hidden="true"
-                className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
-              />
-            )}
-          </div>
-        )}
+        {hasChildren ? (
+          <OptionExpandButton
+            label={expansionLabel}
+            expanded={effectiveExpanded}
+            hasSelectedDescendant={hasDescendantSelected}
+            onToggle={() => setExpanded((prev) => !prev)}
+          />
+        ) : null}
         <div
           className={cn(
             "flex min-w-0 flex-1 cursor-pointer appearance-none items-center gap-1 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary",
@@ -134,7 +161,7 @@ export function InFilterOptionRow<T extends string>({
           </div>
         </div>
       </div>
-      {effectiveExpanded && option.children && (
+      {effectiveExpanded && option.children ? (
         <div>
           {option.children.options
             .filter(
@@ -161,7 +188,7 @@ export function InFilterOptionRow<T extends string>({
               )
             })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

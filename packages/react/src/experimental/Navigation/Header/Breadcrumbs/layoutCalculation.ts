@@ -17,7 +17,9 @@ function calculateVisibleCount(
   breadcrumbWidths: number[]
 ): number {
   const totalItems = breadcrumbWidths.length
-  if (totalItems <= 2) return totalItems
+  if (totalItems <= 2) {
+    return totalItems
+  }
 
   const firstItemWidth = breadcrumbWidths[0]
   let availableWidth = containerWidth - firstItemWidth - RIGHT_PADDING

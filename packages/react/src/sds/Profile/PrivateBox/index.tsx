@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { FC, PropsWithChildren } from "react"
-
 import { usePrivacyMode } from "../../../lib/privacyMode"
 import { cn } from "../../../lib/utils"
 

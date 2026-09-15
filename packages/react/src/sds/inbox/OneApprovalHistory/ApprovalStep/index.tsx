@@ -1,9 +1,7 @@
 import { format } from "date-fns"
 import { FC, useMemo } from "react"
-
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { BadgeProps } from "@/ui/IconBadge"
 import {
   Check as CheckIcon,
   Cross as CrossIcon,
@@ -11,6 +9,7 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
+import { BadgeProps } from "@/ui/IconBadge"
 
 type Status = "waiting" | "pending" | "approved" | "rejected"
 
@@ -124,11 +123,11 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
       <div className="w-full">
         <F0AvatarList avatars={avatars} layout="fill" type="person" size="md" />
       </div>
-      {approvalDate && (
+      {approvalDate ? (
         <p className="text-sm text-f1-foreground-secondary">
           {format(approvalDate, "PP", { locale })}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

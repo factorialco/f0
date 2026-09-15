@@ -1,5 +1,4 @@
 import { ComponentPropsWithoutRef, forwardRef } from "react"
-
 import { Skeleton } from "@/ui/skeleton"
 
 /**

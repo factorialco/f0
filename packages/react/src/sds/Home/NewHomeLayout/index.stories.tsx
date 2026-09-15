@@ -1,3 +1,4 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import {
   type ComponentProps,
   useEffect,
@@ -5,13 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-
-import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
-
-import { createDataSourceDefinition } from "@/hooks/datasource"
-import { f0FormField } from "@/patterns/F0Form"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
@@ -20,14 +15,9 @@ import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { OneEmptyState } from "@/components/OneEmptyState/OneEmptyState"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { defineStepByStepCoachmarkGuidance } from "@/experimental/Overlays/F0Coachmark"
+import { createDataSourceDefinition } from "@/hooks/datasource"
 import { One } from "@/icons/ai"
-import {
-  MockAiChatRuntimeProvider,
-  MockConnectedChatHeader,
-  MockConnectedChatInput,
-  MockConnectedMessagesContainer,
-} from "@/kits/ai/F0AiChat/__stories__/_mock"
-import ApplicationFrameStories from "@/patterns/ApplicationFrame/index.stories"
 import {
   Building,
   Calendar,
@@ -53,10 +43,26 @@ import {
   Target,
   Timer,
 } from "@/icons/app"
-import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
+import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
 import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
+import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { F0Box } from "@/lib/F0Box"
-
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStories from "@/patterns/ApplicationFrame/index.stories"
+import { F0CarouselDialog } from "@/patterns/F0CarouselDialog"
+import { f0FormField } from "@/patterns/F0Form"
+import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
+import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
+import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
+import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
+import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
+import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import {
   ClockInControls,
   type ClockInProject,
@@ -77,19 +83,77 @@ import {
   type SlotRenderers,
   widgetTitle,
 } from "../slotRenderers"
-import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
-import { F0CarouselDialog } from "@/patterns/F0CarouselDialog"
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
-import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
-import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
-import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
-import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
-import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
+import { type WidgetContainerSide } from "../WidgetContainer"
+import { NewHomeLayout } from "."
 
-import { NewHomeLayout } from "./index"
+/* ============================ guided walkthrough =========================== */
+
+/**
+ * THE FIRST-RUN WALKTHROUGH OF THIS HOME — three steps, each NAMING the element
+ * it points at. `HOME_WALKTHROUGH.anchor(…)` marks those elements further down,
+ * and the names are a union the compiler holds both halves to: renaming a step
+ * is a type error at the anchor rather than a coachmark waiting for an element
+ * that is never coming.
+ *
+ * The copy is the prototype's own (factorial-composer's `custom-home` Feed,
+ * where this tour was designed), down to the third step having no description —
+ * its title is the whole sentence.
+ *
+ * The third step points at something THE LAYOUT renders rather than this story,
+ * so it names the handle directly: `data-add-widget="right"`, which the rail's
+ * add control carries as a column AND as a collapsed strip — the step lands on
+ * the same offer either way.
+ *
+ * The overlay comes with the walkthrough (`overlay` defaults to `true`): the
+ * page is dimmed except the step's element, the pointer is shielded from it, and
+ * a reader who keeps pressing past the panel gets out after five presses.
+ */
+const HOME_WALKTHROUGH = defineStepByStepCoachmarkGuidance({
+  id: "new-home-walkthrough",
+  // Longer than the 2s default, for Storybook rather than for Home: the rail's
+  // add control only exists once the layout has measured its own columns, and a
+  // canvas that is still compiling its story takes several times longer to get
+  // there than the app does. Without this the story regularly opens as a
+  // two-step walkthrough — correct behaviour (see `lookForTargetsMs`), wrong
+  // demonstration.
+  lookForTargetsMs: 5000,
+  steps: [
+    {
+      element: "ask-one",
+      title: "Let One do it for you",
+      description:
+        "Ask One to analyse, find information, process expenses, or request holidays; and focus on making decisions.",
+      side: "bottom",
+      // THE ONE STEP THAT TAKES FOCUS: the field is the step, so the caret
+      // starts in it and it wears its own focus glow — the reader can begin
+      // typing the question the panel is describing. Every other step leaves
+      // focus on the panel, where it is announced.
+      focusTarget: true,
+    },
+    {
+      element: "needs-you",
+      title: "Important things come first",
+      description:
+        "View and complete all the updates and tasks that require your attention at a glance.",
+      side: "bottom",
+    },
+    {
+      // No description: the title is the whole sentence.
+      targetElement: '[data-add-widget="right"]',
+      title: "Customise the Home by adding, reordering, and removing widgets",
+      side: "left",
+    },
+  ],
+  // ONE CALLBACK FOR THE WHOLE OUTCOME — what an app would send to analytics:
+  // which way out the reader took, how far they got, and how many times they
+  // pressed past the panel on the way. `completed` / `dismissed` / `skipped`,
+  // plus `unavailable` for the run where nothing it points at was on the page.
+  onEnd: ({ reason, step, totalSteps, outsidePresses }) =>
+    console.log(
+      `walkthrough: ${reason} at ${step}/${totalSteps} (${outsidePresses} presses outside)`
+    ),
+})
 
 /* =============================== main column =============================== */
 
@@ -285,11 +349,18 @@ const HomeComposer = () => {
 const HomeHero = () => (
   <F0Box display="flex" flexDirection="column">
     <Greeting />
-    <HomeComposer />
+    {/* The walkthrough's first step points at THE FIELD, not at the whole
+        block: the composer is what the step is about, and the greeting above it
+        is context the reader already has. The anchor goes on this wrapper
+        rather than inside `HomeComposer` so it takes the field's own focus-glow
+        inset with it — the lit region ends where the glow does. */}
+    <div {...HOME_WALKTHROUGH.anchor("ask-one")}>
+      <HomeComposer />
+    </div>
   </F0Box>
 )
 
-const SHORTCUTS: Array<{ icon: IconType; title: string }> = [
+const SHORTCUTS: { icon: IconType; title: string }[] = [
   { icon: PalmTree, title: "Request Time Off" },
   { icon: Calendar, title: "Request Leave" },
   { icon: Receipt, title: "Add an Expense" },
@@ -376,42 +447,50 @@ const FeedSection = ({
 
 // An ARRAY, not a fragment: the layout inserts pinned widgets BETWEEN these
 // blocks when it stacks, and `Children.toArray` only sees seams in an array.
+//
+// The "Needs you" block is WRAPPED so the walkthrough can point at it: the
+// wrapper is what carries the anchor, since the block's own root is not a DOM
+// element this file can put an attribute on (the composer's own anchor is
+// inside `HomeHero`, on the field). A bare `div` in a flex column changes
+// nothing about how it draws — and an anchor is inert markup, so every story
+// keeps the same blocks whether or not the walkthrough ever runs.
 const mainColumnBlocks = () => [
   <HomeHero key="hero" />,
   <ShortcutCards key="shortcuts" />,
-  <FeedSection
-    key="needs-you"
-    label="Needs you"
-    viewMore={12}
-    rows={[
-      {
-        icon: PalmTree,
-        title: "Request time off",
-        subtitle: "You have 5 days of leave expiring next month.",
-      },
-      {
-        icon: Clock,
-        title: "Missing clock-out",
-        subtitle: "You clocked in but never clocked out yesterday.",
-      },
-      {
-        icon: Receipt,
-        title: "Submit an expense",
-        subtitle: "Snap a receipt and I'll file the expense.",
-      },
-      {
-        icon: Comment,
-        title: "Ask HR anything",
-        subtitle: "Get a policy answer, or have it raised with HR.",
-      },
-      {
-        icon: Target,
-        title: "Draft my self-review",
-        subtitle: "Turn your bullet points into review-ready text.",
-      },
-      { icon: File, title: "Contract to sign", subtitle: "Q3 addendum" },
-    ]}
-  />,
+  <div key="needs-you" {...HOME_WALKTHROUGH.anchor("needs-you")}>
+    <FeedSection
+      label="Needs you"
+      viewMore={12}
+      rows={[
+        {
+          icon: PalmTree,
+          title: "Request time off",
+          subtitle: "You have 5 days of leave expiring next month.",
+        },
+        {
+          icon: Clock,
+          title: "Missing clock-out",
+          subtitle: "You clocked in but never clocked out yesterday.",
+        },
+        {
+          icon: Receipt,
+          title: "Submit an expense",
+          subtitle: "Snap a receipt and I'll file the expense.",
+        },
+        {
+          icon: Comment,
+          title: "Ask HR anything",
+          subtitle: "Get a policy answer, or have it raised with HR.",
+        },
+        {
+          icon: Target,
+          title: "Draft my self-review",
+          subtitle: "Turn your bullet points into review-ready text.",
+        },
+        { icon: File, title: "Contract to sign", subtitle: "Q3 addendum" },
+      ]}
+    />
+  </div>,
   <FeedSection
     key="one-working"
     label="One working for you"
@@ -966,7 +1045,9 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
   slots: widget.slots.map((slot) => {
     const params = slot.params as { items?: unknown[]; events?: unknown[] }
     const items = params.items ?? params.events
-    if (!items) return slot
+    if (!items) {
+      return slot
+    }
     return {
       ...slot,
       expectedItemsCount: items.length,
@@ -1085,13 +1166,17 @@ type CommunityScope = (typeof COMMUNITY_SCOPES)[number]["value"]
 
 /** Which posts each scope covers — the app's own filter, not the widget's. */
 const postsForScope = (scope: CommunityScope): CommunityPostSummary[] => {
-  if (scope === "all") return COMMUNITY_POSTS
-  if (scope === "celebrations" || scope === "claps")
+  if (scope === "all") {
+    return COMMUNITY_POSTS
+  }
+  if (scope === "celebrations" || scope === "claps") {
     return COMMUNITY_POSTS.filter((post) => post.id === "nordics-pilot")
-  if (scope === "announcements")
+  }
+  if (scope === "announcements") {
     return COMMUNITY_POSTS.filter((post) =>
       ["h2-planning", "office-move", "handbook"].includes(post.id)
     )
+  }
   return COMMUNITY_POSTS.filter((post) => post.id === "office-hours")
 }
 
@@ -1490,7 +1575,7 @@ const CATALOG = CATALOG_ITEMS.map((item) => ({
   areas: CATALOG_AREAS[item.id],
 }))
 
-const Home = () => {
+const Home = ({ mainFootnote }: { mainFootnote?: string }) => {
   const [open, setOpen] = useState(false)
   const [side, setSide] = useState<WidgetContainerSide>("main")
   // The configurable widget's params live with the app, next to the rail's
@@ -1542,7 +1627,9 @@ const Home = () => {
           setMainIds((ids) => ids.filter((x) => x !== id))
         }}
         onChangeWidgetParams={(id, params) => {
-          if (id === "events") setEventsParams(params as EventsParams)
+          if (id === "events") {
+            setEventsParams(params as EventsParams)
+          }
         }}
         // The preview rebuilds the widget the same way the rail does, so the
         // dialog shows the events the params will really produce — not just the
@@ -1552,13 +1639,17 @@ const Home = () => {
           widget.id === "events" ? eventsWidget(params as EventsParams) : widget
         }
         onReorderWidgets={(reorderedSide, ids) => {
-          if (reorderedSide === "main") setMainIds(ids)
-          else setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
+          if (reorderedSide === "main") {
+            setMainIds(ids)
+          } else {
+            setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
+          }
         }}
         onClickAddNewWidget={(s) => {
           setSide(s)
           setOpen(true)
         }}
+        mainFootnote={mainFootnote}
       >
         {mainColumnBlocks()}
       </NewHomeLayout>
@@ -1568,11 +1659,14 @@ const Home = () => {
         widgets={CATALOG}
         groups={CATALOG_GROUPS}
         onAdd={(id, params) => {
-          if (id === "events" && params) setEventsParams(params as EventsParams)
+          if (id === "events" && params) {
+            setEventsParams(params as EventsParams)
+          }
           // The picker only offers what the column can hold, so "which column"
           // is already decided — it is the side it was opened for.
-          if (side === "main" && !mainIds.includes(id))
+          if (side === "main" && !mainIds.includes(id)) {
             setMainIds((ids) => [...ids, id])
+          }
           setOpen(false)
         }}
         rebuildPreview={(item, params) =>
@@ -1715,6 +1809,30 @@ export const BannerAboveLayout: Story = {
 }
 
 /**
+ * A NOTE AT THE FOOT OF THE COLUMN, which is not a widget: `mainFootnote` puts
+ * one sentence under every main-column widget and above the "+ Add widget"
+ * placeholder — Home's last word rather than content.
+ *
+ * IT IS A STRING, and the only markdown in it is the inline link
+ * `[label](href)`. f0 draws it: centered, secondary, one paragraph. Nothing
+ * about how it looks is the caller's to pass, which is the point — the foot of
+ * the column is a sentence everywhere, not a place a Home can grow a second
+ * layout in.
+ *
+ * It has no card, cannot be dragged, removed or reordered, and stays at the foot
+ * of the column however the widgets above it are arranged. It arrives on the
+ * same stagger they do, one beat after the last of them.
+ *
+ * `children` is still the other end of the same column: freeform content ABOVE
+ * the widgets, where a Home really does compose its own blocks.
+ */
+export const MainFootnote: Story = {
+  render: () => (
+    <Home mainFootnote="You are viewing Factorial's new home, if you want you can [go back to the old home.](/home?legacy=1)" />
+  ),
+}
+
+/**
  * The same Home while the rail waits on its data. A widget declares
  * `loading: true` and every one of its slots draws that visualization's
  * SKELETON instead of its content — the frame, the header and the seams stay,
@@ -1740,6 +1858,67 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* =========================== guided walkthrough =========================== */
+
+/**
+ * The same Home, walked through: `HOME_WALKTHROUGH.start()` on mount, and a
+ * control to see it again — a walkthrough is over once it is finished or
+ * skipped, and reloading the story is a poor way to review it.
+ */
+const GuidedHome = () => {
+  // A first-run tour is not something the reader asks for, so it starts with the
+  // page. `stop()` on the way out, or the walkthrough would outlive the story
+  // it is describing — Storybook keeps the coachmark store between stories.
+  useEffect(() => {
+    HOME_WALKTHROUGH.start()
+    return () => HOME_WALKTHROUGH.stop()
+  }, [])
+
+  return (
+    <>
+      <Home />
+      {/* Under the shield (`z-[1249]`) on purpose: while the walkthrough is up
+          this is part of the page, dimmed and unpressable like everything else
+          in it. */}
+      <div className="fixed bottom-6 left-6">
+        <F0Button
+          variant="outline"
+          label="Restart the walkthrough"
+          onClick={() => {
+            HOME_WALKTHROUGH.start()
+          }}
+        />
+      </div>
+    </>
+  )
+}
+
+/**
+ * A THREE-STEP WALKTHROUGH of this Home, declared with
+ * `defineStepByStepCoachmarkGuidance` (see `HOME_WALKTHROUGH` at the top of this
+ * file): the composer block, then the "Needs you" list, then the rail's own
+ * add-widget control.
+ *
+ * WHAT THE WALKTHROUGH DOES BEYOND POINTING:
+ * - the page is dimmed except the step's element, which stays lit at full
+ *   strength — the hole is the real element, not a copy of it;
+ * - a shield (`data-f0-coachmark-blocker`) swallows every press on the page, the
+ *   lit element included, so the only way on is the panel's own button;
+ * - a press that went nowhere makes the panel WIGGLE, which is the panel
+ *   answering for it;
+ * - five of those and the walkthrough gives up (`skipAfterOutsideClicks`) and
+ *   reports a dismissal: a reader pressing past it five times is telling us they
+ *   want out, and the way out cannot be the button they are ignoring.
+ *
+ * The first two steps name elements this file anchors (`anchor("ask-one")`,
+ * `anchor("needs-you")`); the third points at `[data-add-widget="right"]`, the
+ * handle the LAYOUT puts on the rail's add control — as a column and as a
+ * collapsed strip, so a narrow window walks the same three steps.
+ */
+export const GuidedWalkthrough: Story = {
+  render: () => <GuidedHome />,
 }
 
 /* ============================= glyph actions ============================= */
@@ -1778,12 +1957,15 @@ const clockInDay = (
   const at = (secondsAgo: number) => new Date(now.getTime() - secondsAgo * 1000)
   const trackedMinutes = Math.floor(worked / 60)
 
-  if (status === "clocked-out") return { data: [], trackedMinutes: 0 }
-  if (status === "clocked-in")
+  if (status === "clocked-out") {
+    return { data: [], trackedMinutes: 0 }
+  }
+  if (status === "clocked-in") {
     return {
       data: [{ from: at(worked), to: now, variant: "clocked-in" }],
       trackedMinutes,
     }
+  }
   return {
     data: [
       { from: at(worked + onBreak), to: at(onBreak), variant: "clocked-in" },
@@ -1835,10 +2017,15 @@ const ClockGlyphActionHome = () => {
   // the corner of the page would be a stopwatch, not a day. In the real Home
   // this is all the app's; the rail only draws the string it is handed.
   useEffect(() => {
-    if (status === "clocked-out") return
+    if (status === "clocked-out") {
+      return
+    }
     const tick = setInterval(() => {
-      if (status === "clocked-in") setWorked((seconds) => seconds + 1)
-      else setOnBreak((seconds) => seconds + 1)
+      if (status === "clocked-in") {
+        setWorked((seconds) => seconds + 1)
+      } else {
+        setOnBreak((seconds) => seconds + 1)
+      }
     }, 1000)
     return () => clearInterval(tick)
   }, [status])
@@ -1973,7 +2160,9 @@ const MountedCount = ({ of }: { of: number }) => {
 
   useEffect(() => {
     const page = root?.ownerDocument.body
-    if (!page) return
+    if (!page) {
+      return
+    }
     const read = () =>
       setMounted(page.querySelectorAll("[data-widget-id]").length)
     read()

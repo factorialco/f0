@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Delete, Pencil, Share } from "@/icons/app"
-
 import { ButtonGroup } from "../ButtonGroup"
 
 const noop = () => {}

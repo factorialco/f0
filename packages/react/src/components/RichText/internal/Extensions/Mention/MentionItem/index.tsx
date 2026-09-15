@@ -1,6 +1,5 @@
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { cn } from "@/lib/utils"
-
 import { MentionedUser } from "../types"
 
 interface MentionItemProps {

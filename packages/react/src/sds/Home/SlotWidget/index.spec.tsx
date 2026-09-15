@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-
 import { Clock, Cross } from "@/icons/app"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import {
   DEFAULT_EXPECTED_ITEMS_COUNT,
   LIST_COMPACT_AFTER,
@@ -11,7 +9,7 @@ import {
   type SlotRenderers,
   widgetChrome,
 } from "../slotRenderers"
-import { SlotWidget } from "./index"
+import { SlotWidget } from "."
 
 describe("SlotWidget", () => {
   test("draws each slot through the default renderer for its visualization", () => {
@@ -115,7 +113,7 @@ describe("SlotWidget", () => {
   })
 
   test("tells a slot whether it is the widget's last, so only that one bleeds to the bottom edge", () => {
-    const seen: Array<boolean | undefined> = []
+    const seen: (boolean | undefined)[] = []
     zeroRender(
       <SlotWidget
         slots={[
@@ -1262,7 +1260,7 @@ describe("widgetChrome", () => {
       id: "communities",
       slots: [],
       action: { label: "Go to Communities" },
-      headerControls: <span>host's own</span>,
+      headerControls: <span>host&apos;s own</span>,
       headerActions: [{ label: "Write post" }],
       headerSelect: select,
       status: undefined,

@@ -31,11 +31,15 @@ const ChatTextThumbnail = ({
     let cancelled = false
     fetch(url)
       .then((response) => {
-        if (!response.ok) throw new Error(`${response.status}`)
+        if (!response.ok) {
+          throw new Error(`${response.status}`)
+        }
         return response.text()
       })
       .then((content) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         if (content.trim() === "") {
           onErrorRef.current()
           return
@@ -44,14 +48,18 @@ const ChatTextThumbnail = ({
         onRenderedRef.current()
       })
       .catch(() => {
-        if (!cancelled) onErrorRef.current()
+        if (!cancelled) {
+          onErrorRef.current()
+        }
       })
     return () => {
       cancelled = true
     }
   }, [url])
 
-  if (text === null) return null
+  if (text === null) {
+    return null
+  }
 
   return (
     <pre className="m-0 whitespace-pre-wrap break-words bg-f1-background p-3 text-left font-mono text-sm leading-5 text-f1-foreground-secondary">

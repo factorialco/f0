@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import type { GraphEdge, GraphNode } from "../../../types"
-
 import { F0Graph, type F0GraphNodeRenderContext } from "../../../F0Graph"
+import type { GraphEdge, GraphNode } from "../../../types"
 import { F0GraphNode } from "../../F0GraphNode"
 import { F0GraphEdge } from "../F0GraphEdge"
 
@@ -17,7 +14,7 @@ const NODES: GraphNode<Person>[] = [
   {
     id: "a",
     parentId: null,
-    data: { name: "Alice Moreno", title: "Manager" },
+    data: { name: "Alice Avery", title: "Manager" },
     childrenCount: 1,
   },
   {

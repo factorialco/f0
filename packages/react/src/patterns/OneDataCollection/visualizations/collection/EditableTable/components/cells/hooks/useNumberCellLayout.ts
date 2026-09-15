@@ -1,8 +1,6 @@
 import { useMemo } from "react"
-
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useL10n } from "@/lib/providers/l10n"
-
 import { NumberCellConfig } from "../../../types"
 import { useInputTextWidth } from "./useInputTextWidth"
 
@@ -13,7 +11,9 @@ export function resolveUnits<R extends RecordType>(
   config: NumberCellConfig<R> | undefined,
   item: R
 ): string | undefined {
-  if (!config?.units) return undefined
+  if (!config?.units) {
+    return undefined
+  }
   return typeof config.units === "function" ? config.units(item) : config.units
 }
 

@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, waitFor, within } from "storybook/test"
-
 import { AlertCircleLine } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
 import { type AIMessage, type Message, type RenderableTurn } from "../types"
 
