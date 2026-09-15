@@ -43,9 +43,8 @@ export function RailClockIn() {
       data-home-clockin-rail
       aria-label={`Clocked in, ${elapsed}`}
       onClick={requestClockInWidget}
-      // 13px: a point under f0's text-base, which is what a readout in a
-      // 68px rail can carry without crowding it (Angel, 2026-09-15).
-      className="f0c-pressable flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1 text-[13px] font-medium leading-4 text-f1-foreground hover:bg-f1-background-secondary"
+      // 12px, the size the rail's own labels carry (Angel, 2026-09-15).
+      className="f0c-pressable flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1 text-[12px] font-medium leading-4 text-f1-foreground hover:bg-f1-background-secondary"
     >
       <ClockDot size={8} />
       <span className="whitespace-nowrap">{elapsed}</span>

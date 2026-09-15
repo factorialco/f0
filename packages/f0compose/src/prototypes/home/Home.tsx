@@ -1033,6 +1033,9 @@ function HomeNavbar({
  */
 /** What a Factorial user actually opens Home to do, in the order the day
  *  tends to need them. Clock-in leads and is the only one that acts. */
+/** Where the digest settles, measured from the suggestions. */
+const DIGEST_GAP = 256
+
 const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
   { icon: Timer, label: "Review this week's timesheet" },
   { icon: CheckCircleLine, label: "Approve 3 pending time off requests" },
@@ -1214,18 +1217,63 @@ function HomeCanvas() {
   const homeLanding = showPromptBar && (!activeConversation || homeSession)
 
   /**
-   * The digest button is a hint that there IS more below, so it belongs
-   * only at the very top (Angel, 2026-09-15).
+   * The landing's scroll, in two beats (Angel, 2026-09-15). The digest
+   * parks 24px below the fold, which is much further down than where it
+   * belongs — 256px under the suggestions. So the first stretch of
+   * scrolling PINS the input and its suggestions while the digest climbs
+   * into that gap; once the gap is 256px the pin releases and the whole
+   * page scrolls as one. The digest button, being the hint that there is
+   * anything down there, shows only at the very top.
    */
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const pinRef = useRef<HTMLDivElement>(null)
+  const firstScreenRef = useRef<HTMLDivElement>(null)
+  const digestRef = useRef<HTMLDivElement>(null)
   const [atTop, setAtTop] = useState(true)
-  useEffect(() => {
+  useLayoutEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller) return
+    const pinBox = pinRef.current
+    const screen = firstScreenRef.current
+    const digest = digestRef.current
+    const recommendations = scroller.querySelector(
+      "[data-home-recommendations]"
+    )
+    const measure = () => {
+      if (!pinBox || !screen || !digest || !recommendations) return
+      const height = scroller.clientHeight
+      // The screen is exactly one viewport and STICKS to the top, so it
+      // holds still for as long as the box around it is taller than it
+      // is. Sticky rather than a transform: a transform on the pills'
+      // ancestor makes it a backdrop root, and their blur would have
+      // nothing left to work on (Angel, 2026-09-15).
+      pinBox.style.height = `${height}px`
+      screen.style.height = `${height}px`
+      digest.style.marginTop = "0px"
+      const top = scroller.getBoundingClientRect().top
+      const base =
+        recommendations.getBoundingClientRect().bottom - top + DIGEST_GAP
+      const parked = height + 24
+      const pin = Math.max(0, parked - base)
+      pinBox.style.height = `${height + pin}px`
+      // The digest parks 24px below the fold and climbs into its base
+      // position while the screen above it is held.
+      digest.style.marginTop = `${24 - pin}px`
+    }
+    measure()
     const follow = () => setAtTop(scroller.scrollTop < 8)
     follow()
     scroller.addEventListener("scroll", follow, { passive: true })
-    return () => scroller.removeEventListener("scroll", follow)
+    const observer = new ResizeObserver(measure)
+    observer.observe(scroller)
+    if (recommendations) observer.observe(recommendations)
+    return () => {
+      observer.disconnect()
+      scroller.removeEventListener("scroll", follow)
+      if (pinBox) pinBox.style.height = ""
+      if (screen) screen.style.height = ""
+      if (digest) digest.style.marginTop = ""
+    }
   }, [homeLanding])
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
@@ -1582,7 +1630,17 @@ function HomeCanvas() {
           }
         >
           {screenView !== "preferences" && screenView !== "activity" && (
-            <div className="flex flex-col">
+            // On the landing it FLOATS: the content scrolls under it
+            // instead of being guillotined at its edge (Angel,
+            // 2026-09-15). Its own buttons keep their clicks; the strip
+            // between them lets the wheel through to the page.
+            <div
+              className={
+                homeLanding
+                  ? "pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col [&_button]:pointer-events-auto"
+                  : "flex flex-col"
+              }
+            >
               <HomeNavbar
                 openWindows={windows.state.open}
                 onToggleWindow={toggleWindow}
@@ -1646,24 +1704,34 @@ function HomeCanvas() {
                   exactly one screen down. */}
               {homeLanding ? (
                 <>
-                  <div className="relative flex min-h-full w-full flex-col items-center justify-center">
+                  <div ref={pinRef} className="w-full shrink-0">
                     <div
-                      data-home-promptbar
-                      className="relative z-10 w-[712px] max-w-full shrink-0"
+                      ref={firstScreenRef}
+                      // No min-height here: at 100% of the pinned box it would be as
+                      // tall as the box and could never stick. Its height is
+                      // measured to one viewport instead.
+                      className="sticky top-0 flex w-full flex-col items-center justify-center"
                     >
-                      <div data-hybrid-target />
-                    </div>
-                    {/* Hung off the midline rather than stacked under the
+                      <div
+                        data-home-promptbar
+                        className="relative z-10 w-[712px] max-w-full shrink-0"
+                      >
+                        <div data-hybrid-target />
+                      </div>
+                      {/* Hung off the midline rather than stacked under the
                         input: in the flow its height would push the input
                         off centre, and the input owns the midline (Angel,
                         2026-09-15). 84px = half the sheet plus the 20px
                         gap. It scrolls with this block like everything
                         else. */}
-                    <div className="absolute inset-x-0 top-1/2 mt-[84px] flex justify-center">
-                      <HomeRecommendations />
+                      <div className="absolute inset-x-0 top-1/2 mt-[84px] flex justify-center">
+                        <HomeRecommendations />
+                      </div>
                     </div>
                   </div>
-                  <DailyDigest />
+                  <div ref={digestRef} className="w-full">
+                    <DailyDigest />
+                  </div>
                 </>
               ) : activeConversation ? (
                 <div

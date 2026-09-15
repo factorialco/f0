@@ -30,9 +30,6 @@ const GAP = 8
 const CHEVRON_ROOM = 12
 /** How steep the fade into the chevron is (Angel, 2026-09-15). */
 const FADE_SPAN = 64
-/** The row's own edge, softened over 12px so nothing ends on a cut. */
-const EDGE_FADE =
-  "linear-gradient(to right, black calc(100% - 12px), transparent 100%)"
 
 export function HomeRecommendationCarousel({
   pinned,
@@ -113,7 +110,10 @@ export function HomeRecommendationCarousel({
   }
 
   return (
-    <div className="flex w-[712px] max-w-full items-center gap-2">
+    <div
+      data-home-recommendations
+      className="flex w-[712px] max-w-full items-center gap-2"
+    >
       {pinned}
       {/* Clock-in is its own control, not a recommendation, so the two
           groups are split the way f0's headers split theirs. */}
@@ -148,13 +148,6 @@ export function HomeRecommendationCarousel({
         // `overflow-x: hidden` still scrolls programmatically, and the
         // smooth behaviour is the browser's own, so a second click during
         // the glide simply retargets it instead of being swallowed.
-        // A 12px linear fade on the right border, so the row never ends
-        // on a hard cut (Angel, 2026-09-15). It lives on the VIEWPORT, so
-        // it is the last thing the pills pass under.
-        style={{
-          maskImage: EDGE_FADE,
-          WebkitMaskImage: EDGE_FADE,
-        }}
         className="home-recommendations min-w-0 flex-1 overflow-x-hidden"
       >
         <div
