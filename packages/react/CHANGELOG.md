@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.106.2](https://github.com/factorialco/f0/compare/f0-react-v6.106.1...f0-react-v6.106.2) (2026-09-15)
+
+
+### Bug Fixes
+
+* **F0Select:** one trigger tooltip, and only when it adds something ([#5552](https://github.com/factorialco/f0/issues/5552)) ([7737a3c](https://github.com/factorialco/f0/commit/7737a3cbc1e8ddd02dac69bfc2589f35fe9903d1))
+
 ## [6.106.1](https://github.com/factorialco/f0/compare/f0-react-v6.106.0...f0-react-v6.106.1) (2026-09-15)
 
 
