@@ -247,7 +247,7 @@
    these — this stays in step with it so the fallback is not a lie. */
 [data-hybrid-root],
 [data-hybrid-work] {
-  background: #fafafa;
+  background: #f7f7f7;
 }
 [data-hybrid-canvas] {
   transition:
@@ -383,23 +383,23 @@
    FULL_BLEED_CSS in Home.tsx. */
 [data-home-nav],
 [data-home-rail] {
-  background: #f7f7f7 !important;
+  background: #f5f5f5 !important;
 }
 /* Alone, the rail rejoins the ground: the darker tone is there to sit
    BEHIND a second level, and with nothing beside it it just reads as a
    stripe (Angel, 2026-09-14). */
 [data-home-rail][data-panel="closed"] {
-  background: #fafafa !important;
+  background: #f7f7f7 !important;
 }
 /* The second sidebar and the surface behind the content sit a point
    above the rail (Angel, 2026-09-14). */
 [data-home-panel] {
-  background: #fafafa !important;
+  background: #f7f7f7 !important;
 }
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {
-  background: #fafafa !important;
+  background: #f7f7f7 !important;
 }
 
 [data-home-panel],
@@ -649,7 +649,7 @@ body:has([data-hybrid-root]) main#content > div {
    page's base is the second sidebar's tone now, so nothing underneath
    can read as a different surface. */
 #f0-layout {
-  background: #fafafa !important;
+  background: #f7f7f7 !important;
 }
 .dark #f0-layout {
   background: hsl(var(--neutral-0)) !important;

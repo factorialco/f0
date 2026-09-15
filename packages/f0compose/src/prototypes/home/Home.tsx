@@ -187,9 +187,9 @@ const FULL_BLEED_CSS = `
      (--neutral-5 composites to #F5F6F8, a cool cast he did not ask for)
      and because a surface painted with alpha compounds when stacked.
      Every one of them has its .dark counterpart below. */
-  .f0c-surface-chrome { background: #f7f7f7; }
-  .f0c-surface-page { background: #fafafa; }
-  main#content { padding: 0 !important; background: #fafafa; }
+  .f0c-surface-chrome { background: #f5f5f5; }
+  .f0c-surface-page { background: #f7f7f7; }
+  main#content { padding: 0 !important; background: #f7f7f7; }
   /* The ApplicationFrame slot reserves a fixed 240px column (plus a 12px
      gutter) for the classic sidebar — the rail + panel nav sizes itself,
      so the wrapper follows its content instead. The wrapper has no
@@ -201,13 +201,13 @@ const FULL_BLEED_CSS = `
      than a border, so the rail's fixed 68px does not become 69. The
      panel needs none: the tonal step to the page does that job. */
   [data-home-rail] {
-    background: #f7f7f7;
+    background: #f5f5f5;
   }
   [data-home-rail][data-panel="closed"] {
-    background: #fafafa;
+    background: #f7f7f7;
   }
   [data-home-panel] {
-    background: #fafafa;
+    background: #f7f7f7;
   }
   /* The hairline between the two sidebars; they share one ground, so it
      is the only thing separating them. */
@@ -218,7 +218,7 @@ const FULL_BLEED_CSS = `
   /* The split conversation panel sits on the ground like everything
      else; its own cards are what float. */
   [data-one-panel] {
-    background: #fafafa;
+    background: #f7f7f7;
   }
   /* Dark: the light hexes above have no dark pair, so the same THREE
      tiers are rebuilt from f0's dark tokens — sidebars the base, page the
@@ -467,7 +467,7 @@ const FULL_BLEED_CSS = `
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
-  .f0c-canvas-surface { background: #fafafa; }
+  .f0c-canvas-surface { background: #f7f7f7; }
   /* Home is a white sheet now like every other view, so its sticky
      greeting bar takes the sheet rather than the page tone — otherwise it
      reads as a grey band behind "Welcome to your new Home". */
@@ -485,7 +485,7 @@ const FULL_BLEED_CSS = `
      without being a different colour from the page. This block is
      injected after Tailwind's sheet and the selector outweighs a single
      utility class, so it wins. */
-  main#content thead th { background: #fafafa; }
+  main#content thead th { background: #f7f7f7; }
   .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
