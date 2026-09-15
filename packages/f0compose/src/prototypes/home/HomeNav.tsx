@@ -156,6 +156,19 @@ const SECTION_VIEW: Record<NavSectionId, string | null> = {
   hub: "tools",
 }
 
+/**
+ * Module names the rail shortens: a 56px button cannot hold "Time
+ * tracking", and the second level says the full name anyway.
+ */
+const RAIL_MODULE_LABELS: Record<string, string> = {
+  "Time tracking": "Tracking",
+  "Talent analytics": "Analytics",
+  "Device catalog": "Devices",
+  "Platform IT": "IT",
+}
+
+const railLabel = (label: string) => RAIL_MODULE_LABELS[label] ?? label
+
 const VIEW_SECTION: Record<string, NavSectionId> = Object.fromEntries(
   Object.entries(SECTION_VIEW)
     .filter(([, view]) => view !== null)
@@ -1102,32 +1115,43 @@ function HubRow({
       <span className="flex-1 truncate text-base font-medium text-f1-foreground">
         {label}
       </span>
-      <RowOptions
-        label={label}
-        items={(close) => (
-          <MenuRow
-            icon={
-              <F0Icon
-                icon={pinned ? PushPinSolid : PushPin}
-                size="md"
-                color="default"
-              />
-            }
-            label={
-              pinned
-                ? "Remove from sidebar"
-                : full
-                  ? `Sidebar is full (${RAIL_PIN_LIMIT})`
-                  : "Pin to sidebar"
-            }
-            onClick={() => {
-              close()
-              if (pinned) unpinFromRail(profile, label)
-              else pinToRail(profile, label)
-            }}
-          />
-        )}
-      />
+      {/* A pin, not a "⋮" (Angel, 2026-09-14): pinning is the only thing
+          this menu ever held, so the row offers it directly. Visible
+          while pinned, on hover otherwise — and inert, with a reason, at
+          the cap. */}
+      <button
+        onClick={(event) => {
+          event.stopPropagation()
+          if (pinned) unpinFromRail(profile, label)
+          else if (!full) pinToRail(profile, label)
+        }}
+        aria-pressed={pinned}
+        aria-label={
+          pinned
+            ? `Remove ${label} from the sidebar`
+            : full
+              ? `Sidebar is full (${RAIL_PIN_LIMIT} pinned)`
+              : `Pin ${label} to the sidebar`
+        }
+        title={
+          pinned
+            ? "Remove from sidebar"
+            : full
+              ? `Sidebar is full (${RAIL_PIN_LIMIT} pinned)`
+              : "Pin to sidebar"
+        }
+        className={`f0c-pressable flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-[6px] transition-opacity duration-100 hover:bg-f1-background-secondary-hover ${
+          pinned
+            ? ""
+            : `[@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 ${full ? "cursor-default opacity-40" : ""}`
+        }`}
+      >
+        <F0Icon
+          icon={pinned ? PushPinSolid : PushPin}
+          size="sm"
+          color={pinned ? "info" : "secondary"}
+        />
+      </button>
     </div>
   )
 }
@@ -1390,7 +1414,11 @@ export function HomeNav() {
   // view at all means the canvas is Home, whatever section the panel was
   // left on (otherwise a reload lit Calendar over a Home canvas).
   const activeSection =
-    utilityView ?? (view ? VIEW_SECTION[view] : "home") ?? section
+    utilityView ??
+    (view ? VIEW_SECTION[view] : "home") ??
+    // With no panel there is no section either: a module opened from the
+    // rail lights its own pin, not the section it came from.
+    (panelVisible ? section : undefined)
 
   // Welcome hides the secondary menu. Keep its underlying state closed too,
   // so Show me around only reveals it after the visitor clicks a rail item.
@@ -1467,15 +1495,19 @@ export function HomeNav() {
     setSearchParams(nextView ? { view: nextView } : {})
   }
 
-  /** A pinned module: the Tools panel stays the coherent second level
-   *  behind it, so the pin reads as a shortcut rather than a section. */
+  /**
+   * A module opened from the RAIL is a destination of its own, so it
+   * takes the whole content area with no second level behind it (Angel,
+   * 2026-09-14: clicking a pinned item "shouldn't open a secondary
+   * sidebar for tools"). Opening the same module from the Tools panel
+   * keeps that panel, because there you are browsing the catalog.
+   */
   const openModule = (label: string) => {
-    if (section !== "hub") jumpLayout()
+    jumpLayout()
     goHome()
     setSearchParams({ view: hubSlug(label) })
-    setSection("hub")
-    setPanelOpen(true)
-    persist("hub", true)
+    setPanelOpen(false)
+    persist(section, false)
   }
 
   /**
@@ -1543,6 +1575,9 @@ export function HomeNav() {
           extra 12 made the column read as six separate things. */}
       <div
         data-home-rail
+        // The hairline belongs BETWEEN the two sidebars, so with no panel
+        // beside it there is nothing to separate (Angel, 2026-09-14).
+        data-panel={panelVisible ? "open" : "closed"}
         className="flex w-[68px] shrink-0 flex-col items-center overflow-y-auto pt-2"
       >
         {/* Figma 2621:22835 — f0's AvatarCompany in its with-logo variant
@@ -1569,7 +1604,7 @@ export function HomeNav() {
             <RailItem
               key={label}
               icon={HUB_ICONS[label] ?? HubIcon}
-              label={label}
+              label={railLabel(label)}
               active={view === hubSlug(label)}
               onClick={() => openModule(label)}
             />
@@ -1581,7 +1616,7 @@ export function HomeNav() {
                 <RailItem
                   key={label}
                   icon={HUB_ICONS[label] ?? HubIcon}
-                  label={label}
+                  label={railLabel(label)}
                   active={view === hubSlug(label)}
                   onClick={() => openModule(label)}
                 />

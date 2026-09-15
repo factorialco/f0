@@ -172,7 +172,7 @@ const FULL_BLEED_CSS = `
   [data-home-panel] {
     background: #f7f7f7;
   }
-  [data-home-rail] {
+  [data-home-rail][data-panel="open"] {
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
   }
 
@@ -196,7 +196,7 @@ const FULL_BLEED_CSS = `
   .dark .f0c-canvas-surface {
     background: hsl(var(--neutral-0));
   }
-  .dark [data-home-rail] {
+  .dark [data-home-rail][data-panel="open"] {
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
   }
   .dark [data-one-panel] {
