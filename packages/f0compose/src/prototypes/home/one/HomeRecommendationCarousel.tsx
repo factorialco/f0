@@ -112,7 +112,9 @@ export function HomeRecommendationCarousel({
   return (
     <div
       data-home-recommendations
-      className="flex w-[712px] max-w-full items-center gap-2"
+      // gap-1: the arrows sit 4px off the track, not 8 (Angel,
+      // 2026-09-15).
+      className="flex w-[712px] max-w-full items-center gap-1"
     >
       {pinned}
       {/* Clock-in is its own control, not a recommendation, so the two
