@@ -3,6 +3,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { FeatureGrid } from "~/docs/components/FeatureGrid"
 import { Kanban, List, Pencil, Table } from "@/icons/app"
 import * as GraphStories from "./visualizations/graph.stories"
+import * as EditableTableStories from "./visualizations/editable-table/editable-table.stories"
 
 <Meta title="Data Collection/Visualizations" />
 
@@ -64,13 +65,14 @@ When you pass more than one visualization, Data Collection renders a view
 switcher (a segmented control) in the header. Each chip shows the
 visualization's icon and label.
 
-## Renaming the switcher chips
+## Customizing the switcher chips
 
 By default each built-in visualization uses its localized name — "Table",
-"Graph", "List", etc. To rename a chip for a specific collection, pass an
-optional `label` on the visualization. Different collections can label the same
-type differently — e.g. the `graph` view as "Org chart" for employees, or the
-`table` view as "Teams" for teams.
+"Graph", "List", etc. — and the icon registered for its type. To tailor a chip
+for a specific collection, pass an optional `label`, `icon`, or both on the
+visualization. Different collections can present the same type differently —
+e.g. the `graph` view as "Org chart" for employees, or the `table` view as
+"Teams" for teams.
 
 ```tsx
 <OneDataCollection
@@ -78,18 +80,28 @@ type differently — e.g. the `graph` view as "Org chart" for employees, or the
   visualizations={[
     // Renames the chip to "Org chart"; the built-in graph icon is kept.
     { type: "graph", label: "Org chart", options: {} },
-    // Omit `label` to keep the default localized name ("Table").
+    // Presents the editable table as a plain table, icon included.
+    { type: "editableTable", label: "Table", icon: Table, options: {} },
+    // Omit both to keep the defaults ("Table" with the table icon).
     { type: "table", options: {} },
   ]}
 />
 ```
 
-- `label` is optional; when omitted the localized built-in label is used, so
-  existing collections keep showing "Table" and "Graph".
-- Only the text is customizable — the icon still comes from the visualization
-  type. For a fully custom icon and label, use a `type: "custom"` visualization.
+- Both are optional and independent; when omitted the localized built-in label
+  and the built-in icon are used, so existing collections keep showing "Table"
+  and "Graph" unchanged.
+- Overriding these only changes how the chip presents the view — the
+  visualization still behaves as its `type`. To add a view F0 doesn't provide,
+  use a `type: "custom"` visualization instead.
 
 In the example below the two chips read "Org chart" and "Directory" instead of
 the defaults "Graph" and "Table":
 
 <Canvas of={GraphStories.CustomViewLabels} />
+
+And here the editable table is presented as a plain table — overriding both the
+label and the pencil icon — so the switcher does not advertise the editing
+affordance:
+
+<Canvas of={EditableTableStories.EditableTableWithCustomChip} />
