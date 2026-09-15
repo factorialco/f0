@@ -470,6 +470,43 @@ describe("list slot schema", () => {
     )
   })
 
+  test("describeOnHover keeps the second line AND offers it on hover, for a line that truncates", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ descriptionOptional: true, describeOnHover: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              description: [
+                { text: "2 days overdue", critical: true },
+                { text: "€340" },
+              ],
+            },
+            // Nothing to say, so nothing to hover: a row without a second line
+            // must not open an empty tooltip.
+            { id: "2", title: "Contract change" },
+          ]),
+        ]}
+      />
+    )
+
+    // Still drawn, still tinted — what separates this from `compact`.
+    expect(screen.getByText("2 days overdue")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+
+    await user.hover(screen.getByText("Expenses report"))
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "2 days overdue · €340"
+    )
+
+    await user.unhover(screen.getByText("Expenses report"))
+    await user.hover(screen.getByText("Contract change"))
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  })
+
   test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
     const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
       id: String(i),

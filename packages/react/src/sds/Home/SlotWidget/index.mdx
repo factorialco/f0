@@ -338,6 +338,7 @@ listSlot(
 | `clickBehavior`       | `"link"` — or omitted for inert rows                                                                           | every row carries an `href` and renders as a REAL anchor (see Click handling)       |
 | `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom         |
 | `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs |
+| `describeOnHover`     | `true`                                                                                                         | rows keep their second line AND offer it on hover — for descriptions that truncate  |
 
 Rows may also carry `unread` for the accent dot on the left glyph, and
 `actions` for what can be done to that row (see **Row actions**).
@@ -659,6 +660,23 @@ A `descriptionOptional` list is **exempt**: auto-compacting was written to tame
 a long column of uniformly two-line rows, and a mixed list is not that column —
 most of its rows are already one line, and folding away the few that aren't
 would hide the only thing telling them apart. `compact: true` still forces it.
+
+### The second line on hover
+
+`describeOnHover: true` gives the rows a tooltip carrying their description
+**while still drawing it**. The second line is one truncating line — the table
+above puts three facts at the edge of what fits — so a row with more to say than
+fits ends in an ellipsis with nowhere to read the rest. This is that somewhere,
+and unlike `compact` it costs the line nothing: the parts stay drawn, and the
+critical one stays red.
+
+Only for lists whose second line carries facts a reader acts on (an amount, a
+due date, the project a task belongs to). A list whose descriptions always fit
+gains nothing from it — a tooltip that repeats what is already legible is noise.
+Under `compact` it adds nothing either: the line has folded into that same
+tooltip already.
+
+<Canvas of={SlotWidgetStories.DescribeOnHover} />
 
 ### Recipes
 

@@ -371,6 +371,21 @@ export interface ListSchema {
    * lists compact on their own past `LIST_COMPACT_AFTER` visible rows.
    */
   compact?: boolean
+  /**
+   * Rows offer their `description` on hover as well as drawing it. The second
+   * line is ONE truncating line — around 40 characters at the rail's width — so
+   * a row with more to say than fits ends in an ellipsis with no way to read
+   * the rest. This gives it one without taking the line away.
+   *
+   * For lists whose second line carries facts a reader acts on (an amount, a
+   * due date, the project a task belongs to). A list whose descriptions always
+   * fit gains nothing and should leave this off: a tooltip that repeats what is
+   * already legible is noise.
+   *
+   * Nothing to add under {@link compact}, where the second line has folded into
+   * that same tooltip already.
+   */
+  describeOnHover?: boolean
 }
 
 type ListLeftData<L> = L extends "module"
@@ -1123,11 +1138,16 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       <HomeSlotItems>
         {rows.map(({ href, description, ...row }, index) => {
           // A compact row hides its second line and offers it on hover
-          // instead — as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
-          // segmented description arrives dot-joined and untinted. Computed
-          // rather than checking `description` for truthiness: an empty parts
-          // list is a row with nothing to say, and `[]` is truthy.
-          const tooltip = compact ? descriptionText(description) : ""
+          // instead; `describeOnHover` offers it on hover as WELL, for a line
+          // that truncates. Either way as PLAIN TEXT, all `Tooltip`'s `label`
+          // can carry, so a segmented description arrives dot-joined and
+          // untinted. Computed rather than checking `description` for
+          // truthiness: an empty parts list is a row with nothing to say, and
+          // `[]` is truthy.
+          const tooltip =
+            compact || schema.describeOnHover
+              ? descriptionText(description)
+              : ""
           const node = (
             <HomeListItem
               title={row.title}

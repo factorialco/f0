@@ -680,6 +680,59 @@ export const SegmentedDescriptions: Story = {
   },
 }
 
+/**
+ * THE SECOND LINE, READABLE IN FULL. `describeOnHover` puts each row's
+ * description in a tooltip as well as drawing it — for a list whose second line
+ * carries facts a reader acts on and cannot always fit them. Hover the first
+ * row: the ellipsis is not the end of what it had to say.
+ *
+ * Unlike `compact`, which trades the line for the tooltip, this costs the row
+ * nothing — the parts stay drawn and the critical one stays red. The last row
+ * has nothing to say and so opens no tooltip; an empty one would be a promise
+ * of information that isn't there.
+ */
+export const DescribeOnHover: Story = {
+  args: {
+    header: { title: "Needs you", count: 3 },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          descriptionOptional: true,
+          describeOnHover: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "long",
+            title: "Q3 travel expenses",
+            description: [
+              { text: "2 days overdue", critical: true },
+              { text: "€1,240 for flights" },
+              { text: "Submitted by Ada Lovelace" },
+            ],
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses/1",
+          },
+          {
+            id: "short",
+            title: "Client dinner",
+            description: [{ text: "€82" }],
+            avatar: { icon: Receipt, color: "purple" },
+            href: "/expenses/2",
+          },
+          {
+            id: "bare",
+            title: "Conference budget",
+            avatar: { icon: Receipt, color: "army" },
+            href: "/expenses/3",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
 /** The pool `ItemChurn` adds from, cycled so the button never runs out. */
 const CHURN_ITEMS = [
   { title: "You never clocked out yesterday", icon: Clock, color: "purple" },
