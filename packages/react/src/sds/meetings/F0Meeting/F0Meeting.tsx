@@ -1,9 +1,9 @@
 "use client"
 
 import { type ReactNode } from "react"
-
 import { F0MeetingSurface } from "./F0MeetingSurface"
 import { F0MeetingProvider } from "./providers/F0MeetingProvider"
+import { MeetingChromeProvider } from "./providers/MeetingChromeProvider"
 import { MeetingSurfaceProvider } from "./providers/MeetingSurfaceProvider"
 import { type F0MeetingProviderProps } from "./types"
 
@@ -23,7 +23,9 @@ export const F0Meeting = ({
   overlay,
   children,
 }: F0MeetingProviderProps): ReactNode => {
-  if (!runtime) return children
+  if (!runtime) {
+    return children
+  }
 
   return (
     <F0MeetingProvider runtime={runtime}>
@@ -31,14 +33,16 @@ export const F0Meeting = ({
         defaultMode={defaultMode}
         roomId={runtime.room.id}
       >
-        {children}
-        <F0MeetingSurface
+        <MeetingChromeProvider
           actions={actions}
           actionOrder={actionOrder}
           sidePanel={sidePanel}
           headerContent={headerContent}
           overlay={overlay}
-        />
+        >
+          {children}
+          <F0MeetingSurface />
+        </MeetingChromeProvider>
       </MeetingSurfaceProvider>
     </F0MeetingProvider>
   )

@@ -439,9 +439,10 @@ export type F0WindowCorner = (typeof f0WindowCorners)[number]
  * shrinking the browser leaves the window off-screen. Anchoring to a corner
  * keeps it where the user expects across viewport changes.
  *
- * `panelWidth` sits alongside rather than inside the anchored rect: the two
- * modes never touch each other's geometry, so switching to the side panel and
- * back returns the exact floating size the user had chosen.
+ * It describes the FLOATING window only. `panel` mode stores nothing here: the
+ * room is the side panel's content there, so its width is the panel's and is
+ * persisted by the panel — which is also why docking and undocking returns the
+ * exact floating size the user had chosen.
  */
 export type F0WindowPlacement = {
   corner: F0WindowCorner
@@ -450,8 +451,6 @@ export type F0WindowPlacement = {
   dy: number
   width: number
   height: number
-  /** Width of the side panel, resizable like the chat's. */
-  panelWidth?: number
 }
 
 export type F0Rect = {

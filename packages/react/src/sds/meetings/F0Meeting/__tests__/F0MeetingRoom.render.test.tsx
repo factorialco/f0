@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
-import { screen, userEvent, within, zeroRender } from "@/testing/test-utils"
-
+import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 import { F0Meeting } from "../F0Meeting"
 import { F0MeetingRoom } from "../F0MeetingRoom"
 import { F0MeetingProvider } from "../providers/F0MeetingProvider"
@@ -246,24 +244,23 @@ describe("mode switch", () => {
   const renderSurface = (runtime = buildRuntime(), track?: F0MeetingTrack) =>
     zeroRender(
       <F0Meeting runtime={runtime} defaultMode="floating">
-        {track && <TrackProbe track={track} />}
+        {track ? <TrackProbe track={track} /> : null}
       </F0Meeting>
     )
 
   // Destinations, not options: the mode you are in is not offered, so there is
-  // never a button that does nothing.
+  // never a button that does nothing. Nor is the side panel offered here: the
+  // room is rendered on its own, with no application frame and therefore no
+  // panel to be the content of — see the ApplicationFrame meeting tests for
+  // what docking does.
   const modeButton = (name: RegExp) => screen.getByRole("button", { name })
   const queryMode = (name: RegExp) => screen.queryByRole("button", { name })
-  const toPanel = () => modeButton(/side panel/i)
   const toFloating = () => modeButton(/floating window/i)
   const toFullscreen = () => modeButton(/fill the screen/i)
 
-  it("moves the call between the three modes", async () => {
+  it("moves the call between the modes it has", async () => {
     renderSurface()
     const window = screen.getByTestId("meeting-window")
-
-    await userEvent.click(toPanel())
-    expect(window).toHaveAttribute("data-mode", "panel")
 
     await userEvent.click(toFullscreen())
     expect(window).toHaveAttribute("data-mode", "fullscreen")
@@ -276,26 +273,26 @@ describe("mode switch", () => {
     renderSurface()
     // Starts floating, so floating is the one missing.
     expect(queryMode(/floating window/i)).toBeNull()
-    expect(toPanel()).toBeVisible()
     expect(toFullscreen()).toBeVisible()
-
-    await userEvent.click(toPanel())
-    expect(queryMode(/side panel/i)).toBeNull()
-    expect(toFloating()).toBeVisible()
-    expect(toFullscreen()).toBeVisible()
-  })
-
-  it("always offers exactly the two places you are not", async () => {
-    renderSurface()
-    const group = screen.getByRole("group", { name: /meeting position/i })
-    expect(within(group).getAllByRole("button")).toHaveLength(2)
 
     await userEvent.click(toFullscreen())
-    expect(
-      within(
-        screen.getByRole("group", { name: /meeting position/i })
-      ).getAllByRole("button")
-    ).toHaveLength(2)
+    expect(queryMode(/fill the screen/i)).toBeNull()
+    expect(toFloating()).toBeVisible()
+  })
+
+  /**
+   * A destination that isn't there is not a destination.
+   *
+   * Standalone there is no side panel, so `panel` derives to `floating` — the
+   * same rule `inline` has always had for a slot nobody registered. Offering
+   * the button anyway would be one that lands you somewhere else.
+   */
+  it("does not offer the side panel when there is no panel", async () => {
+    renderSurface()
+    expect(queryMode(/side panel/i)).toBeNull()
+
+    await userEvent.click(toFullscreen())
+    expect(queryMode(/side panel/i)).toBeNull()
   })
 
   it("has no button for the pill, which is derived rather than chosen", () => {
@@ -303,7 +300,7 @@ describe("mode switch", () => {
     expect(screen.queryByRole("button", { name: /^minimize$/i })).toBeNull()
   })
 
-  it("never remounts the video when changing mode", async () => {
+  it("never remounts the video moving between window modes", async () => {
     const binding = vi.fn(() => vi.fn())
     const track: F0MeetingTrack = {
       id: "me:cam",
@@ -318,38 +315,16 @@ describe("mode switch", () => {
     })
 
     renderSurface(runtime, track)
-    await userEvent.click(toPanel())
+    await userEvent.click(toFullscreen())
     await userEvent.click(toFloating())
-    await userEvent.click(toPanel())
+    await userEvent.click(toFullscreen())
 
-    // A mode change only changes a rect: the window never leaves its portal, so
-    // the element the track is attached to survives all of them. This is the
-    // invariant the whole surface design exists to protect.
+    // Between window modes a change is only a rect: the window never leaves
+    // its portal, so the element the track is attached to survives all of
+    // them. Docking into the side panel is the one transition that does NOT
+    // hold this — there the room genuinely moves into the panel's tree — and
+    // it is asserted where it happens, in the ApplicationFrame tests.
     expect(binding).toHaveBeenCalledTimes(1)
-  })
-
-  it("gives back the exact floating rect after a spell in the panel", async () => {
-    localStorage.setItem(
-      "ONE-meeting-window",
-      JSON.stringify({ corner: "tl", dx: 40, dy: 60, width: 420, height: 300 })
-    )
-
-    renderSurface()
-    await userEvent.click(toPanel())
-    await userEvent.click(toFloating())
-
-    const stored = JSON.parse(
-      localStorage.getItem("ONE-meeting-window") ?? "{}"
-    )
-    // The panel owns a width of its own, so it can never cost the user the
-    // floating size they chose.
-    expect(stored).toMatchObject({
-      corner: "tl",
-      dx: 40,
-      dy: 60,
-      width: 420,
-      height: 300,
-    })
   })
 
   it("falls back to the host default when the stored mode no longer exists", () => {

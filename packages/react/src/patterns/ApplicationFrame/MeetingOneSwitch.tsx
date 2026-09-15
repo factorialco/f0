@@ -1,10 +1,10 @@
 "use client"
 
+import { useCallback } from "react"
 import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { useMeetingSurfaceOptional } from "@/sds/meetings/F0Meeting"
 import { type F0Rect } from "@/sds/meetings/F0Meeting/types"
-
-import { useAiChatBridge } from "./AiChatBridge"
+import { useSidePanel } from "./SidePanel/SidePanelProvider"
 
 /**
  * A way out of a full-screen call and into the AI chat, in the call's own header.
@@ -18,16 +18,37 @@ import { useAiChatBridge } from "./AiChatBridge"
  * of its portal `inert` while full screen, so a chat opened without leaving that
  * mode would be visibly there and completely unreachable.
  *
- * Both sides are forced, and neither is negotiable: the chat to `sidepanel`
- * (`openAsSidePanel` — a full-screen chat spans the frame and there is no side
- * to sit beside), and the call to a window filling what is left.
+ * Both sides are forced, and neither is negotiable: the chat to a docked panel
+ * (a full-screen one spans the frame and there is no side to sit beside), and
+ * the call to a window filling what is left.
  */
 export const MeetingOneSwitch = () => {
   const surface = useMeetingSurfaceOptional()
-  const { enabled, openAsSidePanel, chatWidth, chatSide } = useAiChatBridge()
+  const { hasAvailableView, effectiveWidth, side, setLayout, setOpen, clear } =
+    useSidePanel()
 
-  if (!surface || surface.effectiveMode !== "fullscreen") return null
-  if (!enabled) return null
+  /**
+   * Open the chat AS A DOCKED PANEL, whatever it was doing before.
+   *
+   * `setOpen(true)` alone is not enough for a caller that then sizes itself
+   * around the chat, and the reason is the case that looks least likely: a
+   * panel that is ALREADY open. Covering the frame (`fullscreen`) there is no
+   * side to leave room beside, and `setOpen(true)` is a no-op, so it would stay
+   * that way over a window just sized for it. `clear()` is what hands the space
+   * back from whatever content held it — including this very call.
+   */
+  const openAsSidePanel = useCallback(() => {
+    setLayout("sidepanel")
+    clear()
+    setOpen(true)
+  }, [setLayout, clear, setOpen])
+
+  if (!surface || surface.effectiveMode !== "fullscreen") {
+    return null
+  }
+  if (!hasAvailableView) {
+    return null
+  }
 
   return (
     <F0OneSwitch
@@ -36,27 +57,24 @@ export const MeetingOneSwitch = () => {
       // receive.
       checked={false}
       onCheckedChange={() => {
-        // Opens it *as a side panel* whatever state it was in — closed, already
-        // open, full screen, or showing someone else's content.
         openAsSidePanel()
-        // Straight to `floating`, never `panel`: the frame's exclusivity effect
-        // resolves a contested slot in favour of whoever just arrived, so a call
-        // moved to `panel` with the chat freshly open gets bounced here anyway,
-        // one render later.
+        // Straight to `floating`, never `panel`: the call has just handed the
+        // panel to the chat, and asking for it back in the same breath is how
+        // the two used to fight over it.
         surface.setMode("floating")
-        // Sized against the area the chat is about to leave the call. Both state
-        // changes are read from the same `panelArea` measured here, which is
-        // safe: it is the frame's border box, and neither the chat opening nor
-        // the call leaving full screen moves it — the chat is reserved with
-        // padding INSIDE that box, and the call's window lives in a portal.
+        // Sized against the area the chat is about to leave the call. Both
+        // state changes read the same `panelArea`, which is safe: it is the
+        // frame's border box, and neither the chat opening nor the call leaving
+        // full screen moves it — the chat is reserved with padding INSIDE that
+        // box, and the call's window lives in a portal.
         //
-        // Skipped on a compact viewport, and not as a shortcut: there `floating`
-        // renders minimized and the chat covers the content instead of docking
-        // beside it, so the rect would reserve an edge nothing occupies and get
-        // persisted for the next desktop session.
+        // Skipped on a compact viewport, and not as a shortcut: there
+        // `floating` renders minimized and the panel covers the content instead
+        // of docking beside it, so the rect would reserve an edge nothing
+        // occupies and get persisted for the next desktop session.
         if (!surface.isCompactViewport) {
           surface.resizeRect(
-            fitToContent(surface.panelArea, chatWidth, chatSide)
+            fitToContent(surface.panelArea, effectiveWidth, side)
           )
         }
       }}

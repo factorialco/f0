@@ -1,7 +1,6 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   MeetingSurfaceProvider,
   useMeetingSurface,
@@ -12,40 +11,30 @@ import {
   WINDOW_DEFAULT_WIDTH,
 } from "@/sds/meetings/F0Meeting/window/window-constants"
 import { render } from "@/testing/test-utils"
-
 import { MeetingOneSwitch } from "../MeetingOneSwitch"
-
-const setOpen = vi.fn()
-const openAsSidePanel = vi.fn()
-let bridgeEnabled = true
-let chatSide: "left" | "right" = "right"
-
-const CHAT_WIDTH = 360
-
-vi.mock("../AiChatBridge", () => ({
-  useAiChatBridge: () => ({
-    enabled: bridgeEnabled,
-    open: false,
-    setOpen,
-    openAsSidePanel,
-    chatWidth: CHAT_WIDTH,
-    chatSide,
-  }),
-}))
+import { SidePanelProvider, useSidePanel } from "../SidePanel/SidePanelProvider"
+import { type SidePanelViewDefinition } from "../SidePanel/types"
 
 /** jsdom's window, which is what `panelArea` falls back to with no frame. */
 const VIEWPORT = { width: 1024, height: 768 }
 /** `CONTENT_PADDING` in MeetingOneSwitch. */
 const PAD = 24
 
-const ModeProbe = () => {
+const AI_VIEW: SidePanelViewDefinition[] = [{ id: "ai" }]
+
+const Probe = () => {
   const { mode, rect } = useMeetingSurface()
+  const { layout, open, activeContent, effectiveWidth } = useSidePanel()
   return (
     <>
       <span data-testid="mode">{mode}</span>
       <span data-testid="rect">
         {rect.x},{rect.y},{rect.width},{rect.height}
       </span>
+      <span data-testid="layout">{layout}</span>
+      <span data-testid="open">{String(open)}</span>
+      <span data-testid="content">{activeContent?.id ?? "none"}</span>
+      <span data-testid="panel-width">{effectiveWidth}</span>
     </>
   )
 }
@@ -63,95 +52,112 @@ const setCompactViewport = (matches: boolean) =>
     dispatchEvent: vi.fn(),
   }))
 
-const setup = (defaultMode: F0MeetingSurfaceMode = "fullscreen") =>
+const setup = ({
+  defaultMode = "fullscreen" as F0MeetingSurfaceMode,
+  views = AI_VIEW,
+  side = "right" as "left" | "right",
+  defaultLayout = "sidepanel" as "sidepanel" | "fullscreen",
+} = {}) =>
   render(
-    <MeetingSurfaceProvider defaultMode={defaultMode} roomId="room-1">
-      <MeetingOneSwitch />
-      <ModeProbe />
-    </MeetingSurfaceProvider>
+    <SidePanelProvider
+      views={views}
+      side={side}
+      defaultLayout={defaultLayout}
+      resizable
+    >
+      <MeetingSurfaceProvider defaultMode={defaultMode} roomId="room-1">
+        <MeetingOneSwitch />
+        <Probe />
+      </MeetingSurfaceProvider>
+    </SidePanelProvider>
   )
+
+const panelWidth = (): number =>
+  Number(screen.getByTestId("panel-width").textContent)
 
 describe("MeetingOneSwitch", () => {
   beforeEach(() => {
-    setOpen.mockClear()
-    openAsSidePanel.mockClear()
-    bridgeEnabled = true
-    chatSide = "right"
     setCompactViewport(false)
     localStorage.clear()
   })
 
   it("only exists in full screen", () => {
-    setup("fullscreen")
+    setup()
     expect(screen.getByRole("switch")).toBeVisible()
   })
 
   it.each(["floating", "panel"] as const)(
     "stays out of the way in %s, where the app is already reachable",
     (mode) => {
-      setup(mode)
+      setup({ defaultMode: mode })
       expect(screen.queryByRole("switch")).not.toBeInTheDocument()
     }
   )
 
-  it("is absent when there is no AI to open", () => {
-    bridgeEnabled = false
-    setup("fullscreen")
+  it("is absent when there is no panel to open", () => {
+    setup({ views: [] })
     expect(screen.queryByRole("switch")).not.toBeInTheDocument()
   })
 
-  it("opens the chat and gets the call out of full screen in one press", async () => {
+  it("opens the panel and gets the call out of full screen in one press", async () => {
     // Both halves matter. `F0MeetingSurface` marks every sibling of its portal
     // `inert` while full screen, so a chat opened without changing the mode
     // would be visibly there and completely unreachable.
-    setup("fullscreen")
+    setup()
     await userEvent.click(screen.getByRole("switch"))
 
-    expect(openAsSidePanel).toHaveBeenCalled()
+    expect(screen.getByTestId("open")).toHaveTextContent("true")
     expect(screen.getByTestId("mode")).toHaveTextContent("floating")
   })
 
-  it("opens it as a side panel, not merely open", async () => {
-    // `setOpen(true)` is not enough, and the case it misses is the chat being
-    // ALREADY open: expanded or showing a canvas it spans the frame, so there is
-    // no side to leave room beside, and asking it to open does nothing.
-    setup("fullscreen")
+  it("opens it DOCKED, not merely open", async () => {
+    // `setOpen(true)` is not enough, and the case it misses is the panel being
+    // ALREADY open: covering the frame there is no side to leave room beside,
+    // and asking it to open does nothing.
+    setup({ defaultLayout: "fullscreen" })
     await userEvent.click(screen.getByRole("switch"))
 
-    expect(openAsSidePanel).toHaveBeenCalled()
-    expect(setOpen).not.toHaveBeenCalled()
+    expect(screen.getByTestId("layout")).toHaveTextContent("sidepanel")
+  })
+
+  it("hands the panel back from whatever held it, including the call", async () => {
+    setup()
+    await userEvent.click(screen.getByRole("switch"))
+
+    // The chat is the panel's fallback occupant, so it only shows once nothing
+    // else is claiming the space.
+    expect(screen.getByTestId("content")).toHaveTextContent("none")
   })
 
   it("sizes the call to the content the chat leaves it", async () => {
-    setup("fullscreen")
+    setup()
     await userEvent.click(screen.getByRole("switch"))
 
-    const width = VIEWPORT.width - CHAT_WIDTH - PAD * 2
+    const width = VIEWPORT.width - panelWidth() - PAD * 2
     expect(screen.getByTestId("rect")).toHaveTextContent(
       `${PAD},${PAD},${width},${VIEWPORT.height - PAD * 2}`
     )
   })
 
-  it("leaves the gap on the edge the chat actually docks to", async () => {
-    chatSide = "left"
-    setup("fullscreen")
+  it("leaves the gap on the edge the panel actually docks to", async () => {
+    setup({ side: "left" })
     await userEvent.click(screen.getByRole("switch"))
 
-    const width = VIEWPORT.width - CHAT_WIDTH - PAD * 2
+    const width = VIEWPORT.width - panelWidth() - PAD * 2
     expect(screen.getByTestId("rect")).toHaveTextContent(
-      `${CHAT_WIDTH + PAD},${PAD},${width},${VIEWPORT.height - PAD * 2}`
+      `${panelWidth() + PAD},${PAD},${width},${VIEWPORT.height - PAD * 2}`
     )
   })
 
   it("does not store a desktop rect on a compact viewport", async () => {
-    // There `floating` renders minimized and the chat covers the content rather
+    // There `floating` renders minimized and the panel covers the content rather
     // than docking beside it, so a rect reserving an edge nothing occupies would
     // be persisted for the next desktop session.
     setCompactViewport(true)
-    setup("fullscreen")
+    setup()
     await userEvent.click(screen.getByRole("switch"))
 
-    expect(openAsSidePanel).toHaveBeenCalled()
+    expect(screen.getByTestId("open")).toHaveTextContent("true")
     const stored = JSON.parse(
       localStorage.getItem(PLACEMENT_STORAGE_KEY) ?? "{}"
     )
@@ -159,16 +165,15 @@ describe("MeetingOneSwitch", () => {
   })
 
   it("goes to floating rather than panel", async () => {
-    // `panel` loses: the frame's exclusivity effect hands a contested slot to
-    // whoever just arrived, so a call moved there with the chat freshly open is
-    // bounced to floating one render later anyway.
-    setup("fullscreen")
+    // `panel` loses on purpose: the call has just handed the panel to the chat,
+    // and asking for it back in the same breath is how the two used to fight.
+    setup()
     await userEvent.click(screen.getByRole("switch"))
     expect(screen.getByTestId("mode")).not.toHaveTextContent("panel")
   })
 
   it("never reads as on, because there is no second press to make", () => {
-    setup("fullscreen")
+    setup()
     expect(screen.getByRole("switch")).toHaveAttribute(
       "data-state",
       "unchecked"

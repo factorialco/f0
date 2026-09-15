@@ -167,6 +167,26 @@ describe("collapseActions", () => {
     expect(overflow).toHaveLength(0)
   })
 
+  /**
+   * The bar draws smaller controls in a small window, so capacity has to be
+   * asked with the size that will actually land. It used to be asked with the
+   * large one always, which made a compact bar believe its 32px buttons were
+   * 40px and collapse controls it had room for.
+   */
+  it("fits more in the same width once the controls are compact", () => {
+    const width = widthFor(5)
+    const roomy = collapseActions(many, width, "floating")
+    const compact = collapseActions(many, width, "floating", true)
+
+    expect(compact.visible.length).toBeGreaterThan(roomy.visible.length)
+    expect(compact.overflow.length).toBeLessThan(roomy.overflow.length)
+  })
+
+  it("still keeps the pinned ones when even compact does not fit", () => {
+    const { visible } = collapseActions(many, widthFor(2), "floating", true)
+    expect(visible.every((item) => item.pinned)).toBe(true)
+  })
+
   it("honours per-action mode restrictions", () => {
     const restricted = [
       ...CORE,

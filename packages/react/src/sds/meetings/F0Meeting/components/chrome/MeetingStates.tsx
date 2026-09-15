@@ -7,12 +7,23 @@ import {
   useF0MeetingRoster,
   useF0MeetingStable,
 } from "../../providers/F0MeetingProvider"
+import { useMeetingDensity } from "../../providers/MeetingDensityProvider"
 
-const Centered = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-f1-foreground">
-    {children}
-  </div>
-)
+const Centered = ({ children }: { children: React.ReactNode }) => {
+  const density = useMeetingDensity()
+  return (
+    <div
+      className={cn(
+        "flex h-full w-full flex-col items-center justify-center text-center text-f1-foreground",
+        // A 48px gutter is most of a 280px window, and these states are the one
+        // place the room has nothing else to show — so the words get the room.
+        density === "tight" ? "gap-2 px-3" : "gap-3 px-6"
+      )}
+    >
+      {children}
+    </div>
+  )
+}
 
 /** Full-surface state while there is nothing to render yet. */
 export const MeetingConnecting = () => {

@@ -1,13 +1,27 @@
+import { CONTROLS_HEIGHT, HEADER_HEIGHT } from "../layout/density"
+
 /** Gap kept between the window and the viewport edges. */
 export const WINDOW_MARGIN = 12
 
 export const WINDOW_MIN_WIDTH = 280
-/** 16:9 of the minimum width plus the 60px header and the 64px control bar. */
-export const WINDOW_MIN_HEIGHT = 282
+
+/**
+ * 16:9 of the minimum width, plus the chrome a window this small actually
+ * draws. Derived rather than written down: the old 282 was computed from "a
+ * 60px header and a 64px control bar" when the bar had been 80px for a while,
+ * so the smallest window the user could reach still had its video squeezed.
+ */
+export const WINDOW_MIN_HEIGHT =
+  Math.round((WINDOW_MIN_WIDTH * 9) / 16) +
+  HEADER_HEIGHT.tight +
+  CONTROLS_HEIGHT.tight
 
 export const WINDOW_DEFAULT_WIDTH = 360
-/** 16:9 of the default width, plus the header and the control bar. */
-export const WINDOW_DEFAULT_HEIGHT = 340
+/** 16:9 of the default width, plus the chrome at the density it lands on. */
+export const WINDOW_DEFAULT_HEIGHT =
+  Math.round((WINDOW_DEFAULT_WIDTH * 9) / 16) +
+  HEADER_HEIGHT.compact +
+  CONTROLS_HEIGHT.compact
 
 export const MINIMIZED_WIDTH = 280
 export const MINIMIZED_HEIGHT = 56
@@ -18,22 +32,8 @@ export const SNAP_THRESHOLD = 88
 /** Movement needed before a pointer-down counts as a drag rather than a click. */
 export const DRAG_THRESHOLD = 5
 
-/** Side panel widths, matching the chat's so the two panels feel like siblings. */
-export const PANEL_DEFAULT_WIDTH = 450
-export const PANEL_MIN_WIDTH = 300
-export const PANEL_MAX_WIDTH = 712
-/**
- * Seam around the side panel, so it reads as a card and not as a wall. Matches
- * the chat panel's `p-1`; the window is `fixed`, so where the chat gets this
- * from its container's padding, we inset the rect instead.
- */
-export const PANEL_GAP = 4
-
 export const KEYBOARD_STEP = 16
 export const KEYBOARD_STEP_LARGE = 48
-
-export const WINDOW_HEADER_HEIGHT = 60
-export const WINDOW_CONTROLS_HEIGHT = 64
 
 export const PLACEMENT_STORAGE_KEY = "ONE-meeting-window"
 export const MODE_STORAGE_KEY = "ONE-meeting-mode"

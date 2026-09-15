@@ -1,6 +1,7 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
+import { useMeetingDensity } from "../../providers/MeetingDensityProvider"
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 import { MeetingModeSwitch } from "./MeetingModeSwitch"
 import { MeetingTimer } from "./MeetingTimer"
@@ -17,9 +18,14 @@ import { MeetingTimer } from "./MeetingTimer"
 export const MeetingHeader = ({ extra }: { extra?: React.ReactNode }) => {
   const { room } = useF0MeetingRoster()
   const { effectiveMode } = useMeetingSurface()
+  const density = useMeetingDensity()
 
   const isMinimized = effectiveMode === "minimized"
   const isFullscreen = effectiveMode === "fullscreen"
+  // The avatar is the first thing to go. It is decoration next to the title,
+  // and in a narrow window every pixel it takes comes off the room's name —
+  // which is the one thing the bar exists to say.
+  const hasRoomForAvatar = !isMinimized && density !== "tight"
 
   return (
     <>
@@ -36,8 +42,8 @@ export const MeetingHeader = ({ extra }: { extra?: React.ReactNode }) => {
         </span>
       ) : (
         <span className="flex min-w-0 items-center gap-2 text-f1-foreground">
-          {room.avatar && !isMinimized ? (
-            <span className="shrink-0">
+          {room.avatar && hasRoomForAvatar ? (
+            <span className="shrink-0" data-testid="meeting-room-avatar">
               <F0Avatar avatar={room.avatar} size="xs" />
             </span>
           ) : null}
@@ -51,7 +57,10 @@ export const MeetingHeader = ({ extra }: { extra?: React.ReactNode }) => {
       )}
 
       <div
-        className={cn("ml-auto flex shrink-0 items-center", "gap-1.5")}
+        className={cn(
+          "ml-auto flex shrink-0 items-center",
+          density === "tight" ? "gap-0.5" : "gap-1.5"
+        )}
         data-f0-no-drag
       >
         {extra}

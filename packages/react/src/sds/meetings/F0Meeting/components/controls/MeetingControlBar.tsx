@@ -7,8 +7,10 @@ import {
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { CONTROLS_HEIGHT } from "../../layout/density"
 import { useMeasuredBox } from "../../layout/useMeasuredBox"
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
+import { useMeetingDensity } from "../../providers/MeetingDensityProvider"
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 import { type F0MeetingAction } from "../../types"
 import { collapseActions, PICKER_IDS } from "./collapse-actions"
@@ -51,15 +53,22 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
   const i18n = useI18n()
   const { effectiveMode } = useMeetingSurface()
   const { localMedia } = useF0MeetingRoster()
+  const density = useMeetingDensity()
   const [containerRef, box] = useMeasuredBox<HTMLDivElement>()
 
-  const { visible, overflow } = useMemo(
-    () => collapseActions(actions, box.width, effectiveMode),
-    [actions, box.width, effectiveMode]
-  )
-
-  const compact = effectiveMode === "minimized" || box.width < 320
   const isMinimized = effectiveMode === "minimized"
+  // Compact controls in any room that is not comfortable — not only a narrow
+  // BAR. A short wide window has plenty of horizontal room and no vertical
+  // room at all, and full-size controls there are what push the video out.
+  const compact = isMinimized || density !== "regular" || box.width < 320
+
+  // Capacity is asked with the size that will actually be drawn. It used to be
+  // asked with the large one always, so a compact bar believed its 32px
+  // buttons were 40px and collapsed controls that would have fitted.
+  const { visible, overflow } = useMemo(
+    () => collapseActions(actions, box.width, effectiveMode, compact),
+    [actions, box.width, effectiveMode, compact]
+  )
 
   const byId = useMemo(
     () => new Map(visible.map((action) => [action.id, action])),
@@ -69,10 +78,8 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "flex w-full items-center justify-center",
-        !isMinimized && "h-20"
-      )}
+      className="flex w-full shrink-0 items-center justify-center"
+      style={isMinimized ? undefined : { height: CONTROLS_HEIGHT[density] }}
       data-testid="meeting-control-bar"
     >
       <div

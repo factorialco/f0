@@ -1,7 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { Floating, Kanban, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
+import { useMeetingDensity } from "../../providers/MeetingDensityProvider"
 import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 import { type F0MeetingSurfaceMode } from "../../types"
 
@@ -18,7 +18,12 @@ import { type F0MeetingSurfaceMode } from "../../types"
  */
 export const MeetingModeSwitch = () => {
   const i18n = useI18n()
-  const { effectiveMode, setMode, isCompactViewport } = useMeetingSurface()
+  const { effectiveMode, setMode, isCompactViewport, hasPanelSlot } =
+    useMeetingSurface()
+  const density = useMeetingDensity()
+  // The title bar shrinks with the window, so its controls have to shrink with
+  // it — three 40px buttons beside a room name is most of a 280px bar.
+  const size = density === "tight" ? "sm" : "md"
 
   // On a small viewport there is no window to place and no room for a panel:
   // the only meaningful choice is pill or full screen. Same rule as below —
@@ -28,7 +33,7 @@ export const MeetingModeSwitch = () => {
     return (
       <F0Button
         variant="ghost"
-        size="md"
+        size={size}
         hideLabel
         icon={isFullscreen ? Minimize : Maximize}
         label={
@@ -61,11 +66,15 @@ export const MeetingModeSwitch = () => {
     >
       {destinations
         .filter((destination) => destination.mode !== effectiveMode)
+        // The panel is only a destination where one exists. A call rendered
+        // outside an application frame has nowhere to dock, and offering it
+        // would be a button that lands you somewhere else.
+        .filter((destination) => destination.mode !== "panel" || hasPanelSlot)
         .map((destination) => (
           <F0Button
             key={destination.mode}
             variant="ghost"
-            size="md"
+            size={size}
             hideLabel
             icon={destination.icon}
             label={destination.label}

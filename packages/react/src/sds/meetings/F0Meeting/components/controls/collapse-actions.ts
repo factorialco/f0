@@ -17,6 +17,17 @@ export const MEDIA_CONTROL_SIZE = 89
 export const LEAVE_SIZE = 72
 
 /**
+ * The same three widths at the compact size the bar switches to in a small
+ * window — `md` rather than `lg`, which is `h-8 px-3` against `h-10 px-4`
+ * (see the Action variants). Estimates like the ones above, and estimates that
+ * have to exist: asking capacity with the large numbers while drawing the small
+ * ones is what made a narrow bar collapse controls it had room for.
+ */
+export const ACTION_SIZE_COMPACT = 32
+export const MEDIA_CONTROL_SIZE_COMPACT = 72
+export const LEAVE_SIZE_COMPACT = 60
+
+/**
  * Device pickers are not standalone buttons: they are the chevron half of the
  * control they configure, and the bar draws them there. They still travel in
  * the action array so a host can patch or remove them by id.
@@ -47,28 +58,31 @@ const DEFAULT_PRIORITY = 50
  */
 const widthOf = (
   action: F0MeetingAction,
-  present: ReadonlySet<string>
+  present: ReadonlySet<string>,
+  compact: boolean
 ): number => {
   if (PICKER_IDS.has(action.id)) {
     return 0
   }
+  const iconOnly = compact ? ACTION_SIZE_COMPACT : ACTION_SIZE
   if (action.id === "core:leave") {
-    return LEAVE_SIZE
+    return compact ? LEAVE_SIZE_COMPACT : LEAVE_SIZE
   }
   const picker = PAIRED_PICKER[action.id]
-  if (picker) {
-    return present.has(picker) ? MEDIA_CONTROL_SIZE : ACTION_SIZE
+  if (picker && present.has(picker)) {
+    return compact ? MEDIA_CONTROL_SIZE_COMPACT : MEDIA_CONTROL_SIZE
   }
-  return ACTION_SIZE
+  return iconOnly
 }
 
 /** Total width of a set of actions, gaps included. */
 const measure = (
   actions: F0MeetingAction[],
-  present: ReadonlySet<string>
+  present: ReadonlySet<string>,
+  compact: boolean
 ): number => {
   const widths = actions
-    .map((action) => widthOf(action, present))
+    .map((action) => widthOf(action, present, compact))
     .filter((width) => width > 0)
   if (widths.length === 0) {
     return 0
@@ -90,7 +104,9 @@ const measure = (
 export const collapseActions = (
   actions: F0MeetingAction[],
   barWidth: number,
-  mode: F0MeetingSurfaceMode
+  mode: F0MeetingSurfaceMode,
+  /** Whether the bar is drawing its controls at the compact size. */
+  compact = false
 ): CollapseResult => {
   const applicable = actions.filter(
     (action) => !action.modes || action.modes.includes(mode)
@@ -111,13 +127,14 @@ export const collapseActions = (
   // to come first because the question is circular: reserving the slot can be
   // what forces something out, and then the button exists only to hold the
   // thing its own reservation displaced.
-  if (barWidth <= 0 || measure(applicable, present) <= barWidth) {
+  if (barWidth <= 0 || measure(applicable, present, compact) <= barWidth) {
     return { visible: applicable, overflow: [] }
   }
 
   // Something genuinely has to go, so the button will be drawn and its slot is
   // no longer available.
-  const budget = barWidth - OVERFLOW_SLOT - ACTION_GAP
+  const overflowSlot = compact ? ACTION_SIZE_COMPACT : OVERFLOW_SLOT
+  const budget = barWidth - overflowSlot - ACTION_GAP
 
   const ranked = [...applicable].sort((a, b) => {
     const pinned = Number(Boolean(b.pinned)) - Number(Boolean(a.pinned))
@@ -136,7 +153,7 @@ export const collapseActions = (
       continue
     }
     const candidate = [...chosen, action]
-    if (measure(candidate, present) > budget && !action.pinned) {
+    if (measure(candidate, present, compact) > budget && !action.pinned) {
       continue
     }
     chosen.push(action)

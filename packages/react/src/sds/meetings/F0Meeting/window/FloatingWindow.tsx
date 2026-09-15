@@ -1,27 +1,19 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react"
-
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { EASE_OUT_SWIFT } from "@/lib/motion/f0-motion"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { densityFor, HEADER_HEIGHT } from "../layout/density"
+import { MeetingDensityProvider } from "../providers/MeetingDensityProvider"
 import { useMeetingSurface } from "../providers/MeetingSurfaceProvider"
 import { type F0Rect } from "../types"
 import { clamp } from "../utils/aspect"
-import { PanelResizeHandle } from "./PanelResizeHandle"
 import { nearestCorner } from "./placement"
 import { ResizeHandles } from "./ResizeHandles"
 import { useWindowGestures } from "./useWindowDrag"
 import {
   KEYBOARD_STEP,
   KEYBOARD_STEP_LARGE,
-  PANEL_DEFAULT_WIDTH,
   WINDOW_MARGIN,
   WINDOW_MIN_HEIGHT,
   WINDOW_MIN_WIDTH,
@@ -35,7 +27,8 @@ export type FloatingWindowProps = {
 }
 
 /**
- * The one window that hosts the room in every mode.
+ * The window that hosts the room in every mode but `panel`, where there is no
+ * window: the room is the side panel's content and the panel draws the card.
  *
  * Position and size are plain style properties with a CSS transition rather
  * than a motion animation: a gesture writes them straight to the DOM, and a
@@ -55,16 +48,15 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
     isCompactViewport,
     announce,
     setMode,
-    panelWidth,
-    setPanelWidth,
   } = useMeetingSurface()
 
   const elementRef = useRef<HTMLDivElement | null>(null)
   const rectRef = useRef<F0Rect>(rect)
   rectRef.current = rect
 
-  // The side panel is placed by the frame, not by the user: like the chat's
-  // panel it cannot be dragged, and the mode buttons are the way out of it.
+  // Fullscreen and inline are placed for the user, not by them. `panel` never
+  // reaches here at all: docked, the room is the side panel's content and has
+  // no window of its own.
   const canManipulate =
     !isCompactViewport &&
     (effectiveMode === "floating" || effectiveMode === "minimized")
@@ -88,9 +80,6 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
     [setIsDragging, settleRect, announce, i18n]
   )
 
-  const isPanel = effectiveMode === "panel"
-  const canResizePanel = isPanel && !isCompactViewport
-
   const handleResize = useCallback(
     (next: F0Rect) => {
       setIsDragging(false)
@@ -108,27 +97,13 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
     enabled: canManipulate,
   })
 
-  // The panel resizes live, like the chat's, so it needs its own transient
-  // flag: `isDragging` means "a gesture owns the DOM", which is not the case
-  // here — the rect still comes from React on every move.
-  const [isResizingPanel, setIsResizingPanel] = useState(false)
-  const panelWidthRef = useRef(panelWidth)
-  panelWidthRef.current = panelWidth
-
-  const handlePanelResize = useCallback(
-    (deltaX: number) => setPanelWidth(panelWidthRef.current + deltaX),
-    [setPanelWidth]
-  )
-  const resetPanelWidth = useCallback(
-    () => setPanelWidth(PANEL_DEFAULT_WIDTH),
-    [setPanelWidth]
-  )
-
   // While a gesture owns the element the DOM is the source of truth, so the
   // declarative sync has to stand down until it finishes.
   useLayoutEffect(() => {
     const element = elementRef.current
-    if (!element || isDragging) return
+    if (!element || isDragging) {
+      return
+    }
     element.style.left = `${rect.x}px`
     element.style.top = `${rect.y}px`
     element.style.width = `${rect.width}px`
@@ -137,7 +112,9 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (!canManipulate) return
+      if (!canManipulate) {
+        return
+      }
 
       const step = event.shiftKey ? KEYBOARD_STEP_LARGE : KEYBOARD_STEP
       const resizing = event.metaKey || event.ctrlKey
@@ -151,7 +128,9 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
         ArrowRight: [step, 0],
       }
       const delta = deltas[event.key]
-      if (!delta) return
+      if (!delta) {
+        return
+      }
       event.preventDefault()
 
       const next: F0Rect = resizing
@@ -188,8 +167,11 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
             ),
           }
 
-      if (resizing) resizeRect(next)
-      else handleSettle(next)
+      if (resizing) {
+        resizeRect(next)
+      } else {
+        handleSettle(next)
+      }
     },
     [canManipulate, resizeRect, handleSettle]
   )
@@ -197,9 +179,13 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
   // Escape leaves fullscreen. It must never hang up: losing a call to a stray
   // keypress is unforgivable.
   useEffect(() => {
-    if (effectiveMode !== "fullscreen") return
+    if (effectiveMode !== "fullscreen") {
+      return
+    }
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") setMode("floating")
+      if (event.key === "Escape") {
+        setMode("floating")
+      }
     }
     document.addEventListener("keydown", onKeyDown)
     return () => document.removeEventListener("keydown", onKeyDown)
@@ -207,24 +193,26 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
 
   const isFullscreen = effectiveMode === "fullscreen"
   const isInline = effectiveMode === "inline"
+  const isMinimized = effectiveMode === "minimized"
+  // From the window's own rect, which is the authority for its size in every
+  // mode — including full screen, where it is the viewport.
+  const density = isFullscreen ? "regular" : densityFor(rect)
 
   return (
-    <>
+    <MeetingDensityProvider density={density}>
       <div
         ref={elementRef}
         role="dialog"
-        // Only fullscreen is modal. In every other mode the user keeps working in
-        // the app with the call open, so trapping focus would be wrong.
+        // Only fullscreen is modal. In every other mode the user keeps working
+        // in the app with the call open, so trapping focus would be wrong.
         aria-modal={isFullscreen}
         aria-label={i18n.meeting.meetingWindow}
         data-testid="meeting-window"
         data-mode={effectiveMode}
         className={cn(
-          // Same surface token as the chat's side panel, which is what the call
-          // sits flush against in panel mode.
-          "pointer-events-auto fixed overflow-hidden bg-f1-background shadow-lg",
-          // The panel is a card inset in its slot, exactly like the chat's, so
-          // it is rounded and bordered all the way round like the rest.
+          // Same surface token as the side panel's card, so a call reads as the
+          // same object whether it is docked or floating over the page.
+          "pointer-events-auto fixed flex flex-col overflow-hidden bg-f1-background shadow-lg",
           isFullscreen || isInline
             ? "rounded-none"
             : "rounded-xl border border-solid border-f1-border-secondary",
@@ -232,7 +220,7 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
         )}
         style={{
           transition:
-            isDragging || isResizingPanel || shouldReduceMotion
+            isDragging || shouldReduceMotion
               ? "none"
               : `left 220ms ${EASE}, top 220ms ${EASE}, width 220ms ${EASE}, height 220ms ${EASE}`,
           willChange: isDragging ? "left, top, width, height" : undefined,
@@ -252,52 +240,42 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
           onPointerUp={canManipulate ? gestures.end : undefined}
           onPointerCancel={canManipulate ? gestures.cancel : undefined}
           onKeyDown={handleKeyDown}
-          style={{ touchAction: canManipulate ? "none" : undefined }}
+          style={{
+            touchAction: canManipulate ? "none" : undefined,
+            // A pill is all title bar; full screen keeps its own scaled-up
+            // chrome. Everything else takes the height its density asks for.
+            ...(isMinimized || isFullscreen
+              ? {}
+              : { height: HEADER_HEIGHT[density] }),
+          }}
           className={cn(
             "relative flex shrink-0 items-center gap-2",
             // Fullscreen is a room rather than a widget, so its chrome scales
-            // up with it. The body's height has to follow the same number.
-            isFullscreen ? "h-14 px-4" : "px-3",
-            effectiveMode === "minimized"
-              ? "h-full"
-              : !isFullscreen && "h-[3.75rem]",
+            // up with it.
+            isFullscreen ? "h-14 px-4" : density === "tight" ? "px-2" : "px-3",
+            isMinimized && "h-full",
             canManipulate && "cursor-grab active:cursor-grabbing"
           )}
         >
           {header}
         </div>
 
-        {effectiveMode !== "minimized" && (
-          <div
-            className={cn(
-              "relative w-full",
-              isFullscreen ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-3.75rem)]"
-            )}
-          >
-            {children}
-          </div>
+        {/* What is left of the column. No `calc(100% - header)`: that number
+            had to be kept in step with the title bar by hand, and it was
+            already wrong for one of the two heights it tried to cover. */}
+        {isMinimized ? null : (
+          <div className="relative min-h-0 w-full flex-1">{children}</div>
         )}
 
-        {canManipulate && effectiveMode === "floating" && (
+        {canManipulate && effectiveMode === "floating" ? (
           <ResizeHandles
             onPointerDown={gestures.begin}
             onPointerMove={gestures.move}
             onPointerUp={gestures.end}
             onPointerCancel={gestures.cancel}
           />
-        )}
-
-        {canResizePanel && (
-          // Only the inner edge resizes the panel; the other three belong to
-          // the frame's content area.
-          <PanelResizeHandle
-            onResize={handlePanelResize}
-            onReset={resetPanelWidth}
-            isResizing={isResizingPanel}
-            setIsResizing={setIsResizingPanel}
-          />
-        )}
+        ) : null}
       </div>
-    </>
+    </MeetingDensityProvider>
   )
 }

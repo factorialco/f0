@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-
 import { usePersistedState } from "@/lib/persisted-state"
-
 import { type F0Rect, type F0WindowPlacement } from "../types"
 import {
   isWindowPlacement,
@@ -53,7 +51,9 @@ export const useWindowPlacement = (): {
   const [viewport, setViewport] = useState(readViewport)
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") {
+      return
+    }
     let frame = 0
     const measure = (): void => {
       cancelAnimationFrame(frame)

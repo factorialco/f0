@@ -15,6 +15,7 @@ import { useSynthesizedActions } from "./components/controls/useSynthesizedActio
 import { MeetingGrid } from "./components/grid/MeetingGrid"
 import { MeetingSidePanel } from "./components/panel/MeetingSidePanel"
 import { useF0Meeting, useF0MeetingRoster } from "./providers/F0MeetingProvider"
+import { useMeetingDensity } from "./providers/MeetingDensityProvider"
 import { useMeetingSurface } from "./providers/MeetingSurfaceProvider"
 import { type F0MeetingActionsProp, type F0MeetingSidePanel } from "./types"
 
@@ -39,6 +40,7 @@ export const F0MeetingRoom = ({
   const runtime = useF0Meeting()
   const { status } = useF0MeetingRoster()
   const { effectiveMode } = useMeetingSurface()
+  const density = useMeetingDensity()
   const coreActions = useSynthesizedActions(sidePanel)
 
   const hostActions = useMemo(
@@ -71,10 +73,17 @@ export const F0MeetingRoom = ({
       <RecordingBanner />
       <AudioUnlockPrompt />
 
+      {/* Padding scales with the room. In a window near its minimum a 12px
+          gutter on each side is 9% of the width, and every pixel of it comes
+          off the faces. */}
       <div
         className={cn(
           "flex min-h-0 flex-1",
-          isFullscreen ? "gap-4 px-4" : "gap-3 px-3"
+          isFullscreen
+            ? "gap-4 px-4"
+            : density === "tight"
+              ? "gap-1.5 px-1.5"
+              : "gap-3 px-3"
         )}
       >
         <div className="relative min-w-0 flex-1">

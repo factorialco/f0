@@ -2,25 +2,17 @@
 
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-
-import { MeetingLiveRegion } from "./components/chrome/MeetingLiveRegion"
 import { MeetingHeader } from "./components/chrome/MeetingHeader"
+import { MeetingLiveRegion } from "./components/chrome/MeetingLiveRegion"
 import { MeetingControlBar } from "./components/controls/MeetingControlBar"
 import { mergeActions } from "./components/controls/merge-actions"
 import { useSynthesizedActions } from "./components/controls/useSynthesizedActions"
 import { F0MeetingRoom } from "./F0MeetingRoom"
 import { useF0Meeting } from "./providers/F0MeetingProvider"
+import { useMeetingChrome } from "./providers/MeetingChromeProvider"
 import { useMeetingSurface } from "./providers/MeetingSurfaceProvider"
-import { type F0MeetingActionsProp, type F0MeetingSidePanel } from "./types"
+import { type F0MeetingActionsProp } from "./types"
 import { FloatingWindow } from "./window/FloatingWindow"
-
-export type F0MeetingSurfaceProps = {
-  actions?: F0MeetingActionsProp
-  actionOrder?: string[]
-  sidePanel?: F0MeetingSidePanel
-  headerContent?: React.ReactNode
-  overlay?: React.ReactNode
-}
 
 /** The pinned controls a minimized pill keeps: mic and hang up, nothing else. */
 const MinimizedActions = ({
@@ -38,7 +30,7 @@ const MinimizedActions = ({
 
 /**
  * Mounts the room into a portal on `document.body`, once, for the whole life of
- * the meeting.
+ * the meeting — for every mode EXCEPT `panel`.
  *
  * It lives outside the application frame on purpose. The frame's root is
  * `overflow-hidden` and contains transformed elements, and a transformed
@@ -46,15 +38,17 @@ const MinimizedActions = ({
  * what a free-floating window needs. Portalling also keeps the frame's own
  * z-index map untouched: the surface only claims the 40–49 band at body level,
  * deliberately below Radix dialogs so a modal can still cover the call.
+ *
+ * `panel` is the one mode with no window at all: there the room is the side
+ * panel's content (see `MeetingPanelContent`), so it needs no chrome of its own
+ * and no rect — the panel supplies both. The portal element stays mounted
+ * regardless, because the live region announcing the call must survive the
+ * switch between the two.
  */
-export const F0MeetingSurface = ({
-  actions,
-  actionOrder,
-  sidePanel,
-  headerContent,
-  overlay,
-}: F0MeetingSurfaceProps) => {
+export const F0MeetingSurface = () => {
   const { effectiveMode } = useMeetingSurface()
+  const { actions, actionOrder, sidePanel, headerContent, overlay } =
+    useMeetingChrome()
   const [container, setContainer] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -73,7 +67,9 @@ export const F0MeetingSurface = ({
   // without doing this would tell a screen reader the page is unreachable
   // while it is still perfectly reachable by tabbing.
   useEffect(() => {
-    if (!container || effectiveMode !== "fullscreen") return
+    if (!container || effectiveMode !== "fullscreen") {
+      return
+    }
     const siblings = Array.from(document.body.children).filter(
       (child) => child !== container && !child.hasAttribute("inert")
     )
@@ -83,33 +79,40 @@ export const F0MeetingSurface = ({
     }
   }, [container, effectiveMode])
 
-  if (!container) return null
+  if (!container) {
+    return null
+  }
 
   return createPortal(
     <>
       <MeetingLiveRegion />
-      <FloatingWindow
-        header={
-          <MeetingHeader
-            extra={
-              // A minimized pill is only a title bar, so its two surviving
-              // controls ride in the header rather than in a hidden body.
-              effectiveMode === "minimized" ? (
-                <MinimizedActions actions={actions} actionOrder={actionOrder} />
-              ) : (
-                headerContent
-              )
-            }
+      {effectiveMode === "panel" ? null : (
+        <FloatingWindow
+          header={
+            <MeetingHeader
+              extra={
+                // A minimized pill is only a title bar, so its two surviving
+                // controls ride in the header rather than in a hidden body.
+                effectiveMode === "minimized" ? (
+                  <MinimizedActions
+                    actions={actions}
+                    actionOrder={actionOrder}
+                  />
+                ) : (
+                  headerContent
+                )
+              }
+            />
+          }
+        >
+          <F0MeetingRoom
+            actions={actions}
+            actionOrder={actionOrder}
+            sidePanel={sidePanel}
+            overlay={overlay}
           />
-        }
-      >
-        <F0MeetingRoom
-          actions={actions}
-          actionOrder={actionOrder}
-          sidePanel={sidePanel}
-          overlay={overlay}
-        />
-      </FloatingWindow>
+        </FloatingWindow>
+      )}
     </>,
     container
   )

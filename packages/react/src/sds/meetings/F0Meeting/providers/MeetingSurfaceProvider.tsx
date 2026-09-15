@@ -10,32 +10,29 @@ import {
   type ReactNode,
 } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { usePersistedState } from "@/lib/persisted-state"
-
 import {
   f0MeetingSurfaceModes,
   type F0MeetingFocusIntent,
   type F0MeetingSurfaceMode,
   type F0Rect,
 } from "../types"
-import { panelRect, panelWidthFor, viewportRect } from "../window/panel"
+import { viewportRect } from "../window/panel"
 import { resolvePlacement } from "../window/placement"
 import { useWindowPlacement } from "../window/useWindowPlacement"
 import {
   MINIMIZED_HEIGHT,
   MINIMIZED_WIDTH,
   MODE_STORAGE_KEY,
-  PANEL_DEFAULT_WIDTH,
 } from "../window/window-constants"
 
 /** Modes worth remembering across reloads. `inline` depends on the route. */
-const PERSISTED_MODES: F0MeetingSurfaceMode[] = [
+const PERSISTED_MODES = new Set<F0MeetingSurfaceMode>([
   "fullscreen",
   "floating",
   "minimized",
   "panel",
-]
+])
 
 const isSurfaceMode = (value: unknown): value is F0MeetingSurfaceMode =>
   typeof value === "string" &&
@@ -74,11 +71,23 @@ export type MeetingSurfaceContextValue = {
   resizeRect: (rect: F0Rect) => void
   /** True below the md breakpoint: no dragging, pill instead of window. */
   isCompactViewport: boolean
-  /** Width the side panel reserves. */
-  panelWidth: number
-  /** The region the side panel may occupy — the frame's content area. */
+  /**
+   * The frame's content area. `panel` mode does NOT use it — there the room is
+   * the side panel's content and the panel places itself. It is what a window
+   * sizes itself against when it has to sit BESIDE the panel (see
+   * `fitToContent`), and the viewport when no frame published one.
+   */
   panelArea: F0Rect
-  setPanelWidth: (width: number) => void
+  /**
+   * Whether there is a side panel for the call to be the content of.
+   *
+   * Registered by the application frame, the same way `F0MeetingSlot`
+   * registers a rect for `inline`. A call rendered on its own — a story, a
+   * test, a host with no frame — has nowhere to dock, so `panel` derives to
+   * `floating` and the switch stops offering it.
+   */
+  hasPanelSlot: boolean
+  setPanelSlot: (available: boolean) => void
   /** Registered by `F0MeetingSlot` so `inline` knows where to fly to. */
   setInlineRect: (rect: F0Rect | null) => void
   /**
@@ -113,12 +122,12 @@ export const MeetingSurfaceProvider = ({
   roomId?: string
   children: ReactNode
 }): ReactNode => {
-  const [stored, setStored] = usePersistedState<StoredMode>(
-    MODE_STORAGE_KEY,
-    { roomId, mode: defaultMode },
-    isStoredMode,
-    (value) => PERSISTED_MODES.includes(value.mode)
-  )
+  const [stored, setStored] = usePersistedState<StoredMode>({
+    key: MODE_STORAGE_KEY,
+    fallback: { roomId, mode: defaultMode },
+    validate: isStoredMode,
+    shouldWrite: (value) => PERSISTED_MODES.has(value.mode),
+  })
 
   // Restore only what belongs to this call; anything else starts fresh.
   const mode = stored.roomId === roomId ? stored.mode : defaultMode
@@ -129,6 +138,7 @@ export const MeetingSurfaceProvider = ({
   )
 
   const [inlineRect, setInlineRect] = useState<F0Rect | null>(null)
+  const [hasPanelSlot, setPanelSlot] = useState(false)
   const [frameRect, setFrameRect] = useState<F0Rect | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [focusIntent, setFocusIntent] = useState<F0MeetingFocusIntent>({
@@ -144,7 +154,6 @@ export const MeetingSurfaceProvider = ({
     rect: floatingRect,
     settle,
     resize,
-    setPanelWidth: setStoredPanelWidth,
   } = useWindowPlacement()
 
   const isCompactViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
@@ -154,7 +163,13 @@ export const MeetingSurfaceProvider = ({
   // The environment never mutates the stored mode — it only derives a
   // different one, so returning to desktop restores what the user picked.
   const effectiveMode = useMemo<F0MeetingSurfaceMode>(() => {
-    if (mode === "inline" && !inlineRect) return "floating"
+    if (mode === "inline" && !inlineRect) {
+      return "floating"
+    }
+    // Same rule, for the same reason: a place that isn't there is not a place.
+    if (mode === "panel" && !hasPanelSlot) {
+      return "floating"
+    }
     if (
       isCompactViewport &&
       (mode === "floating" || mode === "inline" || mode === "panel")
@@ -162,37 +177,23 @@ export const MeetingSurfaceProvider = ({
       return "minimized"
     }
     return mode
-  }, [mode, inlineRect, isCompactViewport])
+  }, [mode, inlineRect, hasPanelSlot, isCompactViewport])
 
-  /** Where the side panel is allowed to live. */
+  /** The frame's content region, or the viewport when nobody published one. */
   const panelArea = useMemo(
     () => frameRect ?? viewportRect(viewport),
     [frameRect, viewport]
   )
 
-  const panelWidth = useMemo(
-    () =>
-      panelWidthFor(
-        { width: panelArea.width, height: panelArea.height },
-        placement.panelWidth ?? PANEL_DEFAULT_WIDTH
-      ),
-    [panelArea, placement.panelWidth]
-  )
-
-  const setPanelWidth = useCallback(
-    (width: number) => setStoredPanelWidth(width, panelArea),
-    [setStoredPanelWidth, panelArea]
-  )
-
+  // `panel` is absent on purpose: that mode renders no window at all, so it has
+  // no rect to compute. The room is the side panel's content and the panel
+  // decides where it goes — see `MeetingPanelContent`.
   const rect = useMemo<F0Rect>(() => {
     if (effectiveMode === "fullscreen") {
       return { x: 0, y: 0, width: viewport.width, height: viewport.height }
     }
-    if (effectiveMode === "inline" && inlineRect) return inlineRect
-    if (effectiveMode === "panel") {
-      // The window stays in its portal and simply covers the strip the frame
-      // reserves. Nothing is reparented, so the video never remounts.
-      return panelRect(panelArea, panelWidth)
+    if (effectiveMode === "inline" && inlineRect) {
+      return inlineRect
     }
     if (effectiveMode === "minimized") {
       return isCompactViewport
@@ -212,8 +213,6 @@ export const MeetingSurfaceProvider = ({
     isCompactViewport,
     placement,
     floatingRect,
-    panelWidth,
-    panelArea,
   ])
 
   const announce = useCallback((message: string) => {
@@ -230,6 +229,8 @@ export const MeetingSurfaceProvider = ({
       setIsDragging,
       settleRect: settle,
       resizeRect: resize,
+      hasPanelSlot,
+      setPanelSlot,
       isCompactViewport,
       setInlineRect,
       setFrameRect,
@@ -241,9 +242,7 @@ export const MeetingSurfaceProvider = ({
       setActiveTabId,
       announce,
       liveMessage,
-      panelWidth,
       panelArea,
-      setPanelWidth,
     }),
     [
       mode,
@@ -253,15 +252,14 @@ export const MeetingSurfaceProvider = ({
       isDragging,
       settle,
       resize,
+      hasPanelSlot,
       isCompactViewport,
       focusIntent,
       isSidePanelOpen,
       activeTabId,
       announce,
       liveMessage,
-      panelWidth,
       panelArea,
-      setPanelWidth,
     ]
   )
 

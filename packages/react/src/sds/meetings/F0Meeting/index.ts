@@ -2,6 +2,7 @@ export { F0Meeting } from "./F0Meeting"
 export { F0MeetingRoom, type F0MeetingRoomProps } from "./F0MeetingRoom"
 export { F0MeetingSlot } from "./F0MeetingSlot"
 export { F0MeetingSurface } from "./F0MeetingSurface"
+export { MeetingPanelContent } from "./MeetingPanelContent"
 
 export {
   F0MeetingProvider,
@@ -49,6 +50,6 @@ export {
   resolvePlacement,
   settlePlacement,
 } from "./window/placement"
-export { panelRect, panelWidthFor, viewportRect } from "./window/panel"
+export { viewportRect } from "./window/panel"
 
 export * from "./types"
