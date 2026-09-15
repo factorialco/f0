@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react"
 
 import { ClockDot } from "../one/ClockDot"
-import { RollingTime } from "../one/RollingTime"
 import { requestClockInWidget, useClockIn } from "./clockInStore"
 
 /**
  * The running clock in the rail, above Settings (Angel, 2026-09-15): once
- * you are clocked in the rail carries the breathing mark and the time in
- * the same mm:ss the pill shows, and clicking it brings the clock-in card
- * out beside it. It is absent when you are clocked out, so the rail only
- * grows while something is actually running.
+ * you are clocked in the rail carries the breathing mark and how long you
+ * have been at it, and clicking it brings the clock-in card out beside
+ * it. It is absent when you are clocked out, so the rail only grows while
+ * something is actually running.
+ *
+ * COARSE on purpose: this is a glance, not a stopwatch, so it counts in
+ * minutes and hours and never animates (the pill under the composer is
+ * the one that ticks).
  */
-function pad(value: number) {
-  return String(value).padStart(2, "0")
+function coarse(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`
 }
 
 export function RailClockIn() {
@@ -22,26 +28,27 @@ export function RailClockIn() {
   useEffect(() => {
     if (!clockedInAt) return
     setNow(Date.now())
-    const interval = setInterval(() => setNow(Date.now()), 1000)
+    // Every 15s is enough to land on the minute without a per-second
+    // render that nothing on screen would show.
+    const interval = setInterval(() => setNow(Date.now()), 15000)
     return () => clearInterval(interval)
   }, [clockedInAt])
 
   if (!clockedInAt) return null
 
-  const seconds = Math.max(0, Math.floor((now - clockedInAt) / 1000))
-  const elapsed = `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`
+  const elapsed = coarse(Math.max(0, Math.floor((now - clockedInAt) / 60000)))
 
   return (
     <button
       data-home-clockin-rail
       aria-label={`Clocked in, ${elapsed}`}
       onClick={requestClockInWidget}
-      // text-base is f0's 14px: the 11px of the rail's own labels is for
-      // words under a glyph, and this is a readout (Angel, 2026-09-15).
-      className="f0c-pressable flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1 text-base font-medium text-f1-foreground hover:bg-f1-background-secondary"
+      // 13px: a point under f0's text-base, which is what a readout in a
+      // 68px rail can carry without crowding it (Angel, 2026-09-15).
+      className="f0c-pressable flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1 text-[13px] font-medium leading-4 text-f1-foreground hover:bg-f1-background-secondary"
     >
       <ClockDot size={8} />
-      <RollingTime value={elapsed} />
+      <span className="whitespace-nowrap">{elapsed}</span>
     </button>
   )
 }

@@ -47,7 +47,10 @@ export function ClockInPill() {
       onClick={clockedInAt ? requestClockInWidget : toggleClockIn}
       className={`f0c-pressable inline-flex h-8 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded border-none pl-2.5 pr-3.5 text-base font-medium backdrop-blur-[8px] ${
         clockedInAt
-          ? "bg-transparent text-f1-foreground ring-1 ring-inset ring-f1-border hover:bg-f1-background-secondary"
+          ? // The same ground f0's outline buttons stand on, so the
+            // running clock matches the chevrons beside it (Angel,
+            // 2026-09-15).
+            "bg-f1-background-inverse-secondary text-f1-foreground ring-1 ring-inset ring-f1-border hover:bg-f1-background-tertiary dark:bg-f1-background-tertiary"
           : "bg-f1-background-accent-bold text-f1-foreground-inverse hover:bg-f1-background-accent-bold-hover"
       }`}
     >
