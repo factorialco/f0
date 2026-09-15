@@ -1229,6 +1229,9 @@ function HomeCanvas() {
   const pinRef = useRef<HTMLDivElement>(null)
   const firstScreenRef = useRef<HTMLDivElement>(null)
   const digestRef = useRef<HTMLDivElement>(null)
+  /** How far the first screen is held, which is also how long the dotted
+   *  grid takes to fade out. */
+  const pinned = useRef(0)
   const [atTop, setAtTop] = useState(true)
   useLayoutEffect(() => {
     const scroller = scrollerRef.current
@@ -1256,12 +1259,22 @@ function HomeCanvas() {
       const parked = height + 24
       const pin = Math.max(0, parked - base)
       pinBox.style.height = `${height + pin}px`
+      pinned.current = pin
       // The digest parks 24px below the fold and climbs into its base
       // position while the screen above it is held.
       digest.style.marginTop = `${24 - pin}px`
     }
     measure()
-    const follow = () => setAtTop(scroller.scrollTop < 8)
+    const backdrop = document.querySelector<HTMLElement>("[data-home-backdrop]")
+    const follow = () => {
+      const offset = scroller.scrollTop
+      setAtTop(offset < 8)
+      // Gone by the time the digest has climbed into place.
+      if (backdrop && pinned.current > 0)
+        backdrop.style.opacity = String(
+          Math.max(0, 1 - offset / pinned.current)
+        )
+    }
     follow()
     scroller.addEventListener("scroll", follow, { passive: true })
     const observer = new ResizeObserver(measure)
@@ -1273,6 +1286,7 @@ function HomeCanvas() {
       if (pinBox) pinBox.style.height = ""
       if (screen) screen.style.height = ""
       if (digest) digest.style.marginTop = ""
+      if (backdrop) backdrop.style.opacity = ""
     }
   }, [homeLanding])
   /**

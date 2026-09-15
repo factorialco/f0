@@ -14,6 +14,7 @@ import {
   Comment,
   Delete,
   Ellipsis,
+  Feed,
   Files,
   Filter,
   Folder,
@@ -60,6 +61,7 @@ import { inboxPresetCounts, openInboxTasks } from "./inbox/inboxTasks"
 import { PresetChip } from "./inbox/PresetChip"
 import { MenuDivider, MenuRow } from "./MenuRow"
 import { FILLED_RAIL_ICONS } from "./navigation/filledRailIcons"
+import { BackgroundTasks } from "./navigation/localIcons"
 import { CompanySwitcher, RailPersonalMenu } from "./navigation/RailMenus"
 import { setNavPanelOpen, useNavPanelOpen } from "./navPanelStore"
 import { useNeedsYou } from "./needsYouStore"
@@ -599,7 +601,8 @@ function RecentsControl({
 function HomePanelBody() {
   const profile = useProfile()
   const { conversations, activeId } = useConversations()
-  const [, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const view = searchParams.get("view")
   const [recentsFilter, setRecentsFilter] =
     useState<RecentsFilter>(readRecentsFilter)
 
@@ -649,6 +652,32 @@ function HomePanelBody() {
             setSearchParams({})
           }}
         />
+        {/* Routines and AI Activity are back under New chat (Angel,
+            2026-09-15): what One runs for you belongs beside the place
+            you talk to it, not inside the Tools catalog. The divider is
+            the one every other panel draws between its fixed rows and
+            its list. */}
+        <div className="flex flex-col gap-0.5">
+          <NavRow
+            icon={BackgroundTasks}
+            label="Routines"
+            active={view === "routines"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "routines" })
+            }}
+          />
+          <NavRow
+            icon={Feed}
+            label="AI Activity"
+            active={view === "ai-activity"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "ai-activity" })
+            }}
+          />
+        </div>
+        <PanelDivider />
         {/* `sorted`, not `conversations`: agent threads are filtered out
           above, so counting them here would leave "Recents" standing with
           a header and no rows. */}
