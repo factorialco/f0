@@ -1,6 +1,6 @@
 import { jsx as t } from "react/jsx-runtime";
 import { useState as m, useRef as u, useEffect as h } from "react";
-import { f as b } from "./sheetPreview-5qeAOp0W.js";
+import { f as b } from "./sheetPreview-Djc-YyVs.js";
 const p = 12, w = 8, S = ({
   url: s,
   onError: c,
@@ -12,7 +12,8 @@ const p = 12, w = 8, S = ({
   return f.current = l, h(() => {
     let e = !1;
     return b(s, { maxRows: p, maxCols: w }).then((n) => {
-      if (e) return;
+      if (e)
+        return;
       const r = n[0];
       if (!r || r.rows.length === 0) {
         o.current();

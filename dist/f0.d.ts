@@ -190,7 +190,7 @@ declare type Action_2 = {
 
 declare type Action_3 = {
     label: string;
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     icon?: IconType;
     variant?: ButtonVariant;
     size?: "md" | "lg";
@@ -490,10 +490,19 @@ export declare type AiChatCredits = {
 export declare type AiChatCreditWarning = {
     /** The severity level of the warning. */
     level: "soft";
+    /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+    text?: string;
+    /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+    actionLabel?: string;
     /** Called when the user dismisses the credit warning banner. */
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
     onGetCredits?: () => void;
+    /**
+     * Icon rendered to the left of the "Get Credits" label. Only used when
+     * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+     */
+    getCreditsIcon?: IconType;
 };
 
 /**
@@ -599,8 +608,15 @@ export declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -745,7 +761,8 @@ declare type AiChatProviderReturnValue = {
     }) => void;
     tracking?: AiChatTrackingOptions;
     /**
-     * Current width of the chat window (for resizable mode)
+     * The user's preferred width, persisted against the absolute range. This is
+     * NOT what the layout reserves — read `effectiveChatWidth` for that.
      */
     chatWidth: number;
     setChatWidth: React.Dispatch<React.SetStateAction<number>>;
@@ -753,6 +770,29 @@ declare type AiChatProviderReturnValue = {
      * Reset the chat width to the default value (360px)
      */
     resetChatWidth: () => void;
+    /**
+     * `chatWidth` held inside what the measured frame can actually give it. The
+     * preference survives a narrow window; only this shrinks.
+     *
+     * OPTIONAL for the same reason as `isResizing` below: the provider always
+     * supplies it, but making it required reads as a breaking public-API change.
+     */
+    effectiveChatWidth?: number;
+    /** The range the panel may be dragged to at the frame's current width. */
+    chatWidthBounds?: PanelBounds;
+    /**
+     * True when the panel covers the frame rather than sitting beside it.
+     *
+     * Read this instead of re-deriving it from a media query: the rule combines
+     * the measured frame with the pointer type, and two consumers computing it
+     * separately is how a resize handle ends up on a full-screen panel.
+     */
+    panelOverlays?: boolean;
+    /**
+     * Publishes the frame's content-box width. Called by ApplicationFrame, which
+     * is the only thing that knows how much room is left beside the navigation.
+     */
+    setFrameWidth?: (width: number) => void;
     /**
      * True while the user is dragging the chat's resize handle. Broadcast here
      * because everything laid out against the chat's edge has to follow the drag
@@ -946,6 +986,8 @@ declare interface AiChatState {
     tracking?: AiChatTrackingOptions;
 }
 
+export declare type AiChatTextAreaUsageLimits = Pick<F0AiChatUsageLimitsButtonProps, "usage" | "error" | "onOpenChange">;
+
 export declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
     onClose?: () => void;
@@ -973,6 +1015,32 @@ export declare interface AiChatTranslationsProviderProps {
     translations: AiChatTranslations;
 }
 
+/**
+ * Host-resolved numbers for `F0AiChatUsageLimitsButton`. Percentages only: the
+ * product avoids credit counts in the chat.
+ */
+export declare type AiChatUsageLimits = {
+    /** The viewer's own allowance, 0–100. */
+    usedPercentage: number;
+    /** Already localized, e.g. "Resets in 3h 6m". */
+    description?: string;
+    unlimited?: boolean;
+    /** Extra rows below a divider, typically for admins. */
+    sections?: AiChatUsageLimitsSection[];
+    /** Renders the "Your company" row. */
+    onSeeCompany?: () => void;
+};
+
+export declare type AiChatUsageLimitsSection = {
+    id: string;
+    /** Already localized. */
+    label: string;
+    /** Already localized, e.g. "Renews Sep 4". */
+    description?: string;
+    usedPercentage: number;
+    unlimited?: boolean;
+};
+
 export declare type AiInsightCardContent = {
     content: "text";
 } | {
@@ -980,7 +1048,7 @@ export declare type AiInsightCardContent = {
     avatar: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">;
 } | {
     content: "people";
-    avatars: Array<Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">>;
+    avatars: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">[];
 } | {
     content: "team";
     avatar: Pick<F0AvatarTeamProps, "name" | "src">;
@@ -1025,6 +1093,13 @@ export declare const aiTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
+        readonly attribution: "Suggested by One";
+        readonly evidence: {
+            readonly show: "See {{name}}";
+            readonly hide: "Hide {{name}}";
+        };
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -1073,6 +1148,13 @@ export declare const aiTranslations: {
             readonly creditsError: "Could not load credits";
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
+        };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
         };
         readonly reportCard: {
             readonly tableLabel: "Table";
@@ -1414,12 +1496,6 @@ export declare type AutofillTimesheetShift = {
     locationType?: string | null;
 };
 
-/**
- * An item that can be passed in the `availableFormDefinitions` array.
- * Accepts either a plain {@link F0AiAvailableFormDefinition} or the result
- * of calling {@link useF0FormDefinition} (i.e. {@link F0FormDefinitionSingleSchema}
- * or {@link F0FormDefinitionPerSection}).
- */
 export declare type AvailableFormDefinitionItem = F0AiAvailableFormDefinition | F0FormDefinitionSingleSchema<any> | F0FormDefinitionPerSection<any>;
 
 declare const Avatar: React_2.ForwardRefExoticComponent<Omit<AvatarPrimitive.AvatarProps & React_2.RefAttributes<HTMLSpanElement>, "ref"> & {
@@ -1664,7 +1740,7 @@ declare type BaseColor = keyof typeof baseColors;
  */
 export declare type BaseDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters>, FetchReturn = BaseResponse<R>> = {
     /** Indicates this adapter doesn't use pagination */
-    paginationType?: never | undefined;
+    paginationType?: undefined;
     /**
      * Function to fetch data based on filter options
      * @param options - The filter options to apply when fetching data
@@ -1725,6 +1801,11 @@ declare interface BaseHeaderProps_2 {
         name: string;
         src?: string;
     } | AvatarVariant;
+    /**
+     * Markdown. Inline formatting only — a link out to the resource's source of
+     * truth is the case this exists for. Clamped to two lines behind a "show all"
+     * toggle.
+     */
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -1782,10 +1863,24 @@ declare type BaseQuestionProps = {
      */
     locked?: boolean;
     /**
+     * Freezes only the named fields, leaving the rest of the question editable —
+     * the actions menu included, so it can still be made optional, duplicated or
+     * removed. Use it when the wording is what the consumer depends on: a
+     * question whose answer feeds a validated field stops meaning the same thing
+     * once it is renamed, while deleting it is a legitimate choice.
+     *
+     * `locked` is the stronger form and wins: a locked question (or one inside a
+     * locked section) freezes everything regardless of this.
+     */
+    lockedFields?: LockedFields;
+    /**
      * Optional notice shown in the lock tooltip when the question is locked. Use
      * it to say what this specific question is — it takes precedence over the
      * parent section's `LockedSectionNotice` and over the default question notice
      * from the i18n provider.
+     *
+     * Also used by `lockedFields`, where saying which part is frozen and why is
+     * the only cue the author gets.
      */
     lockedNote?: LockedQuestionNotice;
 };
@@ -2062,7 +2157,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>;
     /**
      * The title of the button.
      */
@@ -2121,7 +2216,9 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     pressed?: boolean;
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean;
     /**
@@ -2198,6 +2295,8 @@ export declare type CalendarDate = {
 
 export declare type CalendarMode = "single" | "range";
 
+export declare type CalendarSelection = Date | DateRange | null;
+
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 /**
@@ -2236,6 +2335,9 @@ declare type CanvasCardAction = {
     hideLabel?: boolean;
 };
 
+/** The card's own control: open/close, or the host's custom action. */
+declare const CanvasCardAction: ({ action, isActive, }: Pick<F0CanvasCardProps, "action" | "isActive">) => JSX_2.Element | null;
+
 declare type CanvasCardAvatar = {
     type: "module";
     module: ModuleId;
@@ -2246,6 +2348,9 @@ declare type CanvasCardAvatar = {
     type: "icon";
     icon: IconType;
 };
+
+/** Whichever avatar the card was given: a module, a file, or an icon. */
+declare const CanvasCardAvatar: ({ avatar }: Pick<F0CanvasCardProps, "avatar">) => JSX_2.Element | null;
 
 /**
  * Discriminated union for canvas panel content.
@@ -2772,7 +2877,7 @@ declare type CardSelectRenderIfCondition = CardSelectRenderIfBase & ({
 });
 
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
+    cardProperties: readonly CardPropertyDefinition<T>[];
     title: (record: T) => string;
     description?: (record: T) => string;
     avatar?: (record: T) => CardAvatarVariant;
@@ -3178,6 +3283,12 @@ declare interface CheckboxProps extends DataAttributes_2 {
      * The title of the checkbox
      */
     title?: string;
+    /**
+     * A secondary line of text rendered under the title, for context the title
+     * cannot carry on its own. Hidden along with the title when `hideLabel` is
+     * set, and exposed to assistive technology as the checkbox's description.
+     */
+    description?: string;
     /**
      * The id of the checkbox
      */
@@ -3846,14 +3957,14 @@ export declare interface DashboardCollectionItem<Filters extends FiltersDefiniti
      * Visualization configs for the collection (table, card, list, kanban).
      * Same shape as OneDataCollection's `visualizations` prop.
      */
-    visualizations: ReadonlyArray<any>;
+    visualizations: readonly any[];
 }
 
 export declare interface DashboardFetchSpec {
-    fetch: Array<{
+    fetch: {
         toolId: string;
         args: Record<string, unknown>;
-    }>;
+    }[];
     query: string | null;
     columnLabels?: Record<string, string>;
 }
@@ -4052,6 +4163,15 @@ export declare type Data<R extends RecordType> = {
     records: WithGroupId<R>[];
     type: "grouped" | "flat";
     groups: GroupRecord<R>[];
+    /**
+     * The records with no value at the FIRST grouping level — they belong to no
+     * group at all, and read as plain rows above the ones that do.
+     *
+     * The counterpart of a group's `ownRecords` one level up: between them a list
+     * can be grouped without being uniformly grouped, which is what a real
+     * hierarchy looks like — some rows nested two deep, some one, some loose.
+     */
+    ungroupedRecords?: WithGroupId<R>[];
 };
 
 /**
@@ -4143,6 +4263,11 @@ declare interface DataCollectionSettingsContextType {
  * Extends the base data source with data collection specific elements / features
  */
 declare type DataCollectionSource<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> = DataSource<R, Filters, Sortings, Grouping> & DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
+    /**
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
+     */
+    definition?: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>;
     setCurrentNavigationFilters: React.Dispatch<React.SetStateAction<NavigationFiltersState<NavigationFilters>>>;
     /** Current summaries data */
@@ -4159,6 +4284,12 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     /**
      * Data Collection specific datasource elements / features
      */
+    /**
+     * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+     * lists everything the callbacks below close over: miss one and a row keeps
+     * calling the closure it mounted with.
+     */
+    memoizeDefinition?: boolean;
     /** Navigation filters */
     navigationFilters?: NavigationFilters;
     currentNavigationFilters?: NavigationFiltersState<NavigationFilters>;
@@ -4192,7 +4323,7 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     /** Item filter that can be used to filter the items before they are displayed */
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
-    lanes?: ReadonlyArray<Lane<Filters>>;
+    lanes?: readonly Lane<Filters>[];
     /** Rich search preview shown in the shared header search (all visualizations). */
     searchPreview?: SearchPreview<R>;
 };
@@ -4204,7 +4335,7 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
     filters?: CurrentFiltersState;
-    search?: string | undefined;
+    search?: string;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
     /** Per-visualization filter states, keyed by visualization index.
@@ -4212,6 +4343,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     visualizationFilters?: Record<string, CurrentFiltersState>;
     /** User-created custom presets persisted alongside the rest of the state. */
     customPresets?: PresetsDefinition<FiltersDefinition>;
+    /** The active view's id, so a revisit restores which view is selected and not
+     *  just the views themselves. */
+    selectedPresetId?: string;
 };
 
 export declare type DataCollectionStorage<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
@@ -4975,6 +5109,10 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -5341,6 +5479,13 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
+        readonly attribution: "Suggested by One";
+        readonly evidence: {
+            readonly show: "See {{name}}";
+            readonly hide: "Hide {{name}}";
+        };
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -5390,6 +5535,13 @@ export declare const defaultTranslations: {
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
         };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
+        };
         readonly reportCard: {
             readonly tableLabel: "Table";
             readonly openButton: "Open";
@@ -5409,12 +5561,6 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -5527,6 +5673,7 @@ export declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -5633,6 +5780,52 @@ export declare const defaultTranslations: {
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledEvent: "Event";
+            readonly draftPosts: "Drafts";
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -5749,6 +5942,31 @@ export declare const defaultTranslations: {
         readonly countryWithDialCode: "{{country}} {{dialCode}}";
         readonly searchCountry: "Search country or dial code";
         readonly noResults: "No country found";
+    };
+    readonly locationInput: {
+        readonly country: "Country";
+        readonly addressLine1: "Address line 1";
+        readonly addressLine2: "Address line 2";
+        readonly city: "City";
+        readonly state: "Region";
+        readonly postalCode: "Postal code";
+        readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
+        readonly searchCountry: "Search country";
+        readonly noCountryResults: "No country found";
+        readonly noResults: "No addresses found";
+        readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
+        readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -6005,19 +6223,14 @@ export declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -6192,7 +6405,7 @@ export declare type DialogControls = {
 } | {
     kind: "back";
     label: string;
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
 };
 
 export declare type DialogDefinition = {
@@ -6636,7 +6849,7 @@ declare type EditableTableOnCellChangeParams<R extends RecordType> = {
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
-    columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Called when a cell value changes. Receives an object with the full updated
      * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
@@ -6948,7 +7161,7 @@ export declare interface F0ActionBarRef {
     wiggle: (options?: WiggleOptions) => void;
 }
 
-export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+export declare const F0ActionItem: ({ title, suffix, status, inGroup, }: F0ActionItemProps) => JSX_2.Element;
 
 /**
  * Props for the F0ActionItem component
@@ -6958,6 +7171,14 @@ export declare interface F0ActionItemProps {
      * The title text displayed next to the status icon
      */
     title?: string;
+    /**
+     * Rendered inline after the title — used for the elapsed-time counter.
+     *
+     * A node rather than a string so that whatever ticks inside it owns its own
+     * state: passing a composed label would re-render this item, and everything
+     * above it, on every tick.
+     */
+    suffix?: ReactNode;
     /**
      * Current status of the action item
      */
@@ -7033,7 +7254,9 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
  * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
- * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ * Decoupled from CopilotKit, and prop-driven apart from one read: whether the
+ * panel is currently covering the frame, which decides if expanding means
+ * anything. Only the provider knows that, and it answers safely when absent.
  */
 export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
 
@@ -7166,7 +7389,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenSuggestionsCollapsedByDefault, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, usageLimits, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenSuggestionsCollapsedByDefault, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -7230,6 +7453,8 @@ export declare type F0AiChatTextAreaProps = {
      * the welcome screen of the fullscreen layout to give the footer room.
      */
     disclaimer?: AiChatDisclaimer;
+    /** Usage ring at the right end of the disclaimer row; the text then aligns left. */
+    usageLimits?: AiChatTextAreaUsageLimits;
     /**
      * Optional footer (e.g. powered-by, legal copy) rendered below the
      * textarea on the welcome screen.
@@ -7370,6 +7595,25 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     context: PendingContext | null;
     quote: PendingQuote | null;
 };
+
+/**
+ * Headless usage-limits popover with its ring trigger. `F0AiChatTextArea`
+ * renders it from its `usageLimits` prop.
+ */
+export declare const F0AiChatUsageLimitsButton: ({ usage, error, onOpenChange, trigger, side, }: F0AiChatUsageLimitsButtonProps) => JSX_2.Element;
+
+export declare interface F0AiChatUsageLimitsButtonProps {
+    /** `null` while loading: empty ring, skeleton in the popover. */
+    usage: AiChatUsageLimits | null;
+    /** Shows an error line instead of the rows. */
+    error?: boolean;
+    /** Hosts refetch on open. */
+    onOpenChange?: (open: boolean) => void;
+    /** Custom popover trigger (asChild). Defaults to the usage ring button. */
+    trigger?: ReactNode;
+    /** `"top"` suits the composer row; use `"bottom"` from a header. */
+    side?: UsageLimitsPopoverSide;
+}
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
@@ -8248,7 +8492,7 @@ export declare type F0AvatarIconProps = {
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
 export declare const F0AvatarList: WithDataTestIdReturnType_4<    {
-({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll, layout, }: F0AvatarListProps_2): JSX_2.Element;
+({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll: _tooltipScroll, layout: _layout, }: F0AvatarListProps_2): JSX_2.Element;
 displayName: string;
 }>;
 
@@ -8651,6 +8895,13 @@ declare type F0ButtonDropdownBaseProps<T = string> = {
      * @default undefined
      */
     tooltip?: string;
+    /**
+     * Where the menu is portalled. Defaults to the document body; inside a modal
+     * layer pass that layer's own element (an `F0Dialog` publishes it as
+     * `portalContainer`) so its focus trap contains the menu rather than fighting
+     * it.
+     */
+    container?: HTMLElement | null;
 };
 
 /**
@@ -8997,7 +9248,7 @@ declare type F0CardSelectField = F0BaseField & {
 
 export declare const F0Checkbox: WithDataTestIdReturnType_3<typeof _F0Checkbox>;
 
-declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
+declare function _F0Checkbox({ title, description, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
 
 /**
  * F0 config options specific to checkbox fields
@@ -9103,12 +9354,12 @@ export declare type F0CustomConfig<TValue = unknown, TConfig = undefined> = TCon
  */
 declare type F0CustomConfigBase<TValue = unknown> = {
     /** Render function for the custom component */
-    render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode;
+    render: (props: CustomFieldRenderProps<TValue>) => ReactNode;
 } | {
     /** Name identifying this custom field type (resolved by renderCustomField on the form) */
     customFieldName: string;
     /** Optional render function (overridden by form-level renderCustomField when customFieldName is set) */
-    render?: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode;
+    render?: (props: CustomFieldRenderProps<TValue>) => ReactNode;
 };
 
 /**
@@ -9161,7 +9412,7 @@ export declare type F0CustomFieldConfig<TValue = unknown, TConfig = undefined> =
  *
  * @typeParam TValue - Type of the field value (inferred from Zod schema)
  */
-declare type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig & F0CustomConfig<TValue, undefined> & {
+declare type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig & F0CustomConfig<TValue> & {
     fieldType: "custom";
 };
 
@@ -10114,7 +10365,7 @@ export declare type F0DialogPrimaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -10136,7 +10387,7 @@ export declare type F0DialogSecondaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -10340,9 +10591,9 @@ declare type F0EntitiesListField = F0BaseField & {
     /** User-facing text (add button, dialog description/title) */
     labels?: F0EntitiesListLabels;
     /** Ids of the items that can be edited (matched against `item.id`) */
-    editableIds?: Array<string | number>;
+    editableIds?: (string | number)[];
     /** Ids of the items that can be removed (matched against `item.id`) */
-    removableIds?: Array<string | number>;
+    removableIds?: (string | number)[];
     /** Maximum number of rows allowed */
     maxItems?: number;
     /** Per-column presentation options, keyed by item-schema property name */
@@ -10485,7 +10736,7 @@ declare interface F0EntitiesListOptions<T = EntitiesListItem> {
      * editing per row; with more than 2 it shows/hides the per-row edit
      * (pencil) action that opens the edit dialog.
      */
-    editableIds?: Array<string | number>;
+    editableIds?: (string | number)[];
     /**
      * Restricts which items can be removed, matched against each item's `id`
      * property. The remove counterpart to {@link editableIds}, and independent
@@ -10495,7 +10746,7 @@ declare interface F0EntitiesListOptions<T = EntitiesListItem> {
      * this list shows no remove action (`list-view`) / no remove button
      * (`editable-table`).
      */
-    removableIds?: Array<string | number>;
+    removableIds?: (string | number)[];
     /** Minimum number of rows required (defaults to 1 unless the field is optional) */
     minItems?: number;
     /** Maximum number of rows allowed. When reached the add button is hidden. */
@@ -11079,112 +11330,112 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function text(config: TextConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: EmailConfig */
     export function email(config: EmailConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function email(config: EmailConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: TextareaConfig */
     export function textarea(config: TextareaConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function textarea(config: TextareaConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: NumberConfig */
     export function number(config: NumberConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function number(config: NumberConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: SwitchConfig */
     export function boolean(config: SwitchConfig & {
         optional: true;
     }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
     export function boolean(config: SwitchConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
     /* Excluded from this release type: CheckboxConfig */
     export function checkbox(config: CheckboxConfig & {
         optional: true;
     }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
     export function checkbox(config: CheckboxConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
     /* Excluded from this release type: DateConfig */
     export function date(config: DateConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function date(config: DateConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: UrlConfig */
     export function url(config: UrlConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function url(config: UrlConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MoneyConfig */
     export function money(config: MoneyConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function money(config: MoneyConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: PercentageConfig */
     export function percentage(config: PercentageConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function percentage(config: PercentageConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: CardSelectConfig */
     export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
         optional: true;
     }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
     export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     /* Excluded from this release type: FileConfig */
     export function file(config: FileConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function file(config: FileConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiFileConfig */
     export function multiFile(config: MultiFileConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
     export function multiFile(config: MultiFileConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
     /* Excluded from this release type: TimeConfig */
     export function time(config: TimeConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function time(config: TimeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: DateTimeConfig */
     export function datetime(config: DateTimeConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function datetime(config: DateTimeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: DurationConfig */
     export function duration(config: DurationConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function duration(config: DurationConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: DateRangeObjectSchema */
     /* Excluded from this release type: DateRangeConfig */
@@ -11192,7 +11443,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<DateRangeObjectSchema> & F0ZodType<z.ZodOptional<DateRangeObjectSchema>>;
     export function dateRange(config: DateRangeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
     /* Excluded from this release type: PeriodValueSchema */
     /* Excluded from this release type: DatePeriodConfig */
@@ -11200,7 +11451,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> & F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>;
     export function datePeriod(config: DatePeriodConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): PeriodValueSchema & F0ZodType<PeriodValueSchema>;
     export type PhoneObjectSchema = z.ZodEffects<z.ZodObject<{
         prefix: z.ZodOptional<z.ZodString>;
@@ -11222,7 +11473,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<PhoneObjectSchema> & F0ZodType<z.ZodOptional<PhoneObjectSchema>>;
     export function phone(config: PhoneFieldShortcutConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
@@ -11230,45 +11481,45 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<RichTextObjectSchema> & F0ZodType<z.ZodOptional<RichTextObjectSchema>>;
     export function richText(config: RichTextConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>;
     /* Excluded from this release type: SelectConfig */
     export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        options: Array<{
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
+        } & Record<string, unknown>)[];
         optional: true;
     }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
     export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        options: Array<{
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
-        optional?: false | undefined;
+        } & Record<string, unknown>)[];
+        optional?: false;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiSelectConfig */
-    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
-        options: Array<{
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig, "options"> & {
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
+        } & Record<string, unknown>)[];
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>;
-    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
-        options: Array<{
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig, "options"> & {
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
-        optional?: false | undefined;
+        } & Record<string, unknown>)[];
+        optional?: false;
     }): z.ZodArray<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
     /* Excluded from this release type: EntitiesListBaseConfig */
     /* Excluded from this release type: EntitiesListSingleConfig */
@@ -11309,13 +11560,13 @@ export declare namespace f0FormField {
         optional: true;
     }): OptionalEntitiesListArray<TItem> & F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>;
     export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListSingleConfig<TItem> & {
-        optional?: false | undefined;
+        optional?: false;
     }): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>;
     export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
         optional: true;
     }): OptionalEntitiesListArray<TUpdate> & F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>;
     export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
-        optional?: false | undefined;
+        optional?: false;
     }): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>;
         {};
 }
@@ -12540,7 +12791,7 @@ export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisp
 
 export declare type F0RichTextDisplayHandle = HTMLDivElement;
 
-export declare interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+export declare interface F0RichTextDisplayProps extends Omit<HTMLAttributes<HTMLDivElement>, "dangerouslySetInnerHTML"> {
     content: string;
     className?: string;
     format?: "html" | "markdown";
@@ -12740,7 +12991,7 @@ declare interface F0SelectConfigWithCustomFieldName extends F0SelectConfigBase {
  */
 declare interface F0SelectConfigWithOptions<T extends SelectValueType = string> extends F0SelectConfigBase {
     /** Options for the select dropdown */
-    options: F0SelectItemProps<T, unknown>[];
+    options: F0SelectItemProps<T>[];
     source?: never;
     mapOptions?: never;
 }
@@ -12765,8 +13016,8 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
+    searchFn?: (option: F0SelectItemProps<T>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T>[];
 };
 
 /**
@@ -12799,6 +13050,14 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * Hides the trigger's dropdown arrow. For fields where the select is an
+     * implementation detail rather than the affordance: the value is a typed
+     * search result, not one of a few known options, and the arrow promises a
+     * list the user is not meant to browse.
+     * @default false
+     */
+    hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
@@ -12814,6 +13073,8 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     children?: never;
     className?: never;
     asList?: never;
+    hideArrow?: never;
+    searchEmptyAction?: never;
     showPreview?: never;
     required?: never;
     loading?: never;
@@ -12884,6 +13145,12 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
      */
     onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
+    /**
+     * Rendered under the empty state, for the way out when the list has nothing
+     * to offer. `onCreate` draws its own action, so this is for the cases where
+     * the answer is not "create what you typed".
+     */
+    searchEmptyAction?: React.ReactNode;
     actions?: Action_2[];
     /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
     onCreate?: (value: string) => Promise<void> | void;
@@ -12905,6 +13172,31 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
      * @default false for field selects; true for inline selects
      */
     fitContentWidth?: boolean;
+    /**
+     * What the TRIGGER says for a selected option — decided once for the whole
+     * select, instead of per option inside `mapOptions`.
+     *
+     * A row is read in the context the list gives it: under its group headers,
+     * beside its siblings. The trigger has none of that, so a label that is clear
+     * in the list can be ambiguous alone ("Backend", once the project header is
+     * gone). This is where the context goes back on, in whatever order reads
+     * best — `"Ship the API (Backend, Apollo)"` as readily as
+     * `"Apollo › Backend › Ship the API"`.
+     *
+     * Receives the option — its own `label`, and the `selectedLabel` `mapOptions`
+     * set if any — together with the record it was mapped from. Build the path
+     * from the RECORD (`item.project.name`), not from the group headers on
+     * screen: a selection made earlier, or one restored from `defaultItem`, is
+     * shown by the trigger while its group is nowhere in the loaded data, and the
+     * record is the part that is always there.
+     *
+     * Returns the string to show. It replaces `selectedLabel` for every selected
+     * option; the rows in the list are untouched.
+     */
+    getSelectedLabel?: (selection: {
+        option: F0SelectItemObject<T, ResolvedRecordType<R>>;
+        item?: ResolvedRecordType<R>;
+    }) => string;
 } & WithDataTestIdProps;
 
 /**
@@ -12920,7 +13212,7 @@ declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSin
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     onSelectItems?: never;
 } | {
     multiple: true;
@@ -12952,7 +13244,7 @@ declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
     onSelectItems?: never;
 };
@@ -14238,7 +14530,7 @@ export declare const getDataCollectionStorageKey: (id: string) => string;
  * @returns The pagination type of the data adapter
  */
 export declare const getDataSourcePaginationType: <D extends {
-    paginationType?: PaginationType | undefined | never;
+    paginationType?: PaginationType;
 }>(dataAdapter: D) => PaginationType;
 
 export declare function getEmojiLabel(emoji: string): string;
@@ -14285,9 +14577,9 @@ export declare interface GranularityDefinition {
         max?: Date;
     } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
-    toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
-    toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
+    toRangeString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
+    toRange: <T extends OptionalCalendarSelection>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
+    toString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -14296,8 +14588,8 @@ export declare interface GranularityDefinition {
     getViewDateFromDate: (date: Date) => Date;
     render: (renderProps: {
         mode: CalendarMode;
-        selected: Date | DateRange | null;
-        onSelect: (date: Date | DateRange | null) => void;
+        selected: CalendarSelection;
+        onSelect: (date: CalendarSelection) => void;
         month: Date;
         onMonthChange: (date: Date) => void;
         motionDirection: number;
@@ -14363,13 +14655,13 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      * toggle to show/hide each metadata column (like configuring table columns).
      * Values are tag `column` keys (or `type` when a tag has no `column`).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    nodeTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Friendly labels per tag column, shown in the metadata visibility toggle. */
     nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
     /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Tag columns that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    pinnedTagTypes?: readonly F0GraphNodeTagColumn[];
     /**
      * Tag columns the actor is not allowed to see, mapped to the reason. Each is
      * still listed in the settings but with its toggle forced OFF and disabled,
@@ -14591,6 +14883,15 @@ export declare interface GridStackReactWidget extends Omit<GridStackWidget, "con
  */
 export declare const GROUP_ID_SYMBOL: unique symbol;
 
+/**
+ * Joins a nested group's key to its parent's. Sub-group keys have to be unique
+ * across the whole tree — "Barcelona" under Engineering and "Barcelona" under
+ * Sales are two different groups, and everything downstream (open/closed state,
+ * selection) addresses a group by its key alone. A unit separator keeps the key
+ * unambiguous without colliding with anything that can appear in a field value.
+ */
+export declare const GROUP_KEY_SEPARATOR = "\u001F";
+
 declare interface GroupGridProps<Widget extends GroupGridWidget, Deps extends Record<string, unknown> = Record<string, unknown>> {
     widgets: Optional<Widget, "x" | "y">[];
     editMode?: boolean;
@@ -14640,6 +14941,14 @@ declare type GroupGridWidgetSize = {
 export declare type GroupingDefinition<R extends RecordType> = {
     /** Whether grouping is mandatory or the user can chose not to group */
     mandatory?: boolean;
+    /**
+     * Hides the grouping picker, leaving the grouping itself in force. For a
+     * grouping the product decides and the user does not: the headers render,
+     * the control to change them never does.
+     *
+     * Pair it with `mandatory: true` and a `defaultGrouping`/`currentGrouping`,
+     * or the state can still arrive as "no grouping" with no way to leave it.
+     */
     hideSelector?: boolean;
     groupBy: {
         [K in RecordPaths<R>]?: {
@@ -14662,19 +14971,62 @@ export declare type GroupingDefinition<R extends RecordType> = {
 });
 
 /**
+ * One level of grouping: a field of the definition's `groupBy` map, plus the
+ * direction its groups are laid out in.
+ * @template Grouping - The grouping definition
+ */
+export declare type GroupingLevelState<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
+    field: keyof Grouping["groupBy"];
+    order?: SortOrder;
+};
+
+/**
  * The selected the grouping state
  * @template Grouping - The grouping definition
  */
-export declare type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> = {
-    field: keyof Grouping["groupBy"];
-    order?: SortOrder;
-} | undefined;
+export declare type GroupingState<R extends RecordType, Grouping extends GroupingDefinition<R>> = (GroupingLevelState<R, Grouping> & {
+    /**
+     * Extra grouping levels, nested inside `field` in the order given: the
+     * second level splits each first-level group, the third splits each of
+     * those, and so on.
+     *
+     * Every level names another field of the SAME `groupBy` map, so it reuses
+     * that field's `name` and `label` and needs no configuration of its own.
+     * A level whose field the definition doesn't declare is ignored rather
+     * than thrown on, so a stale `thenBy` degrades to fewer levels instead of
+     * an empty list.
+     *
+     * Renderers that don't know about nesting see only the first level: each
+     * top-level group still carries all of its records flattened in
+     * `records`, exactly as it does without `thenBy`.
+     */
+    thenBy?: GroupingLevelState<R, Grouping>[];
+}) | undefined;
 
 export declare type GroupRecord<RecordType> = {
     key: string;
     label: string | Promise<string>;
     itemCount: number | undefined | Promise<number | undefined>;
     records: RecordType[];
+    /**
+     * The next grouping level cut out of `records`, present only when the
+     * grouping state asked for one (`thenBy`). `records` stays complete either
+     * way, so a renderer that ignores this field shows exactly what it showed
+     * before nesting existed.
+     */
+    subGroups?: GroupRecord<RecordType>[];
+    /**
+     * The records that belong to THIS group and to none of its `subGroups` —
+     * the ones with no value at the next level down.
+     *
+     * A tree whose branches differ in depth has these: a subproject with tasks
+     * under it becomes a sub-group, while one without stays a row of its parent.
+     * Without somewhere to put them they would bucket under the missing value
+     * and surface beneath a heading with no name.
+     *
+     * Only set when `subGroups` is, and only when some record lacks that value.
+     */
+    ownRecords?: RecordType[];
 };
 
 /**
@@ -14796,7 +15148,7 @@ export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl
  */
 export declare type HiddenAction = "required" | "multiSelect" | "allowCreate" | "questionType" | "duplicate" | "delete";
 
-export declare type HiddenActions = ReadonlyArray<HiddenAction>;
+export declare type HiddenActions = readonly HiddenAction[];
 
 export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
@@ -14927,7 +15279,7 @@ declare type InFilterOptionItem<T = unknown> = {
         /** The filter key where child selections are stored in FiltersState */
         filterKey: string;
         /** Child options, which can themselves have children for infinite nesting */
-        options: Array<InFilterOptionItem<T>>;
+        options: InFilterOptionItem<T>[];
     };
 };
 
@@ -14947,7 +15299,7 @@ declare type InFilterOptions_2<T, _R extends RecordType = RecordType> = {
      */
     getLabel?: (value: unknown) => string | Promise<string>;
 } & ({
-    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
+    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<InFilterOptionItem<T>[]>);
 } | {
     source: DataSourceDefinition<any, FiltersDefinition, SortingsDefinition, GroupingDefinition<any>>;
     mapOptions: (item: any) => InFilterOptionItem<T>;
@@ -15078,7 +15430,7 @@ declare type InputFieldProps<T> = {
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
     onClickContent?: () => void;
-    value?: T | undefined;
+    value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
     error?: string | boolean;
@@ -15291,12 +15643,12 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 } | null) => Promise<TRecord>;
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    lanes: ReadonlyArray<KanbanLaneDefinition>;
+    lanes: readonly KanbanLaneDefinition[];
     /** Per-group columns: when grouping is active, each group's board renders the
      * lanes this returns instead of the global `lanes` (lane ids must exist in
      * `source.lanes`). Enables the onboarding case where each policy version has
      * its own phases. NOTE: API shape pending Foundations review. */
-    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    getLanesForGroup?: (groupKey: string) => readonly KanbanLaneDefinition[];
     /** Whether each group header shows a selection checkbox when the collection is
      * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
      * keep per-card selection while hiding the group-level checkbox — e.g. when
@@ -15307,7 +15659,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
+    metadata?: (record: Record) => readonly CardMetadata[];
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -15436,7 +15788,7 @@ declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = Wi
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
     itemDefinition: (record: R) => ItemDefinition;
-    fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>;
+    fields: readonly ListPropertyDefinition<R, Sortings>[];
 };
 
 export declare interface LoadingStateProps {
@@ -15462,6 +15814,13 @@ declare interface LocalizedOption<T> {
     /** The value for this locale. */
     value: T;
 }
+
+/**
+ * The parts of a question that `lockedFields` can freeze on their own, without
+ * locking the question outright. Both are the question's wording — what it asks
+ * — as opposed to the answer it collects.
+ */
+export declare type LockedFields = readonly ("title" | "description")[];
 
 export declare type LockedQuestionNotice = {
     description: string;
@@ -15606,14 +15965,14 @@ declare type Message_2 = {
     id?: string;
     role?: string;
     content?: unknown;
-    toolCalls?: Array<{
+    toolCalls?: {
         id: string;
         type?: string;
         function?: {
             name: string;
             arguments: string;
         };
-    }>;
+    }[];
     generativeUI?: () => unknown;
     rawData?: unknown;
     /**
@@ -15982,6 +16341,12 @@ export declare interface NotesTextEditorSnapshot {
 declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
     msg: string;
     type?: DialogNotificationType;
+    /**
+     * Renders a dismiss (X) control in the dialog's top-right corner. Lets a notification offer a
+     * way out without spending a button on "Cancel".
+     * @default false
+     */
+    dismissable?: boolean;
 };
 
 export declare type NotificationDialogOptions = NotificationDialogBaseOptions & {
@@ -16337,9 +16702,9 @@ export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth,
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
-    onSelect?: (date: Date | DateRange | null) => void;
+    onSelect?: (date: CalendarSelection) => void;
     defaultMonth?: Date;
-    defaultSelected?: Date | DateRange | null;
+    defaultSelected?: CalendarSelection;
     showNavigation?: boolean;
     showInput?: boolean;
     minDate?: Date;
@@ -16386,6 +16751,13 @@ declare type OneEllipsisProps = {
      * @default false
      */
     markdown?: boolean;
+    /**
+     * How long the pointer has to rest on the clipped text before the tooltip
+     * opens, in milliseconds. Lower it where the tooltip is the only way to read
+     * text the layout has cut off, so recovering it does not feel like a wait.
+     * @default 700
+     */
+    delay?: number;
 };
 
 export declare const OneEmptyState: WithDataTestIdReturnType_3<typeof _OneEmptyState>;
@@ -16569,6 +16941,8 @@ export declare type OpenFormWizardResult<T extends F0FormSchema_2 | F0PerSection
 
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
+export declare type OptionalCalendarSelection = CalendarSelection | undefined;
+
 /** Overflow values */
 export declare type OverflowToken = "visible" | "hidden" | "auto" | "scroll";
 
@@ -16674,6 +17048,22 @@ export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "
  * - "no-pagination": Represents a collection that does not use pagination.
  */
 export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
+
+declare type PanelBounds = {
+    min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
+    max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
+    /** The frame is too narrow to split: the panel should cover it instead. */
+    shouldOverlay: boolean;
+};
 
 /**
  * Parses a data collection's state out of URL query params.
@@ -17134,7 +17524,7 @@ declare type Props = {
     /**
      * Array of chips to display.
      */
-    chips: Array<ChipProps>;
+    chips: ChipProps[];
     /**
      * The maximum number of chips to display.
      * @default 4
@@ -17227,11 +17617,11 @@ declare interface RadarChartSkeletonProps {
 export declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
-    indicators: Array<{
+    indicators: {
         column: string;
         label: string;
         max?: number;
-    }>;
+    }[];
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -17327,6 +17717,14 @@ export declare type RenderableTurn = {
          * the last item is `executing` while the rest are `completed`.
          */
         isWriting?: boolean;
+        /**
+         * Epoch ms for when the turn actually started thinking, if the host knows.
+         *
+         * Optional anchor, not a requirement: turns arrive with no timestamps, so
+         * by default the elapsed counter starts when F0 first saw the signal.
+         * Supplying this makes it survive a reload mid-stream.
+         */
+        startedAt?: number;
     };
     /** Messages rendered after the thinking section (assistant replies). */
     assistantMessages: Message_2[];
@@ -17834,6 +18232,11 @@ declare type SelectCellConfig<R extends RecordType> = {
     clearable?: boolean;
     showSearchBox?: boolean;
     defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined;
+    /**
+     * Buttons rendered below the options, for what a value cannot express —
+     * dropping a scheduled change, say. Pass a function to decide them per row.
+     */
+    actions?: Action_2[] | ((item: R) => Action_2[] | undefined);
 } & ({
     options: F0SelectItemProps<string>[] | ((item: R) => F0SelectItemProps<string>[]);
     source?: never;
@@ -17848,17 +18251,17 @@ declare type SelectCellConfig<R extends RecordType> = {
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
  */
-export declare type SelectedItems<T> = ReadonlyArray<T>;
+export declare type SelectedItems<T> = readonly T[];
 
 export declare type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allSelected: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
+    selectedIds: readonly SelectionId[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -17892,21 +18295,21 @@ export declare type SelectionId = number | string;
 export declare type SelectionMeta<R extends RecordType> = {
     selectedItemsCount: number;
     totalKnownItemsCount: number;
-    checkedItems: ReadonlyArray<R>;
-    uncheckedItems: ReadonlyArray<R>;
+    checkedItems: readonly R[];
+    uncheckedItems: readonly R[];
 };
 
 export declare type SelectionStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allChecked: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
-    checkedItems: ReadonlyArray<R>;
-    uncheckedItems: ReadonlyArray<R>;
+    selectedIds: readonly SelectionId[];
+    checkedItems: readonly R[];
+    uncheckedItems: readonly R[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -17972,10 +18375,10 @@ export declare const setDataCollectionUrlParams: <CurrentFiltersState extends Fi
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
  */
 export declare type SidePanelContent = {
     id: string;
@@ -18455,7 +18858,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /**
      * The columns to display
      */
-    columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly TableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Placeholder to display in summary-row cells when no summary value is
      * rendered. This also applies to columns without a `summary` definition.
@@ -18659,7 +19062,7 @@ export declare type TagListProps<T extends TagType> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T]>;
+    tags: TagTypeMapping[T][];
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -18860,6 +19263,11 @@ declare interface TextProps extends Omit<default_2.HTMLAttributes<HTMLElement>, 
      * @default false
      */
     required?: boolean;
+    /**
+     * The id of the control this text labels. Only meaningful together with
+     * `as="label"`; `React.HTMLAttributes` does not carry it.
+     */
+    htmlFor?: string;
 }
 
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
@@ -18923,6 +19331,12 @@ export declare type ThinkingProps = {
      * every item renders as `completed` regardless of `inProgress`.
      */
     isWriting?: boolean;
+    /**
+     * When the turn started thinking, from `useThinkingClock`. Drives the
+     * elapsed counter on whichever step is executing. `null` means no clock is
+     * running, and nothing is rendered.
+     */
+    startedAt?: number | null;
 };
 
 export declare interface ThreadActionHandlers {
@@ -19398,11 +19812,18 @@ declare interface UpsellRequestResponseDialogProps {
     portalContainer?: HTMLElement | null;
 }
 
+export declare type UsageLimitsPopoverSide = (typeof usageLimitsPopoverSides)[number];
+
+export declare const usageLimitsPopoverSides: readonly ["top", "bottom"];
+
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
@@ -19463,7 +19884,7 @@ declare type UseChatHistoryReturn = {
     threads: ChatThread[];
     isLoading: boolean;
     error: string | null;
-    refetch: () => void;
+    refetch: () => Promise<void>;
     pinnedIds: Set<string>;
     /**
      * Ids of threads with an in-flight pin/unpin/delete request. Use it to show a
@@ -19647,7 +20068,7 @@ export declare interface UseDataReturn<R extends RecordType> {
  * - actions: Available actions for the collection
  * - presets: Available filter presets
  */
-export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: ReadonlyArray<unknown>): DataSource<R, FiltersSchema, Sortings, Grouping>;
+export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: readonly unknown[]): DataSource<R, FiltersSchema, Sortings, Grouping>;
 
 export declare function useDataSourceItemNavigation<R extends RecordType>(props: UseDataSourceItemNavigationProps<R>): UseDataSourceItemNavigationReturn<R>;
 
@@ -20172,7 +20593,7 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * Selectable rows currently rendered (incl. nested children), so "select all"
      * reaches rows absent from `data.records`. Falls back to `data.records`.
      */
-    getRenderedSelectableEntries?: () => Array<[SelectionId, R]>;
+    getRenderedSelectableEntries?: () => [SelectionId, R][];
     /**
      * Count of currently-rendered selectable rows (incl. nested children). Used
      * as the item total when it exceeds `paginationInfo.total`, so selection
@@ -20506,7 +20927,7 @@ export declare type WithDataTestIdPropsOf<T extends default_2.ComponentType<unkn
 export declare type WithDataTestIdReturnType<T extends default_2.ComponentType<any>> = default_2.ForwardRefExoticComponent<default_2.PropsWithoutRef<default_2.ComponentProps<T> & WithDataTestIdProps> & default_2.RefAttributes<T extends default_2.ForwardRefExoticComponent<infer P> ? P extends default_2.RefAttributes<infer R> ? R : unknown : unknown>> & Pick<T, Exclude<keyof T, keyof default_2.ForwardRefExoticComponent<unknown>>>;
 
 export declare type WithGroupId<RecordType> = RecordType & {
-    [GROUP_ID_SYMBOL]: unknown | undefined;
+    [GROUP_ID_SYMBOL]: unknown;
 };
 
 declare type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<PropertyDefinition_2<R>, "hide"> & {
@@ -20603,17 +21024,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
@@ -20625,11 +21046,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -20637,9 +21056,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
