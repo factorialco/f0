@@ -78,6 +78,7 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
+import { DailyDigest } from "./one/DailyDigest"
 import { DailyDigestButton } from "./one/DailyDigestButton"
 import { HomeRecommendationCarousel } from "./one/HomeRecommendationCarousel"
 import { PanelExpand } from "./PanelCollapse"
@@ -1517,7 +1518,7 @@ function HomeCanvas() {
             the recommendation row (Angel, 2026-09-15). Absolutely placed,
             so the composer keeps the midline it is centred on. */}
         {homeLanding && (
-          <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-10 flex justify-center">
+          <div className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center">
             <div className="pointer-events-auto">
               <DailyDigestButton />
             </div>
@@ -1624,7 +1625,10 @@ function HomeCanvas() {
                   the midline as the list grows (Angel, 2026-09-15). Here
                   they hang under it and scroll. */}
               {homeLanding ? (
-                <HomeRecommendations />
+                <>
+                  <HomeRecommendations />
+                  <DailyDigest />
+                </>
               ) : activeConversation ? (
                 <div
                   data-home-inline-conversation
