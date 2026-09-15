@@ -26,7 +26,16 @@ import { homeEvents } from "../windows/EventsWindow"
  * fixtures, so the two cannot drift.
  */
 
-/** Open roles by location, mirroring the monorepo's open-positions rows. */
+/** The monorepo's own caps: NeedsYou/useNeedsYouWidget.ts MAX_NEEDS_YOU_ROWS,
+ *  Events/params.ts DEFAULT_MAX_EVENTS, OpenPositions/widgetSpec.ts
+ *  MAX_VISIBLE_LOCATIONS. */
+const MAX_NEEDS_YOU_ROWS = 6
+const MAX_EVENTS = 5
+const MAX_LOCATIONS = 6
+
+/** Open roles by location, the rows OpenPositions/widgetSpec.ts builds
+ *  from `openPositionsLocationsConnection` (title = location, trailing
+ *  counter, link to the same page). */
 const OPEN_POSITIONS = [
   { id: "barcelona", title: "Barcelona", count: 6 },
   { id: "madrid", title: "Madrid", count: 3 },
@@ -37,7 +46,10 @@ const OPEN_POSITIONS = [
 export function DailyDigest() {
   const profile = useProfile()
   const needsYou = useNeedsYou()
-  const tasks = openInboxTasks(profile, needsYou.cleared, "all").slice(0, 6)
+  const tasks = openInboxTasks(profile, needsYou.cleared, "all").slice(
+    0,
+    MAX_NEEDS_YOU_ROWS
+  )
 
   return (
     <section
@@ -71,21 +83,29 @@ export function DailyDigest() {
           fullHeight
           header={{ title: "Events", link: { title: "Calendar" } }}
         >
-          <CalendarEventList events={homeEvents.slice(0, 3)} showAllItems />
+          <CalendarEventList
+            events={homeEvents.slice(0, MAX_EVENTS)}
+            showAllItems
+          />
         </Widget>
         <Widget
           fullHeight
           header={{
-            title: "Recruitment",
+            title: "Open positions",
             count: OPEN_POSITIONS.reduce((total, row) => total + row.count, 0),
             link: { title: "Open positions" },
           }}
         >
-          <WidgetSimpleList showAllItems items={OPEN_POSITIONS} />
+          <WidgetSimpleList
+            showAllItems
+            items={OPEN_POSITIONS.slice(0, MAX_LOCATIONS)}
+          />
         </Widget>
       </div>
 
-      <Widget header={{ title: "Communities", link: { title: "Communities" } }}>
+      <Widget
+        header={{ title: "Community posts", link: { title: "Communities" } }}
+      >
         <Post post={COMMUNITY_POSTS[1]} />
       </Widget>
     </section>
