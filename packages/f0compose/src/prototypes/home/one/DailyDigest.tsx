@@ -66,7 +66,10 @@ export function DailyDigest() {
         </p>
       </header>
 
-      <Widget header={{ title: "Needs you", count: tasks.length }}>
+      <Widget
+        header={{ title: "Needs you", count: tasks.length }}
+        action={{ label: "Go to Inbox", onClick: () => {} }}
+      >
         <WidgetInboxList
           showAllItems
           items={tasks.map((task) => ({
@@ -81,7 +84,11 @@ export function DailyDigest() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Widget
           fullHeight
-          header={{ title: "Events", link: { title: "Calendar" } }}
+          header={{ title: "Events" }}
+          // The way out is a FOOTER button, not an icon in the header:
+          // f0's SlotWidget states the rule, and the header's corner
+          // belongs to the widget's own menu.
+          action={{ label: "Go to Calendar", onClick: () => {} }}
         >
           <CalendarEventList
             events={homeEvents.slice(0, MAX_EVENTS)}
@@ -93,8 +100,8 @@ export function DailyDigest() {
           header={{
             title: "Open positions",
             count: OPEN_POSITIONS.reduce((total, row) => total + row.count, 0),
-            link: { title: "Open positions" },
           }}
+          action={{ label: "Go to Recruitment", onClick: () => {} }}
         >
           <WidgetSimpleList
             showAllItems
