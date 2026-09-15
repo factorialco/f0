@@ -67,3 +67,69 @@ export const TeamTypeWithLongName: Story = {
     },
   },
 }
+
+export const TeamTypeWithLines: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      teamName: "Engineering Department for International Product Operations",
+    },
+    property: {
+      label: "Team",
+      render: (item) => ({
+        type: "team",
+        value: {
+          name: item.teamName,
+          src: item.teamLogo,
+          lines: 2,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`lines` raises the cap: the name wraps up to two lines and only truncates past that. The avatar stays on the first line.",
+      },
+    },
+  },
+}
+
+export const TeamTypeWithFullName: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      teamName: "Engineering Department for International Product Operations",
+    },
+    property: {
+      label: "Team",
+      render: (item) => ({
+        type: "team",
+        value: {
+          name: item.teamName,
+          src: item.teamLogo,
+          full: true,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`full` removes the cap entirely: the name wraps as far as it needs and nothing is hidden, so there is no ellipsis and no tooltip to recover.",
+      },
+    },
+  },
+}

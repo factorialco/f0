@@ -67,3 +67,69 @@ export const CompanyTypeWithLongName: Story = {
     },
   },
 }
+
+export const CompanyTypeWithLines: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      companyName: "Factorial AI handles the paperwork, you handle the people.",
+    },
+    property: {
+      label: "Company",
+      render: (item) => ({
+        type: "company",
+        value: {
+          name: item.companyName,
+          src: item.companyLogo,
+          lines: 2,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`lines` raises the cap: the name wraps up to two lines and only truncates past that. The avatar stays on the first line.",
+      },
+    },
+  },
+}
+
+export const CompanyTypeWithFullName: Story = {
+  args: {
+    item: {
+      ...mockItem,
+      companyName: "Factorial AI handles the paperwork, you handle the people.",
+    },
+    property: {
+      label: "Company",
+      render: (item) => ({
+        type: "company",
+        value: {
+          name: item.companyName,
+          src: item.companyLogo,
+          full: true,
+        },
+      }),
+    },
+  },
+  render: (args) => (
+    <div style={{ width: 200 }}>
+      <Cell {...args} />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`full` removes the cap entirely: the name wraps as far as it needs and nothing is hidden, so there is no ellipsis and no tooltip to recover.",
+      },
+    },
+  },
+}
