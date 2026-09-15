@@ -36,7 +36,6 @@ import {
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import "./agent-entry.css"
-import { PermissionsNote } from "./one/PermissionsNote"
 import { useProfile } from "./profileStore"
 import { HomeWorking, useHomeRefreshing } from "./setup/homeRefresh"
 
@@ -532,7 +531,9 @@ export function HybridHome({ children }: { children: ReactNode }) {
                     </div>
                   </div>
                 </F0Box>
-                <PermissionsNote />
+                {/* The permissions line and the Pro meter left the
+                    composer on 2026-09-14 (Angel): nothing under the
+                    input but the input. */}
               </div>
             </div>
           )}
