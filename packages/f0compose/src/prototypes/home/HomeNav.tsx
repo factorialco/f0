@@ -261,13 +261,16 @@ function PanelDivider() {
 function SidebarGroup({
   label,
   trailing,
+  defaultOpen = true,
   children,
 }: {
   label: string
   trailing?: React.ReactNode
+  /** "Pinned" starts closed: its rows are already on the rail. */
+  defaultOpen?: boolean
   children: React.ReactNode
 }) {
-  const [groupOpen, setGroupOpen] = useState(true)
+  const [groupOpen, setGroupOpen] = useState(defaultOpen)
   return (
     // No gap: the frame's bundle puts its Items straight under the 32px
     // Section header (2945:793556 — a plain flex-col, items at y=32).
@@ -1171,8 +1174,28 @@ function HubPanelBody() {
   // under a freshly opened module reads as two unrelated things.
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
+  const pins = useRailPins(profile)
   return (
     <div className="flex flex-col gap-3 px-3 pb-1.5">
+      {/* What you pinned, gathered at the top — collapsed, because those
+          rows are already one click away on the rail (Angel,
+          2026-09-14). They keep their place in their own group below:
+          this is a shortcut, not a move. */}
+      {pins.length > 0 && (
+        <SidebarGroup label="Pinned" defaultOpen={false}>
+          {pins.map((label) => (
+            <HubRow
+              key={label}
+              label={label}
+              active={view === hubSlug(label)}
+              onOpen={() => {
+                goHome()
+                setSearchParams({ view: hubSlug(label) })
+              }}
+            />
+          ))}
+        </SidebarGroup>
+      )}
       {groups.map((group) => (
         <SidebarGroup key={group.label} label={group.label}>
           {group.items.map((label) => {
@@ -1315,9 +1338,7 @@ function RailItem({
             you ARE is branded. */}
         <span
           className={`flex size-9 items-center justify-center rounded-lg ${
-            active
-              ? "bg-f1-background-accent text-f1-icon-accent"
-              : "group-hover:bg-f1-background-secondary"
+            active ? "f0c-rail-active" : "group-hover:bg-f1-background-secondary"
           }`}
         >
           {/* Every rail glyph is the SAME weight in the design (Figma

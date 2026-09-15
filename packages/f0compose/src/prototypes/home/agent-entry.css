@@ -382,6 +382,11 @@
 [data-home-panel] {
   background: #f7f7f7 !important;
 }
+/* Beside a second level the rail steps back two points of lightness
+   (Angel, 2026-09-14); on its own it rejoins the ground. */
+[data-home-rail][data-panel="open"] {
+  background: #f2f2f2 !important;
+}
 [data-hybrid-root],
 [data-hybrid-work],
 [data-hybrid-chat] {

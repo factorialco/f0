@@ -172,8 +172,18 @@ const FULL_BLEED_CSS = `
   [data-home-panel] {
     background: #f7f7f7;
   }
+  /* Beside a second level the rail steps back two points of lightness —
+     97% for the ground, 95% here (Angel, 2026-09-14). On its own it goes
+     back to the ground, since there is nothing to step back FROM. */
   [data-home-rail][data-panel="open"] {
+    background: #f2f2f2;
     box-shadow: inset -1px 0 0 hsl(var(--neutral-10));
+  }
+  /* The active rail item: a lighter radical wash under a darker radical
+     glyph, so the mark carries the state and the chip only frames it. */
+  .f0c-rail-active {
+    background: hsl(var(--accent-50) / 0.03);
+    color: hsl(var(--accent-70));
   }
 
   /* The split conversation panel sits on the ground like everything
