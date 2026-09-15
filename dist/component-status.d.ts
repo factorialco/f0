@@ -296,6 +296,16 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
@@ -311,16 +321,6 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
         };
     }
 }

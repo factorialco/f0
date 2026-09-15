@@ -275,6 +275,10 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -940,6 +944,174 @@ export declare const defaultTranslations: {
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly emptyTitle: "No posts yet";
+            readonly emptyDescription: "Posts shared in this community will appear here.";
+            readonly emptyDescriptionCanPost: "Be the first to post here.";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly pinnedPostsCount: {
+                readonly one: "{{count}} pinned post";
+                readonly other: "{{count}} pinned posts";
+            };
+            readonly pinPost: "Pin post";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly noPinnedPosts: "No pinned posts";
+            readonly noPinnedPostsDescription: "Pin a post and it stays at the top of this community.";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledPostsCount: {
+                readonly one: "{{count}} scheduled post";
+                readonly other: "{{count}} scheduled posts";
+            };
+            readonly scheduledEvent: "Event";
+            /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
+            readonly publishesAt: "Publishes {{when}}";
+            readonly noScheduledPosts: "Nothing scheduled";
+            readonly noScheduledPostsDescription: "Posts you schedule will wait here until their time.";
+            readonly scheduledActions: "Scheduled post actions";
+            readonly publishNow: "Publish now";
+            readonly cancelScheduled: "Cancel";
+            readonly draftPosts: "Drafts";
+            readonly draftPostsCount: {
+                readonly one: "{{count}} draft";
+                readonly other: "{{count}} drafts";
+            };
+            /** Where a scheduled row prints its date, a draft prints this. */
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly publishDraft: "Publish";
+            readonly deleteDraft: "Delete draft";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
+    };
+    readonly communities: {
+        readonly composer: {
+            readonly createPost: "Create post";
+            readonly createEvent: "Create event";
+            readonly editPost: "Edit post";
+            readonly basicInformation: "Basic information";
+            readonly postSettings: "Post settings";
+            readonly postCover: "Post cover";
+            readonly addMedia: "Drag and drop or click here";
+            readonly addMediaSubtitle: "any image, video or GIF";
+            readonly addMediaSize: "1200x600px";
+            readonly deletePhoto: "Delete photo";
+            readonly deleteVideo: "Delete video";
+            readonly coverActions: "Cover options";
+            readonly title: "Title";
+            readonly titlePlaceholder: "e.g. World Mental Health Day";
+            readonly description: "Description";
+            readonly descriptionPlaceholder: "Share what's special about it";
+            readonly attachmentsSizePerPost: "Up to 150 MB in attachments per post";
+            readonly previousAttachments: "Previously added attachments";
+            readonly isEventLabel: "This is an event";
+            readonly isEventDescription: "Select this to include a date, time, and location for this event.";
+            readonly eventStartDate: "Event start date";
+            readonly eventStartTime: "Start time";
+            readonly eventLocation: "Event location";
+            readonly eventLocationPlaceholder: "Where will this take place?";
+            readonly requireAction: "Require action";
+            readonly requireActionDescription: "Select how you want to track that users have taken the required action";
+            readonly actionType: "Action type";
+            readonly actionTypePlaceholder: "Select action type";
+            readonly actionTypeAcknowledge: "Acknowledge post";
+            readonly actionTypeAcknowledgeDescription: "Employees read and acknowledge the post";
+            readonly actionTypeWatchVideo: "Watch video";
+            readonly actionTypeWatchVideoDescription: "Employees watch the entire video";
+            readonly actionTypeClickedLink: "Clicked a link";
+            readonly actionTypeClickedLinkDescription: "Employees click the first link in the post";
+            readonly actionTypeComingSoon: "Coming soon";
+            readonly continue: "Continue";
+            readonly publishTitle: "Publish";
+            readonly publishDescription: "When publishing the post, it will be visible in the dashboard of each employee.";
+            readonly publish: "Publish";
+            readonly selectCommunity: "Select community";
+            readonly allowCommentsAndReactions: "Allow comments and reactions.";
+            readonly sendEmailNotification: "Send email notification";
+            readonly schedulePost: "Schedule post";
+            readonly scheduleDate: "Date";
+            readonly scheduleTime: "Time";
+            readonly confirm: "Confirm";
+            readonly cancel: "Cancel";
+            readonly saveAsDraft: "Save as draft";
+            readonly save: "Save";
+            readonly cantBeEmpty: "can't be empty";
+            readonly invalidInput: "Invalid input. Only alphanumeric characters are allowed";
+            readonly publishedSuccess: "The post has been published";
+            readonly scheduledSuccess: "The post has been scheduled";
+            readonly draftSuccess: "The post has been saved as draft";
+            readonly publishError: "There was an error creating the post, please try again.";
+        };
+        readonly detail: {
+            readonly postActions: "Post actions";
+            readonly edit: "Edit post";
+            readonly delete: "Delete post";
+            readonly deleteDescription: "Are you sure you want to delete this post? This action cannot be undone.";
+            readonly proceed: "Proceed";
+            readonly turnInteractionsOff: "Turn comments and reactions off";
+            readonly turnInteractionsOn: "Turn comments and reactions on";
+            readonly insights: "Insights";
+            readonly visits: {
+                readonly one: "Visit";
+                readonly other: "Visits";
+            };
+            readonly postViews: "Post views";
+            readonly anonymous: "Anonymous";
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+            readonly commentPlaceholder: "Click here to write a comment...";
+            readonly submit: "Submit";
+            readonly deleteComment: "Delete comment";
+            readonly deleteCommentDescription: "Are you sure you want to delete this comment? This action cannot be undone.";
+            readonly editComment: "Edit";
+            readonly acknowledgeRequired: "Post acknowledgement required";
+            readonly acknowledge: "I acknowledge";
+            readonly acknowledgeLater: "Acknowledge later";
+            readonly acknowledgedOn: "Acknowledged on {{date}}, at {{time}}";
+            readonly closePostTitle: "Close post?";
+            readonly closePostDescription: "You haven't acknowledged this post yet. You can acknowledge it later.";
+            readonly closePost: "Close post";
+            readonly continueReading: "Continue reading";
+            readonly close: "Close";
+            readonly home: "Home";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -986,6 +1158,31 @@ export declare const defaultTranslations: {
         readonly countryWithDialCode: "{{country}} {{dialCode}}";
         readonly searchCountry: "Search country or dial code";
         readonly noResults: "No country found";
+    };
+    readonly locationInput: {
+        readonly country: "Country";
+        readonly addressLine1: "Address line 1";
+        readonly addressLine2: "Address line 2";
+        readonly city: "City";
+        readonly state: "Region";
+        readonly postalCode: "Postal code";
+        readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
+        readonly searchCountry: "Search country";
+        readonly noCountryResults: "No country found";
+        readonly noResults: "No addresses found";
+        readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
+        readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -1362,6 +1559,16 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
@@ -1377,16 +1584,6 @@ declare module "@tiptap/core" {
                 placeholder?: string;
             }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
         };
     }
 }
