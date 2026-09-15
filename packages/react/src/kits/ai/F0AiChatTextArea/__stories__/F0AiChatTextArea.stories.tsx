@@ -21,6 +21,7 @@ import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
+  AiChatFileIntake,
   F0AiChatWelcomeCard,
   PendingContext,
   PendingQuote,
@@ -458,7 +459,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
 } satisfies Meta<typeof Wrapper>
 
 export default meta
@@ -984,5 +985,145 @@ export const Everything: Story = {
     disclaimer: DISCLAIMER,
     initialPendingContext: PENDING_CONTEXT,
     initialPendingQuote: PENDING_QUOTE,
+  },
+}
+
+export const PartialUploadRecovery: Story = {
+  tags: ["upload-lifecycle"],
+  render: () => {
+    const intake = useRef<AiChatFileIntake | null>(null)
+    const composer = useRef<HTMLDivElement>(null)
+    const failed = useRef(false)
+    const [attempts, setAttempts] = useState<string[]>([])
+    return (
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={() =>
+            void intake
+              .current?.([
+                new globalThis.File(["good"], "good.pdf", {
+                  type: "application/pdf",
+                }),
+                new globalThis.File(["retry"], "retry.pdf", {
+                  type: "application/pdf",
+                }),
+              ])
+              .catch(() => undefined)
+          }
+        >
+          Prepare two files
+        </button>
+        <output aria-label="Upload attempts">{attempts.join(", ")}</output>
+        <F0AiChatTextArea
+          ref={composer}
+          onStop={() => {}}
+          onSubmit={() => {}}
+          onProcessFilesRef={(handler) => {
+            intake.current = handler
+          }}
+          fileAttachments={{
+            onUploadFiles: async (files) => {
+              setAttempts((current) => [...current, files[0].name])
+              if (files[0].name === "retry.pdf" && !failed.current) {
+                failed.current = true
+                throw new Error("Offline")
+              }
+              return files.map((file) => ({
+                url: "https://example.com/" + file.name,
+                filename: file.name,
+                mimetype: file.type,
+              }))
+            },
+          }}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Prepare two files" })
+    )
+    const retry = await canvas.findByRole("button", {
+      name: /retry.*retry.pdf/i,
+    })
+    await userEvent.click(retry)
+    await waitFor(() =>
+      expect(canvas.getByLabelText("Upload attempts")).toHaveTextContent(
+        "good.pdf, retry.pdf, retry.pdf"
+      )
+    )
+    await waitFor(() =>
+      expect(
+        canvas.queryByRole("button", { name: /retry.*retry.pdf/i })
+      ).not.toBeInTheDocument()
+    )
+  },
+}
+
+export const PreparedFileIntake: Story = {
+  tags: ["upload-lifecycle"],
+  render: () => {
+    const intake = useRef<AiChatFileIntake | null>(null)
+    const composer = useRef<HTMLDivElement>(null)
+    const file = useRef(
+      new globalThis.File(["prepared"], "prepared.pdf", {
+        type: "application/pdf",
+      })
+    )
+    const [accepted, setAccepted] = useState(false)
+    return (
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={() =>
+            void intake
+              .current?.([file.current], {
+                preparedFiles: [
+                  {
+                    url: "https://example.com/prepared.pdf",
+                    filename: "prepared.pdf",
+                    mimetype: "application/pdf",
+                  },
+                ],
+                onPrepared: () => {
+                  setAccepted(true)
+                  return accepted
+                },
+              })
+              .catch(() => undefined)
+          }
+        >
+          {accepted ? "Accept prepared file" : "Adopt prepared file"}
+        </button>
+        <F0AiChatTextArea
+          ref={composer}
+          onStop={() => {}}
+          onSubmit={() => {}}
+          onProcessFilesRef={(handler) => {
+            intake.current = handler
+          }}
+          fileAttachments={{
+            onUploadFiles: async () => {
+              throw new Error("Adoption must not upload")
+            },
+          }}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Adopt prepared file" })
+    )
+    await canvas.findByText("prepared.pdf")
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Accept prepared file" })
+    )
+    await waitFor(() =>
+      expect(canvas.queryByText("prepared.pdf")).not.toBeInTheDocument()
+    )
   },
 }

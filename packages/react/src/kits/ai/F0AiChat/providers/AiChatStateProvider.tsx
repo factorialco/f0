@@ -17,6 +17,9 @@ import { useMediaQuery } from "usehooks-ts"
 import { useI18n } from "@/lib/providers/i18n"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
+  type AiChatFileIntake,
+  type AiChatFileIntakeOptions,
+  type UploadedFile,
   type AiChatMode,
   type CanvasContent,
   type PendingContext,
@@ -237,22 +240,48 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // is momentarily unregistered (the textarea re-registers whenever its
   // processFiles identity changes). Without it those drops were lost
   // silently and the user had to drop the file again.
-  const processFilesRef = useRef<((files: File[]) => void) | null>(null)
-  const pendingDropsRef = useRef<File[][]>([])
-  const processDroppedFiles = useCallback((files: File[]) => {
+  const processFilesRef = useRef<AiChatFileIntake | null>(null)
+  const pendingDropsRef = useRef<
+    {
+      files: File[]
+      options?: AiChatFileIntakeOptions
+      resolve: (files: UploadedFile[]) => void
+      reject: (error: unknown) => void
+    }[]
+  >([])
+  const prepareFiles: AiChatFileIntake = useCallback((files, options) => {
     if (processFilesRef.current) {
-      processFilesRef.current(files)
-    } else {
-      pendingDropsRef.current.push(files)
+      return processFilesRef.current(files, options ?? {})
     }
+    return new Promise((resolve, reject) =>
+      pendingDropsRef.current.push({ files, options, resolve, reject })
+    )
   }, [])
+  const processDroppedFiles = useCallback(
+    (files: File[]) => {
+      void prepareFiles(files).catch(() => undefined)
+    },
+    [prepareFiles]
+  )
   const setProcessDroppedFilesFunction = useCallback(
-    (fn: ((files: File[]) => void) | null) => {
+    (fn: AiChatFileIntake | null) => {
       processFilesRef.current = fn
-      if (fn && pendingDropsRef.current.length > 0) {
-        const buffered = pendingDropsRef.current
-        pendingDropsRef.current = []
-        buffered.forEach((files) => fn(files))
+      if (fn) {
+        const buffered = pendingDropsRef.current.splice(0)
+        for (const request of buffered) {
+          void fn(request.files, request.options ?? {}).then(
+            request.resolve,
+            request.reject
+          )
+        }
+      }
+    },
+    []
+  )
+  useEffect(
+    () => () => {
+      for (const request of pendingDropsRef.current.splice(0)) {
+        request.reject(new Error("Composer unmounted"))
       }
     },
     []
@@ -481,6 +510,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         fileDragOver,
         setFileDragOver,
         processDroppedFiles,
+        prepareFiles,
         setProcessDroppedFilesFunction,
         focusChatInput,
         setFocusChatInputFunction,

@@ -17,7 +17,13 @@ export interface ComposerFile<T> {
 
 export interface ComposerFilesOptions<T> {
   scopeKey?: string
-  uploadFiles?: (files: File[]) => Promise<T[]>
+  uploadFiles?: (
+    files: File[],
+    options?: { signal: AbortSignal }
+  ) => Promise<T[]>
+  maxStoredFiles?: number
+  maxStoredBytes?: number
+  getFileExpiry?: (value: T) => number | undefined
   maxFiles?: number
   maxFileSizeBytes?: number
   validateFiles?: (files: File[]) => File[]
@@ -30,10 +36,38 @@ export interface ComposerFilesOptions<T> {
   ) => void
 }
 
+function replaceFile<T>(
+  target: ComposerFile<T>,
+  patch: Partial<ComposerFile<T>>
+) {
+  return (current: ComposerFile<T>[]) =>
+    current.map((item) => (item === target ? { ...item, ...patch } : item))
+}
+
+function exceedsStorageLimit<T>(
+  stored: ComposerFile<T>[],
+  accepted: File[],
+  maxFiles?: number,
+  maxBytes?: number
+) {
+  const count = stored.length + accepted.length
+  const bytes = [...stored.map((item) => item.file), ...accepted].reduce(
+    (total, file) => total + file.size,
+    0
+  )
+  return (
+    (maxFiles !== undefined && count > maxFiles) ||
+    (maxBytes !== undefined && bytes > maxBytes)
+  )
+}
+
 export function useComposerFiles<T>({
   scopeKey = "default",
   uploadFiles,
   maxFiles,
+  maxStoredFiles,
+  maxStoredBytes,
+  getFileExpiry,
   maxFileSizeBytes,
   validateFiles,
   onAdded,
@@ -46,6 +80,9 @@ export function useComposerFiles<T>({
   const scopeRef = useRef(scopeKey)
   const filesByScopeRef = useRef(new Map<string, ComposerFile<T>[]>())
   const previewUrlsRef = useRef(new Set<string>())
+  const attempts = useRef(new Map<string, AbortController>())
+  const queue = useRef<Promise<unknown>[]>([])
+  const mounted = useRef(true)
 
   useLayoutEffect(() => {
     if (scopeRef.current === scopeKey) {
@@ -63,6 +100,9 @@ export function useComposerFiles<T>({
       change: (current: ComposerFile<T>[]) => ComposerFile<T>[],
       scope = scopeRef.current
     ) => {
+      if (!mounted.current) {
+        return
+      }
       const current =
         scope === scopeRef.current
           ? filesRef.current
@@ -84,14 +124,56 @@ export function useComposerFiles<T>({
     }
   }, [])
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      for (const attempt of attempts.current.values()) {
+        attempt.abort()
+      }
       for (const url of previewUrlsRef.current) {
         URL.revokeObjectURL(url)
       }
       previewUrlsRef.current.clear()
+    }
+  }, [])
+
+  useEffect(
+    function expirePreparedFiles() {
+      if (!getFileExpiry) {
+        return
+      }
+      const expiries = files
+        .flatMap((item) =>
+          item.status === "ready" && item.value !== undefined
+            ? [getFileExpiry(item.value)]
+            : []
+        )
+        .filter(
+          (expiry): expiry is number =>
+            expiry !== undefined && Number.isFinite(expiry)
+        )
+      if (!expiries.length) {
+        return
+      }
+      const timer = setTimeout(
+        () =>
+          update((current) =>
+            current.map((item) => {
+              const expiry =
+                item.value === undefined ? undefined : getFileExpiry(item.value)
+              return item.status === "ready" &&
+                expiry !== undefined &&
+                expiry <= Date.now()
+                ? { ...item, status: "error", errorMessage: uploadErrorMessage }
+                : item
+            })
+          ),
+        Math.max(0, Math.min(...expiries) - Date.now())
+      )
+      return () => clearTimeout(timer)
     },
-    []
+    [files, getFileExpiry, update, uploadErrorMessage]
   )
 
   const finishUpload = useCallback(
@@ -99,58 +181,70 @@ export function useComposerFiles<T>({
       if (!uploadFiles || pending.length === 0) {
         return
       }
-      try {
-        const uploaded = await uploadFiles(pending.map((item) => item.file))
-        if (
-          !Array.isArray(uploaded) ||
-          uploaded.length !== pending.length ||
-          uploaded.some((item) => item === undefined)
-        ) {
-          throw new Error("Unexpected attachment upload result")
-        }
-        if (releasePreviewOnReady) {
-          for (const item of pending) {
-            release(item)
-          }
-        }
-        const byId = new Map(
-          pending.map((item, index) => [item.id, uploaded[index]])
-        )
-        update(
-          (current) =>
-            current.map((item) => {
-              if (!byId.has(item.id)) {
-                return item
+      await Promise.all(
+        pending.map(async (item) => {
+          const attempt = new AbortController()
+          attempts.current.get(item.id)?.abort()
+          attempts.current.set(item.id, attempt)
+          const previous =
+            queue.current.length >= 2 ? queue.current.shift() : undefined
+          const work = (async () => {
+            if (previous) {
+              await previous.catch(() => undefined)
+            }
+            if (attempt.signal.aborted) {
+              return
+            }
+            try {
+              const uploaded = await uploadFiles([item.file], {
+                signal: attempt.signal,
+              })
+              if (
+                !Array.isArray(uploaded) ||
+                uploaded.length !== 1 ||
+                uploaded[0] === undefined
+              ) {
+                throw new Error("Unexpected attachment upload result")
               }
-              return {
-                ...item,
-                status: "ready",
-                value: byId.get(item.id),
-                previewUrl: releasePreviewOnReady ? null : item.previewUrl,
-                errorMessage: undefined,
+              if (attempt.signal.aborted || !mounted.current) {
+                return
               }
-            }),
-          scope
-        )
-      } catch (error) {
-        const ids = new Set(pending.map((item) => item.id))
-        update(
-          (current) =>
-            current.map((item) =>
-              ids.has(item.id)
-                ? {
-                    ...item,
-                    status: "error",
-                    errorMessage: uploadErrorMessage,
-                  }
-                : item
-            ),
-          scope
-        )
-        if (scope === scopeRef.current) {
-          onError("upload", error)
-        }
-      }
+              if (releasePreviewOnReady) {
+                release(item)
+              }
+              update(
+                replaceFile(item, {
+                  status: "ready",
+                  value: uploaded[0],
+                  previewUrl: releasePreviewOnReady ? null : item.previewUrl,
+                  errorMessage: undefined,
+                }),
+                scope
+              )
+            } catch (error) {
+              if (attempt.signal.aborted || !mounted.current) {
+                return
+              }
+              update(
+                replaceFile(item, {
+                  status: "error",
+                  errorMessage: uploadErrorMessage,
+                }),
+                scope
+              )
+              if (scope === scopeRef.current) {
+                onError("upload", error)
+              }
+            } finally {
+              if (attempts.current.get(item.id) === attempt) {
+                attempts.current.delete(item.id)
+              }
+            }
+          })()
+          queue.current.push(work)
+          await work
+        })
+      )
     },
     [
       onError,
@@ -163,11 +257,16 @@ export function useComposerFiles<T>({
   )
 
   const addFiles = useCallback(
-    async (rawFiles: File[]) => {
-      if (!uploadFiles || rawFiles.length === 0) {
-        return
+    async (rawFiles: File[], prepared?: T[]) => {
+      if (!uploadFiles) {
+        return []
       }
       const scope = scopeRef.current
+      const existing =
+        prepared && findPreparedFiles(rawFiles, filesRef.current, getFileExpiry)
+      if (existing) {
+        return existing
+      }
       const accepted = validateFiles ? validateFiles(rawFiles) : rawFiles
       if (accepted.length === 0) {
         return
@@ -186,7 +285,17 @@ export function useComposerFiles<T>({
         onError("too-large")
         return
       }
-      const pending = accepted.map((file): ComposerFile<T> => {
+      if (prepared && prepared.length !== accepted.length) {
+        throw new Error("Invalid prepared attachments")
+      }
+      const stored = [...filesByScopeRef.current.values()].flat()
+      if (
+        exceedsStorageLimit(stored, accepted, maxStoredFiles, maxStoredBytes)
+      ) {
+        onError("too-many")
+        return []
+      }
+      const pending = accepted.map((file, index): ComposerFile<T> => {
         const previewUrl =
           typeof URL.createObjectURL === "function"
             ? URL.createObjectURL(file)
@@ -198,19 +307,42 @@ export function useComposerFiles<T>({
           id: crypto.randomUUID(),
           file,
           previewUrl,
-          status: "uploading",
+          status: prepared
+            ? (getFileExpiry?.(prepared[index]) ?? Infinity) <= Date.now()
+              ? "error"
+              : "ready"
+            : "uploading",
+          errorMessage:
+            prepared &&
+            (getFileExpiry?.(prepared[index]) ?? Infinity) <= Date.now()
+              ? uploadErrorMessage
+              : undefined,
+          value: prepared?.[index],
         }
       })
       for (const item of pending) {
         onAdded?.(item)
       }
       update((current) => [...current, ...pending], scope)
-      await finishUpload(pending, scope)
+      if (!prepared) {
+        await finishUpload(pending, scope)
+      }
+      const current =
+        scope === scopeRef.current
+          ? filesRef.current
+          : (filesByScopeRef.current.get(scope) ?? [])
+      return pending
+        .map((item) => current.find((candidate) => candidate.id === item.id))
+        .filter((item): item is ComposerFile<T> => item !== undefined)
     },
     [
       finishUpload,
+      getFileExpiry,
+      uploadErrorMessage,
       maxFileSizeBytes,
       maxFiles,
+      maxStoredFiles,
+      maxStoredBytes,
       onAdded,
       onError,
       update,
@@ -221,6 +353,7 @@ export function useComposerFiles<T>({
 
   const removeFile = useCallback(
     (id: string) => {
+      attempts.current.get(id)?.abort()
       const item = filesRef.current.find((file) => file.id === id)
       if (item) {
         release(item)
@@ -239,6 +372,7 @@ export function useComposerFiles<T>({
           : (filesByScopeRef.current.get(scope) ?? [])
       for (const item of current) {
         if (sentIds.has(item.id)) {
+          attempts.current.get(item.id)?.abort()
           release(item)
         }
       }
@@ -267,4 +401,23 @@ export function useComposerFiles<T>({
   )
 
   return { files, addFiles, removeFile, clearFiles, retryFile }
+}
+
+function findPreparedFiles<T>(
+  rawFiles: File[],
+  files: ComposerFile<T>[],
+  getFileExpiry?: (value: T) => number | undefined
+) {
+  const existing = rawFiles.map((file) =>
+    files.find(
+      (item) =>
+        item.file === file &&
+        item.status === "ready" &&
+        item.value !== undefined &&
+        (getFileExpiry?.(item.value) ?? Infinity) > Date.now()
+    )
+  )
+  return existing.every((item): item is ComposerFile<T> => item !== undefined)
+    ? existing
+    : undefined
 }

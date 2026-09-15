@@ -131,9 +131,28 @@ export const ChatComposer = (): ReactNode => {
   const [existingAttachments, setExistingAttachments] = useState<
     PendingAttachment[]
   >([])
+  const voiceDurations = useRef(new WeakMap<File, number>())
+  const prepareAttachments = useCallback(
+    async (files: File[], request?: { signal: AbortSignal }) => {
+      const uploaded = await uploadFiles!(files, request)
+      return uploaded.map((attachment, index): F0ChatComposableAttachment => {
+        const duration = voiceDurations.current.get(files[index])
+        return duration === undefined || !("url" in attachment)
+          ? attachment
+          : {
+              kind: "voice",
+              url: attachment.url,
+              durationSeconds: duration,
+              mimeType: files[index].type,
+              name: files[index].name,
+            }
+      })
+    },
+    [uploadFiles]
+  )
   const composerFiles = useChatComposerController<F0ChatComposableAttachment>({
     scopeKey: channel.id,
-    uploadFiles: canUpload ? uploadFiles : undefined,
+    uploadFiles: canUpload ? prepareAttachments : undefined,
     maxFiles:
       maxFiles === undefined
         ? undefined
@@ -398,21 +417,19 @@ export const ChatComposer = (): ReactNode => {
           ? "ogg"
           : "webm"
       const file = new File([audio], `voice-note.${ext}`, { type })
+      voiceDurations.current.set(
+        file,
+        Math.max(1, Math.round(durationMs / 1000))
+      )
       try {
-        const [uploaded] = await uploadFiles([file])
-        if (uploaded && "url" in uploaded) {
-          sendMessage({
-            body: "",
-            attachments: [
-              {
-                kind: "voice",
-                url: uploaded.url,
-                durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
-                mimeType: type,
-                name: file.name,
-              },
-            ],
-          })
+        const scope = composerFiles.renderedScopeKey
+        const [item] = (await composerFiles.addFiles([file])) ?? []
+        const uploaded = item?.value
+        if (item?.status === "ready" && uploaded && "url" in uploaded) {
+          await composerFiles.submit(
+            () => sendMessage({ body: "", attachments: [uploaded] }),
+            { scopeKey: scope, text: "", files: [item] }
+          )
         }
       } catch {
         showTransientError(i18n.chat.fileUploadError)
@@ -420,7 +437,15 @@ export const ChatComposer = (): ReactNode => {
         setIsSendingVoiceNote(false)
       }
     },
-    [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
+    [
+      uploadFiles,
+      composerFiles.addFiles,
+      composerFiles.submit,
+      composerFiles.renderedScopeKey,
+      sendMessage,
+      showTransientError,
+      i18n.chat.fileUploadError,
+    ]
   )
 
   const recorder = useAudioRecorder({

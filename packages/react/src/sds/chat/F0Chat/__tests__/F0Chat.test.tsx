@@ -1035,21 +1035,18 @@ describe("F0Chat", () => {
 
   it("previews images, videos, and documents immediately in the composer", async () => {
     // The documents upload first — images must still render grouped at the front.
-    const uploadFiles = vi.fn().mockResolvedValue([
-      {
-        kind: "file",
-        url: "blob:doc",
-        name: "report.pdf",
-        mimeType: "application/pdf",
-      },
-      {
-        kind: "file",
-        url: "blob:video",
-        name: "walkthrough.webm",
-        mimeType: "video/webm",
-      },
-      { kind: "image", url: "blob:img", name: "photo.png" },
-    ])
+    const uploadFiles = vi.fn().mockImplementation(async (files: File[]) =>
+      files.map((file) => ({
+        kind: file.type.startsWith("image/") ? "image" : "file",
+        url: file.type.startsWith("image/")
+          ? "blob:img"
+          : file.type.startsWith("video/")
+            ? "blob:video"
+            : "blob:doc",
+        name: file.name,
+        mimeType: file.type,
+      }))
+    )
     const { container } = renderChat(makeRuntime({ uploadFiles }))
     const fileInput =
       container.querySelector<HTMLInputElement>("input[type=file]")!
@@ -1415,7 +1412,10 @@ describe("F0Chat", () => {
       Object.defineProperty(atLimit, "size", { value: maxFileSizeBytes })
       fireEvent.change(fileInput, { target: { files: [atLimit] } })
 
-      expect(uploadFiles).toHaveBeenCalledWith([atLimit])
+      expect(uploadFiles).toHaveBeenCalledWith(
+        [atLimit],
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
       await waitFor(() =>
         expect(
           screen.queryByText("Each file must be 100 MB or smaller")
@@ -1456,7 +1456,12 @@ describe("F0Chat", () => {
         clipboardData: { files: [pastedFile] },
       })
     ).toBe(false)
-    await waitFor(() => expect(uploadFiles).toHaveBeenCalledWith([pastedFile]))
+    await waitFor(() =>
+      expect(uploadFiles).toHaveBeenCalledWith(
+        [pastedFile],
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
+    )
 
     expect(
       fireEvent.paste(textarea, {

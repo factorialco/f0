@@ -3,6 +3,7 @@ import { useChatComposerController } from "@/lib/chat/useChatComposerController"
 import { useI18n } from "@/lib/providers/i18n"
 import {
   type AiChatFileAttachmentConfig,
+  type AiChatFileIntake,
   type UploadedFile,
 } from "../F0AiChat/types"
 import { filterByMimeType } from "./file-utils"
@@ -77,10 +78,61 @@ export function useFileAttachments(
     scopeKey,
     uploadFiles: onUploadFiles,
     maxFiles,
+    maxStoredFiles: fileAttachments?.maxStoredFiles,
+    maxStoredBytes: fileAttachments?.maxStoredBytes,
+    maxFileSizeBytes: fileAttachments?.maxFileSizeBytes,
+    getFileExpiry: fileAttachments?.getFileExpiry,
     validateFiles,
     uploadErrorMessage: translation.ai.fileUploadError,
     onError,
   })
+  const intakeFiles: AiChatFileIntake = useCallback(
+    async (files, options) => {
+      const preserveText = () => {
+        if (options?.text) {
+          composerFiles.updateValueForScope(
+            scopeKey,
+            (current) => current || options.text || ""
+          )
+        }
+      }
+      try {
+        const prepared = await composerFiles.addFiles(
+          files,
+          options?.preparedFiles
+        )
+        if (
+          !prepared ||
+          prepared.length !== files.length ||
+          prepared.some((item) => item.status !== "ready" || !item.value)
+        ) {
+          throw new Error(translation.ai.fileUploadError)
+        }
+        const values = prepared.map((item) => item.value!)
+        if (options?.onPrepared) {
+          const accepted = await composerFiles.submit(
+            () => options.onPrepared!(values),
+            { scopeKey, text: "", files: prepared }
+          )
+          if (!accepted) {
+            throw new Error(translation.ai.fileUploadError)
+          }
+        }
+        return values
+      } catch (error) {
+        preserveText()
+        throw error
+      }
+    },
+    [
+      composerFiles.addFiles,
+      composerFiles.submit,
+      composerFiles.updateValueForScope,
+      scopeKey,
+      translation.ai.fileUploadError,
+    ]
+  )
+
   const attachedFiles: AttachedFile[] = composerFiles.files.map((item) => ({
     id: item.id,
     file: item.file,
@@ -116,6 +168,7 @@ export function useFileAttachments(
     isAtMaxFiles,
     maxFiles,
     processFiles: composerFiles.addFiles,
+    intakeFiles,
     handleFileSelect,
     handleRemoveFile: composerFiles.removeFile,
     clearFiles: composerFiles.clearFiles,

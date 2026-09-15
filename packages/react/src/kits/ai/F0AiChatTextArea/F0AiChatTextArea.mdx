@@ -22,3 +22,11 @@ Pass a stable `draftKey` for each conversation. Text, caret position, mentions, 
 Pasting text and a file adds both to one draft. Images and PDFs can be previewed before sending. A failed upload remains in the composer for Retry or Remove; it cannot be sent until resolved.
 
 <Canvas of={Stories.WithFileAttachments} />
+
+## File preparation and programmatic intake
+
+Files start uploading as soon as they enter the composer. `onUploadFiles` receives one file per call and an optional abort signal. Successful files remain ready when a sibling fails; Retry uploads only the failed file. `maxFiles` limits one draft, `maxFileSizeBytes` limits each file, and `maxStoredFiles` / `maxStoredBytes` include parked drafts.
+
+`getFileExpiry(file)` returns epoch milliseconds. Expired files retain their original local File and can be retried.
+
+The callback registered by `onProcessFilesRef` accepts `(files, options)` and returns a promise of uploaded values. `options.preparedFiles` adopts corresponding values in the same order without uploading again. `options.onPrepared` participates in the composer's submission guard: acceptance clears only those files; returning `false` or rejecting retains them. `options.text` supplies fallback draft text after failure or nonacceptance, preserving existing text.

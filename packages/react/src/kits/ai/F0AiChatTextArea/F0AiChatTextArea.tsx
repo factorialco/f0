@@ -109,7 +109,7 @@ export const F0AiChatTextArea = ({
     acceptValue,
     isAtMaxFiles,
     maxFiles,
-    processFiles,
+    intakeFiles,
     handleFileSelect,
     handleRemoveFile,
     retryFile,
@@ -248,13 +248,13 @@ export const F0AiChatTextArea = ({
     if (!onProcessFilesRef) {
       return
     }
-    onProcessFilesRef((files) => {
-      void processFiles(files)
-    })
+    onProcessFilesRef((files, options) =>
+      options ? intakeFiles(files, options) : intakeFiles(files).catch(() => [])
+    )
     return () => {
       onProcessFilesRef(null)
     }
-  }, [onProcessFilesRef, processFiles])
+  }, [onProcessFilesRef, intakeFiles])
 
   // While recording, the placeholder becomes "Listening…" so the empty
   // textarea signals that dictation is live.

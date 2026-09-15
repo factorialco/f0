@@ -517,3 +517,7 @@ When a message exceeds the configured character limit, submitting from the
 textarea keeps focus there, marks it invalid, associates it with the visible
 error, and announces the atomic alert. Correcting or replacing the draft
 removes the invalid state and alert.
+
+### Upload recovery
+
+Each attachment prepares independently, so a failed upload does not discard successful siblings. Voice notes use the same preparation and retry lifecycle. Their voice descriptor and duration remain attached to the file after an upload or send failure.

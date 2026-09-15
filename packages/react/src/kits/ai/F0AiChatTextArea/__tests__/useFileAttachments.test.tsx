@@ -45,7 +45,7 @@ describe("useFileAttachments maxFiles", () => {
     })
 
     expect(result.current.attachedFiles).toHaveLength(15)
-    expect(onUploadFiles).toHaveBeenCalledTimes(1)
+    expect(onUploadFiles).toHaveBeenCalledTimes(15)
     expect(result.current.transientError).toBeNull()
     expect(result.current.isAtMaxFiles).toBe(false)
   })
@@ -88,7 +88,7 @@ describe("useFileAttachments maxFiles", () => {
     })
 
     expect(result.current.attachedFiles).toHaveLength(10)
-    expect(onUploadFiles).toHaveBeenCalledTimes(1)
+    expect(onUploadFiles).toHaveBeenCalledTimes(10)
     expect(result.current.transientError).toBeNull()
     expect(result.current.isAtMaxFiles).toBe(true)
   })
@@ -192,5 +192,127 @@ describe("useFileAttachments upload contract", () => {
     expect(
       result.current.attachedFiles.every((f) => f.status === "error")
     ).toBe(true)
+  })
+})
+
+it("adopts prepared files without uploading and clears only the accepted producer files", async () => {
+  const onUploadFiles = vi.fn(async (files: File[]) =>
+    files.map((file) => ({
+      url: file.name,
+      filename: file.name,
+      mimetype: file.type,
+    }))
+  )
+  const { result } = renderHook(() => useFileAttachments({ onUploadFiles }))
+  const draft = new File(["draft"], "draft.pdf", { type: "application/pdf" })
+  const document = new File(["document"], "document.pdf", {
+    type: "application/pdf",
+  })
+  await act(async () => result.current.processFiles([draft]))
+  const prepared = {
+    url: "prepared-document",
+    filename: document.name,
+    mimetype: document.type,
+  }
+  const accept = vi.fn(async () => true)
+  await act(async () =>
+    result.current.intakeFiles([document], {
+      preparedFiles: [prepared],
+      onPrepared: accept,
+    })
+  )
+  expect(onUploadFiles).toHaveBeenCalledTimes(1)
+  expect(accept).toHaveBeenCalledWith([prepared])
+  expect(result.current.attachedFiles.map((item) => item.file.name)).toEqual([
+    "draft.pdf",
+  ])
+})
+
+it("retains producer files and prompt when preparation fails, without discarding successful siblings", async () => {
+  const onUploadFiles = vi.fn(async (files: File[]) => {
+    if (files[0]?.name === "bad.pdf") {
+      throw new Error("offline")
+    }
+    return files.map((file) => ({
+      url: file.name,
+      filename: file.name,
+      mimetype: file.type,
+    }))
+  })
+  const { result } = renderHook(() => useFileAttachments({ onUploadFiles }))
+  const accept = vi.fn()
+  await act(async () => {
+    await expect(
+      result.current.intakeFiles(
+        [new File(["a"], "good.pdf"), new File(["b"], "bad.pdf")],
+        { text: "Create my expenses", onPrepared: accept }
+      )
+    ).rejects.toThrow()
+  })
+  expect(accept).not.toHaveBeenCalled()
+  expect(result.current.value).toBe("Create my expenses")
+  expect(result.current.attachedFiles.map((item) => item.status)).toEqual([
+    "uploaded",
+    "error",
+  ])
+})
+
+it("holds submission ownership while a producer accepts its files", async () => {
+  const onUploadFiles = vi.fn(async (files: File[]) => makeUploaded(files))
+  const { result } = renderHook(() => useFileAttachments({ onUploadFiles }))
+  const file = new File(["document"], "document.pdf")
+  const preparedFiles = makeUploaded([file])
+  let resolve!: (accepted: boolean) => void
+  const onPrepared = vi.fn(
+    () =>
+      new Promise<boolean>((done) => {
+        resolve = done
+      })
+  )
+  let pending!: Promise<unknown>
+  await act(async () => {
+    pending = result.current.intakeFiles([file], { preparedFiles, onPrepared })
+  })
+  const manual = vi.fn()
+  await act(async () => {
+    expect(await result.current.submit(manual)).toBe(false)
+    await expect(
+      result.current.intakeFiles([file], { preparedFiles, onPrepared })
+    ).rejects.toThrow()
+    result.current.setValue("A later draft")
+  })
+  expect(manual).not.toHaveBeenCalled()
+  expect(onPrepared).toHaveBeenCalledTimes(1)
+  await act(async () => {
+    resolve(true)
+    await pending
+  })
+  expect(result.current.attachedFiles).toHaveLength(0)
+  expect(result.current.value).toBe("A later draft")
+})
+
+it("retains expired prepared files for recovery without invoking acceptance", async () => {
+  const onUploadFiles = vi.fn(async (files: File[]) => makeUploaded(files))
+  const { result } = renderHook(() =>
+    useFileAttachments({
+      onUploadFiles,
+      getFileExpiry: () => Date.now() - 1000,
+    })
+  )
+  const file = new File(["document"], "document.pdf")
+  const onPrepared = vi.fn()
+  await act(async () => {
+    await expect(
+      result.current.intakeFiles([file], {
+        preparedFiles: makeUploaded([file]),
+        onPrepared,
+      })
+    ).rejects.toThrow()
+  })
+  expect(onPrepared).not.toHaveBeenCalled()
+  expect(onUploadFiles).not.toHaveBeenCalled()
+  expect(result.current.attachedFiles[0]).toMatchObject({
+    file,
+    status: "error",
   })
 })

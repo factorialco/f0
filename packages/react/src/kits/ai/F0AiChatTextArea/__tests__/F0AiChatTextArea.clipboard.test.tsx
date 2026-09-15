@@ -37,7 +37,10 @@ describe("F0AiChatTextArea clipboard attachments", () => {
 
     expect(textarea).toHaveValue("Please inspect")
     await waitFor(() =>
-      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith([image])
+      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith(
+        [image],
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
     )
     fireEvent.click(
       await screen.findByRole("button", { name: /open image.*screenshot.png/i })

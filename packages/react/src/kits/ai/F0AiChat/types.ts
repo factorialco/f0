@@ -247,8 +247,28 @@ export type UploadedFile = {
   mimetype: string
 }
 
+export type AiChatFileIntakeOptions = {
+  text?: string
+  preparedFiles?: UploadedFile[]
+  onPrepared?: (
+    files: UploadedFile[]
+  ) => boolean | void | Promise<boolean | void>
+}
+
+export type AiChatFileIntake = (
+  files: File[],
+  options?: AiChatFileIntakeOptions
+) => Promise<UploadedFile[]>
+
 export type AiChatFileAttachmentConfig = {
-  onUploadFiles: (files: File[]) => Promise<UploadedFile[]>
+  maxStoredFiles?: number
+  maxStoredBytes?: number
+  maxFileSizeBytes?: number
+  getFileExpiry?: (file: UploadedFile) => number | undefined
+  onUploadFiles: (
+    files: File[],
+    options?: { signal: AbortSignal }
+  ) => Promise<UploadedFile[]>
   allowedMimeTypes?: string | string[]
   /**
    * Maximum number of files that can be attached at once.

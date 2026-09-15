@@ -19,6 +19,8 @@ export function useChatComposerController<T>(
   const draft = useComposerDraftText(options.scopeKey)
   const files = useComposerFiles(options)
   const submittingRef = useRef(false)
+  const activeScope = useRef(options.scopeKey)
+  activeScope.current = options.scopeKey
 
   const paste = useCallback(
     (
@@ -50,16 +52,18 @@ export function useChatComposerController<T>(
     (
       accept: (
         snapshot: ComposerSnapshot<T>
-      ) => boolean | void | Promise<boolean | void>
+      ) => boolean | void | Promise<boolean | void>,
+      selected?: ComposerSnapshot<T>
     ): boolean | Promise<boolean> => {
       if (
         submittingRef.current ||
+        activeScope.current !== options.scopeKey ||
         draft.renderedScopeKey !== options.scopeKey
       ) {
         return false
       }
       submittingRef.current = true
-      const snapshot: ComposerSnapshot<T> = {
+      const snapshot: ComposerSnapshot<T> = selected ?? {
         scopeKey: options.scopeKey,
         text: draft.value,
         files: files.files,
@@ -68,9 +72,11 @@ export function useChatComposerController<T>(
         if (result === false) {
           return false
         }
-        draft.updateValueForScope(snapshot.scopeKey, (current) =>
-          current === snapshot.text ? "" : current
-        )
+        if (!selected) {
+          draft.updateValueForScope(snapshot.scopeKey, (current) =>
+            current === snapshot.text ? "" : current
+          )
+        }
         files.clearFiles(
           snapshot.files.map((file) => file.id),
           snapshot.scopeKey
