@@ -1,10 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { fireEvent, screen, zeroRender } from "@/testing/test-utils"
-
-import type { GraphNode } from "../types"
-
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 /**
  * A stacked column's collapse affordance is revealed by its own narrow CSS hover
@@ -143,7 +140,7 @@ describe("revealing a stacked parent's collapse button from inside its column", 
     fireEvent.pointerMove(tree(), { clientX: 400, clientY: 300 })
 
     expect(revealFlags()).toContain("true")
-    expect(renderNode.mock.calls.length).toBe(before)
+    expect(renderNode.mock.calls).toHaveLength(before)
   })
 
   it("does no work at all for a pointer that stays inside one column", () => {
@@ -158,6 +155,6 @@ describe("revealing a stacked parent's collapse button from inside its column", 
     flowPoint = { x: 130, y: 260 }
     fireEvent.pointerMove(tree(), { clientX: 401, clientY: 340 })
 
-    expect(renderNode.mock.calls.length).toBe(afterFirst)
+    expect(renderNode.mock.calls).toHaveLength(afterFirst)
   })
 })

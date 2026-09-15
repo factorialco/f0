@@ -8,7 +8,6 @@ import {
   SortingsState,
 } from "@/hooks/datasource"
 import { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -24,7 +23,7 @@ export type DataCollectionStatus<
   grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>
   sortings?: SortingsState<SortingsDefinition>
   filters?: CurrentFiltersState
-  search?: string | undefined
+  search?: string
   navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   visualization?: number
   /** Per-visualization filter states, keyed by visualization index.
@@ -32,6 +31,9 @@ export type DataCollectionStatus<
   visualizationFilters?: Record<string, CurrentFiltersState>
   /** User-created custom presets persisted alongside the rest of the state. */
   customPresets?: PresetsDefinition<FiltersDefinition>
+  /** The active view's id, so a revisit restores which view is selected and not
+   *  just the views themselves. */
+  selectedPresetId?: string
 }
 
 export type DataCollectionStatusComplete<
@@ -60,7 +62,7 @@ export type DataCollectionStorageFeaturesDefinition = (
   | "*"
   | `all`
   | `!${DataCollectionStorageFeature}`
-  | `${DataCollectionStorageFeature}`
+  | DataCollectionStorageFeature
 )[]
 
 /**
@@ -110,5 +112,9 @@ export type FeatureProviders<
   customPresets?: {
     value: PresetsDefinition<Filters>
     setValue: React.Dispatch<React.SetStateAction<PresetsDefinition<Filters>>>
+  }
+  selectedPresetId?: {
+    value: string | undefined
+    setValue: (value: string | undefined) => void
   }
 }

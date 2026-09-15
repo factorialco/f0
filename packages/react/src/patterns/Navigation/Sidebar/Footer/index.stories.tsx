@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { action } from "storybook/actions"
-
 import * as Icons from "@/icons/app"
-
-import { SidebarFooter } from "./index"
+import { SidebarFooter } from "."
 
 const meta = {
   title: "Navigation/SidebarFooter",
@@ -18,8 +15,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     user: {
-      firstName: "Dani",
-      lastName: "Moreno Frontend kind of long name",
+      firstName: "Jordan",
+      lastName: "Avery",
       avatarUrl: "/avatars/person04.jpg",
     },
     showActivityButton: true,

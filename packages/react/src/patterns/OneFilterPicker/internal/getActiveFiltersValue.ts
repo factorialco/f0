@@ -1,7 +1,5 @@
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { FiltersDefinition, FiltersState } from "../types"
-
 import { getActiveFilterKeys } from "./getActiveFilterKeys"
 
 /**

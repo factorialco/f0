@@ -1,8 +1,6 @@
 import { createElement, StrictMode, type ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useTranscriptReadiness } from "../useTranscriptReadiness"
 
 describe("useTranscriptReadiness", () => {

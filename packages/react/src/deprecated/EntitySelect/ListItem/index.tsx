@@ -1,15 +1,13 @@
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { Counter } from "@/ui/Counter"
 import { CheckCircle } from "@/icons/app"
 import LogoAvatar from "@/icons/app/LogoAvatar"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-
+import { Counter } from "@/ui/Counter"
 import { HighlightText } from "../HighLightText"
 import { EntitySelectEntity } from "../types"
 
@@ -81,7 +79,9 @@ export const ListItemSingleContent = ({
   const handleLabelClick = (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault()
     ev.stopPropagation()
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     if (selected) {
       onRemove(entity)
     } else {
@@ -92,7 +92,9 @@ export const ListItemSingleContent = ({
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLButtonElement>) => {
     if (ev.key === "Enter" || ev.key === " ") {
       ev.preventDefault()
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       if (!selected) {
         onSelect(entity)
       } else if (selected) {
@@ -118,7 +120,7 @@ export const ListItemSingleContent = ({
             : ""
         )}
       >
-        {!hiddenAvatar && (
+        {!hiddenAvatar ? (
           <F0AvatarPerson
             src={entity.avatar}
             firstName={firstName}
@@ -126,7 +128,7 @@ export const ListItemSingleContent = ({
             size="xs"
             deactivated={entity.deactivated}
           />
-        )}
+        ) : null}
 
         <div className="flex flex-1 flex-col">
           <div
@@ -155,13 +157,13 @@ export const ListItemSingleContent = ({
           )}
         />
 
-        {singleSelector && selected && (
+        {singleSelector && selected ? (
           <F0Icon
             className="text-f1-icon-selected"
             icon={CheckCircle}
             size="md"
           />
-        )}
+        ) : null}
       </label>
     </div>
   )
@@ -230,7 +232,9 @@ const EntitySelectListItem = ({
     } else if (ev.key === "Enter" && singleSelector) {
       onExpand(!expanded)
     } else if (ev.key === "Enter") {
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       if (!selected || partialSelected) {
         onSelect(entity)
       } else if (selected) {
@@ -248,14 +252,23 @@ const EntitySelectListItem = ({
       onExpand(!expanded)
       setPressingLabel(false)
     } else {
-      if (disabled) return
-      if (singleSelector) return
-      if (selected) onRemove(entity)
-      else onSelect(entity)
+      if (disabled) {
+        return
+      }
+      if (singleSelector) {
+        return
+      }
+      if (selected) {
+        onRemove(entity)
+      } else {
+        onSelect(entity)
+      }
     }
   }
 
-  if (!entity.subItems?.length) return null
+  if (!entity.subItems?.length) {
+    return null
+  }
 
   const checked = selected || partialSelected
   return (
@@ -277,12 +290,12 @@ const EntitySelectListItem = ({
           }}
           className="flex flex-1 flex-row items-center gap-2 rounded border px-2 py-1.5 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:cursor-pointer hover:bg-f1-background-hover"
         >
-          {showGroupIcon && (
+          {showGroupIcon ? (
             <F0Icon
               icon={LogoAvatar}
               className="rounded-xs bg-f1-foreground-secondary text-f1-foreground-inverse"
             />
-          )}
+          ) : null}
           <div className="flex flex-grow flex-row items-center gap-2 break-all">
             <HighlightText
               semiBold
@@ -308,9 +321,9 @@ const EntitySelectListItem = ({
         </label>
       </div>
 
-      {!hideLine && !expanded && (
+      {!hideLine && !expanded ? (
         <div className="h-[1px] w-full bg-f1-border-secondary" />
-      )}
+      ) : null}
     </>
   )
 }

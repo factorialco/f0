@@ -25,7 +25,9 @@ export function InFilterOptionCheckbox({
         title={label}
         checked={isSelected}
         onCheckedChange={(checked) => {
-          if (checked !== isSelected) onToggle()
+          if (checked !== isSelected) {
+            onToggle()
+          }
         }}
         hideLabel
       />

@@ -1,21 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useCallback, useRef, useState } from "react"
-
+import { F0Button } from "@/components/F0Button"
 import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
 } from "@/patterns/F0Form/fields/file/types"
-
-import { F0Button } from "@/components/F0Button"
-
-import type { SurveyAnsweringFormProps } from "../types"
-
 import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
+import type { SurveyAnsweringFormProps } from "../types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -30,13 +25,17 @@ const useMockUpload: UseFileUpload = (): FileUploadHookReturn => {
     setProgress(0)
 
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
 
     setStatus("uploading")
 
     for (let i = 1; i <= 10; i++) {
       await sleep(150)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
 

@@ -1,5 +1,4 @@
 import { F0Box, type F0BoxProps } from "@/lib/F0Box"
-
 import { SurveySampleQuestionProps } from "./types"
 
 export type { SurveySampleQuestionProps } from "./types"
@@ -60,7 +59,7 @@ function RatingScale({
           />
         ))}
       </F0Box>
-      {(minLabel || maxLabel) && (
+      {minLabel || maxLabel ? (
         <F0Box display="flex" justifyContent="between" alignItems="center">
           <span className="text-xs text-f1-foreground-secondary">
             {minLabel}
@@ -69,7 +68,7 @@ function RatingScale({
             {maxLabel}
           </span>
         </F0Box>
-      )}
+      ) : null}
     </F0Box>
   )
 }

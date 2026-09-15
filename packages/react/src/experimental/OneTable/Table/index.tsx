@@ -1,12 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import { Table as TableRoot } from "@/ui/table"
-
-import { withSkeleton } from "../../../lib/skeleton"
 import { Spinner } from "@/ui/Spinner"
+import { Table as TableRoot } from "@/ui/table"
+import { withSkeleton } from "../../../lib/skeleton"
 import { TableBody } from "../TableBody"
 import { TableCell } from "../TableCell"
 import { TableHead } from "../TableHead"
@@ -28,7 +26,9 @@ function TableBase({ children, loading = false }: TableProps) {
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const handleScroll = () => {
       setIsScrolled(container.scrollLeft > 0)
@@ -58,7 +58,7 @@ function TableBase({ children, loading = false }: TableProps) {
           {children}
         </TableRoot>
         <AnimatePresence>
-          {loading && (
+          {loading ? (
             <motion.div
               className="absolute inset-0 flex cursor-progress items-center justify-center"
               initial={{ opacity: 0 }}
@@ -67,7 +67,7 @@ function TableBase({ children, loading = false }: TableProps) {
             >
               <Spinner />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </TableContext.Provider>

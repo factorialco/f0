@@ -1,7 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { GroupingDefinition } from "@/hooks/datasource"
 import {
   Add,
@@ -38,15 +36,14 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { mockImage } from "@/testing/mocks/images"
-
-import type { CustomVisualizationProps } from "../visualizations/collection"
-
+import { OneDataCollection } from ".."
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import type { CustomVisualizationProps } from "../visualizations/collection"
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -327,7 +324,9 @@ export const WithLinkedItems: Story = {
       filters,
       presets: filterPresets,
       itemUrl: (item) => {
-        if (item.id === "user-1") return undefined
+        if (item.id === "user-1") {
+          return undefined
+        }
         return `/users/${item.id}`
       },
       sortings: {
@@ -700,8 +699,8 @@ export const RendererTypes: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
+                          firstName: "Jordan",
+                          lastName: "Avery",
                           src: "/avatars/person04.jpg",
                         },
                         {
@@ -768,8 +767,8 @@ export const CustomCardProperties: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
+                          firstName: "Jordan",
+                          lastName: "Avery",
                           src: "/avatars/person04.jpg",
                         },
                         {
@@ -877,6 +876,57 @@ export const WithSelectableAndBulkActions: Story = {
       }}
     />
   ),
+}
+
+/**
+ * One department at a time: the first pick locks it and `selectionDisabled`
+ * greys out the rest, `disableSelectAll` removes the header checkbox that would
+ * break the rule before it can lock, and `selectionInherited` marks everyone
+ * reporting to a picked person as coming along without selecting them.
+ */
+export const WithDisabledSelection: Story = {
+  render: () => {
+    const [lockedDepartment, setLockedDepartment] = useState<string | null>(
+      null
+    )
+    const [selectedManagers, setSelectedManagers] = useState<string[]>([])
+
+    const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
+
+    const source = useDataCollectionSource({
+      filters,
+      sortings,
+      selectable: (item) => item.id,
+      selectionDisabled: (item) =>
+        lockedDepartment !== null && item.department !== lockedDepartment,
+      // Everyone reporting to a picked manager travels with them.
+      selectionInherited: (item) =>
+        selectedManagers.length > 0 && selectedManagers.includes(item.manager),
+      disableSelectAll: true,
+      bulkActions: () => ({
+        primary: [{ label: "Move", id: "move" }],
+      }),
+      dataAdapter: createDataAdapter({
+        data: generateMockUsers(10),
+        paginationType: "pages",
+      }),
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        onSelectItems={(selectedItems) => {
+          const checked = selectedItems.itemsStatus.filter(
+            (status) => status.checked
+          )
+          setLockedDepartment(checked[0]?.item.department ?? null)
+          setSelectedManagers(checked.map((status) => status.item.name))
+        }}
+        onBulkAction={() => {}}
+        visualizations={[mockVisualizations.table]}
+      />
+    )
+  },
 }
 
 export const WithAsyncBulkActions: Story = {
@@ -1437,12 +1487,12 @@ export const WithSynchronousData: Story = {
         fetchData: ({ filters, sortings, navigationFilters }) => {
           // Ensure sortings are properly applied
           return {
-            records: filterUsers(
-              mockUsers,
-              filters,
-              sortings,
-              navigationFilters
-            ),
+            records: filterUsers({
+              users: mockUsers,
+              filterValues: filters,
+              sortingState: sortings,
+              navigationFilters,
+            }),
           }
         },
       },

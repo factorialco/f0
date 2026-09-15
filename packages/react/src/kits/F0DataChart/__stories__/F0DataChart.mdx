@@ -88,9 +88,15 @@ Compare values across categories. Supports vertical/horizontal orientation, stac
 
 ### With Targets
 
-Renders a gradient fade from the bar top up to the target value.
+Renders a gradient fade from the bar top up to the target value. Hovering that gradient shows the bar's own tooltip, so a period with nothing attained yet — where the gradient is the whole column — still reports its target.
 
 <Canvas of={BarStories.WithTargets} />
+
+### Overachievement
+
+`highlightOverachievement` draws the stretch of a bar that passed its target in a darker shade of its own color, split at the target — otherwise a bar that beat its target looks like one that landed exactly on it. `showTargetProgress` adds `value / target` to the tooltip, under the target row.
+
+<Canvas of={BarStories.WithOverachievement} />
 
 ### Horizontal
 

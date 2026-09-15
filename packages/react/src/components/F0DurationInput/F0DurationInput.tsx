@@ -9,13 +9,11 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
-import { Bullet } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
-
+import { Bullet } from "@/icons/app"
+import { cn } from "@/lib/utils"
 import type {
   DurationFields,
   DurationUnit,
@@ -143,7 +141,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const visibleUnits = useMemo(() => {
       const filtered = UNIT_ORDER.filter((u) => units.includes(u))
-      if (filtered.length > 0) return filtered
+      if (filtered.length > 0) {
+        return filtered
+      }
       return UNIT_ORDER.filter((u) => DEFAULT_UNITS.includes(u))
     }, [units])
 
@@ -229,7 +229,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           }
 
           const parsed = parseInt(digits, 10)
-          if (isNaN(parsed)) return
+          if (isNaN(parsed)) {
+            return
+          }
 
           const clamped = clampValue(parsed, max)
           const nextNegative =
@@ -254,8 +256,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const handleKeyDown = useCallback(
       (unit: DurationUnit) => (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.metaKey || e.ctrlKey || e.altKey) return
-        if (e.key.length > 1) return
+        if (e.metaKey || e.ctrlKey || e.altKey) {
+          return
+        }
+        if (e.key.length > 1) {
+          return
+        }
         if (
           allowNegative &&
           e.key === "-" &&
@@ -274,18 +280,27 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const handleContainerClick = useCallback(
       (e: React.MouseEvent) => {
-        if (disabled) return
-        if (e.target instanceof HTMLInputElement) return
+        if (disabled) {
+          return
+        }
+        if (e.target instanceof HTMLInputElement) {
+          return
+        }
         const firstUnit = visibleUnits[0]
-        if (firstUnit) inputRefs.current.get(firstUnit)?.focus()
+        if (firstUnit) {
+          inputRefs.current.get(firstUnit)?.focus()
+        }
       },
       [disabled, visibleUnits]
     )
 
     const setInputRef = useCallback(
       (unit: DurationUnit) => (el: HTMLInputElement | null) => {
-        if (el) inputRefs.current.set(unit, el)
-        else inputRefs.current.delete(unit)
+        if (el) {
+          inputRefs.current.set(unit, el)
+        } else {
+          inputRefs.current.delete(unit)
+        }
       },
       []
     )
@@ -320,7 +335,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           disabled && "cursor-not-allowed"
         )}
       >
-        {showLabel && (
+        {showLabel ? (
           <Label
             label={label}
             required={required}
@@ -328,7 +343,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
             className="min-w-0 flex-1"
             disabled={disabled}
           />
-        )}
+        ) : null}
         <div
           id={id}
           data-testid="input-field-wrapper"
@@ -366,14 +381,14 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
             return (
               <Fragment key={unit}>
-                {index > 0 && (
+                {index > 0 ? (
                   <F0Icon
                     icon={Bullet}
                     size="xs"
                     color="default"
                     aria-hidden="true"
                   />
-                )}
+                ) : null}
                 <input
                   ref={setInputRef(unit)}
                   id={`${baseId}-${unit}`}

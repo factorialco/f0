@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { One as OneIcon } from "@/icons/ai"
 import { cn } from "@/lib/utils"
@@ -76,7 +75,9 @@ export function AccessiblePointActions({
   }, [data, isLoading, chartType, legendSelection, owner, title])
 
   useEffect(() => {
-    if (!shouldFocusPageRef.current) return
+    if (!shouldFocusPageRef.current) {
+      return
+    }
     shouldFocusPageRef.current = false
     let focusFrame = 0
     const frame = requestAnimationFrame(() => {
@@ -95,8 +96,9 @@ export function AccessiblePointActions({
   }, [page])
 
   useEffect(() => {
-    if (!open || actions === null || !shouldFocusInitialActionRef.current)
+    if (!open || actions === null || !shouldFocusInitialActionRef.current) {
       return
+    }
     shouldFocusInitialActionRef.current = false
     let focusFrame = 0
     const frame = requestAnimationFrame(() => {
@@ -112,7 +114,9 @@ export function AccessiblePointActions({
     }
   }, [actions, open])
 
-  if (!hasActions) return null
+  if (!hasActions) {
+    return null
+  }
 
   const pageSize = 100
   const loadedActions = actions ?? []
@@ -167,7 +171,9 @@ export function AccessiblePointActions({
           side="top"
           className="max-h-80 max-w-[min(32rem,90vw)] overflow-y-auto"
           onCloseAutoFocus={(event) => {
-            if (!selectedActionRef.current) return
+            if (!selectedActionRef.current) {
+              return
+            }
             event.preventDefault()
             selectedActionRef.current = false
             const action = pendingActionRef.current
@@ -190,7 +196,7 @@ export function AccessiblePointActions({
             focusChatInput()
           }}
         >
-          {hasPrevious && (
+          {hasPrevious ? (
             <DropdownMenuItem
               onSelect={(event) => {
                 event.preventDefault()
@@ -199,7 +205,7 @@ export function AccessiblePointActions({
             >
               {previousLabel}
             </DropdownMenuItem>
-          )}
+          ) : null}
           {pageActions.map((action) => (
             <DropdownMenuItem
               key={action.key}
@@ -224,7 +230,7 @@ export function AccessiblePointActions({
               {action.getLabel()}
             </DropdownMenuItem>
           ))}
-          {hasNext && (
+          {hasNext ? (
             <DropdownMenuItem
               onSelect={(event) => {
                 event.preventDefault()
@@ -233,7 +239,7 @@ export function AccessiblePointActions({
             >
               {nextLabel}
             </DropdownMenuItem>
-          )}
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

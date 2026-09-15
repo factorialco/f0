@@ -3,7 +3,6 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { SelectCell } from "../components/cells/SelectCell"
@@ -71,6 +70,51 @@ describe("SelectCell", () => {
     onChange: vi.fn(),
     item: testItem,
   }
+
+  it("renders the configured actions below the options", async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    render(
+      <SelectCell
+        {...defaultProps}
+        editableColumn={makeSelectColumn({
+          selectConfig: {
+            options: staticOptions,
+            actions: [{ label: "Cancel scheduled change", onClick }],
+          },
+        })}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(
+      screen.getByRole("button", { name: "Cancel scheduled change" })
+    )
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("resolves the actions per row", async () => {
+    const user = userEvent.setup()
+    const actions = vi
+      .fn()
+      .mockReturnValue([{ label: "Row action", onClick: vi.fn() }])
+    render(
+      <SelectCell
+        {...defaultProps}
+        editableColumn={makeSelectColumn({
+          selectConfig: { options: staticOptions, actions },
+        })}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(actions).toHaveBeenCalledWith(testItem)
+    expect(
+      screen.getByRole("button", { name: "Row action" })
+    ).toBeInTheDocument()
+  })
 
   it("renders F0Select with static options", async () => {
     const user = userEvent.setup()

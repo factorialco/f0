@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import {
   F0GridStack,
   GridStackReactOptions,
@@ -8,7 +7,6 @@ import {
 } from "@/lib/F0GridStack/F0GridStack"
 import { Optional } from "@/lib/typescript-utils/optional"
 import { cn } from "@/lib/utils"
-
 import { PageLayoutGroupComponent } from "../../types"
 import { GroupGridWidget } from "./typings"
 
@@ -245,9 +243,15 @@ export const GroupGrid = <
     prevDeps: (keyof Deps)[] | undefined,
     currentDeps: (keyof Deps)[] | undefined
   ): boolean => {
-    if (!prevDeps && !currentDeps) return false
-    if (!prevDeps || !currentDeps) return true
-    if (prevDeps.length !== currentDeps.length) return true
+    if (!prevDeps && !currentDeps) {
+      return false
+    }
+    if (!prevDeps || !currentDeps) {
+      return true
+    }
+    if (prevDeps.length !== currentDeps.length) {
+      return true
+    }
     return prevDeps.some((dep, index) => dep !== currentDeps[index])
   }
 

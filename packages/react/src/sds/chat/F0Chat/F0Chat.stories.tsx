@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0Chat } from "./F0Chat"
 import { ChatBubble } from "./components/ChatBubble"
 import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
+import { F0Chat } from "./F0Chat"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
@@ -17,10 +14,12 @@ import { ChatUIProvider } from "./providers/ChatUIProvider"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
 import {
   f0ChatSenderColors,
+  type F0ChatEvents,
   type F0ChatMessage,
   type F0ChatRuntime,
   type F0ChatUser,
 } from "./types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "./utils/media-layout"
 
 const me: F0ChatUser = { id: "me", name: "Me" }
 const ana: F0ChatUser = {
@@ -194,6 +193,27 @@ const carmen: F0ChatUser = {
   avatar: { type: "person", firstName: "Carmen", lastName: "Rodríguez" },
   profileHref: "/people/carmen",
 }
+const unicodeNfc: F0ChatUser = {
+  id: "unicode-nfc",
+  name: "Garc\u00EDa",
+  subtitle: "NFC profile",
+  avatar: { type: "person", firstName: "NFC", lastName: "García" },
+  profileHref: "/people/unicode-nfc",
+}
+const unicodeNfd: F0ChatUser = {
+  id: "unicode-nfd",
+  name: "Garci\u0301a",
+  subtitle: "NFD profile",
+  avatar: { type: "person", firstName: "NFD", lastName: "García" },
+  profileHref: "/people/unicode-nfd",
+}
+const unicodeHangul: F0ChatUser = {
+  id: "unicode-hangul",
+  name: "\uAC01",
+  subtitle: "Composed Hangul profile",
+  avatar: { type: "person", firstName: "각", lastName: "" },
+  profileHref: "/people/unicode-hangul",
+}
 
 const groupChannel = {
   id: "grp-product",
@@ -262,6 +282,87 @@ const GroupConversation = (): ReactNode => {
         <F0Chat headerActions={headerActions} />
       </F0ChatProvider>
     </Frame>
+  )
+}
+
+/** Manual regression surface for canonically equivalent mention spellings. */
+const UnicodeMentionConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: { ...groupChannel, id: "grp-unicode-mentions" },
+    me,
+    others: [unicodeNfc, unicodeNfd, unicodeHangul],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "unicode-edit-accent",
+        author: me,
+        body: "Before @Garci\u0301a, after",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        mentions: [{ id: unicodeNfc.id, name: unicodeNfc.name }],
+      },
+      {
+        id: "unicode-distinct-identities",
+        author: me,
+        body: "Two people: @Garc\u00EDa and @Garci\u0301a",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        mentions: [unicodeNfc, unicodeNfd],
+      },
+      {
+        id: "unicode-edit-hangul",
+        author: me,
+        body: "Hangul: @\u1100\u1161\u11A8, ready",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        mentions: [{ id: unicodeHangul.id, name: unicodeHangul.name }],
+      },
+    ],
+  })
+
+  return (
+    <div className="flex w-full flex-col gap-4 bg-f1-background p-4 text-f1-foreground lg:flex-row">
+      <aside className="w-full shrink-0 rounded-lg border border-solid border-f1-border p-4 lg:w-80">
+        <h2 className="mb-2 text-lg font-medium">Manual mention checks</h2>
+        <ol className="list-decimal space-y-2 pl-5 text-sm">
+          <li>Open the first message’s actions menu and choose Edit.</li>
+          <li>
+            Insert text immediately before the mention. Only the mention stays
+            highlighted.
+          </li>
+          <li>
+            Change a character inside the mention. The entire mention is
+            removed.
+          </li>
+          <li>
+            Reopen it and change the comma immediately after the mention. The
+            mention stays highlighted.
+          </li>
+          <li>
+            Focus or hover both mentions in “Two people”. Their profile
+            subtitles must stay distinct and the keyboard focus ring must be
+            visible.
+          </li>
+          <li>
+            Edit the Hangul message. Its decomposed body remains one complete
+            mention.
+          </li>
+          <li>
+            With a screen reader, confirm each focused mention is announced once
+            with its profile subtitle.
+          </li>
+        </ol>
+      </aside>
+      <div className="min-w-0 flex-1">
+        <Frame>
+          <F0ChatProvider runtime={runtime}>
+            <F0Chat />
+          </F0ChatProvider>
+        </Frame>
+      </div>
+    </div>
   )
 }
 
@@ -393,7 +494,9 @@ const StormHud = ({
         const distance =
           viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
         samples.push(distance)
-        if (samples.length > 120) samples.shift()
+        if (samples.length > 120) {
+          samples.shift()
+        }
         const canvas = canvasRef.current
         const ctx = canvas?.getContext("2d")
         if (canvas && ctx) {
@@ -405,8 +508,11 @@ const StormHud = ({
           samples.forEach((s, i) => {
             const x = (i / 119) * canvas.width
             const y = canvas.height - (s / max) * (canvas.height - 4) - 2
-            if (i === 0) ctx.moveTo(x, y)
-            else ctx.lineTo(x, y)
+            if (i === 0) {
+              ctx.moveTo(x, y)
+            } else {
+              ctx.lineTo(x, y)
+            }
           })
           ctx.stroke()
         }
@@ -418,7 +524,7 @@ const StormHud = ({
   }, [commitsRef])
 
   return (
-    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-xs text-f1-foreground shadow-md">
+    <div className="font-mono absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 text-sm text-f1-foreground shadow-md">
       <div>
         {fps} fps · {eventsPerSecond} ev/s
       </div>
@@ -506,6 +612,29 @@ const Conversation = ({
     <Frame>
       <F0ChatProvider runtime={runtime}>
         <F0Chat headerActions={headerActions} />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+const MessageLengthConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 8,
+    olderPages: 0,
+    ambientEveryMs: 0,
+  })
+  const constrainedRuntime = {
+    ...runtime,
+    maxMessageCharacters: 10,
+  } satisfies F0ChatRuntime
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={constrainedRuntime}>
+        <F0Chat />
       </F0ChatProvider>
     </Frame>
   )
@@ -899,7 +1028,9 @@ const VideoConversation = (): ReactNode => {
 const ColdStartVideoConversation = (): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (isOpen) return <VideoConversation />
+  if (isOpen) {
+    return <VideoConversation />
+  }
 
   return (
     <div className="flex h-[680px] items-center justify-center">
@@ -923,6 +1054,97 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+/**
+ * Every interaction F0Chat resolves internally, logged as it happens. Reply,
+ * copy, react from any of the four affordances, attach by button/drop/paste,
+ * play a voice note, open an image — each one appears in the panel below.
+ */
+const ObservedConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 8,
+    olderPages: 1,
+    ambientEveryMs: 0,
+  })
+  const [log, setLog] = useState<string[]>([])
+
+  // Rebuilt inline on every render on purpose: the provider holds it in a ref,
+  // so this must not re-render the transcript. No useMemo, no useCallback.
+  const events: F0ChatEvents = {
+    onMessageCopied: () => setLog((l) => ["Message copied", ...l]),
+    onReplyStarted: () => setLog((l) => ["Reply started", ...l]),
+    onReplyCancelled: () => setLog((l) => ["Reply cancelled", ...l]),
+    onEditStarted: () => setLog((l) => ["Edit started", ...l]),
+    onEditCancelled: () => setLog((l) => ["Edit cancelled", ...l]),
+    onMessageInfoViewed: () => setLog((l) => ["Info viewed", ...l]),
+    onReactionAdded: ({ emoji, source }) =>
+      setLog((l) => [`Reaction added ${emoji} (${source})`, ...l]),
+    onReactionRemoved: ({ emoji, source }) =>
+      setLog((l) => [`Reaction removed ${emoji} (${source})`, ...l]),
+    onFileAttached: ({ kind, source }) =>
+      setLog((l) => [`File attached ${kind} (${source})`, ...l]),
+    onAttachmentRemoved: ({ kind }) =>
+      setLog((l) => [`Attachment removed ${kind}`, ...l]),
+    onEmojiInserted: ({ emoji, source }) =>
+      setLog((l) => [`Emoji inserted ${emoji} (${source})`, ...l]),
+    onMentionInserted: ({ isEveryone }) =>
+      setLog((l) => [
+        `Mention inserted ${isEveryone ? "@here" : "person"}`,
+        ...l,
+      ]),
+    onVoiceRecordingStarted: () =>
+      setLog((l) => ["Voice recording started", ...l]),
+    onVoiceRecordingCancelled: () =>
+      setLog((l) => ["Voice recording cancelled", ...l]),
+    onVoiceNotePlayed: () => setLog((l) => ["Voice note played", ...l]),
+    onVoicePlaybackRateChanged: ({ rate }) =>
+      setLog((l) => [`Voice rate ${rate}x`, ...l]),
+    onImageOpened: ({ count }) =>
+      setLog((l) => [`Image opened (${count})`, ...l]),
+    onDocumentOpened: ({ kind }) =>
+      setLog((l) => [`Document opened ${kind}`, ...l]),
+    onAttachmentDownloaded: ({ kind }) =>
+      setLog((l) => [`Attachment downloaded ${kind}`, ...l]),
+    onLocationOpened: () => setLog((l) => ["Location opened", ...l]),
+    onLinkPreviewClicked: () => setLog((l) => ["Link preview clicked", ...l]),
+    onSearchOpened: () => setLog((l) => ["Search opened", ...l]),
+    onSearchResultNavigated: ({ direction }) =>
+      setLog((l) => [`Search ${direction}`, ...l]),
+    onJumpedToQuotedMessage: () => setLog((l) => ["Jumped to quote", ...l]),
+    onJumpedToBottom: () => setLog((l) => ["Jumped to bottom", ...l]),
+  }
+
+  return (
+    <div className="flex gap-4">
+      <Frame>
+        <F0ChatProvider runtime={runtime} events={events}>
+          <F0Chat />
+        </F0ChatProvider>
+      </Frame>
+      <div className="flex max-h-[600px] w-64 flex-col gap-1 overflow-y-auto rounded-lg border border-solid border-f1-border-secondary p-3">
+        <h3 className="mb-1 text-lg font-medium">Events</h3>
+        {log.length === 0 ? (
+          <p className="text-f1-foreground-secondary">
+            Interact with the chat…
+          </p>
+        ) : (
+          log.map((entry, i) => (
+            <code key={`${entry}-${i}`} className="text-sm">
+              {entry}
+            </code>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const ObservedInteractions: Story = {
+  render: () => <ObservedConversation />,
+}
+
 export const Default: Story = {
   render: () => <Conversation initialCount={40} />,
 }
@@ -943,6 +1165,13 @@ export const Snapshot: Story = {
       >
         <h2 className="text-lg font-medium">Compact voice attachment</h2>
         <CompactVoiceConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-message-limit"
+      >
+        <h2 className="text-lg font-medium">Message character limit</h2>
+        <MessageLengthConversation />
       </section>
       <section
         className="flex w-[760px] flex-col gap-2"
@@ -974,8 +1203,11 @@ export const Snapshot: Story = {
       })
       await userEvent.clear(composer)
       await userEvent.type(composer, ":smil")
+      // Same rule as the dedicated autocomplete story: the list follows the
+      // composer's value, so wait for the value and then for the list.
+      await waitFor(() => expect(composer).toHaveValue(":smil"))
       await expect(
-        defaultChat.getByRole("listbox", { name: "Add emoji" })
+        await defaultChat.findByRole("listbox", { name: "Add emoji" })
       ).toBeVisible()
     })
 
@@ -990,6 +1222,18 @@ export const Snapshot: Story = {
           ).toBeVisible(),
         { timeout: 15_000 }
       )
+    })
+
+    await step("Show the message length validation", async () => {
+      const messageLimit = within(canvas.getByTestId("snapshot-message-limit"))
+      const composer = messageLimit.getByRole("combobox", {
+        name: /write something here/i,
+      })
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+      await expect(
+        messageLimit.getByText("Messages can be up to 10 characters")
+      ).toBeVisible()
     })
 
     await step("Render document snapshots", async () => {
@@ -1033,6 +1277,43 @@ export const ComposerMotion: Story = {
   render: () => <Conversation initialCount={8} />,
 }
 
+export const MessageCharacterLimit: Story = {
+  name: "Message character limit",
+  render: () => <MessageLengthConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+
+    await step("Keep an oversized draft and show the limit", async () => {
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+
+      const alert = canvas.getByRole("alert")
+      await expect(alert).toHaveTextContent(
+        "Messages can be up to 10 characters"
+      )
+      await expect(composer).toHaveValue("12345678901")
+      await expect(composer).toHaveFocus()
+      await expect(composer).toHaveAttribute("aria-invalid", "true")
+      await expect(composer).toHaveAttribute("aria-describedby", alert.id)
+    })
+
+    await step("Clear the error after correction and send", async () => {
+      await userEvent.clear(composer)
+      await userEvent.type(composer, "1234567890")
+      await waitFor(() => expect(canvas.queryByRole("alert")).toBeNull())
+      await expect(composer).not.toHaveAttribute("aria-invalid")
+      await expect(composer).not.toHaveAttribute("aria-describedby")
+
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+      await waitFor(() => expect(canvas.getByText("1234567890")).toBeVisible())
+    })
+  },
+}
+
 /** Minimized-chat regression (360px panel): the waveform compresses before
  * reaching the fixed time/speed slot instead of overflowing across it. */
 export const CompactVoiceAttachment: Story = {
@@ -1063,46 +1344,168 @@ export const EmojiAutocomplete: Story = {
   render: () => <Conversation initialCount={8} />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const composer = canvas.getByRole("combobox", {
-      name: /write something here/i,
-    })
+    // Re-queried per use rather than captured once: the composer is a live
+    // node, and a story that holds the first reference types into a detached
+    // textarea if anything re-mounts the panel mid-play.
+    const composer = () =>
+      canvas.getByRole("combobox", { name: /write something here/i })
+    const emojiList = () => canvas.findByRole("listbox", { name: "Add emoji" })
+
+    /** Type a `:` trigger and wait for the state the list is *derived* from.
+     *
+     * The list is not a timed popover — it renders from the composer's own
+     * `value` + caret, so `expected` (the value once shortcode replacement has
+     * run) is the real precondition. Waiting on it also keeps the failure
+     * honest: a keystroke that never landed now reports the value it got
+     * instead of "the listbox is missing", which is how this story used to
+     * flake in CI. */
+    const typeTrigger = async (text: string, expected: string) => {
+      const field = composer()
+      await userEvent.click(field)
+      await waitFor(() => expect(field).toHaveFocus())
+      await userEvent.type(field, text, { skipClick: true })
+      await waitFor(() => expect(field).toHaveValue(expected))
+    }
 
     await step("Search and select with the keyboard", async () => {
-      await userEvent.type(composer, ":smil")
-      const listbox = canvas.getByRole("listbox", { name: "Add emoji" })
-      const selectedOption = within(listbox).getByRole("option", {
+      await typeTrigger(":smil", ":smil")
+      const listbox = await emojiList()
+      const selectedOption = await within(listbox).findByRole("option", {
         name: /:smile:.*Grinning Face with Smiling Eyes/,
       })
 
       await expect(listbox).toBeVisible()
-      await expect(composer).toHaveAttribute("aria-expanded", "true")
-      await expect(composer).toHaveAttribute("aria-controls", listbox.id)
-      await expect(composer).toHaveAttribute(
+      await expect(composer()).toHaveAttribute("aria-expanded", "true")
+      await expect(composer()).toHaveAttribute("aria-controls", listbox.id)
+      await expect(composer()).toHaveAttribute(
         "aria-activedescendant",
         selectedOption.id
       )
       await expect(selectedOption).toHaveAttribute("aria-selected", "true")
 
       await userEvent.keyboard("{Enter}")
-      await expect(composer).toHaveValue("😄 ")
-      await expect(
-        canvas.queryByRole("listbox", { name: "Add emoji" })
-      ).not.toBeInTheDocument()
-      await expect(composer).toHaveAttribute("aria-expanded", "false")
-      await expect(composer).toHaveFocus()
+      await waitFor(() => expect(composer()).toHaveValue("😄 "))
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("listbox", { name: "Add emoji" })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer()).toHaveAttribute("aria-expanded", "false")
+      await expect(composer()).toHaveFocus()
     })
 
     await step("Convert a complete alias", async () => {
-      await userEvent.clear(composer)
-      await userEvent.type(composer, ":thumbsup:")
-      await expect(composer).toHaveValue("👍")
+      await userEvent.clear(composer())
+      await typeTrigger(":thumbsup:", "👍")
     })
 
     await step("Leave the visual example open", async () => {
-      await userEvent.type(composer, " :joy")
-      await expect(
-        canvas.getByRole("listbox", { name: "Add emoji" })
-      ).toBeVisible()
+      await typeTrigger(" :joy", "👍 :joy")
+      await expect(await emojiList()).toBeVisible()
+    })
+  },
+}
+
+/** Composer shortcuts: Arrow Up on an empty composer reopens the last editable
+ * own message, and a double-click on any message quotes it.
+ *
+ * Runs in a real browser on purpose: the actions popover keeps its content
+ * mounted for a 150ms CSS exit animation, and only then does Radix decide
+ * whether to pull focus back to the trigger. jsdom runs no CSS animations, so
+ * a unit test unmounts the popover immediately and cannot observe that. */
+export const ComposerHotkeys: Story = {
+  name: "Composer hotkeys",
+  render: () => <Conversation initialCount={8} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+    // The transcript is virtualized and stays hidden until the browser reports
+    // the viewport stable, so rows appear well after the runtime has messages.
+    const surfaces = () =>
+      canvas.findAllByTestId("chat-message-surface") as Promise<HTMLElement[]>
+    // Radix portals the popover to document.body, outside the story canvas.
+    const overlay = within(canvasElement.ownerDocument.body)
+
+    await step("Arrow Up reopens my last message", async () => {
+      await userEvent.click(composer)
+      await userEvent.keyboard("{ArrowUp}")
+      // The chip animates its height open, and animations are only skipped
+      // under Chromatic — so it is in the DOM before it is visible.
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /cancel edit/i })
+        ).toBeVisible()
+      )
+      await expect(composer).not.toHaveValue("")
+    })
+
+    await step("A quote replaces the edit and clears its draft", async () => {
+      const [firstMessage] = await surfaces()
+      await userEvent.dblClick(firstMessage)
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /remove quote/i })
+        ).toBeVisible()
+      )
+      // Dropping the edit draft and handing focus over are the quote's own
+      // follow-up effects, not part of the render that shows its chip.
+      await waitFor(() => expect(composer).toHaveValue(""))
+      await waitFor(() => expect(composer).toHaveFocus())
+    })
+
+    await step("The menu's Reply hands focus to the composer", async () => {
+      await userEvent.click(
+        canvas.getByRole("button", { name: /remove quote/i })
+      )
+      const [row] = await surfaces()
+      // The row defers its real popover until interaction intent — hover first,
+      // or the click lands on the placeholder trigger instead.
+      await userEvent.hover(row)
+      // Hovering only *starts* the swap: the row waits out any in-flight click
+      // before replacing the placeholder. Waiting for the button alone
+      // resolves on the placeholder still in place, and a click that lands
+      // mid-swap is lost — the detached node no longer reaches the React root.
+      // Only the armed trigger is a Radix PopoverTrigger, so `aria-expanded`
+      // is the swap's own signal.
+      const menu = await waitFor(() => {
+        const [trigger] = canvas.getAllByRole("button", {
+          name: /message actions/i,
+        })
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+        return trigger
+      })
+      await userEvent.click(menu)
+      // Radix portals the content on a later tick, so the menu's rows are
+      // never in the document on the click's own tick — find, don't get.
+      await userEvent.click(
+        await overlay.findByRole("button", { name: /^Reply$/i })
+      )
+      // Radix keeps the popover mounted for its exit animation and only then
+      // decides about focus — assert after that window, not before.
+      await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
+    })
+
+    await step("Escape backs out of the quote, keeping the draft", async () => {
+      await userEvent.type(composer, "ya lo miro")
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("button", { name: /remove quote/i })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer).toHaveValue("ya lo miro")
+    })
+
+    await step("The next Escape clears the draft", async () => {
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+    })
+
+    await step("Undo puts the cleared draft back", async () => {
+      await userEvent.keyboard("{Meta>}z{/Meta}")
+      await waitFor(() => expect(composer).toHaveValue("ya lo miro"))
     })
   },
 }
@@ -1111,6 +1514,135 @@ export const EmojiAutocomplete: Story = {
 export const Group: Story = {
   name: "Group with mentions",
   render: () => <GroupConversation />,
+}
+
+/** Canonical Unicode mention spans, identity, and edit-boundary QA. */
+export const UnicodeMentionEditing: Story = {
+  name: "Unicode mention editing (QA)",
+  tags: ["unicode-mention-regression"],
+  render: () => <UnicodeMentionConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const document = within(canvasElement.ownerDocument.body)
+    const composer = (): HTMLTextAreaElement =>
+      canvas.getByRole("combobox", {
+        name: /write something here/i,
+      }) as HTMLTextAreaElement
+    const surfaceFor = async (text: string): Promise<HTMLElement> => {
+      const surfaces = await canvas.findAllByTestId("chat-message-surface")
+      const surface = surfaces.find((candidate) =>
+        candidate.textContent?.includes(text)
+      )
+      expect(surface).toBeDefined()
+      return surface!
+    }
+    const openEdit = async (text: string): Promise<HTMLTextAreaElement> => {
+      const surface = await surfaceFor(text)
+      const messageRow = surface.parentElement
+      expect(messageRow).toBeDefined()
+      await userEvent.hover(surface)
+      const menu = await waitFor(() => {
+        const trigger = within(messageRow!).getByRole("button", {
+          name: /message actions/i,
+        })
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+        return trigger
+      })
+      await userEvent.click(menu)
+      await userEvent.click(
+        await document.findByRole("button", { name: /^Edit$/i })
+      )
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: /cancel edit/i })
+        ).toBeVisible()
+      )
+      return composer()
+    }
+    const highlightedMention = (text: string): HTMLElement | undefined => {
+      const composerSurface = canvas.getByTestId("chat-composer-surface")
+      return [
+        ...composerSurface.querySelectorAll<HTMLElement>("[aria-hidden] span"),
+      ].find((node) => node.textContent === text)
+    }
+
+    await step(
+      "Keep an insertion before the mention outside its span",
+      async () => {
+        const field = await openEdit("Before")
+        const at = field.value.indexOf("@")
+        await userEvent.click(field)
+        field.setSelectionRange(at, at)
+        await userEvent.type(field, "x", { skipClick: true })
+
+        await waitFor(() =>
+          expect(field).toHaveValue("Before x@Garci\u0301a, after")
+        )
+        await waitFor(() =>
+          expect(highlightedMention("@Garci\u0301a")).toBeVisible()
+        )
+        expect(highlightedMention("x@Garci\u0301a")).toBeUndefined()
+      }
+    )
+
+    await step("Remove the whole mention when editing inside it", async () => {
+      const field = composer()
+      const at = field.value.indexOf("@")
+      field.setSelectionRange(at + 1, at + 2)
+      await userEvent.type(field, "X", { skipClick: true })
+
+      await waitFor(() => expect(field).toHaveValue("Before x, after"))
+      expect(highlightedMention("@Garci\u0301a")).toBeUndefined()
+      await userEvent.click(
+        canvas.getByRole("button", { name: /cancel edit/i })
+      )
+    })
+
+    await step(
+      "Keep canonically equal occurrences tied to each profile",
+      async () => {
+        const nfc = canvas.getByRole("link", {
+          name: "@García, NFC profile",
+        })
+        const nfd = canvas.getByRole("link", {
+          name: "@García, NFD profile",
+        })
+
+        await userEvent.hover(nfc)
+        await expect(
+          await document.findByText("NFC profile")
+        ).toBeInTheDocument()
+        await userEvent.unhover(nfc)
+        await waitFor(() =>
+          expect(document.queryByText("NFC profile")).not.toBeInTheDocument()
+        )
+        await userEvent.hover(nfd)
+        await expect(
+          await document.findByText("NFD profile")
+        ).toBeInTheDocument()
+        await userEvent.unhover(nfd)
+
+        nfc.focus()
+        await expect(nfc).toHaveFocus()
+        await expect(
+          await document.findByText("NFC profile")
+        ).toBeInTheDocument()
+        nfd.focus()
+        await expect(nfd).toHaveFocus()
+        await expect(
+          await document.findByText("NFD profile")
+        ).toBeInTheDocument()
+      }
+    )
+
+    await step("Anchor the complete decomposed Hangul occurrence", async () => {
+      const field = await openEdit("Hangul")
+      await expect(field).toHaveValue("Hangul: @\u1100\u1161\u11A8, ready")
+      await waitFor(() =>
+        expect(highlightedMention("@\u1100\u1161\u11A8")).toBeVisible()
+      )
+    })
+  },
 }
 
 /** Membership events as centered system rows (added / left / removed) with
@@ -1148,7 +1680,7 @@ export const WithVideoAttachments: Story = {
               expect(card).not.toHaveAttribute("aria-busy")
               expect(card).toHaveClass(
                 "aspect-video",
-                "w-[36rem]",
+                CHAT_MEDIA_WIDTH_CLASS,
                 "max-w-full"
               )
               expect(
@@ -1194,7 +1726,7 @@ export const ColdStartVideoAttachments: Story = {
       for (const card of cards) {
         await expect(card).toHaveClass(
           "aspect-video",
-          "w-[36rem]",
+          CHAT_MEDIA_WIDTH_CLASS,
           "max-w-full"
         )
       }

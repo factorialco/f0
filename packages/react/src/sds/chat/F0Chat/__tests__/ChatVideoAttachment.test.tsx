@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -7,11 +6,11 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { ChatVideoAttachment } from "../components/ChatVideoAttachment"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 
 vi.mock("react-virtuoso", async (importOriginal) => {
   const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
@@ -51,21 +50,21 @@ vi.mock("@/components/F0VideoPlayer", () => ({
       data-silent={silent}
     >
       <video data-testid="mock-video-media">
-        {content?.captions && (
+        {content?.captions ? (
           <track
             data-testid="mock-video-captions"
             kind="captions"
             src="captions.vtt"
           />
-        )}
+        ) : null}
       </video>
       <button type="button">Play</button>
       <button type="button">Enter fullscreen</button>
-      {download && (
+      {download ? (
         <button type="button" onClick={download.onClick}>
           {download.label}
         </button>
-      )}
+      ) : null}
     </div>
   ),
 }))
@@ -199,7 +198,7 @@ describe("ChatVideoAttachment", () => {
     )
 
     const card = screen.getByTestId("chat-video-attachment")
-    expect(card).toHaveClass("w-[36rem]", "max-w-full", "aspect-video")
+    expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS, "aspect-video")
     expect(card).not.toHaveClass("w-full")
     const poster = container.querySelector<HTMLImageElement>(
       'img[src="https://cdn.example.com/poster.webp"]'
@@ -241,8 +240,14 @@ describe("ChatVideoAttachment", () => {
       />
     )
 
-    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+    // The card itself letterboxes on a neutral dark surface — the sender tint
+    // is for card chrome, never for the bars around someone's pixels. It still
+    // reaches the empty-poster skeleton, which IS chrome.
+    expect(screen.getByTestId("chat-video-attachment")).not.toHaveClass(
       surfaceClassName
+    )
+    expect(screen.getByTestId("chat-video-attachment")).toHaveClass(
+      "bg-[hsl(222_31%_11%)]"
     )
     expect(screen.getByTestId("skeleton")).toHaveClass(surfaceClassName)
   })
@@ -296,7 +301,7 @@ describe("ChatVideoAttachment", () => {
     const videoCards = screen.getAllByTestId("chat-video-attachment")
     expect(videoCards).toHaveLength(2)
     for (const card of videoCards) {
-      expect(card).toHaveClass("w-[36rem]", "max-w-full", "aspect-video")
+      expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS, "aspect-video")
     }
 
     expect(screen.getByText("source-deck.pptx")).toBeInTheDocument()

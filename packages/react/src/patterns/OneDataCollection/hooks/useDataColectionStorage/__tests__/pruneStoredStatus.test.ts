@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { pruneStoredStatus, StoredStatusDefinition } from "../pruneStoredStatus"
 import { DataCollectionStatusComplete } from "../types"
 
@@ -179,6 +178,12 @@ describe("pruneStoredStatus", () => {
       expect(prune({ settings } as unknown as Status).settings).toEqual(
         settings
       )
+    })
+
+    it("leaves selectedPresetId untouched, so the active view is still restored", () => {
+      expect(
+        prune({ selectedPresetId: "mine" } as Status).selectedPresetId
+      ).toBe("mine")
     })
 
     it("leaves customPresets untouched, since a saved view is user-authored data", () => {

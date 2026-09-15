@@ -1,5 +1,4 @@
-import { type ReactNode, useState } from "react"
-
+import { type ReactNode, useRef, useState } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import {
@@ -13,16 +12,25 @@ import {
   Reply,
   Plus,
 } from "@/icons/app"
-import { Picker } from "@/sds/social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
-import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
-import { type F0ChatMessage } from "../types"
+import { useChatComposeActions } from "../providers/ChatUIProvider"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
+import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
+import {
+  canCopyAction,
+  canDeleteAction,
+  canEditAction,
+  canReactAction,
+  canReplyAction,
+  canViewInfoAction,
+  type MessageActionContext,
+} from "../utils/message-actions"
 import { formatClock } from "../utils/natural-time"
+import { emitReactionToggle } from "../utils/reactions"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "😮", "🙏"]
@@ -85,42 +93,41 @@ export const ChatMessageActions = ({
     editWindowMs,
     retryMessage,
     capabilities,
+    channelType,
   } = useF0ChatStable()
-  const { setReplyTo } = useChatReply()
-  const { setEditingMessage } = useChatEdit()
+  const { startReply, startEdit } = useChatComposeActions()
+  const emit = useF0ChatEmit()
   const [view, setView] = useState<"menu" | "info">("menu")
+  // Set when the menu closes because a reply started: the composer takes focus,
+  // so the popover must not pull it back to the ellipsis trigger.
+  const keepComposerFocusRef = useRef(false)
 
-  // Editing is offered on non-deleted messages while the host allows it
-  // (provides `editMessage`). The POLICY (whose messages, for how long) comes
-  // from `capabilities.canEditMessage` when provided, else the default: own
-  // messages within the edit window.
-  // `Date.now()` here is fine: the popover content only mounts when open.
-  const withinEditWindow =
-    editWindowMs == null ||
-    Date.now() - new Date(message.createdAt).getTime() <= editWindowMs
-  // Voice notes can't be edited (there's no text to change) — only deleted.
-  const isVoiceNote = (message.attachments ?? []).some(
-    (attachment) => attachment.kind === "voice"
-  )
-  const canEdit =
-    !message.deleted &&
-    !isVoiceNote &&
-    !!editMessage &&
-    (capabilities?.canEditMessage
-      ? capabilities.canEditMessage(message)
-      : isMine && withinEditWindow)
-  // Delete policy: capability override, else own messages only.
-  const canDelete = capabilities?.canDeleteMessage
-    ? capabilities.canDeleteMessage(message)
-    : isMine
-  const canReact = capabilities?.canReact !== false
+  // One shared context for every gate, so this menu and the un-armed trigger in
+  // `ChatMessageItem` can never disagree about whether there's anything here.
+  const actionContext: MessageActionContext = {
+    message,
+    isMine,
+    channelType,
+    capabilities,
+    hasEditMessage: !!editMessage,
+    editWindowMs,
+  }
+  const canReact = canReactAction(actionContext)
+  const canReply = canReplyAction(actionContext)
+  const canCopy = canCopyAction(actionContext)
+  const canViewInfo = canViewInfoAction(actionContext)
+  const canEdit = canEditAction(actionContext)
+  const canDelete = canDeleteAction(actionContext)
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next)
-    if (!next) setView("menu")
+    if (!next) {
+      setView("menu")
+    }
   }
 
-  const react = (emoji: string) => {
+  const react = (emoji: string, source: F0ChatReactionSource) => {
+    emitReactionToggle(emit, message, emoji, source)
     toggleReaction(message.id, emoji)
     handleOpenChange(false)
   }
@@ -179,18 +186,25 @@ export const ChatMessageActions = ({
       <PopoverContent
         align={isMine ? "end" : "start"}
         className="w-64 rounded-lg border border-solid border-f1-border-secondary p-0"
+        onCloseAutoFocus={(event) => {
+          if (!keepComposerFocusRef.current) {
+            return
+          }
+          keepComposerFocusRef.current = false
+          event.preventDefault()
+        }}
       >
         {isFailed ? (
           <div className="flex flex-col gap-0 p-1">
             <MenuItem
               icon={ArrowCycle}
               label={i18n.chat.retry}
-              onClick={runAndClose(() => void retryMessage(message.id))}
+              onClick={runAndClose(() => retryMessage(message.id))}
             />
             <MenuItem
               icon={Delete}
               label={i18n.actions.delete}
-              onClick={runAndClose(() => void discardFailed(message.id))}
+              onClick={runAndClose(() => discardFailed(message.id))}
             />
           </div>
         ) : view === "info" ? (
@@ -200,7 +214,7 @@ export const ChatMessageActions = ({
           />
         ) : (
           <>
-            {canReact && (
+            {canReact ? (
               <>
                 <div className="flex items-center justify-between p-2">
                   {QUICK_EMOJIS.map((emoji) => (
@@ -208,78 +222,96 @@ export const ChatMessageActions = ({
                       key={emoji}
                       label={emoji}
                       emoji={emoji}
+                      emojiMode="native"
                       variant="ghost"
                       aria-label={emoji}
-                      onClick={() => react(emoji)}
+                      onClick={() => react(emoji, "quickRow")}
                       className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
                     />
                   ))}
-                  <Picker
+                  <ChatEmojiPickerButton
                     size="md"
                     variant="ghost"
                     label={i18n.chat.react}
-                    onSelect={react}
+                    onSelect={(emoji) => react(emoji, "menuPicker")}
                     icon={Plus}
                   />
                 </div>
                 <div className="h-px bg-f1-border-secondary" />
               </>
-            )}
-            <div className="flex flex-col gap-0 p-1">
-              <MenuItem
-                icon={AlertCircleLine}
-                label={i18n.chat.info}
-                onClick={() => setView("info")}
-                trailing={
-                  <F0Icon
-                    icon={ChevronRight}
-                    size="md"
-                    className="text-f1-icon"
+            ) : null}
+            {canViewInfo || canReply || canCopy ? (
+              <div className="flex flex-col gap-0 p-1">
+                {canViewInfo ? (
+                  <MenuItem
+                    icon={AlertCircleLine}
+                    label={i18n.chat.info}
+                    onClick={() => {
+                      emit.onMessageInfoViewed({ messageId: message.id })
+                      setView("info")
+                    }}
+                    trailing={
+                      <F0Icon
+                        icon={ChevronRight}
+                        size="md"
+                        className="text-f1-icon"
+                      />
+                    }
                   />
-                }
-              />
-              <MenuItem
-                icon={Reply}
-                label={i18n.chat.reply}
-                onClick={runAndClose(() => {
-                  setEditingMessage(null)
-                  setReplyTo(message)
-                })}
-              />
-              <MenuItem
-                icon={Files}
-                label={i18n.actions.copy}
-                onClick={runAndClose(() => {
-                  void navigator.clipboard?.writeText(message.body)
-                })}
-              />
-            </div>
-            {(canEdit || canDelete) && (
+                ) : null}
+                {/* Gated on `canReply`, which follows `canSend`: without a
+                    composer this used to focus a node that isn't mounted. */}
+                {canReply ? (
+                  <MenuItem
+                    icon={Reply}
+                    label={i18n.chat.reply}
+                    onClick={runAndClose(() => {
+                      keepComposerFocusRef.current = true
+                      startReply(message)
+                    })}
+                  />
+                ) : null}
+                {canCopy ? (
+                  <MenuItem
+                    icon={Files}
+                    label={i18n.actions.copy}
+                    onClick={runAndClose(() => {
+                      void navigator.clipboard
+                        ?.writeText(message.body)
+                        .then(() =>
+                          emit.onMessageCopied({ messageId: message.id })
+                        )
+                        .catch(() => {})
+                    })}
+                  />
+                ) : null}
+              </div>
+            ) : null}
+            {canEdit || canDelete ? (
               <>
-                <div className="h-px bg-f1-border-secondary" />
+                {/* Only a separator when there IS something above to separate
+                    from — a moderator-only menu opens straight on Delete. */}
+                {canReact || canViewInfo || canReply || canCopy ? (
+                  <div className="h-px bg-f1-border-secondary" />
+                ) : null}
                 <div className="flex flex-col gap-0 p-1">
-                  {canEdit && (
+                  {canEdit ? (
                     <MenuItem
                       icon={Pencil}
                       label={i18n.chat.edit}
-                      onClick={runAndClose(() => {
-                        setReplyTo(null)
-                        setEditingMessage(message)
-                      })}
+                      onClick={runAndClose(() => startEdit(message))}
                     />
-                  )}
-                  {canDelete && (
+                  ) : null}
+                  {canDelete ? (
                     <MenuItem
                       icon={Delete}
                       label={i18n.actions.delete}
-                      onClick={runAndClose(
-                        () => void deleteMessage(message.id)
-                      )}
+                      onClick={runAndClose(() => deleteMessage(message.id))}
                     />
-                  )}
+                  ) : null}
                 </div>
               </>
-            )}
+            ) : null}
           </>
         )}
       </PopoverContent>

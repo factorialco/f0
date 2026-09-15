@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 // packages/react/src/experimental/ProductBlankslate/index.tsx
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -84,29 +83,29 @@ const _ProductBlankslate = forwardRef<HTMLDivElement, ProductBlankslateProps>(
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center gap-2">
-                {module && <F0AvatarModule module={module} />}
-                {moduleName && (
+                {module ? <F0AvatarModule module={module} /> : null}
+                {moduleName ? (
                   <p className="text-base font-medium text-f1-foreground">
                     {moduleName}
                   </p>
-                )}
+                ) : null}
               </div>
-              {(tag || promoTag) && (
+              {tag || promoTag ? (
                 <div className="flex justify-start gap-2">
-                  {tag && <F0TagRaw icon={tag.icon} text={tag.label} />}
-                  {promoTag && (
+                  {tag ? <F0TagRaw icon={tag.icon} text={tag.label} /> : null}
+                  {promoTag ? (
                     <F0TagStatus
                       variant={promoTag.variant || "positive"}
                       text={promoTag.label}
                     />
-                  )}
+                  ) : null}
                 </div>
-              )}
+              ) : null}
               <h2 className="font-bold text-xl text-f1-foreground">{title}</h2>
             </div>
             <Benefits benefits={benefits} />
           </div>
-          {actions && <div className="flex gap-3">{actions}</div>}
+          {actions ? <div className="flex gap-3">{actions}</div> : null}
         </div>
       </div>
     )

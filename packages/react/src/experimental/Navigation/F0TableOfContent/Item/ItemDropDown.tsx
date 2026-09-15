@@ -16,7 +16,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { TOCItemAction } from "../types"
 
 interface ItemDropDownProps {
@@ -54,7 +53,9 @@ function renderAction(action: TOCItemAction, index: number) {
             }}
           >
             <div className="flex w-full flex-row items-center gap-2">
-              {action.icon && <F0Icon icon={action.icon} color="default" />}
+              {action.icon ? (
+                <F0Icon icon={action.icon} color="default" />
+              ) : null}
               <span className="flex-1">{action.label}</span>
               <Switch
                 title={action.label}
@@ -74,15 +75,17 @@ function renderAction(action: TOCItemAction, index: number) {
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
               <div className="flex w-full flex-row items-center gap-2">
-                {action.icon && <F0Icon icon={action.icon} color="default" />}
+                {action.icon ? (
+                  <F0Icon icon={action.icon} color="default" />
+                ) : null}
                 <span className="flex-1 text-base font-medium">
                   {action.label}
                 </span>
-                {action.selectedLabel && (
+                {action.selectedLabel ? (
                   <span className="mr-1 text-base text-f1-foreground-secondary">
                     {action.selectedLabel}
                   </span>
-                )}
+                ) : null}
               </div>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -110,9 +113,9 @@ function renderAction(action: TOCItemAction, index: number) {
       className={cn(item.critical && "text-f1-foreground-critical")}
     >
       <div className="flex w-full flex-row items-center gap-2">
-        {item.icon && <F0Icon icon={item.icon} />}
+        {item.icon ? <F0Icon icon={item.icon} /> : null}
         <span className="flex-1">{item.label}</span>
-        {item.selected && <F0Icon icon={Check} color="default" />}
+        {item.selected ? <F0Icon icon={Check} color="default" /> : null}
       </div>
     </DropdownMenuItem>
   )

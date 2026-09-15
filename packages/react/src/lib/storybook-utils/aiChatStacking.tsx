@@ -1,17 +1,16 @@
 import { ComponentProps, ReactNode, useState } from "react"
 import { expect, waitFor, within } from "storybook/test"
-
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import { Page } from "@/patterns/Navigation/Page"
-import * as PageStories from "@/patterns/Navigation/Page/index.stories"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
   MockConnectedChatInput,
   MockConnectedMessagesContainer,
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import { Page } from "@/patterns/Navigation/Page"
+import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 
 // AI chat locked open in fullscreen. In ApplicationFrame the fullscreen chat
 // paints at `z-20` inside a `relative isolate`, as a sibling of `#content`

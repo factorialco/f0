@@ -26,7 +26,9 @@ export const Arrow = ({
         className
       )}
       onClick={() => {
-        if (disabled) return
+        if (disabled) {
+          return
+        }
         onChange?.(!open)
       }}
     >

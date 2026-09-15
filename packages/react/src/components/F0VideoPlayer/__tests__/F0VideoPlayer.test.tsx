@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { VolumeHigh, VolumeMid, VolumeMuted } from "@/icons/app"
 import {
   fireEvent,
@@ -7,7 +6,6 @@ import {
   userEvent,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { volumeIcon } from "../components/VolumeControl"
 import { F0VideoPlayer } from "../F0VideoPlayer"
 
@@ -15,7 +13,9 @@ const VIDEO_SRC = "https://example.com/video.mp4"
 
 function getVideo(): HTMLVideoElement {
   const video = document.querySelector("video")
-  if (!video) throw new Error("Video element not found")
+  if (!video) {
+    throw new Error("Video element not found")
+  }
   return video
 }
 
@@ -37,7 +37,9 @@ function timeUpdate(
   duration = 0
 ) {
   setVideoProp(video, "currentTime", currentTime)
-  if (duration) setVideoProp(video, "duration", duration)
+  if (duration) {
+    setVideoProp(video, "duration", duration)
+  }
   fireEvent.timeUpdate(video)
 }
 

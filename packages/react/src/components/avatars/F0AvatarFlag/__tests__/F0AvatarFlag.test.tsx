@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { F0AvatarFlag } from "../F0AvatarFlag"
 
 describe("F0AvatarFlag", () => {

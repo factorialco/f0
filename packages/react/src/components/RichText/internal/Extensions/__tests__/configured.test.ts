@@ -1,6 +1,5 @@
 import { Editor, type JSONContent } from "@tiptap/core"
 import { afterEach, describe, expect, it } from "vitest"
-
 import { StarterKitExtension } from "../configured"
 
 describe("StarterKitExtension heading levels", () => {

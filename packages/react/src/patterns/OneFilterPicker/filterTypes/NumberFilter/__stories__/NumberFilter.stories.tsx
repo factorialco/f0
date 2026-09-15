@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { NumberFilter } from "../NumberFilter"
 
 const meta = {

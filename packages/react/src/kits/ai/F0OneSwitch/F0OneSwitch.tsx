@@ -1,7 +1,5 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
-import { motion } from "motion/react"
 import { useEffect, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -10,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { useAiChatToggle } from "../F0AiChat/providers/useAiChatToggle"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
@@ -36,11 +33,15 @@ export const F0OneSwitch = ({
   const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
 
   useEffect(() => {
-    if (autoOpen) setAutoTooltipVisible(true)
+    if (autoOpen) {
+      setAutoTooltipVisible(true)
+    }
   }, [autoOpen])
 
   useEffect(() => {
-    if (!autoOpen) return
+    if (!autoOpen) {
+      return
+    }
     const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
     return () => clearTimeout(timer)
   }, [autoOpen])
@@ -63,18 +64,7 @@ export const F0OneSwitch = ({
           onOpenChange={autoOpen ? () => {} : setTooltipOpen}
         >
           <TooltipTrigger asChild>
-            <motion.div
-              animate={{
-                "--gradient-angle": ["0deg", "360deg"],
-              }}
-              transition={{
-                default: {
-                  duration: 8,
-                  ease: "linear",
-                  repeat: Infinity,
-                },
-              }}
-            >
+            <div>
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
                   setOpen(val)
@@ -89,6 +79,7 @@ export const F0OneSwitch = ({
                   "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.04)] data-[state=checked]:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.6)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] data-[state=checked]:after:ring-f1-border-inverse",
                   "before:absolute before:inset-0 before:rounded-full before:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] before:opacity-0 before:transition-all before:duration-300 before:content-[''] data-[state=checked]:before:opacity-100",
+                  "before:[animation:rotate-gradient_8s_linear_infinite_paused] data-[state=checked]:before:[animation:rotate-gradient_8s_linear_infinite_running] motion-reduce:before:[animation:none]",
                   disabled && "cursor-not-allowed opacity-50",
                   focusRing(),
                   className
@@ -115,16 +106,16 @@ export const F0OneSwitch = ({
                   </div>
                 </SwitchPrimitive.Thumb>
               </SwitchPrimitive.Root>
-            </motion.div>
+            </div>
           </TooltipTrigger>
-          {!open && (
+          {!open ? (
             <TooltipContent
               side="left"
               className={cn("font-medium", autoOpen && "z-[100]")}
             >
               {tooltipText}
             </TooltipContent>
-          )}
+          ) : null}
         </Tooltip>
       </TooltipProvider>
     </div>

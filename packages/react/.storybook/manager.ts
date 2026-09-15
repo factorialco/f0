@@ -23,13 +23,10 @@ const STATUS_MARKER: Record<string, { emoji: string; title: string }> = {
   },
 }
 
-/** Must match `normalizeComponentName`/`leafName` in component-status-build.mjs. */
+/** Must match `sidebarStatusKey`/`leafName` in component-status-build.mjs. */
 function normalizeLeaf(name: string) {
   const leaf = name.split("/").pop() ?? name
-  return leaf
-    .toLowerCase()
-    .replace(/^f0/, "")
-    .replace(/[^a-z0-9]/g, "")
+  return leaf.toLowerCase().replace(/[^a-z0-9]/g, "")
 }
 
 const theme = create({

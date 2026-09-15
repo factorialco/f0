@@ -1,6 +1,5 @@
 import { endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it } from "vitest"
-
 import { DateRange } from "../types"
 import { toGranularityDateRange } from "../utils"
 

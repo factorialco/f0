@@ -5,10 +5,8 @@ import type {
   MapLayerMouseEvent,
 } from "maplibre-gl"
 import { useEffect, useMemo, useRef } from "react"
-
-import { arcLineString } from "../utils/arc"
 import type { F0MapArc, F0MapLineStyle, F0MapRoute } from "../types"
-
+import { arcLineString } from "../utils/arc"
 import { markerColorTriplet } from "./internal/BaseMapMarker"
 
 const SOURCE = "f0-map-lines"
@@ -59,13 +57,21 @@ interface LineCollection {
   features: LineFeature[]
 }
 
-const feature = (
-  id: string,
-  kind: LineKind,
-  coordinates: [number, number][],
-  style: F0MapLineStyle,
+type LineFeatureOptions = {
+  id: string
+  kind: LineKind
+  coordinates: [number, number][]
+  style: F0MapLineStyle
   isDark: boolean
-): LineFeature => ({
+}
+
+const feature = ({
+  id,
+  kind,
+  coordinates,
+  style,
+  isDark,
+}: LineFeatureOptions): LineFeature => ({
   type: "Feature",
   // Top-level id (via `promoteId`) is what `setFeatureState` keys on for hover.
   id,
@@ -88,9 +94,23 @@ const buildCollection = (
 ): LineCollection => ({
   type: "FeatureCollection",
   features: [
-    ...routes.map((r) => feature(r.id, "route", r.coordinates, r, isDark)),
+    ...routes.map((r) =>
+      feature({
+        id: r.id,
+        kind: "route",
+        coordinates: r.coordinates,
+        style: r,
+        isDark,
+      })
+    ),
     ...arcs.map((a) =>
-      feature(a.id, "arc", arcLineString(a.from, a.to, a.curvature), a, isDark)
+      feature({
+        id: a.id,
+        kind: "arc",
+        coordinates: arcLineString(a.from, a.to, a.curvature),
+        style: a,
+        isDark,
+      })
     ),
   ],
 })
@@ -175,7 +195,9 @@ export const F0MapVectorLayer = ({
   // depend on the data (that is pushed via `setData` below).
   useEffect(() => {
     const ensure = () => {
-      if (!map.isStyleLoaded() || map.getSource(SOURCE)) return
+      if (!map.isStyleLoaded() || map.getSource(SOURCE)) {
+        return
+      }
       map.addSource(SOURCE, {
         type: "geojson",
         promoteId: "id",
@@ -208,7 +230,9 @@ export const F0MapVectorLayer = ({
       // A render can hand this effect a map that was just `remove()`d (its
       // replacement arrives on the next render); every style accessor throws
       // on it, so bail - the fresh map re-runs this effect from scratch.
-      if (!map.style) return
+      if (!map.style) {
+        return
+      }
       ensure()
       const source = map.getSource(SOURCE) as GeoJSONSource | undefined
       source?.setData(collectionRef.current)
@@ -227,14 +251,19 @@ export const F0MapVectorLayer = ({
     // Hover highlight + cursor + click, only when a handler wants them.
     let hovered: string | number | undefined
     const clearHover = () => {
-      if (hovered !== undefined)
+      if (hovered !== undefined) {
         map.setFeatureState({ source: SOURCE, id: hovered }, { hover: false })
+      }
       hovered = undefined
     }
     const onMove = (event: MapLayerMouseEvent) => {
       const f = event.features?.[0]
-      if (!f || f.id === undefined) return
-      if (hovered !== undefined && hovered !== f.id) clearHover()
+      if (!f || f.id === undefined) {
+        return
+      }
+      if (hovered !== undefined && hovered !== f.id) {
+        clearHover()
+      }
       hovered = f.id
       map.setFeatureState({ source: SOURCE, id: hovered }, { hover: true })
       map.getCanvas().style.cursor = "pointer"
@@ -245,10 +274,15 @@ export const F0MapVectorLayer = ({
     }
     const onClick = (event: MapLayerMouseEvent) => {
       const props = event.features?.[0]?.properties as LineProps | undefined
-      if (!props) return
+      if (!props) {
+        return
+      }
       const { onRouteClick: r, onArcClick: a } = clickRef.current
-      if (props.kind === "route") r?.(props.id)
-      else a?.(props.id)
+      if (props.kind === "route") {
+        r?.(props.id)
+      } else {
+        a?.(props.id)
+      }
     }
     if (interactive) {
       for (const id of INTERACTIVE_LAYERS) {
@@ -271,11 +305,17 @@ export const F0MapVectorLayer = ({
       }
       // After `map.remove()` the style is gone and even `getLayer` throws
       // (it dereferences `map.style`), so bail before touching anything.
-      if (!map.style) return
-      for (const id of [DASHED, SOLID]) {
-        if (map.getLayer(id)) map.removeLayer(id)
+      if (!map.style) {
+        return
       }
-      if (map.getSource(SOURCE)) map.removeSource(SOURCE)
+      for (const id of [DASHED, SOLID]) {
+        if (map.getLayer(id)) {
+          map.removeLayer(id)
+        }
+      }
+      if (map.getSource(SOURCE)) {
+        map.removeSource(SOURCE)
+      }
     }
   }, [map, interactive])
 
@@ -283,7 +323,9 @@ export const F0MapVectorLayer = ({
   // same ref, so a style swap mid-flight can't strand stale colors. Same
   // dead-map guard as `sync`.
   useEffect(() => {
-    if (!map.style) return
+    if (!map.style) {
+      return
+    }
     const source = map.getSource(SOURCE) as GeoJSONSource | undefined
     source?.setData(collection)
   }, [map, collection])

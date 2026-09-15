@@ -1,10 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import type { CardImageFit, CardImageSize } from "@/components/F0Card"
-
 import { cardImageFits, cardImageSizes } from "@/components/F0Card"
 import { mockImage } from "@/testing/mocks/images"
-
 import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {

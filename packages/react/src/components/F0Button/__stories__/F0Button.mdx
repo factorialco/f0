@@ -141,6 +141,12 @@ Icons reinforce the label meaning. Use leading icons for the most common case, t
   </table>
 </Unstyled>
 
+### Counter
+
+<Canvas of={Stories.Counter} />
+
+Counters surface a quantity tied to the action — items to review, pending approvals — right on the button, so the number and its call to action stay together. Set `counterValue` and a pill appears after the label, sized to the button and tucked flush against its trailing edge. It adapts to the surface it sits on: a dark pill on the primary field, and on critical only while hovered, where the field darkens enough to wash a light pill out; elsewhere it stays a neutral grey. A count of zero shows nothing, so the same button reads cleanly whether or not there is anything to count.
+
 ### States
 
 <Canvas of={Stories.States} />

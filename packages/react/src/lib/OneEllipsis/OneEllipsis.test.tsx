@@ -1,6 +1,5 @@
 import { act, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { OneEllipsis } from "./OneEllipsis"
 
 describe("OneEllipsis", () => {

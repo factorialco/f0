@@ -1,8 +1,13 @@
 import React, { forwardRef, memo, type ReactNode } from "react"
-
 import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider"
 
-const ignoredStaticProps = ["prototype", "length", "name", "$$typeof", "render"]
+const ignoredStaticProps = new Set([
+  "prototype",
+  "length",
+  "name",
+  "$$typeof",
+  "render",
+])
 /**
  * Copies all static properties from the source component to the target component.
  * This preserves marker properties like __isPageLayoutBlock and __isPageLayoutGroup.
@@ -17,7 +22,7 @@ const copyStaticProperties = (source: any, target: any): void => {
 
   for (const key of allKeys) {
     // Skip properties that should not be copied
-    if (ignoredStaticProps.includes(key as string)) {
+    if (ignoredStaticProps.has(key as string)) {
       continue
     }
 

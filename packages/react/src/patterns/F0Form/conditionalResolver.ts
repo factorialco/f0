@@ -1,17 +1,14 @@
+import { zodResolver } from "@hookform/resolvers/zod"
 import type {
   Resolver,
   FieldValues,
   ResolverOptions,
   FieldError,
 } from "react-hook-form"
-
-import { zodResolver } from "@hookform/resolvers/zod"
 import { z, ZodTypeAny, ZodRawShape, ZodObject, ZodEffects } from "zod"
-
-import type { F0FormSchema } from "./types"
-
 import { getF0Config, isZodType, unwrapToZodObject } from "./f0Schema"
 import { evaluateRenderIf, resolveFieldAlert } from "./fields/utils"
+import type { F0FormSchema } from "./types"
 
 /**
  * Creates a conditional Zod resolver that only validates visible fields.

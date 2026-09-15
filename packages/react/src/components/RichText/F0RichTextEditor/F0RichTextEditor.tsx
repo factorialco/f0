@@ -1,6 +1,8 @@
+import "../index.css"
 import { FocusScope } from "@radix-ui/react-focus-scope"
 import { Editor, EditorContent, useEditor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
+import type { ReactNode, RefObject } from "react"
 import {
   forwardRef,
   useCallback,
@@ -12,33 +14,32 @@ import {
   useState,
 } from "react"
 import ReactDOM from "react-dom"
-
+import { F0Button } from "@/components/F0Button"
 import {
   EditorBubbleMenu,
   MentionedUser,
   Toolbar,
   ToolbarDivider,
 } from "@/components/RichText/internal"
-import { F0Button } from "@/components/F0Button"
-import { Cross } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
-
-import "../index.css"
-import { Skeleton } from "@/ui/skeleton"
-
+import type { MentionsConfig } from "@/components/RichText/internal"
 import {
   AIEnhanceMenu,
   EnhanceActivator,
   useEnhance,
 } from "@/components/RichText/internal/Enhance"
+import type { UseEnhanceReturn } from "@/components/RichText/internal/Enhance"
 import { EnhanceErrorBanner } from "@/components/RichText/internal/Error"
+import { Cross } from "@/icons/app"
+import type { TranscribeFn } from "@/kits/ai/F0AiChat/types"
 import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { withSkeleton } from "@/lib/skeleton"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 import { FileList } from "./components/FileList"
 import { Footer } from "./components/Footer"
 import { Head } from "./components/Head"
@@ -49,8 +50,6 @@ import {
   handleEditorUpdate,
   setupContainerObservers,
 } from "./utils/helpers"
-import type { MentionsConfig } from "@/components/RichText/internal"
-import type { TranscribeFn } from "@/kits/ai/F0AiChat/types"
 import type {
   enhanceConfig,
   filesConfig,
@@ -116,6 +115,129 @@ export type RichTextEditorSkeletonProps = F0RichTextEditorSkeletonProps
 
 /** How long dictation errors stay visible (mirrors F0AiChatTextArea) */
 const DICTATION_ERROR_MS = 4000
+
+/** The slot both fullscreen toolbars rise into, at the foot of the editor. */
+const FullscreenToolbarSlot = ({ children }: { children: ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 20 }}
+    transition={{ duration: 0.2, ease: "easeOut" }}
+    className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+    style={{ pointerEvents: "none" }}
+  >
+    {children}
+  </motion.div>
+)
+
+/**
+ * The floating toolbar fullscreen mode adds. It disappears the moment an
+ * enhance kicks off — `disableButtons` covers loading, review and error.
+ */
+const FullscreenEditingToolbar = ({
+  visible,
+  editor,
+  enhance,
+  enhanceConfig,
+  plainHtmlMode,
+  toolbarRef,
+  toolbarWidth,
+  onClose,
+}: {
+  visible: boolean
+  editor: Editor
+  enhance: UseEnhanceReturn
+  /** Absent when the host did not configure enhancing. */
+  enhanceConfig: F0RichTextEditorProps["enhanceConfig"]
+  plainHtmlMode: boolean
+  /** The enhance menu is measured against, and portalled into, this box. */
+  toolbarRef: RefObject<HTMLDivElement>
+  toolbarWidth: number
+  onClose: () => void
+}) => {
+  const i18n = useI18n()
+
+  return (
+    <AnimatePresence>
+      {visible ? (
+        <FullscreenToolbarSlot>
+          <div
+            ref={toolbarRef}
+            className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
+            style={{ pointerEvents: "auto" }}
+          >
+            <div className="flex items-center gap-1">
+              <F0Button
+                onClick={(e) => {
+                  e.preventDefault()
+                  onClose()
+                }}
+                variant="neutral"
+                size="md"
+                disabled={enhance.disableButtons}
+                hideLabel
+                label={i18n.actions.close}
+                icon={Cross}
+              />
+              <ToolbarDivider />
+              {enhanceConfig ? (
+                <>
+                  <EnhanceActivator
+                    enhance={enhance}
+                    disabled={enhance.disableButtons}
+                    menuWidth={toolbarWidth}
+                    menuContainerRef={toolbarRef}
+                  />
+                  <ToolbarDivider />
+                </>
+              ) : null}
+              <Toolbar
+                editor={editor}
+                isFullscreen
+                disableButtons={enhance.disableButtons}
+                plainHtmlMode={plainHtmlMode}
+              />
+            </div>
+          </div>
+        </FullscreenToolbarSlot>
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
+/**
+ * In review the floating toolbar disappears entirely and this compact
+ * accept/discard menu takes its place.
+ */
+const FullscreenReviewMenu = ({
+  visible,
+  enhance,
+}: {
+  visible: boolean
+  enhance: UseEnhanceReturn
+}) => (
+  <AnimatePresence>
+    {visible ? (
+      <FullscreenToolbarSlot>
+        <div
+          className="absolute -bottom-4 left-1/2 -translate-x-1/2"
+          style={{ pointerEvents: "auto" }}
+        >
+          <AIEnhanceMenu
+            onSelect={() => {}}
+            enhancementOptions={[]}
+            inputPlaceholder=""
+            menuState="review"
+            compactReview
+            onAccept={enhance.acceptChanges}
+            onReject={enhance.rejectChanges}
+            onRetry={enhance.retryChanges}
+          />
+        </div>
+      </FullscreenToolbarSlot>
+    ) : null}
+  </AnimatePresence>
+)
 
 const F0RichTextEditorComponent = forwardRef<
   F0RichTextEditorHandle,
@@ -188,7 +310,9 @@ const F0RichTextEditorComponent = forwardRef<
   }, [height, isFullscreen])
 
   useEffect(() => {
-    if (!isFullscreen || !isToolbarOpen) return
+    if (!isFullscreen || !isToolbarOpen) {
+      return
+    }
 
     const updateWidth = () => {
       if (fullscreenToolbarRef.current) {
@@ -204,7 +328,9 @@ const F0RichTextEditorComponent = forwardRef<
   const handleToggleFullscreen = () => {
     setIsFullscreen((prev) => {
       const next = !prev
-      if (onFullscreenChange) onFullscreenChange(next)
+      if (onFullscreenChange) {
+        onFullscreenChange(next)
+      }
       return next
     })
   }
@@ -309,7 +435,9 @@ const F0RichTextEditorComponent = forwardRef<
   const applyDictation = useCallback(
     (text: string) => {
       const range = dictationRangeRef.current
-      if (!editor || !range) return
+      if (!editor || !range) {
+        return
+      }
       const docSize = editor.state.doc.content.size
       const from = Math.min(range.from, docSize)
       const to = Math.min(range.to, docSize)
@@ -335,7 +463,9 @@ const F0RichTextEditorComponent = forwardRef<
   })
   const canRecord = !!onTranscribe && recorder.isSupported
   const handleStartRecording = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     dictationRangeRef.current = {
       from: editor.state.selection.to,
       to: editor.state.selection.to,
@@ -370,7 +500,9 @@ const F0RichTextEditorComponent = forwardRef<
     },
   }))
 
-  if (!editor) return null
+  if (!editor) {
+    return null
+  }
 
   const editorContent = (
     <FocusScope trapped={false}>
@@ -389,9 +521,9 @@ const F0RichTextEditorComponent = forwardRef<
             "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
         )}
       >
-        {isFullscreen && (
+        {isFullscreen ? (
           <div className="pointer-events-none fixed inset-0 z-40" />
-        )}
+        ) : null}
 
         <Head
           fullScreenMode={fullScreenMode}
@@ -437,92 +569,26 @@ const F0RichTextEditorComponent = forwardRef<
             </div>
           </div>
 
-          <AnimatePresence>
-            {/* The floating toolbar disappears the moment an enhance kicks off
-                (disableButtons covers loading, review and error). */}
-            {isFullscreen && isToolbarOpen && !enhance.disableButtons && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  ref={fullscreenToolbarRef}
-                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
-                  style={{ pointerEvents: "auto" }}
-                >
-                  <div className="flex items-center gap-1">
-                    <F0Button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setIsToolbarOpen(false)
-                        // Restore focus after state update to trigger BubbleMenu
-                        queueMicrotask(() => editor.commands.focus())
-                      }}
-                      variant="neutral"
-                      size="md"
-                      disabled={enhance.disableButtons}
-                      hideLabel
-                      label={i18n.actions.close}
-                      icon={Cross}
-                    />
-                    <ToolbarDivider />
-                    {enhanceConfig && (
-                      <>
-                        <EnhanceActivator
-                          enhance={enhance}
-                          disabled={enhance.disableButtons}
-                          menuWidth={fullscreenToolbarWidth}
-                          menuContainerRef={fullscreenToolbarRef}
-                        />
-                        <ToolbarDivider />
-                      </>
-                    )}
-                    <Toolbar
-                      editor={editor}
-                      isFullscreen={isFullscreen}
-                      disableButtons={enhance.disableButtons}
-                      plainHtmlMode={plainHtmlMode}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* In review the floating toolbar disappears entirely and the
-              compact accept/discard menu takes its place. */}
-          <AnimatePresence>
-            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  className="absolute -bottom-4 left-1/2 -translate-x-1/2"
-                  style={{ pointerEvents: "auto" }}
-                >
-                  <AIEnhanceMenu
-                    onSelect={() => {}}
-                    enhancementOptions={[]}
-                    inputPlaceholder=""
-                    menuState="review"
-                    compactReview
-                    onAccept={enhance.acceptChanges}
-                    onReject={enhance.rejectChanges}
-                    onRetry={enhance.retryChanges}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <FullscreenEditingToolbar
+            visible={isFullscreen && isToolbarOpen && !enhance.disableButtons}
+            editor={editor}
+            enhance={enhance}
+            enhanceConfig={enhanceConfig}
+            plainHtmlMode={plainHtmlMode}
+            toolbarRef={fullscreenToolbarRef}
+            toolbarWidth={fullscreenToolbarWidth}
+            onClose={() => {
+              setIsToolbarOpen(false)
+              // Restore focus after state update to trigger BubbleMenu
+              queueMicrotask(() => editor.commands.focus())
+            }}
+          />
+          <FullscreenReviewMenu
+            visible={
+              isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen
+            }
+            enhance={enhance}
+          />
         </div>
 
         <div
@@ -533,7 +599,7 @@ const F0RichTextEditorComponent = forwardRef<
           )}
         >
           <AnimatePresence>
-            {enhance.error && !enhance.isLoading && (
+            {enhance.error && !enhance.isLoading ? (
               <motion.div
                 key="accordion"
                 initial={{ height: 0, opacity: 0, y: -20 }}
@@ -547,11 +613,11 @@ const F0RichTextEditorComponent = forwardRef<
                   onDismiss={enhance.clearError}
                 />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           <AnimatePresence initial={false}>
-            {dictationError && (
+            {dictationError ? (
               <motion.div
                 key="dictation-error"
                 role="alert"
@@ -567,7 +633,7 @@ const F0RichTextEditorComponent = forwardRef<
                   dismissLabel={i18n.actions.close}
                 />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           <FileList

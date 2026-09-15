@@ -10,13 +10,6 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
-
-import type {
-  FiltersDefinition,
-  FiltersState,
-  PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
-
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
@@ -32,17 +25,12 @@ import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
-import { Spinner } from "@/ui/Spinner"
-
 import type {
-  BulkActionDefinition,
-  GroupingState,
-  OnBulkActionCallback,
-  OnLoadDataCallback,
-  SortingsState,
-} from "./types"
-import type { Visualization } from "./visualizations/collection"
-
+  FiltersDefinition,
+  FiltersState,
+  PresetsDefinition,
+} from "@/patterns/OneFilterPicker/types"
+import { Spinner } from "@/ui/Spinner"
 import {
   filterActions,
   getPrimaryActions,
@@ -65,21 +53,23 @@ import {
 import { Search } from "./components/Search"
 import { useSearchPreview } from "./components/Search/useSearchPreview"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
-import {
-  DataCollectionStatusComplete,
-  DataCollectionStorageFeaturesDefinition,
-} from "./hooks/useDataColectionStorage/types"
-import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
-import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
+import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import {
   ESTIMATED_LIST_ROW_HEIGHT,
   ESTIMATED_ROW_HEIGHT,
   shouldAutoSizePerPage,
   useAutoPerPage,
 } from "./hooks/useAutoPerPage"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "./hooks/useDataColectionStorage/types"
+import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
+import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { useExportAction } from "./hooks/useExportAction"
-import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { getDefaultDataCollectionSettings } from "./internal/isSettingsDefault"
 import { derivePresetId } from "./internal/presetId"
@@ -96,10 +86,16 @@ import {
   DataCollectionSettings,
   useDataCollectionSettings,
 } from "./Settings/SettingsProvider"
-import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
-import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import { SummariesDefinition } from "./summary"
+import type {
+  BulkActionDefinition,
+  GroupingState,
+  OnBulkActionCallback,
+  OnLoadDataCallback,
+  SortingsState,
+} from "./types"
 import { useEventEmitter } from "./useEventEmitter"
+import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
 
 const SUCCESS_DISMISS_MS = 1500
@@ -145,17 +141,15 @@ export type OneDataCollectionProps<
     NavigationFilters,
     Grouping
   >
-  visualizations: ReadonlyArray<
-    Visualization<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   onBulkAction?: OnBulkActionCallback<R, Filters>
   /**
@@ -353,7 +347,9 @@ const OneDataCollectionComp = <
   // later URL sync can't wipe it before we read it). When present, we open the
   // create dialog prefilled with it; saving stores the shared config verbatim.
   const [sharedPreset] = useState<SharedPresetPayload | null>(() => {
-    if (typeof window === "undefined") return null
+    if (typeof window === "undefined") {
+      return null
+    }
     const params = new URLSearchParams(window.location.search)
     return decodeSharedPreset(params.get(SHARED_PRESET_PARAM))
   })
@@ -413,14 +409,10 @@ const OneDataCollectionComp = <
   // only trims, never grows. List rows are a fixed height (no reflow); the
   // table and editable table depend on their content, so they seed at the
   // baseline and rely on the measurement to trim.
-  const autoPerPageRowHeight = (() => {
-    switch (visualizations[currentVisualization]?.type) {
-      case "list":
-        return ESTIMATED_LIST_ROW_HEIGHT
-      default:
-        return ESTIMATED_ROW_HEIGHT
-    }
-  })()
+  const autoPerPageRowHeight =
+    visualizations[currentVisualization]?.type === "list"
+      ? ESTIMATED_LIST_ROW_HEIGHT
+      : ESTIMATED_ROW_HEIGHT
   const autoPerPage = useAutoPerPage(vizContainerRef, autoPerPageEnabled, {
     rowHeight: autoPerPageRowHeight,
     ready: firstDataLoaded,
@@ -431,7 +423,9 @@ const OneDataCollectionComp = <
   // re-measured when the visualization switches: clear the ready flag so the
   // measurement waits for the new visualization's first page to load.
   useEffect(() => {
-    if (autoPerPageEnabled) setFirstDataLoaded(false)
+    if (autoPerPageEnabled) {
+      setFirstDataLoaded(false)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only on visualization change
   }, [currentVisualization])
 
@@ -598,7 +592,7 @@ const OneDataCollectionComp = <
    * Bulk actions
    */
   type MappedBulkAction =
-    | (BulkActionDefinition & { onClick: () => void })
+    | (BulkActionDefinition & { onClick: () => void; tooltip?: string })
     | { type: "separator" }
 
   const [bulkActions, setBulkActions] = useState<
@@ -719,7 +713,9 @@ const OneDataCollectionComp = <
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
-        if (hideBar) setShowActionBar(false)
+        if (hideBar) {
+          setShowActionBar(false)
+        }
         onDismiss()
         successTimerRef.current = null
       }, SUCCESS_DISMISS_MS)
@@ -816,6 +812,30 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
+    const settleBulkAction = (
+      bulkAction: BulkActionDefinition,
+      result: Promise<void>
+    ) => {
+      setInternalBulkActionStatus("loading")
+      result.then(
+        () => {
+          setInternalBulkActionStatus("success")
+          // Always wipe on success — prevents already-processed items from
+          // mixing with new selections made during loading.
+          scheduleDismiss(() => {
+            if (!bulkAction.keepSelection) {
+              clearSelectedItems()
+            }
+            setInternalBulkActionStatus("idle")
+          }, !bulkAction.keepSelection)
+        },
+        () => {
+          setInternalBulkActionStatus("error")
+          actionBarRef.current?.wiggle({ errorHighlight: true })
+        }
+      )
+    }
+
     const mapBulkActions = (
       action: BulkActionDefinition | { type: "separator" }
     ): MappedBulkAction => {
@@ -825,6 +845,8 @@ const OneDataCollectionComp = <
       const bulkAction = action as BulkActionDefinition
       return {
         ...bulkAction,
+        // The bar speaks of a generic `tooltip`; here it is always the reason.
+        tooltip: bulkAction.disabled ? bulkAction.disabledTooltip : undefined,
         onClick: () => {
           const result = onBulkAction?.(
             bulkAction.id,
@@ -854,24 +876,7 @@ const OneDataCollectionComp = <
             return
           }
 
-          setInternalBulkActionStatus("loading")
-          ;(result as Promise<void>).then(
-            () => {
-              setInternalBulkActionStatus("success")
-              // Always wipe on success — prevents already-processed items from
-              // mixing with new selections made during loading.
-              scheduleDismiss(() => {
-                if (!bulkAction.keepSelection) {
-                  clearSelectedItems()
-                }
-                setInternalBulkActionStatus("idle")
-              }, !bulkAction.keepSelection)
-            },
-            () => {
-              setInternalBulkActionStatus("error")
-              actionBarRef.current?.wiggle({ errorHighlight: true })
-            }
-          )
+          settleBulkAction(bulkAction, result as Promise<void>)
         },
       }
     }
@@ -916,7 +921,9 @@ const OneDataCollectionComp = <
     filters: FiltersState<Filters>,
     search: string | undefined
   ) => {
-    if (totalItems !== 0) return false
+    if (totalItems !== 0) {
+      return false
+    }
     // Count only *active* filters: an all-empty value like `{ department: [] }`
     // is not a filter, so an empty result with no active filters is "no-data",
     // not "no-results".
@@ -1123,7 +1130,9 @@ const OneDataCollectionComp = <
       }
 
       const preset = mergedPresets.find((p) => p.id === presetId)
-      if (!preset) return
+      if (!preset) {
+        return
+      }
 
       // Remember the working state the first time a preset is selected (kept
       // across preset-to-preset switches) so it can be restored on deselect.
@@ -1178,15 +1187,21 @@ const OneDataCollectionComp = <
       }
     }
     const tracked = devSelectionRef.current
-    if (!tracked) return
+    if (!tracked) {
+      return
+    }
 
     // Don't evaluate mid-transition (filters still being applied across a view
     // switch); the post-transition render will re-run this effect.
-    if (pendingFiltersRef.current) return
+    if (pendingFiltersRef.current) {
+      return
+    }
 
     if (!tracked.settled) {
       // Wait until the view first matches the preset before arming deselect.
-      if (isEqual(capturedState, tracked.snapshot)) tracked.settled = true
+      if (isEqual(capturedState, tracked.snapshot)) {
+        tracked.settled = true
+      }
       return
     }
 
@@ -1234,10 +1249,14 @@ const OneDataCollectionComp = <
   const presetActionState = useMemo<"save" | "none">(() => {
     // Consumer opted out of saving views (e.g. the org-chart graph): never show
     // the "Save view" chip regardless of how the view diverges from the baseline.
-    if (savingViewsDisabled) return "none"
+    if (savingViewsDisabled) {
+      return "none"
+    }
     // Nothing can be persisted, so offering to save would silently discard the
     // view on unmount.
-    if (!canPersistViews) return "none"
+    if (!canPersistViews) {
+      return "none"
+    }
     // Compares everything except the view mode, so a visualization-only change
     // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
@@ -1256,9 +1275,12 @@ const OneDataCollectionComp = <
 
     // Until storage settles (baseline captured), don't offer to save — avoids a
     // spurious "save" flash while filters/sorting/etc. hydrate from storage.
-    if (sessionBaseline === null) return "none"
-    if (!sameIgnoringVisualization(capturedState, sessionBaseline))
+    if (sessionBaseline === null) {
+      return "none"
+    }
+    if (!sameIgnoringVisualization(capturedState, sessionBaseline)) {
       return "save"
+    }
     // Just diverged from a (now de-selected) view → offer to fork it, even when
     // only the view mode differs, as long as we're not back at baseline.
     if (
@@ -1330,7 +1352,9 @@ const OneDataCollectionComp = <
     (values: PresetFormValues) => {
       const targetId =
         presetDialog?.mode === "update" ? presetDialog.presetId : undefined
-      if (!targetId) return
+      if (!targetId) {
+        return
+      }
       // The id is title-derived and doubles as the readable `dc_view` URL
       // value, so a rename must regenerate it (deduped against the other views)
       // and re-point the selection — otherwise the URL keeps the old name.
@@ -1362,7 +1386,9 @@ const OneDataCollectionComp = <
   const handleDeleteEditingPreset = useCallback(() => {
     const targetId =
       presetDialog?.mode === "update" ? presetDialog.presetId : undefined
-    if (!targetId) return
+    if (!targetId) {
+      return
+    }
     setCustomPresets((prev) => prev.filter((preset) => preset.id !== targetId))
     setSelectedPresetId((current) =>
       current === targetId ? undefined : current
@@ -1390,7 +1416,9 @@ const OneDataCollectionComp = <
   const onSharePreset = useCallback(
     (presetId: string) => {
       const preset = customPresets.find((p) => p.id === presetId)
-      if (!preset) return
+      if (!preset) {
+        return
+      }
       const url = buildSharedPresetUrl({
         label: preset.label,
         description: preset.description,
@@ -1402,7 +1430,9 @@ const OneDataCollectionComp = <
       })
       const clipboard =
         typeof navigator !== "undefined" ? navigator.clipboard : undefined
-      if (!url || !clipboard) return
+      if (!url || !clipboard) {
+        return
+      }
       void clipboard
         .writeText(url)
         .then(() => setShareCopied(true))
@@ -1414,7 +1444,9 @@ const OneDataCollectionComp = <
   // Transient confirmation shown after a successful "Share preset" copy.
   const [shareCopied, setShareCopied] = useState(false)
   useEffect(() => {
-    if (!shareCopied) return
+    if (!shareCopied) {
+      return
+    }
     const timer = setTimeout(
       () => setShareCopied(false),
       SHARE_COPIED_DISMISS_MS
@@ -1425,7 +1457,9 @@ const OneDataCollectionComp = <
   // A shared preset link prefills (once) the create dialog so the recipient can
   // just hit Save; strip the param afterwards so a reload doesn't reopen it.
   useEffect(() => {
-    if (!sharedPreset) return
+    if (!sharedPreset) {
+      return
+    }
     // Saving is the only way a shared view materializes, so skip the dialog
     // when there is nowhere to persist it rather than offer a save that is
     // discarded on unmount. The param is still stripped either way.
@@ -1493,6 +1527,10 @@ const OneDataCollectionComp = <
         value: customPresets,
         setValue: setCustomPresets,
       },
+      selectedPresetId: {
+        value: selectedPresetId,
+        setValue: setSelectedPresetId,
+      },
       ...(hasPerVisualizationFilters
         ? {
             visualizationFilters: {
@@ -1503,17 +1541,19 @@ const OneDataCollectionComp = <
         : {}),
     },
     {
-      // The collection-level filters, not `effectiveFilters`: validation must
-      // use the superset so state stored for one visualization is not dropped
-      // while another is active.
-      filters,
-      sortings,
-      grouping,
-      navigationFilters,
-      search,
-      visualizationCount: visualizations.length,
-    },
-    storage === false
+      definition: {
+        // The collection-level filters, not `effectiveFilters`: validation must
+        // use the superset so state stored for one visualization is not dropped
+        // while another is active.
+        filters,
+        sortings,
+        grouping,
+        navigationFilters,
+        search,
+        visualizationCount: visualizations.length,
+      },
+      disabled: storage === false,
+    }
   )
 
   // Capture the session baseline once storage has settled, so "Save as preset"
@@ -1662,26 +1702,26 @@ const OneDataCollectionComp = <
           layout === "standard" && !tmpFullWidth ? "calc(100% + 46px)" : "100%", // To counteract the -mx-[23px] from the layout,
       }}
     >
-      {showTopToolbar && (
+      {showTopToolbar ? (
         <div className="border-f1-border-primary px-page flex gap-4">
-          {totalItemSummaryPosition === "top" && (
+          {totalItemSummaryPosition === "top" ? (
             <TotalItemsSummary
               isReady={!showTotalItemSummarySkeleton}
               totalItemSummaryResult={totalItemSummaryResult}
             />
-          )}
+          ) : null}
           <div className="flex flex-1 flex-shrink justify-end">
-            {navigationFiltersPosition === "top" && (
+            {navigationFiltersPosition === "top" ? (
               <NavigationFiltersComponent
                 navigationFilters={navigationFilters}
                 currentNavigationFilters={currentNavigationFilters}
                 onChangeNavigationFilters={setCurrentNavigationFilters}
               />
-            )}
+            ) : null}
           </div>
         </div>
-      )}
-      {showBottomToolbar && (
+      ) : null}
+      {showBottomToolbar ? (
         <div
           ref={toolbarRef}
           className={cn(
@@ -1690,14 +1730,14 @@ const OneDataCollectionComp = <
             tmpFullWidth && "px-0"
           )}
         >
-          {totalItemSummaryPosition === "bottom" && (
+          {totalItemSummaryPosition === "bottom" ? (
             <div ref={headerSummaryRef} className="flex items-center">
               <TotalItemsSummary
                 isReady={!showTotalItemSummarySkeleton}
                 totalItemSummaryResult={totalItemSummaryResult}
               />
             </div>
-          )}
+          ) : null}
           <div className="flex-1">
             <OneFilterPicker
               filters={effectiveFilters}
@@ -1714,7 +1754,7 @@ const OneDataCollectionComp = <
               onPresetAction={onPresetAction}
             >
               <div ref={headerActionsRef} className="flex items-center gap-2">
-                {isLoading && (
+                {isLoading ? (
                   <motion.div
                     className="flex h-8 w-8 items-center justify-center"
                     initial={{ opacity: 0 }}
@@ -1725,8 +1765,8 @@ const OneDataCollectionComp = <
                   >
                     <Spinner size="small" />
                   </motion.div>
-                )}
-                {search && (
+                ) : null}
+                {search ? (
                   <Search
                     onChange={setCurrentSearch}
                     value={currentSearch}
@@ -1737,16 +1777,16 @@ const OneDataCollectionComp = <
                     loadingMore={searchPreview.loadingMore}
                     onLoadMore={searchPreview.onLoadMore}
                   />
-                )}
-                {visualizations && visualizations.length > 1 && (
+                ) : null}
+                {visualizations && visualizations.length > 1 ? (
                   <VisualizationSwitcher
                     visualizations={visualizations}
                     currentVisualization={currentVisualization}
                     onVisualizationChange={setCurrentVisualization}
                     hideLabels={collapseHeaderActions}
                   />
-                )}
-                {shouldShowSettings && (
+                ) : null}
+                {shouldShowSettings ? (
                   <Settings
                     visualizations={visualizations}
                     currentVisualization={currentVisualization}
@@ -1758,12 +1798,12 @@ const OneDataCollectionComp = <
                     defaultSortings={defaultSortings.current}
                     onSortingsChange={setCurrentSortings}
                   />
-                )}
-                {hasCollectionsActions && (
+                ) : null}
+                {hasCollectionsActions ? (
                   <>
-                    {elementsRightActions && (
+                    {elementsRightActions ? (
                       <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-                    )}
+                    ) : null}
                     <CollectionActions
                       primaryActions={primaryActionItems}
                       primaryActionsLabel={primaryActionsLabel}
@@ -1772,19 +1812,19 @@ const OneDataCollectionComp = <
                       upsellAction={upsellActionItem}
                     />
                   </>
-                )}
-                {navigationFiltersPosition === "bottom" && (
+                ) : null}
+                {navigationFiltersPosition === "bottom" ? (
                   <NavigationFiltersComponent
                     navigationFilters={navigationFilters}
                     currentNavigationFilters={currentNavigationFilters}
                     onChangeNavigationFilters={setCurrentNavigationFilters}
                   />
-                )}
+                ) : null}
               </div>
             </OneFilterPicker>
           </div>
         </div>
-      )}
+      ) : null}
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
       <div
         ref={vizContainerRef}
@@ -1795,7 +1835,7 @@ const OneDataCollectionComp = <
       >
         {/* With perPage "auto", defer mounting one frame until the container
             is measured, so the first fetch already uses the resolved size */}
-        {(!autoPerPageEnabled || autoPerPage !== undefined) && (
+        {!autoPerPageEnabled || autoPerPage !== undefined ? (
           <VisualizationRenderer
             visualization={visualizations[currentVisualization]}
             source={effectiveSource}
@@ -1805,7 +1845,7 @@ const OneDataCollectionComp = <
             tmpFullWidth={tmpFullWidth}
             searchSelectionNonce={searchPreview.selectionNonce}
           />
-        )}
+        ) : null}
       </div>
       {emptyState ? (
         <div className="flex flex-1 flex-col items-center justify-center">
@@ -1818,7 +1858,7 @@ const OneDataCollectionComp = <
         </div>
       ) : (
         <>
-          {bulkActions && (
+          {bulkActions ? (
             <ActionBar
               ref={actionBarRef}
               isOpen={
@@ -1848,7 +1888,7 @@ const OneDataCollectionComp = <
               isAllItemsSelected={isAllItemsSelected}
               totalItems={totalItems}
             />
-          )}
+          ) : null}
         </>
       )}
       <PresetFormDialog
@@ -1893,23 +1933,24 @@ const OneDataCollectionComp = <
           )
           .map((preset) => preset.label)}
       />
-      {typeof document !== "undefined" &&
-        createPortal(
-          // Portal next to the preset dialog (same container it uses) inside a
-          // stacking context above its overlay (z-50), so the confirmation
-          // paints on top of the overlay it's triggered from. The z-index is
-          // set inline (not a Tailwind arbitrary class) so it always applies
-          // regardless of the consumer's CSS build.
-          <div style={{ position: "relative", zIndex: 9999 }}>
-            <F0ActionBar
-              isOpen={shareCopied}
-              variant="light"
-              status="success"
-              label={i18n.collections.presets.copiedToClipboard}
-            />
-          </div>,
-          document.getElementById("content") ?? document.body
-        )}
+      {typeof document !== "undefined"
+        ? createPortal(
+            // Portal next to the preset dialog (same container it uses) inside a
+            // stacking context above its overlay (z-50), so the confirmation
+            // paints on top of the overlay it's triggered from. The z-index is
+            // set inline (not a Tailwind arbitrary class) so it always applies
+            // regardless of the consumer's CSS build.
+            <div style={{ position: "relative", zIndex: 9999 }}>
+              <F0ActionBar
+                isOpen={shareCopied}
+                variant="light"
+                status="success"
+                label={i18n.collections.presets.copiedToClipboard}
+              />
+            </div>,
+            document.getElementById("content") ?? document.body
+          )
+        : null}
     </div>
   )
 }

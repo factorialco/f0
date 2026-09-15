@@ -1,9 +1,9 @@
+import { useEffect, useId, useRef, useState } from "react"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
-import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Comment as CommentIcon,
@@ -15,9 +15,8 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
+import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useId, useRef, useState } from "react"
-
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
@@ -115,6 +114,17 @@ export type CommunityPostProps = {
   descriptionExpandable?: boolean
 
   /**
+   * THE WHOLE BODY, unclamped and with no "See more" — for a container that IS
+   * the post rather than a way to it: a dialog, a page. There the body is what
+   * the reader came for, and a clamp with nothing behind it hides the end of
+   * what they opened.
+   *
+   * In a FEED, leave it off. Posts a page long each are what makes a feed
+   * unskimmable, which is what the clamp is for.
+   */
+  noDescriptionClamp?: boolean
+
+  /**
    * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
    * for a container that already shows it, like a dialog carrying the post's
    * title in its own header. Without this the same words appear twice, an inch
@@ -145,6 +155,7 @@ export const BaseCommunityPost = ({
   dropdownItems,
   noReactionsButton = false,
   descriptionExpandable = false,
+  noDescriptionClamp = false,
   hideTitle = false,
 }: CommunityPostProps) => {
   const titleId = useId()
@@ -165,7 +176,7 @@ export const BaseCommunityPost = ({
     descriptionExpandable &&
     expandedDescription?.id === id &&
     expandedDescription.description === description
-  const descriptionCollapsed = !descriptionExpanded
+  const descriptionCollapsed = !descriptionExpanded && !noDescriptionClamp
   const date = getDisplayDateBasedOnDuration(createdAt, { locale })
 
   const isClickable = Boolean(onClick)
@@ -183,7 +194,9 @@ export const BaseCommunityPost = ({
     event.preventDefault()
     event.stopPropagation()
 
-    if (!description) return
+    if (!description) {
+      return
+    }
 
     setExpandedDescription({ id, description })
   }
@@ -195,7 +208,9 @@ export const BaseCommunityPost = ({
   }, [descriptionExpanded])
 
   useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescription(null)
+    if (!descriptionExpandable) {
+      setExpandedDescription(null)
+    }
   }, [descriptionExpandable])
 
   useEffect(() => {
@@ -214,7 +229,9 @@ export const BaseCommunityPost = ({
 
     updateDescriptionOverflow()
 
-    if (typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
     resizeObserver.observe(descriptionElement)
@@ -325,13 +342,13 @@ export const BaseCommunityPost = ({
                 title={act.label ?? ""}
               />
             ))}
-            {dropdownItems?.length && (
+            {dropdownItems?.length ? (
               <Dropdown
                 items={dropdownItems}
                 icon={EllipsisHorizontal}
                 size="sm"
               />
-            )}
+            ) : null}
           </div>
           <div className="md:hidden">
             <Dropdown
@@ -359,7 +376,7 @@ export const BaseCommunityPost = ({
         >
           {title}
         </p>
-        {description && (
+        {description ? (
           <>
             <PostDescription
               ref={descriptionRef}
@@ -370,19 +387,20 @@ export const BaseCommunityPost = ({
               className={cn(descriptionExpanded && focusRing())}
             />
             {descriptionExpandable &&
-              isDescriptionOverflowing &&
-              !descriptionExpanded && (
-                <ExpandDescriptionButton
-                  describedBy={titleId}
-                  controls={descriptionId}
-                  expanded={descriptionExpanded}
-                  onClick={handleExpandDescription}
-                />
-              )}
+            !noDescriptionClamp &&
+            isDescriptionOverflowing &&
+            !descriptionExpanded ? (
+              <ExpandDescriptionButton
+                describedBy={titleId}
+                controls={descriptionId}
+                expanded={descriptionExpanded}
+                onClick={handleExpandDescription}
+              />
+            ) : null}
           </>
-        )}
+        ) : null}
       </div>
-      {mediaUrl && !event && (
+      {mediaUrl && !event ? (
         // FILLS THE POST, UP TO THE READING COLUMN. The old 480px cap dated
         // from when the avatar's gutter took a chunk of the card and the media
         // sat in what was left; with the body starting at the card's own edge it
@@ -423,14 +441,14 @@ export const BaseCommunityPost = ({
             </>
           )}
         </div>
-      )}
-      {event && (
+      ) : null}
+      {event ? (
         <div className="w-full @[744px]:max-w-content">
           <PostEvent {...event} />
         </div>
-      )}
+      ) : null}
       <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-      {!noReactionsButton && (
+      {!noReactionsButton ? (
         <Reactions
           items={reactions?.items ?? []}
           onInteraction={reactions?.onInteraction}
@@ -440,7 +458,7 @@ export const BaseCommunityPost = ({
             icon: CommentIcon,
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }
@@ -470,16 +488,16 @@ export const CommunityPostSkeleton = ({
       <div className="mt-3">
         <PostDescription.Skeleton />
       </div>
-      {withImage && !withEvent && (
+      {withImage && !withEvent ? (
         <div className="mt-3 aspect-video w-full overflow-hidden rounded-xl md:w-2/3">
           <Skeleton className="h-full w-full rounded-2xs" />
         </div>
-      )}
-      {withEvent && (
+      ) : null}
+      {withEvent ? (
         <div className="mt-3 w-full md:w-2/3">
           <PostEvent.Skeleton />
         </div>
-      )}
+      ) : null}
       <div className="mt-3 flex flex-row items-center gap-1 py-1">
         <Skeleton className="h-2.5 w-14 rounded-2xs" />
         <Skeleton className="h-2.5 w-14 rounded-2xs" />

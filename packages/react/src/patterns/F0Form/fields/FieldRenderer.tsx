@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import { useFormContext } from "react-hook-form"
-
 import { F0Alert } from "@/components/F0Alert"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { F0Link } from "@/components/F0Link"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
@@ -11,14 +11,11 @@ import {
   FormItem,
   FormMessage,
 } from "@/ui/form"
-import { InputMessages } from "@/components/F0InputField/components/InputMessages"
-
-import type { RenderCustomFieldSelectConfig } from "../types"
-import type { F0Field } from "./types"
-
 import { generateAnchorId, useF0FormContext } from "../context"
+import type { RenderCustomFieldSelectConfig } from "../types"
 import { renderFieldInput } from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
+import type { F0Field } from "./types"
 import { evaluateDisabled, evaluateRenderIf, resolveFieldAlert } from "./utils"
 
 function isSelectConfig(
@@ -218,7 +215,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
       render={({ field: formField, fieldState }) => (
         <FormItem id={anchorId} className="scroll-mt-4">
-          {showLabel && (
+          {showLabel ? (
             /* No `htmlFor`: it used to be `field.id`, which matches no element
                in the DOM — the rendered input gets its own id from
                `F0InputField` (`props.id ?? useId()`), and the field renderers
@@ -230,11 +227,11 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
                not focus the input — tracked separately. */
             <label className="text-base font-medium leading-normal text-f1-foreground-secondary">
               {field.label}
-              {isRequired && (
+              {isRequired ? (
                 <span className="ml-0.5 text-f1-foreground-critical">*</span>
-              )}
+              ) : null}
             </label>
-          )}
+          ) : null}
           <FormControl>
             {renderFieldContent({
               field,
@@ -247,10 +244,10 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               renderCustomField,
             })}
           </FormControl>
-          {field.helpText && (
+          {field.helpText ? (
             <FormDescription>{field.helpText}</FormDescription>
-          )}
-          {"moreInfoLink" in field && field.moreInfoLink && (
+          ) : null}
+          {"moreInfoLink" in field && field.moreInfoLink ? (
             <F0Link
               href={field.moreInfoLink.href}
               target="_blank"
@@ -258,25 +255,27 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
             >
               {field.moreInfoLink.label ?? forms.moreInformation}
             </F0Link>
-          )}
+          ) : null}
           {(() => {
             const alertProps = resolveFieldAlert(
               field.alert,
               formField.value,
               values
             )
-            if (!alertProps) return null
+            if (!alertProps) {
+              return null
+            }
             return (
               <F0Alert {...alertProps} variant={alertProps.variant ?? "info"} />
             )
           })()}
-          {showFormMessage && !fieldState.error && (
+          {showFormMessage && !fieldState.error ? (
             <InputMessages status={field.status} />
-          )}
+          ) : null}
           {/* A critical alert already conveys the message via the F0Alert above,
               so suppress the redundant FormMessage text (the input still shows
               error styling because fieldState.error is set). */}
-          {showFormMessage && fieldState.error?.type !== "alertCritical" && (
+          {showFormMessage && fieldState.error?.type !== "alertCritical" ? (
             <FormMessage
               fallback={
                 isRequired
@@ -284,7 +283,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
                   : forms.validation.invalidType
               }
             />
-          )}
+          ) : null}
         </FormItem>
       )}
     />

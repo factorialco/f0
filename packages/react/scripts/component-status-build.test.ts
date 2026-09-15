@@ -127,6 +127,21 @@ beforeAll(() => {
     story("Alert", ["stable"], "\n" + PLAY_STORY)
   )
 
+  // 10a) Component whose only unit test uses the `.spec.` convention. The repo
+  // uses both `.test.` and `.spec.`, and Vitest runs both.
+  write(
+    "sds/Home/HomeListItem/index.stories.tsx",
+    story("HomeListItem", ["experimental"])
+  )
+  write("sds/Home/HomeListItem/index.spec.tsx", "test('x', () => {})")
+
+  // 10b) Same, with a `.spec.ts` inside `__tests__/`.
+  write(
+    "sds/Home/ClockIn/index.stories.tsx",
+    story("ClockIn", ["experimental"])
+  )
+  write("sds/Home/ClockIn/__tests__/clock.spec.ts", "test('x', () => {})")
+
   // 10) The meta title must win over a `title:` in a sample-data/args object
   // that appears before the meta (e.g. AI cards).
   write(
@@ -195,6 +210,13 @@ describe("computeComponentStatusData (extraction)", () => {
       hasMdxDocs: true,
       docQuality: "stub",
     })
+  })
+
+  test("counts .spec.ts(x) files as unit tests, like Vitest does", () => {
+    // The repo uses both conventions; a component tested only via `.spec.`
+    // must not read as untested.
+    expect(byName("HomeListItem")?.hasUnitTests).toBe(true)
+    expect(byName("ClockIn")?.hasUnitTests).toBe(true)
   })
 
   test("unit-test detection is scoped to the component, not the zone", () => {

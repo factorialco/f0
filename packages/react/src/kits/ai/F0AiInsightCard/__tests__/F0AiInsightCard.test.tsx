@@ -1,14 +1,12 @@
-import type { ReactNode } from "react"
-
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import type { ReactNode } from "react"
+import { describe, expect, it, vi } from "vitest"
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0AiInsightCard } from "../F0AiInsightCard"
 
 // Mock Recharts since JSDOM does not support SVG layout
@@ -43,7 +41,9 @@ vi.mock("@/ui/OverflowList", () => ({
     return (
       <div data-testid="overflow-list-mock">
         {visible.map((item, i) => renderListItem(item, i))}
-        {overflowCount > 0 && renderOverflowIndicator?.(overflowCount, false)}
+        {overflowCount > 0
+          ? renderOverflowIndicator?.(overflowCount, false)
+          : null}
       </div>
     )
   },

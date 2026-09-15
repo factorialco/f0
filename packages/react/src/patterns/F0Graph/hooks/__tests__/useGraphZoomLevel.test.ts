@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRenderHook } from "@/testing/test-utils"
-
 import { useGraphZoomLevel } from "../useGraphZoomLevel"
 
 function renderZoomLevel(
@@ -12,25 +10,18 @@ function renderZoomLevel(
 }
 
 describe("useGraphZoomLevel", () => {
-  it("returns 'detail' for zoom factor 1.0", () => {
-    const { result } = renderZoomLevel(1.0)
-    expect(result.current).toBe("detail")
-  })
-
-  it("returns 'compact' for zoom factor 0.5", () => {
-    const { result } = renderZoomLevel(0.5)
-    expect(result.current).toBe("compact")
-  })
-
-  it("returns 'dot' for zoom factor 0.2", () => {
-    const { result } = renderZoomLevel(0.2)
-    expect(result.current).toBe("dot")
-  })
-
-  it("returns 'dot' for zoom factor 0.05", () => {
-    const { result } = renderZoomLevel(0.05)
-    expect(result.current).toBe("dot")
-  })
+  it.each([
+    { zoomFactor: 1.0, level: "detail" },
+    { zoomFactor: 0.5, level: "compact" },
+    { zoomFactor: 0.2, level: "dot" },
+    { zoomFactor: 0.05, level: "dot" },
+  ])(
+    "returns '$level' for zoom factor $zoomFactor",
+    ({ zoomFactor, level }) => {
+      const { result } = renderZoomLevel(zoomFactor)
+      expect(result.current).toBe(level)
+    }
+  )
 
   it("hysteresis prevents flicker at threshold boundaries", () => {
     // Use explicit thresholds so this test is independent of default preset changes.

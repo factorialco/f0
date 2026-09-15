@@ -1,12 +1,10 @@
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { Fragment, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Search } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { fuzzyMatch } from "@/lib/fuzzyMatch"
 import { cn, focusRing } from "@/lib/utils"
-
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { SidebarTabPanelAction, SidebarTabPanelProps } from "./types"
 
@@ -60,9 +58,9 @@ const SidebarTabPanelActionButton = ({
       focusRing("focus-visible:ring-inset")
     )}
   >
-    {action.icon && (
+    {action.icon ? (
       <F0Icon icon={action.icon} size="md" className="text-f1-icon" />
-    )}
+    ) : null}
     <span className="line-clamp-1">{action.label}</span>
   </button>
 )
@@ -113,14 +111,14 @@ export const SidebarTabPanel = ({
       data-sidebar-tab-panel-searching={isSearching}
     >
       {/* Search always sits at the very top of the panel. */}
-      {searchPlaceholder !== undefined && (
+      {searchPlaceholder !== undefined ? (
         <SidebarTabPanelSearch
           value={query}
           onChange={setQuery}
           placeholder={searchPlaceholder}
         />
-      )}
-      {actions && actions.length > 0 && (
+      ) : null}
+      {actions && actions.length > 0 ? (
         <div className="flex flex-col gap-0.5">
           {actions.map((action) => {
             const button = <SidebarTabPanelActionButton action={action} />
@@ -131,16 +129,16 @@ export const SidebarTabPanel = ({
             )
           })}
         </div>
-      )}
-      {showSkeleton && skeleton}
-      {!showSkeleton && !hasAnyItems && emptyState}
-      {noResults && (
+      ) : null}
+      {showSkeleton ? skeleton : null}
+      {!showSkeleton && !hasAnyItems ? emptyState : null}
+      {noResults ? (
         <p className="px-1.5 py-2 text-base text-f1-foreground-secondary">
           {noResultsLabel}
         </p>
-      )}
-      {!showSkeleton &&
-        (animateItems ? (
+      ) : null}
+      {!showSkeleton ? (
+        animateItems ? (
           // Layout-animated lists. A `LayoutGroup` lets the collapsible groups
           // remeasure together, so a row leaving one group and joining another
           // (pin/unpin) stays in sync as positions shift.
@@ -237,7 +235,8 @@ export const SidebarTabPanel = ({
               </SidebarCollapsibleSection>
             </div>
           ))
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

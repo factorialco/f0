@@ -5,7 +5,6 @@ import {
   useContext,
   useState,
 } from "react"
-
 import { type AIMessage } from "../../types"
 
 const FeedbackContext = createContext<FeedbackModal | null>(null)

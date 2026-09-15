@@ -1,5 +1,4 @@
 import { ComponentProps } from "react"
-
 import type {
   ChartContainer,
   LineChartConfig,
@@ -9,7 +8,8 @@ import type {
 export type ChartItem<K extends ChartConfig> = {
   label: string
   values: {
-    [key in keyof K]: number
+    // null renders as a gap, letting a series start or end mid-chart.
+    [key in keyof K]: number | null
   }
 }
 

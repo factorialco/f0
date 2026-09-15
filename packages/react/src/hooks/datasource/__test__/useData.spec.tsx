@@ -1,15 +1,14 @@
 import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
-import { FiltersState } from "@/patterns/OneFilterPicker/types"
 import { PromiseState } from "@/lib/promise-to-observable"
-
+import { FiltersState } from "@/patterns/OneFilterPicker/types"
 import {
   BaseDataAdapter,
   BaseFetchOptions,
   BaseResponse,
   GroupingDefinition,
+  GroupingState,
   PageBasedPaginatedResponse,
   PaginatedDataAdapter,
   PaginatedFetchOptions,
@@ -122,7 +121,7 @@ describe("useData", () => {
       })
       expect(result.current.isLoading).toBe(false)
       expect(result.current.isInitialLoading).toBe(false)
-      expect(result.current.error).toBe(null)
+      expect(result.current.error).toBeNull()
     })
 
     it("should handle synchronous paginated data", async () => {
@@ -249,26 +248,6 @@ describe("useData", () => {
   })
 
   describe("with filters", () => {
-    it("should apply filters to synchronous data", () => {
-      const filters: Partial<FiltersState<TestFilters>> = {
-        search: "Test 1",
-      }
-      const source = createMockDataSource(
-        ({ filters }: { filters: FiltersState<TestFilters> }) => ({
-          records: mockData.filter((item) =>
-            filters.search ? item.name.includes(filters.search) : true
-          ),
-        })
-      )
-
-      const { result } = renderHook(() => useData(source, { filters }))
-
-      expect(result.current.data).toMatchObject({
-        records: [mockData[0]],
-        type: "flat",
-      })
-    })
-
     it("should apply filters to synchronous data", () => {
       const filters: Partial<FiltersState<TestFilters>> = {
         search: "Test 1",
@@ -648,5 +627,307 @@ describe("mergeFiltersWithIntersection", () => {
       expect(small.fetchData).toHaveBeenCalledTimes(2)
       expect(result.current.data.records).toHaveLength(20)
     })
+  })
+})
+
+describe("useData grouping", () => {
+  interface Person extends RecordType {
+    id: number
+    name: string
+    role: string
+    office: string
+  }
+
+  const people: Person[] = [
+    { id: 1, name: "Alice", role: "Engineer", office: "Barcelona" },
+    { id: 2, name: "Bob", role: "Engineer", office: "Madrid" },
+    { id: 3, name: "Cleo", role: "Engineer", office: "Barcelona" },
+    { id: 4, name: "Dan", role: "Designer", office: "Barcelona" },
+  ]
+
+  const grouping: GroupingDefinition<Person> = {
+    mandatory: true,
+    groupBy: {
+      role: {
+        name: "Role",
+        label: (groupId) => `${groupId}`,
+        itemCount: () => 99,
+      },
+      office: {
+        name: "Office",
+        label: (groupId) => `${groupId}`,
+        itemCount: () => 99,
+      },
+    },
+  }
+
+  const buildSource = (
+    currentGrouping: GroupingState<Person, GroupingDefinition<Person>>,
+    records: Person[] = people
+  ) =>
+    ({
+      dataAdapter: { fetchData: () => ({ records }) },
+      currentFilters: {},
+      setCurrentFilters: vi.fn(),
+      currentSortings: null,
+      setCurrentSortings: vi.fn(),
+      currentSearch: undefined,
+      debouncedCurrentSearch: undefined,
+      setCurrentSearch: vi.fn(),
+      isLoading: false,
+      setIsLoading: vi.fn(),
+      grouping,
+      currentGrouping,
+      setCurrentGrouping: vi.fn(),
+    }) as unknown as DataSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      GroupingDefinition<Person>
+    >
+
+  it("leaves a single-level grouping flat", () => {
+    const { result } = renderHook(() => useData(buildSource({ field: "role" })))
+
+    const groups = result.current.data.groups
+    expect(groups.map((group) => group.key)).toEqual(["Engineer", "Designer"])
+    expect(groups.every((group) => group.subGroups === undefined)).toBe(true)
+  })
+
+  it("cuts each group by the next level named in `thenBy`", () => {
+    const { result } = renderHook(() =>
+      useData(buildSource({ field: "role", thenBy: [{ field: "office" }] }))
+    )
+
+    const [engineers, designers] = result.current.data.groups
+
+    expect(
+      engineers.subGroups?.map((group) => group.records.map((r) => r.name))
+    ).toEqual([["Alice", "Cleo"], ["Bob"]])
+    expect(designers.subGroups?.map((group) => group.records.length)).toEqual([
+      1,
+    ])
+  })
+
+  it("keeps a parent's own records complete, so renderers that ignore nesting still work", () => {
+    const { result } = renderHook(() =>
+      useData(buildSource({ field: "role", thenBy: [{ field: "office" }] }))
+    )
+
+    const [engineers] = result.current.data.groups
+    expect(engineers.records.map((record) => record.name)).toEqual([
+      "Alice",
+      "Bob",
+      "Cleo",
+    ])
+  })
+
+  it("keeps a record with no value at the second level as a row of its group", () => {
+    // Erin has a role but no office: she belongs under Engineer, and to none of
+    // the offices Engineer is cut into.
+    const mixed = [
+      ...people,
+      { id: 5, name: "Erin", role: "Engineer", office: "" },
+    ]
+    const { result } = renderHook(() =>
+      useData(
+        buildSource({ field: "role", thenBy: [{ field: "office" }] }, mixed)
+      )
+    )
+
+    const engineer = result.current.data.groups.find(
+      (group) => group.key === "Engineer"
+    )
+    expect(engineer?.subGroups?.map((sub) => sub.label)).toEqual([
+      "Barcelona",
+      "Madrid",
+    ])
+    expect(engineer?.ownRecords?.map((record) => record.name)).toEqual(["Erin"])
+    // And NOT bucketed under the value it is missing.
+    expect(
+      engineer?.subGroups?.some((sub) => `${sub.label}`.includes("undefined"))
+    ).toBe(false)
+  })
+
+  it("leaves a record with no value at the FIRST level out of the groups entirely", () => {
+    // Frank has no role at all, so no heading can name him.
+    const mixed = [
+      ...people,
+      { id: 6, name: "Frank", role: "", office: "Madrid" },
+    ]
+    const { result } = renderHook(() =>
+      useData(buildSource({ field: "role" }, mixed))
+    )
+
+    expect(
+      result.current.data.ungroupedRecords?.map((record) => record.name)
+    ).toEqual(["Frank"])
+    expect(result.current.data.groups.map((group) => group.key)).toEqual([
+      "Engineer",
+      "Designer",
+    ])
+  })
+
+  it("gives sub-groups keys that are unique across branches", () => {
+    const { result } = renderHook(() =>
+      useData(buildSource({ field: "role", thenBy: [{ field: "office" }] }))
+    )
+
+    const [engineers, designers] = result.current.data.groups
+    // "Barcelona" under two parents must not collapse into one open/close key.
+    expect(engineers.subGroups?.[0].key).not.toBe(designers.subGroups?.[0].key)
+    expect(engineers.subGroups?.[0].label).toBe("Barcelona")
+    expect(designers.subGroups?.[0].label).toBe("Barcelona")
+  })
+
+  it("counts a sub-group by its own records, not by the definition's itemCount", () => {
+    const { result } = renderHook(() =>
+      useData(buildSource({ field: "role", thenBy: [{ field: "office" }] }))
+    )
+
+    const [engineers] = result.current.data.groups
+    // The definition answers 99 for the whole field; the branch holds two.
+    expect(engineers.itemCount).toBe(99)
+    expect(engineers.subGroups?.[0].itemCount).toBe(2)
+  })
+
+  it("nests as deep as `thenBy` is long", () => {
+    const { result } = renderHook(() =>
+      useData(
+        buildSource({
+          field: "office",
+          thenBy: [{ field: "role" }, { field: "office" }],
+        })
+      )
+    )
+
+    const [barcelona] = result.current.data.groups
+    expect(barcelona.subGroups?.[0].subGroups?.[0].label).toBe("Barcelona")
+  })
+
+  it("drops a level whose field the definition does not declare", () => {
+    const { result } = renderHook(() =>
+      useData(
+        buildSource({
+          field: "role",
+          thenBy: [
+            { field: "unknown" as keyof GroupingDefinition<Person>["groupBy"] },
+          ],
+        })
+      )
+    )
+
+    const [engineers] = result.current.data.groups
+    expect(engineers.subGroups).toBeUndefined()
+    expect(engineers.records).toHaveLength(3)
+  })
+})
+
+/**
+ * The production shape this was built for: a flat list of TASKS, each carrying
+ * the project and subproject it belongs to as nested objects, grouped into the
+ * project > subproject > task hierarchy. Grouping is by id (names repeat across
+ * projects), so the labels resolve the id to a name.
+ */
+describe("useData grouping over a project > subproject > task hierarchy", () => {
+  interface Task extends RecordType {
+    id: number
+    title: string
+    project: { id: string; name: string }
+    subproject: { id: string; name: string }
+  }
+
+  const apollo = { id: "p1", name: "Apollo" }
+  const zephyr = { id: "p2", name: "Zephyr" }
+  // Deliberately the same NAME under both projects, different ids.
+  const apolloBackend = { id: "s1", name: "Backend" }
+  const apolloWeb = { id: "s2", name: "Web" }
+  const zephyrBackend = { id: "s3", name: "Backend" }
+
+  const tasks: Task[] = [
+    {
+      id: 1,
+      title: "Ship the API",
+      project: apollo,
+      subproject: apolloBackend,
+    },
+    { id: 2, title: "Add a cache", project: apollo, subproject: apolloBackend },
+    { id: 3, title: "Dark mode", project: apollo, subproject: apolloWeb },
+    { id: 4, title: "Rate limits", project: zephyr, subproject: zephyrBackend },
+  ]
+
+  const nameOf = (entities: { id: string; name: string }[], groupId: unknown) =>
+    entities.find((entity) => entity.id === groupId)?.name ?? `${groupId}`
+
+  const grouping: GroupingDefinition<Task> = {
+    groupBy: {
+      "project.id": {
+        name: "Project",
+        label: (groupId) => nameOf([apollo, zephyr], groupId),
+        itemCount: (groupId) =>
+          tasks.filter((task) => task.project.id === groupId).length,
+      },
+      "subproject.id": {
+        name: "Subproject",
+        label: (groupId) =>
+          nameOf([apolloBackend, apolloWeb, zephyrBackend], groupId),
+      },
+    },
+  }
+
+  const source = {
+    dataAdapter: { fetchData: () => ({ records: tasks }) },
+    currentFilters: {},
+    setCurrentFilters: vi.fn(),
+    currentSortings: null,
+    setCurrentSortings: vi.fn(),
+    currentSearch: undefined,
+    debouncedCurrentSearch: undefined,
+    setCurrentSearch: vi.fn(),
+    isLoading: false,
+    setIsLoading: vi.fn(),
+    grouping,
+    currentGrouping: {
+      field: "project.id",
+      thenBy: [{ field: "subproject.id" }],
+    },
+    setCurrentGrouping: vi.fn(),
+  } as unknown as DataSource<
+    Task,
+    TestFilters,
+    SortingsDefinition,
+    GroupingDefinition<Task>
+  >
+
+  it("reads a dotted path at the nested level, not just the top one", () => {
+    const { result } = renderHook(() => useData(source))
+    const [apolloGroup, zephyrGroup] = result.current.data.groups
+
+    expect(apolloGroup.label).toBe("Apollo")
+    expect(apolloGroup.subGroups?.map((group) => group.label)).toEqual([
+      "Backend",
+      "Web",
+    ])
+    expect(zephyrGroup.subGroups?.map((group) => group.label)).toEqual([
+      "Backend",
+    ])
+  })
+
+  it("keeps same-named subprojects apart across projects", () => {
+    const { result } = renderHook(() => useData(source))
+    const [apolloGroup, zephyrGroup] = result.current.data.groups
+
+    const apolloBackendGroup = apolloGroup.subGroups![0]
+    const zephyrBackendGroup = zephyrGroup.subGroups![0]
+
+    expect(apolloBackendGroup.label).toBe(zephyrBackendGroup.label)
+    expect(apolloBackendGroup.key).not.toBe(zephyrBackendGroup.key)
+    expect(apolloBackendGroup.records.map((task) => task.title)).toEqual([
+      "Ship the API",
+      "Add a cache",
+    ])
+    expect(zephyrBackendGroup.records.map((task) => task.title)).toEqual([
+      "Rate limits",
+    ])
   })
 })

@@ -1,9 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react"
-
 import { F0Select } from "@/components/F0Select"
 import { Download, Minus, Plus } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import { downloadFromUrl } from "../pdfActions"
 import {
   fixedScales,
@@ -85,7 +83,7 @@ export const DocumentToolbar = ({
       <div className="flex min-w-0 flex-1 basis-0 flex-row items-center gap-2 overflow-x-auto">
         {children}
       </div>
-      {zoom && (
+      {zoom ? (
         <div className="flex shrink-0 flex-row items-center gap-2">
           <ToolbarButton
             label={pdfViewer.zoomOut}
@@ -105,7 +103,7 @@ export const DocumentToolbar = ({
             onChange={(value: FixedScale) => zoom.setScale(Number(value))}
           />
         </div>
-      )}
+      ) : null}
       <div className="flex flex-1 basis-0 flex-row items-center justify-end gap-2">
         <ToolbarButton
           label={pdfViewer.download}

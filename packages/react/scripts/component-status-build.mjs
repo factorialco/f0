@@ -13,7 +13,8 @@
  * - name (from the story `title` or the filename)
  * - zone (components, patterns, sds, kits, experimental, layouts, deprecated…)
  * - API status tag (stable / experimental / deprecated / internal — from tags)
- * - hasUnitTests  (a __tests__ folder or *.test.ts(x) near the story)
+ * - hasUnitTests  (a __tests__ folder, or a *.test.ts(x) / *.spec.ts(x) file,
+ *                  near the story)
  * - hasSnapshot   (a Chromatic snapshot story — `withSnapshot(...)`)
  * - hasMdxDocs    (an *.mdx file alongside the story)
  * - docQuality    (heuristic tier from the MDX structure)
@@ -75,6 +76,18 @@ export function effectiveStatusOf(c) {
 }
 
 /** Normalize a component name for matching (drop F0 prefix + punctuation). */
+/**
+ * Key for the sidebar's status badge. Unlike `normalizeComponentName` this does
+ * *not* drop an `F0` prefix, because the two functions do opposite jobs: that
+ * one matches two spellings of the same component (the export `F0Callout`
+ * against the story `AICallout`), while this one has to tell two different
+ * components apart. Stripping here collapsed `F0AiCallout` and `AICallout` onto
+ * one key, so a deprecated component's ❌ landed on its replacement.
+ */
+export function sidebarStatusKey(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "")
+}
+
 export function normalizeComponentName(name) {
   return name
     .toLowerCase()
@@ -96,7 +109,7 @@ export function leafName(name) {
 export function effectiveStatusByLeaf(components) {
   const byLeaf = {}
   for (const c of components) {
-    const key = normalizeComponentName(leafName(c.name))
+    const key = sidebarStatusKey(leafName(c.name))
     const prev = byLeaf[key]
     if (!prev || (c.zone === "components" && prev.zone !== "components")) {
       byLeaf[key] = { zone: c.zone, status: effectiveStatusOf(c) }
@@ -266,9 +279,7 @@ export function a11yTierOf(content) {
 export function computeComponentStatusData(srcDir = SRC_DIR) {
   const allFiles = walk(srcDir)
   const storyFiles = allFiles.filter((f) => f.endsWith(".stories.tsx"))
-  const testFiles = allFiles.filter(
-    (f) => f.endsWith(".test.tsx") || f.endsWith(".test.ts")
-  )
+  const testFiles = allFiles.filter((f) => /\.(test|spec)\.(ts|tsx)$/.test(f))
   const mdxByDir = new Map()
   for (const f of allFiles) {
     if (!f.endsWith(".mdx")) continue

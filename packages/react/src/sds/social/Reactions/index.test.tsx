@@ -1,14 +1,12 @@
 import { expect, it, vi } from "vitest"
-
+import { getEmojiLabel } from "@/lib/emojis"
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-import { getEmojiLabel } from "@/lib/emojis"
-
-import { Reactions } from "./index"
+import { Reactions } from "."
 
 it("forwards the lazy user loader and shows the resolved identities", async () => {
   const loadUsers = vi

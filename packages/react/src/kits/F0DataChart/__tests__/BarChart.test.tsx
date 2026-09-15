@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom/vitest"
 import {
   afterAll,
   afterEach,
@@ -8,9 +9,7 @@ import {
   it,
   vi,
 } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { act, zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
 import { resolveChartTheme } from "../utils/theme"
@@ -22,15 +21,32 @@ import { resolveChartTheme } from "../utils/theme"
 
 const setOptionMock = vi.fn()
 
+/**
+ * Stands in for the gradient constructor, so the tests that assert on a fill can
+ * read the stops it was built with. Hoisted because the `echarts` mock factory
+ * reads it as it is built, before module-level bindings exist.
+ */
+const { linearGradientMock } = vi.hoisted(() => ({
+  linearGradientMock: vi.fn(function LinearGradient(
+    this: object,
+    ..._args: unknown[]
+  ) {
+    // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
+    return this
+  }),
+}))
+
 /** Handlers the chart registered, so tests can fire ECharts events at it. */
-const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
+let chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
 
 /** Fire an ECharts event at every handler the component registered for it. */
 function emitChartEvent(event: string, params: unknown) {
   // Wrapped in `act` because the handlers set React state, and the assertion
   // reads the `setOption` payload that the resulting render produces.
   act(() => {
-    for (const handler of chartHandlers[event] ?? []) handler(params)
+    for (const handler of chartHandlers[event] ?? []) {
+      handler(params)
+    }
   })
 }
 
@@ -41,7 +57,8 @@ vi.mock("echarts", () => ({
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
     on: vi.fn((event: string, handler: (params: unknown) => void) => {
-      ;(chartHandlers[event] ??= []).push(handler)
+      chartHandlers[event] ??= []
+      chartHandlers[event].push(handler)
     }),
     off: vi.fn(),
     dispatchAction: vi.fn(),
@@ -49,10 +66,7 @@ vi.mock("echarts", () => ({
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
   graphic: {
-    LinearGradient: vi.fn(function LinearGradient(this: object) {
-      // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
-      return this
-    }),
+    LinearGradient: linearGradientMock,
   },
 }))
 
@@ -71,7 +85,9 @@ type BarItemStyle = { color?: string; borderRadius?: number | number[] }
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     legend?: { show?: boolean }
     grid?: { right?: number | string }
@@ -101,7 +117,9 @@ type LabelLayoutParams = {
 
 function getMainSeries() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return (
     call[0] as {
       series: {
@@ -133,7 +151,9 @@ function getMainSeries() {
 /** Root-level animation keys that drive the hover blur cross-fade */
 function getAnimationOptions() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     animation?: boolean
     animationDuration?: number
@@ -164,7 +184,7 @@ function getBorderRadii(seriesIndex: number) {
 
 beforeEach(() => {
   setOptionMock.mockClear()
-  for (const key of Object.keys(chartHandlers)) delete chartHandlers[key]
+  chartHandlers = {}
   containerSize.width = 800
   containerSize.height = 320
 })
@@ -606,8 +626,8 @@ describe("BarChart — stacked segment polish", () => {
     const series = getMainSeries()
     for (const entry of series) {
       expect(entry?.emphasis?.focus).toBe("series")
-      expect(entry?.blur?.itemStyle?.opacity).toBe(0.4)
-      expect(entry?.blur?.label?.opacity).toBe(0.4)
+      expect(entry?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
+      expect(entry?.blur?.label?.opacity).toBeCloseTo(0.4)
     }
   })
 
@@ -632,7 +652,7 @@ describe("BarChart — stacked segment polish", () => {
     // [main, target] — the ghost is a separate series, so `focus: "series"`
     // blurs it too; it must dim to the same 40%.
     const target = getMainSeries()[1]
-    expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
+    expect(target?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
   })
 
   it("runs the blur cross-fade without animating entrance or updates", () => {
@@ -694,7 +714,7 @@ describe("BarChart — stacked segment polish", () => {
       // just arrives instantly instead of fading.
       expect(getAnimationOptions().stateAnimation?.duration).toBe(0)
       expect(getMainSeries()[0]?.emphasis?.focus).toBe("series")
-      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBe(0.4)
+      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
     })
 
     it("overrides a consumer-provided cross-fade duration", () => {
@@ -976,7 +996,9 @@ describe("BarChart — hideOverflowingLabels", () => {
 describe("BarChart — item tooltip", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
-    if (!call) throw new Error("setOption was never called")
+    if (!call) {
+      throw new Error("setOption was never called")
+    }
     return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
       .tooltip?.formatter
   }
@@ -1026,7 +1048,7 @@ describe("BarChart — item tooltip", () => {
     expect(html).not.toContain("107505.8632") // no raw float precision
   })
 
-  it("formats and escapes values in target tooltips, and hides ghost series", () => {
+  it("formats and escapes values in target tooltips, gradient included", () => {
     render(
       <F0DataChart
         type="bar"
@@ -1059,14 +1081,47 @@ describe("BarChart — item tooltip", () => {
     expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
     expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;") // target row
     expect(html).not.toContain("<script>")
-    // Hovering the ghost gradient bar renders no tooltip.
-    expect(
-      formatter?.({
-        seriesName: "<strong>Revenue</strong> (target)",
-        value: 17495,
-        dataIndex: 0,
-      })
-    ).toBe("")
+    // Hovering the gradient reads as hovering its bar: same card, and the
+    // value is the bar's, not the height of the gap.
+    const overGradient = formatter?.({
+      name: "<script>category</script>",
+      seriesName: "<strong>Revenue</strong> (target)",
+      value: 17495,
+      dataIndex: 0,
+    })
+    expect(overGradient).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
+    expect(overGradient).toContain("&lt;em&gt;107,505&lt;/em&gt;")
+    expect(overGradient).not.toContain("17,495")
+  })
+
+  it("answers over a bar that has attained nothing, where the gradient is all there is", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["Q3"]}
+        series={[{ name: "Attainment", data: [{ value: 0, target: 185_000 }] }]}
+        showTargetProgress
+        valueFormatter={(value) => (value === 0 ? "nothing yet" : `${value}!`)}
+      />
+    )
+
+    // A zero-height bar has no rectangle to hover, so ECharts reports the
+    // gradient — the whole column, in this case.
+    const html = getTooltipFormatter()?.({
+      name: "Q3",
+      seriesName: "Attainment (target)",
+      value: 185_000,
+      dataIndex: 0,
+    })
+
+    expect(html).toContain("Attainment")
+    expect(html).toContain("Q3")
+    expect(html).toContain("nothing yet")
+    expect(html).toContain("185000!")
+    expect(html).toContain("0.0%")
+    // The dot is drawn from the series colour: ECharts' own marker for the
+    // gradient item is not a colour the card can use.
+    expect(html).toContain("background-color:#")
   })
 
   it("shows share of total only for multi-series charts", () => {
@@ -2174,5 +2229,149 @@ describe("BarChart — the window takes data order, not rank", () => {
     // (Barcelona, 90) being inside it is a coincidence of position.
     expect(shown).toBeLessThan(categories.length)
     expect(onHidden).toHaveBeenLastCalledWith(categories.length - shown)
+  })
+})
+
+describe("BarChart — overachievement", () => {
+  const base = {
+    type: "bar" as const,
+    categories: ["Q1", "Q2"],
+    series: [
+      {
+        name: "Attainment",
+        data: [
+          { value: 80, target: 100 },
+          { value: 150, target: 100 },
+        ],
+      },
+    ],
+  }
+
+  /**
+   * The gradient built for the overachieving bar: the one with four stops. The
+   * two-stop gradients are the target ghosts.
+   */
+  function overachievementGradient() {
+    return linearGradientMock.mock.calls.find(
+      (args) => (args[4] as { offset: number }[]).length === 4
+    )
+  }
+
+  beforeEach(() => {
+    linearGradientMock.mockClear()
+  })
+
+  it("leaves the bars alone until the flag is on", () => {
+    render(<F0DataChart {...base} />)
+
+    // Both points stay plain numbers: no per-point fill to describe.
+    expect(getLatestOption().series[0]?.data).toEqual([80, 150])
+  })
+
+  it("fills the stretch past the target with a darker shade of the bar", () => {
+    render(<F0DataChart {...base} highlightOverachievement />)
+
+    const data = getLatestOption().series[0]?.data
+    // The bar that fell short is untouched; only the one that passed its
+    // target carries a fill of its own.
+    expect(data?.[0]).toBe(80)
+    expect(typeof data?.[1]).toBe("object")
+
+    // 150 against a target of 100: the darker third sits at the top, and the
+    // two stops meet exactly at the target.
+    const stops = overachievementGradient()?.[4] as
+      | { offset: number; color: string }[]
+      | undefined
+    expect(stops?.map((s) => s.offset)).toEqual([0, 1 / 3, 1 / 3, 1])
+    expect(stops?.[0]?.color).toBe(stops?.[1]?.color)
+    expect(stops?.[2]?.color).toBe(stops?.[3]?.color)
+    expect(stops?.[0]?.color).not.toBe(stops?.[3]?.color)
+  })
+
+  it("runs the darker stretch in from the far end of a horizontal bar", () => {
+    render(
+      <F0DataChart
+        {...base}
+        orientation="horizontal"
+        highlightOverachievement
+      />
+    )
+
+    // Right-to-left, so the dark end is the one the bar grew towards.
+    expect(overachievementGradient()?.slice(0, 4)).toEqual([1, 0, 0, 0])
+  })
+
+  it("ignores points that have no target of their own", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [42] }]}
+        highlightOverachievement
+      />
+    )
+
+    expect(getLatestOption().series[0]?.data).toEqual([42])
+  })
+})
+
+describe("BarChart — target progress row", () => {
+  function getTooltipFormatter() {
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) {
+      throw new Error("setOption was never called")
+    }
+    return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
+      .tooltip?.formatter
+  }
+
+  const base = {
+    type: "bar" as const,
+    categories: ["Q2"],
+    series: [
+      { name: "Attainment", data: [{ value: 200_000, target: 185_000 }] },
+    ],
+  }
+  const hover = {
+    seriesName: "Attainment",
+    name: "Q2",
+    value: 200_000,
+    dataIndex: 0,
+  }
+
+  it("stays out of the tooltip until asked for", () => {
+    render(<F0DataChart {...base} />)
+
+    const html = getTooltipFormatter()?.(hover)
+    expect(html).toContain("185,000")
+    expect(html).not.toContain("of target")
+  })
+
+  it("reports what the bar came to against its target", () => {
+    render(<F0DataChart {...base} showTargetProgress />)
+
+    const html = getTooltipFormatter()?.(hover)
+    expect(html).toContain("108.1%")
+    expect(html).toContain("of target")
+  })
+
+  it("says nothing about a target of zero", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [{ value: 5, target: 0 }] }]}
+        showTargetProgress
+      />
+    )
+
+    const html = getTooltipFormatter()?.({
+      seriesName: "S",
+      name: "A",
+      value: 5,
+      dataIndex: 0,
+    })
+    expect(html).not.toContain("of target")
+    expect(html).not.toContain("Infinity")
   })
 })

@@ -8,9 +8,7 @@ import {
   it,
   vi,
 } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import {
@@ -185,6 +183,20 @@ describe("typing indicator transitions", () => {
     // A NEW typing_start after the stop shows the dots again.
     rerender(chatFor([MARIA], [HELLO, replyFrom(MARIA, "On my way!")]))
     expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
+  })
+
+  // Same rule as the bubbles: the point aims at the avatar, and a DM has none.
+  it("points the dots bubble at the avatar only in a group", () => {
+    const dots = () =>
+      screen
+        .getByRole("status", { name: /writing/i })
+        .querySelector(".rounded-2xl")
+
+    const { rerender } = render(chatFor([MARIA]))
+    expect(dots()).not.toHaveClass("rounded-bl-2xs")
+
+    rerender(chatFor([MARIA], undefined, "group"))
+    expect(dots()).toHaveClass("rounded-bl-2xs")
   })
 
   it("keeps the dots when someone ELSE's message lands while typing (group)", () => {

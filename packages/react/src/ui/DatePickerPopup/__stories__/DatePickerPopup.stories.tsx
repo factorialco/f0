@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { subDays } from "date-fns"
 import { useState } from "react"
-
-import { DateRange } from "@/components/OneCalendar/types"
 import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
-
+import { DateRange } from "@/components/OneCalendar/types"
 import { DatePickerPopup, DatePickerPopupProps } from "../DatePickerPopup"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"

@@ -1,20 +1,22 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
   F0DataChartBarSeries,
 } from "../../types"
-
-import { paletteColor, resolveChartColorToken } from "../../utils/colors"
+import {
+  darkenChartColor,
+  paletteColor,
+  resolveChartColorToken,
+} from "../../utils/colors"
 import {
   buildBaseChartOptions,
   buildItemTooltip,
   labelWidthCap,
+  renderMarker,
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
@@ -75,6 +77,13 @@ const INSIDE_LABEL_COLOR = "#ffffff"
  */
 const STACK_GAP_BORDER_WIDTH = 0.5
 
+/**
+ * Suffix marking the internal series that draws the gap up to a target. It names
+ * a series ECharts needs but the reader never chose, so the legend leaves it out
+ * and the tooltip resolves it back to the bar it belongs to.
+ */
+const TARGET_SERIES_SUFFIX = " (target)"
+
 /** Opacity of the series that are *not* hovered, while one series has focus. */
 const BLUR_OPACITY = 0.4
 
@@ -88,7 +97,9 @@ function resolveGridRightSpace(
   right: number | string | undefined,
   containerWidth: number
 ): number {
-  if (typeof right === "number") return right
+  if (typeof right === "number") {
+    return right
+  }
   if (typeof right === "string" && right.endsWith("%")) {
     const percentage = Number.parseFloat(right)
     if (Number.isFinite(percentage)) {
@@ -109,7 +120,9 @@ function measureTextWidth(text: string, font: string): number {
         ? document.createElement("canvas").getContext("2d")
         : null
   }
-  if (!measureContext) return text.length * 8
+  if (!measureContext) {
+    return text.length * 8
+  }
   measureContext.font = font
   return measureContext.measureText(text).width
 }
@@ -201,6 +214,53 @@ function resolveColor(series: F0DataChartBarSeries, index: number): string {
   return series.color
     ? resolveChartColorToken(series.color)
     : paletteColor(index)
+}
+
+/**
+ * Fill for a bar that ran past its target: the stretch beyond the target in a
+ * darker shade of the bar's own colour, split at the exact target.
+ *
+ * One gradient with a hard stop rather than a second stacked series, so the bar
+ * stays a single mark — its label, its tooltip, its rounded end and its share
+ * of a stack all keep counting the whole value.
+ */
+function overachievementFill(
+  color: string,
+  value: number,
+  target: number,
+  isVertical: boolean
+): echarts.graphic.LinearGradient {
+  // Offset 0 is the far end from the axis (top of a column, right of a row),
+  // so the darker stretch runs from there down to the target.
+  const split = (value - target) / value
+  const darker = darkenChartColor(color)
+  return new echarts.graphic.LinearGradient(
+    ...(isVertical
+      ? ([0, 0, 0, 1] as [number, number, number, number])
+      : ([1, 0, 0, 0] as [number, number, number, number])),
+    [
+      { offset: 0, color: darker },
+      { offset: split, color: darker },
+      { offset: split, color },
+      { offset: 1, color },
+    ]
+  )
+}
+
+/**
+ * The part of a point that passed its target, or `undefined` when it didn't.
+ * Negative bars are left alone: they grow away from zero, so "past the target"
+ * has no single reading.
+ */
+function overachievesTarget(
+  point: F0DataChartBarDataPoint
+): number | undefined {
+  const value = getValue(point)
+  const target = getTarget(point)
+  if (target === undefined || value <= 0 || value <= target) {
+    return undefined
+  }
+  return target
 }
 
 /** Check whether a series contains any target values */
@@ -320,7 +380,9 @@ export function expandedHorizontalChartHeight(
   }
 
   const categoryCount = props.categories?.length ?? 0
-  if (categoryCount === 0) return undefined
+  if (categoryCount === 0) {
+    return undefined
+  }
 
   const barsPerBand = props.stacked ? 1 : (props.series?.length ?? 1)
   const band = minBandHeight(barsPerBand, EXPANDED_MIN_BAR_THICKNESS)
@@ -357,14 +419,22 @@ export function horizontalCategoryWindow({
 }): number | undefined {
   // Hiding rows is opt-in: without it a dense chart compresses instead, which
   // keeps every category reachable. See `windowCategories` in the prop docs.
-  if (!windowCategories || showAllCategories) return undefined
-  if (isVertical || !containerHeight || categoryCount === 0) return undefined
+  if (!windowCategories || showAllCategories) {
+    return undefined
+  }
+  if (isVertical || !containerHeight || categoryCount === 0) {
+    return undefined
+  }
 
   const plotHeight = containerHeight - HORIZONTAL_CHART_CHROME
-  if (plotHeight <= 0) return undefined
+  if (plotHeight <= 0) {
+    return undefined
+  }
 
   const band = minBandHeight(stacked ? 1 : seriesCount)
-  if (plotHeight / categoryCount >= band) return undefined
+  if (plotHeight / categoryCount >= band) {
+    return undefined
+  }
 
   // At least two rows, so the window can never collapse to a single bar that
   // gives no sense of the surrounding data.
@@ -442,7 +512,9 @@ function buildBorderRadiusResolver(
   })
 
   return (seriesIndex, dataIndex, value) => {
-    if (value === 0) return 0
+    if (value === 0) {
+      return 0
+    }
     const isNegative = value < 0
     const outer = isNegative ? outerNegative : outerPositive
     return outer.get(dataIndex) === seriesIndex
@@ -451,51 +523,86 @@ function buildBorderRadiusResolver(
   }
 }
 
-/**
- * Build ECharts series entries for a single F0DataChartBarSeries.
- *
- * When the series contains target data points, two ECharts series are produced:
- *  1. The main (solid) bar showing `value`
- *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
- */
-function buildSeriesEntries(
-  series: F0DataChartBarSeries,
-  index: number,
-  isVertical: boolean,
-  showLabels: boolean,
-  stacked: boolean,
-  labelColor: string,
-  stackGapColor: string,
-  labelFontSize: number,
-  resolveBorderRadius: BorderRadiusResolver | undefined,
-  labelLayout?: echarts.BarSeriesOption["labelLayout"],
+type BuildSeriesEntriesOptions = {
+  series: F0DataChartBarSeries
+  index: number
+  isVertical: boolean
+  showLabels: boolean
+  stacked: boolean
+  highlightOverachievement: boolean
+  labelColor: string
+  stackGapColor: string
+  labelFontSize: number
+  resolveBorderRadius: BorderRadiusResolver | undefined
+  labelLayout?: echarts.BarSeriesOption["labelLayout"]
   valueFormatter?: (value: number) => string
-): echarts.BarSeriesOption[] {
-  const color = resolveColor(series, index)
-  const hasTargetData = hasTargets(series)
-  // When stacked, all series share "stacked"; when using targets, each series
-  // gets its own stack so the ghost bar stacks on its own solid bar only
-  const stackId = stacked
-    ? hasTargetData
-      ? `stacked-${index}`
-      : "stacked"
-    : hasTargetData
-      ? `stack-${index}`
-      : undefined
+}
 
+/**
+ * When stacked, every series shares one stack; with targets each series gets
+ * its own, so a ghost bar stacks on its own solid bar and nothing else.
+ */
+function resolveStackId(
+  stacked: boolean,
+  hasTargetData: boolean,
+  index: number
+): string | undefined {
+  if (stacked) {
+    return hasTargetData ? `stacked-${index}` : "stacked"
+  }
+  return hasTargetData ? `stack-${index}` : undefined
+}
+
+/** What both series of one bar share: its colour, its stack, its corners. */
+type SeriesShape = {
+  color: string
+  stackId: string | undefined
+  borderRadius: ReturnType<typeof barCornerRadius>
+}
+
+/** The solid bar: the value itself. */
+function buildMainSeries(
+  {
+    series,
+    index,
+    isVertical,
+    showLabels,
+    stacked,
+    highlightOverachievement,
+    labelColor,
+    stackGapColor,
+    labelFontSize,
+    resolveBorderRadius,
+    labelLayout,
+    valueFormatter,
+  }: BuildSeriesEntriesOptions,
+  { color, stackId, borderRadius }: SeriesShape
+): echarts.BarSeriesOption {
   // Build per-item data: use plain numbers unless the point needs its own
   // itemStyle (per-bar color override or a direction-specific corner radius)
   const mainData = series.data.map((point, dataIndex) => {
     const value = getValue(point)
     const pointColor = getPointColor(point)
     const pointBorderRadius = resolveBorderRadius?.(index, dataIndex, value)
-    if (pointColor === undefined && pointBorderRadius === undefined) {
+    const passedTarget = highlightOverachievement
+      ? overachievesTarget(point)
+      : undefined
+    const fill =
+      passedTarget === undefined
+        ? pointColor
+        : overachievementFill(
+            pointColor ?? color,
+            value,
+            passedTarget,
+            isVertical
+          )
+    if (fill === undefined && pointBorderRadius === undefined) {
       return value
     }
     return {
       value,
       itemStyle: {
-        ...(pointColor !== undefined && { color: pointColor }),
+        ...(fill !== undefined && { color: fill }),
         ...(pointBorderRadius !== undefined && {
           borderRadius: pointBorderRadius,
         }),
@@ -505,15 +612,6 @@ function buildSeriesEntries(
       // already applies.
     }
   })
-
-  // Round only the far end (away from the zero line):
-  // - Vertical: top corners rounded, bottom flat against x-axis
-  // - Horizontal: right corners rounded, left flat against y-axis
-  // This series-level default only applies when `resolveBorderRadius` is
-  // undefined (non-stacked, all-positive charts) — everything else
-  // (negatives, or any stacked chart) is overridden per data point below,
-  // since the direction and the outer-most segment can vary per category.
-  const borderRadius = barCornerRadius(isVertical, false)
 
   const mainSeries: echarts.BarSeriesOption = {
     name: series.name,
@@ -573,10 +671,14 @@ function buildSeriesEntries(
     }),
   }
 
-  if (!hasTargetData) {
-    return [mainSeries]
-  }
+  return mainSeries
+}
 
+/** The stacked ghost bar: how far the value still is from its target. */
+function buildTargetSeries(
+  { series, isVertical, stacked }: BuildSeriesEntriesOptions,
+  { color, stackId, borderRadius }: SeriesShape
+): echarts.BarSeriesOption {
   const targetData = series.data.map((point) => {
     const value = getValue(point)
     const target = getTarget(point)
@@ -605,15 +707,14 @@ function buildSeriesEntries(
   })
 
   const targetSeries: echarts.BarSeriesOption = {
-    name: `${series.name} (target)`,
+    name: `${series.name}${TARGET_SERIES_SUFFIX}`,
     type: "bar",
     data: targetData,
     stack: stackId,
-    // Hide from legend and tooltip
+    // Out of the legend, but not out of the tooltip: until a bar attains
+    // something, this gradient is all there is to hover, and the card it
+    // resolves to is the one for its own bar.
     legendHoverLink: false,
-    tooltip: {
-      show: false,
-    },
     itemStyle: {
       color: new echarts.graphic.LinearGradient(
         // Gradient direction: offset 0 is the far end from the solid bar
@@ -648,7 +749,41 @@ function buildSeriesEntries(
     }),
   }
 
-  return [mainSeries, targetSeries]
+  return targetSeries
+}
+
+/**
+ * Build ECharts series entries for a single F0DataChartBarSeries.
+ *
+ * When the series contains target data points, two ECharts series are produced:
+ *  1. The main (solid) bar showing `value`
+ *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
+ */
+function buildSeriesEntries(
+  options: BuildSeriesEntriesOptions
+): echarts.BarSeriesOption[] {
+  const { series, index, isVertical, stacked } = options
+  const hasTargetData = hasTargets(series)
+  const shape: SeriesShape = {
+    color: resolveColor(series, index),
+    stackId: resolveStackId(stacked, hasTargetData, index),
+    // Round only the far end (away from the zero line):
+    // - Vertical: top corners rounded, bottom flat against x-axis
+    // - Horizontal: right corners rounded, left flat against y-axis
+    // This series-level default only applies when `resolveBorderRadius` is
+    // undefined (non-stacked, all-positive charts) — everything else
+    // (negatives, or any stacked chart) is overridden per data point,
+    // since the direction and the outer-most segment can vary per category.
+    borderRadius: barCornerRadius(isVertical, false),
+  }
+
+  const mainSeries = buildMainSeries(options, shape)
+
+  if (!hasTargetData) {
+    return [mainSeries]
+  }
+
+  return [mainSeries, buildTargetSeries(options, shape)]
 }
 
 /**
@@ -699,9 +834,13 @@ function dataValueAxisMax(
     let positive = 0
     for (const s of series) {
       const point = s.data[dataIndex]
-      if (point === undefined) continue
+      if (point === undefined) {
+        continue
+      }
       const own = pointExtent(point)
-      if (own <= 0) continue
+      if (own <= 0) {
+        continue
+      }
       positive = stacked ? positive + own : Math.max(positive, own)
     }
     widest = Math.max(widest, positive)
@@ -729,7 +868,9 @@ function stackTotals(
   series: F0DataChartBarSeries[],
   categories: string[]
 ): number[] | undefined {
-  if (series.length < 2) return undefined
+  if (series.length < 2) {
+    return undefined
+  }
 
   const totals: number[] = []
   for (let dataIndex = 0; dataIndex < categories.length; dataIndex++) {
@@ -738,13 +879,20 @@ function stackTotals(
     let hasNegative = false
     for (const s of series) {
       const point = s.data[dataIndex]
-      if (point === undefined) continue
+      if (point === undefined) {
+        continue
+      }
       const value = getValue(point) || 0
-      if (value > 0) hasPositive = true
-      else if (value < 0) hasNegative = true
+      if (value > 0) {
+        hasPositive = true
+      } else if (value < 0) {
+        hasNegative = true
+      }
       total += value
     }
-    if (hasPositive && hasNegative) return undefined
+    if (hasPositive && hasNegative) {
+      return undefined
+    }
     totals.push(total)
   }
   return totals
@@ -765,13 +913,21 @@ function stackTotals(
  * still reads as the full total. The tooltip's total behaves the same way, so
  * the two stay consistent with each other.
  */
-function buildStackTotalSeries(
-  totals: number[],
-  labelColor: string,
-  labelFontSize: number,
-  containerWidth: number,
+type BuildStackTotalSeriesOptions = {
+  totals: number[]
+  labelColor: string
+  labelFontSize: number
+  containerWidth: number
   valueFormatter?: (value: number) => string
-): echarts.BarSeriesOption {
+}
+
+function buildStackTotalSeries({
+  totals,
+  labelColor,
+  labelFontSize,
+  containerWidth,
+  valueFormatter,
+}: BuildStackTotalSeriesOptions): echarts.BarSeriesOption {
   return {
     name: STACK_TOTAL_SERIES_NAME,
     type: "bar",
@@ -790,7 +946,9 @@ function buildStackTotalSeries(
       fontSize: labelFontSize,
       formatter: (params) => {
         const total = totals[params.dataIndex ?? 0]
-        if (total === undefined) return ""
+        if (total === undefined) {
+          return ""
+        }
         return valueFormatter ? valueFormatter(total) : String(total)
       },
     },
@@ -848,6 +1006,8 @@ export function useBarChartOptions(
     series,
     orientation = "vertical",
     stacked = false,
+    highlightOverachievement = false,
+    showTargetProgress = false,
     showLegend = true,
     showGrid = true,
     showLabels = false,
@@ -955,7 +1115,9 @@ export function useBarChartOptions(
         let widest = 0
         for (const s of series) {
           const point = s.data[categoryIndex]
-          if (point === undefined) continue
+          if (point === undefined) {
+            continue
+          }
           const value = getValue(point)
           const text = valueFormatter ? valueFormatter(value) : String(value)
           widest = Math.max(widest, measureTextWidth(text, labelFont))
@@ -1013,19 +1175,21 @@ export function useBarChartOptions(
 
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
-      buildSeriesEntries(
-        s,
-        i,
+      buildSeriesEntries({
+        series: s,
+        index: i,
         isVertical,
         showLabels,
         stacked,
-        theme.colors.foregroundSecondary,
-        theme.colors.containerBackground ?? theme.colors.background,
-        resolvedLabelFontSize,
+        highlightOverachievement,
+        labelColor: theme.colors.foregroundSecondary,
+        stackGapColor:
+          theme.colors.containerBackground ?? theme.colors.background,
+        labelFontSize: resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
-        valueFormatter
-      )
+        valueFormatter,
+      })
     )
 
     // A horizontal stacked bar reads as one quantity split into parts, so the
@@ -1038,13 +1202,13 @@ export function useBarChartOptions(
         : undefined
     if (totals) {
       echartsSeries.push(
-        buildStackTotalSeries(
+        buildStackTotalSeries({
           totals,
-          theme.colors.foregroundSecondary,
-          resolvedLabelFontSize,
+          labelColor: theme.colors.foregroundSecondary,
+          labelFontSize: resolvedLabelFontSize,
           containerWidth,
-          valueFormatter
-        )
+          valueFormatter,
+        })
       )
     }
 
@@ -1065,6 +1229,13 @@ export function useBarChartOptions(
 
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
+
+    // The colour each series is actually painted in, for the dot on a card the
+    // gradient resolved: ECharts' own marker there is the gradient, not a colour.
+    const seriesColors = new Map<string, string>()
+    series.forEach((s, index) =>
+      seriesColors.set(s.name, resolveColor(s, index))
+    )
 
     // Build a lookup of targets per series/category for the tooltip
     const targetMap = new Map<string, (number | undefined)[]>()
@@ -1148,7 +1319,9 @@ export function useBarChartOptions(
           0,
           currentSeries.data.length - ARIA_MAX_VALUES_PER_SERIES
         )
-        return `${currentSeries.name}: ${values}${remainingValues > 0 ? `; ${remainingValues} more values` : ""}.`
+        const remainingSuffix =
+          remainingValues > 0 ? `; ${remainingValues} more values` : ""
+        return `${currentSeries.name}: ${values}${remainingSuffix}.`
       })
     if (series.length > ARIA_MAX_SERIES) {
       ariaDescriptions.push(`${series.length - ARIA_MAX_SERIES} more series.`)
@@ -1208,11 +1381,25 @@ export function useBarChartOptions(
             dataIndex?: number
             marker?: string
           }
-          const seriesName = String(p.seriesName ?? "")
-          if (seriesName.endsWith(" (target)")) return ""
-
-          const value = Number(p.value)
+          const hovered = String(p.seriesName ?? "")
           const dataIndex = p.dataIndex ?? 0
+          // Hovering the gradient reads as hovering the bar it tops, so the card
+          // is the bar's: its own name, its own value — not the gap's height.
+          const overTarget = hovered.endsWith(TARGET_SERIES_SUFFIX)
+          const seriesName = overTarget
+            ? hovered.slice(0, -TARGET_SERIES_SUFFIX.length)
+            : hovered
+          const point = overTarget
+            ? series.find((s) => s.name === seriesName)?.data[dataIndex]
+            : undefined
+          if (overTarget && point === undefined) {
+            return ""
+          }
+
+          const value = point === undefined ? Number(p.value) : getValue(point)
+          const marker = overTarget
+            ? renderMarker(seriesColors.get(seriesName) ?? "")
+            : p.marker
           const target = targetMap.get(seriesName)?.[dataIndex]
           // Only a stack has a total this component can be sure of: its
           // segments are parts of the very bar being hovered. Grouped bars
@@ -1253,7 +1440,7 @@ export function useBarChartOptions(
           // to its left is only meaningful on a trend — i.e. a line chart.
           return renderValueTooltip(
             {
-              marker: p.marker,
+              marker,
               title: seriesName,
               subtitle: String(p.name ?? ""),
               value: formatTooltipValue(value),
@@ -1273,6 +1460,12 @@ export function useBarChartOptions(
                   value: formatTooltipValue(target),
                   label: i18n.dataChart.tooltip.target,
                 },
+                showTargetProgress &&
+                  target !== undefined &&
+                  target !== 0 && {
+                    value: `${((value / target) * 100).toFixed(1)}%`,
+                    label: i18n.dataChart.tooltip.ofTarget,
+                  },
               ],
             },
             theme
@@ -1361,6 +1554,8 @@ export function useBarChartOptions(
     series,
     orientation,
     stacked,
+    highlightOverachievement,
+    showTargetProgress,
     showLegend,
     showGrid,
     showLabels,

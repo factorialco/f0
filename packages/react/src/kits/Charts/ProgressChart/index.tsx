@@ -1,7 +1,5 @@
 import { ForwardedRef } from "react"
-
 import { Progress } from "@/ui/progress"
-
 import { getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartPropsBase } from "../utils/types"
@@ -34,9 +32,9 @@ const _ProgressBar = <K extends ChartConfig>(
           aria-label={`${percentage.toFixed(1)}%`}
         />
       </div>
-      {label && (
+      {label ? (
         <div className="flex-shrink-0 text-sm font-medium">{label}</div>
-      )}
+      ) : null}
     </div>
   )
 }

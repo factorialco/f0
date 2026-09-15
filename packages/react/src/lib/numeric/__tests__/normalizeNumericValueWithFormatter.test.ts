@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type {
   Numeric,
   NumericFormatter,
@@ -7,7 +6,6 @@ import type {
   NumericWithFormatter,
   RelaxedNumericWithFormatter,
 } from "../types"
-
 import { normalizeNumericWithFormatter } from "../utils/normalizeValueWithFormatter"
 import { numericFormatter } from "../utils/numericFormatter"
 

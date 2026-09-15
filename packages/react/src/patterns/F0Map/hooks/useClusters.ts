@@ -1,6 +1,5 @@
-import type maplibregl from "maplibre-gl"
 import { useEffect, useState } from "react"
-
+import type { MapAdapter, ScreenPoint } from "../providers/types"
 import type { F0MapPoint } from "../types"
 
 export interface F0MapClusterData {
@@ -30,27 +29,43 @@ export interface F0MapClusterResult {
  * points within the looser `clusterRadius`. This keeps individual markers
  * distinct while still gathering the rest of a dense pocket into one pile.
  */
-export const useClusters = (
-  map: maplibregl.Map | null,
-  points: F0MapPoint[],
-  enabled: boolean,
+type UseClustersOptions = {
+  adapter: MapAdapter | null
+  points: F0MapPoint[]
+  enabled: boolean
+  radius?: number
+  clusterRadius?: number
+}
+
+export const useClusters = ({
+  adapter,
+  points,
+  enabled,
   radius = 12,
-  clusterRadius = 164
-): F0MapClusterResult => {
+  clusterRadius = 164,
+}: UseClustersOptions): F0MapClusterResult => {
   const [result, setResult] = useState<F0MapClusterResult>({
     clusters: [],
     singles: points,
   })
 
   useEffect(() => {
-    if (!map || !enabled) {
+    if (!adapter || !enabled) {
       setResult({ clusters: [], singles: points })
       return
     }
 
     let raf = 0
     const recompute = () => {
-      const projected = points.map((p) => map.project(p.coordinates))
+      const projected: ScreenPoint[] = []
+      for (const p of points) {
+        const at = adapter.project(p.coordinates)
+        // Not projectable yet: leave the previous grouping until `ready`.
+        if (!at) {
+          return
+        }
+        projected.push(at)
+      }
       const n = points.length
       const markerR2 = radius * radius
       const clusterR2 = clusterRadius * clusterRadius
@@ -63,38 +78,51 @@ export const useClusters = (
       // Union-find over the points.
       const parent = Array.from({ length: n }, (_, i) => i)
       const find = (x: number): number => {
-        while (parent[x] !== x) x = parent[x] = parent[parent[x]]
+        while (parent[x] !== x) {
+          x = parent[x] = parent[parent[x]]
+        }
         return x
       }
       const union = (a: number, b: number) => {
         const ra = find(a)
         const rb = find(b)
-        if (ra !== rb) parent[ra] = rb
+        if (ra !== rb) {
+          parent[ra] = rb
+        }
       }
 
       // "Core" points nearly touch a neighbour (tight `radius`) — only these
       // seed a cluster, so isolated markers stay individual.
-      const core = new Array(n).fill(false)
-      for (let i = 0; i < n; i++)
-        for (let j = i + 1; j < n; j++)
+      const core = Array.from({ length: n }, () => false)
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
           if (dist2(i, j) <= markerR2) {
             core[i] = core[j] = true
             union(i, j)
           }
+        }
+      }
       // A cluster then swallows everything within the looser `clusterRadius` of
       // any core point, so a dense pocket collapses into one pile rather than a
       // cluster ringed by leftover labelled dots. Non-core points can't extend
       // the reach, which keeps genuinely separate markers from chaining in.
-      for (let i = 0; i < n; i++)
-        for (let j = i + 1; j < n; j++)
-          if ((core[i] || core[j]) && dist2(i, j) <= clusterR2) union(i, j)
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          if ((core[i] || core[j]) && dist2(i, j) <= clusterR2) {
+            union(i, j)
+          }
+        }
+      }
 
       const groups = new Map<number, number[]>()
       for (let i = 0; i < n; i++) {
         const r = find(i)
         const g = groups.get(r)
-        if (g) g.push(i)
-        else groups.set(r, [i])
+        if (g) {
+          g.push(i)
+        } else {
+          groups.set(r, [i])
+        }
       }
 
       const clusters: F0MapClusterData[] = []
@@ -154,16 +182,16 @@ export const useClusters = (
       raf = requestAnimationFrame(recompute)
     }
     schedule()
-    map.on("move", schedule)
-    map.on("zoom", schedule)
-    map.on("resize", schedule)
+    const offs = [
+      adapter.on("move", schedule),
+      adapter.on("zoom", schedule),
+      adapter.on("resize", schedule),
+    ]
     return () => {
       cancelAnimationFrame(raf)
-      map.off("move", schedule)
-      map.off("zoom", schedule)
-      map.off("resize", schedule)
+      offs.forEach((off) => off())
     }
-  }, [map, points, enabled, radius, clusterRadius])
+  }, [adapter, points, enabled, radius, clusterRadius])
 
   return result
 }

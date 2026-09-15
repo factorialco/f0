@@ -1,7 +1,5 @@
-import { useState } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { useState } from "react"
 import {
   Clock,
   Comment,
@@ -14,14 +12,13 @@ import {
   Sparkles,
 } from "@/icons/app"
 import { Skeleton } from "@/ui/skeleton"
-
 import {
   homeSlot,
   listSlot,
   type HomeWidgetSlot,
   type SlotRenderers,
 } from "../slotRenderers"
-import { SlotWidget } from "./index"
+import { SlotWidget } from "."
 
 const meta = {
   title: "Home/SlotWidget",
@@ -501,6 +498,243 @@ export const NeedsYou: Story = {
 export const NeedsYouWide: Story = {
   args: NeedsYou.args,
   parameters: { widgetWidth: "40rem" },
+}
+
+/**
+ * A SUBTITLE THAT CARRIES BAD NEWS. The subtitle is normally the muted half of
+ * the title's line; a row whose subtitle is what has gone WRONG with it —
+ * overdue, rejected, over budget — sets `subtitleCritical` and says it in red,
+ * the leading dot included.
+ *
+ * Per row, like `unread`: lateness is a state of that row's data, so the first
+ * row here reports it while the second one, with the same schema, still
+ * murmurs "Due Friday". The titles are the same colour in both — a title says
+ * what the row IS, not what's wrong with it.
+ *
+ * `subtitleOptional` is the other half of the story: the last row has nothing to
+ * add, so it carries no subtitle and no stray separator. Unlike an optional
+ * second line this changes no geometry — the subtitle shares the title's line,
+ * so the glyph column and the row heights are those of an even list.
+ *
+ * Keep the red for what the reader has to act on: a list where every subtitle is
+ * critical has said nothing.
+ */
+export const CriticalSubtitles: Story = {
+  args: {
+    header: { title: "Your tasks", count: 3 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          subtitleOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "expenses",
+            title: "Expenses report",
+            subtitle: "2 days overdue",
+            subtitleCritical: true,
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses",
+          },
+          {
+            id: "review",
+            title: "Performance review",
+            subtitle: "Due Friday",
+            avatar: { icon: Clock, color: "purple" },
+            href: "/reviews",
+          },
+          {
+            id: "onboarding",
+            title: "Onboarding checklist",
+            avatar: { icon: PersonPlus, color: "army" },
+            href: "/onboarding",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
+/**
+ * A SECOND LINE THAT CARRIES BAD NEWS. Same story as `subtitleCritical`, one
+ * line down: the description is normally the muted second line of a row, and a
+ * row whose second line is what has gone WRONG with it — rejected, overdue,
+ * over budget — sets `descriptionCritical` and says it in red.
+ *
+ * Per row, like `unread`: rejection is a state of that row's data, so the first
+ * row here reports it while the second one, with the same schema, still murmurs
+ * "Due Friday". The titles are the same colour in both — a title says what the
+ * row IS, not what's wrong with it.
+ *
+ * The two murmuring lines are coloured INDEPENDENTLY: the first row's subtitle
+ * ("Travel") stays muted under a critical second line, because what has gone
+ * wrong is the rejection and not the trip. Reddening both would just be a red
+ * row.
+ *
+ * Keep the red for what the reader has to act on: a list where every second
+ * line is critical has said nothing.
+ */
+export const CriticalDescriptions: Story = {
+  args: {
+    header: { title: "Your expenses", count: 3 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          subtitleOptional: true,
+          descriptionOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "expenses",
+            title: "Expenses report",
+            subtitle: "Travel",
+            description: "Rejected by Finance",
+            descriptionCritical: true,
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses",
+          },
+          {
+            id: "review",
+            title: "Performance review",
+            subtitle: "Q3",
+            description: "Due Friday",
+            avatar: { icon: Clock, color: "purple" },
+            href: "/reviews",
+          },
+          {
+            id: "onboarding",
+            title: "Onboarding checklist",
+            avatar: { icon: PersonPlus, color: "army" },
+            href: "/onboarding",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
+/**
+ * SEVERAL FACTS ON ONE LINE, one of them bad. When a row's second line states
+ * more than one thing, `description` takes a list of parts instead of a string
+ * and each carries its own `critical`. They draw dot-separated, and the
+ * separator stays muted whatever its neighbours do — it belongs to neither, and
+ * a red one would read as a third, wordless piece of bad news.
+ *
+ * THE CRITICAL PART GOES FIRST. The second line is a single truncating line —
+ * about 306px at this 24rem rail width, some 40 characters — and it is cut from
+ * the RIGHT. The last row here is what that costs: its overdue notice sits
+ * third and the ellipsis eats it, which is why the first row leads with the
+ * same news instead. Marking a part critical claims it is the most important
+ * thing on the line; putting it first makes the claim true.
+ *
+ * Two facts fit comfortably; three fit only if they are short. Past that the
+ * row is trying to be a detail view, and should link to one.
+ */
+export const SegmentedDescriptions: Story = {
+  args: {
+    header: { title: "Your expenses", count: 3 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        { left: "icon", descriptionRequired: true, clickBehavior: "link" },
+        [
+          {
+            id: "overdue",
+            title: "Q3 travel",
+            description: [
+              { text: "2 days overdue", critical: true },
+              { text: "€340" },
+              { text: "12 receipts" },
+            ],
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses/1",
+          },
+          {
+            id: "fine",
+            title: "Client dinner",
+            description: [{ text: "€82" }, { text: "3 receipts" }],
+            avatar: { icon: Receipt, color: "purple" },
+            href: "/expenses/2",
+          },
+          {
+            // What NOT to do: the news is third, so the ellipsis takes it.
+            id: "buried",
+            title: "Conference",
+            description: [
+              { text: "Submitted Monday" },
+              { text: "€1,240 for flights" },
+              { text: "2 days overdue", critical: true },
+            ],
+            avatar: { icon: Receipt, color: "army" },
+            href: "/expenses/3",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
+/**
+ * WHAT THE ROW HAD NO ROOM FOR. A row's `tooltipDescription` is its own line of
+ * plain text, drawn as a tooltip over the whole row — hover the first two.
+ *
+ * Written separately rather than repeating the second line, which is the point:
+ * the line states the facts you triage by ("2 days overdue · €1,240"), the
+ * tooltip the fuller thing it abbreviates. Unlike `compact`, which trades the
+ * line away to get a tooltip, this costs the row nothing — the parts stay drawn
+ * and the critical one stays red.
+ *
+ * The last row wrote none and so hovers silently; an empty tooltip would be a
+ * promise of information that isn't there.
+ */
+export const TooltipDescriptions: Story = {
+  args: {
+    header: { title: "Needs you", count: 3 },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          descriptionOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "long",
+            title: "Q3 travel expenses",
+            description: [
+              { text: "2 days overdue", critical: true },
+              { text: "€1,240 for flights" },
+            ],
+            tooltipDescription:
+              "Flights and two nights in Berlin for the Q3 partner summit, submitted by Ada Lovelace on 12 September",
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses/1",
+          },
+          {
+            id: "short",
+            title: "Client dinner",
+            description: [{ text: "€82" }],
+            tooltipDescription:
+              "Dinner with the Meridian account team after the renewal call",
+            avatar: { icon: Receipt, color: "purple" },
+            href: "/expenses/2",
+          },
+          {
+            id: "bare",
+            title: "Conference budget",
+            avatar: { icon: Receipt, color: "army" },
+            href: "/expenses/3",
+          },
+        ]
+      ),
+    ],
+  },
 }
 
 /** The pool `ItemChurn` adds from, cycled so the button never runs out. */

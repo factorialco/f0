@@ -7,8 +7,9 @@
  * applied (green: the fix works).
  *
  * How CI verifies that:
- *   1. Collect the unit-test files this PR adds or modifies (vs the base ref),
- *      plus any changed `__tests__/` helpers they may import.
+ *   1. Collect the unit-test files this PR adds or modifies (vs the base ref)
+ *      — `.test.ts(x)` and `.spec.ts(x)` alike — plus any changed
+ *      `__tests__/` helpers they may import.
  *   2. RED — build a throwaway git worktree of the base ref (latest main),
  *      overlay ONLY those files on top of it, and run the tests there: at
  *      least one must fail, proving the test reproduces the bug without the fix.
@@ -49,7 +50,8 @@ export function isBugfixTitle(title: string): boolean {
 }
 
 export interface OverlayFiles {
-  /** Unit-test files (.test.ts / .test.tsx) added or modified by the PR. */
+  /** Unit-test files added or modified by the PR — both the `.test.` and
+   * `.spec.` conventions (.ts and .tsx), since Vitest runs both. */
   testFiles: string[]
   /** Changed non-test files under `__tests__/` (helpers, fixtures, factories)
    * that the tests may import — overlaid alongside them. */
@@ -73,7 +75,7 @@ export function overlayFilesFrom(nameStatusOutput: string): OverlayFiles {
     const file = parts[parts.length - 1]
     if (!TESTED_ROOTS.some((root) => file.startsWith(`${PKG_PREFIX}${root}`)))
       continue
-    if (/\.test\.(ts|tsx)$/.test(file)) {
+    if (/\.(test|spec)\.(ts|tsx)$/.test(file)) {
       testFiles.push(file)
     } else if (file.includes("/__tests__/")) {
       supportFiles.push(file)

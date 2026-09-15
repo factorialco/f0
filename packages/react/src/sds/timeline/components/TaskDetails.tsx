@@ -1,7 +1,5 @@
 import { Metadata } from "@/experimental/Information/Headers/Metadata"
-
 import type { F0TimelineRowTaskProps } from "../types"
-
 import { Actions } from "./Actions"
 
 export const TaskDetails = ({ props }: { props: F0TimelineRowTaskProps }) => {
@@ -15,13 +13,13 @@ export const TaskDetails = ({ props }: { props: F0TimelineRowTaskProps }) => {
 
   return (
     <div className="pl-9">
-      {metadata && hasMetadata && (
+      {metadata && hasMetadata ? (
         <div className="mb-3">
           <Metadata items={metadata} />
         </div>
-      )}
+      ) : null}
 
-      {hasActions && (
+      {hasActions ? (
         <div className="mb-3">
           <Actions
             primaryAction={primaryAction}
@@ -29,7 +27,7 @@ export const TaskDetails = ({ props }: { props: F0TimelineRowTaskProps }) => {
             otherActions={otherActions}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   ItemNeighborsFetchOptions,
   ItemNeighborsResponse,
@@ -16,7 +15,6 @@ import {
 } from "@/lib/providers/datacollection"
 import { notifyDataCollectionStorageChange } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
-
 import { DataCollectionSourceDefinition } from "../../useDataCollectionSource"
 import { useDataCollectionItemNavigation } from "../useDataCollectionItemNavigation"
 
@@ -512,7 +510,7 @@ describe("useDataCollectionItemNavigation", () => {
     it("holds the previous navigation while neighbors resolve (no flicker)", async () => {
       const fetchData = makeFetchData()
       const fetchItemNeighbors = makeFetchItemNeighbors()
-      const navigationSamples: Array<boolean> = []
+      const navigationSamples: boolean[] = []
 
       const { result } = zeroRenderHook(() => {
         const controller = useDataCollectionItemNavigation({

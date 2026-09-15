@@ -1,7 +1,5 @@
 import { JSONContent } from "@tiptap/react"
-
 import { IconType } from "@/components/F0Icon"
-
 import { FileType } from "./constants"
 
 // Re-export enhance types from internal

@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0DataChart as _F0DataChart } from "./F0DataChart"
 
 export type {

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { F0DataChart } from "../index"
+import { F0DataChart } from ".."
 import { ChartDecoratorWide } from "./decorators"
 
 const meta = {

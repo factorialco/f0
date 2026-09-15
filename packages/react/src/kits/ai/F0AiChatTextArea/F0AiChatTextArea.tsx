@@ -1,15 +1,18 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
 import { Link } from "@/lib/linkHandler"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import type {
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../F0AiChat/types"
+import { F0AiChatUsageLimitsButton } from "../F0AiChatUsageLimits"
 import { F0OneIcon } from "../F0OneIcon"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
@@ -21,10 +24,6 @@ import { SubmitButton } from "./components/SubmitButton"
 import { TextareaField } from "./components/TextareaField"
 import { WelcomeScreenCardsRow } from "./components/WelcomeScreenCardsRow"
 import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
-import type {
-  WelcomeScreenSuggestion,
-  WelcomeScreenSuggestionItem,
-} from "../F0AiChat/types"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
 import { type RecorderError, useAudioRecorder } from "./useAudioRecorder"
@@ -46,7 +45,9 @@ const escapeUserText = (s: string): string =>
     .map((part, i) => {
       // Odd indices are entity-ref tags produced by transformMentions — leave
       // them intact so the markdown renderer can turn them into chips.
-      if (i % 2 === 1) return part
+      if (i % 2 === 1) {
+        return part
+      }
       return part
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -81,6 +82,7 @@ export const F0AiChatTextArea = ({
   searchPersons,
   onProcessFilesRef,
   disclaimer,
+  usageLimits,
   footer,
   isWelcomeScreen = false,
   fullscreen = false,
@@ -113,7 +115,9 @@ export const F0AiChatTextArea = ({
 
   useEffect(
     () => () => {
-      if (blurCheckRef.current) clearTimeout(blurCheckRef.current)
+      if (blurCheckRef.current) {
+        clearTimeout(blurCheckRef.current)
+      }
     },
     []
   )
@@ -199,7 +203,9 @@ export const F0AiChatTextArea = ({
     // A composer that asks to start collapsed must not focus itself: the focus
     // is what opens the row, so autofocusing here would open it before the
     // reader has touched anything and make the prop a no-op.
-    if (welcomeScreenSuggestionsCollapsedByDefault) return
+    if (welcomeScreenSuggestionsCollapsedByDefault) {
+      return
+    }
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
       textareaRef.current?.focus()
     }
@@ -224,7 +230,9 @@ export const F0AiChatTextArea = ({
   // of the textarea — `processFiles` keeps its identity unless its
   // dependencies change, which the parent re-registers automatically.
   useEffect(() => {
-    if (!onProcessFilesRef) return
+    if (!onProcessFilesRef) {
+      return
+    }
     onProcessFilesRef((files) => {
       void processFiles(files)
     })
@@ -249,7 +257,9 @@ export const F0AiChatTextArea = ({
   // a transient banner so the user knows the click was acknowledged but the
   // send was blocked, instead of silently swallowing the event.
   useEffect(() => {
-    if (!pendingSubmit || isUploading) return
+    if (!pendingSubmit || isUploading) {
+      return
+    }
     setPendingSubmit(false)
     if (hasErrorFiles) {
       showTransientError(translation.ai.fileUploadBlockedSubmit)
@@ -268,7 +278,9 @@ export const F0AiChatTextArea = ({
     e.preventDefault()
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
-    if (isClarifying) return
+    if (isClarifying) {
+      return
+    }
 
     mentions.close()
     if (inProgress) {
@@ -303,8 +315,12 @@ export const F0AiChatTextArea = ({
 
       const consumedContext = pendingContext
       const consumedQuote = pendingQuote
-      if (consumedContext) onPendingContextChange?.(null)
-      if (consumedQuote) onPendingQuoteChange?.(null)
+      if (consumedContext) {
+        onPendingContextChange?.(null)
+      }
+      if (consumedQuote) {
+        onPendingQuoteChange?.(null)
+      }
 
       await onSubmit({
         text: safeUserText,
@@ -321,8 +337,12 @@ export const F0AiChatTextArea = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isClarifying) return
-    if (mentions.handleKeyDown(e)) return
+    if (isClarifying) {
+      return
+    }
+    if (mentions.handleKeyDown(e)) {
+      return
+    }
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -418,8 +438,12 @@ export const F0AiChatTextArea = ({
    * focus.
    */
   const focusStaysInComposer = (next: EventTarget | null) => {
-    if (!(next instanceof Node)) return false
-    if (formRef.current?.contains(next)) return true
+    if (!(next instanceof Node)) {
+      return false
+    }
+    if (formRef.current?.contains(next)) {
+      return true
+    }
     return (
       next instanceof Element &&
       next.closest("[data-radix-popper-content-wrapper]") !== null
@@ -438,9 +462,13 @@ export const F0AiChatTextArea = ({
    * next tick `document.activeElement` has settled and can be trusted.
    */
   const handleComposerBlur = () => {
-    if (blurCheckRef.current) clearTimeout(blurCheckRef.current)
+    if (blurCheckRef.current) {
+      clearTimeout(blurCheckRef.current)
+    }
     blurCheckRef.current = setTimeout(() => {
-      if (!focusStaysInComposer(document.activeElement)) setFocusWithin(false)
+      if (!focusStaysInComposer(document.activeElement)) {
+        setFocusWithin(false)
+      }
     }, 0)
   }
 
@@ -547,7 +575,7 @@ export const F0AiChatTextArea = ({
       {...(fullscreen ? composerReveal : {})}
     >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {suggestionsRow && !suggestionsInside && (
+        {suggestionsRow && !suggestionsInside ? (
           <div>
             {/* The row above the composer has no bar to collapse — it IS the
                 thing that opens, so the reveal is its own height. Composers that
@@ -555,7 +583,7 @@ export const F0AiChatTextArea = ({
                 nothing for a layout to trip over. */}
             {welcomeScreenSuggestionsCollapsedByDefault ? (
               <AnimatePresence initial={false}>
-                {composerOpen && (
+                {composerOpen ? (
                   <motion.div
                     key="welcome-suggestions"
                     className="overflow-hidden"
@@ -566,15 +594,15 @@ export const F0AiChatTextArea = ({
                   >
                     {suggestionsRow}
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
             ) : (
               suggestionsRow
             )}
           </div>
-        )}
+        ) : null}
         <CreditWarningWrapper creditWarning={creditWarning}>
-          <motion.form
+          <form
             aria-busy={inProgress}
             ref={formRef}
             className={cn(
@@ -590,30 +618,26 @@ export const F0AiChatTextArea = ({
               "transition-all hover:cursor-text",
               "p-0",
               "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
-              "before:rounded-[inherit] before:bg-f1-background before:content-['']",
-              "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
-              "after:rounded-md after:blur-[6px] after:content-['']",
-              "after:scale-90 after:opacity-0",
+              "before:rounded-[inherit] before:content-['']",
+              "before:bg-f1-background-inverse-secondary dark:before:bg-f1-background-tertiary",
+              "after:pointer-events-none after:absolute after:-inset-2.5 after:z-[-2]",
+              "after:rounded-3xl after:border-[10px] after:border-solid after:border-transparent",
+              "after:p-0.5 after:blur-[6px] after:content-['']",
+              "after:[background-clip:content-box]",
+              "after:[mask:linear-gradient(#000,#000)_padding-box_exclude,linear-gradient(#000,#000)]",
+              "after:opacity-0",
               "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
               "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-              "after:transition-all after:delay-200 after:duration-300",
-              "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-              isClarifying &&
-                "after:scale-100 after:opacity-100 border-f1-background-tertiary"
+              "after:transition-opacity after:delay-200 after:duration-300",
+              "has-[textarea:focus]:after:opacity-100",
+              !shouldReduceMotion &&
+                !isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_paused] has-[textarea:focus]:after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              !shouldReduceMotion &&
+                isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              isClarifying && "after:opacity-100 border-f1-background-tertiary"
             )}
-            animate={{
-              "--gradient-angle": ["0deg", "360deg"],
-            }}
-            transition={{
-              duration: 6,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            style={
-              {
-                "--gradient-angle": "180deg",
-              } as React.CSSProperties
-            }
             onClick={() => {
               if (!isClarifying) {
                 textareaRef.current?.focus()
@@ -679,15 +703,15 @@ export const F0AiChatTextArea = ({
                     ease: [0.4, 0, 0.2, 1],
                   }}
                 >
-                  {pendingQuote && (
+                  {pendingQuote ? (
                     <PendingQuoteChip
                       quote={pendingQuote}
                       onRemove={() => onPendingQuoteChange?.(null)}
                     />
-                  )}
+                  ) : null}
 
                   <AnimatePresence initial={false}>
-                    {transientError && (
+                    {transientError ? (
                       <motion.div
                         key="transient-error"
                         role="alert"
@@ -715,7 +739,7 @@ export const F0AiChatTextArea = ({
                           </p>
                         </div>
                       </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
 
                   <AttachedFilesList
@@ -755,11 +779,11 @@ export const F0AiChatTextArea = ({
                         Spins while a response streams — F0OneIcon's own
                         affordance for exactly this, and the only moving part the
                         composer has to say the AI is working. */}
-                    {inlineComposerBar && (
+                    {inlineComposerBar ? (
                       <div className="flex shrink-0 self-center pl-3">
                         <F0OneIcon size="sm" spin={inProgress} />
                       </div>
-                    )}
+                    ) : null}
                     <TextareaField
                       textareaRef={textareaRef}
                       highlightRef={highlightRef}
@@ -787,7 +811,7 @@ export const F0AiChatTextArea = ({
                         taller than the line, visibly high against the top
                         border. Grown past one line the same 10px keeps it on the
                         last line. */}
-                    {barCollapsed && (
+                    {barCollapsed ? (
                       // `preventDefault` ON MOUSEDOWN IS LOAD-BEARING, and the
                       // bug it fixes is worth spelling out: taking focus is the
                       // browser's DEFAULT ACTION for mousedown, focus is what
@@ -806,14 +830,14 @@ export const F0AiChatTextArea = ({
                         className="flex shrink-0 items-center gap-2 pb-[10px] pl-2"
                         onMouseDown={(event) => event.preventDefault()}
                       >
-                        {canRecord && (
+                        {canRecord ? (
                           <DictationButton
                             inProgress={inProgress}
                             recordingStatus={recorder.status}
                             onStartRecording={handleStartRecording}
                             size="sm"
                           />
-                        )}
+                        ) : null}
                         <SubmitButton
                           inProgress={inProgress}
                           hasDataToSend={hasDataToSend}
@@ -822,7 +846,7 @@ export const F0AiChatTextArea = ({
                           size="sm"
                         />
                       </div>
-                    )}
+                    ) : null}
                   </div>
 
                   {/* THE CONTROL ROW, and whether it is there at all. The
@@ -840,7 +864,7 @@ export const F0AiChatTextArea = ({
                       (its focus-ring room) is not clipped with it. */}
                   {barCollapsible ? (
                     <AnimatePresence initial={false}>
-                      {!barCollapsed && (
+                      {!barCollapsed ? (
                         <motion.div
                           key="action-row"
                           className="overflow-hidden"
@@ -851,7 +875,7 @@ export const F0AiChatTextArea = ({
                         >
                           {actionRow}
                         </motion.div>
-                      )}
+                      ) : null}
                     </AnimatePresence>
                   ) : (
                     actionRow
@@ -859,21 +883,21 @@ export const F0AiChatTextArea = ({
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.form>
+          </form>
         </CreditWarningWrapper>
       </div>
 
-      {showWelcomeCards && (
+      {showWelcomeCards ? (
         <div className="w-full max-w-content pt-2">
           <WelcomeScreenCardsRow cards={welcomeScreenCards} />
         </div>
-      )}
+      ) : null}
 
-      {footer && isWelcomeScreen && fullscreen && (
+      {footer && isWelcomeScreen && fullscreen ? (
         <div className="w-full py-4 mx-auto flex max-w-content justify-center">
           {footer}
         </div>
-      )}
+      ) : null}
 
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
@@ -899,11 +923,14 @@ export const F0AiChatTextArea = ({
             </span>
           </motion.div>
         ) : (
-          disclaimer?.text &&
+          (disclaimer?.text || usageLimits) &&
           !isFullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
-              className="flex w-full max-w-content flex-row items-center justify-center gap-1"
+              className={cn(
+                "flex w-full max-w-content flex-row items-center gap-1",
+                usageLimits ? "justify-between" : "justify-center"
+              )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -912,43 +939,50 @@ export const F0AiChatTextArea = ({
                 ease: "easeOut",
               }}
             >
-              {disclaimer.onClick ? (
-                <button
-                  type="button"
-                  onClick={disclaimer.onClick}
-                  className={cn(
-                    "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
-                    "transition-transform duration-700 ease-out",
-                    "hover:scale-[1.02] focus-visible:scale-[1.02]",
-                    "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
-                  )}
-                >
-                  <OneEllipsis
+              <div className="flex min-w-0 flex-row items-center gap-1">
+                {disclaimer?.text && disclaimer.onClick ? (
+                  <button
+                    type="button"
+                    onClick={disclaimer.onClick}
                     className={cn(
-                      "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
-                      "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
-                      "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                      "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
+                      "transition-transform duration-700 ease-out",
+                      "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                      "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
                     )}
                   >
+                    <OneEllipsis
+                      className={cn(
+                        "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
+                        "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
+                        "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                      )}
+                    >
+                      {disclaimer.text}
+                    </OneEllipsis>
+                  </button>
+                ) : disclaimer?.text ? (
+                  <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
                     {disclaimer.text}
                   </OneEllipsis>
-                </button>
-              ) : (
-                <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-                  {disclaimer.text}
-                </OneEllipsis>
-              )}
+                ) : null}
 
-              {disclaimer.link && disclaimer.linkText && (
-                <Link
-                  href={disclaimer.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
-                >
-                  {disclaimer.linkText}
-                </Link>
-              )}
+                {disclaimer?.link && disclaimer.linkText ? (
+                  <Link
+                    href={disclaimer.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+                  >
+                    {disclaimer.linkText}
+                  </Link>
+                ) : null}
+              </div>
+              {usageLimits ? (
+                <div className="flex shrink-0 items-center">
+                  <F0AiChatUsageLimitsButton {...usageLimits} />
+                </div>
+              ) : null}
             </motion.div>
           )
         )}

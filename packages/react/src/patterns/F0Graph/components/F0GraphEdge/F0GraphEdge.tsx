@@ -3,13 +3,12 @@ import {
   getBezierPath,
   getSmoothStepPath,
   getStraightPath,
+  Position,
   type EdgeProps,
 } from "@xyflow/react"
 import { memo } from "react"
-
-import type { EdgeVariant, F0GraphEdgeProps } from "./types"
-
 import { useF0GraphZoomInternal } from "../../contexts"
+import type { EdgeVariant, F0GraphEdgeProps } from "./types"
 
 // Semantic edge stroke colors. Defined as CSS vars on .f0-graph in
 // F0Graph.css so they flip automatically in dark mode and stay aligned
@@ -68,7 +67,8 @@ export function F0GraphEdgeBase({
   // When source and target are nearly aligned on the cross-axis,
   // use a straight line to avoid smoothstep introducing a tiny jog ("wiggle")
   const isVertical =
-    edgeProps.sourcePosition === "bottom" || edgeProps.sourcePosition === "top"
+    edgeProps.sourcePosition === Position.Bottom ||
+    edgeProps.sourcePosition === Position.Top
   const crossAxisDelta = isVertical
     ? Math.abs(edgeProps.sourceX - edgeProps.targetX)
     : Math.abs(edgeProps.sourceY - edgeProps.targetY)
@@ -91,7 +91,7 @@ export function F0GraphEdgeBase({
 
   return (
     <>
-      {showDot && (
+      {showDot ? (
         <defs>
           <marker
             id={`${MARKER_ID}-${edgeProps.id}`}
@@ -109,7 +109,7 @@ export function F0GraphEdgeBase({
             />
           </marker>
         </defs>
-      )}
+      ) : null}
       <BaseEdge
         id={edgeProps.id}
         path={edgePath}
@@ -127,19 +127,45 @@ export function F0GraphEdgeBase({
 F0GraphEdgeBase.displayName = "F0GraphEdge"
 
 export const F0GraphEdge = memo(F0GraphEdgeBase, (prev, next) => {
-  if (prev.id !== next.id) return false
-  if (prev.variant !== next.variant) return false
-  if (prev.strokeWidth !== next.strokeWidth) return false
-  if (prev.data?.variant !== next.data?.variant) return false
-  if (prev.data?.showDot !== next.data?.showDot) return false
-  if (prev.data?.pathType !== next.data?.pathType) return false
-  if (prev.style?.strokeWidth !== next.style?.strokeWidth) return false
-  if (prev.sourceX !== next.sourceX) return false
-  if (prev.sourceY !== next.sourceY) return false
-  if (prev.targetX !== next.targetX) return false
-  if (prev.targetY !== next.targetY) return false
-  if (prev.sourcePosition !== next.sourcePosition) return false
-  if (prev.targetPosition !== next.targetPosition) return false
+  if (prev.id !== next.id) {
+    return false
+  }
+  if (prev.variant !== next.variant) {
+    return false
+  }
+  if (prev.strokeWidth !== next.strokeWidth) {
+    return false
+  }
+  if (prev.data?.variant !== next.data?.variant) {
+    return false
+  }
+  if (prev.data?.showDot !== next.data?.showDot) {
+    return false
+  }
+  if (prev.data?.pathType !== next.data?.pathType) {
+    return false
+  }
+  if (prev.style?.strokeWidth !== next.style?.strokeWidth) {
+    return false
+  }
+  if (prev.sourceX !== next.sourceX) {
+    return false
+  }
+  if (prev.sourceY !== next.sourceY) {
+    return false
+  }
+  if (prev.targetX !== next.targetX) {
+    return false
+  }
+  if (prev.targetY !== next.targetY) {
+    return false
+  }
+  if (prev.sourcePosition !== next.sourcePosition) {
+    return false
+  }
+  if (prev.targetPosition !== next.targetPosition) {
+    return false
+  }
   return true
 })
 

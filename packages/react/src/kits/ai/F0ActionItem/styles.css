@@ -34,8 +34,10 @@
 @keyframes globe-spin-enter {
   from {
     opacity: 0;
-    transform: scale(0.8);
-    filter: blur(4px);
+    transform: scale(0.92);
+    /* Size-relative — set by the component. A flat px blur reads completely
+       differently at 20px and at 120px. */
+    filter: blur(var(--globe-spin-blur, 1px));
   }
   to {
     opacity: 1;
@@ -44,8 +46,25 @@
   }
 }
 
-/* Subtle "thinking" breath. Plays after the entrance finishes (0.5s delay)
-   and loops forever. Amplitude is small (~3.5%) so it reads as life, not noise. */
+/* Reduced motion. The rotation is stopped in the component, since that is where
+   the real movement lives — but a loading indicator that is perfectly still
+   says nothing about loading, so the mark breathes in opacity instead. Opacity
+   is the channel the guidance keeps; it is position and scale that trigger
+   motion sickness. Deliberately unlike `.shine-text` above, which can go fully
+   static because its text stays readable. */
+@keyframes globe-spin-dim {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* Subtle "thinking" breath. Plays after the entrance finishes and loops
+   forever, on the spin's own period so the two rhythms stay in phase.
+   Amplitude is small (~3.5%) so it reads as life, not noise. */
 @keyframes globe-spin-breathe {
   0%,
   100% {
@@ -62,12 +81,13 @@
    first. Comma-separated values let both run on the same element. */
 .globe-spin-anim {
   animation:
-    globe-spin-enter 0.5s cubic-bezier(0.33, 1, 0.68, 1) both,
-    globe-spin-breathe 3.6s ease-in-out 0.5s infinite;
+    globe-spin-enter 0.2s cubic-bezier(0.23, 1, 0.32, 1) both,
+    globe-spin-breathe var(--globe-spin-cycle, 2300ms) ease-in-out 0.2s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .globe-spin-anim {
-    animation: none;
+    animation: globe-spin-dim var(--globe-spin-cycle, 2300ms) ease-in-out
+      infinite;
   }
 }

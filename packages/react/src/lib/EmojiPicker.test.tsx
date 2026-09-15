@@ -1,8 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { EmojiPicker } from "./EmojiPicker"
 
 const realCreateElement = document.createElement.bind(document)
@@ -81,7 +79,9 @@ describe("EmojiPicker", () => {
       this: HTMLElement,
       node: Node
     ) {
-      if (node === stub) propsAtAppendTime = stub.props
+      if (node === stub) {
+        propsAtAppendTime = stub.props
+      }
       return originalAppend.call(this, node) as Node
     })
     vi.spyOn(document, "createElement").mockImplementation((tag: string) =>

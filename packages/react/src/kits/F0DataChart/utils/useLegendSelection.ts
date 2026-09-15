@@ -21,12 +21,16 @@ export function useLegendSelection(
 ): void {
   useEffect(() => {
     const chart = chartRef.current
-    if (!chart || typeof chart.on !== "function") return
+    if (!chart || typeof chart.on !== "function") {
+      return
+    }
 
     function onLegendSelectChanged(params: unknown) {
       const selected = (params as { selected?: Record<string, boolean> })
         .selected
-      if (!selected) return
+      if (!selected) {
+        return
+      }
       // Everything on is the same as no filter, and reporting it as `null` keeps
       // consumers from re-deriving numbers they already have.
       const allSelected = Object.values(selected).every(Boolean)

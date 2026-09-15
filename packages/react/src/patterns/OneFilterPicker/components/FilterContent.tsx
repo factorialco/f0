@@ -1,13 +1,12 @@
 "use client"
 
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 import type {
   FilterDefinition,
   FiltersDefinition,
   FiltersState,
   FilterValue,
 } from "../types"
-
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 
 /**
  * Props for the FilterContent component.
@@ -49,7 +48,9 @@ export function FilterContent<Definition extends FiltersDefinition>({
   onFilterChange,
   isCompactMode,
 }: FilterContentProps<Definition>) {
-  if (!selectedFilterKey) return null
+  if (!selectedFilterKey) {
+    return null
+  }
 
   const filter = definition[selectedFilterKey]
 

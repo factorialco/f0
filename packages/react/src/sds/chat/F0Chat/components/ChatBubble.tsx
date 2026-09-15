@@ -1,9 +1,7 @@
 import { motion } from "motion/react"
 import { memo, type ReactNode, useMemo, useRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
@@ -12,6 +10,7 @@ import {
   senderNameColorClass,
 } from "../utils/sender-color"
 import { ChatLinkPreview } from "./ChatLinkPreview"
+import { ChatMessageMeta, ChatMessageMetaLabel } from "./ChatMessageMeta"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
 
@@ -21,6 +20,9 @@ interface BubbleCornerOptions {
   isMine: boolean
   isFirstOfRun: boolean
   isLastOfRun: boolean
+  /** Whether an avatar sits in the gutter beside this row — see the tail
+   * corner in {@link bubbleCornerClass}. */
+  hasAvatar?: boolean
   layer?: BubbleCornerLayer
 }
 
@@ -29,6 +31,9 @@ const bubbleCornerClasses = {
     base: "rounded-2xl",
     left: ["rounded-tl-sm", "rounded-bl-sm"],
     right: ["rounded-tr-sm", "rounded-br-sm"],
+    // Pulled in to 4px, so the run ends on a point aimed at its own side.
+    endLeft: "rounded-bl-2xs",
+    endRight: "rounded-br-2xs",
   },
   outer: {
     // The interaction surface wraps the bubble with 2px of padding. Adding
@@ -36,32 +41,51 @@ const bubbleCornerClasses = {
     base: "rounded-[22px]",
     left: ["rounded-tl-[10px]", "rounded-bl-[10px]"],
     right: ["rounded-tr-[10px]", "rounded-br-[10px]"],
+    // The one corner that doesn't take the +2px: at 4px the offset is below
+    // what the eye resolves, and matching the inner radius keeps the point
+    // itself sharp rather than letting the hover surface round it off.
+    endLeft: "rounded-bl-2xs",
+    endRight: "rounded-br-2xs",
   },
 } as const
 
 /**
  * Border-radius classes for a chat bubble given its position in a same-author
- * run: on the tail side, a corner tucks in only when it abuts another bubble
- * from the same author (top when continuing a run, bottom when another follows).
- * Exported so the highlight ring / hover surface in `ChatMessageItem` can follow
- * the exact same shape as the bubble it wraps.
+ * run.
+ *
+ * On the tail side the top corner tucks in while the run continues above, and
+ * the bottom corner takes one of three shapes: tucked while another bubble
+ * follows, and **squared** on the last one — the corner points down at the
+ * sender's own side, which is how Telegram and Messages mark where a stack
+ * ends. Only one bubble per run carries it.
+ *
+ * That point only appears where an **avatar** sits in the gutter: it exists to
+ * aim at the face it belongs to. With nothing beside the bubble (a DM, or your
+ * own messages) it has nothing to point at and reads as a chipped corner, so
+ * the run simply ends on the base radius.
+ *
+ * Exported so the highlight ring / hover surface in `ChatMessageItem`, and the
+ * media cards in `ChatMessageAttachments`, follow the exact same shape.
  */
 export const bubbleCornerClass = ({
   isMine,
   isFirstOfRun,
   isLastOfRun,
+  hasAvatar = false,
   layer = "inner",
 }: BubbleCornerOptions): string => {
   const profile = bubbleCornerClasses[layer]
   const [topTailCorner, bottomTailCorner] = profile[isMine ? "right" : "left"]
+  const endCorner = isMine ? profile.endRight : profile.endLeft
 
   return cn(
     // The radius transitions because extending a run flips the previous
-    // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
+    // bubble's tail corner (square → sm) — animated, not a dry class swap.
     profile.base,
     "transition-[border-radius] duration-150 motion-reduce:transition-none",
     !isFirstOfRun && topTailCorner,
-    !isLastOfRun && bottomTailCorner
+    // Without an avatar the last of a run keeps the base radius: no point.
+    isLastOfRun ? hasAvatar && endCorner : bottomTailCorner
   )
 }
 
@@ -78,6 +102,7 @@ const ChatBubbleImpl = ({
   currentUserId,
   isFirstOfRun = true,
   isLastOfRun = true,
+  hasAvatar = false,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -91,6 +116,9 @@ const ChatBubbleImpl = ({
   /** Last message of a same-author run. When false, the bubble tucks in its
    * tail-side bottom corner so the run reads as one chained, stacked group. */
   isLastOfRun?: boolean
+  /** An avatar sits in the gutter beside this row — the only case where the
+   * run ends on a point (see `bubbleCornerClass`). */
+  hasAvatar?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
@@ -134,7 +162,14 @@ const ChatBubbleImpl = ({
   // reads as its scraped page title instead of the raw address.
   const renderedBody = useMemo(
     () =>
-      renderBodyWithMentions(message.body, mentionTokens, message.linkPreviews),
+      renderBodyWithMentions(
+        // Trailing newlines survive sanitisation and `whitespace-pre-wrap`
+        // renders every one of them, which would strand the floated time at the
+        // top of a tall, empty bubble.
+        message.body.trimEnd(),
+        mentionTokens,
+        message.linkPreviews
+      ),
     [message.body, mentionTokens, message.linkPreviews]
   )
 
@@ -142,6 +177,7 @@ const ChatBubbleImpl = ({
     isMine,
     isFirstOfRun,
     isLastOfRun,
+    hasAvatar,
   })
 
   if (message.deleted) {
@@ -156,12 +192,13 @@ const ChatBubbleImpl = ({
         transition={{ duration: 0.15 }}
         className={cn(
           corners,
-          "w-fit max-w-full px-3.5 py-2.5",
+          "relative w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
           messageSurfaceColorClass(message.author, isMine)
         )}
       >
         {i18n.chat.deletedMessage}
+        <ChatMessageMeta message={message} placement="bubble" />
       </motion.div>
     )
   }
@@ -171,21 +208,21 @@ const ChatBubbleImpl = ({
       <div
         className={cn(
           corners,
-          "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
+          "flex w-fit max-w-full flex-col text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
           // Incoming bubbles share the author's hue at a quiet tint, while the
           // current user's bubble remains clearly neutral.
           messageSurfaceColorClass(message.author, isMine)
         )}
       >
-        {message.replyTo && (
+        {message.replyTo ? (
           <ReplyQuote
             reply={message.replyTo}
             isMine={isMine}
             isFirstOfRun={isFirstOfRun}
           />
-        )}
-        {message.linkPreviews && message.linkPreviews.length > 0 && (
+        ) : null}
+        {message.linkPreviews && message.linkPreviews.length > 0 ? (
           <ChatLinkPreview
             previews={message.linkPreviews}
             isMine={isMine}
@@ -193,9 +230,9 @@ const ChatBubbleImpl = ({
             // keep it fully rounded there.
             isFirstOfRun={message.replyTo ? true : isFirstOfRun}
           />
-        )}
-        <div className="px-3.5 py-2.5">
-          {author && (
+        ) : null}
+        <div className="relative px-3.5 py-2.5">
+          {author ? (
             <ChatUserHoverCard user={author}>
               {/* WhatsApp-style: tint the sender name to match their avatar colour. */}
               <span
@@ -207,15 +244,15 @@ const ChatBubbleImpl = ({
                 {author.name}
               </span>
             </ChatUserHoverCard>
-          )}
-          {renderedBody}
-          {message.editedAt && (
-            // WhatsApp-style "edited" marker; sits at the end of the body (the
-            // bubble shows no timestamp, so there's no time to pair it with).
-            <span className="ml-1 align-baseline text-sm text-f1-foreground-secondary">
-              {i18n.chat.edited}
-            </span>
-          )}
+          ) : null}
+          {/* The body is the one part of a message a double-click must NOT
+              quote: the browser selects a word there instead. The marker is
+              read by SELF_HANDLING_DESCENDANTS in ChatMessageItem. An inline
+              span keeps the meta twin flowing on the body's last line. */}
+          <span data-chat-message-text>{renderedBody}</span>
+          {/* Trails the body so the time reads as the end of the message. */}
+          <ChatMessageMeta message={message} placement="bubble" />
+          <ChatMessageMetaLabel message={message} />
         </div>
       </div>
     </div>

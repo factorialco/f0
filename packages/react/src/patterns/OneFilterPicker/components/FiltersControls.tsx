@@ -11,23 +11,20 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0DialogContext } from "@/patterns/F0Dialog"
-import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { F0DialogContext } from "@/patterns/F0Dialog"
+import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
-import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
-
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
-import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "../internal/getActiveFiltersValue"
+import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
@@ -148,7 +145,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   // edit in those apps while working fine in stories with stable state.
   const previousValueRef = useRef(value)
   useEffect(() => {
-    if (isEqual(previousValueRef.current, value)) return
+    if (isEqual(previousValueRef.current, value)) {
+      return
+    }
     previousValueRef.current = value
     setLocalFiltersValue(value)
   }, [value])
@@ -192,7 +191,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   useEffect(() => {
     const getFirstFilterNotEmpty = () => {
       return Object.entries(localFiltersValue || {}).find(([key, value]) => {
-        if (!filters[key]) return false
+        if (!filters[key]) {
+          return false
+        }
         // TODO: Make this type better
         const filterType = getFilterType(filters[key].type) as unknown as {
           isEmpty: (value: unknown, context: FilterTypeContext) => boolean
@@ -279,12 +280,12 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             tooltip={activeFiltersTooltip}
           />
 
-          {hasFiltersApplied && (
+          {hasFiltersApplied ? (
             <div className="absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold" />
-          )}
+          ) : null}
         </div>
         <AnimatePresence mode="popLayout" propagate={false}>
-          {isOpen && (
+          {isOpen ? (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -316,7 +317,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     }
                     onClickApplyFilters={handleApplyFilters}
                   />
-                  {selectedFilterKey && (
+                  {selectedFilterKey ? (
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <FilterContent
                         selectedFilterKey={selectedFilterKey}
@@ -325,7 +326,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                         onFilterChange={updateFilterValue}
                       />
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
                   <F0Button
@@ -335,7 +336,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                 </div>
               </div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     )
@@ -367,14 +368,14 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
     const ApplySelectionButton = (
       <>
-        {selectedFilterKey && (
+        {selectedFilterKey ? (
           <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
             <F0Button
               onClick={handleApplyFiltersSelection}
               label={i18n.filters.applySelection}
             />
           </div>
-        )}
+        ) : null}
       </>
     )
 
@@ -403,12 +404,12 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             tooltip={activeFiltersTooltip}
           />
 
-          {hasFiltersApplied && (
+          {hasFiltersApplied ? (
             <div className="absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold" />
-          )}
+          ) : null}
         </div>
         <AnimatePresence mode="popLayout" propagate={false}>
-          {isOpen && (
+          {isOpen ? (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -461,7 +462,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                 {ApplySelectionButton}
               </div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     )

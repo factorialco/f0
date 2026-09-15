@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { getColsOrderFromDefinition } from "../useColums"
 
 describe("getColsOrderFromDefinition", () => {
@@ -42,7 +41,7 @@ describe("getColsOrderFromDefinition", () => {
   })
 
   it("should handle empty columns array", () => {
-    const columns: Array<{ id: string; order?: number }> = []
+    const columns: { id: string; order?: number }[] = []
 
     const result = getColsOrderFromDefinition(columns)
 

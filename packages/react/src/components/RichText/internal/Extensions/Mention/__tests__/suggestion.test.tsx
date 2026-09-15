@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { createSuggestionConfig } from "../suggestion"
 import { MentionedUser } from "../types"
 
@@ -8,8 +7,10 @@ const rendererState: {
     items: MentionedUser[]
     command: (item: MentionedUser) => void
   } | null
+  destroy: ReturnType<typeof vi.fn>
 } = {
   props: null,
+  destroy: vi.fn(),
 }
 
 vi.mock("@tiptap/react", () => {
@@ -30,27 +31,46 @@ vi.mock("@tiptap/react", () => {
     }
 
     updateProps(nextProps: { items: MentionedUser[] }) {
-      if (!rendererState.props) return
+      if (!rendererState.props) {
+        return
+      }
       rendererState.props = {
         ...rendererState.props,
         ...nextProps,
       }
     }
 
-    destroy() {}
+    destroy() {
+      rendererState.destroy()
+    }
   }
 
   return {
-    Editor: class {},
+    Editor: class {
+      destroy() {}
+    },
     ReactRenderer: MockReactRenderer,
   }
 })
 
+const rootState: {
+  roots: {
+    render: ReturnType<typeof vi.fn>
+    unmount: ReturnType<typeof vi.fn>
+  }[]
+} = {
+  roots: [],
+}
+
 vi.mock("react-dom/client", () => ({
-  createRoot: () => ({
-    render: vi.fn(),
-    unmount: vi.fn(),
-  }),
+  createRoot: () => {
+    const root = {
+      render: vi.fn(),
+      unmount: vi.fn(),
+    }
+    rootState.roots.push(root)
+    return root
+  },
 }))
 
 const users: MentionedUser[] = [
@@ -115,6 +135,123 @@ const createEditorMock = () => {
 describe("createSuggestionConfig", () => {
   beforeEach(() => {
     rendererState.props = null
+    rendererState.destroy.mockClear()
+    rootState.roots = []
+  })
+
+  const startPopover = () => {
+    const config = createSuggestionConfig(users, vi.fn(), undefined, users)
+    const renderer = config.render()
+    const { editor } = createEditorMock()
+    const props = {
+      items: users,
+      clientRect: () => rect,
+      editor: editor as never,
+      range: { from: 0, to: 1 },
+    }
+
+    renderer.onStart(props)
+
+    const root = rootState.roots.at(-1)
+    expect(root?.render).toHaveBeenCalledTimes(1)
+    const container = document.body.lastElementChild
+    expect(container).not.toBeNull()
+
+    return { config, renderer, props, root, container }
+  }
+
+  it("ignores a suspended update that resumes after the popover exited", () => {
+    const { renderer, props, root } = startPopover()
+
+    renderer.onExit()
+    expect(root?.unmount).toHaveBeenCalledTimes(1)
+
+    renderer.onUpdate(props)
+
+    expect(root?.render).toHaveBeenCalledTimes(1)
+  })
+
+  it("ignores a suspended update that resumes after Escape dismissed it", () => {
+    const { renderer, props, root } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+    expect(root?.unmount).toHaveBeenCalledTimes(1)
+
+    renderer.onUpdate(props)
+
+    expect(root?.render).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears a pending debounce when Escape dismisses the popover", async () => {
+    vi.useFakeTimers()
+    try {
+      const publish = vi.fn()
+      const config = createSuggestionConfig([], publish, undefined, users)
+      const renderer = config.render()
+      const { editor } = createEditorMock()
+
+      renderer.onStart({
+        items: users,
+        clientRect: () => rect,
+        editor: editor as never,
+        range: { from: 0, to: 1 },
+      })
+
+      await config.items({ query: "" })
+      void config.items({ query: "ali" })
+      publish.mockClear()
+      expect(vi.getTimerCount()).toBe(1)
+
+      renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+
+      expect(vi.getTimerCount()).toBe(0)
+      await vi.advanceTimersByTimeAsync(500)
+      expect(publish).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("destroys the renderer and removes the container on Escape", () => {
+    const { renderer, container } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+
+    expect(rendererState.destroy).toHaveBeenCalledTimes(1)
+    expect(container?.isConnected).toBe(false)
+  })
+
+  it("destroys the renderer and removes the container on exit", () => {
+    const { renderer, container } = startPopover()
+
+    renderer.onExit()
+
+    expect(rendererState.destroy).toHaveBeenCalledTimes(1)
+    expect(container?.isConnected).toBe(false)
+  })
+
+  it("ignores a command fired after the popover was dismissed", () => {
+    const { renderer, props } = startPopover()
+    const command = rendererState.props?.command
+
+    renderer.onUpdate(props)
+    renderer.onExit()
+    command?.(users[0])
+
+    expect(props.editor.chain).not.toHaveBeenCalled()
+  })
+
+  it("stops handling keys once the popover has been dismissed", () => {
+    const { renderer } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+
+    expect(
+      renderer.onKeyDown({ event: { key: "ArrowDown" } as KeyboardEvent })
+    ).toBe(false)
+    expect(
+      renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+    ).toBe(false)
   })
 
   it("uses latest suggestion range and inserts mention atomically", () => {

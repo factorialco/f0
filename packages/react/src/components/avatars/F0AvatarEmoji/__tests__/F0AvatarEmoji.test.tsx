@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { F0AvatarEmoji } from "../F0AvatarEmoji"
 
 describe("F0AvatarEmoji", () => {

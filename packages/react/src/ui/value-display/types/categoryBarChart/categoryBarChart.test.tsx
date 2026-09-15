@@ -1,8 +1,6 @@
 import { fireEvent, waitFor } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { ValueDisplayRendererContext } from "../../renderers"
 import {
   CategoryBarChartCell,
@@ -51,7 +49,7 @@ describe("CategoryBarChartCell", () => {
       container.querySelector('[data-cell-type="categoryBarChart"]')
     ).toBeInTheDocument()
     const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
-    expect(segments.length).toBe(2)
+    expect(segments).toHaveLength(2)
   })
 
   it("renders fallback dash when total is zero", () => {
@@ -78,7 +76,7 @@ describe("CategoryBarChartCell", () => {
     const { container } = render(CategoryBarChartCell(args, defaultMeta))
 
     const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
-    expect(segments.length).toBe(1)
+    expect(segments).toHaveLength(1)
   })
 
   it("formats percentage correctly in aria-label", () => {
@@ -123,7 +121,7 @@ describe("CategoryBarChartCell", () => {
     const { container } = render(CategoryBarChartCell(args, defaultMeta))
 
     const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
-    expect(segments.length).toBe(3)
+    expect(segments).toHaveLength(3)
     segments.forEach((segment) => {
       expect(segment.getAttribute("style")).toContain("background-color")
     })
@@ -140,7 +138,7 @@ describe("CategoryBarChartCell", () => {
     const { container } = render(CategoryBarChartCell(args, defaultMeta))
 
     const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
-    expect(segments.length).toBe(2)
+    expect(segments).toHaveLength(2)
     // legacy tokens resolve to a CSS var
     expect(segments[0]?.getAttribute("style")).toContain(
       "--chart-categorical-3"
@@ -230,7 +228,7 @@ describe("CategoryBarChartCell", () => {
 
     // Radix marks its trigger with data-state; there must be exactly one for
     // the whole bar so hovering any segment (or the gaps) opens the same tooltip
-    expect(container.querySelectorAll("[data-state]").length).toBe(1)
+    expect(container.querySelectorAll("[data-state]")).toHaveLength(1)
   })
 
   it("lists every segment in the tooltip, not only the hovered one", async () => {
@@ -387,7 +385,7 @@ describe("CategoryBarChartCell", () => {
 
     const { container } = render(CategoryBarChartCell(args, defaultMeta))
 
-    expect(container.querySelectorAll('[tabindex="0"]').length).toBe(1)
+    expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1)
   })
 
   it("handles duplicate names with unique keys", () => {
@@ -401,6 +399,6 @@ describe("CategoryBarChartCell", () => {
     const { container } = render(CategoryBarChartCell(args, defaultMeta))
 
     const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
-    expect(segments.length).toBe(2)
+    expect(segments).toHaveLength(2)
   })
 })

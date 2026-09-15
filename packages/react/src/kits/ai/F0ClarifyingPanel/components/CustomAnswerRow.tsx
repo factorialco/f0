@@ -1,12 +1,9 @@
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
 import { useLayoutEffect, useRef, type Ref } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { ClarifyingSelectionMode } from "../types"
-
 import { RadioIndicator } from "./RadioIndicator"
 
 // Cap on auto-growth: beyond this the textarea scrolls internally instead of
@@ -51,7 +48,9 @@ export const CustomAnswerRow = ({
   // after every value change via useLayoutEffect to avoid a visible reflow.
   useLayoutEffect(() => {
     const textarea = textareaRef.current
-    if (!textarea) return
+    if (!textarea) {
+      return
+    }
     // Collapse first so scrollHeight reports the true content height rather
     // than the previous (possibly taller) height.
     textarea.style.height = "auto"

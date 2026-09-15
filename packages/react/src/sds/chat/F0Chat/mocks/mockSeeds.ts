@@ -1,11 +1,11 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-import { BellOff } from "@/icons/app"
+import { BellOff, People } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
-
 import {
   isUserMessage,
   type F0ChatAttachment,
   type F0ChatChannelStatus,
+  type F0ChatChannelType,
   type F0ChatItem,
   type F0ChatLinkPreview,
   type F0ChatMessageStatus,
@@ -29,6 +29,22 @@ export type MockPerson = F0ChatUser & {
   vacation?: boolean
 }
 
+/**
+ * Stand-in for the ~40px derivative a real host supplies as `blurUrl` (Stream
+ * takes `?w=40&resize=clip` off the image URL). The mock images are static
+ * files with no resizing service behind them, so this approximates one: a few
+ * colour blocks that read correctly once blurred.
+ */
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="6">' +
+      '<rect width="8" height="6" fill="#8fb8d8"/>' +
+      '<rect x="3" width="5" height="4" fill="#c7d9e8"/>' +
+      '<rect y="4" width="8" height="2" fill="#e8d9c0"/>' +
+      "</svg>"
+  )
+
 const PHOTO_AVATAR_COLORS = [
   "viridian",
   "orange",
@@ -40,108 +56,185 @@ const PHOTO_AVATAR_COLORS = [
   "camel",
 ] as const satisfies readonly F0ChatSenderColor[]
 
-const person = (
-  id: string,
-  firstName: string,
-  lastName: string,
-  subtitle: string,
+type PersonSeed = {
+  id: string
+  firstName: string
+  lastName: string
+  subtitle: string
+  online?: boolean
+  vacation?: boolean
   // `image` (index into the mock photo set) gives a photo avatar; omit it to use
   // the initials + colour avatar — the mock mixes both on purpose.
-  opts: {
-    online?: boolean
-    vacation?: boolean
-    image?: number
-    avatarColor?: F0ChatSenderColor
-  } = {}
-): MockPerson =>
-  ({
-    id,
-    name: `${firstName} ${lastName}`,
-    subtitle,
-    avatar: {
-      type: "person",
-      firstName,
-      lastName,
-      ...(opts.image !== undefined
-        ? { src: mockImage("person", opts.image) }
-        : {}),
-    },
-    ...(opts.avatarColor
-      ? { avatarColor: opts.avatarColor }
-      : opts.image !== undefined
-        ? {
-            avatarColor:
-              PHOTO_AVATAR_COLORS[opts.image % PHOTO_AVATAR_COLORS.length],
-          }
-        : {}),
-    profileHref: `/people/${id}`,
-    online: opts.online ?? false,
-    vacation: opts.vacation,
-  })
+  image?: number
+  avatarColor?: F0ChatSenderColor
+}
+
+const person = ({
+  id,
+  firstName,
+  lastName,
+  subtitle,
+  ...opts
+}: PersonSeed): MockPerson => ({
+  id,
+  name: `${firstName} ${lastName}`,
+  subtitle,
+  avatar: {
+    type: "person",
+    firstName,
+    lastName,
+    ...(opts.image !== undefined
+      ? { src: mockImage("person", opts.image) }
+      : {}),
+  },
+  ...(opts.avatarColor
+    ? { avatarColor: opts.avatarColor }
+    : opts.image !== undefined
+      ? {
+          avatarColor:
+            PHOTO_AVATAR_COLORS[opts.image % PHOTO_AVATAR_COLORS.length],
+        }
+      : {}),
+  profileHref: `/people/${id}`,
+  online: opts.online ?? false,
+  vacation: opts.vacation,
+})
 
 // A deliberate mix: some people have a photo (`image`), others fall back to the
 // initials + colour avatar (and their name is tinted to match — WhatsApp-style).
-export const ME = person("me", "Jordan", "Avery", "Product Manager", {
+export const ME = person({
+  id: "me",
+  firstName: "Jordan",
+  lastName: "Avery",
+  subtitle: "Product Manager",
   online: true,
   image: 4,
 })
 // Online people reply when you message them; offline people never do.
-const ELEANOR = person(
-  "u_eleanor",
-  "Eleanor",
-  "Whitfield",
-  "Senior Product Designer",
-  { online: true, image: 0 }
-)
-const MARCUS = person("u_marcus", "Marcus", "Bennett", "Engineering Manager", {
+const ELEANOR = person({
+  id: "u_eleanor",
+  firstName: "Eleanor",
+  lastName: "Whitfield",
+  subtitle: "Senior Product Designer",
+  online: true,
+  image: 0,
+})
+const MARCUS = person({
+  id: "u_marcus",
+  firstName: "Marcus",
+  lastName: "Bennett",
+  subtitle: "Engineering Manager",
   online: true,
   image: 1,
 })
-const PRIYA = person("u_priya", "Priya", "Raman", "Account Executive", {
+const PRIYA = person({
+  id: "u_priya",
+  firstName: "Priya",
+  lastName: "Raman",
+  subtitle: "Account Executive",
   online: true,
   vacation: true,
   image: 2,
 })
 // No photo — initials + colour avatar.
-const THEO = person("u_theo", "Theo", "Lindqvist", "On vacation until Monday", {
+const THEO = person({
+  id: "u_theo",
+  firstName: "Theo",
+  lastName: "Lindqvist",
+  subtitle: "On vacation until Monday",
   vacation: true,
 })
-const NADIA = person("u_nadia", "Nadia", "Costa", "Recruiter")
-const OWEN = person("u_owen", "Owen", "Carter", "Finance Analyst", {
+const NADIA = person({
+  id: "u_nadia",
+  firstName: "Nadia",
+  lastName: "Costa",
+  subtitle: "Recruiter",
+})
+const OWEN = person({
+  id: "u_owen",
+  firstName: "Owen",
+  lastName: "Carter",
+  subtitle: "Finance Analyst",
   online: true,
   image: 3,
 })
-const HARPER = person("u_harper", "Harper", "Quinn", "Customer Success", {
+const HARPER = person({
+  id: "u_harper",
+  firstName: "Harper",
+  lastName: "Quinn",
+  subtitle: "Customer Success",
   online: true,
   image: 7,
 })
 // No photo — initials + colour avatar.
-const GRACE = person("u_grace", "Grace", "Liang", "Data Analyst", {
+const GRACE = person({
+  id: "u_grace",
+  firstName: "Grace",
+  lastName: "Liang",
+  subtitle: "Data Analyst",
   online: true,
 })
-const SAM = person("u_sam", "Sam", "Okafor", "Frontend Engineer", {
+const SAM = person({
+  id: "u_sam",
+  firstName: "Sam",
+  lastName: "Okafor",
+  subtitle: "Frontend Engineer",
   online: true,
   image: 5,
 })
-const NOAH = person("u_noah", "Noah", "Bergström", "QA Engineer")
-const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
+const NOAH = person({
+  id: "u_noah",
+  firstName: "Noah",
+  lastName: "Bergström",
+  subtitle: "QA Engineer",
+})
+const ISLA = person({
+  id: "u_isla",
+  firstName: "Isla",
+  lastName: "Romano",
+  subtitle: "Content Strategist",
   online: true,
   image: 6,
 })
 // No photo — initials + colour avatar.
-const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
+const VIKTOR = person({
+  id: "u_viktor",
+  firstName: "Viktor",
+  lastName: "Hale",
+  subtitle: "Staff Engineer",
+})
+
+/** The brand mark, the same one the ApplicationFrame sidebar shows. */
+const FACTORIAL_AVATAR: AvatarVariant = {
+  type: "company",
+  name: "Factorial",
+  src: "/avatars/factorial.png",
+}
+
+/**
+ * The product itself, as the author of the announcement channel. Not a person:
+ * a company avatar and an explicit `avatarColor` so the incoming bubble takes
+ * the brand's own tint instead of a name hash.
+ */
+const FACTORIAL: MockPerson = {
+  id: "factorial",
+  name: "Factorial",
+  avatar: FACTORIAL_AVATAR,
+  avatarColor: "red",
+  online: false,
+}
 
 /** Extra members for the large read-receipt demo. Together with the named
  * participants, they make every Quarterly Reporting message expose 45 readers
  * so the message-info list has a realistic overflow state. */
 const RECEIPT_DEMO_READERS = Array.from({ length: 42 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0")
-  return person(
-    `u_receipt_demo_${number}`,
-    "Demo",
-    `Reader ${number}`,
-    "Quarterly Reporting member"
-  )
+  return person({
+    id: `u_receipt_demo_${number}`,
+    firstName: "Demo",
+    lastName: `Reader ${number}`,
+    subtitle: "Quarterly Reporting member",
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -191,9 +284,11 @@ const isSystemLine = (line: Line): line is SystemLine => "system" in line
 
 export type Seed = {
   id: string
-  type: "dm" | "group"
+  type: F0ChatChannelType
   title: string
   avatar: AvatarVariant
+  /** Announcement channels: the sentence shown in place of the composer. */
+  readOnlyNotice?: string
   presence?: "online" | "offline"
   /** Channel statuses shown consistently in the header and sidebar. */
   statuses?: F0ChatChannelStatus[]
@@ -232,6 +327,26 @@ const MIN = 1
 const HOUR = 60
 const DAY = 24 * HOUR
 const MONTH = 30 * DAY
+
+/**
+ * "Minutes ago" for a given wall-clock time yesterday, so a seed can land on a
+ * specific separator ("Yesterday 22:14") instead of drifting with the hour the
+ * demo happens to be opened at.
+ *
+ * Only the announcement seed needs this. Real announcements anchor to the
+ * viewer's own join date, which the mock has no equivalent of.
+ */
+const yesterdayAt = (hour: number, minute: number): number => {
+  const now = new Date()
+  const then = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1,
+    hour,
+    minute
+  )
+  return Math.round((now.getTime() - then.getTime()) / 60_000)
+}
 
 // Pool of short, varied lines for a busy group transcript (the big-unread demo).
 const BUSY_LINES = [
@@ -371,16 +486,100 @@ const everythingStressLines = (): Line[] => {
   })
   add({
     from: ELEANOR,
-    body: "A single image with explicit intrinsic dimensions",
+    body: "A single image with a blur-up source",
     attachments: [
       {
         kind: "image",
         url: mockImage("card", 0),
         thumbnailUrl: mockImage("card", 0),
+        blurUrl: BLUR_PLACEHOLDER,
         name: "dashboard-overview.webp",
         mimeType: "image/webp",
         width: 1200,
         height: 800,
+      },
+    ],
+  })
+  add({
+    from: ELEANOR,
+    body: "",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 5),
+        name: "tower-portrait.webp",
+        // 1:10 — the ratio clamp is what keeps this from eating the transcript.
+        width: 200,
+        height: 2000,
+      },
+    ],
+  })
+  add({
+    from: MARCUS,
+    body: "Two photos land as tall halves, not squares",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 6),
+        name: "pair-a.webp",
+        width: 1400,
+        height: 900,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 7),
+        name: "pair-b.webp",
+        width: 900,
+        height: 1400,
+      },
+    ],
+  })
+  add({
+    from: PRIYA,
+    body: "Three go hero-on-top",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 8),
+        name: "trio-hero.webp",
+        width: 1600,
+        height: 900,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 9),
+        name: "trio-b.webp",
+        width: 1000,
+        height: 1000,
+      },
+      {
+        kind: "image",
+        url: mockImage("card", 10),
+        name: "trio-c.webp",
+        width: 900,
+        height: 1200,
+      },
+    ],
+  })
+  add({
+    from: THEO,
+    body: "",
+    attachments: Array.from({ length: 7 }, (_, index) => ({
+      kind: "image" as const,
+      url: mockImage("card", 11 + index),
+      name: `album-${index + 1}.webp`,
+      width: index % 2 === 0 ? 1400 : 900,
+      height: index % 2 === 0 ? 900 : 1400,
+    })),
+  })
+  add({
+    from: NADIA,
+    body: "An image with no intrinsic dimensions falls back to a square",
+    attachments: [
+      {
+        kind: "image",
+        url: mockImage("card", 18),
+        name: "dimensionless.webp",
       },
     ],
   })
@@ -686,6 +885,52 @@ const everythingStressLines = (): Line[] => {
 }
 
 export const SEEDS: Seed[] = [
+  // ANNOUNCEMENT — the product's own noticeboard, and the welcome screen every
+  // employee lands on. Nothing here is sent: every message is seeded, which is
+  // why the timestamp is anchored (see `yesterdayAt`) and the per-message clock
+  // doesn't render. Read-only comes from the channel TYPE, not `readOnly`.
+  // The copy is factorial's noticeboard verbatim (admin variant, the one with
+  // the permissions card) — keep both in sync.
+  {
+    id: "dm-factorial",
+    type: "announcement",
+    title: "Factorial",
+    avatar: FACTORIAL_AVATAR,
+    readOnlyNotice: "Only Factorial can send messages",
+    participants: [FACTORIAL],
+    // Badge in the sidebar, but no unread divider inside — see MockChatApp.
+    unread: 3,
+    myRole: "guest",
+    lines: [
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14),
+        body: `👋 Hi ${ME.name.split(" ")[0]}! Welcome to your company's chat.`,
+      },
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14) - 1,
+        body: "No new app, no new password — everyone you work with is already here. Files, voice notes and more, from your computer or your phone 💬",
+      },
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14) - 2,
+        body: "",
+        attachments: [
+          {
+            kind: "card",
+            avatar: { type: "icon", icon: People },
+            title: "Set up the chat for your company",
+            description: "Choose who sees each channel and who can post 🔐",
+            action: {
+              label: "Manage permissions",
+              onClick: () => {},
+            },
+          },
+        ],
+      },
+    ],
+  },
   // DM — always typing (online): sidebar "Writing…" + a dots bubble, non-stop.
   {
     id: "dm-eleanor",
@@ -1492,7 +1737,9 @@ export const groupReadersFor = (
   seed: Seed | undefined,
   authorId: string
 ): F0ChatUser[] | undefined => {
-  if (seed?.type !== "group") return undefined
+  if (seed?.type !== "group") {
+    return undefined
+  }
 
   const uniqueParticipants = new Map(
     [...seed.participants, ME].map((participant) => [
@@ -1504,7 +1751,7 @@ export const groupReadersFor = (
   return [...uniqueParticipants.values()]
 }
 
-const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
+export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
     if (isSystemLine(line)) {
@@ -1544,7 +1791,9 @@ const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   })
   // Second pass: resolve reply references now that every message has an id.
   seed.lines.forEach((line, i) => {
-    if (isSystemLine(line) || line.replyToIndex == null) return
+    if (isSystemLine(line) || line.replyToIndex == null) {
+      return
+    }
     const target = built[line.replyToIndex]
     const source = built[i]
     if (target && isUserMessage(target) && isUserMessage(source)) {

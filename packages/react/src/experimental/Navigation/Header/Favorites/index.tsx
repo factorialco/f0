@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import Star from "@/icons/app/Star"
 import StarFilled from "@/icons/app/StarFilled"

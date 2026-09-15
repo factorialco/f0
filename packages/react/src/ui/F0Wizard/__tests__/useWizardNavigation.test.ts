@@ -1,7 +1,6 @@
 import { act } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { zeroRenderHook } from "@/testing/test-utils"
-
 import { useWizardNavigation } from "../hooks/useWizardNavigation"
 import type { F0WizardStep } from "../types"
 

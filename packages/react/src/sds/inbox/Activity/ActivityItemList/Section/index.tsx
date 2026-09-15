@@ -1,7 +1,5 @@
 import React from "react"
-
 import { withSkeleton } from "@/lib/skeleton"
-
 import { ActivityItem, ActivityItemProps } from "../../ActivityItem"
 
 export type SectionProps = {

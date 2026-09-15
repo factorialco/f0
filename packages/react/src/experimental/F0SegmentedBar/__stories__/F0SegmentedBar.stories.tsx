@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { F0SegmentedBar } from ".."
 import { SegmentColorToken } from "../types"
-
-import { F0SegmentedBar } from "../index"
 
 const meta = {
   title: "F0SegmentedBar",

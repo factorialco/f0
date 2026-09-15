@@ -1,12 +1,11 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
   Platform,
   UserPlatformProvider,
 } from "@/lib/providers/user-platafform/UserPlatformProvider"
-import { Shortcut } from "./index"
+import { Shortcut } from "."
 
 const renderShortcut = (
   keys: string[],

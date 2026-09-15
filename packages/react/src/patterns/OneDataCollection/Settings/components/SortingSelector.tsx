@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import {
@@ -68,7 +67,7 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
           />
         </div>
 
-        {displaySortings.field !== EmptySortingValue && (
+        {displaySortings.field !== EmptySortingValue ? (
           <div>
             <F0Button
               hideLabel
@@ -83,7 +82,7 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
               }
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

@@ -1,22 +1,21 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-
 import { DropdownItemObject } from "./internal"
 
 export const DropdownItemContent = ({ item }: { item: DropdownItemObject }) => (
   <>
-    {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-    {item.icon && (
+    {item.avatar ? <F0Avatar avatar={item.avatar} size="xs" /> : null}
+    {item.icon ? (
       <F0Icon
         icon={item.icon}
         size="md"
         className={cn("text-f1-icon", item.critical && "text-f1-icon-critical")}
       />
-    )}
+    ) : null}
     <div className="flex flex-col items-start">
       {item.label}
-      {item.description && (
+      {item.description ? (
         <div
           className={cn(
             "font-normal text-f1-foreground-secondary",
@@ -25,7 +24,7 @@ export const DropdownItemContent = ({ item }: { item: DropdownItemObject }) => (
         >
           {item.description}
         </div>
-      )}
+      ) : null}
     </div>
   </>
 )

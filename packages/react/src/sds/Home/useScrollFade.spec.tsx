@@ -1,8 +1,6 @@
 import { fireEvent } from "@testing-library/react"
 import { beforeEach, describe, expect, test } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { useScrollFade } from "./useScrollFade"
 
 /**

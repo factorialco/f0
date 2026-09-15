@@ -1,13 +1,12 @@
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Skeleton } from "@/ui/skeleton"
-
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../../summary"
@@ -31,7 +30,7 @@ type ListSkeletonProps<
     NavigationFilters,
     Grouping
   >
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   count?: number
   isInitialLoading?: boolean
   className?: string
@@ -78,11 +77,11 @@ export const ListSkeleton = <
           className="relative flex w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:pl-3 md:pr-4"
         >
           <div className="flex flex-1 flex-row items-center gap-2">
-            {source.selectable && (
+            {source.selectable ? (
               <div className="z-10 hidden items-center justify-end md:flex">
                 <Skeleton className="h-4 w-4" />
               </div>
-            )}
+            ) : null}
             <article className="flex w-[calc(100%-72px)] min-w-40 flex-col items-start gap-3 md:w-full md:flex-row md:items-center md:gap-2">
               <Skeleton className="h-8 w-8 rounded-full" />
               <div className="flex flex-1 flex-col gap-1">
@@ -107,12 +106,12 @@ export const ListSkeleton = <
               </div>
             ))}
           </div>
-          {source.itemActions && (
+          {source.itemActions ? (
             <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden">
               <Skeleton className="h-6 w-6" />
             </div>
-          )}
-          {source.selectable && (
+          ) : null}
+          {source.selectable ? (
             <div
               className={cn(
                 "absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
@@ -121,7 +120,7 @@ export const ListSkeleton = <
             >
               <Skeleton className="h-4 w-4" />
             </div>
-          )}
+          ) : null}
         </div>
       ))}
     </div>

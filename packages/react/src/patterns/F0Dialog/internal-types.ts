@@ -1,11 +1,9 @@
 import { ReactNode } from "react"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
-import { TabsProps } from "@/patterns/Navigation/Tabs"
 import { F0ResourceHeaderProps } from "@/patterns/F0ResourceHeader"
-
+import { TabsProps } from "@/patterns/Navigation/Tabs"
 import {
   DialogControls,
   DialogPosition,
@@ -29,6 +27,8 @@ export type F0DialogHeaderProps = {
   resourceHeader?: F0ResourceHeaderProps
   controls?: DialogControls
   headerStatus?: string
+  /** See {@link F0DialogInternalProps.dismissable} — hides the close button. */
+  dismissable?: boolean
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 /**
@@ -73,6 +73,17 @@ export type F0DialogInternalProps = {
   isOpen: boolean
   // Callback when dialog is closed
   onClose: () => void
+  /**
+   * Whether the reader can walk away. `false` removes the close button and
+   * stops Escape and a click outside from closing — a forced choice, where the
+   * dialog's own actions are the only way out.
+   *
+   * Use it only when leaving would be worse than being trapped: a decision the
+   * product genuinely cannot proceed without. A dialog nobody can dismiss is a
+   * dead end for anyone who does not understand it.
+   * @default true
+   */
+  dismissable?: boolean
   // Whether to render the dialog as a bottom sheet on mobile
   asBottomSheetInMobile?: boolean
   // The position of the dialog

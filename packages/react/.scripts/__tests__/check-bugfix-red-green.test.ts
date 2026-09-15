@@ -46,6 +46,48 @@ describe("overlayFilesFrom", () => {
     })
   })
 
+  it("collects .spec.ts(x) files too — the repo uses both conventions", () => {
+    const diff = [
+      "M\tpackages/react/src/sds/Home/HomeListItem/index.spec.tsx",
+      "A\tpackages/react/src/lib/__tests__/parse.spec.ts",
+      "M\tpackages/react/src/sds/Home/HomeListItem/index.tsx",
+    ].join("\n")
+
+    expect(overlayFilesFrom(diff)).toEqual({
+      testFiles: [
+        "packages/react/src/sds/Home/HomeListItem/index.spec.tsx",
+        "packages/react/src/lib/__tests__/parse.spec.ts",
+      ],
+      supportFiles: [],
+    })
+  })
+
+  it("collects .test. and .spec. files from the same diff", () => {
+    const diff = [
+      "A\tpackages/react/src/components/F0Tag/__tests__/F0Tag.test.tsx",
+      "A\tpackages/react/src/components/F0Tag/F0Tag.spec.ts",
+    ].join("\n")
+
+    expect(overlayFilesFrom(diff).testFiles).toEqual([
+      "packages/react/src/components/F0Tag/__tests__/F0Tag.test.tsx",
+      "packages/react/src/components/F0Tag/F0Tag.spec.ts",
+    ])
+  })
+
+  it("does not mistake a .spec. helper name for a test file", () => {
+    const diff = [
+      "A\tpackages/react/src/components/F0Tag/__tests__/spec.fixtures.ts",
+      "A\tpackages/react/src/components/F0Tag/specimen.ts",
+    ].join("\n")
+
+    expect(overlayFilesFrom(diff)).toEqual({
+      testFiles: [],
+      supportFiles: [
+        "packages/react/src/components/F0Tag/__tests__/spec.fixtures.ts",
+      ],
+    })
+  })
+
   it("collects tests for the repo's own scripts", () => {
     const diff = [
       "M\tpackages/react/.scripts/__tests__/check-api-surface.test.ts",

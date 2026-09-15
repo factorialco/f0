@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { IconType } from "@/components/F0Icon"
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { CollectionActions } from "../CollectionActions"
 
@@ -62,12 +60,12 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
         }
         onClick={() =>
           (onClick as (value: string, item: unknown) => void)(
-            (items as Array<{ value: string }>)[0].value,
-            (items as Array<unknown>)[0]
+            (items as { value: string }[])[0].value,
+            (items as unknown[])[0]
           )
         }
       >
-        {(items as Array<{ label: string }>)[0]?.label}
+        {(items as { label: string }[])[0]?.label}
       </button>
     </div>
   ),
@@ -399,6 +397,27 @@ describe("CollectionActions", () => {
 
       expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
       expect(screen.getByText("Export")).toBeInTheDocument()
+    })
+
+    it("forwards counterValue to the secondary action button", () => {
+      render(
+        <CollectionActions
+          secondaryActions={[
+            {
+              label: "To review",
+              icon: mockIcon,
+              onClick: vi.fn(),
+              counterValue: 3,
+            },
+          ]}
+        />
+      )
+
+      expect(screen.getByText("To review")).toBeInTheDocument()
+      expect(screen.getByTestId("f0-button")).toHaveAttribute(
+        "counterValue",
+        "3"
+      )
     })
 
     it("renders secondary action without Tooltip when tooltip is not provided", () => {

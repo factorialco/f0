@@ -1,16 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState, useCallback, useId, useMemo, useRef } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import { forms } from "@/patterns/forms"
-
+import {
+  f0FormField,
+  F0Form,
+  F0SectionConfig,
+  RenderCustomFieldProps,
+  F0FormRef,
+} from ".."
 import type {
   FileUploadHookReturn,
   FileUploadResult,
@@ -18,13 +22,7 @@ import type {
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
 
-import {
-  f0FormField,
-  F0Form,
-  F0SectionConfig,
-  RenderCustomFieldProps,
-  F0FormRef,
-} from "../index"
+const DISABLED_STORY_SAMPLE_VALUE = "sample-value"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -1412,7 +1410,7 @@ export const AllFieldTypesDisabled: Story = {
       defaultValues: {
         textField: "Sample text value",
         emailField: "user@example.com",
-        passwordField: "secretpassword",
+        passwordField: DISABLED_STORY_SAMPLE_VALUE,
         numberField: 42,
         durationField: 3661,
         textareaField:
@@ -1456,11 +1454,15 @@ function useMockUpload(): FileUploadHookReturn {
     setStatus("processing")
     setProgress(0)
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
     setStatus("uploading")
     for (let i = 1; i <= 10; i++) {
       await sleep(200)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
     setStatus("success")
@@ -2503,9 +2505,9 @@ export const CustomField: Story = {
               </option>
             ))}
           </select>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -2554,9 +2556,9 @@ export const CustomField: Story = {
               </button>
             ))}
           </div>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -3537,9 +3539,9 @@ export const FormInDialog: Story = {
     return (
       <div className="flex flex-col items-start gap-3">
         <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
-        {lastResult && (
+        {lastResult ? (
           <p className="text-sm text-f1-foreground-secondary">{lastResult}</p>
-        )}
+        ) : null}
       </div>
     )
   },

@@ -1,12 +1,10 @@
 import * as React from "react"
-
 import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import InfoCircleLine from "@/icons/app/InfoCircleLine"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import {
   Tooltip,
   TooltipContent,
@@ -41,16 +39,22 @@ const Card = React.forwardRef<
       )}
       {...props}
       onClick={() => {
-        if (disabled) return
-        if (href) return
-        if (onClick) return onClick()
+        if (disabled) {
+          return
+        }
+        if (href) {
+          return
+        }
+        if (onClick) {
+          return onClick()
+        }
       }}
     >
-      {href && !disabled && (
+      {href && !disabled ? (
         <Link href={href} className="absolute inset-0 block" tabIndex={0}>
           <span className="sr-only">{actions.view}</span>
         </Link>
-      )}
+      ) : null}
       {children}
     </div>
   )

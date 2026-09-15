@@ -1,11 +1,10 @@
+import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
 } from "@/ui/DatePickerPopup"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
-
 import { InputFieldInheritedProps } from "./types.internal"
 
 export * from "@/ui/DatePickerPopup/types"

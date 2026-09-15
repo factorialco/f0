@@ -2,17 +2,15 @@ import { act, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, describe, expect, test, vi } from "vitest"
-
+import type { ActionBarStatus } from "@/components/F0ActionBar"
 import { aiTranslations } from "@/kits/ai/F0AiChat"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-import type { ActionBarStatus } from "@/components/F0ActionBar"
-
+import { OneDataCollection } from ".."
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider
@@ -568,7 +566,7 @@ describe("OneDataCollection bulk-action status", () => {
 
     // Bar should be dismissed and ALL selection cleared (including the new row).
     await waitFor(() => {
-      expect(queryArchiveButtons().length).toBe(0)
+      expect(queryArchiveButtons()).toHaveLength(0)
     })
 
     vi.useRealTimers()

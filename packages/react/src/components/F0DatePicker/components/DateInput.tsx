@@ -1,17 +1,14 @@
 import { forwardRef, useEffect, useState } from "react"
-
+import { InputFieldProps } from "@/components/F0InputField"
 import type {
   GranularityDefinition,
   NavigationGranularityKey,
 } from "@/components/OneCalendar"
-
 import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import { isActiveDate } from "@/components/OneCalendar/utils"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/components/F0InputField"
-
 import { DatePickerValue } from "../types"
 import { InputFieldInheritedProps } from "../types.internal"
 
@@ -104,31 +101,29 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const placeholder = inputProps.placeholder ?? granularity.placeholder()
 
     return (
-      <>
-        <Input
-          {...inputProps}
-          placeholder={placeholder}
-          icon={showIcon ? getFieldInputIcon("date") : undefined}
-          ref={ref}
-          onFocus={() => onOpenChange?.(true)}
-          onClear={() => {
-            onClear?.()
-            setInputValue("")
-            handleNewValue("", granularity)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleBlur()
-            }
-          }}
-          type="text"
-          onChange={handleChange}
-          error={error || inputProps.error}
-          onBlur={handleBlur}
-          value={inputValue}
-          onClickContent={() => onOpenChange?.(true)}
-        />
-      </>
+      <Input
+        {...inputProps}
+        placeholder={placeholder}
+        icon={showIcon ? getFieldInputIcon("date") : undefined}
+        ref={ref}
+        onFocus={() => onOpenChange?.(true)}
+        onClear={() => {
+          onClear?.()
+          setInputValue("")
+          handleNewValue("", granularity)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleBlur()
+          }
+        }}
+        type="text"
+        onChange={handleChange}
+        error={error || inputProps.error}
+        onBlur={handleBlur}
+        value={inputValue}
+        onClickContent={() => onOpenChange?.(true)}
+      />
     )
   }
 )

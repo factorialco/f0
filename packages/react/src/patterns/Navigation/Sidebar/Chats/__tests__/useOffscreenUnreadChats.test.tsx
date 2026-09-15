@@ -1,8 +1,6 @@
 import { type ReactNode, useRef } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRender as render } from "@/testing/test-utils"
-
 import { type SidebarChatGroup } from "../types"
 import { useOffscreenUnreadChats } from "../useOffscreenUnreadChats"
 
@@ -43,7 +41,9 @@ const runNextFrame = () => {
   const next = frames.entries().next().value as
     | [number, FrameRequestCallback]
     | undefined
-  if (!next) throw new Error("No animation frame is pending")
+  if (!next) {
+    throw new Error("No animation frame is pending")
+  }
   frames.delete(next[0])
   act(() => next[1](0))
 }

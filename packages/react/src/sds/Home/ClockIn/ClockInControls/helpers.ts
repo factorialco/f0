@@ -1,5 +1,5 @@
 import { CLOCK_IN_COLORS } from "../ClockInGraph"
-import { ClockInControlsProps } from "./index"
+import { ClockInControlsProps } from "."
 
 // to prevent having an overtime greater that the total time that we're showing
 export const getNormalizedRemainingMinutes = (
@@ -38,9 +38,13 @@ export const getInfo = ({
   }[status]
 
   const subtitle = (() => {
-    if (!canSeeRemainingTime) return
+    if (!canSeeRemainingTime) {
+      return
+    }
 
-    if (remainingMinutes === undefined) return
+    if (remainingMinutes === undefined) {
+      return
+    }
 
     const normalizedRemainingMinutes = getNormalizedRemainingMinutes(
       trackedMinutes,

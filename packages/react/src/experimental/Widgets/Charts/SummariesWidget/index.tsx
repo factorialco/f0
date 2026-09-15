@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { experimentalComponent } from "@/lib/experimental"
-
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ChartContainerPropsBase } from "../ChartContainer"
 

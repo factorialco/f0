@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 

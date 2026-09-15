@@ -1,14 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { Placeholder } from "@/icons/app"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { expect, userEvent, within } from "storybook/test"
 import { inputSizes } from "@/components/F0TextInput/types"
-
-import { F0TextAreaInput } from "../index"
+import { Placeholder } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { F0TextAreaInput } from ".."
 
 const meta = {
   title: "Inputs/Text area input",
   component: F0TextAreaInput,
+  parameters: {
+    a11y: { test: "error" },
+  },
   tags: ["stable", "!autodocs"],
   args: {
     disabled: false,
@@ -30,6 +32,15 @@ export const Default: Story = {
   args: {
     label: "Label text here",
     placeholder: "Placeholder text here",
+  },
+  play: async ({ canvasElement }) => {
+    const textarea = within(canvasElement).getByRole("textbox", {
+      name: "Label text here",
+    })
+
+    await userEvent.type(textarea, "first line{Enter}second line")
+
+    await expect(textarea).toHaveValue("first line\nsecond line")
   },
 }
 
@@ -125,7 +136,7 @@ export const Clearable: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({})),
+  parameters: withSnapshot({}),
   args: {
     label: "Label text here",
   },

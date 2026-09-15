@@ -15,7 +15,9 @@ import {
 const interopCache = new WeakMap<IconType, IconType>()
 
 function stripTextClasses(className?: string): string | undefined {
-  if (!className) return className
+  if (!className) {
+    return className
+  }
 
   const filteredClassName = className
     .split(/\s+/)
@@ -95,7 +97,9 @@ const F0Icon = React.memo(
       const forwardedProps = omitProps(rest, F0_ICON_BLOCKED_FORWARD_PROPS)
 
       // Early return if no icon provided (after all hooks)
-      if (!icon || !IconComponent) return null
+      if (!icon || !IconComponent) {
+        return null
+      }
 
       return (
         <IconComponent

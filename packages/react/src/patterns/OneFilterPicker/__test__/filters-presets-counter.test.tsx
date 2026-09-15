@@ -1,9 +1,7 @@
 import "@testing-library/jest-dom/vitest"
 import React, { type ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
 import { FiltersPresets } from "../components/FiltersPresets"
 
 vi.mock("@/ui/OverflowList", () => ({

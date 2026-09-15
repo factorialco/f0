@@ -8,17 +8,14 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
-import type { F0GraphNodeProps } from "./types"
-
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeStackedRow } from "./F0GraphNodeStackedRow"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
+import type { F0GraphNodeProps } from "./types"
 import { tagColumn } from "./types"
 import { graphNodeContainerVariants } from "./variants"
 
@@ -161,16 +158,14 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
      */
     const tagRow = (maxWidthClass: string) =>
       tagsVisible ? (
-        <motion.div
+        <div
           key="tags"
-          initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={
-            noMotion
-              ? { duration: 0 }
-              : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
-          }
-          className={maxWidthClass}
+          className={cn(
+            maxWidthClass,
+            // The connector runs behind this block on its way to the next node.
+            // A radius this wide flattens it away — practically a crop.
+            "rounded-[13px] backdrop-blur-[400px]"
+          )}
           // Tags are informational: clicking a tag must not select the node.
           // Two paths select a node: the node-level `onClick` (selection, plus
           // any consumer `itemOnClick`) — swallowed here via stopPropagation —
@@ -181,8 +176,20 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           data-no-node-select
           onClick={(e) => e.stopPropagation()}
         >
-          <F0GraphNodeTags tags={filteredTags!} />
-        </motion.div>
+          {/* The reveal has to live on a child: `filter` makes an element the
+              backdrop root, leaving the blur above nothing to sample. */}
+          <motion.div
+            initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={
+              noMotion
+                ? { duration: 0 }
+                : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
+            }
+          >
+            <F0GraphNodeTags tags={filteredTags!} />
+          </motion.div>
+        </div>
       ) : null
 
     // A row has no pill chrome, no dot↔compact avatar growth and no hover card,
@@ -409,12 +416,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                           width: isCompact ? 120 : 96,
                         }}
                       />
-                      {!isCompact && !isDot && (
+                      {!isCompact && !isDot ? (
                         <Skeleton
                           className="rounded-xs"
                           style={{ height: 12, width: 64 }}
                         />
-                      )}
+                      ) : null}
                     </div>
                   ) : (
                     <>
@@ -428,7 +435,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                       >
                         {title}
                       </p>
-                      {!isCompact && !isDot && subtitle && (
+                      {!isCompact && !isDot && subtitle ? (
                         <p
                           className="w-full truncate tracking-[-0.07px] text-f1-foreground-secondary"
                           style={{
@@ -439,7 +446,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                         >
                           {subtitle}
                         </p>
-                      )}
+                      ) : null}
                     </>
                   )}
                 </motion.div>
@@ -448,7 +455,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           </div>
         </div>
 
-        {isDetail && actions && (
+        {isDetail && actions ? (
           <NodeToolbar
             nodeId={nodeId}
             isVisible={state === "selected"}
@@ -458,7 +465,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           >
             <div className="flex items-center gap-1">{actions}</div>
           </NodeToolbar>
-        )}
+        ) : null}
 
         {tagRow("max-w-[256px]")}
       </div>

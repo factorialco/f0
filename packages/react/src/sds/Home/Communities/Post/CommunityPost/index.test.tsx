@@ -1,8 +1,7 @@
 import { afterEach, beforeAll, expect, test, vi } from "vitest"
-
 import { L10nProvider } from "@/lib/providers/l10n"
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-import { BaseCommunityPost, CommunityPostProps } from "./index"
+import { BaseCommunityPost, CommunityPostProps } from "."
 
 const defaultProps: CommunityPostProps = {
   id: "post-1",
@@ -88,6 +87,40 @@ test("expands the description when enabled", async () => {
   expect(description).toHaveFocus()
   expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
   expect(onClick).not.toHaveBeenCalled()
+})
+
+test("shows the whole description, with no See more, when the clamp is off", async () => {
+  mockDescriptionDimensions({ scrollHeight: 120, clientHeight: 100 })
+
+  render(
+    <BaseCommunityPost
+      {...defaultProps}
+      noDescriptionClamp
+      // Expandable as well: a container that shows the body whole has nothing
+      // left to expand, and the button must not appear anyway.
+      descriptionExpandable
+    />
+  )
+
+  expect(document.querySelector(".FactorialOneTextEditor")).not.toHaveClass(
+    "line-clamp-5"
+  )
+  expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
+})
+
+test("clamps the description again once the clamp comes back", () => {
+  mockDescriptionDimensions({ scrollHeight: 120, clientHeight: 100 })
+
+  const { rerender } = render(
+    <BaseCommunityPost {...defaultProps} noDescriptionClamp />
+  )
+
+  const description = document.querySelector(".FactorialOneTextEditor")
+  expect(description).not.toHaveClass("line-clamp-5")
+
+  rerender(<BaseCommunityPost {...defaultProps} />)
+
+  expect(description).toHaveClass("line-clamp-5")
 })
 
 test("does not show description expansion controls when the description fits", () => {

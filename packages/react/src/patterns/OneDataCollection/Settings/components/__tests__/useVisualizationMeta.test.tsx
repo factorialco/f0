@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest"
-
 import { IconType } from "@/components/F0Icon"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useVisualizationMeta } from "../useVisualizationMeta"
 
 // A stand-in IconType value; the resolver only compares identity.
 const CustomIcon = (() => null) as unknown as IconType
 
-// The resolver only reads `type`, `label` and (for custom) `icon` at runtime, so
-// we cast minimal fixtures to the visualization union to avoid rebuilding the full
+// The resolver only reads `type`, `label` and `icon` at runtime, so we cast
+// minimal fixtures to the visualization union to avoid rebuilding the full
 // options shape of each view.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const viz = (v: Record<string, unknown>): any => v
@@ -45,6 +43,23 @@ describe("useVisualizationMeta", () => {
     )
 
     expect(withOverride.icon).toBe(withoutOverride.icon)
+  })
+
+  it("uses the per-instance icon override for built-in visualizations", () => {
+    const resolve = renderResolver()
+
+    expect(
+      resolve(viz({ type: "editableTable", icon: CustomIcon, options: {} }))
+        .icon
+    ).toBe(CustomIcon)
+  })
+
+  it("keeps the localized built-in label when only the icon is overridden", () => {
+    const resolve = renderResolver()
+
+    expect(
+      resolve(viz({ type: "table", icon: CustomIcon, options: {} })).label
+    ).toBe("Table")
   })
 
   it("honors the label and icon of a custom visualization", () => {

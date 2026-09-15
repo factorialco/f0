@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ReactNode } from "react"
 import { action } from "storybook/actions"
-
 import { New, People } from "@/icons/app"
-
 import { SidebarTabPanel } from "./SidebarTabPanel"
 import { SidebarTabPanelGroup } from "./types"
 

@@ -63,6 +63,8 @@ export const defaultTranslations = {
     details: "Recording details",
     summary: "Summary",
     transcription: "Transcription",
+    jumpTo: "Jump to {{time}}",
+    transcriptHint: "Select a line to move the recording to that moment",
     language: "Language",
     audio: "Audio",
   },
@@ -115,6 +117,7 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -393,6 +396,16 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    // How long the turn has been thinking, shown beside the step that is
+    // running. Two keys rather than one unbounded second count, because "137s"
+    // reads badly past a couple of minutes — the consumer picks.
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
+    attribution: "Suggested by One",
+    evidence: {
+      show: "See {{name}}",
+      hide: "Hide {{name}}",
+    },
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -441,6 +454,13 @@ export const defaultTranslations = {
       creditsError: "Could not load credits",
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?",
+    },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage",
     },
     reportCard: {
       tableLabel: "Table",
@@ -549,12 +569,33 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    // Shown where the composer would be on a read-only channel. Hosts that can
+    // name the poster override it per channel (`channel.readOnlyNotice`).
+    readOnly: "You can't send messages in this conversation",
     online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
+    // The picker lives in F0Chat and is used only while having a conversation;
+    // everywhere else in the product keeps the emoji-mart one.
+    emojiPicker: {
+      search: "Search emoji",
+      frequentlyUsed: "Frequently used",
+      noResults: "No emoji found",
+      grid: "Emoji",
+      categories: {
+        people: "Smileys & people",
+        nature: "Animals & nature",
+        foods: "Food & drink",
+        activity: "Activity",
+        places: "Travel & places",
+        objects: "Objects",
+        symbols: "Symbols",
+        flags: "Flags",
+      },
+    },
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",
@@ -565,6 +606,7 @@ export const defaultTranslations = {
     // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
+    messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
     fileUploadError: "Upload failed",
     micPermissionDenied:
       "Microphone access is blocked. Allow it in your browser settings to dictate.",
@@ -706,6 +748,7 @@ export const defaultTranslations = {
       ofTotal: "of total",
       total: "total",
       target: "target",
+      ofTarget: "of target",
       ofRange: "of range",
       fromPrevious: "from previous",
       fromStage: "from {{stage}}",
@@ -733,6 +776,31 @@ export const defaultTranslations = {
     countryWithDialCode: "{{country}} {{dialCode}}",
     searchCountry: "Search country or dial code",
     noResults: "No country found",
+  },
+  locationInput: {
+    country: "Country",
+    addressLine1: "Address line 1",
+    addressLine2: "Address line 2",
+    city: "City",
+    state: "Region",
+    postalCode: "Postal code",
+    placeholder: "Enter an address",
+    selectCountry: "Select a country",
+    searchCountry: "Search country",
+    noCountryResults: "No country found",
+    noResults: "No addresses found",
+    searchHint: "Type an address to search",
+    noResultsHelp: "Can't find an address?",
+    enterManually: "Enter it manually",
+    addressLine1Placeholder: "Enter a street and number",
+    addressLine2Placeholder: "Enter a floor or unit",
+    postalCodePlaceholder: "e.g., 08001",
+    searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found",
+    },
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -1004,6 +1072,7 @@ export const defaultTranslations = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
+    configureWidget: "Configure {{title}}",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */

@@ -1,14 +1,16 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
-
 import { useAudioPlayer } from "@/components/F0AudioPlayer"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
-
-import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import {
+  useF0ChatEmit,
+  useF0ChatVoicePlayLog,
+} from "../providers/F0ChatProvider"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
 const PLAYBACK_RATES = [1, 1.5, 2, 0.5]
@@ -45,10 +47,14 @@ const enqueueWaveformDecode = <Result,>(
 
 const loadVoiceWaveform = (url: string): Promise<number[]> => {
   const cached = waveformCache.get(url)
-  if (cached) return Promise.resolve(cached)
+  if (cached) {
+    return Promise.resolve(cached)
+  }
 
   const pending = waveformRequests.get(url)
-  if (pending) return pending
+  if (pending) {
+    return pending
+  }
 
   const AudioCtx =
     typeof window !== "undefined"
@@ -56,7 +62,9 @@ const loadVoiceWaveform = (url: string): Promise<number[]> => {
         (window as { webkitAudioContext?: typeof AudioContext })
           .webkitAudioContext)
       : undefined
-  if (!AudioCtx) return Promise.resolve(FALLBACK_LEVELS)
+  if (!AudioCtx) {
+    return Promise.resolve(FALLBACK_LEVELS)
+  }
 
   const request = (async () => {
     const response = await fetch(url)
@@ -124,7 +132,9 @@ const useVoiceWaveform = (url: string): number[] => {
 
     let cancelled = false
     void loadVoiceWaveform(url).then((nextLevels) => {
-      if (!cancelled) setLevels(nextLevels)
+      if (!cancelled) {
+        setLevels(nextLevels)
+      }
     })
     return () => {
       cancelled = true
@@ -164,6 +174,9 @@ const ChatVoiceAttachmentContent = ({
   const levels = useVoiceWaveform(voice.url)
   const [rateIndex, setRateIndex] = useState(0)
   const barsRef = useRef<HTMLDivElement>(null)
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
+  const voicePlayLog = useF0ChatVoicePlayLog()
 
   const duration =
     player.duration > 0 ? player.duration : (voice.durationSeconds ?? 0)
@@ -174,21 +187,43 @@ const ChatVoiceAttachmentContent = ({
       player.pause()
       return
     }
-    if (duration > 0 && player.currentTime >= duration) player.seek(0)
+    // Once per note, not once per mount: Virtuoso unmounts offscreen rows, so
+    // a component-local flag would re-report the same note on every scroll back.
+    // Resuming after a pause is the same listen. Draft notes are not consumption.
+    if (surface === "transcript" && !voicePlayLog.hasReported(voice.url)) {
+      voicePlayLog.markReported(voice.url)
+      emit.onVoiceNotePlayed({ durationSeconds: voice.durationSeconds })
+    }
+    if (duration > 0 && player.currentTime >= duration) {
+      player.seek(0)
+    }
     player.play()
-  }, [player, duration])
+  }, [
+    player,
+    duration,
+    emit,
+    surface,
+    voicePlayLog,
+    voice.url,
+    voice.durationSeconds,
+  ])
 
   const handleCycleRate = useCallback(() => {
     const next = (rateIndex + 1) % PLAYBACK_RATES.length
     setRateIndex(next)
     player.setPlaybackRate(PLAYBACK_RATES[next])
-  }, [player, rateIndex])
+    if (surface === "transcript") {
+      emit.onVoicePlaybackRateChanged({ rate: PLAYBACK_RATES[next] })
+    }
+  }, [player, rateIndex, emit, surface])
 
   // Click anywhere on the waveform to seek to that point.
   const handleSeek = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       const bars = barsRef.current
-      if (!bars || duration <= 0) return
+      if (!bars || duration <= 0) {
+        return
+      }
       const rect = bars.getBoundingClientRect()
       const fraction = Math.min(
         1,
@@ -201,7 +236,9 @@ const ChatVoiceAttachmentContent = ({
 
   const handleSeekKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (duration <= 0) return
+      if (duration <= 0) {
+        return
+      }
       const step = Math.max(1, duration / BAR_COUNT)
       let nextTime: number
 
@@ -233,9 +270,14 @@ const ChatVoiceAttachmentContent = ({
   return (
     <div
       className={cn(
-        // 320px by default, shrinking with the column when it doesn't fit.
-        // The fixed height is also used by the deferred placeholder.
-        "group/voice flex h-[58px] w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        // The shared media width, not `w-full`: a waveform reads better wide
+        // and shouldn't look like a stray chip next to an album, but sizing it
+        // off the column made the column stretch. The fixed height is also used
+        // by the deferred placeholder.
+        "group/voice flex h-[58px] min-w-0 items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        CHAT_MEDIA_WIDTH_CLASS,
+        // Carries the message's own bubble colour, so a voice note reads as
+        // part of the conversation rather than a neutral attachment.
         isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
         cornerClass,
         className,
@@ -337,36 +379,22 @@ export const ChatVoiceAttachment = ({
   /** Sender-aware surface supplied by a transcript message. */
   surfaceClassName?: string
 }): ReactNode => {
-  const i18n = useI18n()
-  const { ref, shouldMount } = useTranscriptHeavyPreview()
-
+  // Mounts with its row. The card has no chunk to fetch — the waveform decode
+  // it used to wait for is already serialized globally and cached per URL — so
+  // deferring it only ever showed a grey bar where the player was about to be.
+  // The card's own h-[58px] is what reserves the row now.
   return (
     <div
-      ref={ref}
       data-testid="chat-voice-attachment-shell"
       className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
     >
-      {shouldMount ? (
-        <ChatVoiceAttachmentContent
-          voice={voice}
-          isMine={isMine}
-          cornerClass={cornerClass}
-          className={className}
-          surfaceClassName={surfaceClassName}
-        />
-      ) : (
-        <Skeleton
-          role="status"
-          aria-busy={true}
-          aria-label={i18n.audioPlayer.label}
-          className={cn(
-            "h-[58px] w-80 max-w-full animate-none",
-            cornerClass,
-            surfaceClassName
-          )}
-          data-testid="chat-voice-placeholder"
-        />
-      )}
+      <ChatVoiceAttachmentContent
+        voice={voice}
+        isMine={isMine}
+        cornerClass={cornerClass}
+        className={className}
+        surfaceClassName={surfaceClassName}
+      />
     </div>
   )
 }

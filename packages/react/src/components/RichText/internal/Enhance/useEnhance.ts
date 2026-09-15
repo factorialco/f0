@@ -1,8 +1,6 @@
 import { Editor } from "@tiptap/react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import { handleEnhanceWithAIFunction } from "./enhance"
 import { enhanceConfig, lastIntentType } from "./types"
 
@@ -79,7 +77,9 @@ function useEnhance(
 
   const handleEnhanceWithAI = useCallback(
     async (selectedIntent?: string, customIntent?: string) => {
-      if (!config || !editor) return
+      if (!config || !editor) {
+        return
+      }
 
       setLastIntent({ selectedIntent, customIntent })
 
@@ -130,7 +130,9 @@ function useEnhance(
   )
 
   const acceptChanges = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor.commands.clearEnhanceHighlight()
     setIsAcceptChangesOpen(false)
     editor.setEditable(true)
@@ -139,7 +141,9 @@ function useEnhance(
   }, [editor, config])
 
   const rejectChanges = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor.commands.clearEnhanceHighlight()
     editor.chain().focus().undo().run()
     setIsAcceptChangesOpen(false)
@@ -149,7 +153,9 @@ function useEnhance(
   }, [editor, config])
 
   const retryChanges = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor.commands.clearEnhanceHighlight()
     editor.chain().focus().undo().run()
     config?.onRetryChanges?.()

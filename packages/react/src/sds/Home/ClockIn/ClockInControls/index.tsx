@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { Dispatch, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
@@ -8,7 +7,6 @@ import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-
 import { ClockInGraph, ClockInGraphProps } from "../ClockInGraph"
 import { getLabels } from "../ClockInGraph/helpers"
 import { getInfo } from "./helpers"
@@ -76,7 +74,7 @@ const StatusPulse = ({ color }: { color: string }) => {
 
   return (
     <div className="relative aspect-square h-4 shrink-0 self-center">
-      {!reducedMotion && (
+      {!reducedMotion ? (
         <motion.div
           className="absolute inset-0 rounded-full opacity-20"
           style={{ backgroundColor: color }}
@@ -84,7 +82,7 @@ const StatusPulse = ({ color }: { color: string }) => {
           animate={{ scale: 1.6, opacity: 0 }}
           transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
         />
-      )}
+      ) : null}
       <div
         className="absolute inset-[3px] rounded-full"
         style={{ backgroundColor: color }}
@@ -411,7 +409,7 @@ export function ClockInControls({
   // layout, so a variant re-places them rather than redefining them.
   const controls = (
     <>
-      {status === "clocked-out" && (
+      {status === "clocked-out" ? (
         // The nudge off the right edge is the DEFAULT layout's: it balances the
         // lone button against the ring beside it. The bar variant pins its
         // controls to the tile's edge, where that margin would be a gap.
@@ -422,11 +420,11 @@ export function ClockInControls({
             icon={SolidPlay}
           />
         </div>
-      )}
+      ) : null}
 
-      {status === "clocked-in" && (
+      {status === "clocked-in" ? (
         <>
-          {canShowBreakButton && (
+          {canShowBreakButton ? (
             <>
               {breakTypeOptions.length > 1 && onChangeBreakTypeId ? (
                 <F0Select
@@ -457,7 +455,7 @@ export function ClockInControls({
                 />
               )}
             </>
-          )}
+          ) : null}
           <F0Button
             onClick={onClockOut}
             label={labels.clockOut}
@@ -465,12 +463,12 @@ export function ClockInControls({
             icon={SolidStop}
           />
         </>
-      )}
-      {status === "break" &&
+      ) : null}
+      {status === "break" ? (
         // The PROMOTED action is the primary button, labelled; the other is an
         // icon-only outline beside it. Which one is promoted depends on where the
         // day stands — see `promotedOnBreak`.
-        (promotedOnBreak === "clock-out" ? (
+        promotedOnBreak === "clock-out" ? (
           <>
             <F0Button
               onClick={onClockIn}
@@ -500,7 +498,8 @@ export function ClockInControls({
               icon={SolidPlay}
             />
           </>
-        ))}
+        )
+      ) : null}
     </>
   )
 
@@ -523,8 +522,8 @@ export function ClockInControls({
 
   const contextTags = (
     <>
-      {canShowLocation && locationControl}
-      {canShowProject && projectControl}
+      {canShowLocation ? locationControl : null}
+      {canShowProject ? projectControl : null}
       {breakTag}
     </>
   )
@@ -613,7 +612,7 @@ export function ClockInControls({
                 can run long ("Lunch break — canteen, second shift"), so it
                 truncates; `OneEllipsis` mounts a tooltip only when it actually
                 clips, and the status keeps the room it needs first. */}
-            {canShowBreakTypeName && breakTypeName && (
+            {canShowBreakTypeName && breakTypeName ? (
               <>
                 <span
                   aria-hidden
@@ -628,7 +627,7 @@ export function ClockInControls({
                   {breakTypeName}
                 </OneEllipsis>
               </>
-            )}
+            ) : null}
           </div>
           <span className="shrink-0 text-xl font-semibold tabular-nums text-f1-foreground">
             {time}
@@ -636,22 +635,22 @@ export function ClockInControls({
         </div>
         {/* The same graph the default variant draws, in its rail geometry — so
             the day is normalized and coloured in exactly one place. */}
-        {canSeeGraph && (
+        {canSeeGraph ? (
           <ClockInGraph
             variant="horizontal-bar"
             data={data}
             trackedMinutes={trackedMinutes}
             remainingMinutes={canSeeRemainingTime ? remainingMinutes : 0}
           />
-        )}
+        ) : null}
         {/* The bar's two ends, labelled: when the day started, and what is left
             of it — the same remaining/overtime string the default variant puts
             under its status, so no new label is needed to translate. */}
         <div className="flex flex-row items-center justify-between gap-2 text-f1-foreground-secondary">
           <span className="tabular-nums">{primaryLabel}</span>
-          {subtitle && (
+          {subtitle ? (
             <span className="line-clamp-1 tabular-nums">{subtitle}</span>
-          )}
+          ) : null}
         </div>
         {/* THE FOOTER SPENDS LINES ON WHAT IS THERE: a picker on the actions'
             line, and a second one — the project — on a line above it. Two pickers
@@ -686,24 +685,24 @@ export function ClockInControls({
                 </span>
                 <StatusPulse color={statusColor} />
               </div>
-              {subtitle && (
+              {subtitle ? (
                 <p className="line-clamp-1 text-f1-foreground-secondary">
                   {subtitle}
                 </p>
-              )}
+              ) : null}
             </div>
 
             <div className="flex justify-center gap-2 @xs:justify-start">
               {controls}
             </div>
           </div>
-          {canSeeGraph && (
+          {canSeeGraph ? (
             <ClockInGraph
               data={data}
               trackedMinutes={trackedMinutes}
               remainingMinutes={canSeeRemainingTime ? remainingMinutes : 0}
             />
-          )}
+          ) : null}
         </div>
         <div className="mt-6 flex flex-row flex-wrap items-center justify-center gap-2 @xs:justify-start">
           {contextTags}

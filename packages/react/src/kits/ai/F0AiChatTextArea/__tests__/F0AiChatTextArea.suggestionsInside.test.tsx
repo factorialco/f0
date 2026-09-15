@@ -1,6 +1,5 @@
 import { type RefObject } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { ChartVerticalBars, Search } from "@/icons/app"
 import {
   userEvent,
@@ -8,7 +7,6 @@ import {
   zeroRender as render,
   screen,
 } from "@/testing/test-utils"
-
 import { type WelcomeScreenSuggestion } from "../../F0AiChat/types"
 
 // jsdom has no MediaRecorder, so dictation would report itself unsupported and

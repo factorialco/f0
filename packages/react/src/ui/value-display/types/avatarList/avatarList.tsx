@@ -14,7 +14,6 @@ import {
 } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListExtras } from "@/components/avatars/F0AvatarList/types"
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 

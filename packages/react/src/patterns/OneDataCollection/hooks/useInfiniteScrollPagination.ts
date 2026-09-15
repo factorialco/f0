@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { isInfiniteScrollPagination, PaginationInfo } from "@/hooks/datasource"
 
 export const useInfiniteScrollPagination = (
@@ -20,7 +19,9 @@ export const useInfiniteScrollPagination = (
     }
 
     const loadingIndicator = loadingIndicatorRef.current
-    if (!loadingIndicator) return
+    if (!loadingIndicator) {
+      return
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {

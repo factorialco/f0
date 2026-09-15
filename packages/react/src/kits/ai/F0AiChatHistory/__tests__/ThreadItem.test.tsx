@@ -1,12 +1,8 @@
 import { describe, expect, it, vi } from "vitest"
-
 import Graph from "@/icons/app/Graph"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
-import { type ChatThread } from "../useChatHistory"
-
 import { ThreadItem } from "../components/ThreadItem"
+import { type ChatThread } from "../useChatHistory"
 
 const thread: ChatThread = {
   id: "a",

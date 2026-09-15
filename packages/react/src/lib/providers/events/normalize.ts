@@ -16,7 +16,9 @@ import { EventValue } from "./types"
  * date-range and number-range filters never produced a `filter-change` event.
  */
 export const normalizeEventValue = (value: unknown): EventValue | undefined => {
-  if (value === null || value === undefined) return undefined
+  if (value === null || value === undefined) {
+    return undefined
+  }
 
   if (
     typeof value === "string" ||

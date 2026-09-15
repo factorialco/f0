@@ -1,10 +1,9 @@
 "use client"
 
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { CurrentVersionIndicator } from "./CurrentVersionIndicator"
 import { F0VersionHistoryProps } from "./types"
 import { VersionItem } from "./VersionItem"
@@ -30,13 +29,13 @@ function _F0VersionHistory({
 
       <ScrollArea className="h-full flex-1">
         <div className="flex flex-col gap-1">
-          {currentVersion && (
+          {currentVersion ? (
             <CurrentVersionIndicator
               title={currentVersion.title}
               onClick={currentVersion.onClick}
               isActive={activeVersionId === "current"}
             />
-          )}
+          ) : null}
           {versions.map((version) => (
             <VersionItem
               key={version.id}

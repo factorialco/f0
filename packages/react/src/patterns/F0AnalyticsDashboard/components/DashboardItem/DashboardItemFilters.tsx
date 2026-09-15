@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowLeft, Filter } from "@/icons/app"
@@ -18,7 +17,6 @@ import { FilterList } from "@/patterns/OneFilterPicker/components/FilterList"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "@/patterns/OneFilterPicker/internal/getActiveFiltersValue"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import type {
   DashboardItemFiltersConfig,
   DashboardItemFiltersDefinition,
@@ -93,7 +91,9 @@ export function DashboardItemFilters<
   // Keep the draft in sync with the applied value while the popover is
   // closed, so reopening always starts from what is actually applied.
   useEffect(() => {
-    if (!isOpen) setDraftValue(value)
+    if (!isOpen) {
+      setDraftValue(value)
+    }
   }, [isOpen, value])
 
   // When rendered inside a dialog (e.g. a fullscreen canvas), portal the
@@ -128,9 +128,13 @@ export function DashboardItemFilters<
   // editor. Move focus into the new pane, then restore it to that row when the
   // user returns so keyboard navigation never drops to <body>.
   useLayoutEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      return
+    }
     const content = contentRef.current
-    if (!content) return
+    if (!content) {
+      return
+    }
     if (activeSelectedFilterKey) {
       content.querySelector<HTMLElement>("button")?.focus()
       return
@@ -163,12 +167,16 @@ export function DashboardItemFilters<
     setSelectedFilterKey(null)
   }
 
-  if (Object.keys(shownFilters).length === 0) return null
+  if (Object.keys(shownFilters).length === 0) {
+    return null
+  }
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
     onOpenChange?.(open)
-    if (open) return
+    if (open) {
+      return
+    }
     // Dismissing without applying discards the draft.
     setSelectedFilterKey(null)
     setDraftValue(value)
@@ -205,11 +213,11 @@ export function DashboardItemFilters<
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         />
       </PopoverTrigger>
-      {appliedCount && (
+      {appliedCount ? (
         <span id={`${id}-status`} className="sr-only">
           {appliedFilterLabel} ({appliedCount})
         </span>
-      )}
+      ) : null}
       <PopoverContent
         ref={contentRef}
         aria-label={i18n.filters.label}

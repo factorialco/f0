@@ -1,8 +1,6 @@
 import { type ReactNode, useContext } from "react"
-
 import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
 import type { F0DialogContextType } from "@/patterns/F0Dialog/internal-types"
-
 import { DialogAlikePosition as Position } from "./types"
 
 export type DialogWrapperContextType = F0DialogContextType

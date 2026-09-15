@@ -1,8 +1,6 @@
 import { fireEvent, screen, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0TextInput } from "../F0TextInput"
 
 describe("F0TextInput", () => {

@@ -1,6 +1,5 @@
 import { cva } from "cva"
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
-
 import {
   AlertAvatarProps,
   F0AvatarAlert,
@@ -12,7 +11,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import {
   F0ToastProps,
   F0ToastVariant,
@@ -56,6 +54,83 @@ const titleVariants = cva({
     hasIcon: false,
   },
 })
+
+/**
+ * The toast's own action(s), inline on the trailing edge — never below the
+ * text. The link sits to the LEFT of the button, which is the trailing control.
+ */
+const ToastActions = ({
+  linkActions,
+  buttonActions,
+  onActionClick,
+}: {
+  linkActions: ToastActionLink[]
+  buttonActions: ToastActionButton[]
+  onActionClick: (
+    action: ToastActionButton | ToastActionLink,
+    originalOnClick?: () => void
+  ) => void
+}) => {
+  if (linkActions.length === 0 && buttonActions.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="dark flex flex-shrink-0 flex-row flex-wrap items-center gap-3">
+      {linkActions.map((linkAction) => (
+        <div
+          key={`link-${linkAction.label}`}
+          onClick={() => onActionClick(linkAction)}
+        >
+          <F0Link href={linkAction.href}>{linkAction.label}</F0Link>
+        </div>
+      ))}
+      {buttonActions.map((buttonAction) => (
+        <F0Button
+          key={`button-${buttonAction.label}`}
+          label={buttonAction.label}
+          icon={buttonAction.icon}
+          variant="outline"
+          size="sm"
+          onClick={() => onActionClick(buttonAction, buttonAction.onClick)}
+        />
+      ))}
+    </div>
+  )
+}
+
+/**
+ * The bar along the bottom that runs down as the toast times itself out.
+ * `null` when there is no timer to draw — a persistent toast, or one still
+ * loading.
+ */
+const ToastCountdownBar = ({
+  progress,
+  color,
+  paused,
+}: {
+  /** Remaining time as a percentage of the duration. `null` = no timer. */
+  progress: number | null
+  color: string
+  /** The countdown holds while the pointer is on the toast. */
+  paused: boolean
+}) => {
+  if (progress === null) {
+    return null
+  }
+
+  return (
+    <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
+      <div
+        className={cn("h-full w-full", color)}
+        style={{
+          transform: `translateX(-${100 - progress}%)`,
+          transition: paused ? "none" : "transform 16ms linear",
+        }}
+      />
+    </div>
+  )
+}
 
 const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
   (
@@ -187,8 +262,11 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
       }
     }
 
-    // Calculate progress percentage
-    const progress = duration ? (remainingTime / duration) * 100 : 0
+    // `null` when nothing is counting down: no duration, or still loading.
+    const progress =
+      !isLoading && duration && duration > 0
+        ? (remainingTime / duration) * 100
+        : null
 
     return (
       <div
@@ -223,7 +301,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
           )}
 
           <div className="flex flex-1 flex-col gap-1">
-            {title && (
+            {title ? (
               <p
                 className={titleVariants({
                   variant,
@@ -232,46 +310,25 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
               >
                 {title}
               </p>
-            )}
-            {description && (
+            ) : null}
+            {description ? (
               <p className="line-clamp-3 text-base text-f1-foreground-inverse-secondary">
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
 
-          {/* Action(s) — inline on the trailing edge (never below the text).
-              Link sits to the LEFT of the primary button (button is trailing). */}
-          {!isLoading && hasActions && (
-            <div className="dark flex flex-shrink-0 flex-row flex-wrap items-center gap-3">
-              {linkActions.map((linkAction) => (
-                <div
-                  key={`link-${linkAction.label}`}
-                  onClick={() => handleActionClick(linkAction)}
-                >
-                  <F0Link href={linkAction.href}>{linkAction.label}</F0Link>
-                </div>
-              ))}
-              {buttonActions.map((buttonAction) => (
-                <F0Button
-                  key={`button-${buttonAction.label}`}
-                  label={buttonAction.label}
-                  icon={buttonAction.icon}
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    handleActionClick(buttonAction, buttonAction.onClick)
-                  }
-                />
-              ))}
-            </div>
-          )}
+          <ToastActions
+            linkActions={linkActions}
+            buttonActions={buttonActions}
+            onActionClick={handleActionClick}
+          />
 
           {/* Close — the manual dismiss. Hidden when the action is the only
               control AND the toast auto-dismisses (so the ✕ isn't adjacent to the
               action). But a toast that WON'T auto-dismiss (persistent) always
               keeps the ✕, even with an action, so it's never a dead-end. */}
-          {onClose && !isLoading && (!hasActions || !willAutoDismiss) && (
+          {onClose && !isLoading && (!hasActions || !willAutoDismiss) ? (
             <div className="dark flex-shrink-0">
               <F0Button
                 variant="outline"
@@ -282,21 +339,14 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                 label={i18n.actions.close}
               />
             </div>
-          )}
+          ) : null}
         </div>
 
-        {/* Progress Bar */}
-        {!isLoading && duration && duration > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
-            <div
-              className={cn("h-full w-full", progressBarColor)}
-              style={{
-                transform: `translateX(-${100 - progress}%)`,
-                transition: isHovered ? "none" : "transform 16ms linear",
-              }}
-            />
-          </div>
-        )}
+        <ToastCountdownBar
+          progress={progress}
+          color={progressBarColor}
+          paused={isHovered}
+        />
       </div>
     )
   }

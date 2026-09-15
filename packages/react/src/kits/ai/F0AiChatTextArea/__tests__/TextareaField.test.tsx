@@ -1,11 +1,8 @@
 import { createRef } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
-import { type HighlightSegment } from "../highlight-utils"
-
 import { TextareaField } from "../components/TextareaField"
+import { type HighlightSegment } from "../highlight-utils"
 
 vi.mock("../components/TypewriterPlaceholder", () => ({
   TypewriterPlaceholder: ({ placeholders }: { placeholders: string[] }) => (

@@ -1,13 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
-import { Delete, Files } from "@/icons/app"
 import { F0Text } from "@/components/F0Text"
+import { Delete, Files } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
+import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
 import {
   cardVisualization,
   createResourceDataAdapter,
@@ -256,7 +253,9 @@ function CardDeleteScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {previewedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}

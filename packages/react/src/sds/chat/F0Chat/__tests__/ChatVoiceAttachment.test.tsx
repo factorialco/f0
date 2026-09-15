@@ -1,14 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ChatVoiceAttachment } from "../components/ChatVoiceAttachment"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 import { summariseAttachments } from "../utils/reply-preview"
 
 const VOICE: F0ChatVoiceAttachment = {
@@ -41,7 +40,7 @@ describe("ChatVoiceAttachment", () => {
     expect(audio?.getAttribute("src")).toBe(VOICE.url)
 
     const waveform = screen.getByTestId("chat-voice-waveform")
-    expect(waveform.querySelectorAll("span").length).toBe(32)
+    expect(waveform.querySelectorAll("span")).toHaveLength(32)
   })
 
   it("serializes waveform decoding across voice notes", async () => {
@@ -92,12 +91,16 @@ describe("ChatVoiceAttachment", () => {
     await waitFor(() => expect(decodeAudioData).toHaveBeenCalledTimes(2))
   })
 
-  it("defaults to 320px and never exceeds its container", () => {
+  // Wide enough to scrub, and the same width as every other media surface so it
+  // doesn't read as a stray chip beside an album. Sizing it off the column
+  // (`w-full`) is what used to stretch the column itself.
+  it("takes the shared media width and never exceeds the column", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const card = screen.getByTestId("chat-voice-attachment")
-    expect(card.className).toContain("w-80")
-    expect(card.className).toContain("max-w-full")
+    expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS)
+    expect(card.classList.contains("w-full")).toBe(false)
     expect(card.className).toContain("min-w-0")
+    expect(card.className).toContain("h-[58px]")
   })
 
   it("shows the total duration before playback starts", () => {

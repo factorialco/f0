@@ -1,7 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { Cell, mockItem } from "../../../__stories__/shared"
 import { CompoundCellValue } from "../compound"
 
@@ -170,10 +168,10 @@ export const Snapshot: Story = {
     },
   },
   render: () => {
-    const variants: Array<{
+    const variants: {
       title: string
       value: CompoundCellValue
-    }> = [
+    }[] = [
       {
         title: "Tones",
         value: {

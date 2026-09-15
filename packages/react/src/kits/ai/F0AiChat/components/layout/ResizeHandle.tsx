@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react"
-
 import { cn } from "@/lib/utils"
 
 export const ResizeHandle = ({
@@ -19,6 +18,8 @@ export const ResizeHandle = ({
   side?: "left" | "right"
 }) => {
   const startXRef = useRef(0)
+  const pendingDeltaRef = useRef(0)
+  const frameRef = useRef<number | null>(null)
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -29,14 +30,29 @@ export const ResizeHandle = ({
     [setIsResizing]
   )
 
-  const handleDoubleClick = useCallback(async () => {
+  const handleDoubleClick = useCallback(() => {
     setIsResizing(true)
-    await onReset()
+    onReset()
     setIsResizing(false)
   }, [onReset, setIsResizing])
 
   useEffect(() => {
-    if (!isResizing) return
+    if (!isResizing) {
+      return
+    }
+
+    // Pointer samples arrive faster than the screen repaints (120Hz trackpads),
+    // and every one of them re-lays-out the whole panel — including a
+    // synchronous re-measure of every rendered transcript row. Accumulate the
+    // deltas and apply at most one per frame.
+    const flush = () => {
+      frameRef.current = null
+      const delta = pendingDeltaRef.current
+      pendingDeltaRef.current = 0
+      if (delta !== 0) {
+        onResize(delta)
+      }
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       // Right-docked: dragging the (left-edge) handle leftward widens the panel.
@@ -46,7 +62,10 @@ export const ResizeHandle = ({
           ? e.clientX - startXRef.current
           : startXRef.current - e.clientX
       startXRef.current = e.clientX
-      onResize(deltaX)
+      pendingDeltaRef.current += deltaX
+      if (frameRef.current == null) {
+        frameRef.current = requestAnimationFrame(flush)
+      }
     }
 
     const handleMouseUp = () => {
@@ -59,6 +78,12 @@ export const ResizeHandle = ({
     return () => {
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
+      if (frameRef.current != null) {
+        cancelAnimationFrame(frameRef.current)
+        frameRef.current = null
+      }
+      // Don't drop the last sample when the gesture ends between frames.
+      flush()
     }
   }, [isResizing, onResize, setIsResizing, side])
 

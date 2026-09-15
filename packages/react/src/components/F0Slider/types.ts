@@ -1,6 +1,6 @@
+import { InputFieldStatus } from "@/components/F0InputField/types"
 import { DataAttributes } from "@/global.types"
 import { WithDataTestIdProps } from "@/lib/data-testid"
-import { InputFieldStatus } from "@/components/F0InputField/types"
 
 export const sliderTooltipModes = ["always", "onHover", "never"] as const
 export type F0SliderTooltipMode = (typeof sliderTooltipModes)[number]

@@ -1,5 +1,4 @@
 import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
-
 import type { F0AiChatWelcomeCard } from "../../F0AiChat/types"
 
 /**
@@ -29,7 +28,9 @@ export type WelcomeScreenCardsRowProps = {
 export const WelcomeScreenCardsRow = ({
   cards,
 }: WelcomeScreenCardsRowProps) => {
-  if (cards.length === 0) return null
+  if (cards.length === 0) {
+    return null
+  }
 
   return (
     <div className="grid w-full grid-cols-2 gap-3">

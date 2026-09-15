@@ -7,11 +7,9 @@ import {
   useState,
 } from "react"
 import { useDebounceValue } from "usehooks-ts"
-
 import { cn } from "@/lib/utils"
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { Content } from "./Content"
 import { Trigger } from "./Trigger"
 import {
@@ -111,7 +109,9 @@ export const EntitySelect = <T,>(
 
     parentIdsToUpdate.forEach((parentId) => {
       const filteredParent = filteredEntities.find((p) => p.id === parentId)
-      if (!filteredParent) return
+      if (!filteredParent) {
+        return
+      }
 
       const newVisibleSubItems =
         filteredParent.subItems?.filter((sub) =>
@@ -340,7 +340,9 @@ export const EntitySelect = <T,>(
       }
     })
 
-    if (!props.singleSelector) props.onSelect(newSelected)
+    if (!props.singleSelector) {
+      props.onSelect(newSelected)
+    }
   }
 
   const onSearch = (search: string) => {

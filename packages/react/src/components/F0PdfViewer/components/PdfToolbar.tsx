@@ -1,5 +1,5 @@
 import type { Ref } from "react"
-
+import { F0Select } from "@/components/F0Select"
 import {
   ChevronDown,
   ChevronUp,
@@ -11,8 +11,6 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-import { F0Select } from "@/components/F0Select"
-
 import type { F0PdfScale, F0PdfViewerAction } from "../types"
 import { ToolbarButton } from "./ToolbarButton"
 
@@ -74,14 +72,14 @@ export const PdfToolbar = ({
       )}
     >
       <div className={groupClassName}>
-        {hasDocument && (
+        {hasDocument ? (
           <span
             aria-live="polite"
             className="whitespace-nowrap text-sm font-medium text-f1-foreground-secondary"
           >
             {currentPage} / {totalPages}
           </span>
-        )}
+        ) : null}
         <ToolbarButton
           label={pdfViewer.previousPage}
           onClick={onPreviousPage}
@@ -117,13 +115,13 @@ export const PdfToolbar = ({
       </div>
 
       <div className={groupClassName}>
-        {rotatable && (
+        {rotatable ? (
           <ToolbarButton
             label={pdfViewer.rotate}
             onClick={onRotate}
             icon={Reset}
           />
-        )}
+        ) : null}
         <ToolbarButton
           label={pdfViewer.print}
           onClick={onPrint}

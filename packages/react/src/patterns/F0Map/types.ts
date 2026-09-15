@@ -1,5 +1,5 @@
-import type { BaseMapMarkerColor } from "./components/internal/BaseMapMarker"
 import type { F0MapMarkerVariantProps } from "./components/F0MapMarker"
+import type { BaseMapMarkerColor } from "./components/internal/BaseMapMarker"
 
 /** Initial camera position for the map. */
 export interface F0MapViewport {

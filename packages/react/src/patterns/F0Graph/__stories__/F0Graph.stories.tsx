@@ -1,19 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useCallback, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Laptop, Money, People, Star } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import type { DeferredNodesPayload, GraphNode } from "../types"
-
+import { F0GraphNode, type F0GraphNodeTag } from "../components/F0GraphNode"
 import {
   F0Graph,
   type F0GraphNodeRenderContext,
   type F0GraphProps,
 } from "../F0Graph"
-import { F0GraphNode, type F0GraphNodeTag } from "../components/F0GraphNode"
+import type { DeferredNodesPayload, GraphNode } from "../types"
 
 const meta = {
   title: "Graph/F0Graph",
@@ -98,8 +95,8 @@ interface Employee {
   phone?: string
   workEmail?: string
   workplace?: string
-  workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
-  teams?: ReadonlyArray<Team>
+  workableDays?: readonly ("M" | "T" | "W" | "R" | "F" | "S" | "U")[]
+  teams?: readonly Team[]
 }
 
 function profileDefaults(
@@ -359,11 +356,11 @@ export const Lazy: Story = {
     loadChildren: async (nodeId: string) => {
       const lazyChildren: Record<
         string,
-        Array<{
+        {
           id: string
           data: { name: string; title: string }
           childrenCount: number
-        }>
+        }[]
       > = {
         "vp-eng": [
           {
@@ -785,7 +782,7 @@ function ClickToFocusWithSidePanelDemo() {
         }}
         onPaneClick={() => setSelected(null)}
       />
-      {selected && (
+      {selected ? (
         <div
           className="absolute right-0 top-0 z-20 flex h-full flex-col gap-2 border-l border-f1-border bg-f1-background p-6 shadow-lg"
           style={{ width: PANEL_WIDTH }}
@@ -802,7 +799,7 @@ function ClickToFocusWithSidePanelDemo() {
             onClick={() => setSelected(null)}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -1218,8 +1215,11 @@ export const Controlled: Story = {
             onExpandToggle={(nodeId, expanded) => {
               setExpandedNodes((prev) => {
                 const next = new Set(prev)
-                if (expanded) next.add(nodeId)
-                else next.delete(nodeId)
+                if (expanded) {
+                  next.add(nodeId)
+                } else {
+                  next.delete(nodeId)
+                }
                 return next
               })
             }}
@@ -1228,8 +1228,11 @@ export const Controlled: Story = {
             onNodeSelect={(nodeId, selected) => {
               setSelectedNodes((prev) => {
                 const next = new Set(prev)
-                if (selected) next.add(nodeId)
-                else next.delete(nodeId)
+                if (selected) {
+                  next.add(nodeId)
+                } else {
+                  next.delete(nodeId)
+                }
                 return next
               })
             }}
@@ -1411,7 +1414,9 @@ const LEVEL_TAG_LABELS = {
  */
 function catalogLevelTags(node: CatalogNode): F0GraphNodeTag[] {
   const { headcount, salaryFrom, competencies, devices } = node
-  if (salaryFrom === undefined) return []
+  if (salaryFrom === undefined) {
+    return []
+  }
   return [
     {
       type: "raw",
@@ -1471,7 +1476,9 @@ function catalogRoleTags(
   role: string,
   levels: CatalogNode[]
 ): F0GraphNodeTag[] {
-  if (levels.length === 0) return []
+  if (levels.length === 0) {
+    return []
+  }
   const from = Math.min(...levels.map((l) => l.salaryFrom ?? 0))
   const to = Math.max(...levels.map((l) => (l.salaryFrom ?? 0) + 10))
   return [
@@ -1506,7 +1513,9 @@ function catalogRoleTags(
 /** The levels under each role, so a role card can roll their metadata up. */
 const LEVELS_BY_ROLE = CATALOG_NODES.reduce<Record<string, CatalogNode[]>>(
   (acc, node) => {
-    if (node.data.kind !== "level") return acc
+    if (node.data.kind !== "level") {
+      return acc
+    }
     const role = node.data.name.split(" ").slice(1).join(" ")
     acc[role] = [...(acc[role] ?? []), node.data]
     return acc
@@ -1568,6 +1577,62 @@ export const StackedNodesWithTags: Story = {
     },
   },
   render: () => <StackedNodesWithTagsDemo />,
+}
+
+// ─── Cards with tags ───────────────────────────────────────────
+
+const CARD_TAG_COLUMNS = ["team", "level", "devices"] as const
+
+const CARD_TAG_LABELS = {
+  team: "Team",
+  level: "Level",
+  devices: "Devices",
+}
+
+/** Deliberately uneven — the reservation is the same for all five, the pills are not. */
+const CARD_TAGS: Record<string, F0GraphNodeTag[]> = {
+  "1": [{ type: "raw", icon: People, text: "Board", column: "team" }],
+  "2": [
+    { type: "raw", icon: People, text: "Platform", column: "team" },
+    { type: "raw", icon: Laptop, text: "3", column: "devices" },
+  ],
+  "3": [],
+  "4": [
+    { type: "raw", icon: People, text: "Core Engineering", column: "team" },
+    { type: "raw", icon: Star, text: "Senior", column: "level" },
+    { type: "raw", icon: Laptop, text: "2", column: "devices" },
+  ],
+  "5": [{ type: "raw", icon: People, text: "Quality", column: "team" }],
+}
+
+export const CardsWithTags: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Tags under a node card, with a different number of pills per node. A connector runs the whole way from the pill it leaves to the node it points at; the tag block crops the part that would otherwise cross it, so the metadata reads as sitting on the line rather than being pierced by it. Use the controls popover to toggle a column and watch the connectors stay put.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    defaultExpandDepth: 2,
+    showControls: true,
+    nodeTagTypes: CARD_TAG_COLUMNS,
+    renderNode: (node, ctx) => {
+      const [firstName = "", lastName = ""] = node.data.name.split(" ")
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={node.data.name}
+          subtitle={node.data.title}
+          tags={CARD_TAGS[node.id]}
+          tagLabels={CARD_TAG_LABELS}
+        />
+      )
+    },
+  },
 }
 
 export const Snapshot: Story = {

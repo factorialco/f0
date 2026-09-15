@@ -1,13 +1,11 @@
 import confetti from "canvas-confetti"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { PongBall } from "./components/PongBall"
 
 // Layout
@@ -173,7 +171,9 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
   }, [centerBall, serveBall])
 
   const fireConfetti = useCallback(() => {
-    if (shouldReduceMotion || !confettiInstanceRef.current) return
+    if (shouldReduceMotion || !confettiInstanceRef.current) {
+      return
+    }
     confettiInstanceRef.current({
       particleCount: 80,
       spread: 70,
@@ -186,8 +186,11 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
   const handleScore = useCallback(
     (scorer: "player" | "ai") => {
       const newScore = { ...scoreRef.current }
-      if (scorer === "player") newScore.player++
-      else newScore.ai++
+      if (scorer === "player") {
+        newScore.player++
+      } else {
+        newScore.ai++
+      }
       scoreRef.current = newScore
       setScore(newScore)
       shakeRef.current = 8
@@ -237,7 +240,9 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
   useEffect(() => {
     if (mountRef.current) {
       const target = mountRef.current.closest("[aria-hidden]")
-      if (target) setPortalTarget(target as HTMLElement)
+      if (target) {
+        setPortalTarget(target as HTMLElement)
+      }
     }
   }, [])
 
@@ -257,7 +262,9 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
   // Keyboard
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") {
+        onClose()
+      }
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         e.preventDefault()
         keysPressed.current.add(e.key)
@@ -277,7 +284,9 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
   // Main game loop
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const rect = container.getBoundingClientRect()
     containerSize.current = { width: rect.width, height: rect.height }
@@ -309,7 +318,9 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
     container.addEventListener("pointermove", handlePointerMove)
 
     const gameLoop = (timestamp: number) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp
+      if (!lastTimeRef.current) {
+        lastTimeRef.current = timestamp
+      }
       const rawDt = (timestamp - lastTimeRef.current) / 16.667
       const dt = Math.min(rawDt, 3)
       lastTimeRef.current = timestamp
@@ -337,7 +348,9 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
       // Shake decay
       if (shakeRef.current > 0) {
         shakeRef.current *= 0.85
-        if (shakeRef.current < 0.5) shakeRef.current = 0
+        if (shakeRef.current < 0.5) {
+          shakeRef.current = 0
+        }
       }
 
       if (phaseRef.current === "playing") {
@@ -617,7 +630,7 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
             </div>
 
             {/* Goal indicator — bottom half when player scores, top half when AI scores */}
-            {phase === "scored" && lastScorer && (
+            {phase === "scored" && lastScorer ? (
               <div
                 className={cn(
                   "pointer-events-none absolute left-4 flex items-center",
@@ -628,16 +641,16 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
                   {translations.ai.pong.goal}
                 </span>
               </div>
-            )}
+            ) : null}
 
             {/* Game over overlay */}
-            {phase === "gameover" && endMessage && (
+            {phase === "gameover" && endMessage ? (
               <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center bg-f1-special-page/60 backdrop-blur-sm">
                 <span className="text-2xl font-semibold text-f1-foreground">
                   {endMessage}
                 </span>
               </div>
-            )}
+            ) : null}
 
             {/* Confetti canvas */}
             <canvas

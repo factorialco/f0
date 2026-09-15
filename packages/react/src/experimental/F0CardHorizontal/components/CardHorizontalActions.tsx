@@ -1,3 +1,8 @@
+import {
+  type CardPrimaryAction,
+  type CardSecondaryAction,
+  type CardSecondaryLink,
+} from "@/components/F0Card/components/CardActions"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { type StatusVariant } from "@/components/tags/F0TagStatus"
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -9,12 +14,6 @@ import {
   type ButtonGroupSecondaryItem,
   type ButtonGroupSecondaryLink,
 } from "@/ui/ButtonGroup"
-
-import {
-  type CardPrimaryAction,
-  type CardSecondaryAction,
-  type CardSecondaryLink,
-} from "@/components/F0Card/components/CardActions"
 
 /**
  * Container breakpoint at which the horizontal card switches between its inline and its

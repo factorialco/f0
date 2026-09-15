@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -13,7 +12,6 @@ import {
   tagColumn,
 } from "@/patterns/F0Graph"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
@@ -185,7 +183,9 @@ export const GraphCollection = <
   const lastNonceRef = useRef<number | undefined>(undefined)
   const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
-    if (isInitialLoading) return
+    if (isInitialLoading) {
+      return
+    }
     const decision = resolveGraphReveal({
       isInitialLoading,
       initialConsumed: initialRevealConsumedRef.current,
@@ -194,10 +194,14 @@ export const GraphCollection = <
       revealNonce: searchSelectionNonce,
       lastNonce: lastNonceRef.current,
     })
-    if (decision.consumeInitial) initialRevealConsumedRef.current = true
+    if (decision.consumeInitial) {
+      initialRevealConsumedRef.current = true
+    }
     lastRevealedRef.current = decision.lastRevealed
     lastNonceRef.current = decision.lastNonce
-    if (decision.revealId) void revealAndFocus(decision.revealId)
+    if (decision.revealId) {
+      void revealAndFocus(decision.revealId)
+    }
   }, [revealNodeId, searchSelectionNonce, revealAndFocus, isInitialLoading])
 
   // Clear the shared header search when ENTERING and LEAVING the graph view, so
@@ -227,8 +231,8 @@ export const GraphCollection = <
   const order = graphSettings?.order ?? allTagTypes
   const orderedTagTypes = allTagTypes.sort(
     (a, b) =>
-      (order.indexOf(a) === -1 ? Infinity : order.indexOf(a)) -
-      (order.indexOf(b) === -1 ? Infinity : order.indexOf(b))
+      (!order.includes(a) ? Infinity : order.indexOf(a)) -
+      (!order.includes(b) ? Infinity : order.indexOf(b))
   )
   const visibleTagTypes = orderedTagTypes.filter(
     (type) =>
@@ -278,8 +282,12 @@ export const GraphCollection = <
           // re-centers. When controlled we also mirror the set so clicks keep
           // moving the ring past the seeded entry selection.
           onSelectedNodesChange={(next) => {
-            if (controlSelection) setSelectedNodes(next)
-            if (next.size > 0) clearFocus()
+            if (controlSelection) {
+              setSelectedNodes(next)
+            }
+            if (next.size > 0) {
+              clearFocus()
+            }
           }}
           showControls={showControls ?? true}
           canvasFooterActions={canvasFooterActions}

@@ -1,7 +1,5 @@
 import { type CSSProperties, ReactNode, useState } from "react"
-
 import { type z } from "zod"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
@@ -16,9 +14,7 @@ import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
 import { type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { cn } from "@/lib/utils"
-import { Counter } from "@/ui/Counter"
-import { Skeleton } from "@/ui/skeleton"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   CalendarEvent,
   type CalendarEventProps,
@@ -27,12 +23,19 @@ import {
   IndicatorsList,
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
+import { cn } from "@/lib/utils"
 import { type F0FormSchema } from "@/patterns/F0Form"
-
-import { HomeListItem, type HomeListItemAction } from "./HomeListItem"
+import { Counter } from "@/ui/Counter"
+import { Skeleton } from "@/ui/skeleton"
 import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
+import {
+  descriptionText,
+  HomeListItem,
+  type DescriptionPart,
+  type HomeListItemAction,
+} from "./HomeListItem"
+import { useHomeWidgetTracking } from "./tracking"
 
 /**
  * The item-churn animation, re-exported so a BESPOKE renderer draws its items
@@ -62,6 +65,14 @@ export interface HomeRenderCtx {
    * { slotRowBleed}).
    */
   isLastSlot?: boolean
+  /**
+   * Whether the widget draws a FOOTER under its slots (the frame's `action`).
+   * The last slot's bottom bleed is spent differently either way: with a footer
+   * it is what the footer's own `mt-2` buys back; without one, the slot's
+   * bottom IS the card's bottom edge — which is what a "View more" button
+   * sitting there needs to know (see {@link listMoreButtonClass}).
+   */
+  hasFooter?: boolean
   /**
    * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
    * option the reader is on. A slot renderer that owns its own data reads this
@@ -213,7 +224,9 @@ const hexChannels = (hex: string): string | undefined => {
           .map((digit) => digit + digit)
           .join("")
       : digits
-  if (!/^[0-9a-f]{6}$/i.test(full)) return undefined
+  if (!/^[0-9a-f]{6}$/i.test(full)) {
+    return undefined
+  }
   const value = parseInt(full, 16)
   return `${(value >> 16) & 255} ${(value >> 8) & 255} ${value & 255}`
 }
@@ -233,8 +246,9 @@ const LIST_ICON_TINT_CUSTOM = cn(
 const listIconTint = (
   color: ListIconColor
 ): { className: string; style?: CSSProperties } | undefined => {
-  if (!color.startsWith("#"))
+  if (!color.startsWith("#")) {
     return { className: LIST_ICON_TINT[color as ListIconPaletteColor] }
+  }
 
   const channels = hexChannels(color)
   return channels
@@ -314,6 +328,15 @@ export interface ListSchema {
   rightOptional?: boolean
   /** Every row carries an inline subtitle (on the title's line, after a dot). */
   subtitleRequired?: boolean
+  /**
+   * An inline subtitle is ALLOWED but not demanded: some rows carry one and
+   * others don't — a list where only the late items say how late they are.
+   * Unlike a second line this changes no geometry (the subtitle shares the
+   * title's line), so such a list draws exactly like an even one.
+   *
+   * `subtitleRequired` wins when both are set: demanding it already allows it.
+   */
+  subtitleOptional?: boolean
   /** Every row carries a second line — this is what makes rows two-line. */
   descriptionRequired?: boolean
   /**
@@ -368,7 +391,7 @@ type Demanded<T, Optional> = Optional extends true ? Partial<T> : T
 type ListRightData<R, Optional> = R extends "counter"
   ? Demanded<{ count: number }, Optional>
   : R extends `${infer T extends F0AvatarListProps["type"]}-list`
-    ? Demanded<{ avatars: Array<AvatarData<T>> }, Optional> & {
+    ? Demanded<{ avatars: AvatarData<T>[] }, Optional> & {
         remainingCount?: number
       }
     : R extends AvatarVariant["type"]
@@ -377,16 +400,57 @@ type ListRightData<R, Optional> = R extends "counter"
 
 type ListClickData<C> = C extends "link" ? { href: string } : object
 
+/**
+ * What a row may say ABOUT its subtitle — offered by every schema that declares
+ * a subtitle at all, required by none of them.
+ */
+type SubtitleTone = {
+  /**
+   * Draws THIS row's subtitle critical instead of muted — the row is overdue,
+   * rejected, over budget.
+   *
+   * Per ROW rather than per schema, like `unread` and `actions`: what has gone
+   * wrong is a state of the row's own data, so one list holds rows that say so
+   * beside rows that have nothing to report. The title reads the same either
+   * way — the subtitle is what carries the news.
+   */
+  subtitleCritical?: boolean
+}
+
+/**
+ * A row's SECOND LINE, in either of the two forms it may take.
+ *
+ * One string with `descriptionCritical` colours the whole line; a list of
+ * {@link DescriptionPart}s colours each fact on it separately. The two are
+ * mutually exclusive on purpose — parts already carry their own `critical`, so
+ * a row that passes both is saying the same thing twice and meaning different
+ * things by it.
+ *
+ * Whichever form, the tone is per ROW rather than per schema, for the same
+ * reason `subtitleCritical` is: what has gone wrong is a state of the row's
+ * own data, so one list holds rows that say so beside rows that have nothing
+ * to report.
+ *
+ * Both forms go untinted in a COMPACT list, where the second line has folded
+ * into the row's tooltip and there is nothing left to colour — see
+ * {@link listCompacts}.
+ */
+type DescribedRow =
+  | { description: string; descriptionCritical?: boolean }
+  | { description: DescriptionPart[]; descriptionCritical?: never }
+
 type ListTextData<S extends ListSchema> = {
   title: string
 } & (S["subtitleRequired"] extends true
-  ? { subtitle: string }
-  : { subtitle?: never }) &
+  ? { subtitle: string } & SubtitleTone
+  : S["subtitleOptional"] extends true
+    ? { subtitle?: string } & SubtitleTone
+    : { subtitle?: never; subtitleCritical?: never }) &
   (S["descriptionRequired"] extends true
-    ? { description: string }
+    ? DescribedRow
     : S["descriptionOptional"] extends true
-      ? { description?: string }
-      : { description?: never })
+      ? DescribedRow | { description?: undefined; descriptionCritical?: never }
+      : { description?: never; descriptionCritical?: never })
 
 /**
  * One HOVER ACTION on a `list` row: an icon button over the row's right edge
@@ -402,6 +466,25 @@ export type ListItem<S extends ListSchema = ListSchema> = {
   /** An accent dot on the left glyph — unseen/pending. */
   unread?: boolean
   /**
+   * What this row says ON HOVER: its own line of plain text, drawn as a tooltip
+   * over the whole row.
+   *
+   * For what the row could not fit. A second line is ONE truncating line —
+   * around 40 characters at the rail's width — so a row with more to say ends
+   * in an ellipsis; this is where the rest can live. Written SEPARATELY rather
+   * than repeating the description, so the tooltip can say the fuller thing (a
+   * task's actual detail, an expense's full breakdown) instead of the
+   * abbreviation the line had room for.
+   *
+   * Per ROW, like `unread` and `actions`: whether there is more to say is a
+   * state of the row's own data. Rows without it hover silently — an empty
+   * tooltip promises information that isn't there.
+   *
+   * It also OVERRIDES what a {@link ListSchema.compact} row would otherwise
+   * surface, which is its folded-away description.
+   */
+  tooltipDescription?: string
+  /**
    * What can be DONE to this row, revealed on hover (and on focus, so they are
    * reachable by keyboard) behind a fade over whatever the row trails. Keep it
    * to two: the strip covers the row's right-hand side while it shows.
@@ -415,7 +498,7 @@ export type ListItem<S extends ListSchema = ListSchema> = {
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
 export interface ListParams<S extends ListSchema = ListSchema> {
   schema: S
-  items: Array<ListItem<S>>
+  items: ListItem<S>[]
 }
 
 /**
@@ -486,7 +569,7 @@ export const homeSlot = <V extends keyof HomeSlotParamsMap>(
  */
 export const listSlot = <const S extends ListSchema>(
   schema: S,
-  items: Array<ListItem<S>>,
+  items: ListItem<S>[],
   options?: SlotOptions
 ): HomeWidgetSlot => ({
   visualization: "list",
@@ -546,7 +629,7 @@ export type HomeWidgetChrome = Pick<
  */
 export interface WidgetHeaderSelect {
   /** What the reader can switch between. The first one is the default. */
-  options: Array<{ value: string; label: string; icon?: IconType }>
+  options: { value: string; label: string; icon?: IconType }[]
   /** Which one the card starts on. Defaults to the first option. */
   value?: string
   /** The trigger names the selection, so this is what says what KIND it is. */
@@ -639,7 +722,9 @@ export const resolveWidgetHeader = (
   header: HomeWidgetHeader | undefined,
   params: WidgetParams = {}
 ): WidgetProps["header"] => {
-  if (!header) return undefined
+  if (!header) {
+    return undefined
+  }
   const { title, info, ...rest } = header
   const from = <T,>(value: FromWidgetParams<T> | undefined) =>
     typeof value === "function"
@@ -871,6 +956,35 @@ export const SLOT_ROW_BLEED = "-m-2"
 export const slotRowBleed = (ctx: HomeRenderCtx) =>
   cn(SLOT_ROW_BLEED, "mt-0", !ctx.isLastSlot && "mb-0")
 
+/**
+ * WHERE "View more" SITS. Not where the rows above it start: a row-based slot
+ * bleeds 8px past the card's content box (`SLOT_ROW_BLEED`), and a button left
+ * in that bleed hangs its whole filled rectangle 8px to the left of the
+ * widget's TITLE — visible as a rectangle that overhangs the card's text.
+ *
+ * It sits exactly where the frame's own footer button sits instead, because it
+ * is the same button one slot higher (`SlotWidget`'s footer class): 8px back to
+ * the content box, then 2px out again — the nudge that makes a filled or
+ * bordered box read as aligned with the text above it rather than measuring
+ * 2px shy of it.
+ */
+export const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start"
+
+/**
+ * The same edge on the OTHER axis, for when the button is the last thing on the
+ * card. The bleed a row-based slot keeps at its bottom is there so ROWS reach
+ * the card's bottom edge; the button is not a row, so left in that bleed it
+ * ends up 8px from the card's border while measuring 14px from its left — the
+ * corner reads as cropped. `mb-1.5` gives it the left edge's exact treatment
+ * (bleed cancelled, 2px nudge kept), so the gap below it equals the gap beside.
+ *
+ * Only when there is nothing after it: with a footer under the slots the bleed
+ * is already what the footer's own `mt-2` buys back, and padding here would
+ * push that footer 6px further down instead.
+ */
+export const listMoreButtonClass = (ctx: HomeRenderCtx) =>
+  cn(LIST_MORE_BUTTON_CLASS, ctx.isLastSlot && !ctx.hasFooter && "mb-1.5")
+
 /** The gap between rows of the `event-list` slot. */
 export const EVENT_LIST_GAP = "gap-2"
 
@@ -879,7 +993,10 @@ type ListRow = {
   id: string | number
   title: string
   subtitle?: string
-  description?: string
+  subtitleCritical?: boolean
+  description?: string | DescriptionPart[]
+  descriptionCritical?: boolean
+  tooltipDescription?: string
   unread?: boolean
   avatar?: object & { icon?: IconType; color?: ListIconColor }
   module?: ModuleId
@@ -898,27 +1015,31 @@ const listLeft = (
   row: ListRow,
   avatarSize: AvatarSize & ListGlyphSize
 ) => {
-  if (left === "module" && row.module)
+  if (left === "module" && row.module) {
     return { left: <F0AvatarModule module={row.module} size={avatarSize} /> }
-  if (left === "alert" && row.alert)
+  }
+  if (left === "alert" && row.alert) {
     return { left: <F0AvatarAlert type={row.alert} size={avatarSize} /> }
+  }
   // A TINTED icon is the Home kit's own glyph, so it goes in as a node. An icon
   // row without a `color` — or with one that cannot be parsed — falls through to
   // the plain `F0AvatarIcon` below.
   if (left === "icon" && row.avatar?.icon && row.avatar.color) {
     const tint = listIconTint(row.avatar.color)
-    if (tint)
+    if (tint) {
       return {
         left: (
           <ListIconGlyph icon={row.avatar.icon} tint={tint} size={avatarSize} />
         ),
       }
+    }
   }
-  if (left && row.avatar)
+  if (left && row.avatar) {
     return {
       avatar: { type: left, ...row.avatar } as AvatarVariant,
       avatarSize,
     }
+  }
   return {}
 }
 
@@ -933,10 +1054,13 @@ const listRight = (
   row: ListRow,
   avatarSize: "sm" | "md"
 ): ReactNode => {
-  if (!right) return undefined
-  if (right === "counter")
+  if (!right) {
+    return undefined
+  }
+  if (right === "counter") {
     return row.count != null ? <Counter value={row.count} /> : undefined
-  if (right.endsWith("-list"))
+  }
+  if (right.endsWith("-list")) {
     return row.avatars && row.avatars.length > 0 ? (
       <F0AvatarList
         type={right.slice(0, -"-list".length) as F0AvatarListProps["type"]}
@@ -950,6 +1074,7 @@ const listRight = (
         remainingCount={row.remainingCount}
       />
     ) : undefined
+  }
   return row.rightAvatar ? (
     <F0Avatar
       avatar={{ type: right, ...row.rightAvatar } as AvatarVariant}
@@ -987,6 +1112,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const { schema, items } = params
   const allRows = items as ListRow[]
   const [expanded, setExpanded] = useState(false)
+  const { reportAction, reportItemActivate } = useHomeWidgetTracking()
   // ASKED, not measured: the slot is built before the frame renders but drawn
   // inside it, so the card it landed in is the one thing it can only learn from
   // context. `false` for a list rendered outside a `Widget`.
@@ -1015,25 +1141,39 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       {/* Keyed by the row's OWN id, so a row that goes away is the one that
           animates out and the rest close the gap. */}
       <HomeSlotItems>
-        {rows.map(({ href, description, ...row }) => {
+        {rows.map(({ href, description, ...row }, index) => {
+          // What the row says on hover: its own `tooltipDescription` where it
+          // wrote one — the fuller thing the line had no room for — and
+          // otherwise, in a COMPACT list, the second line that folded away.
+          // Both as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
+          // segmented description arrives dot-joined and untinted. The fallback
+          // is computed rather than checking `description` for truthiness: an
+          // empty parts list is a row with nothing to say, and `[]` is truthy.
+          const tooltip =
+            row.tooltipDescription ??
+            (compact ? descriptionText(description) : "")
           const node = (
             <HomeListItem
               title={row.title}
               subtitle={row.subtitle}
+              subtitleCritical={row.subtitleCritical}
               description={compact ? undefined : description}
+              descriptionCritical={row.descriptionCritical}
               unread={row.unread}
               {...listLeft(schema.left, row, avatarSize)}
               right={listRight(schema.right, row, rightAvatarSize)}
               actions={row.actions}
               href={schema.clickBehavior === "link" ? href : undefined}
+              onActivate={() => reportItemActivate(row.id, index + 1)}
             />
           )
           return (
             <HomeSlotItem key={row.id} animated={!isBulkChange}>
-              {compact && description ? (
-                // The hidden second line surfaces on hover. The span is the
-                // tooltip's trigger — HomeListItem doesn't forward trigger props.
-                <Tooltip label={description}>
+              {tooltip ? (
+                // What the row had no room for surfaces on hover. The span is
+                // the tooltip's trigger — HomeListItem doesn't forward trigger
+                // props.
+                <Tooltip label={tooltip}>
                   <span className="block">{node}</span>
                 </Tooltip>
               ) : (
@@ -1044,7 +1184,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
         })}
       </HomeSlotItems>
       {overflows ? (
-        <div className="mt-1 self-start">
+        <div className={listMoreButtonClass(ctx)}>
           {/* `neutral`, the same button a widget's own call to action is (the
               frame's `action`): "View more" is something you press, and a ghost
               button under a dense list of rows reads as another row. Past the
@@ -1059,7 +1199,14 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
             }
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              // Reported on the way OUT of the cap only: collapsing the list
+              // again is not a reader reaching for more.
+              if (!expanded) {
+                reportAction("view-more")
+              }
+              setExpanded(!expanded)
+            }}
           />
         </div>
       ) : null}
@@ -1211,7 +1358,7 @@ const ListSlotSkeleton = ({
         </div>
       ))}
       {overflows ? (
-        <div className="mt-1 self-start">
+        <div className={listMoreButtonClass(ctx)}>
           {/* An `sm` neutral button — what "View more (n)" will be. */}
           <Skeleton className="h-6 w-24 rounded-sm" />
         </div>

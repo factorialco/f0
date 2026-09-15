@@ -5,12 +5,9 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
-
 import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
-
 import { ReplyPopover } from "./ReplyPopover"
 
 /**
@@ -98,15 +95,15 @@ export const AssistantMessage = ({
   return (
     <ToolCallIdContext.Provider value={toolCallId}>
       <div className="relative isolate flex w-full flex-col items-start justify-center">
-        {message && content && (
+        {message && content ? (
           <div
             ref={contentRef}
             className="w-full max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
           >
             {(renderMarkdown ?? defaultMarkdownFallback)(content)}
           </div>
-        )}
-        {!!subComponent && <div className="w-full">{subComponent}</div>}
+        ) : null}
+        {subComponent ? <div className="w-full">{subComponent}</div> : null}
         <ReplyPopover
           anchor={anchor}
           onReply={(text) => {

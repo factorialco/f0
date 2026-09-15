@@ -1,24 +1,4 @@
-/**
- * Safe localStorage read with JSON parsing and fallback.
- */
-export function readFromLocalStorage<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw === null) return fallback
-    return JSON.parse(raw) as T
-  } catch {
-    return fallback
-  }
-}
-
-/**
- * Safe localStorage write with JSON serialization.
- * Silently ignores errors (e.g. quota exceeded, unavailable).
- */
-export function writeToLocalStorage<T>(key: string, value: T): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    // localStorage full or unavailable — silently ignore
-  }
-}
+// Moved to `@/lib/local-storage` once the emoji picker needed the same helpers
+// and `lib/` couldn't reach into a kit. Re-exported so the kit's own imports
+// (and anything pointing at this path) keep working.
+export { readFromLocalStorage, writeToLocalStorage } from "@/lib/local-storage"

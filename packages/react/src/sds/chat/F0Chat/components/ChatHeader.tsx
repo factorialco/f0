@@ -1,16 +1,13 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { type ReactNode } from "react"
-import { useMediaQuery } from "usehooks-ts"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatSearch } from "../providers/ChatUIProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
@@ -23,7 +20,9 @@ const PresenceDot = ({
   online: boolean
   label: string
 }): ReactNode => {
-  if (!online) return null
+  if (!online) {
+    return null
+  }
 
   return (
     <span
@@ -59,11 +58,15 @@ export const ChatHeader = ({
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatSearch()
-  // On mobile the chat already fills the screen, so the fullscreen toggle is a
-  // no-op — hide it (matches F0AiChatHeader).
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
+  // When the panel is covering the frame the chat already fills the screen and
+  // the fullscreen toggle is a no-op, so hide it (matches F0AiChatHeader).
+  //
+  // Read from the panel rather than the viewport: a narrow window no longer
+  // implies a covering panel — a laptop at half the screen splits — and the
+  // old viewport rule was hiding the button on a chat that plainly had
+  // somewhere to expand into. `useAiChat` answers `false` with no provider, so
+  // a standalone chat keeps its button.
+  const { panelOverlays } = useAiChat()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
   const showGroupFallback =
@@ -92,8 +95,13 @@ export const ChatHeader = ({
   const inlineActions = channelActions.filter(isInline)
   const menuActions = channelActions.filter((action) => !isInline(action))
 
+  // A noticeboard is a short, fixed transcript — there is nothing to search
+  // through, and without host actions the menu would hold a single useless item.
+  const canSearch = channel.type !== "announcement"
   const menuItems: DropdownItem[] = [
-    { label: i18n.actions.search, icon: Search, onClick: openSearch },
+    ...(canSearch
+      ? [{ label: i18n.actions.search, icon: Search, onClick: openSearch }]
+      : []),
     ...menuActions.map((action) => ({
       label: action.label,
       icon: action.icon,
@@ -119,12 +127,12 @@ export const ChatHeader = ({
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />
         )}
-        {showPresence && (
+        {showPresence ? (
           <PresenceDot
             online={channel.presence === "online"}
             label={i18n.chat.online}
           />
-        )}
+        ) : null}
       </div>
       <span className="truncate text-base font-medium text-f1-foreground">
         {channel.title}
@@ -169,16 +177,19 @@ export const ChatHeader = ({
                 onClick={() => action.onClick(channel)}
               />
             ))}
-            {/* Search + the host's menu actions live behind the ellipsis menu. */}
-            <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
-              <ButtonInternal
-                variant="ghost"
-                hideLabel
-                label={i18n.chat.options}
-                icon={Ellipsis}
-              />
-            </Dropdown>
-            {onToggleFullscreen && !isSmallScreen && (
+            {/* Search + the host's menu actions live behind the ellipsis menu,
+                which only exists while it holds something. */}
+            {menuItems.length > 0 ? (
+              <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
+                <ButtonInternal
+                  variant="ghost"
+                  hideLabel
+                  label={i18n.chat.options}
+                  icon={Ellipsis}
+                />
+              </Dropdown>
+            ) : null}
+            {onToggleFullscreen && !panelOverlays ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -188,8 +199,8 @@ export const ChatHeader = ({
                 icon={isFullscreen ? Minimize : Maximize}
                 onClick={onToggleFullscreen}
               />
-            )}
-            {onClose && (
+            ) : null}
+            {onClose ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -197,7 +208,7 @@ export const ChatHeader = ({
                 icon={Cross}
                 onClick={onClose}
               />
-            )}
+            ) : null}
           </div>
         </>
       )}

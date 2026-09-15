@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { FadeInImage } from "../FadeInImage"
 
 describe("FadeInImage", () => {

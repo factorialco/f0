@@ -1,7 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import image from "@storybook-static/avatars/person04.jpg"
-
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0HILActionConfirmation } from ".."
 
 const meta = {

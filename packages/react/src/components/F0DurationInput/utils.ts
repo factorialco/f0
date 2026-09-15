@@ -56,7 +56,11 @@ export function secondsToVisibleFields(
 }
 
 export function clampValue(val: number, max: number | undefined): number {
-  if (max != null && val > max) return max
-  if (val < 0) return 0
+  if (max != null && val > max) {
+    return max
+  }
+  if (val < 0) {
+    return 0
+  }
   return val
 }

@@ -34,11 +34,15 @@ const mountedRenderers = new Set<number>()
 const rendererListeners = new Set<Listener>()
 
 const emit = () => {
-  for (const listener of listeners) listener()
+  for (const listener of listeners) {
+    listener()
+  }
 }
 
 const emitRenderer = () => {
-  for (const listener of rendererListeners) listener()
+  for (const listener of rendererListeners) {
+    listener()
+  }
 }
 
 export const dialogsAlikeStore = {
@@ -59,13 +63,17 @@ export const dialogsAlikeStore = {
     emit()
   },
   removeItem(id: DialogId) {
-    if (!items.some((item) => item.id === id)) return
+    if (!items.some((item) => item.id === id)) {
+      return
+    }
     items = items.filter((item) => item.id !== id)
     emit()
   },
   /** Remove all open items. Mainly useful to isolate Storybook stories/tests. */
   clear() {
-    if (items.length === 0) return
+    if (items.length === 0) {
+      return
+    }
     items = EMPTY
     emit()
   },
@@ -97,7 +105,9 @@ export const dialogsAlikeStore = {
   getActiveRendererId(): number | null {
     let min: number | null = null
     for (const id of mountedRenderers) {
-      if (min === null || id < min) min = id
+      if (min === null || id < min) {
+        min = id
+      }
     }
     return min
   },

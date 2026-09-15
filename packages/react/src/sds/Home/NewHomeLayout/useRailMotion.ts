@@ -1,5 +1,3 @@
-import { useEffect, useLayoutEffect, useState } from "react"
-
 import {
   animate,
   type MotionValue,
@@ -7,9 +5,8 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react"
-
+import { useEffect, useLayoutEffect, useState } from "react"
 import { useReducedMotion } from "@/lib/a11y"
-
 import {
   GENIE_CLOSE_MS,
   GENIE_GLYPH_DELAY_MS,
@@ -38,9 +35,9 @@ export interface RailMotion {
    * Whether the rail BODY should be at full size and opacity.
    *
    * Only the floating panel is ever anything else. Collapsing is not the body's
-   * animation to play: its cards go into their own glyphs one by one (see
-   * `WidgetMotion`'s stow), and a block that also shrank would be the same
-   * gesture happening twice at two scales.
+   * animation to play: its cards fade out where they stand as the strip's glyphs
+   * slide in (see `WidgetMotion`'s stow), and a block that also shrank would be a
+   * second gesture drawn on top of theirs.
    */
   bodyOut: boolean
   /** `display: none`, which arrives only once the retract has played out. */
@@ -109,7 +106,9 @@ export const useRailMotion = ({
    */
   const [live, setLive] = useState(false)
   useEffect(() => {
-    if (drawn) setLive(true)
+    if (drawn) {
+      setLive(true)
+    }
   }, [drawn])
   const animated = live && !reducedMotion
 
@@ -137,7 +136,9 @@ export const useRailMotion = ({
   useLayoutEffect(() => {
     // Nothing reads the variable until the rail is drawn, so there is nothing to
     // animate from either.
-    if (!drawn) return
+    if (!drawn) {
+      return
+    }
     if (!animated) {
       widthValue.jump(width)
       return

@@ -62,7 +62,9 @@ export function getFiltersFromUrl<Definition extends FiltersDefinition>(
   const url = new URL(window.location.href)
   const serialized = url.searchParams.get(paramName)
 
-  if (!serialized) return null
+  if (!serialized) {
+    return null
+  }
 
   try {
     return deserializeFilters(serialized)

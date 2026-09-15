@@ -1,3 +1,4 @@
+import { motionTokens } from "@factorialco/f0-core"
 import { type Transition } from "motion/react"
 
 /**
@@ -22,10 +23,14 @@ export const ENTRY_STAGGER_CAP_MS = 210
 export const entryStaggerDelay = (order: number): number =>
   Math.min(order * ENTRY_STAGGER_MS, ENTRY_STAGGER_CAP_MS) / 1000
 
-/** Fast start, soft landing, NO overshoot (Material "emphasized decelerate"). */
-export const EASE_OUT_SWIFT: [number, number, number, number] = [
-  0.05, 0.7, 0.1, 1,
-]
+/**
+ * Fast start, soft landing, NO overshoot (Material "emphasized decelerate").
+ *
+ * Re-exported from `f0-core` rather than declared here: the application frame
+ * moves the window this transcript lives inside, and the two describing the
+ * same seam with two copies of the same numbers is how they drift apart.
+ */
+export const EASE_OUT_SWIFT = motionTokens.ease.outSwift
 
 /** Row entry (messages, separators, system rows): opacity-only and FAST —
  * the row must be visible almost immediately while the transcript's follow

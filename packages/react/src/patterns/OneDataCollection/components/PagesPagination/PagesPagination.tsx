@@ -14,8 +14,12 @@ export const PagesPagination = ({
 }) => {
   const t = useI18n()
 
-  if (!isPageBasedPagination(paginationInfo) || paginationInfo.pagesCount <= 1)
+  if (
+    !isPageBasedPagination(paginationInfo) ||
+    paginationInfo.pagesCount <= 1
+  ) {
     return null
+  }
 
   return (
     <div
@@ -25,11 +29,12 @@ export const PagesPagination = ({
       )}
     >
       <span className="shrink-0 text-f1-foreground-secondary">
-        {paginationInfo.total > 0 &&
-          `${(paginationInfo.currentPage - 1) * paginationInfo.perPage + 1}-${Math.min(
-            paginationInfo.currentPage * paginationInfo.perPage,
-            paginationInfo.total
-          )} ${t.collections.visualizations.pagination.of} ${paginationInfo.total}`}
+        {paginationInfo.total > 0
+          ? `${(paginationInfo.currentPage - 1) * paginationInfo.perPage + 1}-${Math.min(
+              paginationInfo.currentPage * paginationInfo.perPage,
+              paginationInfo.total
+            )} ${t.collections.visualizations.pagination.of} ${paginationInfo.total}`
+          : null}
       </span>
       <div className="flex items-center">
         <OnePagination

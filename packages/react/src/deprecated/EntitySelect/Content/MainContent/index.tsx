@@ -1,12 +1,10 @@
 import { VirtualItem } from "@tanstack/react-virtual"
 import React, { useCallback, useMemo } from "react"
-
 import { F0Select } from "@/components/F0Select"
-
 import { Action } from "@/components/F0Select/components/SelectBottomActions"
 import { cn } from "@/lib/utils"
-import { Spinner } from "@/ui/Spinner"
 import { VirtualList } from "@/lib/VirtualList"
+import { Spinner } from "@/ui/Spinner"
 import { CreateItem } from "../../CreateItem"
 import { EntitySelectListItem } from "../../ListItem"
 import {
@@ -459,7 +457,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             goToLast={goToLast}
           />
         </div>
-        {groups && groups.length > 1 && (
+        {groups && groups.length > 1 ? (
           <div className="flex-1">
             <F0Select
               label="Group"
@@ -474,7 +472,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               )}
             />
           </div>
-        )}
+        ) : null}
       </header>
       <section
         className={cn(
@@ -482,12 +480,12 @@ export const MainContent: React.FC<MainContentProps> = ({
           !showFooter ? "rounded-b-xl border-r-0" : ""
         )}
       >
-        {loading && (
+        {loading ? (
           <div className="flex h-full w-full flex-row items-center justify-center">
             <Spinner />
           </div>
-        )}
-        {!loading && !totalFilteredEntities && (
+        ) : null}
+        {!loading && !totalFilteredEntities ? (
           <div
             className="absolute flex w-full flex-col items-center justify-center gap-0.5 p-5"
             style={{
@@ -499,8 +497,8 @@ export const MainContent: React.FC<MainContentProps> = ({
               {notFoundSubtitle}
             </span>
           </div>
-        )}
-        {!loading && (!!totalFilteredEntities || onCreate) && (
+        ) : null}
+        {!loading && (!!totalFilteredEntities || onCreate) ? (
           <div className="h-full">
             {!groupView ? (
               <VirtualList
@@ -515,7 +513,9 @@ export const MainContent: React.FC<MainContentProps> = ({
                 height={VIRTUAL_LIST_HEIGHT}
                 itemCount={totalFlattenedItems + (onCreate ? 1 : 0)}
                 itemSize={(index) => {
-                  if (index === 0 && onCreate) return ITEM_SIZE_DEFAULT
+                  if (index === 0 && onCreate) {
+                    return ITEM_SIZE_DEFAULT
+                  }
                   const adjustedIndex = onCreate ? index - 1 : index
                   return flattenedList[adjustedIndex]?.parent === null
                     ? ITEM_SIZE_PARENT
@@ -526,7 +526,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               />
             )}
           </div>
-        )}
+        ) : null}
       </section>
       <Footer
         onSelectAll={onSelectAll}

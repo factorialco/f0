@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import { VirtualList } from "@/lib/VirtualList"
 import { ListTag } from "../../ListTag"
 import {
@@ -63,11 +62,11 @@ export const SecondaryContent = ({
   return (
     <div className="w-full flex-col rounded-r-xl">
       <div className="flex h-[48px] rounded-tr-xl border-0 border-b-[1px] border-solid border-f1-border-secondary bg-f1-background/30 p-3 backdrop-blur-2xl">
-        {selectedLabel && (
+        {selectedLabel ? (
           <span className="my-auto text-f1-foreground-secondary">
             {totalSelectedSubItems} {selectedLabel}
           </span>
-        )}
+        ) : null}
       </div>
       <div className="flex flex-col gap-3 rounded-br-xl bg-f1-background pb-0 pl-2">
         <VirtualList
@@ -78,6 +77,7 @@ export const SecondaryContent = ({
           renderer={(vi) => {
             const current = flattenedList[vi.index]
             if (!current) {
+              // oxlint-disable-next-line react/jsx-no-useless-fragment -- the renderer must return an element
               return <></>
             }
             return (

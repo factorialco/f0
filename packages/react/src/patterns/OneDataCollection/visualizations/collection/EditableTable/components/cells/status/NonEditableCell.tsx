@@ -1,5 +1,4 @@
 import { RecordType } from "@/hooks/datasource/types/records.typings"
-
 import { EditableCellProps } from ".."
 import { BaseCell } from "../BaseCell"
 import { ReadOnlyCellContent } from "../ReadOnlyCellContent"

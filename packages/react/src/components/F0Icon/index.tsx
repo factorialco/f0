@@ -1,5 +1,4 @@
 import { withDataTestId } from "@/lib/data-testid"
-
 import { Component } from "../../lib/component/component"
 import {
   F0Icon as IconComponent,

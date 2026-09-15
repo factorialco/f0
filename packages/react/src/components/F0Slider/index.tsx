@@ -1,7 +1,6 @@
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
-
 import { F0SliderBase } from "./F0Slider"
 import { F0SliderSkeleton } from "./F0SliderSkeleton"
 

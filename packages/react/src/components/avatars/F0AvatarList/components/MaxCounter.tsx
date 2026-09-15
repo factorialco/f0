@@ -1,13 +1,11 @@
 import { cva } from "cva"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { internalAvatarTypes } from "@/ui/Avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-
 import { AvatarVariant, AvatarVariants, F0Avatar } from "../../F0Avatar"
 import { type AvatarListSize, type F0AvatarListExtras } from "../types"
 import { getAvatarDisplayName } from "../utils"
@@ -106,7 +104,7 @@ export const MaxCounter = ({
 
   // Without a list there is nothing to disclose, so the counter stays a plain
   // element: a button would advertise an interaction that does not exist.
-  if (!list?.length)
+  if (!list?.length) {
     return (
       <div
         className={cn(
@@ -117,6 +115,7 @@ export const MaxCounter = ({
         {counterContent}
       </div>
     )
+  }
 
   const items = list.map((avatar, index) => {
     const description = avatar.tooltipDescription
@@ -135,11 +134,11 @@ export const MaxCounter = ({
           <div className="truncate font-semibold">
             {getAvatarDisplayName(avatarType, avatar)}
           </div>
-          {description && (
+          {description ? (
             <div className="truncate text-sm text-current opacity-70">
               {description}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     )
@@ -215,14 +214,18 @@ export const MaxCounter = ({
         onPointerLeave={closeByPointer}
         onOpenAutoFocus={(event) => {
           // Hover must not pull focus out of whatever the user is doing.
-          if (openedByPointer.current) event.preventDefault()
+          if (openedByPointer.current) {
+            event.preventDefault()
+          }
         }}
         onCloseAutoFocus={(event) => {
           // ...and must not push it back either. Radix returns focus to the
           // trigger on close, which after a hover-and-leave leaves the counter
           // sitting there focus-ringed as though it had been tabbed to. Only a
           // card the user opened deliberately should hand focus back.
-          if (openedByPointer.current) event.preventDefault()
+          if (openedByPointer.current) {
+            event.preventDefault()
+          }
         }}
       >
         {/* 172px, the legacy cap — not the viewport clamp. Same visual height

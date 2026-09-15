@@ -1,17 +1,16 @@
 import { Fragment, ReactNode, useState } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { ChevronRight } from "@/icons/app"
-import { isExternalHref, Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
-import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
 import {
   DropdownInternal,
   type DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
+import { ChevronRight } from "@/icons/app"
+import { isExternalHref, Link } from "@/lib/linkHandler"
+import { cn } from "@/lib/utils"
 
 /**
  * One of a row's hover actions: a button at the row's right that acts on THAT
@@ -89,6 +88,56 @@ const ACTIONS_CLASS = cn(
 const ACTIONS_PINNED_CLASS = "pointer-events-auto opacity-100"
 
 /**
+ * ONE FACT on a row's second line — the unit a `description` is made of when
+ * the row has more than one thing to say ("€340", "12 receipts", "2 days
+ * overdue"). Parts draw dot-separated, each carrying its OWN tone, so the one
+ * fact that has gone wrong goes red while the rest keep murmuring.
+ *
+ * Put the critical part FIRST. The second line is a single truncating line —
+ * about 306px at the rail's 24rem width, some 40 characters — and it is cut
+ * from the RIGHT, so a part marked critical in third place is the part most
+ * likely to vanish into the ellipsis. Marking a part critical claims it is the
+ * most important thing on the line; leading with it makes that claim true.
+ */
+export type DescriptionPart = {
+  text: string
+  /** Draws THIS part critical rather than muted. */
+  critical?: boolean
+}
+
+/** A row's second line, in either of the forms it may be given. */
+export type Description = string | DescriptionPart[]
+
+/**
+ * A `description` as the row draws it: a list of parts, whatever form it
+ * arrived in, with the empty ones dropped. Empty means there is no second line
+ * at all — an `[]` is as silent as an absent `description`, which a bare
+ * truthiness check would get wrong.
+ */
+export function descriptionParts(
+  description: Description | undefined,
+  descriptionCritical = false
+): DescriptionPart[] {
+  if (typeof description === "string") {
+    return description
+      ? [{ text: description, critical: descriptionCritical }]
+      : []
+  }
+  return (description ?? []).filter((part) => part.text)
+}
+
+/**
+ * A `description` flattened to PLAIN TEXT. What a compact row's tooltip can
+ * carry — `Tooltip`'s `label` takes a string — so a segmented second line
+ * arrives there dot-joined and untinted.
+ */
+export function descriptionText(description: Description | undefined): string {
+  return descriptionParts(description)
+    .map((part) => part.text)
+    .join(" · ")
+}
+
+/**
  * The BASE row every Home list draws: a LEFT slot, a text stack and a RIGHT
  * slot. A row that goes somewhere says so by being a link — hover state and
  * all — not with a trailing chevron: a column of arrows repeating "clickable"
@@ -100,7 +149,10 @@ const ACTIONS_PINNED_CLASS = "pointer-events-auto opacity-100"
  * module glyph, an alert).
  *
  * The text stack is three optional voices: `title` leads, `subtitle` murmurs on
- * the same line after a dot, `description` takes the second line.
+ * the same line after a dot, `description` takes the second line. Either
+ * murmuring voice, when what it carries is BAD NEWS about the row — overdue,
+ * rejected, over budget — stops murmuring and says so (`subtitleCritical`,
+ * `descriptionCritical`).
  *
  * A row can also carry `actions` — what you can DO to it without leaving the
  * widget (snooze it, dismiss it). They stay out of the way until the row is
@@ -119,8 +171,33 @@ export interface HomeListItemProps {
   title: string
   /** Muted, on the title's line, dot-separated. */
   subtitle?: string
-  /** The second line. */
-  description?: string
+  /**
+   * Draws the `subtitle` CRITICAL rather than muted — the row is overdue,
+   * rejected, over budget. Per row, because it is a state of THAT row's data:
+   * one list holds rows whose subtitle is bad news and rows whose isn't.
+   *
+   * The title reads the same either way — it says what the row IS, and the
+   * subtitle is what has gone wrong with it. Inert without a `subtitle`.
+   */
+  subtitleCritical?: boolean
+  /**
+   * The second line — one string, or {@link DescriptionPart}s when the row has
+   * several facts to state and only some of them are bad news. Parts draw
+   * dot-separated and each carries its own tone.
+   */
+  description?: Description
+  /**
+   * Draws the whole `description` CRITICAL rather than muted — the row is
+   * overdue, rejected, over budget. Per row, because it is a state of THAT
+   * row's data: one list holds rows whose second line is bad news and rows
+   * whose isn't.
+   *
+   * The title reads the same either way — it says what the row IS, and the
+   * description is what has gone wrong with it. Inert without a
+   * `description`, and IGNORED when the description is already a list of
+   * parts: those carry their own `critical`.
+   */
+  descriptionCritical?: boolean
   /** Trailing slot: a tag, a counter, people. */
   right?: ReactNode
   /**
@@ -144,6 +221,16 @@ export interface HomeListItemProps {
   href?: string
   /** A trailing chevron. Off — the row's link affordance is the row itself. */
   showChevron?: boolean
+  /**
+   * Called when the row is activated, ALONGSIDE the navigation its `href`
+   * performs — it neither replaces nor gates it, so a middle-click or a
+   * modified click still behaves like the link it is.
+   *
+   * The Home's analytics seam, wired by the `list` slot from the layout's
+   * `tracking` prop. NOT a click behavior: a row's only one is still its
+   * `href`, which is why this is not part of the row DATA a host writes.
+   */
+  onActivate?: () => void
 }
 
 export function HomeListItem({
@@ -152,12 +239,15 @@ export function HomeListItem({
   left,
   title,
   subtitle,
+  subtitleCritical = false,
   description,
+  descriptionCritical = false,
   right,
   actions,
   unread = false,
   href,
   showChevron = false,
+  onActivate,
 }: HomeListItemProps) {
   const hasActions = Boolean(actions?.length)
   // The card the row landed in — the row's controls step up with it.
@@ -167,6 +257,7 @@ export function HomeListItem({
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const leading =
     left ?? (avatar ? <F0Avatar avatar={avatar} size={avatarSize} /> : null)
+  const parts = descriptionParts(description, descriptionCritical)
 
   const content = (
     <>
@@ -186,14 +277,60 @@ export function HomeListItem({
             {title}
           </span>
           {subtitle ? (
-            <span className="truncate text-f1-foreground-secondary">
+            // The dot takes the subtitle's colour with it: it is the subtitle's
+            // own punctuation, and a muted separator against a critical phrase
+            // reads as a rendering slip at this size.
+            <span
+              className={cn(
+                "truncate",
+                subtitleCritical
+                  ? "text-f1-foreground-critical"
+                  : "text-f1-foreground-secondary"
+              )}
+            >
               · {subtitle}
             </span>
           ) : null}
         </div>
-        {description ? (
-          <div className="truncate text-f1-foreground-secondary">
-            {description}
+        {parts.length > 0 ? (
+          // The ellipsis `truncate` adds is painted in THIS element's colour,
+          // not the last part's — so the container has to carry a tone of its
+          // own. Left to inherit, a link row's second line ends in a browser-
+          // blue "…" hanging off the end of the sentence.
+          //
+          // One part lends its own tone, so a wholly critical line truncates
+          // in critical. Several fall back to muted, like the separators: the
+          // ellipsis stands for the line rather than for whichever part it
+          // happened to cut.
+          <div
+            className={cn(
+              "truncate",
+              parts.length === 1 && parts[0].critical
+                ? "text-f1-foreground-critical"
+                : "text-f1-foreground-secondary"
+            )}
+          >
+            {parts.map((part, i) => (
+              <Fragment key={i}>
+                {/* The separator belongs to NEITHER neighbour, so it stays
+                    muted between two parts of any tone — unlike the subtitle's
+                    leading dot, which is that subtitle's own punctuation and
+                    takes its colour. A red separator would read as a third,
+                    wordless piece of bad news. */}
+                {i > 0 ? (
+                  <span className="text-f1-foreground-secondary">{" · "}</span>
+                ) : null}
+                <span
+                  className={
+                    part.critical
+                      ? "text-f1-foreground-critical"
+                      : "text-f1-foreground-secondary"
+                  }
+                >
+                  {part.text}
+                </span>
+              </Fragment>
+            ))}
           </div>
         ) : null}
       </div>
@@ -227,6 +364,7 @@ export function HomeListItem({
   const row = href ? (
     <Link
       href={href}
+      onClick={onActivate}
       className={cn(className, "no-underline")}
       {...(isExternalHref(href) ? { target: "_blank", rel: "noreferrer" } : {})}
     >
@@ -236,7 +374,9 @@ export function HomeListItem({
     <div className={className}>{content}</div>
   )
 
-  if (!hasActions) return row
+  if (!hasActions) {
+    return row
+  }
 
   return (
     <div className="group relative">
@@ -260,8 +400,9 @@ export function HomeListItem({
             />
           )
 
-          if (!action.items)
+          if (!action.items) {
             return <Fragment key={action.label}>{button}</Fragment>
+          }
 
           return (
             <DropdownInternal

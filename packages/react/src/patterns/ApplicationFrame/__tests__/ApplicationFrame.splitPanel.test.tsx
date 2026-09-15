@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   zeroRender as render,
@@ -8,7 +7,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 // Drives the panel the way the real hosts do: the sidebar mounts a

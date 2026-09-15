@@ -1,5 +1,11 @@
-import { Fragment, isValidElement, ReactNode, useMemo, useState } from "react"
-
+import {
+  Fragment,
+  isValidElement,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import {
   modules,
@@ -7,16 +13,19 @@ import {
 } from "@/components/avatars/F0AvatarModule/modules"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0SearchInput } from "@/components/F0SearchInput"
-import { Star } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { ArrowLeft, Star } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
+import { F0Form, useF0Form } from "@/patterns/F0Form"
 import {
   resolveWidgetHeader,
   widgetChrome,
+  widgetParamsAreComplete,
   type HomeWidgetItem,
   type SlotRenderers,
+  type WidgetParams,
+  type WidgetParamsSchema,
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import type { WidgetContainerSide } from "../WidgetContainer"
@@ -24,14 +33,19 @@ import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 
 /**
  * The width each area gives a widget, used to cap the preview when the picker is
- * opened for one. The rail is the layout's `asideWidth` and the main column is
- * its `mainWidth` — f0's `max-w-content` reading column — so a widget previews at
- * the width the column it is headed for will really give it.
+ * opened for one. These are the layout's own `mainWidth` and `asideWidth`
+ * defaults, so a widget previews at the width the column it is headed for will
+ * really give it — which matters most for the widgets that divide their column
+ * into tiles, where 40px of preview is a visibly different tile.
+ *
+ * ⚠️ `main` IS 672, NOT `max-w-content` (712). The main column stopped borrowing
+ * the reading column's measure — see `MAIN_WIDTH` in `NewHomeLayout`. Keep the
+ * two in step: a preview drawn at the wrong width is a preview that lies.
  *
  * Override either with `previewWidth` when the app's own columns differ.
  */
 const AREA_PREVIEW_WIDTH: Record<WidgetContainerSide, number> = {
-  main: 712,
+  main: 672,
   right: 396,
 }
 
@@ -88,6 +102,9 @@ export interface WidgetCatalogItem {
    * retire an entry without deleting it.
    */
   areas?: WidgetContainerSide[]
+  paramsSchema?: WidgetParamsSchema
+  params?: WidgetParams
+  addWithDefaults?: boolean
 }
 
 /**
@@ -111,7 +128,7 @@ export interface WidgetCatalogProps {
   /** The widgets that can be added, in the order to list them. */
   widgets: WidgetCatalogItem[]
   /** Called with the chosen widget id when the CTA is pressed. */
-  onAdd: (id: string) => void
+  onAdd: (id: string, params?: WidgetParams) => void
   /**
    * The DOMAINS the picker is organised into, in the order to show them. Omit it
    * and the list is flat — grouping is an offer, not a requirement.
@@ -142,8 +159,16 @@ export interface WidgetCatalogProps {
    * "No renderer for slot …" and then render properly once added.
    */
   slotRenderers?: SlotRenderers
+  rebuildPreview?: (
+    item: WidgetCatalogItem,
+    params: WidgetParams
+  ) => WidgetCatalogItem["preview"]
   title?: string
 }
+
+type WidgetCatalogStep = "pick" | "configure"
+
+const PREVIEW_DELAY_MS = 250
 
 /**
  * Which of the two things a `preview` is. A `HomeWidgetItem` is a plain object
@@ -167,17 +192,21 @@ const isWidgetItem = (
  */
 const CatalogPreview = ({
   preview,
+  params,
   slotRenderers,
 }: {
   preview: WidgetCatalogItem["preview"]
+  params?: WidgetParams
   slotRenderers?: SlotRenderers
 }) => {
-  if (!isWidgetItem(preview)) return <>{preview}</>
+  if (!isWidgetItem(preview)) {
+    return <>{preview}</>
+  }
   return (
     <SlotWidget
       {...widgetChrome(preview)}
       header={preview.header}
-      params={preview.params}
+      params={params ?? preview.params}
       fullHeight={preview.fullHeight}
       slots={preview.slots}
       loading={preview.loading}
@@ -187,11 +216,24 @@ const CatalogPreview = ({
 }
 
 /** The sentence under a preview: the item's own, else the widget's. */
-const previewInfo = (item: WidgetCatalogItem) =>
+const previewInfo = (
+  item: WidgetCatalogItem,
+  preview: WidgetCatalogItem["preview"],
+  params?: WidgetParams
+) =>
   item.info ??
-  (isWidgetItem(item.preview)
-    ? resolveWidgetHeader(item.preview.header, item.preview.params)?.info
+  (isWidgetItem(preview)
+    ? resolveWidgetHeader(preview.header, params ?? preview.params)?.info
     : undefined)
+
+const itemParamsSchema = (item: WidgetCatalogItem) =>
+  item.paramsSchema ??
+  (isWidgetItem(item.preview) ? item.preview.paramsSchema : undefined)
+
+const itemParams = (item: WidgetCatalogItem): WidgetParams =>
+  item.params ??
+  (isWidgetItem(item.preview) ? item.preview.params : undefined) ??
+  {}
 
 /**
  * A section's heading: its glyph and its name.
@@ -241,6 +283,7 @@ export function WidgetCatalog({
   area,
   previewWidth,
   slotRenderers,
+  rebuildPreview,
   title = "Add widget",
 }: WidgetCatalogProps) {
   const t = useI18n()
@@ -248,6 +291,17 @@ export function WidgetCatalog({
     useWidgetDialogLayout()
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [step, setStep] = useState<WidgetCatalogStep>("pick")
+  const [stepped, setStepped] = useState(false)
+  const goToStep = (next: WidgetCatalogStep) => {
+    setStepped(true)
+    setStep(next)
+  }
+  const [draft, setDraft] = useState<{
+    id: string
+    params: WidgetParams
+  } | null>(null)
+  const { formRef, getValues, trigger } = useF0Form()
 
   const needle = query.trim().toLowerCase()
   // The column decides the preview's width unless the app overrides it — a rail
@@ -300,12 +354,12 @@ export function WidgetCatalog({
       // No heading: these belong to nothing in particular, and inventing "Other"
       // for them would claim they do.
       ...(loose.length ? [{ id: "ungrouped", items: loose }] : []),
-    ] as Array<{
+    ] as {
       id: string
       label?: string
       icon?: IconType
       items: WidgetCatalogItem[]
-    }>
+    }[]
   }, [widgets, groups, needle, area, t])
 
   // Selection follows the ORDER THE LIST IS IN, so "the first one" is the first
@@ -314,78 +368,198 @@ export function WidgetCatalog({
   const selected =
     ordered.find((w) => w.id === selectedId) ?? ordered[0] ?? null
 
+  const schema = selected ? itemParamsSchema(selected) : undefined
+  const needsStep =
+    schema !== undefined &&
+    !(
+      selected?.addWithDefaults &&
+      widgetParamsAreComplete(schema, itemParams(selected))
+    )
+  const configuring = step === "configure" && needsStep
+  const params =
+    selected && draft?.id === selected.id
+      ? draft.params
+      : selected
+        ? itemParams(selected)
+        : {}
+  const previewed =
+    configuring && selected && rebuildPreview
+      ? rebuildPreview(selected, params)
+      : selected?.preview
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep("pick")
+      setStepped(false)
+      setDraft(null)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (step === "configure" && !needsStep) {
+      setStep("pick")
+    }
+  }, [step, needsStep])
+
   return (
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={
+        configuring && selected
+          ? t.widgets.configureWidget.replace("{{title}}", selected.title)
+          : title
+      }
       // Fullscreen unless the display is big enough for a centered box to be
       // worth it — these two columns want the room (`useWidgetDialogLayout`).
       position={position}
       width={width}
-      primaryAction={{
-        label: "Add widget",
-        disabled: !selected,
-        onClick: () => selected && onAdd(selected.id),
-      }}
+      primaryAction={
+        configuring && selected
+          ? {
+              label: "Add widget",
+              onClick: async () => {
+                if (!(await trigger())) {
+                  return
+                }
+                onAdd(selected.id, getValues())
+              },
+            }
+          : {
+              label: needsStep ? t.wizard.next : "Add widget",
+              disabled: !selected,
+              onClick: () => {
+                if (!selected) {
+                  return
+                }
+                if (needsStep) {
+                  goToStep("configure")
+                } else if (schema) {
+                  onAdd(selected.id, params)
+                } else {
+                  onAdd(selected.id)
+                }
+              },
+            }
+      }
+      secondaryAction={
+        configuring && selected
+          ? {
+              label: t.actions.back,
+              icon: ArrowLeft,
+              iconPosition: "left",
+              onClick: () => {
+                setDraft({ id: selected.id, params: getValues() })
+                goToStep("pick")
+              },
+            }
+          : undefined
+      }
     >
       <div className={bodyClassName}>
-        {/* The picker: a search field leading the widget rows. */}
-        <div className={cn("flex flex-col gap-2", asideClassName)}>
-          <F0SearchInput
-            value={query}
-            onChange={setQuery}
-            placeholder="Search widgets"
-          />
-          <div className="flex flex-col gap-1 overflow-y-auto">
-            {sections.map((section) => (
-              <Fragment key={section.id}>
-                {section.label ? (
-                  <SectionHeader label={section.label} icon={section.icon} />
-                ) : null}
-                {section.items.map((w) => (
-                  <button
-                    key={w.id}
-                    type="button"
-                    onClick={() => setSelectedId(w.id)}
-                    className={
-                      "flex items-center gap-3 rounded-md p-2 text-left " +
-                      (selected?.id === w.id
-                        ? "bg-f1-background-selected"
-                        : "hover:bg-f1-background-tertiary")
-                    }
-                  >
-                    <F0AvatarIcon icon={w.icon} size="lg" />
-                    <span className="truncate font-medium text-f1-foreground">
-                      {w.title}
-                    </span>
-                  </button>
+        <div
+          key={step}
+          className={cn(
+            "flex min-h-0 flex-col gap-2",
+            asideClassName,
+            stepped &&
+              cn(
+                "duration-300 ease-out animate-in fade-in motion-reduce:animate-none",
+                configuring ? "slide-in-from-right-4" : "slide-in-from-left-4"
+              )
+          )}
+        >
+          {configuring && selected && schema ? (
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <F0Form
+                key={selected.id}
+                formRef={formRef}
+                name="widget-params"
+                schema={schema}
+                defaultValues={params}
+                submitConfig={{
+                  type: "autosubmit",
+                  delay: PREVIEW_DELAY_MS,
+                  hideActionBar: true,
+                }}
+                styling={{ noPadding: true }}
+                onSubmit={(values: WidgetParams) => {
+                  setDraft({ id: selected.id, params: values })
+                  return { success: true }
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              {/* The picker: a search field leading the widget rows. */}
+              <F0SearchInput
+                value={query}
+                onChange={setQuery}
+                placeholder="Search widgets"
+              />
+              <div className="flex flex-col gap-1 overflow-y-auto">
+                {sections.map((section) => (
+                  <Fragment key={section.id}>
+                    {section.label ? (
+                      <SectionHeader
+                        label={section.label}
+                        icon={section.icon}
+                      />
+                    ) : null}
+                    {section.items.map((w) => (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => setSelectedId(w.id)}
+                        className={
+                          "flex items-center gap-3 rounded-md p-2 text-left " +
+                          (selected?.id === w.id
+                            ? "bg-f1-background-selected"
+                            : "hover:bg-f1-background-tertiary")
+                        }
+                      >
+                        <F0AvatarIcon icon={w.icon} size="lg" />
+                        <span className="truncate font-medium text-f1-foreground">
+                          {w.title}
+                        </span>
+                      </button>
+                    ))}
+                  </Fragment>
                 ))}
-              </Fragment>
-            ))}
-            {ordered.length === 0 ? (
-              <div className="p-2 text-f1-foreground-secondary">
-                {/* Two ways to end up with nothing, and they are not the same
+                {ordered.length === 0 ? (
+                  <div className="p-2 text-f1-foreground-secondary">
+                    {/* Two ways to end up with nothing, and they are not the same
                     problem: a search that matched none can be cleared, while a
                     column with nothing left to offer cannot. */}
-                {needle
-                  ? "No widgets match your search."
-                  : "No widgets to add here."}
+                    {needle
+                      ? "No widgets match your search."
+                      : "No widgets to add here."}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
+            </>
+          )}
         </div>
         {/* The preview: the real widget, centered on the page grey, at the width
             the target column will really give it — and it JUMPS in as you move
             down the list, so each row you land on announces its widget. */}
         <WidgetPreviewPane
           previewKey={selected?.id}
-          info={selected ? previewInfo(selected) : undefined}
+          info={
+            selected
+              ? previewInfo(
+                  selected,
+                  previewed,
+                  configuring ? params : undefined
+                )
+              : undefined
+          }
           previewWidth={resolvedPreviewWidth}
         >
           {selected ? (
             <CatalogPreview
-              preview={selected.preview}
+              preview={previewed}
+              params={configuring ? params : undefined}
               slotRenderers={slotRenderers}
             />
           ) : null}

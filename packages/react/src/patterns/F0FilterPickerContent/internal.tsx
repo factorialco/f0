@@ -3,12 +3,10 @@
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import type { FiltersDefinition } from "../OneFilterPicker/types"
-import type { FilterPickerInternalProps } from "./internal-types"
-
 import { FilterContent } from "../OneFilterPicker/components/FilterContent"
 import { FilterList } from "../OneFilterPicker/components/FilterList"
+import type { FiltersDefinition } from "../OneFilterPicker/types"
+import type { FilterPickerInternalProps } from "./internal-types"
 
 /**
  * Internal component that renders the filter picker content.
@@ -48,7 +46,7 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           onFilterSelect={onFilterSelect}
           onClickApplyFilters={onApply}
         />
-        {selectedFilterKey && (
+        {selectedFilterKey ? (
           <div className="min-w-[340px] flex-1">
             <FilterContent
               selectedFilterKey={selectedFilterKey}
@@ -57,23 +55,23 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
               onFilterChange={onFilterChange}
             />
           </div>
-        )}
+        ) : null}
       </div>
       {showApplyButton || onClear ? (
         <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
-          {onClear && (
+          {onClear ? (
             <F0Button
               onClick={onClear}
               label={i18n.collections.emptyStates.noResults.clearFilters}
               variant="outline"
             />
-          )}
-          {showApplyButton && (
+          ) : null}
+          {showApplyButton ? (
             <F0Button
               onClick={onApply}
               label={applyButtonLabel ?? i18n.filters.applyFilters}
             />
-          )}
+          ) : null}
         </div>
       ) : null}
     </div>

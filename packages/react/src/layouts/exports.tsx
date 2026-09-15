@@ -1,6 +1,5 @@
 import { Component } from "@/lib/component/component"
 import { withDataTestId } from "@/lib/data-testid"
-
 import { HomeLayout as HomeLayoutComponent } from "./HomeLayout"
 import {
   StandardLayout as StandardLayoutComponent,

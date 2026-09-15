@@ -1,17 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { subDays } from "date-fns"
 import { useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { granularityDefinitions } from "@/components/OneCalendar"
 import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
-
 import { DateRange, WeekStartDay } from "@/components/OneCalendar/types"
+import { payrollPeriods } from "@/lib/storybook-utils/payrollPeriods"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"
-import { payrollPeriods } from "@/lib/storybook-utils/payrollPeriods"
 
 const meta = {
   title: "Filters/DateNavigator",

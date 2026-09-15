@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
@@ -18,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 import { FormMessage } from "@/ui/form"
-
 import { useQuestionTypes } from "../../constants"
 import { useSurveyFormBuilderContext } from "../../Context"
 import { useDragContext } from "../../DragContext"
@@ -33,6 +31,34 @@ const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
 }
 
+/**
+ * Wraps a field that `lockedFields` has frozen. Such a field has no affordance
+ * of its own — no lock, since that icon means the whole card is frozen — so the
+ * notice hangs off this wrapper, which stays pointer-interactive even though the
+ * textarea inside is disabled and fires no hover events.
+ */
+const FrozenFieldNotice = ({
+  notice,
+  className,
+  children,
+}: {
+  notice: { description: string } | null
+  className?: string
+  children: React.ReactNode
+}) => {
+  const content = <div className={className}>{children}</div>
+
+  if (!notice) {
+    return content
+  }
+
+  return (
+    <Tooltip instant {...notice}>
+      {content}
+    </Tooltip>
+  )
+}
+
 export const BaseQuestion = ({
   id,
   title,
@@ -42,6 +68,7 @@ export const BaseQuestion = ({
   type: questionType,
   hiddenActions,
   locked: ownLocked,
+  lockedFields,
   lockedNote,
 }: BaseQuestionProps) => {
   const {
@@ -61,6 +88,12 @@ export const BaseQuestion = ({
   // A question is locked either on its own (`locked` prop) or by living inside a
   // locked section.
   const locked = !!containingSection?.locked || !!ownLocked
+
+  // `lockedFields` freezes the wording alone. A fully locked question already
+  // freezes everything, so it subsumes them.
+  const titleLocked = locked || !!lockedFields?.includes("title")
+  const descriptionLocked = locked || !!lockedFields?.includes("description")
+  const partiallyLocked = !locked && (titleLocked || descriptionLocked)
 
   const isWithinSection = !!containingSection
 
@@ -140,20 +173,21 @@ export const BaseQuestion = ({
     }
   }, [])
 
-  const inputDisabled = disabled || locked || answering
-
-  const showCursorNotAllowed = !answering && inputDisabled
+  const titleDisabled = disabled || titleLocked || answering
+  const descriptionDisabled = disabled || descriptionLocked || answering
 
   // A read-only question (locked/disabled) with no description has nothing to
   // edit, so hide the input rather than show an editable-looking placeholder.
   // Editable questions always render it so authors can add one.
-  const showDescription = !inputDisabled || !!description
+  const showDescription = !descriptionDisabled || !!description
 
   // Blocked question: an instant, title-less tooltip shown on the lock icon. It
   // prefers the question's own `lockedNote`, falls back to the parent section's
   // `lockedNote`, and finally to a default so a locked question always says
   // something.
-  const lockTooltipProps: { description: string } | null = !locked
+  const lockTooltipProps: { description: string } | null = !(
+    locked || partiallyLocked
+  )
     ? null
     : {
         description:
@@ -181,13 +215,18 @@ export const BaseQuestion = ({
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
-          <div className="relative w-full">
+          <FrozenFieldNotice
+            className="relative w-full"
+            // Only for a partial lock: a fully locked question already carries
+            // its notice on the lock icon.
+            notice={partiallyLocked && titleLocked ? lockTooltipProps : null}
+          >
             {answering ? (
               <div className="w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold text-f1-foreground">
                 {title || titlePlaceholder}
-                {required && (
+                {required ? (
                   <span className="text-f1-foreground-critical"> *</span>
-                )}
+                ) : null}
               </div>
             ) : (
               <>
@@ -197,16 +236,16 @@ export const BaseQuestion = ({
                   aria-label={t("surveyFormBuilder.labels.title")}
                   placeholder={titlePlaceholder}
                   onChange={handleChangeTitle}
-                  disabled={inputDisabled}
+                  disabled={titleDisabled}
                   className={cn(
                     "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
-                    showCursorNotAllowed && "cursor-not-allowed"
+                    !answering && titleDisabled && "!cursor-not-allowed"
                   )}
                   style={TEXT_AREA_STYLE}
                 />
                 <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
                   <span className="opacity-0">{title || titlePlaceholder}</span>
-                  {required && (
+                  {required ? (
                     <span
                       className={cn(
                         "text-f1-foreground-critical",
@@ -216,34 +255,20 @@ export const BaseQuestion = ({
                       {" "}
                       *
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </>
             )}
-          </div>
-          {!disabled && !answering && !locked && (
-            <div
-              className={cn(
-                "opacity-0 group-hover/question:opacity-100",
-                actionsDropdownOpen && "opacity-100"
-              )}
-            >
-              <ActionsMenu
-                open={actionsDropdownOpen}
-                setOpen={setActionsDropdownOpen}
-                questionId={id}
-                questionType={questionType}
-                canDeleteQuestion={
-                  !isWithinSection || !isSingleQuestionInSection
-                }
-                hiddenActions={hiddenActions}
-              />
-            </div>
-          )}
-          {!answering && locked && (
+          </FrozenFieldNotice>
+          {!answering && locked ? (
             // Blocked question: a static lock sits where the actions "⋯" menu
             // would be, signalling the card is predefined and can't be edited.
             // Hovering just the lock (not the whole card) reveals why.
+            //
+            // A partially locked question gets no lock of its own: the icon
+            // reads as "this card is frozen", which is exactly what it is not,
+            // and it would sit next to a menu that still offers delete and
+            // duplicate. Its notice hangs off the frozen field instead.
             <div>
               {lockTooltipProps ? (
                 <Tooltip instant {...lockTooltipProps}>
@@ -276,7 +301,26 @@ export const BaseQuestion = ({
                 />
               )}
             </div>
-          )}
+          ) : null}
+          {!disabled && !answering && !locked ? (
+            <div
+              className={cn(
+                "opacity-0 group-hover/question:opacity-100",
+                actionsDropdownOpen && "opacity-100"
+              )}
+            >
+              <ActionsMenu
+                open={actionsDropdownOpen}
+                setOpen={setActionsDropdownOpen}
+                questionId={id}
+                questionType={questionType}
+                canDeleteQuestion={
+                  !isWithinSection || !isSingleQuestionInSection
+                }
+                hiddenActions={hiddenActions}
+              />
+            </div>
+          ) : null}
         </div>
         {answering ? (
           description ? (
@@ -285,22 +329,28 @@ export const BaseQuestion = ({
             </p>
           ) : null
         ) : showDescription ? (
-          <textarea
-            value={description}
-            aria-label={t("surveyFormBuilder.labels.description")}
-            placeholder={descriptionPlaceholder}
-            onChange={handleChangeDescription}
-            disabled={inputDisabled}
-            className={cn(
-              "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-              showCursorNotAllowed && "cursor-not-allowed"
-            )}
-            style={TEXT_AREA_STYLE}
-          />
+          <FrozenFieldNotice
+            notice={
+              partiallyLocked && descriptionLocked ? lockTooltipProps : null
+            }
+          >
+            <textarea
+              value={description}
+              aria-label={t("surveyFormBuilder.labels.description")}
+              placeholder={descriptionPlaceholder}
+              onChange={handleChangeDescription}
+              disabled={descriptionDisabled}
+              className={cn(
+                "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+                !answering && descriptionDisabled && "!cursor-not-allowed"
+              )}
+              style={TEXT_AREA_STYLE}
+            />
+          </FrozenFieldNotice>
         ) : null}
       </div>
       {children}
-      {answering && (
+      {answering ? (
         <FormMessage
           className="-mt-2"
           fallback={
@@ -309,8 +359,8 @@ export const BaseQuestion = ({
               : t("forms.validation.invalidType")
           }
         />
-      )}
-      {!disabled && !answering && !locked && (
+      ) : null}
+      {!disabled && !answering && !locked ? (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",
@@ -331,7 +381,7 @@ export const BaseQuestion = ({
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-80">
-              {!isWithinSection && (
+              {!isWithinSection ? (
                 <>
                   <DropdownMenuItem onClick={handleAddNewSection}>
                     <div className="flex w-full flex-row items-center gap-2">
@@ -343,7 +393,7 @@ export const BaseQuestion = ({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
-              )}
+              ) : null}
               {regularTypes.map((qt) => (
                 <DropdownMenuItem
                   key={qt.questionType}
@@ -357,7 +407,7 @@ export const BaseQuestion = ({
                   </div>
                 </DropdownMenuItem>
               ))}
-              {datasetKeys.length > 0 && (
+              {datasetKeys.length > 0 ? (
                 <>
                   <DropdownMenuSeparator />
                   {datasetKeys.map((dk) => {
@@ -370,9 +420,9 @@ export const BaseQuestion = ({
                       <DropdownMenuSub key={dk}>
                         <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
                           <div className="flex w-full flex-row items-center gap-2">
-                            {entry && (
+                            {entry ? (
                               <F0Icon icon={entry.icon} color="default" />
-                            )}
+                            ) : null}
                             <span className="flex-1 text-base font-medium">
                               {entry?.label ?? dk}
                             </span>
@@ -380,7 +430,7 @@ export const BaseQuestion = ({
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent>
-                            {isQuestionTypeAllowed("dropdown-single") && (
+                            {isQuestionTypeAllowed("dropdown-single") ? (
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleAddNewQuestion("dropdown-single", dk)
@@ -395,8 +445,8 @@ export const BaseQuestion = ({
                                   </span>
                                 </div>
                               </DropdownMenuItem>
-                            )}
-                            {isQuestionTypeAllowed("dropdown-multi") && (
+                            ) : null}
+                            {isQuestionTypeAllowed("dropdown-multi") ? (
                               <DropdownMenuItem
                                 onClick={() =>
                                   handleAddNewQuestion("dropdown-multi", dk)
@@ -411,18 +461,18 @@ export const BaseQuestion = ({
                                   </span>
                                 </div>
                               </DropdownMenuItem>
-                            )}
+                            ) : null}
                           </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                       </DropdownMenuSub>
                     )
                   })}
                 </>
-              )}
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      )}
+      ) : null}
     </div>
   )
 

@@ -3,7 +3,6 @@ import { cva, type VariantProps } from "cva"
 import { LayoutGroup, motion } from "motion/react"
 import * as React from "react"
 import { useId } from "react"
-
 import { withSkeleton } from "../lib/skeleton"
 import { cn } from "../lib/utils"
 import { Skeleton } from "./skeleton"
@@ -13,8 +12,9 @@ function getSubtree(
   content: React.ReactNode | ((children: React.ReactNode) => React.ReactNode)
 ) {
   const { asChild, children } = options
-  if (!asChild)
+  if (!asChild) {
     return typeof content === "function" ? content(children) : content
+  }
 
   const firstChild = React.Children.only(children) as React.ReactElement
   return React.cloneElement(firstChild, {
@@ -128,7 +128,7 @@ const _TabNavigationLink = React.forwardRef<
             )}
           >
             {children}
-            {active && !secondary && (
+            {active && !secondary ? (
               <motion.div
                 layoutId="underline"
                 className="absolute inset-x-0 -bottom-3 h-px bg-f1-background-inverse"
@@ -138,7 +138,7 @@ const _TabNavigationLink = React.forwardRef<
                   duration: 0.5,
                 }}
               />
-            )}
+            ) : null}
           </span>
         ))}
       </NavigationMenuPrimitives.Link>

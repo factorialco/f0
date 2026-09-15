@@ -7,7 +7,6 @@ import {
   it,
   vi,
 } from "vitest"
-
 import { getEmojiLabel } from "@/lib/emojis"
 import {
   act,
@@ -16,15 +15,14 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
-import { formatClock } from "../utils/natural-time"
 import {
   type F0ChatMessage,
   type F0ChatMessageStatus,
   type F0ChatRuntime,
 } from "../types"
+import { formatClock } from "../utils/natural-time"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).

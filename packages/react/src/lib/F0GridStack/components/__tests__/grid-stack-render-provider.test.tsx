@@ -1,7 +1,5 @@
 import type { GridStack } from "gridstack"
-
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { gridWidgetContainersMap } from "../grid-stack-render-provider"
 
 // Mock GridStack type

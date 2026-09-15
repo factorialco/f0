@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, within } from "storybook/test"
-
-import { DetailsItem } from "./index"
+import { DetailsItem } from "."
 
 const meta: Meta = {
   title: "List/DetailsItem",
@@ -82,7 +80,12 @@ export const FileVariant: Story = {
       actions: [
         {
           label: "Open",
-          onClick: () => window.open("https://example.com/contract.pdf"),
+          onClick: () =>
+            window.open(
+              "https://example.com/contract.pdf",
+              "_blank",
+              "noopener,noreferrer"
+            ),
         },
       ],
     },

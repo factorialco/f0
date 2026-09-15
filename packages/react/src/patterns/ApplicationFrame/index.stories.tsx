@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   ComponentProps,
   useCallback,
@@ -9,7 +8,7 @@ import {
   useState,
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
-
+import { F0Button } from "@/components/F0Button"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -89,8 +88,7 @@ import {
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
-
-import { ApplicationFrame } from "./index"
+import { ApplicationFrame } from "."
 
 /**
  * Mock people database for @mention search and entity resolution in Storybook.
@@ -721,6 +719,71 @@ const withMockChatSlots = (
 ): ComponentProps<typeof ApplicationFrame>["ai"] =>
   ai ? { ...ai, ...mockChatSlots } : ai
 
+/**
+ * Manual-QA controls for the frame's motion. Storybook only — nothing here
+ * ships.
+ *
+ * Opening straight into fullscreen is the one entry the product's own chrome
+ * cannot give you: the header's expand button only exists once the panel is
+ * already docked. And fullscreen is where the two hardest transitions start —
+ * leaving it for the sidepanel, and closing outright, which is a different
+ * movement (`open` goes false first, and the mode resets a commit later).
+ *
+ * `clearPanelContent` first because these stories dock conversations on the
+ * opposite edge: without it the fullscreen would be the hosted window, not
+ * the AI chat.
+ */
+const MotionQaControls = () => {
+  const {
+    setOpen,
+    setVisualizationMode,
+    clearPanelContent,
+    open,
+    visualizationMode,
+  } = useAiChat()
+
+  const openAiChat = (mode: "sidepanel" | "fullscreen") => {
+    clearPanelContent()
+    // `setVisualizationMode("fullscreen")` opens the panel by itself; the
+    // docked case has to say so.
+    if (mode === "fullscreen") {
+      setVisualizationMode("fullscreen")
+    } else {
+      setVisualizationMode("sidepanel")
+      setOpen(true)
+    }
+  }
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-f1-border-secondary p-3">
+      <span className="text-sm font-medium text-f1-foreground-secondary">
+        Motion QA
+      </span>
+      <F0Button
+        label="AI chat · fullscreen"
+        variant="outline"
+        size="sm"
+        onClick={() => openAiChat("fullscreen")}
+      />
+      <F0Button
+        label="AI chat · docked"
+        variant="outline"
+        size="sm"
+        onClick={() => openAiChat("sidepanel")}
+      />
+      <F0Button
+        label="Close panel"
+        variant="neutral"
+        size="sm"
+        onClick={() => setOpen(false)}
+      />
+      <span className="text-sm text-f1-foreground-secondary">
+        open: {String(open)} · {visualizationMode}
+      </span>
+    </div>
+  )
+}
+
 // Communications mode hides the per-page One switch (One is reached from the
 // sidebar tab), so the page header opts out via `hideOneSwitch`.
 const communicationsPageHeader = (
@@ -736,7 +799,7 @@ const communicationsPageHeader = (
 
 export const Default: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           // Transitional communications layout: conversations dock LEFT
@@ -769,6 +832,118 @@ export const Default: Story = {
               employeeAvatar: "/avatars/person05.jpg",
             }}
           >
+            <MotionQaControls />
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * Everything at once, in one channel, inside the real resizable side panel.
+ *
+ * This is the manual-QA surface for the transcript work: it opens
+ * `grp-everything-stress` — a year of history, ten extra pages, every message
+ * shape (albums of 1/2/3/4/7, a 1:10 tower, a dimensionless photo, video,
+ * voice, location, pdf/sheet/docx/text cards, file chips, link previews,
+ * replies, mentions, reactions, edits, deletions, failures, system rows) and a
+ * live typing indicator.
+ *
+ * What to exercise here:
+ * - drag the panel's resize handle across its whole range while reading history
+ *   with albums and video above the fold — the message under the cursor must
+ *   stay put, and the sticky date pill must keep showing the right day;
+ * - toggle fullscreen (150ms in, 400ms out) and cross the `md` breakpoint;
+ * - close the panel, pick a different conversation, reopen — no jump on entry;
+ * - scroll up fast through the reaction-heavy stretch — no pill may drift;
+ * - check the in-bubble time against every shape, and its legibility over the
+ *   brightest and darkest photos in light and dark.
+ */
+export const EverythingChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider pace={5}>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="grp-everything-stress"
+              tabsPersistKey="communications-everything"
+            />
+          }
+        >
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <MotionQaControls />
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The announcement channel — Factorial's own noticeboard, and the welcome
+ * screen a new employee lands on. A `type: "announcement"` channel, so every
+ * capability defaults to off with no configuration at all.
+ *
+ * What it demonstrates, top to bottom:
+ * - a header with just the identity and the close button: no ellipsis, because
+ *   a fixed two-message transcript has nothing to search;
+ * - the day separator carrying the time ("Yesterday 22:14") while the messages
+ *   themselves carry none — their timestamp is seeded, not sent;
+ * - a card attachment (`kind: "card"`) rendered as an `F0Card`, the one thing
+ *   in here that IS interactive;
+ * - no hover ellipsis on either message: no reply, no reaction, no copy;
+ * - the read-only notice where the composer would be.
+ *
+ * What to exercise: hover both messages, drag a file over the panel (no drop
+ * affordance), and check the sidebar — badge of 2, no pin on hover, and no
+ * unread divider inside once opened.
+ */
+export const AnnouncementChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider pace={5}>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="dm-factorial"
+              tabsPersistKey="communications-announcement"
+            />
+          }
+        >
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <MotionQaControls />
             <HomeLayout {...HomeLayoutStories.Default.args} />
           </DaytimePage>
         </ApplicationFrame>
@@ -799,8 +974,9 @@ const MockChatPanel = ({
   }
 
   const previewRuntime = useMemo<F0ChatRuntime>(() => {
-    if (receiptPreview !== "partial" || previewMessageId.current == null)
+    if (receiptPreview !== "partial" || previewMessageId.current == null) {
       return runtime
+    }
 
     return {
       ...runtime,
@@ -1214,7 +1390,9 @@ const ConversationsSidebarInner = ({
   // up so the panel falls back to the AI chat.
   const restored = useRef(false)
   useEffect(() => {
-    if (!restoringPanelContentId || restored.current) return
+    if (!restoringPanelContentId || restored.current) {
+      return
+    }
     restored.current = true
     // An explicit story target is deterministic fixture setup, so it must win
     // over panel content persisted by a previously visited story.
@@ -1283,9 +1461,9 @@ const ConversationsSidebarInner = ({
           />
           {/* Search lives with the tabs in the (fixed) header so it stays put
               while the body scrolls. Only the Home tab uses it. */}
-          {tab === "home" && (
+          {tab === "home" ? (
             <SearchBar placeholder="Search..." onClick={() => {}} />
-          )}
+          ) : null}
         </>
       }
       body={
@@ -1349,7 +1527,9 @@ const ReceiptStatusComparison = () => {
   const message = [...runtime.messages]
     .reverse()
     .find((item) => isUserMessage(item) && item.isMine)
-  if (!message || !isUserMessage(message)) return null
+  if (!message || !isUserMessage(message)) {
+    return null
+  }
 
   const partialMessage = {
     ...message,
@@ -1448,11 +1628,13 @@ export const Snapshot: Story = {
         await canvas.findByRole("region", { name: "Completed group receipts" })
       )
 
+      // Delivery only: the clock moved onto the bubble itself, so the footer no
+      // longer repeats it.
       await waitFor(() =>
-        expect(partial.getByRole("status")).toHaveTextContent(/^Sent · /i)
+        expect(partial.getByRole("status")).toHaveTextContent(/^Sent$/i)
       )
       await waitFor(() =>
-        expect(completed.getByRole("status")).toHaveTextContent(/^Read · /i)
+        expect(completed.getByRole("status")).toHaveTextContent(/^Read$/i)
       )
     })
   },

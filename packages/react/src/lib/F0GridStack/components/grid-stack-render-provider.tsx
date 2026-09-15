@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
 } from "react"
-
 import { useGridStackContext } from "./grid-stack-context"
 import { GridStackRenderContext } from "./grid-stack-render-context"
 

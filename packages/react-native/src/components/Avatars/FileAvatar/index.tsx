@@ -1,6 +1,5 @@
 import { ComponentProps, useMemo } from "react"
-import { Text } from "react-native"
-import { View } from "react-native"
+import { Text, View } from "react-native"
 
 import { cn } from "../../../lib/utils"
 import { Avatar } from "../../../ui/avatar"

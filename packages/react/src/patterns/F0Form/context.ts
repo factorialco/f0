@@ -1,5 +1,4 @@
 import { createContext, useContext } from "react"
-
 import type { InitialFile, UseFileUpload } from "./fields/file/types"
 import type { F0FormSubmitConfig, RenderCustomFieldFunction } from "./types"
 

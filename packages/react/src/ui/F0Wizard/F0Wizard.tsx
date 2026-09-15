@@ -1,5 +1,4 @@
 import { FC, useMemo } from "react"
-
 import type { F0DialogAction } from "@/components/dialog-alike/F0Dialog"
 // Import the unwrapped component directly to avoid the experimental-usage
 // console warning that the public (experimentalComponent-wrapped) export emits.
@@ -7,12 +6,10 @@ import { F0Dialog } from "@/components/dialog-alike/F0Dialog/F0Dialog"
 import ArrowLeft from "@/icons/app/ArrowLeft"
 import ArrowRight from "@/icons/app/ArrowRight"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
-import type { F0WizardProps } from "./types"
-
 import { WizardProvider } from "./components/WizardProvider"
 import { WizardSteps } from "./components/WizardSteps"
 import { useWizardNavigation } from "./hooks/useWizardNavigation"
+import type { F0WizardProps } from "./types"
 
 const noop = () => {}
 
@@ -40,8 +37,12 @@ export const F0Wizard: FC<F0WizardProps> = ({
   autoSkipCompletedSteps = false,
 }) => {
   const effectiveDefaultStepIndex = useMemo(() => {
-    if (defaultStepIndex !== undefined) return defaultStepIndex
-    if (!autoSkipCompletedSteps) return 0
+    if (defaultStepIndex !== undefined) {
+      return defaultStepIndex
+    }
+    if (!autoSkipCompletedSteps) {
+      return 0
+    }
     const firstIncomplete = steps.findIndex(
       (step) => step.isCompleted?.() !== true
     )

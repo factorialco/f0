@@ -13,18 +13,35 @@ import {
 import { userEvent } from "@testing-library/user-event"
 import React, { type ReactElement } from "react"
 import * as ReactDOMClient from "react-dom/client"
-
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
-
 import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
 export * from "@testing-library/react"
 
 import { MotionGlobalConfig } from "motion"
-
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { L10nProvider } from "@/lib/providers/l10n"
 MotionGlobalConfig.skipAnimations = true
+
+/**
+ * The clocks a test about elapsed TIME needs faked, and nothing else.
+ *
+ * `vi.useFakeTimers()` also fakes `requestAnimationFrame`, so advancing the
+ * clock by a few seconds makes the runner execute every animation frame in
+ * that span — hundreds of them, each re-rendering the tree. A test that walks
+ * a counter to eight seconds then costs seconds of real time, which is fine on
+ * an idle laptop and blows the 5s timeout on CI.
+ *
+ * Pass this to `vi.useFakeTimers({ toFake: CLOCKS_ONLY })` whenever the test
+ * drives an interval or a timeout and does not care about frames.
+ */
+export const CLOCKS_ONLY = [
+  "setTimeout",
+  "clearTimeout",
+  "setInterval",
+  "clearInterval",
+  "Date",
+] as const
 
 const TestProviders = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -71,7 +88,7 @@ const zeroRenderHook = <
   BaseElement extends RendererableContainer | HydrateableContainer = Container,
 >(
   render: (initialProps: Props) => Result,
-  options?: RenderHookOptions<Props, Q, Container, BaseElement> | undefined
+  options?: RenderHookOptions<Props, Q, Container, BaseElement>
 ): RenderHookResult<Result, Props> =>
   renderHook(render, { wrapper: TestProviders, ...options })
 

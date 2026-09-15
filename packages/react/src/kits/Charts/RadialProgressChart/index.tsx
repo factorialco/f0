@@ -47,7 +47,7 @@ export function RadialProgressChart({
           strokeLinecap="round"
         />
       </svg>
-      {overview && (
+      {overview ? (
         <div className="absolute inset-0 flex translate-y-0.5 flex-col items-center justify-center">
           <span className="text-sm text-f1-foreground-secondary">
             {overview.label}
@@ -56,7 +56,7 @@ export function RadialProgressChart({
             {overview.number}
           </span>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

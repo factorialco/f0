@@ -1,10 +1,7 @@
 import { act } from "@testing-library/react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { zeroRender, screen } from "@/testing/test-utils"
-
 import type { GraphNode, ZoomLevel } from "../../types"
-
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
 // React Flow requires DOM dimensions to render nodes.

@@ -1,6 +1,6 @@
+import type { IconType } from "@/components/F0Icon"
 import type { InputFieldStatus } from "@/components/F0InputField"
 import { INPUTFIELD_SIZES } from "@/components/F0InputField"
-import type { IconType } from "@/components/F0Icon"
 import type { CountryCode } from "@/lib/countries"
 
 export const phoneInputSizes = INPUTFIELD_SIZES

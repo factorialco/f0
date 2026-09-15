@@ -1,6 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   fireEvent,
@@ -8,7 +7,6 @@ import {
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { toasts } from "../imperative"
 import { ToastProvider } from "../ToastProvider"
 

@@ -2,15 +2,14 @@
 
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useCallback, useEffect, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight, Cross, Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatImagePreview } from "../providers/ChatUIProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { triggerDownload } from "../utils/download"
 import { FadeInImage } from "./FadeInImage"
@@ -54,6 +53,7 @@ export const ChatImagePreview = (): ReactNode => {
   const { reducedMotion } = useChatRenderConfig()
   const { imagePreview, closeImagePreview, setImagePreviewIndex } =
     useChatImagePreview()
+  const emit = useF0ChatEmit()
 
   // Portal above the whole app: the chat panel owns the top stacking context, so
   // the dialog's default `#content` target renders the lightbox behind it. `body`
@@ -70,7 +70,9 @@ export const ChatImagePreview = (): ReactNode => {
 
   const go = useCallback(
     (delta: number) => {
-      if (count === 0) return
+      if (count === 0) {
+        return
+      }
       setImagePreviewIndex((index + delta + count) % count)
     },
     [count, index, setImagePreviewIndex]
@@ -78,10 +80,15 @@ export const ChatImagePreview = (): ReactNode => {
 
   // Arrow keys page between a message's images while the lightbox is open.
   useEffect(() => {
-    if (!open || !multiple) return
+    if (!open || !multiple) {
+      return
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(1)
-      else if (e.key === "ArrowLeft") go(-1)
+      if (e.key === "ArrowRight") {
+        go(1)
+      } else if (e.key === "ArrowLeft") {
+        go(-1)
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -91,10 +98,12 @@ export const ChatImagePreview = (): ReactNode => {
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) closeImagePreview()
+        if (!next) {
+          closeImagePreview()
+        }
       }}
     >
-      {current && (
+      {current ? (
         <DialogContent
           container={portalTarget}
           className="h-full w-full max-w-none rounded-none bg-transparent p-0 shadow-none"
@@ -148,7 +157,10 @@ export const ChatImagePreview = (): ReactNode => {
             <PreviewControl
               icon={Download}
               label={i18n.chat.download}
-              onClick={() => triggerDownload(current.url, current.name)}
+              onClick={() => {
+                triggerDownload(current.url, current.name)
+                emit.onAttachmentDownloaded({ kind: "image" })
+              }}
             />
             <PreviewControl
               icon={Cross}
@@ -158,7 +170,7 @@ export const ChatImagePreview = (): ReactNode => {
           </div>
 
           {/* Bottom band: paging + counter (only with several images). */}
-          {multiple && (
+          {multiple ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 p-3">
               <PreviewControl
                 icon={ChevronLeft}
@@ -174,9 +186,9 @@ export const ChatImagePreview = (): ReactNode => {
                 onClick={() => go(1)}
               />
             </div>
-          )}
+          ) : null}
         </DialogContent>
-      )}
+      ) : null}
     </Dialog>
   )
 }

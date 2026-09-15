@@ -1,10 +1,4 @@
 import { useRef, useState, type ReactNode } from "react"
-
-import type {
-  F0AnalyticsDashboardAskAiTarget,
-  F0AnalyticsDashboardAskAiTargetWithQuote,
-} from "../../types"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -14,6 +8,7 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
+import { One as OneIcon } from "@/icons/ai"
 import {
   Delete,
   Download,
@@ -22,9 +17,8 @@ import {
   Minimize,
   InfoCircleLine,
 } from "@/icons/app"
-import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
-import { One as OneIcon } from "@/icons/ai"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -39,9 +33,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
-import type { DashboardItemFiltersConfig } from "../../types"
-
+import type {
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+  DashboardItemFiltersConfig,
+} from "../../types"
 import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {
@@ -169,7 +165,9 @@ export function DashboardItem({
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
-    if (!open) setIsExplanationView(false)
+    if (!open) {
+      setIsExplanationView(false)
+    }
   }
 
   // Filter to only actionable items (not separators/labels)
@@ -201,28 +199,38 @@ export function DashboardItem({
       // The host answers this one. Nothing else here applies: it may not open
       // the chat at all, so leaving fullscreen would be a guess. `hasAskOne`
       // guarantees the public payload has a real widget ID.
-      if (!itemId) return
+      if (!itemId) {
+        return
+      }
       onAskAi({ id: itemId, title })
       return
     }
 
     // Fullscreen covers the chat, so step out of it before handing the widget
     // over — same reason the delete action does.
-    if (isFullscreen) onFullscreenChange?.(false)
+    if (isFullscreen) {
+      onFullscreenChange?.(false)
+    }
     shouldFocusChatAfterMenuRef.current = true
     const quote = { text: title }
-    if (itemId) onAskAiTarget?.({ id: itemId, title, quote })
+    if (itemId) {
+      onAskAiTarget?.({ id: itemId, title, quote })
+    }
     setPendingQuote(quote)
     setAiChatOpen(true)
   }
 
   const handleAskOneMenuCloseAutoFocus = (event: Event) => {
-    if (!shouldFocusChatAfterMenuRef.current) return
+    if (!shouldFocusChatAfterMenuRef.current) {
+      return
+    }
     shouldFocusChatAfterMenuRef.current = false
 
     // Keep Radix's normal trigger restoration while the composer is still
     // mounting. The buffered request moves focus once registration completes.
-    if (focusChatInput()) event.preventDefault()
+    if (focusChatInput()) {
+      event.preventDefault()
+    }
   }
 
   const askOneMenuItem = hasAskOne ? (
@@ -250,27 +258,27 @@ export function DashboardItem({
               <h3 className="text-base font-medium text-f1-foreground">
                 {title}
               </h3>
-              {info && (
+              {info ? (
                 <div className="flex shrink-0 items-center text-f1-foreground-secondary">
                   <InfoHint info={info} />
                 </div>
-              )}
+              ) : null}
             </div>
-            {description && (
+            {description ? (
               <p className="text-base text-f1-foreground-secondary">
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
-          {(itemFilters || hasAskOne) && (
+          {itemFilters || hasAskOne ? (
             <div className={actionsClassName}>
-              {itemFilters && (
+              {itemFilters ? (
                 <DashboardItemFilters
                   {...itemFilters}
                   onOpenChange={setIsFiltersOpen}
                 />
-              )}
-              {hasAskOne && (
+              ) : null}
+              {hasAskOne ? (
                 <DropdownMenu
                   open={isDropdownOpen}
                   onOpenChange={handleDropdownOpenChange}
@@ -297,9 +305,9 @@ export function DashboardItem({
                     {askOneMenuItem}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           <OneEmptyState
@@ -350,24 +358,24 @@ export function DashboardItem({
             >
               {title}
             </OneEllipsis>
-            {info && (
+            {info ? (
               <div className="flex shrink-0 items-center text-f1-foreground-secondary">
                 <InfoHint info={info} />
               </div>
-            )}
+            ) : null}
           </div>
-          {(description || descriptionAction) && (
+          {description || descriptionAction ? (
             // Baseline-aligned row so the link sits on the description's own
             // line; the text keeps its own truncation, the link never shrinks.
             <div className="flex items-baseline gap-1">
-              {description && (
+              {description ? (
                 <OneEllipsis className="text-base text-f1-foreground-secondary">
                   {description}
                 </OneEllipsis>
-              )}
-              {descriptionAction && (
+              ) : null}
+              {descriptionAction ? (
                 <>
-                  {description && (
+                  {description ? (
                     // Separator, not content: hidden from the accessibility tree
                     // so the description and the action read as two things rather
                     // than one sentence with a stray character in it.
@@ -377,7 +385,7 @@ export function DashboardItem({
                     >
                       ·
                     </span>
-                  )}
+                  ) : null}
                   <button
                     type="button"
                     onClick={descriptionAction.onClick}
@@ -386,18 +394,18 @@ export function DashboardItem({
                     {descriptionAction.label}
                   </button>
                 </>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <div className={actionsClassName}>
-          {itemFilters && (
+          {itemFilters ? (
             <DashboardItemFilters
               {...itemFilters}
               onOpenChange={setIsFiltersOpen}
             />
-          )}
-          {hasFullscreen && (
+          ) : null}
+          {hasFullscreen ? (
             <ButtonInternal
               label={
                 isFullscreen
@@ -411,8 +419,8 @@ export function DashboardItem({
               compact
               onClick={() => onFullscreenChange?.(!isFullscreen)}
             />
-          )}
-          {showMenu && (
+          ) : null}
+          {showMenu ? (
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={handleDropdownOpenChange}
@@ -443,7 +451,7 @@ export function DashboardItem({
                   </div>
                 ) : (
                   <>
-                    {hasChartTypes && (
+                    {hasChartTypes ? (
                       <div className="mb-1 flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
                         <OneEllipsis className="text-base font-medium text-f1-foreground-tertiary">
                           {translations.ai.dashboardItem.chartType}
@@ -468,8 +476,8 @@ export function DashboardItem({
                           fullWidth
                         />
                       </div>
-                    )}
-                    {hasExplanation && (
+                    ) : null}
+                    {hasExplanation ? (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onSelect={(e) => {
@@ -485,11 +493,11 @@ export function DashboardItem({
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                    )}
+                    ) : null}
 
                     {askOneMenuItem}
 
-                    {hasDownloads && (
+                    {hasDownloads ? (
                       <DropdownMenuGroup>
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
@@ -508,9 +516,9 @@ export function DashboardItem({
                                   onClick={action.onClick}
                                 >
                                   <div className="flex w-full flex-row items-center gap-2">
-                                    {action.icon && (
+                                    {action.icon ? (
                                       <F0Icon icon={action.icon} />
-                                    )}
+                                    ) : null}
                                     <span className="flex-1">
                                       {action.label}
                                     </span>
@@ -521,12 +529,14 @@ export function DashboardItem({
                           </DropdownMenuPortal>
                         </DropdownMenuSub>
                       </DropdownMenuGroup>
-                    )}
-                    {hasDelete && (
+                    ) : null}
+                    {hasDelete ? (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => {
-                            if (isFullscreen) onFullscreenChange?.(false)
+                            if (isFullscreen) {
+                              onFullscreenChange?.(false)
+                            }
                             handleDelete(itemId)
                           }}
                           className={cn("text-f1-foreground-critical")}
@@ -539,12 +549,12 @@ export function DashboardItem({
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                    )}
+                    ) : null}
                   </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          ) : null}
         </div>
       </div>
       <div className={cn("flex-1", !fitContent && "min-h-0")}>

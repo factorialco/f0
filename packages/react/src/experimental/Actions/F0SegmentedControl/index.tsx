@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0SegmentedControl as _F0SegmentedControl } from "./F0SegmentedControl"
 
 export * from "./types"

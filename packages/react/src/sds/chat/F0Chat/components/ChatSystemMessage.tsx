@@ -1,7 +1,5 @@
 import { Fragment, type ReactNode } from "react"
-
 import { useI18n, type TranslationKey } from "@/lib/providers/i18n"
-
 import {
   type F0ChatSystemEvent,
   type F0ChatSystemMessage as F0ChatSystemMessageType,

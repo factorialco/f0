@@ -14,7 +14,9 @@ export const RadioIndicator = ({ isSelected }: RadioIndicatorProps) => {
           : "border-2 border-solid border-f1-border bg-f1-background"
       )}
     >
-      {isSelected && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+      {isSelected ? (
+        <div className="h-2 w-2 rounded-full bg-f1-background" />
+      ) : null}
     </div>
   )
 }

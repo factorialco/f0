@@ -1,7 +1,5 @@
 import { assertType } from "vitest"
-
 import { PalmTree } from "@/icons/app"
-
 import { type HomeWidgetSlot, listSlot } from "./slotRenderers"
 
 /**
@@ -59,7 +57,9 @@ test("left decides the avatar data every row must carry", () => {
 })
 
 test("right decides the trailing data every row must carry", () => {
-  listSlot({ right: "counter" }, [{ id: 1, title: "x", count: 3 }])
+  assertType<HomeWidgetSlot>(
+    listSlot({ right: "counter" }, [{ id: 1, title: "x", count: 3 }])
+  )
   listSlot({ right: "person" }, [{ id: 1, title: "x", rightAvatar: ada }])
   listSlot({ right: "person-list" }, [
     { id: 1, title: "x", avatars: [ada], remainingCount: 2 },
@@ -80,7 +80,9 @@ test("right decides the trailing data every row must carry", () => {
 })
 
 test("the schema's text voices are required — and forbidden when not declared", () => {
-  listSlot({ subtitleRequired: true }, [{ id: 1, title: "x", subtitle: "y" }])
+  assertType<HomeWidgetSlot>(
+    listSlot({ subtitleRequired: true }, [{ id: 1, title: "x", subtitle: "y" }])
+  )
   listSlot({ descriptionRequired: true }, [
     { id: 1, title: "x", description: "y" },
   ])
@@ -104,7 +106,9 @@ test("the schema's text voices are required — and forbidden when not declared"
 })
 
 test("clickBehavior: link is the ONLY click behavior — href, never onClick", () => {
-  listSlot({ clickBehavior: "link" }, [{ id: 1, title: "x", href: "/x" }])
+  assertType<HomeWidgetSlot>(
+    listSlot({ clickBehavior: "link" }, [{ id: 1, title: "x", href: "/x" }])
+  )
 
   listSlot({ clickBehavior: "link" }, [
     // @ts-expect-error link rows demand an href
@@ -124,12 +128,19 @@ test("clickBehavior: link is the ONLY click behavior — href, never onClick", (
 
 test("the OPTIONAL flags let a feed mix rows the schema would otherwise even out", () => {
   // Some rows two-line, some one — and some trailing a face, some nothing.
-  listSlot(
-    { right: "person", rightOptional: true, descriptionOptional: true },
-    [
-      { id: 1, title: "with both", description: "Due Today", rightAvatar: ada },
-      { id: 2, title: "with neither" },
-    ]
+  assertType<HomeWidgetSlot>(
+    listSlot(
+      { right: "person", rightOptional: true, descriptionOptional: true },
+      [
+        {
+          id: 1,
+          title: "with both",
+          description: "Due Today",
+          rightAvatar: ada,
+        },
+        { id: 2, title: "with neither" },
+      ]
+    )
   )
 
   listSlot({ right: "counter", rightOptional: true }, [
@@ -147,12 +158,134 @@ test("the OPTIONAL flags let a feed mix rows the schema would otherwise even out
     // @ts-expect-error a subtitle is still not allowed unless declared
     { id: 1, title: "x", subtitle: "y" },
   ])
+
+  // A subtitle only SOME rows have — the late ones say how late they are.
+  listSlot({ subtitleOptional: true }, [
+    { id: 1, title: "Expenses", subtitle: "2 days overdue" },
+    { id: 2, title: "Onboarding" },
+  ])
+})
+
+test("a row's subtitle may be critical — wherever a subtitle is declared at all", () => {
+  assertType<HomeWidgetSlot>(
+    listSlot({ subtitleRequired: true }, [
+      { id: 1, title: "x", subtitle: "2 days overdue", subtitleCritical: true },
+      { id: 2, title: "y", subtitle: "Due Friday" },
+    ])
+  )
+  listSlot({ subtitleOptional: true }, [
+    { id: 1, title: "x", subtitle: "2 days overdue", subtitleCritical: true },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no subtitle
+    { id: 1, title: "x", subtitleCritical: true },
+  ])
+})
+
+test("a row's second line may be critical — wherever a description is declared at all", () => {
+  assertType<HomeWidgetSlot>(
+    listSlot({ descriptionRequired: true }, [
+      {
+        id: 1,
+        title: "x",
+        description: "Rejected by Finance",
+        descriptionCritical: true,
+      },
+      { id: 2, title: "y", description: "Due Friday" },
+    ])
+  )
+  listSlot({ descriptionOptional: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no description
+    { id: 1, title: "x", descriptionCritical: true },
+  ])
+})
+
+test("a second line may be a LIST of facts, each with its own tone", () => {
+  assertType<HomeWidgetSlot>(
+    listSlot({ descriptionRequired: true }, [
+      {
+        id: 1,
+        title: "Expenses",
+        description: [
+          { text: "2 days overdue", critical: true },
+          { text: "€340" },
+          { text: "12 receipts" },
+        ],
+      },
+      // The plain string form still works beside it, in the same list.
+      { id: 2, title: "Onboarding", description: "Due Friday" },
+    ])
+  )
+
+  listSlot({ descriptionOptional: true }, [
+    { id: 1, title: "x", description: [{ text: "Rejected", critical: true }] },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      // @ts-expect-error a part's tone is `critical`, not `descriptionCritical`
+      description: [{ text: "Rejected", descriptionCritical: true }],
+    },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    // @ts-expect-error parts carry their own tone — the whole-line flag is not also allowed
+    {
+      id: 1,
+      title: "x",
+      description: [{ text: "Rejected", critical: true }],
+      descriptionCritical: true,
+    },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to say: this schema declares no description
+    { id: 1, title: "x", description: [{ text: "Rejected" }] },
+  ])
+})
+
+test("the two murmuring lines carry their tone independently", () => {
+  assertType<HomeWidgetSlot>(
+    listSlot({ subtitleRequired: true, descriptionRequired: true }, [
+      {
+        id: 1,
+        title: "x",
+        subtitle: "Travel",
+        description: "Rejected by Finance",
+        descriptionCritical: true,
+      },
+      {
+        id: 2,
+        title: "y",
+        subtitle: "2 days overdue",
+        subtitleCritical: true,
+        description: "Submitted Monday",
+      },
+    ])
+  )
 })
 
 test("an icon row may be tinted, and only with a colour from the palette", () => {
-  listSlot({ left: "icon" }, [
-    { id: 1, title: "Row", avatar: { icon: PalmTree, color: "purple" } },
-  ])
+  assertType<HomeWidgetSlot>(
+    listSlot({ left: "icon" }, [
+      { id: 1, title: "Row", avatar: { icon: PalmTree, color: "purple" } },
+    ])
+  )
 
   // A hex of its own, for a colour that is already data.
   listSlot({ left: "icon" }, [
@@ -170,14 +303,16 @@ test("an icon row may be tinted, and only with a colour from the palette", () =>
 })
 
 test("a row's actions are its own — no schema flag gates them", () => {
-  listSlot({}, [
-    {
-      id: 1,
-      title: "x",
-      actions: [{ label: "Dismiss", icon: PalmTree, onClick: () => {} }],
-    },
-    { id: 2, title: "y" },
-  ])
+  assertType<HomeWidgetSlot>(
+    listSlot({}, [
+      {
+        id: 1,
+        title: "x",
+        actions: [{ label: "Dismiss", icon: PalmTree, onClick: () => {} }],
+      },
+      { id: 2, title: "y" },
+    ])
+  )
 
   listSlot({}, [
     {
@@ -190,6 +325,7 @@ test("a row's actions are its own — no schema flag gates them", () => {
 })
 
 test("the schema only speaks the declared kinds", () => {
+  assertType<HomeWidgetSlot>(listSlot({}, []))
   // @ts-expect-error not a left kind
   listSlot({ left: "banana" }, [])
   // @ts-expect-error not a right kind

@@ -7,7 +7,6 @@ import {
   useContext,
   useMemo,
 } from "react"
-
 import { EventCatcherFunction } from "./types"
 
 type ContextType = { onEvent: EventCatcherFunction }
@@ -51,5 +50,5 @@ export function F0EventCatcherProvider({
 export function useF0EventCatcher() {
   const context = useContext(EventCatcherContext)
 
-  return context ?? { onEvent: () => Promise.resolve(false) }
+  return context ?? { onEvent: () => undefined }
 }

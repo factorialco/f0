@@ -1,8 +1,6 @@
 import { screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { OneCalendar } from "../OneCalendar"
 
 describe("OneCalendar", () => {

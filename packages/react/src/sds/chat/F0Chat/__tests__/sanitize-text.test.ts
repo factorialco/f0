@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { sanitizeDisplayText } from "../utils/sanitize-text"
 
 // A pool of combining marks (strikethrough overlay, cyrillic millions sign,
@@ -31,6 +30,19 @@ describe("sanitizeDisplayText", () => {
   it("keeps emojis intact (ZWJ sequences, variation selectors, skin tones)", () => {
     const emojis = "👨‍👩‍👧 ❤️ 👍🏽"
     expect(sanitizeDisplayText(emojis)).toBe(emojis.normalize("NFC"))
+  })
+
+  // The zalgo cap matches `\p{M}`, and U+FE0F is a nonspacing mark — so this
+  // rule runs straight over the one character that makes a legacy dingbat
+  // render in colour instead of black and white. Harmless while emoji were
+  // swapped for images; load-bearing now that the OS draws them.
+  it("keeps the colour variation selector on legacy dingbats", () => {
+    expect(sanitizeDisplayText("☺️")).toContain("️")
+    expect(sanitizeDisplayText("❤️ ✌️ ☀️")).toBe("❤️ ✌️ ☀️".normalize("NFC"))
+  })
+
+  it("keeps regional-indicator pairs together so flags stay flags", () => {
+    expect(sanitizeDisplayText("🇪🇸 🇬🇧")).toBe("🇪🇸 🇬🇧")
   })
 
   it("drops bidi override characters", () => {

@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, within } from "storybook/test"
-
 import * as Icons from "../../../../icons/app"
-import { Menu } from "./index"
+import { Menu } from "."
 
 const meta = {
   title: "Sidebar/Menu",
@@ -91,26 +89,26 @@ export const Default: Story = {
       },
       {
         type: "avatar",
-        label: "Dani Moreno",
+        label: "Jordan Avery",
         avatar: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: "Jordan",
+          lastName: "Avery",
           src: "/avatars/person04.jpg",
         },
-        href: "/people/dani-moreno",
+        href: "/people/dani-avery",
         tooltip: "Employee",
       },
       {
         type: "avatar",
-        label: "Dani Moreno",
+        label: "Jordan Avery",
         avatar: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: "Jordan",
+          lastName: "Avery",
           src: "/avatars/person05.jpg",
         },
-        href: "/people/dani-moreno",
+        href: "/people/dani-avery",
         tooltip: "Days off",
       },
       {
