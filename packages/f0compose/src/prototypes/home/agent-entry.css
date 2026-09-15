@@ -552,3 +552,27 @@ body[data-nav-instant] *::after {
   background:
     linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
 }
+
+/* The conversation panel parks 40px outside the frame while it is closed,
+   ready to slide in. That used to be clipped by its ancestors — the Home
+   sheet made them overflow:visible, and the overhang turned into a page
+   scrollbar (Angel, 2026-09-14). `clip` on one axis stops it without
+   creating a scroll container, so the sheet's shadow still shows. */
+body:has([data-hybrid-root]) main#content,
+body:has([data-hybrid-root]) main#content > div {
+  /* !important because the Home sheet's own `overflow: visible` rule
+     carries an attribute selector and would otherwise win the shorthand
+     back. */
+  overflow-x: clip !important;
+}
+
+/* f0's own shell paints #F5F6F8 behind everything, which showed through
+   between screens as a colder grey than ours (Angel, 2026-09-14). The
+   page's base is the second sidebar's tone now, so nothing underneath
+   can read as a different surface. */
+#f0-layout {
+  background: #fafafa !important;
+}
+.dark #f0-layout {
+  background: hsl(var(--neutral-0)) !important;
+}
