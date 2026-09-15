@@ -2,10 +2,12 @@ import { AnimatePresence, motion } from "motion/react"
 import { ReactNode, useEffect, useState } from "react"
 import { F0Icon } from "../../../../components/F0Icon"
 import { CheckCircle, LayersFront } from "../../../../icons/app"
+import { copyToClipboard } from "../../../../lib/clipboard"
 import { cn } from "../../../../lib/utils"
 import { InternalCopyActionType } from "../ItemContainer"
 
-const COPIED_SHOWN_MS = 750
+/** How long the copy tick stays up. One figure for every copy in F0. */
+const COPIED_SHOWN_MS = 1000
 
 export type CopyActionProps = {
   children: ReactNode
@@ -23,12 +25,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
   }, [copied])
 
   const copyHandler = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-    } catch {
-      // Clipboard unavailable: leave the button as it is.
-    }
+    setCopied(await copyToClipboard(text))
   }
   return (
     <button

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
+import { F0Button } from "@/components/F0Button"
 import { inputFieldStatus } from "@/components/F0InputField"
 import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
@@ -110,14 +112,10 @@ export const Password: Story = {
 
     await expect(input).toHaveAttribute("type", "password")
 
-    await userEvent.click(
-      canvas.getByRole("button", { name: /show password/i })
-    )
+    await userEvent.click(canvas.getByRole("button", { name: "Show password" }))
     await expect(input).toHaveAttribute("type", "text")
 
-    await userEvent.click(
-      canvas.getByRole("button", { name: /hide password/i })
-    )
+    await userEvent.click(canvas.getByRole("button", { name: "Hide password" }))
     await expect(input).toHaveAttribute("type", "password")
   },
 }
@@ -218,6 +216,242 @@ export const Clearable: Story = {
   },
 }
 
+/**
+ * A details-row value cell: plain text at rest, the ordinary bordered field
+ * while editing. Click the value or the pencil to start, Enter to commit,
+ * Escape to revert. The consumer owns the readonly flip and the draft.
+ */
+const InlineEditingDemo = () => {
+  const [value, setValue] = useState("ada.lovelace@example.com")
+  const [draft, setDraft] = useState(value)
+  const [editing, setEditing] = useState(false)
+
+  const commit = (committed: string) => {
+    setEditing(false)
+    setValue(committed)
+  }
+
+  const revert = () => {
+    setDraft(value)
+    setEditing(false)
+  }
+
+  const startEditing = () => {
+    setDraft(value)
+    setEditing(true)
+  }
+
+  return (
+    <div className="flex w-80 items-center gap-1 rounded-md border border-solid border-f1-border p-1">
+      <F0TextInput
+        label="Email"
+        hideLabel
+        type="email"
+        value={editing ? draft : value}
+        onChange={setDraft}
+        readonly={!editing}
+        transparent={!editing}
+        clearable={editing}
+        onPressEnter={() => commit(draft)}
+        onPressEscape={revert}
+        // Clicking away commits; only Escape throws the draft away.
+        onBlur={editing ? () => commit(draft) : undefined}
+        onClickContent={editing ? undefined : startEditing}
+        // The pencil is outside the field, so its click cannot focus it.
+        focusOnEditable={editing}
+      />
+      {/* The pencil is the row's, so the row takes it away while typing. */}
+      {editing ? null : (
+        <F0Button
+          variant="ghost"
+          size="sm"
+          hideLabel
+          icon={Icons.Pencil}
+          label="Edit Email"
+          onClick={startEditing}
+        />
+      )}
+    </div>
+  )
+}
+
+export const InlineEditing: Story = {
+  args: { label: "Email" },
+  render: () => <InlineEditingDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = () => canvas.getAllByLabelText("Email")[0] as HTMLInputElement
+    const wrapper = () => canvas.getByTestId("input-field-wrapper")
+
+    // Read the starting value: the manager re-runs play functions on hot
+    // reload and on replay, without remounting.
+    await waitFor(() => expect(field()).toBeDisabled())
+    const committed = field().value
+    const restingBox = wrapper().getBoundingClientRect()
+
+    // The pointer has to land on the cell, because the disabled input
+    // swallows the event. jsdom does no hit-testing to prove it.
+    const underPointer = document.elementFromPoint(
+      restingBox.left + restingBox.width / 2,
+      restingBox.top + restingBox.height / 2
+    )
+    await expect(underPointer).not.toBe(field())
+    await userEvent.click(underPointer as HTMLElement)
+    await waitFor(() => expect(field()).not.toBeDisabled())
+
+    await expect(field()).toHaveFocus()
+
+    // Only the clear button is left beside the value being typed.
+    await expect(
+      canvas.queryByRole("button", { name: "Edit Email" })
+    ).toBeNull()
+    await waitFor(() =>
+      expect(canvas.getByTestId("clear-button")).toBeVisible()
+    )
+
+    // The row must not move: same height, same left edge. Zeros in jsdom.
+    await expect(wrapper()).toHaveClass("border-[1px]")
+    const editingBox = wrapper().getBoundingClientRect()
+    await expect(Math.round(editingBox.height)).toBe(
+      Math.round(restingBox.height)
+    )
+    await expect(Math.round(editingBox.left)).toBe(Math.round(restingBox.left))
+    // Only grows, into the space the pencil gave up. A collapse to the inner
+    // input's intrinsic width would clip the value.
+    await expect(editingBox.width).toBeGreaterThanOrEqual(restingBox.width)
+
+    // Whichever value is not showing, so Chromatic sees no churn.
+    const next =
+      committed === "grace.hopper@example.com"
+        ? "ada.lovelace@example.com"
+        : "grace.hopper@example.com"
+    await userEvent.clear(field())
+    await userEvent.type(field(), next)
+    await expect(field()).toHaveValue(next)
+    await userEvent.keyboard("{Enter}")
+
+    await waitFor(() => expect(field()).toBeDisabled())
+    await expect(field()).toHaveValue(next)
+
+    // The pencil is the other way in, and `focusOnEditable` is what focuses.
+    await waitFor(() =>
+      expect(canvas.getByRole("button", { name: "Edit Email" })).toBeVisible()
+    )
+    await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
+    await waitFor(() => expect(field()).not.toBeDisabled())
+    await expect(field()).toHaveFocus()
+    await userEvent.clear(field())
+    await userEvent.type(field(), "discarded@example.com")
+    await userEvent.keyboard("{Escape}")
+
+    await waitFor(() => expect(field()).toBeDisabled())
+    await expect(field()).toHaveValue(next)
+    await expect(field()).not.toHaveValue(committed)
+  },
+}
+
+/**
+ * The same row with a governed value: a national ID. It rests behind a fixed
+ * run of dots, so its length is no more readable than its digits, and opens as
+ * plain text under the caret, because the eye stands down while you type and a
+ * value you cannot read is one you cannot correct. `masked` also keeps password
+ * managers off it, the way `type="private"` does.
+ */
+const MaskedInlineEditingDemo = () => {
+  const [value, setValue] = useState("084 62 4471 6")
+  const [draft, setDraft] = useState(value)
+  const [editing, setEditing] = useState(false)
+
+  const startEditing = () => {
+    setDraft(value)
+    setEditing(true)
+  }
+
+  const commit = (committed: string) => {
+    setEditing(false)
+    setValue(committed)
+  }
+
+  return (
+    <div className="flex w-80 items-center gap-1 rounded-md border border-solid border-f1-border p-1">
+      <F0TextInput
+        label="Social security number"
+        hideLabel
+        masked
+        value={editing ? draft : value}
+        onChange={setDraft}
+        readonly={!editing}
+        transparent={!editing}
+        onPressEnter={() => commit(draft)}
+        onPressEscape={() => {
+          setDraft(value)
+          setEditing(false)
+        }}
+        onBlur={editing ? () => commit(draft) : undefined}
+        onClickContent={editing ? undefined : startEditing}
+        focusOnEditable={editing}
+      />
+    </div>
+  )
+}
+
+export const MaskedInlineEditing: Story = {
+  args: { label: "Social security number" },
+  render: () => <MaskedInlineEditingDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const field = () =>
+      canvas.getAllByLabelText("Social security number")[0] as HTMLInputElement
+
+    await waitFor(() => expect(field()).toBeDisabled())
+
+    // Twelve dots as text, not one password bullet per character: the length
+    // of a national ID is half of guessing it.
+    await expect(field()).not.toHaveAttribute("type", "password")
+    await expect(field()).toHaveValue("•".repeat(12))
+
+    // Nothing here should reach a password manager.
+    await expect(field()).toHaveAttribute("autocomplete", "off")
+    await expect(field()).toHaveAttribute("data-1p-ignore", "true")
+
+    // The eye reveals it without making it editable.
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show Social security number" })
+    )
+    await expect(field()).toHaveValue("084 62 4471 6")
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Hide Social security number" })
+    )
+    await expect(field()).toHaveValue("•".repeat(12))
+
+    const box = canvas
+      .getByTestId("input-field-wrapper")
+      .getBoundingClientRect()
+    const underPointer = document.elementFromPoint(
+      box.left + box.width / 2,
+      box.top + box.height / 2
+    )
+    await userEvent.click(underPointer as HTMLElement)
+
+    // Readable while typed, and the eye is gone, which is why.
+    await waitFor(() => expect(field()).not.toBeDisabled())
+    await expect(field()).toHaveFocus()
+    await expect(field()).toHaveValue("084 62 4471 6")
+    await expect(
+      canvas.queryByTestId("input-field-mask-toggle")
+    ).not.toBeInTheDocument()
+
+    await userEvent.keyboard("{Escape}")
+
+    // And masked again the moment it stops being edited.
+    await waitFor(() => expect(field()).toBeDisabled())
+    await expect(field()).toHaveValue("•".repeat(12))
+    await expect(
+      canvas.getByRole("button", { name: "Show Social security number" })
+    ).toBeVisible()
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {
@@ -242,6 +476,16 @@ export const Snapshot: Story = {
       { ...base, icon: Placeholder },
       { ...base, icon: Placeholder, type: "password" },
       { ...base, type: "private" as const, value: "Value" },
+      {
+        ...base,
+        clearable: false,
+        icon: undefined,
+        labelIcon: undefined,
+        hideLabel: true,
+        readonly: true,
+        transparent: true,
+        value: "ada@example.com",
+      },
       { ...base, status: { type: "error" as const, message: "Error message" } },
       {
         ...base,

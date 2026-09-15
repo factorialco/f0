@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -305,6 +305,117 @@ export const WithAppendTag: Story = {
   },
 }
 
+export const MaskedValue: Story = {
+  args: {
+    ...Default.args,
+    value: "ada@example.com",
+    clearable: true,
+    masked: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show This is the label" })
+    )
+    await expect(
+      canvas.getByRole("button", { name: "Hide This is the label" })
+    ).toBeInTheDocument()
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Hide This is the label" })
+    )
+    // A password input has no `textbox` role, hence the label lookup.
+    const value = canvas.getAllByLabelText("This is the label")[0]
+    await expect(value).toHaveAttribute("type", "password")
+
+    // The eye and the mask stand down together while the value is typed:
+    // there would be no way back to the value otherwise.
+    await userEvent.click(value)
+    await waitFor(() =>
+      expect(canvas.queryByTestId("input-field-mask-toggle")).toBeNull()
+    )
+    await expect(value).toHaveAttribute("type", "text")
+    await waitFor(() =>
+      expect(canvas.getByTestId("clear-button")).toBeVisible()
+    )
+  },
+}
+
+export const MaskedRestingValue: Story = {
+  args: {
+    ...Default.args,
+    label: "Social security number",
+    hideLabel: true,
+    value: "084 62 4471 6",
+    masked: true,
+    readonly: true,
+    transparent: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const value = canvas.getByLabelText("Social security number")
+
+    // Password bullets are drawn one per character, and the length of a
+    // national ID is half of guessing it.
+    await expect(value).toHaveAttribute("type", "text")
+    await expect(value).toHaveValue("•".repeat(12))
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show Social security number" })
+    )
+    await expect(value).toHaveValue("084 62 4471 6")
+  },
+}
+
+export const RestingValue: Story = {
+  args: {
+    ...Default.args,
+    label: "Email",
+    value: "ada.lovelace@example.com",
+    readonly: true,
+    transparent: true,
+    hideLabel: true,
+    onClickContent: fn(),
+  },
+  // The second field is the reference the play function measures against.
+  render: (args) => (
+    <div className="flex w-80 flex-col gap-1 rounded-md border border-solid border-f1-border p-1">
+      <F0InputField {...args}>
+        <input type="text" className="w-full" />
+      </F0InputField>
+      <F0InputField {...args} readonly={false} transparent={false}>
+        <input type="text" className="w-full" />
+      </F0InputField>
+    </div>
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    const [resting] = canvas.getAllByLabelText("Email")
+
+    // Real hit-testing, which jsdom cannot do: the disabled input swallows
+    // the event, so the pointer has to land on the cell.
+    await expect(resting).toBeDisabled()
+    const box = resting.getBoundingClientRect()
+    const underPointer = document.elementFromPoint(
+      box.left + box.width / 2,
+      box.top + box.height / 2
+    )
+    await expect(underPointer).not.toBe(resting)
+
+    await userEvent.click(underPointer as HTMLElement)
+    await expect(args.onClickContent).toHaveBeenCalled()
+
+    // Same height as the editable field, so the row does not move.
+    const [restingCell, editableCell] = canvas.getAllByTestId(
+      "input-field-wrapper"
+    )
+    await expect(restingCell.getBoundingClientRect().height).toBe(
+      editableCell.getBoundingClientRect().height
+    )
+  },
+}
+
 export const LongPlaceholder: Story = {
   decorators: [
     (Story) => (
@@ -364,6 +475,33 @@ export const Snapshot: Story = {
             Tag
           </div>
         ),
+      },
+      {
+        ...base,
+        clearable: false,
+        value: "ada@example.com",
+        masked: true,
+      },
+      {
+        ...base,
+        clearable: false,
+        icon: undefined,
+        labelIcon: undefined,
+        hideLabel: true,
+        masked: true,
+        readonly: true,
+        transparent: true,
+        value: "084 62 4471 6",
+      },
+      {
+        ...base,
+        clearable: false,
+        icon: undefined,
+        labelIcon: undefined,
+        hideLabel: true,
+        readonly: true,
+        transparent: true,
+        value: "ada@example.com",
       },
       { ...base },
     ]

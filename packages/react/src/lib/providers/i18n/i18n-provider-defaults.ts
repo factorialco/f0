@@ -34,6 +34,7 @@ export const defaultTranslations = {
     next: "Next",
   },
   inputs: {
+    /** Fixed, unlike every other masked field, which names its own label. */
     password: {
       show: "Show password",
       hide: "Hide password",
@@ -928,6 +929,15 @@ export const defaultTranslations = {
     },
   },
   forms: {
+    /** The trailing controls on a details row. */
+    details: {
+      copy: "Copy {{label}}",
+      copied: "{{label}} copied",
+      copyFailed: "Could not copy",
+      edit: "Edit {{label}}",
+      saved: "{{label}} saved",
+      requestChange: "Request a change to {{label}}",
+    },
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",

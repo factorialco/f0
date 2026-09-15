@@ -161,6 +161,7 @@ export type NumberInputInternalProps = Pick<
     | "transparent"
     | "onBlur"
     | "readonly"
+    | "masked"
   > & {
     locale: string
     value?: number | null
