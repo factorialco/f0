@@ -14,7 +14,7 @@ import { GradientWaves } from "./GradientWaves"
  */
 export function HomeWaves() {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 top-0 z-0">
+    <div className="pointer-events-none absolute inset-x-0 -top-[88%] z-0 h-[188%]">
       <GradientWaves
         horizonColor="#FAFAFA"
         waveColor="#E61942"
@@ -25,13 +25,13 @@ export function HomeWaves() {
         waveRatio={2.6}
         swell={10}
         turbulence={14}
-        tilt={1.25}
+        tilt={1.15}
         zoom={0.9}
-        height={4.6}
-        fogDepth={17}
+        height={4.0}
+        fogDepth={24}
         detail="medium"
-        brightness={1.25}
-        opacity={0.32}
+        brightness={1.3}
+        opacity={0.45}
         mouseInteraction
         parallaxStrength={0.4}
         grain
