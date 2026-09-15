@@ -1,12 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ChatVoiceAttachment } from "../components/ChatVoiceAttachment"
 import { type F0ChatVoiceAttachment } from "../types"
 import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
@@ -42,7 +40,7 @@ describe("ChatVoiceAttachment", () => {
     expect(audio?.getAttribute("src")).toBe(VOICE.url)
 
     const waveform = screen.getByTestId("chat-voice-waveform")
-    expect(waveform.querySelectorAll("span").length).toBe(32)
+    expect(waveform.querySelectorAll("span")).toHaveLength(32)
   })
 
   it("serializes waveform decoding across voice notes", async () => {

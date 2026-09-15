@@ -165,7 +165,7 @@ export interface PositionedEdge {
   id: string
   source: string
   target: string
-  points: Array<{ x: number; y: number }>
+  points: { x: number; y: number }[]
 }
 
 // ─── Deferred payload ──────────────────────────────────────────

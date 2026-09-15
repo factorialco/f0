@@ -37,7 +37,7 @@ type F0AvatarListTypeMapping = {
 
 export type F0AvatarListProps<T extends F0AvatarListType = F0AvatarListType> = {
   type: T
-  avatars: Array<F0AvatarListTypeMapping[T]>
+  avatars: F0AvatarListTypeMapping[T][]
   size?: AvatarListSize
   max?: number
   remainingCount?: number

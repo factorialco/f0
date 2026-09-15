@@ -1,24 +1,29 @@
-import { type DragEvent, type ReactNode, useRef, useState } from "react"
-
+import { type ReactNode } from "react"
 import { useReducedMotion } from "@/lib/a11y"
-
+import { ChatCommunityShelf } from "./components/ChatCommunityShelf"
 import { ChatComposer } from "./components/ChatComposer"
 import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
+import { ChatPostComposer } from "./components/ChatPostComposer"
 import { ChatReadOnlyNotice } from "./components/ChatReadOnlyNotice"
 import {
   ChatConnecting,
   ChatEmptyState,
   ChatError,
 } from "./components/ChatStates"
+import { useChatFileDropZone } from "./hooks/useChatFileDropZone"
 import { useComposerOverlayLayout } from "./hooks/useComposerOverlayLayout"
 import { ChatRenderConfigProvider } from "./providers/ChatRenderConfigProvider"
-import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
+import { ChatUIProvider } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
-import { type F0ChatChannel, type F0ChatHeaderAction } from "./types"
+import {
+  type F0ChatChannel,
+  type F0ChatHeaderAction,
+  type F0ChatStatus,
+} from "./types"
 import { chatPermission } from "./utils/capabilities"
 
 export type F0ChatProps = {
@@ -48,7 +53,79 @@ export type F0ChatProps = {
   header?: ReactNode | null
 }
 
-const isFileDrag = (e: DragEvent) => e.dataTransfer?.types?.includes("Files")
+/**
+ * What sits between the header and the composer: the transcript, or whichever
+ * state stands in for it.
+ *
+ * `reconnecting` / `offline` render the transcript exactly like `ready` —
+ * per-message states communicate connectivity, no banner. With nothing loaded
+ * yet they show the skeleton instead, because "empty" and "not loaded" are
+ * indistinguishable at that point and claiming the former is the worse guess.
+ */
+const ChatBody = ({
+  status,
+  hasTranscript,
+  channelId,
+}: {
+  status: F0ChatStatus
+  hasTranscript: boolean
+  channelId: string
+}): ReactNode => {
+  if (status === "connecting") {
+    return <ChatConnecting />
+  }
+  if (status === "error") {
+    return <ChatError />
+  }
+  if (hasTranscript) {
+    return <ChatMessagesContainer key={channelId} />
+  }
+  if (status === "ready") {
+    return <ChatEmptyState />
+  }
+  return <ChatConnecting />
+}
+
+/**
+ * The composer, or the read-only notice standing in for it.
+ *
+ * With a transcript the notice rides INSIDE it, as the last thing in the scroll
+ * (see `ChatBottomGap`) — it is worth reading once, and a fixed strip charged
+ * every screen for it. With no transcript to end, there is nowhere to put it
+ * but here.
+ */
+const ChatFooter = ({
+  canSend,
+  hasTranscript,
+  isCommunity,
+  channel,
+  overlayRef,
+}: {
+  canSend: boolean
+  hasTranscript: boolean
+  isCommunity: boolean
+  channel: F0ChatChannel
+  overlayRef: React.Ref<HTMLDivElement>
+}): ReactNode => {
+  if (!canSend) {
+    return hasTranscript ? null : <ChatReadOnlyNotice channel={channel} />
+  }
+
+  return (
+    <div
+      ref={overlayRef}
+      data-testid="chat-composer-overlay"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
+    >
+      {/* Publishing is not sending: a post has a title, a body with formatting
+          and media, and it is written somewhere the size of what is being
+          written. The bar that replaces the composer takes the SAME floating
+          slot, so `useComposerOverlayLayout` keeps publishing its height and
+          the transcript's bottom gap keeps adding up. */}
+      {isCommunity ? <ChatPostComposer /> : <ChatComposer />}
+    </div>
+  )
+}
 
 const ChatShell = ({
   isFullscreen,
@@ -58,15 +135,12 @@ const ChatShell = ({
   header,
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages, capabilities } = useF0Chat()
-  const { dropFiles } = useChatDrop()
   const canSend = chatPermission("canSend", channel.type, capabilities)
+  const isCommunity = channel.type === "community"
+  const hasTranscript =
+    status !== "connecting" && status !== "error" && messages.length > 0
   const { shellRef, composerOverlayRef } = useComposerOverlayLayout(canSend)
-
-  // Whole-panel drag & drop, just like the AI chat: the overlay covers the
-  // entire surface and a drop anywhere attaches to the composer. Stop file-drag
-  // events so the AI chat's SidebarWindow (our host) doesn't hijack them.
-  const dragDepth = useRef(0)
-  const [dragging, setDragging] = useState(false)
+  const { dragging, dropZoneProps } = useChatFileDropZone()
 
   return (
     <div
@@ -75,37 +149,7 @@ const ChatShell = ({
       // so rows measured before the Inter swap don't rewrap after it.
       data-f0-chat-shell=""
       className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
-      onDragEnter={(e) => {
-        if (!isFileDrag(e)) return
-        e.preventDefault()
-        e.stopPropagation()
-        dragDepth.current++
-        setDragging(true)
-      }}
-      onDragOver={(e) => {
-        if (!isFileDrag(e)) return
-        e.preventDefault()
-        e.stopPropagation()
-      }}
-      onDragLeave={(e) => {
-        if (!isFileDrag(e)) return
-        e.preventDefault()
-        e.stopPropagation()
-        dragDepth.current--
-        if (dragDepth.current <= 0) {
-          dragDepth.current = 0
-          setDragging(false)
-        }
-      }}
-      onDrop={(e) => {
-        if (!isFileDrag(e)) return
-        e.preventDefault()
-        e.stopPropagation()
-        dragDepth.current = 0
-        setDragging(false)
-        const files = Array.from(e.dataTransfer.files)
-        if (files.length > 0) dropFiles(files)
-      }}
+      {...dropZoneProps}
     >
       {header === undefined ? (
         <ChatHeader
@@ -122,39 +166,30 @@ const ChatShell = ({
       ) : (
         header
       )}
-      {status === "connecting" ? (
-        <ChatConnecting />
-      ) : status === "error" ? (
-        <ChatError />
-      ) : messages.length > 0 ? (
-        // `reconnecting` / `offline` render the transcript exactly like
-        // `ready` — per-message states communicate connectivity, no banner.
-        <ChatMessagesContainer key={channel.id} />
-      ) : status === "ready" ? (
-        <ChatEmptyState />
-      ) : (
-        // reconnecting/offline with nothing loaded yet: can't tell "empty"
-        // from "not loaded" — show the skeleton until the transport settles.
-        <ChatConnecting />
-      )}
+      {/* Under the header and OUTSIDE the transcript: chrome, not a row, and
+          the virtualizer must not have to measure around it. Its sheet opens
+          OVER the transcript for the same reason. */}
+      {isCommunity ? <ChatCommunityShelf /> : null}
+      <ChatBody
+        status={status}
+        hasTranscript={hasTranscript}
+        channelId={channel.id}
+      />
+
       {/* A read-only channel (frozen, announcements…) hides the composer and
-          says so in its place, so the surface doesn't just end in nothing. The
-          notice is a normal flex child, not an overlay: there is no composer
-          for the transcript to scroll under. */}
-      {canSend ? (
-        <div
-          ref={composerOverlayRef}
-          data-testid="chat-composer-overlay"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
-        >
-          <ChatComposer />
-        </div>
-      ) : (
-        <ChatReadOnlyNotice channel={channel} />
-      )}
+          says so in its place, so the surface doesn't just end in nothing. */}
+      <ChatFooter
+        canSend={canSend}
+        hasTranscript={hasTranscript}
+        isCommunity={isCommunity}
+        channel={channel}
+        overlayRef={composerOverlayRef}
+      />
       {/* Without a composer the drop handler was never registered, so the
-          affordance promised something the panel could not do. */}
-      <ChatDropOverlay visible={dragging && canSend} />
+          affordance promised something the panel could not do. The post
+          composer is a button, not a drop target — a post's cover belongs in
+          its dialog, not in the transcript. */}
+      <ChatDropOverlay visible={dragging && canSend && !isCommunity} />
       <ChatImagePreview />
       <ChatDocumentPreview />
     </div>

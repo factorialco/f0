@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { calculateVisiblePage } from "../visiblePage"
 
 const pageEl = (offsetTop: number, offsetHeight: number) =>

@@ -1,11 +1,9 @@
 import { type ReactNode, useState } from "react"
-
 import { type F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { Reaction } from "@/icons/app"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { EmojiPicker } from "./EmojiPicker"
 
 /**

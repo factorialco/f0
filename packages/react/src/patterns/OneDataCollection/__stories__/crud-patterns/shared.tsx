@@ -1,22 +1,19 @@
 import type { MutableRefObject, ReactNode } from "react"
-
 import { ComponentProps } from "react"
 import { z } from "zod"
-
-import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 import { Add, Download, EllipsisHorizontal } from "@/icons/app"
+import { StandardLayout } from "@/layouts/StandardLayout"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { f0FormField, F0Form, F0FormRef } from "@/patterns/F0Form"
-import { Page } from "@/patterns/Navigation/Page"
-import { Tabs, TabItem } from "@/patterns/Navigation/Tabs"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { Page } from "@/patterns/Navigation/Page"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { Tabs, TabItem } from "@/patterns/Navigation/Tabs"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
-import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
-
 import type { ItemActionsDefinition } from "../../item-actions"
 import type { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import type { SummariesDefinition } from "../../summary"
@@ -50,7 +47,7 @@ export const resourceFilters = {
     options: {
       options: [
         { value: "Alicia Keys", label: "Alicia Keys" },
-        { value: "Dani Moreno", label: "Dani Moreno" },
+        { value: "Jordan Avery", label: "Jordan Avery" },
         { value: "Marta Soler", label: "Marta Soler" },
         { value: "Nora Park", label: "Nora Park" },
       ],
@@ -69,7 +66,7 @@ export const initialResources: Resource[] = [
   {
     id: "resource-2",
     name: "Engineering onboarding",
-    owner: "Dani Moreno",
+    owner: "Jordan Avery",
     status: "Draft",
     summary: "Checklist for laptop, accounts, and first-week sessions.",
   },

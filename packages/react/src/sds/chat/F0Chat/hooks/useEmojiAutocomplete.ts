@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
   type EmojiEntry,
   findEmojiByShortcode,
   searchEmoji,
 } from "../utils/emoji-index"
-import { detectMaxEmojiVersion } from "../utils/emoji-support"
 import { type EmojiLocaleTerms } from "../utils/emoji-locale"
+import { detectMaxEmojiVersion } from "../utils/emoji-support"
 import { useEmojiLocaleTerms } from "./useEmojiLocaleTerms"
-
 import {
   getTextareaCaretCoordinates,
   type PopoverPosition,
@@ -47,6 +45,8 @@ export type UseEmojiAutocompleteReturn = {
   handleKeyDown: (event: React.KeyboardEvent<HTMLElement>) => boolean
   selectCandidate: (candidate: EmojiAutocompleteCandidate) => void
   setSelectedIndex: (index: number) => void
+  handleFocus: () => void
+  handleBlur: () => void
   close: () => void
 }
 
@@ -76,12 +76,18 @@ export const findEmojiTrigger = (
 ): EmojiTrigger | null => {
   const textBeforeCursor = text.slice(0, cursorPosition)
   const colonIndex = textBeforeCursor.lastIndexOf(":")
-  if (colonIndex === -1) return null
+  if (colonIndex === -1) {
+    return null
+  }
 
-  if (colonIndex > 0 && !/\s/.test(text[colonIndex - 1] ?? "")) return null
+  if (colonIndex > 0 && !/\s/.test(text[colonIndex - 1] ?? "")) {
+    return null
+  }
 
   const query = textBeforeCursor.slice(colonIndex + 1)
-  if (!/^[a-zA-Z0-9_+-]*$/.test(query)) return null
+  if (!/^[a-zA-Z0-9_+-]*$/.test(query)) {
+    return null
+  }
 
   return { colonIndex, query }
 }
@@ -92,10 +98,14 @@ export const replaceClosedEmojiShortcode = (
 ): { value: string; cursorPosition: number } | null => {
   const textBeforeCursor = text.slice(0, cursorPosition)
   const match = textBeforeCursor.match(/(^|\s):([a-zA-Z0-9_+-]+):$/)
-  if (!match) return null
+  if (!match) {
+    return null
+  }
 
   const emoji = findEmojiByShortcode(match[2] ?? "")
-  if (!emoji) return null
+  if (!emoji) {
+    return null
+  }
 
   const boundaryLength = match[1]?.length ?? 0
   const shortcodeStart = cursorPosition - match[0].length + boundaryLength
@@ -130,6 +140,13 @@ export function useEmojiAutocomplete({
   const listboxId = `chat-emoji-autocomplete-${reactId.replace(/:/g, "")}`
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [dismissedTrigger, setDismissedTrigger] = useState<number | null>(null)
+  // Leaving the composer HIDES the list; it does not dismiss the token under
+  // the caret. Blur used to route through `close()`, which parks the trigger in
+  // `dismissedTrigger` — and that is only released once the trigger disappears
+  // entirely, so a single focusout in the middle of `:smil` left the list
+  // unable to reopen however much more you typed. Escape and picking a
+  // candidate still dismiss the token for real.
+  const [isBlurred, setIsBlurred] = useState(false)
 
   // The same localized layer the picker uses, so `:` and the picker's search
   // box agree in every language, not just in English.
@@ -145,13 +162,16 @@ export function useEmojiAutocomplete({
   )
   const isOpen =
     trigger !== null &&
+    !isBlurred &&
     trigger.colonIndex !== dismissedTrigger &&
     results.length > 0
   const effectiveSelectedIndex = results[selectedIndex] ? selectedIndex : 0
 
   useEffect(() => {
     setSelectedIndex(0)
-    if (!trigger) setDismissedTrigger(null)
+    if (!trigger) {
+      setDismissedTrigger(null)
+    }
   }, [trigger?.colonIndex, trigger?.query])
 
   const close = useCallback(() => {
@@ -159,9 +179,14 @@ export function useEmojiAutocomplete({
     setSelectedIndex(0)
   }, [trigger?.colonIndex])
 
+  const handleFocus = useCallback(() => setIsBlurred(false), [])
+  const handleBlur = useCallback(() => setIsBlurred(true), [])
+
   const selectCandidate = useCallback(
     (candidate: EmojiAutocompleteCandidate) => {
-      if (!trigger) return
+      if (!trigger) {
+        return
+      }
 
       const before = inputValue.slice(0, trigger.colonIndex)
       const after = inputValue.slice(cursorPosition)
@@ -180,7 +205,9 @@ export function useEmojiAutocomplete({
 
       requestAnimationFrame(() => {
         const textarea = textareaRef.current
-        if (!textarea) return
+        if (!textarea) {
+          return
+        }
         textarea.focus()
         textarea.setSelectionRange(nextCursorPosition, nextCursorPosition)
       })
@@ -199,8 +226,12 @@ export function useEmojiAutocomplete({
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLElement>): boolean => {
-      if (!isOpen) return false
-      if (event.nativeEvent?.isComposing) return false
+      if (!isOpen) {
+        return false
+      }
+      if (event.nativeEvent?.isComposing) {
+        return false
+      }
 
       if (event.key === "Escape") {
         event.preventDefault()
@@ -209,7 +240,9 @@ export function useEmojiAutocomplete({
         return true
       }
 
-      if (results.length === 0) return false
+      if (results.length === 0) {
+        return false
+      }
 
       switch (event.key) {
         case "ArrowDown":
@@ -224,9 +257,13 @@ export function useEmojiAutocomplete({
           return true
         case "Enter":
         case "Tab": {
-          if (event.key === "Tab" && event.shiftKey) return false
+          if (event.key === "Tab" && event.shiftKey) {
+            return false
+          }
           const candidate = results[effectiveSelectedIndex] ?? results[0]
-          if (!candidate) return false
+          if (!candidate) {
+            return false
+          }
           event.preventDefault()
           selectCandidate(candidate)
           return true
@@ -246,9 +283,13 @@ export function useEmojiAutocomplete({
   )
 
   const popoverPosition: PopoverPosition = useMemo(() => {
-    if (!isOpen || !trigger) return null
+    if (!isOpen || !trigger) {
+      return null
+    }
     const textarea = textareaRef.current
-    if (!textarea) return null
+    if (!textarea) {
+      return null
+    }
 
     const coordinates = getTextareaCaretCoordinates(
       textarea,
@@ -279,6 +320,8 @@ export function useEmojiAutocomplete({
     handleKeyDown,
     selectCandidate,
     setSelectedIndex,
+    handleFocus,
+    handleBlur,
     close,
   }
 }

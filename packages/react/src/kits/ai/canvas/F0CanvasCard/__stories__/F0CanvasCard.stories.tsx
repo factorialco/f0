@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { Download, Table } from "@/icons/app"
-
 import { F0CanvasCard } from "../F0CanvasCard"
 
 const meta = {

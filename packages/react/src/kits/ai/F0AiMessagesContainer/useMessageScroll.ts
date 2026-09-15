@@ -51,13 +51,17 @@ export function useMessageScroll({
   useEffect(() => {
     const viewport = viewportRef.current
     const content = contentRef.current
-    if (!viewport || !content) return
+    if (!viewport || !content) {
+      return
+    }
     const observer = new ResizeObserver(() => {
       // Skip updates while frozen — the input area is transiently
       // resizing (e.g. clarifying panel animating in/out) and we want
       // the reserved last-turn minHeight to stay put so messages above
       // don't shift.
-      if (freezeRef.current) return
+      if (freezeRef.current) {
+        return
+      }
       const py =
         parseFloat(getComputedStyle(content).paddingTop) +
         parseFloat(getComputedStyle(content).paddingBottom) +
@@ -72,7 +76,9 @@ export function useMessageScroll({
   // Scroll tracking
   const handleScroll = useCallback(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const { scrollTop, scrollHeight, clientHeight } = el
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight
     setShowScrollBtn(distanceFromBottom > clientHeight)
@@ -80,7 +86,9 @@ export function useMessageScroll({
 
   useEffect(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     el.addEventListener("scroll", handleScroll, { passive: true })
     return () => el.removeEventListener("scroll", handleScroll)
   }, [handleScroll, viewportRef])
@@ -98,7 +106,9 @@ export function useMessageScroll({
         requestAnimationFrame(() => {
           const viewport = viewportRef.current
           const lastTurn = lastTurnRef.current
-          if (!viewport || !lastTurn) return
+          if (!viewport || !lastTurn) {
+            return
+          }
           const viewportRect = viewport.getBoundingClientRect()
           const turnRect = lastTurn.getBoundingClientRect()
           const target = viewport.scrollTop + (turnRect.top - viewportRect.top)

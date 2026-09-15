@@ -1,7 +1,4 @@
 import { useState } from "react"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import {
@@ -13,17 +10,16 @@ import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { Kanban, Sliders, Table } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
-import type { OnLoadDataCallback, OnLoadErrorCallback } from "./types"
-import type { CardVisualizationOptions } from "./visualizations/collection/Card"
-import type { TableVisualizationOptions } from "./visualizations/collection/Table"
-
 import { DataCollectionSource } from "./hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { SummariesDefinition } from "./summary"
+import type { OnLoadDataCallback, OnLoadErrorCallback } from "./types"
+import type { CardVisualizationOptions } from "./visualizations/collection/Card"
 import { CardCollection } from "./visualizations/collection/Card"
+import type { TableVisualizationOptions } from "./visualizations/collection/Table"
 import { TableCollection } from "./visualizations/collection/Table"
 
 /**
@@ -102,17 +98,15 @@ export type VisualizationProps<
   Grouping extends GroupingDefinition<Record>,
 > = {
   /** Array of available visualization configurations */
-  visualizations?: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations?: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
 }
 
 /**
@@ -142,17 +136,15 @@ export const VisualizationSelector = <
   currentVisualization,
   onVisualizationChange,
 }: {
-  visualizations: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   currentVisualization: number
   onVisualizationChange: (index: number) => void
 }): JSX.Element => {

@@ -1,8 +1,6 @@
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { CHAT_MEDIA_SCRIM_CLASS } from "../utils/media-layout"
@@ -45,7 +43,9 @@ export const ChatMessageMeta = ({
   const channelType = useF0ChatChannelType()
   const label = metaLabel(message, i18n.chat.edited)
 
-  if (channelType === "announcement") return null
+  if (channelType === "announcement") {
+    return null
+  }
 
   if (placement === "overlay") {
     return (
@@ -123,7 +123,9 @@ export const ChatMessageMetaLabel = ({
   const i18n = useI18n()
   const channelType = useF0ChatChannelType()
   // Announcing a made-up minute is worse than announcing nothing.
-  if (channelType === "announcement") return null
+  if (channelType === "announcement") {
+    return null
+  }
   return <span className="sr-only">{metaLabel(message, i18n.chat.edited)}</span>
 }
 

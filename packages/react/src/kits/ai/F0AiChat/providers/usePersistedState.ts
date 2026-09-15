@@ -1,6 +1,8 @@
 /**
- * Moved to `@/lib/persisted-state` so other surfaces (meetings) can persist
- * their own state without importing across kits. Re-exported here so existing
- * call sites keep working.
+ * Moved to `@/patterns/ApplicationFrame/SidePanel` once the panel stopped
+ * belonging to the AI chat. Re-exported so the kit's own imports keep working.
  */
-export { usePersistedState } from "@/lib/persisted-state"
+export {
+  usePersistedState,
+  type UsePersistedStateOptions,
+} from "@/patterns/ApplicationFrame/SidePanel/usePersistedState"

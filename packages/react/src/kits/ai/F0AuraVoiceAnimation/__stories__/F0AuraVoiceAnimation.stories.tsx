@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0AuraVoiceAnimation } from "@/kits/ai/F0AuraVoiceAnimation"
 
 const meta = {

@@ -1,7 +1,5 @@
 import { type ReactNode } from "react"
-
 import { F0Card } from "@/components/F0Card"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatCardAttachment } from "../types"
 import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"

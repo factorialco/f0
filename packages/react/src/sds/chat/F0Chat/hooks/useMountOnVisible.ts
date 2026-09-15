@@ -29,11 +29,17 @@ export const useMountOnVisible = (): {
   const ref = useCallback<RefCallback<HTMLElement>>((element) => {
     observerRef.current?.disconnect()
     observerRef.current = null
-    if (!element || mountedRef.current) return
-    if (typeof IntersectionObserver === "undefined") return
+    if (!element || mountedRef.current) {
+      return
+    }
+    if (typeof IntersectionObserver === "undefined") {
+      return
+    }
 
     const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return
+      if (!entries.some((entry) => entry.isIntersecting)) {
+        return
+      }
       mountedRef.current = true
       observer.disconnect()
       observerRef.current = null

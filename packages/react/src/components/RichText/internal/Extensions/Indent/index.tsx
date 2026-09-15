@@ -13,7 +13,7 @@ const CLASS_PREFIX = "f0-indent-"
 
 // List nesting owns Tab and Shift-Tab inside a list; the indent shortcuts must
 // stand aside there rather than compete with it.
-const LIST_ITEM_TYPES = ["listItem", "taskItem"]
+const LIST_ITEM_TYPES = new Set(["listItem", "taskItem"])
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -169,7 +169,7 @@ export const IndentExtension = Extension.create<IndentOptions>({
       const { $from } = this.editor.state.selection
 
       for (let depth = $from.depth; depth > 0; depth -= 1) {
-        if (LIST_ITEM_TYPES.includes($from.node(depth).type.name)) {
+        if (LIST_ITEM_TYPES.has($from.node(depth).type.name)) {
           return false
         }
       }

@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest"
-
 import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
-
 import { CAROUSEL_SHADOW_BLEED } from "./carousel"
 
 /**
@@ -45,5 +43,9 @@ describe("the carousel's shadow bleed", () => {
       expect(rule).toContain(`black_calc(100%_-_${bleed}px)`)
       expect(rule).toContain(`transparent_calc(100%_-_${bleed / 2}px)`)
     }
+  })
+
+  test("takes no pointer events, so the band cannot cover its neighbours", () => {
+    expect(CAROUSEL_SHADOW_BLEED).toContain("pointer-events-none")
   })
 })

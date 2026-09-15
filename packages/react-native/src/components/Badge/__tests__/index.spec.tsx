@@ -7,7 +7,9 @@ import { Badge } from "../index"
 const getClassName = (
   json: ReturnType<ReturnType<typeof render>["toJSON"]>
 ) => {
-  if (!json || Array.isArray(json)) return ""
+  if (!json || Array.isArray(json)) {
+    return ""
+  }
   return String(json.props.className ?? "")
 }
 

@@ -1,13 +1,10 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
-
 import { BaseFetchOptions, FiltersDefinition } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
 import { TextCell } from "@/ui/value-display/types/text"
-
 import { DataCollectionSource } from "../../../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
@@ -74,7 +71,7 @@ const createTestSource = (
 
 class MockIntersectionObserver implements IntersectionObserver {
   root: Document | Element | null = null
-  rootMargin: string = ``
+  rootMargin = ``
   thresholds: readonly number[] = []
 
   disconnect = vi.fn()

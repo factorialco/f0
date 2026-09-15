@@ -1,11 +1,8 @@
 import { screen, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
-import type { GraphVisualizationOptions } from "../../types"
-
 import { DataCollectionSettingsProvider } from "../../../../../Settings/SettingsProvider"
+import type { GraphVisualizationOptions } from "../../types"
 import { SettingsRenderer } from "../SettingsRenderer"
 
 vi.stubGlobal(
@@ -71,7 +68,7 @@ describe("Graph SettingsRenderer", () => {
     renderSettings(baseOptions)
     const switches = screen.getAllByRole("switch")
     const disabled = switches.filter((s) => s.hasAttribute("disabled"))
-    expect(disabled.length).toBe(1)
+    expect(disabled).toHaveLength(1)
   })
 
   it("renders a locked tag as OFF + disabled, and locked wins over pinned", () => {

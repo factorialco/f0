@@ -1,8 +1,6 @@
 import { useForm } from "react-hook-form"
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import {
   Form,
   FormControl,
@@ -39,8 +37,10 @@ function Harness({
             <FormControl>
               <input aria-label="Field" {...field} />
             </FormControl>
-            {description && <FormDescription>{description}</FormDescription>}
-            {message && <FormMessage>{message}</FormMessage>}
+            {description ? (
+              <FormDescription>{description}</FormDescription>
+            ) : null}
+            {message ? <FormMessage>{message}</FormMessage> : null}
           </FormItem>
         )}
       />

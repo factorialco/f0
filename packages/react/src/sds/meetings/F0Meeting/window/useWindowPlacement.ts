@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react"
 import { usePersistedState } from "@/lib/persisted-state"
 
 import { type F0Rect, type F0WindowPlacement } from "../types"
-import { panelWidthFor } from "./panel"
 import {
   isWindowPlacement,
   placementFromRect,
@@ -45,14 +44,12 @@ export const useWindowPlacement = (): {
   settle: (rect: F0Rect) => void
   /** Commit a resize without re-anchoring. */
   resize: (rect: F0Rect) => void
-  /** Resize the side panel. Never touches the floating rect. */
-  setPanelWidth: (width: number, area: { width: number }) => void
 } => {
-  const [placement, setPlacement] = usePersistedState<F0WindowPlacement>(
-    PLACEMENT_STORAGE_KEY,
-    DEFAULT_PLACEMENT,
-    isWindowPlacement
-  )
+  const [placement, setPlacement] = usePersistedState<F0WindowPlacement>({
+    key: PLACEMENT_STORAGE_KEY,
+    fallback: DEFAULT_PLACEMENT,
+    validate: isWindowPlacement,
+  })
   const [viewport, setViewport] = useState(readViewport)
 
   useEffect(() => {
@@ -81,39 +78,17 @@ export const useWindowPlacement = (): {
     }
   }, [])
 
-  // `placementFromRect` builds a fresh placement and knows nothing about the
-  // panel, so both of these have to carry `panelWidth` over by hand — otherwise
-  // resizing or dragging the floating window silently resets the width the user
-  // chose for the side panel.
   const settle = useCallback(
-    (rect: F0Rect) =>
-      setPlacement((previous) => ({
-        ...settlePlacement(rect, readViewport()),
-        ...(previous.panelWidth !== undefined
-          ? { panelWidth: previous.panelWidth }
-          : {}),
-      })),
+    (rect: F0Rect) => setPlacement(settlePlacement(rect, readViewport())),
     [setPlacement]
   )
 
   // Resizing keeps the current anchor: only dragging re-decides the corner.
   const resize = useCallback(
     (rect: F0Rect) =>
-      setPlacement((previous) => ({
-        ...placementFromRect(rect, previous.corner, readViewport()),
-        ...(previous.panelWidth !== undefined
-          ? { panelWidth: previous.panelWidth }
-          : {}),
-      })),
-    [setPlacement]
-  )
-
-  const setPanelWidth = useCallback(
-    (width: number, area: { width: number }) =>
-      setPlacement((previous) => ({
-        ...previous,
-        panelWidth: panelWidthFor({ width: area.width, height: 0 }, width),
-      })),
+      setPlacement((previous) =>
+        placementFromRect(rect, previous.corner, readViewport())
+      ),
     [setPlacement]
   )
 
@@ -123,6 +98,5 @@ export const useWindowPlacement = (): {
     rect: resolvePlacement(placement, viewport),
     settle,
     resize,
-    setPanelWidth,
   }
 }

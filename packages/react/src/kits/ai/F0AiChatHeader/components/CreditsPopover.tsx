@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { type ReactNode, useCallback, useState } from "react"
-
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -8,7 +7,6 @@ import { Sliders, Upsell } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import type { AiChatCredits, CreditsUsage } from "../../F0AiChat/types"
 
 type CreditsPopoverProps = {
@@ -47,7 +45,9 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
     [credits]
   )
 
-  if (!credits) return null
+  if (!credits) {
+    return null
+  }
 
   const percentage = data
     ? Math.min(100, Math.round((data.used / data.total) * 100))
@@ -76,7 +76,7 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
         collisionPadding={12}
         className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
-        {hasHeader && (
+        {hasHeader ? (
           <div className="flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden text-left text-lg text-f1-foreground">
             <F0AvatarCompany
               name={credits.companyName ?? ""}
@@ -87,20 +87,20 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
               <OneEllipsis tag="span" className="font-medium">
                 {credits.companyName ?? ""}
               </OneEllipsis>
-              {credits.planName && (
+              {credits.planName ? (
                 <OneEllipsis
                   tag="span"
                   className="text-sm font-medium text-f1-foreground-secondary"
                 >
                   {credits.planName}
                 </OneEllipsis>
-              )}
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
         <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
           <div className="flex flex-col gap-2 p-3">
-            {loading && (
+            {loading ? (
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between">
                   <div className="h-5 w-16 animate-pulse rounded bg-f1-background-secondary" />
@@ -112,13 +112,13 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
                   <div className="h-3 w-28 animate-pulse rounded bg-f1-background-secondary" />
                 </div>
               </div>
-            )}
-            {error && (
+            ) : null}
+            {error ? (
               <span className="text-sm text-f1-foreground-secondary">
                 {i18n.t("ai.credits.creditsError")}
               </span>
-            )}
-            {!loading && !error && data && (
+            ) : null}
+            {!loading && !error && data ? (
               <>
                 <div className="flex justify-between">
                   <span className="text-base font-medium text-f1-foreground">
@@ -162,9 +162,9 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
                   </span>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
-          {credits.upgradePlanUrl && (
+          {credits.upgradePlanUrl ? (
             <div className="flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3">
               <span>{i18n.t("ai.credits.needMoreCredits")}</span>
               <F0Button
@@ -174,7 +174,7 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
                 icon={Upsell}
               />
             </div>
-          )}
+          ) : null}
         </div>
       </PopoverContent>
     </Popover>

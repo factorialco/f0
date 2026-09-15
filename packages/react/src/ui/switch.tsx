@@ -1,7 +1,6 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import * as React from "react"
 import { useId } from "react"
-
 import { cn } from "../lib/utils"
 
 const Switch = React.forwardRef<
@@ -62,7 +61,7 @@ const Switch = React.forwardRef<
           )}
         />
       </SwitchPrimitive.Root>
-      {props.title && !hideLabel && (
+      {props.title && !hideLabel ? (
         <label
           htmlFor={switchId}
           className={cn(
@@ -72,11 +71,11 @@ const Switch = React.forwardRef<
           )}
         >
           {props.title}
-          {required && (
+          {required ? (
             <span className="ml-0.5 text-f1-foreground-critical">*</span>
-          )}
+          ) : null}
         </label>
-      )}
+      ) : null}
     </div>
   )
 })

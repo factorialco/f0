@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0GraphExpander } from "../F0GraphExpander"
 
 describe("F0GraphExpander", () => {

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest"
-
 import { getFileTypeInfo } from "./utils"
 
 describe("getFileTypeInfo", () => {

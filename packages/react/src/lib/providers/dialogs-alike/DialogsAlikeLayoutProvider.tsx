@@ -1,8 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from "react"
 import { createPortal } from "react-dom"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import { DialogsAlike } from "./components/DialogsAlike"
 import { dialogsAlikeStore } from "./store"
 
@@ -64,9 +62,9 @@ export const DialogsAlikeLayoutProvider = ({
 
   return (
     <>
-      {isRenderer &&
-        typeof document !== "undefined" &&
-        createPortal(<DialogsAlike items={items} />, document.body)}
+      {isRenderer && typeof document !== "undefined"
+        ? createPortal(<DialogsAlike items={items} />, document.body)
+        : null}
       {children}
     </>
   )

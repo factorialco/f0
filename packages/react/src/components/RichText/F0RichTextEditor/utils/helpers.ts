@@ -1,20 +1,23 @@
 import { Editor } from "@tiptap/react"
 import { RefObject } from "react"
-
 import { heightType, resultType } from "./types"
 
 const checkContainerHeight = (
   containerRef: RefObject<HTMLDivElement>,
-  heightThreshold: number = 240
+  heightThreshold = 240
 ): boolean => {
-  if (!containerRef.current) return false
+  if (!containerRef.current) {
+    return false
+  }
   return containerRef.current.clientHeight >= heightThreshold
 }
 
 const isScrolledToBottom = (
   containerRef: RefObject<HTMLDivElement>
 ): boolean => {
-  if (!containerRef.current) return true
+  if (!containerRef.current) {
+    return true
+  }
   const container = containerRef.current
   return (
     container.scrollHeight - container.scrollTop - container.clientHeight < 1
@@ -62,7 +65,9 @@ const setupContainerObservers = ({
   updateStates()
 
   const container = containerRef.current
-  if (!container) return () => {}
+  if (!container) {
+    return () => {}
+  }
 
   const handleScroll = () => {
     onScrollChange(isScrolledToBottom(containerRef))

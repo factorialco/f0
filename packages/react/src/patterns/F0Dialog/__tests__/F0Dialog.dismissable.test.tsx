@@ -1,13 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   userEvent,
   zeroRender as render,
   screen,
 } from "@/testing/test-utils"
-
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 
 const renderDialog = (props: { dismissable?: boolean; onClose: () => void }) =>
   render(

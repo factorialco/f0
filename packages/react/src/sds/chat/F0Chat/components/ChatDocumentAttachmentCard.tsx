@@ -1,7 +1,6 @@
 "use client"
 
 import { lazy, type ReactNode, Suspense, useState } from "react"
-
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
@@ -10,10 +9,9 @@ import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"
@@ -36,6 +34,106 @@ const ChatTextThumbnail = lazy(loadTextThumbnail)
 /** Matches the transcript's shared media width at its cap (see media-layout). */
 const CARD_WIDTH = 384
 const THUMB_HEIGHT = 160
+
+/** The snapshot renderer for this document kind. */
+const DocumentThumbnail = ({
+  kind,
+  url,
+  width,
+  onError,
+  onRendered,
+}: {
+  kind: ChatDocumentKind
+  url: string
+  /** Kinds that lay out to a fixed width need it up front. */
+  width: number
+  onError: () => void
+  onRendered: () => void
+}) => {
+  if (kind === "pdf") {
+    return (
+      <ChatPdfThumbnail
+        url={url}
+        width={width}
+        onError={onError}
+        onRendered={onRendered}
+      />
+    )
+  }
+
+  if (kind === "sheet") {
+    return (
+      <ChatSheetThumbnail url={url} onError={onError} onRendered={onRendered} />
+    )
+  }
+
+  if (kind === "docx") {
+    return (
+      <ChatDocxThumbnail
+        url={url}
+        width={width}
+        onError={onError}
+        onRendered={onRendered}
+      />
+    )
+  }
+
+  if (kind === "text") {
+    return (
+      <ChatTextThumbnail url={url} onError={onError} onRendered={onRendered} />
+    )
+  }
+
+  return null
+}
+/**
+ * What the card falls back to once the snapshot fails to render: the plain
+ * downloadable file chip, or a square tile in the compact surfaces.
+ */
+const FailedDocumentCard = ({
+  file,
+  action,
+  compact,
+  cornerClass,
+  surfaceClassName,
+}: {
+  file: F0ChatFileAttachment
+  /** The download action, or whatever the host put in its place. */
+  action: { label: string; icon: IconType; onClick: () => void }
+  compact: boolean
+  cornerClass: string
+  surfaceClassName: string | undefined
+}) => {
+  const fileDescriptor = { name: file.name, type: file.mimeType ?? "" }
+
+  if (!compact) {
+    return <F0FileItem size="md" file={fileDescriptor} actions={[action]} />
+  }
+
+  return (
+    <div
+      className={cn(
+        "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
+        cornerClass,
+        surfaceClassName
+      )}
+      data-testid="chat-document-attachment"
+    >
+      <F0AvatarFile file={fileDescriptor} size="md" />
+      <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+        <ButtonInternal
+          variant="outline"
+          size="sm"
+          hideLabel
+          icon={action.icon}
+          label={action.label}
+          onClick={action.onClick}
+        />
+      </div>
+      <span className="sr-only">{file.name}</span>
+    </div>
+  )
+}
 
 /**
  * Document card with a type badge and name over a cropped snapshot of the
@@ -89,40 +187,13 @@ export const ChatDocumentAttachmentCard = ({
   const thumbHeight = compact ? "100%" : THUMB_HEIGHT
 
   if (failed) {
-    if (compact) {
-      return (
-        <div
-          className={cn(
-            "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
-            cornerClass,
-            surfaceClassName
-          )}
-          data-testid="chat-document-attachment"
-        >
-          <F0AvatarFile
-            file={{ name: file.name, type: file.mimeType ?? "" }}
-            size="md"
-          />
-          <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
-            <ButtonInternal
-              variant="outline"
-              size="sm"
-              hideLabel
-              icon={fallbackAction.icon}
-              label={fallbackAction.label}
-              onClick={fallbackAction.onClick}
-            />
-          </div>
-          <span className="sr-only">{file.name}</span>
-        </div>
-      )
-    }
-
     return (
-      <F0FileItem
-        size="md"
-        file={{ name: file.name, type: file.mimeType ?? "" }}
-        actions={[fallbackAction]}
+      <FailedDocumentCard
+        file={file}
+        action={fallbackAction}
+        compact={compact}
+        cornerClass={cornerClass}
+        surfaceClassName={surfaceClassName}
       />
     )
   }
@@ -138,7 +209,7 @@ export const ChatDocumentAttachmentCard = ({
       style={{ width: cardWidth }}
       data-testid="chat-document-attachment"
     >
-      {!compact && (
+      {!compact ? (
         <div className="flex items-center gap-2 px-2 py-2">
           <F0AvatarFile
             file={{ name: file.name, type: file.mimeType ?? "" }}
@@ -147,7 +218,7 @@ export const ChatDocumentAttachmentCard = ({
           <ClampText className="grow text-sm font-medium text-f1-foreground">
             {file.name}
           </ClampText>
-          {action && (
+          {action ? (
             <ButtonInternal
               variant="ghost"
               size="sm"
@@ -156,15 +227,17 @@ export const ChatDocumentAttachmentCard = ({
               label={action.label}
               onClick={action.onClick}
             />
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
       <button
         type="button"
         onClick={() => {
           openDocumentPreview(file)
           // Opening your own not-yet-sent draft is not consuming shared content.
-          if (surface === "transcript") emit.onDocumentOpened({ kind })
+          if (surface === "transcript") {
+            emit.onDocumentOpened({ kind })
+          }
         }}
         disabled={previewDisabled}
         aria-busy={!rendered ? true : undefined}
@@ -194,40 +267,17 @@ export const ChatDocumentAttachmentCard = ({
           data-testid="chat-document-snapshot"
         >
           <Suspense fallback={null}>
-            {kind === "pdf" && (
-              <ChatPdfThumbnail
-                url={file.url}
-                width={cardWidth - 2}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            )}
-            {kind === "sheet" && (
-              <ChatSheetThumbnail
-                url={file.url}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            )}
-            {kind === "docx" && (
-              <ChatDocxThumbnail
-                url={file.url}
-                width={cardWidth - 2}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            )}
-            {kind === "text" && (
-              <ChatTextThumbnail
-                url={file.url}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            )}
+            <DocumentThumbnail
+              kind={kind}
+              url={file.url}
+              width={cardWidth - 2}
+              onError={() => setFailed(true)}
+              onRendered={() => setRendered(true)}
+            />
           </Suspense>
         </div>
       </button>
-      {compact && action && (
+      {compact && action ? (
         <>
           <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
             <ButtonInternal
@@ -241,7 +291,7 @@ export const ChatDocumentAttachmentCard = ({
           </div>
           <span className="sr-only">{file.name}</span>
         </>
-      )}
+      ) : null}
     </div>
   )
 }

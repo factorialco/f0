@@ -1,7 +1,6 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { RecordType, SortingKey, SortingsDefinition } from "@/hooks/datasource"
-
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { PropertyDefinition } from "../../../property-render"
 
 export type WithOptionalSorting<
@@ -28,5 +27,5 @@ export type ListVisualizationOptions<
   Sortings extends SortingsDefinition,
 > = {
   itemDefinition: (record: R) => ItemDefinition
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
 }

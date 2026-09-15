@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useEffect, useRef, useState } from "react"
 import { fn } from "storybook/test"
-
 import { Reset, Save } from "@/icons/app"
-
 import {
   ActionBarStatus,
   F0ActionBar,

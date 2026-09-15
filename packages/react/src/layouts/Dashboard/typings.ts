@@ -1,5 +1,4 @@
 import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
-
 import { GroupGridWidget } from "../Layout/groups/GroupGrid/typings"
 
 export const dashboardWidgetSizes = ["1x1", "2x2", "4x2"] as const

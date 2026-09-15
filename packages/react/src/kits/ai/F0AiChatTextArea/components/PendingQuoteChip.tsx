@@ -4,7 +4,6 @@ import { Cross, Reply } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { type PendingQuote } from "../../F0AiChat/types"
 
 type PendingQuoteChipProps = {

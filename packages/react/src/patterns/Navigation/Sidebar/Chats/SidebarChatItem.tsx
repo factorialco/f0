@@ -7,7 +7,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { UnreadBadge } from "./UnreadBadge"
@@ -36,7 +35,9 @@ const PresenceDot = ({
   isActive: boolean
   label: string
 }) => {
-  if (presence === "offline") return null
+  if (presence === "offline") {
+    return null
+  }
   return (
     <div
       role="img"
@@ -119,25 +120,44 @@ export const SidebarChatItem = ({
               // shrunk inside the bordered avatar box.
               <span
                 aria-hidden={showGroupFallback || undefined}
-                className="flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary"
+                className={cn(
+                  "flex size-5 items-center justify-center text-lg font-medium",
+                  // The muted colour belongs to the ＃ ALONE — it is type, and
+                  // it sits at the same weight as the name beside it. An emoji
+                  // in here keeps its own (see `EmojiImage`).
+                  showGroupFallback && "text-f1-foreground-secondary"
+                )}
                 data-testid={
                   showGroupFallback
                     ? "sidebar-group-avatar-fallback"
                     : undefined
                 }
               >
-                <EmojiImage emoji={identityEmoji} size="sm" />
+                {showGroupFallback ? (
+                  // ＃ IS NOT AN EMOJI — it is the typographic stand-in for a
+                  // community, which has no emoji to give (`PostsGroup` has no
+                  // field for one). So it must not go through the emoji font:
+                  // that stack ends in `sans-serif`, and U+FF03 has no glyph in
+                  // any of the emoji fonts before it, so the ＃ would fall
+                  // through to the browser's generic sans while the name beside
+                  // it stays Inter.
+                  identityEmoji
+                ) : (
+                  // NATIVE, not a twemoji image: at 20px the sprite reads soft
+                  // next to Inter, and it costs a network image per row.
+                  <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+                )}
               </span>
             ) : (
               <F0Avatar size="xs" avatar={chat.avatar} />
             )}
-            {presence && (
+            {presence ? (
               <PresenceDot
                 presence={presence}
                 isActive={isActive}
                 label={i18n.chat.online}
               />
-            )}
+            ) : null}
           </div>
         ) : null}
 
@@ -157,7 +177,7 @@ export const SidebarChatItem = ({
         >
           {chat.label}
         </OneEllipsis>
-        {(statuses.length > 0 || chat.unreadCount) && (
+        {statuses.length > 0 || chat.unreadCount ? (
           <div
             className={cn(
               "gap-1 flex items-center justify-center transition-opacity",
@@ -185,17 +205,18 @@ export const SidebarChatItem = ({
               <UnreadBadge
                 count={chat.unreadCount}
                 hasMention={!!chat.mentionCount}
+                kind={chat.kind}
               />
             ) : null}
           </div>
-        )}
+        ) : null}
       </button>
       {/* Hover (or focus) reveals a pin/unpin button, sitting where the unread
           badge / status is — a sibling of the row button so it isn't a nested
           <button>. While a pin/unpin is saving, a spinner takes its place and
           stays visible off-hover. */}
-      {chat.onTogglePin &&
-        (chat.pinPending ? (
+      {chat.onTogglePin ? (
+        chat.pinPending ? (
           <div
             className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center"
             aria-label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
@@ -221,7 +242,8 @@ export const SidebarChatItem = ({
               }}
             />
           </div>
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { seedFromStorage, SeedTarget } from "../seedFromStorage"
 
 type TestRecord = { id: number; name: string; department: string }

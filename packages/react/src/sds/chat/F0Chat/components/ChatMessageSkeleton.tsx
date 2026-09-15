@@ -1,5 +1,4 @@
 import { type ReactNode } from "react"
-
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -14,7 +13,7 @@ const SkeletonRun = ({
   <div
     className={cn("flex w-full items-end gap-2", mine && "flex-row-reverse")}
   >
-    {!mine && <Skeleton className="size-6 shrink-0 rounded-full" />}
+    {!mine ? <Skeleton className="size-6 shrink-0 rounded-full" /> : null}
     <div
       className={cn("flex flex-col gap-1", mine ? "items-end" : "items-start")}
     >
@@ -33,6 +32,7 @@ const SkeletonRun = ({
 export const ChatMessageSkeleton = (): ReactNode => (
   <div
     aria-hidden
+    data-testid="chat-message-skeleton"
     className="mx-auto flex w-full max-w-content flex-col gap-6 px-4 pt-4"
   >
     <SkeletonRun mine={false} widths={["w-48", "w-32"]} />

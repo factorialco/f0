@@ -1,12 +1,10 @@
+import { act, renderHook, waitFor } from "@testing-library/react"
 import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
-import { act, renderHook, waitFor } from "@testing-library/react"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { EnhanceHighlight } from "@/components/RichText/internal/Extensions/EnhanceHighlight"
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
-
 import { useEnhance } from "../useEnhance"
 
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -59,7 +57,7 @@ describe("useEnhance", () => {
       resolveEnhance({ success: true, text: "<p>Enhanced</p>" })
       await enhancePromise
     })
-    expect(editor.view.dom.querySelectorAll(".enhance-highlight").length).toBe(
+    expect(editor.view.dom.querySelectorAll(".enhance-highlight")).toHaveLength(
       0
     )
   })

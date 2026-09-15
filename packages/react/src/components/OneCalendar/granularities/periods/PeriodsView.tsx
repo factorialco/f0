@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { DateRange } from "../../types"
 import { isAfterOrEqual, isBeforeOrEqual, toDateRange } from "../../utils"
 import { DatePeriod } from "./types"
@@ -70,11 +68,11 @@ export function PeriodsView({
 
   return (
     <div className="flex flex-col gap-2">
-      {header && (
+      {header ? (
         <div className="px-2 font-medium text-f1-foreground-secondary">
           {header}
         </div>
-      )}
+      ) : null}
       <AnimatePresence
         mode="popLayout"
         initial={false}

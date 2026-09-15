@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { memo } from "react"
-
 import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { useI18n } from "@/lib/providers/i18n"
 

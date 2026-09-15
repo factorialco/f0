@@ -47,9 +47,15 @@ export function resolveLocalized<T>(
   value: Localized<T> | undefined,
   locale: string | undefined
 ): T | undefined {
-  if (value === undefined) return undefined
-  if (!isLocalizedList(value)) return value
-  if (value.length === 0) return undefined
+  if (value === undefined) {
+    return undefined
+  }
+  if (!isLocalizedList(value)) {
+    return value
+  }
+  if (value.length === 0) {
+    return undefined
+  }
   const match = locale ? value.find((o) => o.locale === locale) : undefined
   return (match ?? value[0]).value
 }
@@ -59,12 +65,12 @@ export function resolveLocalized<T>(
  * the union that drives a single shared language picker. Plain values
  * contribute no options (they aren't language-specific).
  */
-export function collectLanguages(
-  ...values: Array<Localized<unknown> | undefined>
-): LanguageOption[] {
+export function collectLanguages(...values: unknown[]): LanguageOption[] {
   const byLocale = new Map<string, LanguageOption>()
   for (const value of values) {
-    if (!isLocalizedList(value)) continue
+    if (!isLocalizedList(value)) {
+      continue
+    }
     for (const option of value) {
       const existing = byLocale.get(option.locale)
       if (!existing) {
@@ -88,7 +94,9 @@ export function languageLabel(
   option: LanguageOption,
   displayLocale?: string
 ): string {
-  if (option.label) return option.label
+  if (option.label) {
+    return option.label
+  }
   try {
     const locale = displayLocale ?? option.locale
     const names = new Intl.DisplayNames([locale], { type: "language" })
@@ -109,7 +117,9 @@ export function defaultLocale(
   languages: LanguageOption[],
   preferred?: string
 ): string | undefined {
-  if (languages.length === 0) return undefined
+  if (languages.length === 0) {
+    return undefined
+  }
   const codes = languages.map((l) => l.locale)
   const subtag = (tag: string) => tag.split("-")[0]
   const match = (want: string) =>
@@ -118,12 +128,16 @@ export function defaultLocale(
 
   if (preferred) {
     const found = match(preferred)
-    if (found) return found
+    if (found) {
+      return found
+    }
   }
   const nav = typeof navigator !== "undefined" ? navigator.language : undefined
   if (nav) {
     const found = match(nav)
-    if (found) return found
+    if (found) {
+      return found
+    }
   }
   return codes[0]
 }

@@ -1,9 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
-
 import {
   DataAdapter,
   ItemNeighborsFetchOptions,
@@ -133,8 +131,9 @@ const DetailPanel = ({ withCapability }: { withCapability: boolean }) => {
           </div>
           <div className="text-sm text-f1-foreground-secondary">
             {activeEmployee?.department}
-            {neighbors?.position !== undefined &&
-              ` — ${neighbors.position} of ${neighbors.total}`}
+            {neighbors?.position !== undefined
+              ? ` — ${neighbors.position} of ${neighbors.total}`
+              : null}
           </div>
         </div>
         <div className="flex gap-2">
@@ -146,7 +145,9 @@ const DetailPanel = ({ withCapability }: { withCapability: boolean }) => {
             label="Previous"
             disabled={!neighbors?.previous || isResolving}
             onClick={() => {
-              if (neighbors?.previous) setActiveId(neighbors.previous.id)
+              if (neighbors?.previous) {
+                setActiveId(neighbors.previous.id)
+              }
             }}
           />
           <F0Button
@@ -158,7 +159,9 @@ const DetailPanel = ({ withCapability }: { withCapability: boolean }) => {
             loading={isResolving}
             disabled={!neighbors?.next || isResolving}
             onClick={() => {
-              if (neighbors?.next) setActiveId(neighbors.next.id)
+              if (neighbors?.next) {
+                setActiveId(neighbors.next.id)
+              }
             }}
           />
         </div>

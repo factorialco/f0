@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
-
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   FiltersDefinition,
   FiltersState,
@@ -10,8 +8,9 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { useDataCollectionStorage as useDataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
-
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { getFeatures } from "./getFeatures"
+import { pruneStoredStatus, StoredStatusDefinition } from "./pruneStoredStatus"
 import {
   DataCollectionStatus,
   DataCollectionStorageFeature,
@@ -29,6 +28,10 @@ type UseDataCollectionStorage = {
  * @param key - The storage key
  * @param featuresDef - The features definition
  * @param settings - The settings
+ * @param options - `definition` is the collection's declared shape: stored
+ *   state is validated against it on hydration so state that no longer applies
+ *   (schema drift, or a payload written by a different collection under the
+ *   same key) never reaches the data source. `disabled` turns storage off.
  * @returns The settings in storage and the settings storage ready
  */
 
@@ -48,7 +51,10 @@ export const useDataCollectionStorage = <
     Filters,
     NavigationFilters
   >,
-  disabled?: boolean
+  {
+    definition,
+    disabled,
+  }: { definition: StoredStatusDefinition; disabled?: boolean }
 ): UseDataCollectionStorage => {
   const [storageReady, setStorageReady] = useState(false)
 
@@ -64,10 +70,16 @@ export const useDataCollectionStorage = <
   }
 
   const storageFeatures = useMemo(
-    // Settings and customPresets are always included, regardless of the
-    // consumer's `features` allowlist: presets are a first-class, always-on
-    // capability and must persist whenever a storage key is present.
-    () => [...getFeatures(featuresDef), "settings", "customPresets"],
+    // Settings, the views and which one is selected are always included,
+    // regardless of the consumer's `features` allowlist: views are a
+    // first-class, always-on capability and must persist whenever a storage key
+    // is present.
+    () => [
+      ...getFeatures(featuresDef),
+      "settings",
+      "customPresets",
+      "selectedPresetId",
+    ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
     [JSON.stringify(featuresDef)]
   )
@@ -75,6 +87,15 @@ export const useDataCollectionStorage = <
   const active = useMemo(() => {
     return !disabled && !!key
   }, [disabled, key])
+
+  // Latest-value ref so the hydration effect can validate against the current
+  // definition without re-running every time the (inline) definition object is
+  // rebuilt. Seeded with the mount-time definition, which is the one hydration
+  // needs, and refreshed after every render for later key changes.
+  const definitionRef = useRef(definition)
+  useEffect(() => {
+    definitionRef.current = definition
+  })
 
   /** Gets the settings in storage when the key and features change */
   useEffect(() => {
@@ -89,7 +110,8 @@ export const useDataCollectionStorage = <
     // values left over from the previous key/inactive state.
     setStorageReady(false)
 
-    storageProvider.get(key!).then((status) => {
+    storageProvider.get(key!).then((rawStatus) => {
+      const status = pruneStoredStatus(rawStatus, definitionRef.current)
       Object.entries(featureProviders).forEach(
         ([featureName, featureProvider]) => {
           if (
@@ -169,7 +191,9 @@ export const useDataCollectionStorage = <
     // visualizationFilters map containing only the default visualization)
     // can be debounced and later flushed, overwriting the previously persisted
     // multi-key map because the default storage handler replaces the whole key.
-    if (!active || !storageReady) return
+    if (!active || !storageReady) {
+      return
+    }
 
     debouncedSetFeatures(featureProviders)
 

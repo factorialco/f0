@@ -1,9 +1,7 @@
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import { formatRelativeDay, formatSeparator } from "../utils/natural-time"
 
 /**
@@ -44,7 +42,7 @@ export const DateTimeSeparator = ({
       data-testid="chat-date-separator"
     >
       <span className="flex items-center gap-1.5 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2.5 py-0.5 backdrop-blur">
-        {loading && <Spinner size="small" className="h-3.5 w-3.5" />}
+        {loading ? <Spinner size="small" className="h-3.5 w-3.5" /> : null}
         <span className="text-sm font-normal text-f1-foreground-secondary">
           {label}
         </span>

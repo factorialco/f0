@@ -1,8 +1,11 @@
 import { createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
-import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
-
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 import { F0Map, type F0MapHandle } from "../F0Map"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 
@@ -11,15 +14,20 @@ import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 // a machine without WebGL (the map constructor throwing).
 const mock = vi.hoisted(() => {
   const instances: MockMap[] = []
+  const markers: {
+    element?: HTMLElement
+    position: [number, number] | null
+    added: boolean
+  }[] = []
   const state = { throwOnCreate: false }
 
   class MockMap {
     opts: Record<string, unknown>
-    handlers: Record<string, Array<(e?: unknown) => void>> = {}
+    handlers: Record<string, ((e?: unknown) => void)[]> = {}
     calls = {
-      easeTo: [] as Array<Record<string, unknown>>,
-      flyTo: [] as Array<Record<string, unknown>>,
-      jumpTo: [] as Array<Record<string, unknown>>,
+      easeTo: [] as Record<string, unknown>[],
+      flyTo: [] as Record<string, unknown>[],
+      jumpTo: [] as Record<string, unknown>[],
       fitBounds: [] as unknown[],
       setStyle: [] as unknown[],
       setProjection: [] as unknown[],
@@ -30,12 +38,15 @@ const mock = vi.hoisted(() => {
     // GL source/layer registry, so the vector-line layer is observable.
     sources: Record<string, { data: unknown; setData(d: unknown): void }> = {}
     layers = new Set<string>()
+    layerInsertions: [string, string | undefined][] = []
     // A live map exposes its Style instance; the GL layers use its presence as
     // the "map not yet destroyed" guard, so the mock must carry one.
     style = {}
 
     constructor(opts: Record<string, unknown>) {
-      if (state.throwOnCreate) throw new Error("WebGL not supported")
+      if (state.throwOnCreate) {
+        throw new Error("WebGL not supported")
+      }
       this.opts = opts
       instances.push(this)
     }
@@ -46,12 +57,22 @@ const mock = vi.hoisted(() => {
       b?: (e?: unknown) => void
     ) {
       const cb = typeof a === "function" ? a : b
-      if (cb) (this.handlers[type] ??= []).push(cb)
+      if (cb) {
+        this.handlers[type] ??= []
+        this.handlers[type].push(cb)
+        // A real map fires `load` at whoever is subscribed, `on` and `once`
+        // alike - and the adapter subscribes with `on`. Deferred to a microtask
+        // so the subscription is in place first.
+        if (type === "load") {
+          queueMicrotask(() => cb())
+        }
+      }
       return this
     }
     once(type: string, cb: (e?: unknown) => void) {
-      // Fire `load` on a microtask so the component's handler is registered.
-      if (type === "load") void Promise.resolve().then(() => cb())
+      if (type === "load") {
+        queueMicrotask(() => cb())
+      }
       return this
     }
     off() {
@@ -119,10 +140,12 @@ const mock = vi.hoisted(() => {
       return this.sources[id]
     }
     removeSource(id: string) {
-      delete this.sources[id]
+      const { [id]: _removed, ...rest } = this.sources
+      this.sources = rest
     }
-    addLayer(spec: { id: string }) {
+    addLayer(spec: { id: string }, before?: string) {
       this.layers.add(spec.id)
+      this.layerInsertions.push([spec.id, before])
     }
     getLayer(id: string) {
       return this.layers.has(id) ? { id } : undefined
@@ -139,23 +162,38 @@ const mock = vi.hoisted(() => {
     }
   }
   class MockMarker {
-    setLngLat() {
+    constructor(opts?: { element?: HTMLElement }) {
+      markers.push({ element: opts?.element, position: null, added: false })
+      this.index = markers.length - 1
+    }
+    index: number
+    setLngLat(at: [number, number]) {
+      markers[this.index].position = at
       return this
     }
     addTo() {
+      markers[this.index].added = true
       return this
     }
-    remove() {}
+    remove() {
+      markers.splice(this.index, 1)
+    }
   }
   class MockLngLatBounds {
     extend() {
       return this
     }
   }
-  class MockAttributionControl {}
+  class MockAttributionControl {
+    opts: Record<string, unknown> | undefined
+    constructor(opts?: Record<string, unknown>) {
+      this.opts = opts
+    }
+  }
 
   return {
     instances,
+    markers,
     state,
     Map: MockMap,
     Marker: MockMarker,
@@ -202,6 +240,7 @@ const LINE_LAYERS = ["f0-map-lines-solid", "f0-map-lines-dashed"]
 describe("F0Map", () => {
   beforeEach(() => {
     mock.instances.length = 0
+    mock.markers.length = 0
     mock.state.throwOnCreate = false
   })
 
@@ -261,10 +300,10 @@ describe("F0Map", () => {
       expect(onMarkerSelect).toHaveBeenCalledWith(null)
     })
 
-    it("getMap returns the underlying instance", () => {
+    it("getNativeMap returns the engine's own instance", () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
-      expect(ref.current?.getMap()).toBe(mock.instances[0])
+      expect(ref.current?.getNativeMap()).toBe(mock.instances[0])
     })
   })
 
@@ -326,6 +365,87 @@ describe("F0Map", () => {
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("current location", () => {
+    const grantLocation = () => {
+      Object.defineProperty(navigator, "geolocation", {
+        configurable: true,
+        value: {
+          getCurrentPosition: (success: PositionCallback) =>
+            success({
+              coords: { longitude: 2.16, latitude: 41.4 },
+            } as GeolocationPosition),
+        },
+      })
+      Object.defineProperty(navigator, "permissions", {
+        configurable: true,
+        value: {
+          query: async () => ({ state: "granted" }) as PermissionStatus,
+        },
+      })
+    }
+
+    it("draws the dot beneath the lines once located", async () => {
+      grantLocation()
+      render(<F0Map markers={POINTS} routes={ROUTES} showCurrentLocation />)
+      const map = mock.instances[0]
+      await waitFor(() =>
+        expect(map.layers.has("f0-current-location")).toBe(true)
+      )
+      expect(map.sources["f0-current-location"]).toBeDefined()
+      // Inserted below the bottom line layer, so lines and pins stay above it.
+      expect(map.layerInsertions.at(-1)).toEqual([
+        "f0-current-location",
+        "f0-map-lines-solid",
+      ])
+    })
+  })
+
+  describe("markers", () => {
+    it("anchors one engine marker per point, at its coordinates", () => {
+      render(<F0Map markers={POINTS} />)
+      expect(mock.markers).toHaveLength(POINTS.length)
+      expect(mock.markers.map((m) => m.position)).toEqual(
+        POINTS.map((p) => p.coordinates)
+      )
+      // Anchored to the map, with the element the content is portalled into.
+      expect(mock.markers.every((m) => m.added)).toBe(true)
+      expect(mock.markers.every((m) => m.element instanceof HTMLElement)).toBe(
+        true
+      )
+    })
+  })
+
+  describe("engine readiness", () => {
+    it("frames the markers and applies the projection once ready", async () => {
+      render(<F0Map markers={POINTS} />)
+      // The readiness handler does this, not the imperative handle: nothing
+      // here calls fitToMarkers.
+      await waitFor(() =>
+        expect(mock.instances[0].calls.fitBounds.length).toBeGreaterThan(0)
+      )
+      expect(mock.instances[0].calls.setProjection.at(-1)).toEqual({
+        type: "mercator",
+      })
+    })
+  })
+
+  describe("style", () => {
+    it("hands the engine the matching half of the style pair", () => {
+      // The pair is opaque to F0Map (its shape belongs to the engine), so the
+      // only thing worth asserting is that the right half reaches the map
+      // unchanged - jsdom has no `.dark` ancestor, so that is `light`.
+      const light = { version: 8, name: "light" }
+      const dark = { version: 8, name: "dark" }
+      render(
+        <F0Map
+          markers={POINTS}
+          mapStyle={{ provider: "maplibre", light, dark }}
+        />
+      )
+      expect(mock.instances[0].opts.style).toBe(light)
     })
   })
 

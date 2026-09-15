@@ -1,39 +1,38 @@
 import React, { useEffect, useMemo, useRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ZodTypeAny } from "zod"
-
-import { F0Alert } from "@/components/F0Alert"
 import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/components/CardSelectable"
+import { F0Alert } from "@/components/F0Alert"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   FormField as FormFieldPrimitive,
   FormItem,
   FormMessage,
 } from "@/ui/form"
-
-import type { F0FieldAlertProps } from "../f0Schema"
-import type { F0SwitchField } from "../fields/switch/types"
-import type { F0Field } from "../fields/types"
-import type { RowDefinition } from "../types"
-
 import { generateAnchorId, useF0FormContext } from "../context"
+import type { F0FieldAlertProps } from "../f0Schema"
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
+import type { F0SwitchField } from "../fields/switch/types"
+import type { F0Field } from "../fields/types"
 import {
   evaluateDisabled,
   evaluateRenderIf,
   resolveFieldAlert,
 } from "../fields/utils"
+import type { RowDefinition } from "../types"
 import { RowRenderer } from "./RowRenderer"
 
 /**
  * Check if a switch schema requires the value to be `true`.
  * This is the case for z.literal(true) schemas.
  */
+const rowKey = (row: RowDefinition) => row.fields.map((f) => f.id).join("-")
+
 function isMustBeTrue(schema: ZodTypeAny): boolean {
   const inner = unwrapZodSchema(schema)
   return isZodType(inner, "ZodLiteral") && inner._def.value === true
@@ -135,7 +134,7 @@ export function SwitchGroupRenderer({
               if ("type" in dep && dep.type === "row") {
                 return (
                   <RowRenderer
-                    key={dep.fields.map((f) => f.id).join("-")}
+                    key={rowKey(dep)}
                     row={dep}
                     sectionId={sectionId}
                   />
@@ -156,7 +155,7 @@ export function SwitchGroupRenderer({
                       {deps.map((innerDep) =>
                         "type" in innerDep && innerDep.type === "row" ? (
                           <RowRenderer
-                            key={innerDep.fields.map((fd) => fd.id).join("-")}
+                            key={rowKey(innerDep)}
                             row={innerDep}
                             sectionId={sectionId}
                           />
@@ -198,10 +197,6 @@ export function SwitchGroupRenderer({
     () => visibleFields.filter((field) => values[field.id]).map((f) => f.id),
     [visibleFields, values]
   )
-
-  if (visibleFields.length === 0) {
-    return null
-  }
 
   const handleChange = (newSelectedIds: string[]) => {
     // Update each field's value based on whether it's in the selected list
@@ -260,6 +255,15 @@ export function SwitchGroupRenderer({
     [visibleFields, formName, sectionId]
   )
 
+  // AFTER every hook, not before. A group whose switches are all hidden by
+  // `renderIf` still has to run the same hooks as one that isn't — otherwise
+  // the render that empties it runs fewer hooks than the one before, and React
+  // tears the component down mid-update. Which is exactly what happened when a
+  // switch appeared between two others and split their group.
+  if (visibleFields.length === 0) {
+    return null
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {/* First field's anchor wraps the container for wiggle animation */}
@@ -283,7 +287,7 @@ export function SwitchGroupRenderer({
           <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
         ))}
       </div>
-      {groupErrors.length > 0 && (
+      {groupErrors.length > 0 ? (
         <div className="flex flex-col gap-1">
           {groupErrors.map((error) => (
             <FormFieldPrimitive
@@ -298,7 +302,7 @@ export function SwitchGroupRenderer({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

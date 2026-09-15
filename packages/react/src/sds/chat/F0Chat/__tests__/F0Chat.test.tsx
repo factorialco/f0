@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { getEmojiLabel } from "@/lib/emojis"
 import {
   act,
@@ -11,7 +10,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { resolveMockReactionUsers } from "../mocks/MockChatApp"
 import {
@@ -29,8 +27,9 @@ import {
   type F0ChatMessage,
   type F0ChatRuntime,
 } from "../types"
-import { messageSurfaceColorClass } from "../utils/sender-color"
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
+import { messageSurfaceColorClass } from "../utils/sender-color"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -589,6 +588,78 @@ describe("F0Chat", () => {
     expect(screen.getByTestId("chat-image-album")).toHaveClass("rounded-bl-2xs")
   })
 
+  it("sizes a lone photo from its own dimensions, keeping the chained corner", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "solo-photo",
+            author: { id: "other", name: "María José" },
+            body: "",
+            createdAt: now,
+            isMine: false,
+            attachments: [
+              {
+                kind: "image",
+                url: "blob:img",
+                name: "panorama.png",
+                width: 2000,
+                height: 400,
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    // 5:1 is past what the box can represent, so it stops at the floor height
+    // and the photo is letterboxed inside — whole, not a cropped third of it.
+    const album = screen.getByTestId("chat-image-album")
+    expect(album).toHaveStyle({ width: "384px" })
+    expect(album).toHaveClass("max-w-full", "rounded-2xl")
+    expect(screen.getByAltText("panorama.png")).toHaveStyle({ height: "60%" })
+  })
+
+  it("keeps the shared media width for an album of several photos", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "album",
+            author: { id: "other", name: "María José" },
+            body: "",
+            createdAt: now,
+            isMine: false,
+            attachments: [
+              {
+                kind: "image",
+                url: "blob:a",
+                name: "a.png",
+                width: 200,
+                height: 2000,
+              },
+              {
+                kind: "image",
+                url: "blob:b",
+                name: "b.png",
+                width: 2000,
+                height: 400,
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    const album = screen.getByTestId("chat-image-album")
+    expect(album).toHaveClass(...CHAT_MEDIA_WIDTH_CLASS.split(" "))
+    expect(album).not.toHaveStyle({ width: "384px" })
+    // The mosaic still crops to its own ratios — only a lone photo changed.
+    for (const cell of screen.getAllByTestId("chat-image-attachment")) {
+      expect(cell).not.toHaveClass("items-center")
+    }
+  })
+
   it("keeps my attachment surfaces neutral", () => {
     renderChat(
       makeRuntime({
@@ -658,6 +729,109 @@ describe("F0Chat", () => {
     expect(sendMessage).toHaveBeenCalledWith(
       expect.objectContaining({ body: "A new message" })
     )
+  })
+
+  it("keeps an oversized message in the composer and shows the limit", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage, maxMessageCharacters: 10 }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "12345678901")
+    await userEvent.keyboard("{Enter}")
+
+    expect(sendMessage).not.toHaveBeenCalled()
+    expect(input).toHaveValue("12345678901")
+    const error = screen.getByText("Messages can be up to 10 characters")
+    expect(error).toBeInTheDocument()
+    expect(input).toHaveAttribute("aria-invalid", "true")
+    expect(input).toHaveAttribute("aria-describedby", error.closest("[id]")?.id)
+
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+    await waitFor(() => expect(input).toHaveValue(""))
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    expect(input).not.toHaveAttribute("aria-invalid")
+    expect(input).not.toHaveAttribute("aria-describedby")
+
+    await userEvent.type(input, "1234567890")
+
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    expect(input).not.toHaveAttribute("aria-invalid")
+    expect(input).not.toHaveAttribute("aria-describedby")
+    await userEvent.keyboard("{Enter}")
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ body: "1234567890" })
+    )
+  })
+
+  it("keeps an oversized edit active and saves it after correction", async () => {
+    const editMessage = vi.fn()
+    renderChat(
+      makeRuntime({
+        editMessage,
+        editWindowMs: 60_000,
+        maxMessageCharacters: 10,
+      })
+    )
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, " too long")
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+
+    expect(editMessage).not.toHaveBeenCalled()
+    expect(input).toHaveValue("Hi back too long")
+    expect(screen.getByText(/editing/i)).toBeInTheDocument()
+    expect(
+      screen.getByText("Messages can be up to 10 characters")
+    ).toBeInTheDocument()
+
+    await userEvent.clear(input)
+    await userEvent.type(input, "Updated")
+
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+    expect(editMessage).toHaveBeenCalledWith(
+      "m2",
+      expect.objectContaining({ body: "Updated" })
+    )
+    expect(screen.queryByText(/editing/i)).not.toBeInTheDocument()
+  })
+
+  it("clears length validation when an oversized edit is cancelled", async () => {
+    renderChat(
+      makeRuntime({
+        editMessage: vi.fn(),
+        editWindowMs: 60_000,
+        maxMessageCharacters: 10,
+      })
+    )
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, " too long")
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+    expect(
+      screen.getByText("Messages can be up to 10 characters")
+    ).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: /cancel edit/i }))
+
+    expect(input).toHaveValue("")
+    expect(screen.queryByText(/editing/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    expect(input).not.toHaveAttribute("aria-invalid")
   })
 
   it("selects an emoji with Enter before sending the completed message", async () => {
@@ -1308,7 +1482,9 @@ describe("F0Chat", () => {
 
   it("seeds more than 40 readers for the application frame overflow demo", () => {
     const seed = SEED_BY_ID.get("grp-reporting")
-    if (!seed) throw new Error("Expected grp-reporting mock seed")
+    if (!seed) {
+      throw new Error("Expected grp-reporting mock seed")
+    }
 
     const messages = initialConvState(seed).messages.filter(isUserMessage)
 
@@ -1318,7 +1494,9 @@ describe("F0Chat", () => {
     }
 
     const firstParticipant = seed.participants[0]
-    if (!firstParticipant) throw new Error("Expected group participants")
+    if (!firstParticipant) {
+      throw new Error("Expected group participants")
+    }
     const readers = groupReadersFor(
       {
         ...seed,
@@ -1329,7 +1507,9 @@ describe("F0Chat", () => {
     expect(new Set(readers?.map(({ id }) => id)).size).toBe(readers?.length)
 
     const dmSeed = SEED_BY_ID.get("dm-eleanor")
-    if (!dmSeed) throw new Error("Expected dm-eleanor mock seed")
+    if (!dmSeed) {
+      throw new Error("Expected dm-eleanor mock seed")
+    }
     expect(groupReadersFor(dmSeed, ME.id)).toBeUndefined()
   })
 
@@ -1347,7 +1527,9 @@ describe("F0Chat", () => {
         const message = result.current.states["grp-reporting"]?.messages
           .filter(isUserMessage)
           .find(({ body }) => body === "Receipt state test")
-        if (!message) throw new Error("Expected the live mock message")
+        if (!message) {
+          throw new Error("Expected the live mock message")
+        }
         return message
       }
 
@@ -1373,13 +1555,17 @@ describe("F0Chat", () => {
 
   it("resolves complete and fallback reaction users in the application mock", () => {
     const seed = SEED_BY_ID.get("grp-reporting")
-    if (!seed) throw new Error("Expected grp-reporting mock seed")
+    if (!seed) {
+      throw new Error("Expected grp-reporting mock seed")
+    }
 
     const messages = initialConvState(seed).messages
     const message = messages
       .filter(isUserMessage)
       .find((item) => item.reactions?.some(({ emoji }) => emoji === "🎉"))
-    if (!message) throw new Error("Expected a seeded reaction message")
+    if (!message) {
+      throw new Error("Expected a seeded reaction message")
+    }
 
     expect(
       resolveMockReactionUsers(seed, messages, message.id, "🎉").map(

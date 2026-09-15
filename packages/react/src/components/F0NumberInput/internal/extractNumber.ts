@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-useless-escape
-const COMPLETE_NUMBER_FORMAT = /^(-?)([0-9]+)?(?:([\.,])([0-9]+)?)?$/
+const COMPLETE_NUMBER_FORMAT = /^(-?)(\d+)?(?:([\.,])(\d+)?)?$/
 
 interface ExtractedNumber {
   formattedValue: string
@@ -32,7 +32,9 @@ export function extractNumber(
   }
 
   const match = input.match(COMPLETE_NUMBER_FORMAT)
-  if (!match) return null
+  if (!match) {
+    return null
+  }
 
   // eslint-disable-next-line prefer-const
   let [_, sign, integers, separator, decimals] = match

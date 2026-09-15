@@ -1,7 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Check } from "../../../icons/app"
-import { DataList } from "./index"
+import { DataList } from "."
 
 const meta: Meta<typeof DataList> = {
   title: "List/DataList",
@@ -27,10 +26,10 @@ const meta: Meta<typeof DataList> = {
           avatarUrl="/avatars/person05.jpg"
         />
         <DataList.PersonItem
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           avatarUrl="/avatars/person06.jpg"
-          action={{ type: "copy", text: "Dani" }}
+          action={{ type: "copy", text: "Jordan" }}
         />
         <DataList.PersonItem
           firstName="Josep Jaume"

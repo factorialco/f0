@@ -1,9 +1,7 @@
 import { forwardRef } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
-
 import { CardInternal, type CardInternalProps } from "./internal"
 
 const privateProps = ["className"] as const

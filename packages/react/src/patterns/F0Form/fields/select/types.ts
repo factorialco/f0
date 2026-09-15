@@ -7,7 +7,6 @@ import type {
   GroupingDefinition,
   RecordType,
 } from "@/hooks/datasource"
-
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
@@ -78,7 +77,7 @@ interface F0SelectConfigWithOptions<
   T extends SelectValueType = string,
 > extends F0SelectConfigBase {
   /** Options for the select dropdown */
-  options: F0SelectItemProps<T, unknown>[]
+  options: F0SelectItemProps<T>[]
   source?: never
   mapOptions?: never
 }

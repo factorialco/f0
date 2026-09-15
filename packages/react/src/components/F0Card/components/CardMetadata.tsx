@@ -1,9 +1,7 @@
 import React from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { valueDisplayRenderers } from "@/ui/value-display"
-
 import { CardMetadata as CardMetadataType } from "../types"
 
 export const cardPropertyRenderers = {
@@ -39,9 +37,9 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
   if (!renderer) {
     return (
       <div className="flex h-8 items-center gap-1.5">
-        {"icon" in metadata && metadata.icon && (
+        {"icon" in metadata && metadata.icon ? (
           <F0Icon icon={metadata.icon} color="default" size="md" />
-        )}
+        ) : null}
         <span>Unsupported property type: {type}</span>
       </div>
     )
@@ -54,13 +52,13 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
 
   return (
     <div className="flex h-8 items-center gap-1.5">
-      {"icon" in metadata && metadata.icon && (
+      {"icon" in metadata && metadata.icon ? (
         <div className="pointer-events-auto flex items-center">
           <Tooltip label={metadata.property.label}>
             <F0Icon icon={metadata.icon} color="default" size="md" />
           </Tooltip>
         </div>
-      )}
+      ) : null}
       {typedRenderer(value, { visualization: "card" })}
     </div>
   )

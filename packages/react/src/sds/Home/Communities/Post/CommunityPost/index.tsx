@@ -1,23 +1,23 @@
+import { useEffect, useId, useRef, useState } from "react"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { IconType } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
-import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Comment as CommentIcon,
   EllipsisHorizontal,
   Person as PersonIcon,
+  PushPinSolid,
 } from "@/icons/app"
-import { getDisplayDateBasedOnDuration } from "@/lib/date"
+import { getAgo, getDisplayDateBasedOnDuration } from "@/lib/date"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
+import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useId, useRef, useState } from "react"
-
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
@@ -115,6 +115,28 @@ export type CommunityPostProps = {
   descriptionExpandable?: boolean
 
   /**
+   * THE WHOLE BODY, unclamped and with no "See more" — for a container that IS
+   * the post rather than a way to it: a dialog, a page. There the body is what
+   * the reader came for, and a clamp with nothing behind it hides the end of
+   * what they opened.
+   *
+   * In a FEED, leave it off. Posts a page long each are what makes a feed
+   * unskimmable, which is what the clamp is for.
+   */
+  noDescriptionClamp?: boolean
+
+  /**
+   * Drops "in <community>" from the header — for a container that already names
+   * the community, like a single community's feed, whose channel header carries
+   * that name an inch above every card. Without this the link repeats what you
+   * are already reading and leads nowhere you aren't.
+   *
+   * `group` stays required: it is still the post's community, and a caller that
+   * hides the line today may show it tomorrow without changing what it passes.
+   */
+  hideGroup?: boolean
+
+  /**
    * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
    * for a container that already shows it, like a dialog carrying the post's
    * title in its own header. Without this the same words appear twice, an inch
@@ -125,6 +147,28 @@ export type CommunityPostProps = {
    * break that as well as the post's name.
    */
   hideTitle?: boolean
+
+  /**
+   * Marks the post as pinned in its community: a pin beside the date.
+   *
+   * A BADGE, not a control — pinning and unpinning are decisions the container
+   * owns (they need to know who may), and this only says what is already true.
+   */
+  pinned?: boolean
+
+  /** Accessible name for the pin badge, e.g. "Pinned post". Required with
+   * `pinned`, since the icon alone says nothing to a screen reader. */
+  pinnedLabel?: string
+
+  /**
+   * "2 days ago" instead of "August 25th, 2026 at 3:00 PM".
+   *
+   * For a FEED, where the question a date answers is "how fresh is this" and
+   * the posts scroll past in one column — a full timestamp on every row is
+   * four lines of clerical detail nobody reads. A page or a dialog showing one
+   * post keeps the exact date, which is the default.
+   */
+  relativeDate?: boolean
 }
 
 export const BaseCommunityPost = ({
@@ -145,7 +189,12 @@ export const BaseCommunityPost = ({
   dropdownItems,
   noReactionsButton = false,
   descriptionExpandable = false,
+  noDescriptionClamp = false,
   hideTitle = false,
+  hideGroup = false,
+  pinned = false,
+  pinnedLabel,
+  relativeDate = false,
 }: CommunityPostProps) => {
   const titleId = useId()
   const descriptionId = useId()
@@ -165,8 +214,10 @@ export const BaseCommunityPost = ({
     descriptionExpandable &&
     expandedDescription?.id === id &&
     expandedDescription.description === description
-  const descriptionCollapsed = !descriptionExpanded
-  const date = getDisplayDateBasedOnDuration(createdAt, { locale })
+  const descriptionCollapsed = !descriptionExpanded && !noDescriptionClamp
+  const date = relativeDate
+    ? getAgo(createdAt, locale)
+    : getDisplayDateBasedOnDuration(createdAt, { locale })
 
   const isClickable = Boolean(onClick)
   const handleClick = onClick ? () => onClick(id) : undefined
@@ -183,7 +234,9 @@ export const BaseCommunityPost = ({
     event.preventDefault()
     event.stopPropagation()
 
-    if (!description) return
+    if (!description) {
+      return
+    }
 
     setExpandedDescription({ id, description })
   }
@@ -195,7 +248,9 @@ export const BaseCommunityPost = ({
   }, [descriptionExpanded])
 
   useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescription(null)
+    if (!descriptionExpandable) {
+      setExpandedDescription(null)
+    }
   }, [descriptionExpandable])
 
   useEffect(() => {
@@ -214,7 +269,9 @@ export const BaseCommunityPost = ({
 
     updateDescriptionOverflow()
 
-    if (typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
     resizeObserver.observe(descriptionElement)
@@ -225,7 +282,7 @@ export const BaseCommunityPost = ({
   return (
     <div
       className={cn(
-        "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 md:pb-4 md:pt-3",
+        "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-4",
         // The affordances belong to the click, so they come and go with it.
         isClickable &&
           "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"
@@ -281,29 +338,48 @@ export const BaseCommunityPost = ({
                 {authorFullName}
               </F0Link>
             ) : null}
-            <span
-              className={cn(
-                "text-f1-foreground-secondary",
-                !author && "capitalize"
-              )}
-            >
-              {inLabel}
-            </span>
-            <F0Link
-              onClick={group.onClick}
-              title={group.title}
-              className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
-              stopPropagation
-              href="#"
-            >
-              {group.title}
-            </F0Link>
+            {/* `inLabel` goes with the group link, not the author: on its own
+                it is a dangling "in" (or, with no author at all, a capitalised
+                "In" followed by nothing). */}
+            {!hideGroup ? (
+              <>
+                <span
+                  className={cn(
+                    "text-f1-foreground-secondary",
+                    !author && "capitalize"
+                  )}
+                >
+                  {inLabel}
+                </span>
+                <F0Link
+                  onClick={group.onClick}
+                  title={group.title}
+                  className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
+                  stopPropagation
+                  href="#"
+                >
+                  {group.title}
+                </F0Link>
+              </>
+            ) : null}
           </div>
 
           {/* `text-base`, like the author line above it: the two are one
               header, and a smaller size made the date read as a footnote to the
               line it sits under. */}
-          <span className="text-base text-f1-foreground-secondary">{date}</span>
+          <span className="flex flex-row items-center gap-1.5 text-base text-f1-foreground-secondary">
+            {date}
+            {/* Beside the date rather than by the title: it is a fact about the
+                post's standing, not part of what it says. */}
+            {pinned ? (
+              <F0Icon
+                icon={PushPinSolid}
+                size="xs"
+                aria-label={pinnedLabel}
+                role={pinnedLabel ? "img" : undefined}
+              />
+            ) : null}
+          </span>
         </div>
         {/* THE ACTIONS SIT ON THE AVATAR'S ROW, not on the first line of the
             heading. Inside that line they were a 32px control on a 21px line,
@@ -325,13 +401,13 @@ export const BaseCommunityPost = ({
                 title={act.label ?? ""}
               />
             ))}
-            {dropdownItems?.length && (
+            {dropdownItems?.length ? (
               <Dropdown
                 items={dropdownItems}
                 icon={EllipsisHorizontal}
                 size="sm"
               />
-            )}
+            ) : null}
           </div>
           <div className="md:hidden">
             <Dropdown
@@ -359,7 +435,7 @@ export const BaseCommunityPost = ({
         >
           {title}
         </p>
-        {description && (
+        {description ? (
           <>
             <PostDescription
               ref={descriptionRef}
@@ -370,19 +446,20 @@ export const BaseCommunityPost = ({
               className={cn(descriptionExpanded && focusRing())}
             />
             {descriptionExpandable &&
-              isDescriptionOverflowing &&
-              !descriptionExpanded && (
-                <ExpandDescriptionButton
-                  describedBy={titleId}
-                  controls={descriptionId}
-                  expanded={descriptionExpanded}
-                  onClick={handleExpandDescription}
-                />
-              )}
+            !noDescriptionClamp &&
+            isDescriptionOverflowing &&
+            !descriptionExpanded ? (
+              <ExpandDescriptionButton
+                describedBy={titleId}
+                controls={descriptionId}
+                expanded={descriptionExpanded}
+                onClick={handleExpandDescription}
+              />
+            ) : null}
           </>
-        )}
+        ) : null}
       </div>
-      {mediaUrl && !event && (
+      {mediaUrl && !event ? (
         // FILLS THE POST, UP TO THE READING COLUMN. The old 480px cap dated
         // from when the avatar's gutter took a chunk of the card and the media
         // sat in what was left; with the body starting at the card's own edge it
@@ -423,14 +500,14 @@ export const BaseCommunityPost = ({
             </>
           )}
         </div>
-      )}
-      {event && (
+      ) : null}
+      {event ? (
         <div className="w-full @[744px]:max-w-content">
           <PostEvent {...event} />
         </div>
-      )}
+      ) : null}
       <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-      {!noReactionsButton && (
+      {!noReactionsButton ? (
         <Reactions
           items={reactions?.items ?? []}
           onInteraction={reactions?.onInteraction}
@@ -440,7 +517,7 @@ export const BaseCommunityPost = ({
             icon: CommentIcon,
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }
@@ -470,16 +547,16 @@ export const CommunityPostSkeleton = ({
       <div className="mt-3">
         <PostDescription.Skeleton />
       </div>
-      {withImage && !withEvent && (
+      {withImage && !withEvent ? (
         <div className="mt-3 aspect-video w-full overflow-hidden rounded-xl md:w-2/3">
           <Skeleton className="h-full w-full rounded-2xs" />
         </div>
-      )}
-      {withEvent && (
+      ) : null}
+      {withEvent ? (
         <div className="mt-3 w-full md:w-2/3">
           <PostEvent.Skeleton />
         </div>
-      )}
+      ) : null}
       <div className="mt-3 flex flex-row items-center gap-1 py-1">
         <Skeleton className="h-2.5 w-14 rounded-2xs" />
         <Skeleton className="h-2.5 w-14 rounded-2xs" />

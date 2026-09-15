@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../../utils/chat-layout"
 import { ChatViewportOverlays } from "../ChatViewportOverlays"
 

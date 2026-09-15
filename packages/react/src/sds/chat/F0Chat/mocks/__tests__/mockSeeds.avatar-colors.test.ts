@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { SEEDS } from "../mockSeeds"
 
 describe("mock sender avatar colours", () => {

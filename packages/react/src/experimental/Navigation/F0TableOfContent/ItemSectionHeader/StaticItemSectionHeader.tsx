@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import { Item } from "../Item"
 import { TOCItem } from "../types"
 
@@ -49,11 +48,11 @@ export function StaticItemSectionHeader({
         currentParentId={currentParentId}
         draggedItemId={draggedItemId}
       />
-      {children && (
+      {children ? (
         <div className="ml-[18px] min-w-0 border-0 border-l border-solid border-f1-border-secondary pl-4">
           {children}
         </div>
-      )}
+      ) : null}
     </>
   )
 }

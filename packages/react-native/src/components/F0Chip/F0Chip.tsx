@@ -27,8 +27,12 @@ const getLeadingVisual = (
   avatar: F0ChipProps["avatar"],
   icon: F0ChipProps["icon"]
 ) => {
-  if (avatar) return "avatar" as const
-  if (icon) return "icon" as const
+  if (avatar) {
+    return "avatar" as const
+  }
+  if (icon) {
+    return "icon" as const
+  }
   return "none" as const
 }
 

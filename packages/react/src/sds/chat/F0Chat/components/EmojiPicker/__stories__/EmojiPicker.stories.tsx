@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
-import { EmojiPicker } from "../index"
+import { EmojiPicker } from ".."
 
 const meta = {
   title: "Internals/EmojiPicker",

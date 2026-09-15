@@ -1,12 +1,10 @@
-import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
-import { describe, expect, it, vi } from "vitest"
-
+import userEvent from "@testing-library/user-event"
+import type { ReactElement } from "react"
+import { assertType, describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
+import { ChipsList, Controls, OneFilterPicker, Root } from ".."
 import type { FiltersDefinition } from "../types"
-
-import { ChipsList, Controls, OneFilterPicker, Root } from "../index"
 
 /**
  * OverflowList renders items in both a hidden measurement container
@@ -685,7 +683,7 @@ describe("Presets - Chip Visibility", () => {
 describe("Filters Type Safety", () => {
   it.skip("should enforce type safety in props", () => {
     // Valid usage - this should type check
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -706,7 +704,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -722,7 +720,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -738,7 +736,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -760,7 +758,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -782,7 +780,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -804,7 +802,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -823,7 +821,7 @@ describe("Filters Type Safety", () => {
 
   it.skip("should enforce type safety in presets", () => {
     // Valid usage - this should type check
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {
@@ -850,7 +848,7 @@ describe("Filters Type Safety", () => {
       />
     )
 
-    render(
+    assertType<ReactElement>(
       <OneFilterPicker
         filters={
           {

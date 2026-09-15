@@ -1,11 +1,9 @@
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Check } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { PlaybackRate, formatPlaybackRate, playbackRates } from "../utils"
 
 export interface PlaybackRateMenuProps {
@@ -36,7 +34,9 @@ export function PlaybackRateMenu({
         '[role="menuitemradio"]'
       )
     )
-    if (items.length === 0) return
+    if (items.length === 0) {
+      return
+    }
     const current = items.indexOf(document.activeElement as HTMLButtonElement)
     let next: number
     switch (event.key) {
@@ -104,11 +104,11 @@ export function PlaybackRateMenu({
                 setOpen(false)
               }}
             >
-              {isActive && (
+              {isActive ? (
                 <span className="absolute left-2.5 inline-flex items-center">
                   <Check />
                 </span>
-              )}
+              ) : null}
               {formatPlaybackRate(rate)}
             </button>
           )

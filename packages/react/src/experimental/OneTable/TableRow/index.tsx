@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { TableRow as TableRowRoot } from "@/ui/table"
-
 import { cn } from "../../../lib/utils"
 
 export const TABLE_ROW_STICKY_TOP_OFFSET = 40
@@ -31,9 +29,15 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
           "relative before:pointer-events-none before:absolute before:inset-0 before:z-10 before:content-['']",
           "[&:has(.table-cell-action-button:focus)]:before:rounded-sm [&:has(.table-cell-action-button:focus)]:before:ring-1 [&:has(.table-cell-action-button:focus)]:before:ring-inset [&:has(.table-cell-action-button:focus)]:before:ring-f1-special-ring",
           "[&:has(a:focus)]:before:rounded-sm [&:has(a:focus)]:before:ring-1 [&:has(a:focus)]:before:ring-inset [&:has(a:focus)]:before:ring-f1-special-ring",
-          // Tailwind v3 important syntax: the v4 trailing-`!` form compiles to
-          // nothing, yet tailwind-merge still drops the plain hover utility.
-          sticky && "hover:!bg-f1-background-hover sticky z-20 bg-f1-background"
+          // A sticky row is lifted above the rows scrolling underneath it, so its
+          // background has to stay opaque in every state. `bg-f1-background-hover`
+          // is a 4%-alpha tint — right for a plain row, where it tints the page
+          // behind it, but on a sticky row it would own `background-color` and let
+          // those rows show through. So the opaque colour is kept on hover too and
+          // the tint rides over it as a background-image layer, the same way the
+          // highlighted table header paints its own.
+          sticky &&
+            "sticky z-20 bg-f1-background hover:bg-f1-background hover:bg-[linear-gradient(hsl(var(--neutral-5)),hsl(var(--neutral-5)))]"
         )}
         style={{
           ...(sticky ? { top: TABLE_ROW_STICKY_TOP_OFFSET } : undefined),

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-
 import { dialogs } from "@/lib/providers/dialogs-alike"
 import {
   zeroRender as render,
@@ -9,7 +8,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { F0Form } from "../../../F0Form"
 import { f0FormField } from "../../../f0Schema"
 
@@ -150,7 +148,7 @@ describe("EntitiesListFieldRenderer — date fields", () => {
       expect(onSubmit).toHaveBeenCalled()
     })
     const submitted = onSubmit.mock.calls[0][0] as {
-      events: Array<{ title: string; date: unknown }>
+      events: { title: string; date: unknown }[]
     }
     expect(submitted.events[0].title).toBe("Launch")
     expect(submitted.events[0].date).toBeInstanceOf(Date)
@@ -578,7 +576,9 @@ describe("EntitiesListFieldRenderer — list-view remove gating (removableIds)",
     while (el && !(el.className || "").includes("min-h-[64px]")) {
       el = el.parentElement
     }
-    if (!el) throw new Error(`Row for "${name}" not found`)
+    if (!el) {
+      throw new Error(`Row for "${name}" not found`)
+    }
     return el
   }
 
@@ -588,8 +588,8 @@ describe("EntitiesListFieldRenderer — list-view remove gating (removableIds)",
    */
   function renderMembers(
     opts: {
-      editableIds?: Array<string | number>
-      removableIds?: Array<string | number>
+      editableIds?: (string | number)[]
+      removableIds?: (string | number)[]
       onRemove?: () => Promise<{ success: boolean } | void>
     } = {}
   ) {

@@ -1,3 +1,4 @@
+import { motionTokens } from "@factorialco/f0-core"
 import { type Transition } from "motion/react"
 
 /**
@@ -8,10 +9,14 @@ import { type Transition } from "motion/react"
  * belongs to the same product (chat, meetings).
  */
 
-/** Fast start, soft landing, NO overshoot (Material "emphasized decelerate"). */
-export const EASE_OUT_SWIFT: [number, number, number, number] = [
-  0.05, 0.7, 0.1, 1,
-]
+/**
+ * Fast start, soft landing, NO overshoot (Material "emphasized decelerate").
+ *
+ * Re-exported from `f0-core` rather than declared here: the application frame
+ * moves the windows these surfaces live inside, and two copies of the same
+ * numbers describing the same seam is how they drift apart.
+ */
+export const EASE_OUT_SWIFT = motionTokens.ease.outSwift
 
 /** Micro-presences: chips, alerts, buttons, tooltips. */
 export const microEnterTransition: Transition = {

@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   zeroRender as render,
@@ -8,7 +7,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 // Drives the panel the way the real hosts do: the sidebar mounts a
@@ -130,8 +128,8 @@ describe("ApplicationFrame split panel (conversations left, AI chat right)", () 
 
   it("restores the last conversation on reload without flashing the AI chat", async () => {
     // The previous session had the conversation showing when it unloaded.
-    localStorage.setItem("ONE-ai-chat-open", "true")
-    localStorage.setItem("ONE-ai-chat-panel-content-id", '"conv"')
+    localStorage.setItem("f0-side-panel-open", "true")
+    localStorage.setItem("f0-side-panel-view-id", '"conv"')
 
     // Restore-aware host: re-mounts the persisted conversation (the way the
     // sidebar does in the stories / CommunicationsPanelBridge in factorial).

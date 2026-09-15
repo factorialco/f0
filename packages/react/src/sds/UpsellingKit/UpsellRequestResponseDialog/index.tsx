@@ -1,10 +1,9 @@
 import { forwardRef, useCallback, useState } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { withDataTestId } from "@/lib/data-testid"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle, DottedCircle } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import {
   Dialog,
   DialogContent,
@@ -108,7 +107,7 @@ const DialogActions = ({
         onClick={onClose}
         size={isSmallScreen ? "lg" : undefined}
       />
-      {showSecondButton && (
+      {showSecondButton ? (
         <F0Button
           variant="promote"
           label={successButtonLabel}
@@ -118,7 +117,7 @@ const DialogActions = ({
           }}
           size={isSmallScreen ? "lg" : undefined}
         />
-      )}
+      ) : null}
     </>
   )
 

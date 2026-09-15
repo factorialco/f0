@@ -23,10 +23,11 @@ const MoveCoordinatorContext = createContext<MoveCoordinatorApi | null>(null)
 
 export function useMoveCoordinator(): MoveCoordinatorApi {
   const ctx = useContext(MoveCoordinatorContext)
-  if (!ctx)
+  if (!ctx) {
     throw new Error(
       "useMoveCoordinator must be used within MoveCoordinatorProvider"
     )
+  }
   return ctx
 }
 
@@ -71,7 +72,9 @@ export function MoveCoordinatorProvider({
           // Try a short number of microtasks before giving up
           let attempts = 0
           const tick = () => {
-            if (check()) return
+            if (check()) {
+              return
+            }
             attempts += 1
             if (attempts > 10) {
               reject(new Error("No executor available for move key"))

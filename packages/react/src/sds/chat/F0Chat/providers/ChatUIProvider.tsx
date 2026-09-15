@@ -11,7 +11,6 @@ import {
   useState,
   type ReactNode,
 } from "react"
-
 import {
   isUserMessage,
   type F0ChatFileAttachment,
@@ -200,7 +199,9 @@ export const ChatUIProvider = ({
 
   useEffect(
     () => () => {
-      if (highlightTimer.current) clearTimeout(highlightTimer.current)
+      if (highlightTimer.current) {
+        clearTimeout(highlightTimer.current)
+      }
     },
     []
   )
@@ -231,7 +232,9 @@ export const ChatUIProvider = ({
 
   const openDocumentPreview = useCallback((file: F0ChatFileAttachment) => {
     const kind = documentPreviewKind(file)
-    if (kind) setDocumentPreview({ file, kind })
+    if (kind) {
+      setDocumentPreview({ file, kind })
+    }
   }, [])
   const closeDocumentPreview = useCallback(() => setDocumentPreview(null), [])
 
@@ -268,14 +271,18 @@ export const ChatUIProvider = ({
     (message: F0ChatMessage) => {
       // A read-only channel renders no composer, so a target set there is
       // invisible and unclearable.
-      if (canSendRef.current === false) return
+      if (canSendRef.current === false) {
+        return
+      }
       setComposeTarget({ kind: "reply", message })
     },
     [setComposeTarget]
   )
   const startEdit = useCallback(
     (message: F0ChatMessage) => {
-      if (canSendRef.current === false) return
+      if (canSendRef.current === false) {
+        return
+      }
       setComposeTarget({ kind: "edit", message })
     },
     [setComposeTarget]
@@ -292,7 +299,9 @@ export const ChatUIProvider = ({
   const channelIdRef = useRef(channel.id)
   useLayoutEffect(
     function abandonDraftOnChannelChange() {
-      if (channelIdRef.current === channel.id) return
+      if (channelIdRef.current === channel.id) {
+        return
+      }
       channelIdRef.current = channel.id
       composerHandleRef.current?.abandonDraft()
       clearComposeTarget()
@@ -304,7 +313,9 @@ export const ChatUIProvider = ({
   const scrollAndHighlight = useCallback((id: string, persist: boolean) => {
     scrollFnRef.current?.(id)
     setHighlightedId(id)
-    if (highlightTimer.current) clearTimeout(highlightTimer.current)
+    if (highlightTimer.current) {
+      clearTimeout(highlightTimer.current)
+    }
     if (!persist) {
       highlightTimer.current = setTimeout(
         () => setHighlightedId(null),
@@ -321,9 +332,11 @@ export const ChatUIProvider = ({
       // Already-loaded messages scroll immediately, with no reload flicker.
       const loaded = messagesRef.current.some((message) => message.id === id)
       const load = loadCtxRef.current
-      if (!loaded && load)
+      if (!loaded && load) {
         void load(id).then(() => scrollAndHighlight(id, false))
-      else scrollAndHighlight(id, false)
+      } else {
+        scrollAndHighlight(id, false)
+      }
     },
     [scrollAndHighlight]
   )
@@ -332,12 +345,17 @@ export const ChatUIProvider = ({
   const navigateToMatch = useCallback(
     (index: number, ids: string[] = matchIdsRef.current) => {
       const id = ids[index]
-      if (id == null) return
+      if (id == null) {
+        return
+      }
       setActiveMatchIndex(index)
       const focus = () => scrollAndHighlight(id, true)
       const load = loadCtxRef.current
-      if (load) void load(id).then(focus)
-      else focus()
+      if (load) {
+        void load(id).then(focus)
+      } else {
+        focus()
+      }
     },
     [scrollAndHighlight]
   )
@@ -345,7 +363,9 @@ export const ChatUIProvider = ({
   // Debounced search: server-side via `searchMessages` when provided, else a
   // client-side substring scan over the loaded messages.
   useEffect(() => {
-    if (!searchOpen) return
+    if (!searchOpen) {
+      return
+    }
     const q = searchQuery.trim()
     if (q === "") {
       setMatchIds([])
@@ -360,11 +380,14 @@ export const ChatUIProvider = ({
     const runId = ++searchRunRef.current
     const timer = setTimeout(() => {
       const apply = (ids: string[]) => {
-        if (runId !== searchRunRef.current) return // a newer query superseded us
+        if (runId !== searchRunRef.current) {
+          return
+        } // a newer query superseded us
         setMatchIds(ids)
         setSearching(false)
-        if (ids.length > 0) navigateToMatch(ids.length - 1, ids)
-        else {
+        if (ids.length > 0) {
+          navigateToMatch(ids.length - 1, ids)
+        } else {
           setActiveMatchIndex(-1)
           setHighlightedId(null)
         }
@@ -380,7 +403,9 @@ export const ChatUIProvider = ({
             .filter((m) => {
               // System rows aren't searchable content (narrow BEFORE reading
               // user-message-only fields like `deleted`).
-              if (!isUserMessage(m) || m.deleted) return false
+              if (!isUserMessage(m) || m.deleted) {
+                return false
+              }
               let lower = cache.get(m)
               if (lower === undefined) {
                 lower = m.body.toLowerCase()
@@ -412,14 +437,18 @@ export const ChatUIProvider = ({
 
   const goToNextMatch = useCallback(() => {
     const ids = matchIdsRef.current
-    if (ids.length === 0) return
+    if (ids.length === 0) {
+      return
+    }
     emit.onSearchResultNavigated({ direction: "next" })
     navigateToMatch((activeIndexRef.current + 1) % ids.length, ids)
   }, [navigateToMatch, emit])
 
   const goToPrevMatch = useCallback(() => {
     const ids = matchIdsRef.current
-    if (ids.length === 0) return
+    if (ids.length === 0) {
+      return
+    }
     emit.onSearchResultNavigated({ direction: "prev" })
     navigateToMatch((activeIndexRef.current - 1 + ids.length) % ids.length, ids)
   }, [navigateToMatch, emit])

@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { ChatReactionPill } from "../ChatReactionPill"
 
 const pill = () => screen.getByRole("button")

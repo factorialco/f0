@@ -1,9 +1,7 @@
 import { Reorder, useDragControls } from "motion/react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { useSurveyFormBuilderContext } from "../Context"
 import { useDragContext } from "../DragContext"
 import {
@@ -72,9 +70,8 @@ export const QuestionItem = ({
             isDragging && "cursor-grabbing"
           )}
         >
-          {!disabled &&
-            !answering &&
-            (questionLocked ? (
+          {!disabled && !answering ? (
+            questionLocked ? (
               // Blocked question: drop the drag affordance but keep the handle's
               // gutter so the card stays the same width and alignment as the
               // editable questions around it.
@@ -93,7 +90,8 @@ export const QuestionItem = ({
               >
                 <F0Icon icon={Handle} size="sm" />
               </div>
-            ))}
+            )
+          ) : null}
           <QuestionComponent
             {...({
               ...item.question,
@@ -101,7 +99,7 @@ export const QuestionItem = ({
           />
         </div>
       </div>
-      {showEndOfSection && <EndOfSectionDivider />}
+      {showEndOfSection ? <EndOfSectionDivider /> : null}
     </Reorder.Item>
   )
 }

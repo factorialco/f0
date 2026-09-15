@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import { OneCalendar } from "@/components/OneCalendar"
@@ -20,11 +19,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { getCompareToValue } from "./compareTo"
-import { createCalendarDismissalHandlers } from "./dismissal"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
+import { createCalendarDismissalHandlers } from "./dismissal"
 import { DatePickerValue, DatePreset } from "./types"
 import { isSameDatePickerValue } from "./utils"
 
@@ -179,7 +177,9 @@ export function DatePickerPopup({
     setCustomRangeMode(presetId === PRESET_CUSTOM)
 
     const selectedPreset = presetId ? presets[+presetId] : undefined
-    if (!selectedPreset) return
+    if (!selectedPreset) {
+      return
+    }
 
     handleSelect({
       value: definitions[selectedPreset.granularity].toRange(
@@ -312,9 +312,9 @@ export function DatePickerPopup({
           />
         ) : (
           <div className="flex gap-4">
-            {(presets.length > 0 || granularityOptions.length > 1) && (
+            {presets.length > 0 || granularityOptions.length > 1 ? (
               <div>
-                {presets.length > 0 && (
+                {presets.length > 0 ? (
                   <F0Button
                     icon={ChevronLeft}
                     variant="neutral"
@@ -323,17 +323,17 @@ export function DatePickerPopup({
                     label="Back"
                     onClick={handleBackToPresets}
                   />
-                )}
-                {granularityOptions.length > 1 && (
+                ) : null}
+                {granularityOptions.length > 1 ? (
                   <GranularitySelector
                     granularities={granularityOptions}
                     value={localGranularity}
                     onChange={handleSelectGranularity}
                     definitions={definitions}
                   />
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
             <div className="min-w-[300px] flex-1">
               <OneCalendar
                 showInput={!hideCalendarInput}
@@ -347,7 +347,7 @@ export function DatePickerPopup({
                 selectOnCellOnly={selectOnCellOnly}
                 periods={periods}
               />
-              {compareToOptions.length > 0 && (
+              {compareToOptions.length > 0 ? (
                 <div className="mt-4 flex flex-col gap-2">
                   <div className="text-gray-500 text-sm">
                     {i18n.date.compareTo}
@@ -365,7 +365,7 @@ export function DatePickerPopup({
                     value={selectedCompareTo}
                   />
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}

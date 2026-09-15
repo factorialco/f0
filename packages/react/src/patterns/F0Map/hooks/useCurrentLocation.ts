@@ -25,8 +25,12 @@ export const useCurrentLocation = (enabled: boolean): CurrentLocation => {
 
   const request = useCallback(
     (onLocated?: (coords: [number, number]) => void) => {
-      if (!enabled) return
-      if (typeof navigator === "undefined" || !navigator.geolocation) return
+      if (!enabled) {
+        return
+      }
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        return
+      }
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const next: [number, number] = [
@@ -46,7 +50,9 @@ export const useCurrentLocation = (enabled: boolean): CurrentLocation => {
   )
 
   useEffect(() => {
-    if (!enabled || coords || typeof navigator === "undefined") return
+    if (!enabled || coords || typeof navigator === "undefined") {
+      return
+    }
     // Auto-show only when permission is already granted, so enabling the
     // feature never prompts on load - the locate control is the only thing
     // that asks. Without the Permissions API (older Safari) we stay silent
@@ -54,7 +60,9 @@ export const useCurrentLocation = (enabled: boolean): CurrentLocation => {
     navigator.permissions
       ?.query({ name: "geolocation" as PermissionName })
       .then((status) => {
-        if (status.state === "granted") request()
+        if (status.state === "granted") {
+          request()
+        }
       })
       .catch(() => {
         // No Permissions API: wait for the locate control.

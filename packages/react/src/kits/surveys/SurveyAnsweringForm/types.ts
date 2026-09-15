@@ -3,7 +3,6 @@ import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { F0FormErrorTriggerMode } from "@/patterns/F0Form/types"
 import type { F0ResourceHeaderProps } from "@/patterns/F0ResourceHeader"
-
 import type {
   SurveyDatasets,
   SurveyFormBuilderElement,

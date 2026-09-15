@@ -1,8 +1,6 @@
 import { useMemo } from "react"
-
 import { Tooltip } from "@/experimental/Overlays/Tooltip/index"
 import { OverflowList } from "@/ui/OverflowList"
-
 import { AvatarVariant, F0Avatar } from "../F0Avatar"
 import { MaxCounter } from "./components/MaxCounter"
 import {
@@ -37,18 +35,15 @@ export const F0AvatarList = ({
   // destructuring, under these exact names, because the pattern is emitted
   // verbatim into the public .d.ts signature of `F0AvatarList`: dropping or
   // renaming them reads as a breaking public API change for props that still
-  // exist and still typecheck. `void` below satisfies `noUnusedLocals`.
+  // exist and still typecheck. The `_` names mark them as unused on purpose.
   //
   // `layout` is listed here rather than left out of the destructuring so the
   // ignore is deliberate in the code, not an omission a reader has to infer:
   // it was documented for long enough that both of its values already have a
   // home on `max` (unset = the old `"fill"`, a number = the old `"compact"`).
-  tooltipScroll,
-  layout,
+  tooltipScroll: _tooltipScroll,
+  layout: _layout,
 }: F0AvatarListProps) => {
-  void tooltipScroll
-  void layout
-
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
     const sizesMappingList: Record<string, AvatarListSize> = {

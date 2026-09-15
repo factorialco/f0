@@ -3,7 +3,6 @@ import type {
   F0TimelineRowMultitaskItemProps,
   F0TimelineRowNestedtaskProps,
 } from "../types"
-
 import { MultitaskHeader } from "./MultitaskHeader"
 import { NestedtaskRow } from "./NestedtaskRow"
 import { TaskRow } from "./TaskRow"
@@ -28,7 +27,7 @@ export const MultitaskRow = ({
       <div className="flex min-h-8 items-center gap-2">
         <MultitaskHeader props={props} />
       </div>
-      {expanded && (
+      {expanded ? (
         <div className="flex flex-col pl-4">
           {items.map((item, index: number) =>
             isNestedtaskItem(item) ? (
@@ -52,7 +51,7 @@ export const MultitaskRow = ({
             )
           )}
         </div>
-      )}
+      ) : null}
     </TimelineRowLayout>
   )
 }

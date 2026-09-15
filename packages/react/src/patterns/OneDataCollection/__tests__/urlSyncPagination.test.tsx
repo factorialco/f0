@@ -1,7 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { waitFor, zeroRender as render } from "@/testing/test-utils"
-
 import { PaginationExampleComponent } from "../__stories__/mockData"
 
 afterEach(() => {

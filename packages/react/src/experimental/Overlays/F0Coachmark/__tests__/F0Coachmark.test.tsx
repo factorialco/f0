@@ -1,9 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
 import { F0Coachmark } from "../F0Coachmark"
 import type { F0CoachmarkProps } from "../types"
 
@@ -20,7 +18,7 @@ const Harness = (props: PanelProps) => {
   return (
     <>
       <button ref={setTarget}>Filters</button>
-      {target && <F0Coachmark {...props} target={target} />}
+      {target ? <F0Coachmark {...props} target={target} /> : null}
     </>
   )
 }

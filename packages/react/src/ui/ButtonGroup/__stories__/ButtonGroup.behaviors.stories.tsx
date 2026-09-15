@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Archive,
@@ -14,7 +13,6 @@ import {
   Share,
 } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { ButtonGroup } from "../ButtonGroup"
 
 const noop = () => {}
@@ -384,7 +382,7 @@ export const OverflowMenu: Story = {
       {[560, 360, 240].map((w) => (
         <div key={w} className="flex flex-col gap-2">
           <span className="text-sm text-f1-foreground-secondary">
-            {w}px — buttons that don't fit collapse under the ellipsis
+            {w}px — buttons that don&apos;t fit collapse under the ellipsis
           </span>
           <div
             style={{ width: w }}

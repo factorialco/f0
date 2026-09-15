@@ -1,15 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
-
 import {
   screen,
   userEvent,
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import type { SortAndHideListItem } from "./types"
-
 import { mergeReorderedItems, SortAndHideList } from "./SortAndHideList"
+import type { SortAndHideListItem } from "./types"
 
 const items: SortAndHideListItem[] = [
   { id: "name", label: "Name", sortable: false, canHide: false, visible: true },

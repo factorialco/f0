@@ -6,6 +6,7 @@
 
 import { documentPreviewKind, isVideoFileAttachment } from "./attachments"
 import { type ChatRow } from "./grouping"
+import { stripHtml } from "./posts"
 
 /**
  * Base for `firstItemIndex`. Virtuoso retains the viewport position on a
@@ -65,14 +66,26 @@ export function classifyWindowChange(
    * conversation takes when its panel is reopened). */
   overlaps = false
 ): WindowChange {
-  if (prev.length === 0 && next.length === 0) return "none"
-  if (prev.length === 0) return "initial"
-  if (next.length === 0) return "replace"
+  if (prev.length === 0 && next.length === 0) {
+    return "none"
+  }
+  if (prev.length === 0) {
+    return "initial"
+  }
+  if (next.length === 0) {
+    return "replace"
+  }
   const firstChanged = next.firstId !== prev.firstId
   const lastChanged = next.lastId !== prev.lastId
-  if (!firstChanged && !lastChanged) return "none"
-  if (firstChanged && !lastChanged) return "prepend"
-  if (!firstChanged && lastChanged) return "append"
+  if (!firstChanged && !lastChanged) {
+    return "none"
+  }
+  if (firstChanged && !lastChanged) {
+    return "prepend"
+  }
+  if (!firstChanged && lastChanged) {
+    return "append"
+  }
   return overlaps ? "grow" : "replace"
 }
 
@@ -89,16 +102,30 @@ export function classifyWindowChange(
  * the old head never sat at row 0 and its raw new index over-shifts by at least
  * one row (see `chatWindowHeadRowIndex`).
  */
-export function nextFirstItemIndex(
-  prev: number,
-  change: WindowChange,
-  prevRowCount: number,
-  rowCount: number,
-  headShift = 0
-): number {
-  if (change === "initial" || change === "replace") return PREPEND_OFFSET
-  if (change === "prepend") return prev - (rowCount - prevRowCount)
-  if (change === "grow") return prev - headShift
+export type NextFirstItemIndexOptions = {
+  prev: number
+  change: WindowChange
+  prevRowCount: number
+  rowCount: number
+  headShift?: number
+}
+
+export function nextFirstItemIndex({
+  prev,
+  change,
+  prevRowCount,
+  rowCount,
+  headShift = 0,
+}: NextFirstItemIndexOptions): number {
+  if (change === "initial" || change === "replace") {
+    return PREPEND_OFFSET
+  }
+  if (change === "prepend") {
+    return prev - (rowCount - prevRowCount)
+  }
+  if (change === "grow") {
+    return prev - headShift
+  }
   return prev
 }
 
@@ -186,20 +213,22 @@ export function advanceChatWindow(
     (prevEnds.lastId != null && indexById.has(prevEnds.lastId))
   const change = classifyWindowChange(prevEnds, nextEnds, overlaps)
 
-  if (change === "none") return { state: prev, change, ownGlide: false }
+  if (change === "none") {
+    return { state: prev, change, ownGlide: false }
+  }
 
   // How far the surviving head MOVED — not where it landed. Its previous row
   // index is carried in the state precisely because it is never 0.
   const headShift =
     survivingHeadIndex != null ? survivingHeadIndex - prev.headRowIndex : 0
 
-  const firstItemIndex = nextFirstItemIndex(
-    prev.firstItemIndex,
+  const firstItemIndex = nextFirstItemIndex({
+    prev: prev.firstItemIndex,
     change,
-    prev.rowCount,
+    prevRowCount: prev.rowCount,
     rowCount,
-    headShift
-  )
+    headShift,
+  })
 
   const last = messages[messages.length - 1]
   const ownGlide =
@@ -251,10 +280,14 @@ export function entryLocation({
   /** True when the loaded window isn't the live tail. */
   hasMoreNewer: boolean
 }): ChatEntryLocation {
-  if (pendingIndex != null) return { index: pendingIndex, align: "center" }
+  if (pendingIndex != null) {
+    return { index: pendingIndex, align: "center" }
+  }
   // An older window without a jump target (deep link): hold its top — landing
   // at its bottom would immediately trigger the load-newer edge.
-  if (hasMoreNewer) return { index: 0, align: "start" }
+  if (hasMoreNewer) {
+    return { index: 0, align: "start" }
+  }
   if (dividerIndex >= 0) {
     return {
       index: dividerIndex,
@@ -334,7 +367,12 @@ const ESTIMATE_CHARS_PER_LINE = 52
 const ESTIMATE_SENDER_NAME = 20
 const ESTIMATE_REPLY_QUOTE = 46
 const ESTIMATE_REACTIONS = 32
+/** Title, description and host — a card with no banner is only its texts. */
 const ESTIMATE_LINK_PREVIEW = 96
+/** Plus a banner: 24rem at the Open Graph 1.91:1 is ~200px of picture. A lone
+ * preview with an image is the only card that gets one (several stack as
+ * compact rows with a thumbnail, which fits inside the texts' own height). */
+const ESTIMATE_LINK_PREVIEW_BANNER = ESTIMATE_LINK_PREVIEW + 200
 /** Media cards are `w-[24rem]`; the album's tallest common shape is ~1:1. */
 const ESTIMATE_ALBUM = 300
 const ESTIMATE_VIDEO = 220
@@ -343,6 +381,36 @@ const ESTIMATE_VOICE = 58
 const ESTIMATE_DOCUMENT_CARD = 96
 const ESTIMATE_CARD = 120
 const ESTIMATE_FILE_CHIP = 56
+
+/**
+ * Post rows. A post is the one row whose height is genuinely PREDICTABLE: its
+ * media sits in a reserved `aspect-video` box, and the transcript column is
+ * `max-w-content` (712px), which never trips `CommunityPost`'s `@[744px]`
+ * container query — so the media is always the full column and its height is
+ * exactly `width · 9/16`.
+ *
+ * ⚠️ `ESTIMATE_POST_MEDIA` is CALIBRATED TO THAT 712px COLUMN. Widen the
+ * transcript and this drifts, taking the entry position with it.
+ */
+/** The row's own 1px divider. Posts have no gap between them — see
+ * `topSpacing` in the row renderer. */
+const ESTIMATE_POST_SPACING = 1
+/** The card's `p-4`, top and bottom. */
+const ESTIMATE_POST_PADDING = 32
+/** 32px avatar next to two lines of author/community. */
+const ESTIMATE_POST_HEADER = 44
+/** `text-xl`, one line (the card clamps the title to two). */
+const ESTIMATE_POST_TITLE = 28
+const ESTIMATE_POST_MEDIA = 400
+const ESTIMATE_POST_EVENT = 180
+const ESTIMATE_POST_COUNTERS = 24
+const ESTIMATE_POST_REACTIONS = 40
+/**
+ * A collapsed `PostDescription` is `line-clamp-5`: the body CANNOT exceed five
+ * lines however long the HTML is, so the estimate caps there instead of growing
+ * with a page-long post.
+ */
+const ESTIMATE_POST_DESCRIPTION_MAX_LINES = 5
 
 const ESTIMATE_SEPARATOR = 28 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_DIVIDER = 28 + ESTIMATE_STANDALONE_SPACING
@@ -355,7 +423,9 @@ const ESTIMATE_FOOTER = 24
 
 const estimateTextHeight = (body: string): number => {
   const text = body.trim()
-  if (text.length === 0) return 0
+  if (text.length === 0) {
+    return 0
+  }
   const longest = text
     .split("\n")
     .reduce(
@@ -381,6 +451,29 @@ export function chatRowHeightEstimate(row: ChatRow): number {
       return ESTIMATE_TYPING
     case "footer":
       return ESTIMATE_FOOTER
+    case "post": {
+      const { post } = row
+      let height =
+        ESTIMATE_POST_SPACING +
+        ESTIMATE_POST_PADDING +
+        ESTIMATE_POST_HEADER +
+        ESTIMATE_POST_TITLE +
+        ESTIMATE_POST_COUNTERS +
+        ESTIMATE_POST_REACTIONS
+      // The event REPLACES the cover rather than stacking under it.
+      if (post.event) {
+        height += ESTIMATE_POST_EVENT
+      } else if (post.mediaUrl) {
+        height += ESTIMATE_POST_MEDIA
+      }
+      if (post.description) {
+        height += Math.min(
+          estimateTextHeight(stripHtml(post.description)),
+          ESTIMATE_POST_DESCRIPTION_MAX_LINES * ESTIMATE_LINE_HEIGHT
+        )
+      }
+      return height
+    }
     case "message":
       break
   }
@@ -390,7 +483,9 @@ export function chatRowHeightEstimate(row: ChatRow): number {
     ? ESTIMATE_RUN_START_SPACING
     : ESTIMATE_MESSAGE_RUN_SPACING
 
-  if (message.deleted) return height + ESTIMATE_BUBBLE_PADDING
+  if (message.deleted) {
+    return height + ESTIMATE_BUBBLE_PADDING
+  }
 
   const media = message.attachments ?? []
   let hasMedia = false
@@ -401,23 +496,42 @@ export function chatRowHeightEstimate(row: ChatRow): number {
       images += 1
       continue
     }
-    if (attachment.kind === "location") height += ESTIMATE_LOCATION
-    else if (attachment.kind === "voice") height += ESTIMATE_VOICE
-    else if (attachment.kind === "card") height += ESTIMATE_CARD
-    else if (isVideoFileAttachment(attachment)) height += ESTIMATE_VIDEO
-    else if (documentPreviewKind(attachment)) height += ESTIMATE_DOCUMENT_CARD
-    else height += ESTIMATE_FILE_CHIP
+    if (attachment.kind === "location") {
+      height += ESTIMATE_LOCATION
+    } else if (attachment.kind === "voice") {
+      height += ESTIMATE_VOICE
+    } else if (attachment.kind === "card") {
+      height += ESTIMATE_CARD
+    } else if (isVideoFileAttachment(attachment)) {
+      height += ESTIMATE_VIDEO
+    } else if (documentPreviewKind(attachment)) {
+      height += ESTIMATE_DOCUMENT_CARD
+    } else {
+      height += ESTIMATE_FILE_CHIP
+    }
   }
-  if (images > 0) height += ESTIMATE_ALBUM
+  if (images > 0) {
+    height += ESTIMATE_ALBUM
+  }
 
   const body = estimateTextHeight(message.body)
   if (body > 0 || message.replyTo) {
     height += ESTIMATE_BUBBLE_PADDING + body
-    if (message.replyTo) height += ESTIMATE_REPLY_QUOTE
-    if (row.isFirstOfRun && !hasMedia) height += ESTIMATE_SENDER_NAME
-    height += (message.linkPreviews?.length ?? 0) * ESTIMATE_LINK_PREVIEW
+    if (message.replyTo) {
+      height += ESTIMATE_REPLY_QUOTE
+    }
+    if (row.isFirstOfRun && !hasMedia) {
+      height += ESTIMATE_SENDER_NAME
+    }
+    const previews = message.linkPreviews ?? []
+    height +=
+      previews.length === 1 && previews[0]?.imageUrl
+        ? ESTIMATE_LINK_PREVIEW_BANNER
+        : previews.length * ESTIMATE_LINK_PREVIEW
   }
-  if ((message.reactions?.length ?? 0) > 0) height += ESTIMATE_REACTIONS
+  if ((message.reactions?.length ?? 0) > 0) {
+    height += ESTIMATE_REACTIONS
+  }
 
   return height
 }

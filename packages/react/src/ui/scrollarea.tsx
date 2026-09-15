@@ -8,7 +8,6 @@ import {
   type ComponentPropsWithoutRef,
   type ElementRef,
 } from "react"
-
 import { cn } from "../lib/utils"
 
 type ScrollAreaProps = ComponentPropsWithoutRef<
@@ -129,9 +128,9 @@ const ScrollBar = forwardRef<
     )}
     {...props}
   >
-    {showBar && (
+    {showBar ? (
       <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-f1-background-inverse opacity-30 transition-opacity group-hover/scrollbar:opacity-50" />
-    )}
+    ) : null}
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName

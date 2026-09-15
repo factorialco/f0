@@ -1,9 +1,7 @@
 import { motion } from "motion/react"
 import { memo, type ReactNode, useMemo, useRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
@@ -217,14 +215,14 @@ const ChatBubbleImpl = ({
           messageSurfaceColorClass(message.author, isMine)
         )}
       >
-        {message.replyTo && (
+        {message.replyTo ? (
           <ReplyQuote
             reply={message.replyTo}
             isMine={isMine}
             isFirstOfRun={isFirstOfRun}
           />
-        )}
-        {message.linkPreviews && message.linkPreviews.length > 0 && (
+        ) : null}
+        {message.linkPreviews && message.linkPreviews.length > 0 ? (
           <ChatLinkPreview
             previews={message.linkPreviews}
             isMine={isMine}
@@ -232,9 +230,9 @@ const ChatBubbleImpl = ({
             // keep it fully rounded there.
             isFirstOfRun={message.replyTo ? true : isFirstOfRun}
           />
-        )}
+        ) : null}
         <div className="relative px-3.5 py-2.5">
-          {author && (
+          {author ? (
             <ChatUserHoverCard user={author}>
               {/* WhatsApp-style: tint the sender name to match their avatar colour. */}
               <span
@@ -246,7 +244,7 @@ const ChatBubbleImpl = ({
                 {author.name}
               </span>
             </ChatUserHoverCard>
-          )}
+          ) : null}
           {/* The body is the one part of a message a double-click must NOT
               quote: the browser selects a word there instead. The marker is
               read by SELF_HANDLING_DESCENDANTS in ChatMessageItem. An inline

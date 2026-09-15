@@ -1,11 +1,9 @@
 import { act, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
+import { OneDataCollection } from ".."
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 
 /**
  * Reproduces FCT-62014's follow-up against the mechanism the Teams v2 list
@@ -51,8 +49,8 @@ const columns = [
 const prunedChildren: { current: Record<string, Team[]> } = {
   current: { sales: SUBTEAMS },
 }
-const notify: Record<string, () => void> = {}
-const refreshChildren = (parentId: string) => notify[parentId]?.()
+const notify = new Map<string, () => void>()
+const refreshChildren = (parentId: string) => notify.get(parentId)?.()
 const getChildren = (item: Team) => prunedChildren.current[item.id] ?? []
 
 const fetchChildren = ({ item }: { item: Team }) =>
@@ -64,9 +62,9 @@ const fetchChildren = ({ item }: { item: Team }) =>
         data: { records: getChildren(item), type: "basic" as const },
       })
     emit()
-    notify[item.id] = emit
+    notify.set(item.id, emit)
     return () => {
-      delete notify[item.id]
+      notify.delete(item.id)
     }
   })
 

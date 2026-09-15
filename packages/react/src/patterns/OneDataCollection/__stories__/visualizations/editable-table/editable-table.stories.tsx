@@ -2,13 +2,10 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { format, parseISO } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
-
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
-
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
+import { Delete, InfoCircleLine, Pencil, Table } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
-
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import {
@@ -97,6 +94,43 @@ export const BasicEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-basic/v1"
+      />
+    )
+  },
+}
+
+/**
+ * The view-switcher chip is presented as a plain table: `label` replaces the
+ * built-in "Editable table" text and `icon` replaces the built-in pencil, so
+ * the editing affordance is not advertised in the switcher. Both overrides are
+ * independent — pass either one alone — and the view still behaves as an
+ * editable table.
+ */
+export const EditableTableWithCustomChip: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            label: "Table",
+            icon: Table,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+          mockVisualizations.list,
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-custom-chip/v1"
       />
     )
   },
@@ -1175,7 +1209,9 @@ export const EditableTableWithDataSourceSelect: Story = {
                       placeholder: "Select role",
                       showSearchBox: true,
                       defaultItem: (item: MockUser) => {
-                        if (!item.role) return undefined
+                        if (!item.role) {
+                          return undefined
+                        }
                         return { value: item.role, label: item.role }
                       },
                     },
@@ -1893,6 +1929,17 @@ export const EditableTableWithStatusPillSelect: Story = {
                   selectConfig: {
                     placeholder: "Status",
                     showSearchBox: false,
+                    actions: (item: MockUser) =>
+                      item.status === "pending"
+                        ? [
+                            {
+                              label: "Withdraw request",
+                              icon: Delete,
+                              variant: "ghost" as const,
+                              onClick: () => alert(`Withdrawn: ${item.name}`),
+                            },
+                          ]
+                        : undefined,
                     options: STATUS_VALUES.map((id) => ({
                       value: id,
                       label: STATUS_LABEL[id],

@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import {
   OneTable,
   TableBody,
@@ -9,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../index"
-import type { TableHeaderInfo } from "../../index"
+} from "../.."
+import type { TableHeaderInfo } from "../.."
 
 const renderHeader = (
   info: string | TableHeaderInfo,

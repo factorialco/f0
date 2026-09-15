@@ -50,7 +50,7 @@ export type F0TagAlertLevel = keyof typeof f0TagAlertLevelClasses
  */
 export const F0_TAG_ALERT_LEVELS = Object.keys(
   f0TagAlertLevelClasses
-) as ReadonlyArray<F0TagAlertLevel>
+) as readonly F0TagAlertLevel[]
 
 /**
  * Allowed status variants.

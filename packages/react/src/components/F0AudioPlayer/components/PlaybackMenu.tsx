@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import type { AudioPlayerMenuAction } from "../types"
 
 interface PlaybackMenuProps {
@@ -57,7 +56,7 @@ export const PlaybackMenu = ({
         align="end"
         className="flex min-w-44 flex-col gap-0.5"
       >
-        {showSpeed && (
+        {showSpeed ? (
           <>
             <DropdownMenuLabel className="text-f1-foreground-secondary">
               {i18n.audioPlayer.playbackSpeed}
@@ -75,19 +74,19 @@ export const PlaybackMenu = ({
                   )}
                 >
                   <span className="relative">{rate}x</span>
-                  {selected && (
+                  {selected ? (
                     <span className="relative flex text-f1-icon-selected">
                       <F0Icon icon={CheckCircle} size="md" />
                     </span>
-                  )}
+                  ) : null}
                 </DropdownMenuItem>
               )
             })}
           </>
-        )}
-        {showAudioLanguages && (
+        ) : null}
+        {showAudioLanguages ? (
           <>
-            {showSpeed && <DropdownMenuSeparator />}
+            {showSpeed ? <DropdownMenuSeparator /> : null}
             <DropdownMenuLabel className="text-f1-foreground-secondary">
               {i18n.audioPlayer.audio}
             </DropdownMenuLabel>
@@ -104,19 +103,19 @@ export const PlaybackMenu = ({
                   )}
                 >
                   <span className="relative">{languageLabel(option)}</span>
-                  {selected && (
+                  {selected ? (
                     <span className="relative flex text-f1-icon-selected">
                       <F0Icon icon={CheckCircle} size="md" />
                     </span>
-                  )}
+                  ) : null}
                 </DropdownMenuItem>
               )
             })}
           </>
-        )}
-        {extraItems.length > 0 && (
+        ) : null}
+        {extraItems.length > 0 ? (
           <>
-            {(showSpeed || showAudioLanguages) && <DropdownMenuSeparator />}
+            {showSpeed || showAudioLanguages ? <DropdownMenuSeparator /> : null}
             {extraItems.map((action) => (
               <DropdownMenuItem
                 key={action.label}
@@ -128,7 +127,7 @@ export const PlaybackMenu = ({
                     : "text-f1-foreground"
                 )}
               >
-                {action.icon && (
+                {action.icon ? (
                   <span
                     className={cn(
                       "relative flex",
@@ -137,12 +136,12 @@ export const PlaybackMenu = ({
                   >
                     <F0Icon icon={action.icon} size="md" />
                   </span>
-                )}
+                ) : null}
                 <span className="relative">{action.label}</span>
               </DropdownMenuItem>
             ))}
           </>
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

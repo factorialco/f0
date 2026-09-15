@@ -11,9 +11,22 @@ import {
   useMemo,
   useRef,
 } from "react"
-
 import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
+import {
+  BACKGROUND_DOT_GAP,
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  NODE_HEIGHT,
+  STACKED_NODE_HEIGHT,
+} from "../constants"
 import type { F0GraphNodeRenderContext } from "../F0Graph"
+import {
+  EXPANDER_Y_OFFSET_BY_ZOOM,
+  EXPANDER_Y_OFFSET_STACKED_BY_ZOOM,
+  type CollapserNodeData,
+  type ExpanderNodeData,
+  type GraphNodeData,
+  type StackGroupData,
+} from "../internal/ReactFlowAdapters"
 import type {
   GraphEdge,
   GraphNode,
@@ -23,21 +36,6 @@ import type {
   TreeNode,
   ZoomLevel,
 } from "../types"
-
-import {
-  BACKGROUND_DOT_GAP,
-  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-  NODE_HEIGHT,
-  STACKED_NODE_HEIGHT,
-} from "../constants"
-import {
-  EXPANDER_Y_OFFSET_BY_ZOOM,
-  EXPANDER_Y_OFFSET_STACKED_BY_ZOOM,
-  type CollapserNodeData,
-  type ExpanderNodeData,
-  type GraphNodeData,
-  type StackGroupData,
-} from "../internal/ReactFlowAdapters"
 import {
   collectVisibleNodes,
   computeLayoutBounds,
@@ -79,10 +77,10 @@ interface UseGraphRenderModelOptions<T> {
   onAnchorReflow?: (dx: number, dy: number) => void
   resolvedEdgesProp?: GraphEdge[]
   stableRenderNode: (
-    node: GraphNode<unknown>,
+    node: GraphNode,
     ctx: F0GraphNodeRenderContext
   ) => ReactNode
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  nodeTagTypes?: readonly F0GraphNodeTagColumn[]
   visibleTagTypesSet: Set<F0GraphNodeTagColumn>
   reserveTagRow?: boolean
   nodeWidthProp?: number
@@ -183,7 +181,9 @@ export function useGraphRenderModel<T>({
     const byParent = new Map<string | null, typeof visibleTreeNodes>()
     for (const tn of visibleTreeNodes) {
       const key = tn.parentId
-      if (!byParent.has(key)) byParent.set(key, [])
+      if (!byParent.has(key)) {
+        byParent.set(key, [])
+      }
       byParent.get(key)!.push(tn)
     }
     for (const siblings of byParent.values()) {
@@ -215,7 +215,9 @@ export function useGraphRenderModel<T>({
     >()
 
     for (const treeNode of visibleTreeNodes) {
-      if (treeNode.childrenCount === 0) continue
+      if (treeNode.childrenCount === 0) {
+        continue
+      }
       const expanded = expandedNodes.has(treeNode.id)
       const loading = expanded && treeNode.children.length === 0
       if (!expanded || loading) {
@@ -250,8 +252,9 @@ export function useGraphRenderModel<T>({
 
   // ── Edges ──
   const resolvedEdges = useMemo((): GraphEdge[] => {
-    if (resolvedEdgesProp && resolvedEdgesProp.length > 0)
+    if (resolvedEdgesProp && resolvedEdgesProp.length > 0) {
       return resolvedEdgesProp
+    }
     return deriveEdgesFromTree(roots)
   }, [resolvedEdgesProp, roots])
 
@@ -259,13 +262,13 @@ export function useGraphRenderModel<T>({
   const { visibleEdges, expanderNodes } = useMemo(() => {
     const visibleIds = new Set(visibleTreeNodes.map((n) => n.id))
     const edges: GraphEdge[] = []
-    const expNodes: Array<{
+    const expNodes: {
       id: string
       parentId: string
       avatars: { firstName: string; lastName: string; src?: string }[]
       count: number
       loading: boolean
-    }> = []
+    }[] = []
 
     // An expander hangs below every visible collapsed parent that HAS children
     // (per `childrenCount`). This is driven by `expanderMap`, NOT by edges, so
@@ -274,7 +277,9 @@ export function useGraphRenderModel<T>({
     // derived parent→child edge would hide the affordance until a fetch ran.
     const parentsWithExpanders = new Set(expanderMap.keys())
     for (const [parentId, exp] of expanderMap) {
-      if (!visibleIds.has(parentId)) continue
+      if (!visibleIds.has(parentId)) {
+        continue
+      }
       edges.push({
         id: `${parentId}->${exp.expanderId}`,
         source: parentId,
@@ -292,7 +297,9 @@ export function useGraphRenderModel<T>({
     // Plain edges between two visible nodes. Skip any whose source is collapsed
     // (its children are hidden behind the expander created above).
     for (const edge of resolvedEdges) {
-      if (parentsWithExpanders.has(edge.source)) continue
+      if (parentsWithExpanders.has(edge.source)) {
+        continue
+      }
       if (visibleIds.has(edge.source) && visibleIds.has(edge.target)) {
         edges.push(edge)
       }
@@ -320,7 +327,9 @@ export function useGraphRenderModel<T>({
     // every other node.
     const treeNodes = visibleTreeNodes.map((node) => {
       const stacked = stackedParentIds.has(node.id)
-      if (Boolean(node.stackNodes) === stacked) return node
+      if (Boolean(node.stackNodes) === stacked) {
+        return node
+      }
       return { ...node, stackNodes: stacked }
     })
     return [...treeNodes, ...expanderTreeNodes]
@@ -412,7 +421,9 @@ export function useGraphRenderModel<T>({
     const zones: StackHoverZone[] = []
     for (const [parentId, group] of stackGroups.groups) {
       const parent = positionMap.get(parentId)
-      if (!parent) continue
+      if (!parent) {
+        continue
+      }
       const minX = Math.min(parent.x, group.x)
       const minY = Math.min(parent.y, group.y)
       zones.push({
@@ -463,7 +474,9 @@ export function useGraphRenderModel<T>({
   // Compute anchor offset (pure — no ref mutations)
   const anchorOffset = useMemo(() => {
     const anchorId = anchorNodeRef.current
-    if (!anchorId) return { dx: 0, dy: 0 }
+    if (!anchorId) {
+      return { dx: 0, dy: 0 }
+    }
 
     const newPos = layout.nodes.find((pn) => pn.id === anchorId)
     const oldPos = prevPositionsRef.current.get(anchorId)
@@ -493,7 +506,9 @@ export function useGraphRenderModel<T>({
     )
     const anchorId = anchorNodeRef.current
     if (anchorId) {
-      if (dx !== 0 || dy !== 0) onAnchorReflow?.(dx, dy)
+      if (dx !== 0 || dy !== 0) {
+        onAnchorReflow?.(dx, dy)
+      }
       const anchorNode = nodeMap.get(anchorId)
       const stillExpanding =
         anchorNode !== undefined &&
@@ -526,7 +541,9 @@ export function useGraphRenderModel<T>({
   // pan/zoom on large graphs: without it every pan cell-crossing and every
   // zoom-level change would rebuild an object per visible node.
   const windowedIds = useMemo((): Set<string> | null => {
-    if (!enableNodeWindowing || !viewportRect) return null
+    if (!enableNodeWindowing || !viewportRect) {
+      return null
+    }
     const fallbackWidth = nodeWidthProp ?? 256
     const ids = new Set<string>()
     for (const pn of layout.nodes) {
@@ -592,7 +609,9 @@ export function useGraphRenderModel<T>({
     // silently disappears. Bounded by one extra row per windowed row.
     for (const id of Array.from(ids)) {
       const above = stackGroups.previousRow.get(id)
-      if (above) ids.add(above)
+      if (above) {
+        ids.add(above)
+      }
     }
     return ids
   }, [
@@ -710,7 +729,9 @@ export function useGraphRenderModel<T>({
     // a `parentId` React Flow does not know about would be dropped.
     const groupNodes: RFNode[] = []
     for (const group of stackGroups.groups.values()) {
-      if (![...group.rows.keys()].some(inWindow)) continue
+      if (![...group.rows.keys()].some(inWindow)) {
+        continue
+      }
       groupNodes.push({
         id: group.id,
         type: "stackGroup",
@@ -734,7 +755,9 @@ export function useGraphRenderModel<T>({
     const nodes: RFNode[] = []
 
     for (const treeNode of visibleTreeNodes) {
-      if (!inWindow(treeNode.id)) continue
+      if (!inWindow(treeNode.id)) {
+        continue
+      }
       const pos = positionMap.get(treeNode.id)
 
       // The node wrapper's `memo` compares `data.graphNode` by identity, so
@@ -850,7 +873,9 @@ export function useGraphRenderModel<T>({
     // Expanders are not part of the layout tree; they're positioned
     // manually adjacent to their parent on the "outgoing" edge of the layout.
     for (const exp of expanderNodes) {
-      if (!inWindow(exp.id)) continue
+      if (!inWindow(exp.id)) {
+        continue
+      }
       const parentPos = positionMap.get(exp.parentId)
       const parentNode = parentPos ?? {
         x: 0,
@@ -892,9 +917,12 @@ export function useGraphRenderModel<T>({
 
     // Collapser buttons for expanded parents with visible children.
     for (const parent of visibleTreeNodes) {
-      if (!expandedNodes.has(parent.id) || parent.children.length === 0)
+      if (!expandedNodes.has(parent.id) || parent.children.length === 0) {
         continue
-      if (!inWindow(parent.id)) continue
+      }
+      if (!inWindow(parent.id)) {
+        continue
+      }
       const parentPos = positionMap.get(parent.id)
       const px = parentPos?.x ?? 0
       const py = parentPos?.y ?? 0

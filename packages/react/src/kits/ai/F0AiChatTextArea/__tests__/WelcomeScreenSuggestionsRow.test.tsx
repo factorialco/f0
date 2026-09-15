@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
 import {
   act,
@@ -8,7 +7,6 @@ import {
   waitFor,
   zeroRender,
 } from "@/testing/test-utils"
-
 import { type WelcomeScreenSuggestion } from "../../F0AiChat/types"
 import { WelcomeScreenSuggestionsRow } from "../components/WelcomeScreenSuggestionsRow"
 

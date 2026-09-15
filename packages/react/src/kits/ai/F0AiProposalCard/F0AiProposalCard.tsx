@@ -1,23 +1,24 @@
 import { useEffect, useId, useRef, useState } from "react"
-
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import type { DataAttributes } from "@/global.types"
 import { cn, focusRing } from "@/lib/utils"
-
 import type { F0AiProposalCardActions, F0AiProposalCardProps } from "./types"
 
 const DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH = 180
 
 const getSafeCollapsedDescriptionLength = (maxLength: number) => {
-  if (!Number.isFinite(maxLength))
+  if (!Number.isFinite(maxLength)) {
     return DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH
+  }
 
   return Math.max(0, Math.floor(maxLength))
 }
 
 const getCollapsedDescription = (description: string, maxLength: number) => {
-  if (description.length <= maxLength) return description
+  if (description.length <= maxLength) {
+    return description
+  }
 
   return `${description.slice(0, maxLength).trimEnd()}...`
 }
@@ -69,16 +70,16 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
       {...dataAttributes}
     >
       <div className="flex items-center gap-3 px-4 py-3">
-        {module && <F0AvatarModule module={module} size="md" />}
+        {module ? <F0AvatarModule module={module} size="md" /> : null}
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-lg font-semibold text-f1-foreground">
             {heading}
           </h2>
-          {subtitle && (
+          {subtitle ? (
             <p className="truncate text-base text-f1-foreground-secondary">
               {subtitle}
             </p>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -95,7 +96,7 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
           )}
         >
           {visibleDescription}
-          {shouldTruncate && !expanded && (
+          {shouldTruncate && !expanded ? (
             <>
               {" "}
               <button
@@ -111,11 +112,11 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
                 {seeMoreLabel}
               </button>
             </>
-          )}
+          ) : null}
         </p>
       </div>
 
-      {actions && (
+      {actions ? (
         <div className="flex items-center justify-end gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
           <F0Button
             type="button"
@@ -124,7 +125,7 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
             onClick={actions.onPrimaryAction}
           />
         </div>
-      )}
+      ) : null}
     </section>
   )
 }

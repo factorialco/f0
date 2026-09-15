@@ -1,6 +1,5 @@
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   screen,
@@ -8,8 +7,7 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import { F0PhoneInput } from "../index"
+import { F0PhoneInput } from ".."
 
 const getInput = () => screen.getByRole("textbox") as HTMLInputElement
 const getCountryTrigger = () => screen.getByRole("combobox")

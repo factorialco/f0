@@ -1,8 +1,8 @@
 import type { F0AvatarCompanyProps } from "@/components/avatars/F0AvatarCompany"
 import type { F0AvatarPersonProps } from "@/components/avatars/F0AvatarPerson"
 import type { F0AvatarTeamProps } from "@/components/avatars/F0AvatarTeam"
-import type { Numeric, RelaxedNumericWithFormatter } from "@/lib/numeric"
 import type { Level } from "@/components/tags/F0TagAlert"
+import type { Numeric, RelaxedNumericWithFormatter } from "@/lib/numeric"
 
 export const contentTypes = [
   "text",
@@ -40,9 +40,7 @@ export type AiInsightCardContent =
     }
   | {
       content: "people"
-      avatars: Array<
-        Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">
-      >
+      avatars: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">[]
     }
   | {
       content: "team"

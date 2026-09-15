@@ -1,17 +1,14 @@
 import { useRef } from "react"
-
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Tag } from "@/components/tags/F0Tag/F0Tag"
-
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import type {
   F0DataChartFunnelDataPoint,
   F0DataChartFunnelProps,
 } from "../../types"
-
 import { formatPercent } from "../../utils/formatters"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
-import { usePointClick } from "../../utils/usePointClick"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
+import { usePointClick } from "../../utils/usePointClick"
 import { useFunnelChartOptions } from "./useFunnelChartOptions"
 
 /** Sort funnel data points according to the sort prop */
@@ -19,9 +16,12 @@ function sortFunnelData(
   dataPoints: F0DataChartFunnelDataPoint[],
   sort: "descending" | "ascending" | "none"
 ): F0DataChartFunnelDataPoint[] {
-  if (sort === "none") return dataPoints
-  if (sort === "ascending")
+  if (sort === "none") {
+    return dataPoints
+  }
+  if (sort === "ascending") {
     return [...dataPoints].sort((a, b) => a.value - b.value)
+  }
   return [...dataPoints].sort((a, b) => b.value - a.value)
 }
 
@@ -48,7 +48,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
 
   return (
     <div className="relative h-full w-full">
-      {showLabels && (
+      {showLabels ? (
         <div
           className={`pointer-events-none absolute inset-0 z-10 flex ${isHorizontal ? "" : "flex-col"}`}
         >
@@ -91,7 +91,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
                       >
                         {formattedValue}
                       </OneEllipsis>
-                      {pct && <Tag tag={{ type: "raw", text: pct }} />}
+                      {pct ? <Tag tag={{ type: "raw", text: pct }} /> : null}
                     </div>
                   ) : (
                     <>
@@ -101,7 +101,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
                       >
                         {formattedValue}
                       </OneEllipsis>
-                      {pct && <Tag tag={{ type: "raw", text: pct }} />}
+                      {pct ? <Tag tag={{ type: "raw", text: pct }} /> : null}
                     </>
                   )}
                 </div>
@@ -109,7 +109,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
             )
           })}
         </div>
-      )}
+      ) : null}
 
       <div ref={ref} className="h-full w-full" />
     </div>

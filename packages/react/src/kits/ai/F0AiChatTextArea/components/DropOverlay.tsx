@@ -45,7 +45,9 @@ export const DropOverlay = ({
       }}
       onDrop={(e) => {
         e.preventDefault()
-        if (!onFilesDropped) return
+        if (!onFilesDropped) {
+          return
+        }
         const files = Array.from(e.dataTransfer.files)
         if (files.length > 0) {
           onFilesDropped(files)

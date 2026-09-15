@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fn, userEvent, within } from "storybook/test"
-
 import { Clock } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AiChatHeader } from "../F0AiChatHeader"
 
 // Shared across WithHeaderAction / Compact / Snapshot, so it must be reset per

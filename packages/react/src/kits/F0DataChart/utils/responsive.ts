@@ -27,8 +27,14 @@ export const MD_MAX_WIDTH = 520
  * charts that will end up large once measured.
  */
 export function resolveChartSize(width: number): ChartResponsiveSize {
-  if (width === 0) return "lg"
-  if (width < SM_MAX_WIDTH) return "sm"
-  if (width < MD_MAX_WIDTH) return "md"
+  if (width === 0) {
+    return "lg"
+  }
+  if (width < SM_MAX_WIDTH) {
+    return "sm"
+  }
+  if (width < MD_MAX_WIDTH) {
+    return "md"
+  }
   return "lg"
 }

@@ -1,10 +1,10 @@
 import { forwardRef, useCallback, useState } from "react"
-
 import {
   F0AvatarAlert,
   type AlertAvatarProps,
 } from "@/components/avatars/F0AvatarAlert"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { Component } from "@/lib/component/component"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import {
@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/ui/Dialog/dialog"
-import { Component } from "@/lib/component/component"
 
 type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
 
@@ -74,7 +73,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
               </DialogDescription>
             </div>
           </DialogHeader>
-          {actions && (
+          {actions ? (
             <DialogFooter className="px-4 pb-4 pt-2">
               <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3 [&>div]:w-full">
                 <F0Button variant="outline" {...actions.secondary} />
@@ -92,7 +91,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
                 />
               </div>
             </DialogFooter>
-          )}
+          ) : null}
         </DialogContent>
       </DialogPrimitive>
     )

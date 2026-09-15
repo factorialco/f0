@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Check } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
-
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { avatarSizes } from "../../internal/BaseAvatar/types"
 import { F0AvatarPerson } from "../F0AvatarPerson"
@@ -28,8 +26,8 @@ type Story = StoryObj<typeof F0AvatarPerson>
 
 export const Default: Story = {
   args: {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: "Jordan",
+    lastName: "Avery",
     size: "lg",
   },
 }

@@ -1,11 +1,9 @@
-import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-import type { Labels, Value } from "react-phone-number-input"
-
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { cva } from "cva"
+import type { CountryCode as PhoneCountry } from "libphonenumber-js"
 import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react"
+import type { Labels, Value } from "react-phone-number-input"
 import RPNInput from "react-phone-number-input"
-
 import { F0Icon } from "@/components/F0Icon"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
@@ -13,9 +11,6 @@ import { CrossedCircle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
-import type { F0PhoneInputProps, F0PhoneInputValue } from "./types"
-
 import { CountrySelect } from "./components/CountrySelect"
 import { PhoneNumberInput } from "./components/PhoneNumberInput"
 import {
@@ -31,6 +26,7 @@ import {
   exampleInternationalPlaceholder,
   exampleNationalPlaceholder,
 } from "./lib/placeholder"
+import type { F0PhoneInputProps, F0PhoneInputValue } from "./types"
 
 const containerVariants = cva({
   base: [
@@ -174,7 +170,9 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       const pinned = (pinnedCountries ?? [])
         .map(toPhoneCountry)
         .filter((code): code is PhoneCountry => !!code)
-      if (!pinned.length) return undefined
+      if (!pinned.length) {
+        return undefined
+      }
       return [...pinned, "|" as const, "..." as const]
     }, [pinnedCountries])
 
@@ -186,7 +184,9 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
     )
 
     const countries = useMemo(() => {
-      if (!allowedCountries) return undefined
+      if (!allowedCountries) {
+        return undefined
+      }
       const allowed = allowedCountries
         .map(toPhoneCountry)
         .filter((code): code is PhoneCountry => !!code)
@@ -211,9 +211,13 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       null
     )
     useEffect(() => {
-      if (country || !e164) return
+      if (country || !e164) {
+        return
+      }
       const detected = countryForPartialE164(e164, countries)
-      if (detected) selectCountryRef.current?.(detected)
+      if (detected) {
+        selectCountryRef.current?.(detected)
+      }
     }, [country, e164, countries])
 
     // Legacy `hint`/`error` shortcuts, mirroring F0InputField's semantics
@@ -239,7 +243,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
           disabled && "cursor-not-allowed"
         )}
       >
-        {!hideLabel && label && (
+        {!hideLabel && label ? (
           <Label
             label={label}
             required={required}
@@ -248,7 +252,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
             className="min-w-0 flex-1"
             disabled={disabled}
           />
-        )}
+        ) : null}
         <div
           className={cn(
             "pointer-events-auto",
@@ -295,14 +299,14 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
             aria-invalid={effectiveStatus?.type === "error" || undefined}
             aria-busy={loading || undefined}
           />
-          {(showClear || loading) && (
+          {showClear || loading ? (
             <div
               className={cn(
                 "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
                 size === "md" && "pr-[7px]"
               )}
             >
-              {showClear && (
+              {showClear ? (
                 <button
                   className={cn(
                     "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
@@ -319,14 +323,14 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
                 >
                   <F0Icon icon={CrossedCircle} color="default" size="md" />
                 </button>
-              )}
-              {loading && (
+              ) : null}
+              {loading ? (
                 <div className="pointer-events-none flex h-6 w-6 items-center justify-center">
                   <Spinner size="small" className="mt-[1px]" />
                 </div>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <InputMessages status={effectiveStatus} />
       </div>

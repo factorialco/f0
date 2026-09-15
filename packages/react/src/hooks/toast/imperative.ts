@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid"
-
 import { toastStore } from "./store"
 import { ToastId, ToastOptions } from "./types"
 

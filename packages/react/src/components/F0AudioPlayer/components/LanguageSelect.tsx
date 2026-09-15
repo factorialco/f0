@@ -1,5 +1,4 @@
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Check } from "@/icons/app"
 import { type LanguageOption, languageLabel } from "@/lib/localized"
@@ -40,7 +39,9 @@ export function LanguageSelect({
         '[role="menuitemradio"]'
       )
     )
-    if (items.length === 0) return
+    if (items.length === 0) {
+      return
+    }
     const current = items.indexOf(document.activeElement as HTMLButtonElement)
     let next: number
     switch (event.key) {
@@ -105,11 +106,11 @@ export function LanguageSelect({
                 setOpen(false)
               }}
             >
-              {isActive && (
+              {isActive ? (
                 <span className="absolute left-2.5 inline-flex items-center">
                   <Check />
                 </span>
-              )}
+              ) : null}
               {languageLabel(option)}
             </button>
           )

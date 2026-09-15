@@ -10,9 +10,9 @@ vi.mock("@/components/RichText/internal/BubbleMenu", () => ({
   EditorBubbleMenu: () => null,
 }))
 
-import { F0RichTextEditor, type F0RichTextEditorHandle } from ".."
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
+import { F0RichTextEditor, type F0RichTextEditorHandle } from ".."
 
 test("exposes the title as the accessible name of the editor textbox", async () => {
   render(

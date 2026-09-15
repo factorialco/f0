@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -7,7 +6,6 @@ import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Ellipsis } from "@/icons/app"
 import UpsellIcon from "@/icons/app/Upsell"
-
 import {
   PrimaryActionItemDefinition,
   SecondaryActionGroup,
@@ -62,8 +60,9 @@ export const CollectionActions = ({
     secondaryActionsButtons.length === 0 &&
     dropdownItems.length === 0 &&
     !upsellAction
-  )
+  ) {
     return null
+  }
 
   return (
     <div className="flex flex-row-reverse items-center gap-2">
@@ -154,7 +153,7 @@ export const CollectionActions = ({
         )
       })}
 
-      {upsellAction && (
+      {upsellAction ? (
         <F0Button
           size="md"
           variant={upsellAction.variant ?? "outlinePromote"}
@@ -163,9 +162,9 @@ export const CollectionActions = ({
           onClick={upsellAction.onClick}
           disabled={upsellAction.disabled}
         />
-      )}
+      ) : null}
 
-      {dropdownItems.length > 0 && (
+      {dropdownItems.length > 0 ? (
         <Dropdown
           items={dropdownItems}
           align="end"
@@ -180,7 +179,7 @@ export const CollectionActions = ({
             pressed={open}
           />
         </Dropdown>
-      )}
+      ) : null}
     </div>
   )
 }

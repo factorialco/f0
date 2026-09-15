@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, userEvent, within } from "storybook/test"
-
 import { F0Map } from "../F0Map"
 import type { F0MapPoint } from "../types"
 

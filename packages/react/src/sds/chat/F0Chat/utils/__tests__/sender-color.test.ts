@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest"
-
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
 import { internalAvatarColors } from "@/ui/Avatar"
-
 import {
   f0ChatSenderColors,
   type F0ChatSenderColor,
@@ -163,7 +161,9 @@ describe("senderBubbleColorClass", () => {
       | F0ChatSenderColor
       | undefined
 
-    if (!nameHue) throw new Error("Expected the sender name hue")
+    if (!nameHue) {
+      throw new Error("Expected the sender name hue")
+    }
     expect(bubbleClass).toContain(`colors.${nameHue}.50`)
     expect(bubbleClass).toContain(
       lightBubbleColorMixClass(nameHue, lightBubbleColorMix[nameHue])

@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import React from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import {
   avatarVariants,
   CompanyAvatarVariant,
@@ -12,7 +10,6 @@ import {
   TeamAvatarVariant,
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AvatarList } from "../F0AvatarList"
 import { avatarListSizes } from "../types"
 
@@ -32,8 +29,8 @@ const dummyPeople = [
     lastName: "Domínguez",
   },
   {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: "Jordan",
+    lastName: "Avery",
     src: "/avatars/person03.jpg",
   },
   {
@@ -362,7 +359,9 @@ export const OverflowPopover: Story = {
           const el = body.querySelector<HTMLElement>(
             '[data-radix-popper-content-wrapper] [data-state="open"]'
           )
-          if (!el) throw new Error("the `+N` popover did not open")
+          if (!el) {
+            throw new Error("the `+N` popover did not open")
+          }
           return el
         },
         { timeout: 3000 }

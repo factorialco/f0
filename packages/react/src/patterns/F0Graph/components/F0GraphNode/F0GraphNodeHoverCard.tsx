@@ -1,11 +1,9 @@
 import { type ReactNode } from "react"
-
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Card } from "@/components/F0Card"
 import type { CardMetadata } from "@/components/F0Card/types"
 import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-
 import type { F0GraphNodeTag, F0GraphNodeTagLabels } from "./types"
 import { tagColumn } from "./types"
 

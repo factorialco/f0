@@ -1,6 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import Check from "@/icons/app/Check"
 import Clock from "@/icons/app/Clock"
 import Comment from "@/icons/app/Comment"
@@ -8,7 +7,6 @@ import Cross from "@/icons/app/Cross"
 import FileSigned from "@/icons/app/FileSigned"
 import Settings from "@/icons/app/Settings"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0TimelineRow } from "../F0TimelineRow"
 
 describe("F0TimelineRow", () => {

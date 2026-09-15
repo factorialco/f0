@@ -1,8 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useMemo, useState } from "react"
-
-import { Circle, Desktop } from "../../../icons/app"
 import {
   Select,
   SelectContent,
@@ -10,7 +7,8 @@ import {
   SelectProps,
   SelectTrigger,
   SelectValue,
-} from "../index"
+} from ".."
+import { Circle, Desktop } from "../../../icons/app"
 
 const SelectWithHooks = ({
   options,
@@ -46,25 +44,24 @@ const SelectWithHooks = ({
           {props.children}
         </Select>
       )
-    } else {
-      const [value, setValue] = useState<string | undefined>(
-        props.value as string | undefined
-      )
-      const handleChange = (value: string) => {
-        console.log("value", value)
-        setValue(value)
-        props.onValueChange(value)
-      }
-
-      return (
-        <Select
-          {...rest}
-          value={value}
-          onValueChange={handleChange}
-          multiple={false}
-        />
-      )
     }
+    const [value, setValue] = useState<string | undefined>(
+      props.value as string | undefined
+    )
+    const handleChange = (value: string) => {
+      console.log("value", value)
+      setValue(value)
+      props.onValueChange(value)
+    }
+
+    return (
+      <Select
+        {...rest}
+        value={value}
+        onValueChange={handleChange}
+        multiple={false}
+      />
+    )
   }
 
   const items = useMemo(

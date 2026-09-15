@@ -1,6 +1,5 @@
 import { Reorder } from "motion/react"
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
@@ -8,7 +7,6 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Delete, Ellipsis, LayersFront, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useSurveyFormBuilderContext } from "../Context"
 import { DragProvider } from "../DragContext"
 import { OnChangeSectionParams, QuestionElement } from "../types"
@@ -133,11 +131,11 @@ export const Section = ({
         locked && !answering ? "cursor-not-allowed" : "bg-f1-background"
       )}
     >
-      {(showTitle || showDescription || (locked && !answering)) && (
+      {showTitle || showDescription || (locked && !answering) ? (
         <div className="py-1 pl-5 pr-3">
-          {(showTitle || (locked && !answering)) && (
+          {showTitle || (locked && !answering) ? (
             <div className="flex flex-row items-center gap-2">
-              {showTitle && (
+              {showTitle ? (
                 <input
                   ref={titleRef}
                   type="text"
@@ -151,15 +149,15 @@ export const Section = ({
                     inputDisabled && "cursor-not-allowed"
                   )}
                 />
-              )}
-              {lockedTag && (
+              ) : null}
+              {lockedTag ? (
                 <div className="ml-auto flex shrink-0 items-center">
                   <Tooltip description={lockedNoticeText} instant>
                     <span className="inline-flex">{lockedTag}</span>
                   </Tooltip>
                 </div>
-              )}
-              {!disabled && !answering && !locked && (
+              ) : null}
+              {!disabled && !answering && !locked ? (
                 <div
                   className={cn(
                     "opacity-0 group-hover/section:opacity-100",
@@ -183,10 +181,10 @@ export const Section = ({
                     />
                   </Dropdown>
                 </div>
-              )}
+              ) : null}
             </div>
-          )}
-          {showDescription && !(locked && !answering) && (
+          ) : null}
+          {showDescription && !(locked && !answering) ? (
             <textarea
               value={description}
               aria-label={t("surveyFormBuilder.labels.description")}
@@ -201,10 +199,10 @@ export const Section = ({
                 inputDisabled && "cursor-not-allowed"
               )}
             />
-          )}
+          ) : null}
         </div>
-      )}
-      {!hideQuestions && (
+      ) : null}
+      {!hideQuestions ? (
         <>
           <DragProvider>
             <Reorder.Group
@@ -220,7 +218,7 @@ export const Section = ({
               </div>
             </Reorder.Group>
           </DragProvider>
-          {!answering && (
+          {!answering ? (
             <div className="mt-8 flex flex-row items-center gap-4">
               <div className="h-px flex-1 bg-f1-border-secondary" />
               <span className="text-base font-medium text-f1-foreground-secondary">
@@ -228,9 +226,9 @@ export const Section = ({
               </span>
               <div className="h-px flex-1 bg-f1-border-secondary" />
             </div>
-          )}
+          ) : null}
         </>
-      )}
+      ) : null}
     </div>
   )
 }

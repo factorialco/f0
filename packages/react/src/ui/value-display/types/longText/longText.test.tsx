@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { LongTextCell } from "./longText"

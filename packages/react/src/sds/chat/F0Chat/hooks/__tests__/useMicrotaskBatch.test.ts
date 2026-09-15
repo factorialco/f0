@@ -1,8 +1,6 @@
 import { createElement, StrictMode, type ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useMicrotaskBatch } from "../useMicrotaskBatch"
 
 describe("useMicrotaskBatch", () => {

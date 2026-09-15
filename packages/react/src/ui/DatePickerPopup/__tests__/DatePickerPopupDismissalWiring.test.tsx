@@ -1,7 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { DatePickerPopup } from "../DatePickerPopup"
 
 /**

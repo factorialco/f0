@@ -69,12 +69,16 @@ const LOADERS: Record<string, () => Promise<{ default: CompactEmoji[] }>> = {
  * English of any flavour returns `null`: it is already in the index.
  */
 export const resolveEmojiLocale = (tag: string | undefined): string | null => {
-  if (!tag) return null
+  if (!tag) {
+    return null
+  }
   const normalized = tag.toLowerCase()
   if (normalized === "en" || normalized.startsWith("en-")) {
     return normalized in LOADERS ? normalized : null
   }
-  if (normalized in LOADERS) return normalized
+  if (normalized in LOADERS) {
+    return normalized
+  }
   const base = normalized.split("-")[0]
   return base in LOADERS ? base : null
 }
@@ -113,13 +117,19 @@ const buildTerms = (data: CompactEmoji[]): EmojiLocaleTerms => {
 export const loadEmojiLocaleTerms = (
   locale: string | null
 ): Promise<EmojiLocaleTerms> => {
-  if (!locale) return Promise.resolve(new Map())
+  if (!locale) {
+    return Promise.resolve(new Map())
+  }
 
   const cached = cache.get(locale)
-  if (cached) return cached
+  if (cached) {
+    return cached
+  }
 
   const loader = LOADERS[locale]
-  if (!loader) return Promise.resolve(new Map())
+  if (!loader) {
+    return Promise.resolve(new Map())
+  }
 
   const pending = loader()
     .then((module) => buildTerms(module.default))

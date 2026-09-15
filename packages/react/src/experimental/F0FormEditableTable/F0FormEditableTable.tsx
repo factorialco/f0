@@ -17,9 +17,6 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { ReactNode } from "react"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -30,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/experimental/OneTable"
+import type { RecordType } from "@/hooks/datasource"
 import { Add, Delete, Handle, Pencil } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
@@ -42,7 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import type {
   EditableColumn,
   F0FormEditableTableColumn,
@@ -168,7 +165,9 @@ const restrictToParentElement: Modifier = ({
   draggingNodeRect,
   transform,
 }) => {
-  if (!draggingNodeRect || !containerNodeRect) return transform
+  if (!draggingNodeRect || !containerNodeRect) {
+    return transform
+  }
   const value = { ...transform }
   if (draggingNodeRect.top + transform.y < containerNodeRect.top) {
     value.y = containerNodeRect.top - draggingNodeRect.top
@@ -207,7 +206,9 @@ function RowActionButton<R extends RecordType>({
       onClick={() => action.onClick(item, index)}
     />
   )
-  if (!action.critical) return button
+  if (!action.critical) {
+    return button
+  }
   return (
     <span className="inline-flex [&:active_svg]:!text-f1-icon-inverse [&:hover_svg]:!text-f1-icon-inverse [&_svg]:!text-f1-icon-critical-bold">
       {button}
@@ -218,7 +219,7 @@ function RowActionButton<R extends RecordType>({
 type RowCellsProps<R extends RecordType> = {
   item: R
   index: number
-  columns: ReadonlyArray<EditableColumn<R>>
+  columns: readonly EditableColumn<R>[]
   onRemoveRow?: (item: R, index: number) => void
   onEditRow?: (item: R, index: number) => void
   canEditRow?: (item: R, index: number) => boolean
@@ -265,7 +266,7 @@ function RowCells<R extends RecordType>({
   const customActions = rowActions?.(item, index) ?? []
   return (
     <>
-      {dragHandle !== undefined && (
+      {dragHandle !== undefined ? (
         <TableCell
           width={HANDLE_COL_WIDTH}
           sticky={{ left: 0 }}
@@ -278,7 +279,7 @@ function RowCells<R extends RecordType>({
             {dragHandle}
           </div>
         </TableCell>
-      )}
+      ) : null}
       {columns.map((column, cellIndex) => {
         const editType = column.editType?.(item)
         const isEditableCell =
@@ -321,14 +322,14 @@ function RowCells<R extends RecordType>({
           </TableCell>
         )
       })}
-      {hasActionsColumn && (
+      {hasActionsColumn ? (
         <TableCell
           width={actionsColWidth}
           sticky={{ right: 0 }}
           className={cn(CELL_CLASSES, ACTIONS_SHRINK_CLASSES)}
         >
           <div className="pointer-events-auto flex h-full items-center justify-center gap-2 px-2">
-            {showEdit && (
+            {showEdit ? (
               <F0Button
                 type="button"
                 variant="outline"
@@ -338,7 +339,7 @@ function RowCells<R extends RecordType>({
                 disabled={disabled}
                 onClick={() => onEditRow(item, index)}
               />
-            )}
+            ) : null}
             {customActions.map((action, actionIndex) => (
               <RowActionButton
                 key={action.id ?? `${action.label}-${actionIndex}`}
@@ -348,7 +349,7 @@ function RowCells<R extends RecordType>({
                 disabled={disabled}
               />
             ))}
-            {showRemove && (
+            {showRemove ? (
               // The critical variant inverts its icon on `group-hover`, which
               // the surrounding `.group` table row also triggers — turning the
               // icon white on mere row hover. Pin it to the critical color and
@@ -366,10 +367,10 @@ function RowCells<R extends RecordType>({
                   onClick={() => onRemoveRow(item, index)}
                 />
               </span>
-            )}
+            ) : null}
           </div>
         </TableCell>
-      )}
+      ) : null}
     </>
   )
 }
@@ -471,7 +472,9 @@ function F0FormEditableTableBase<R extends RecordType>({
   const columns = columnsProp.map(withRenderFallback)
 
   const resolveRowId = (item: R, index: number): string => {
-    if (getRowId) return getRowId(item, index)
+    if (getRowId) {
+      return getRowId(item, index)
+    }
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return String(item.id)
     }
@@ -488,10 +491,14 @@ function F0FormEditableTableBase<R extends RecordType>({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    if (!over || active.id === over.id) return
+    if (!over || active.id === over.id) {
+      return
+    }
     const from = rowIds.indexOf(String(active.id))
     const to = rowIds.indexOf(String(over.id))
-    if (from === -1 || to === -1) return
+    if (from === -1 || to === -1) {
+      return
+    }
     onReorderRows?.({
       items: arrayMove(items, from, to),
       from,
@@ -554,7 +561,7 @@ function F0FormEditableTableBase<R extends RecordType>({
     <OneTable>
       <TableHeader>
         <TableRow>
-          {sortableRows && (
+          {sortableRows ? (
             <TableHead
               width={HANDLE_COL_WIDTH}
               sticky={{ left: 0 }}
@@ -562,7 +569,7 @@ function F0FormEditableTableBase<R extends RecordType>({
             >
               <span className="sr-only">{reorderLabel}</span>
             </TableHead>
-          )}
+          ) : null}
           {columns.map((column, index) => (
             <TableHead
               key={column.id ?? `head-${index}`}
@@ -575,7 +582,7 @@ function F0FormEditableTableBase<R extends RecordType>({
               {column.label}
             </TableHead>
           ))}
-          {hasActionsColumn && (
+          {hasActionsColumn ? (
             <TableHead
               width={actionsColWidth}
               sticky={{ right: 0 }}
@@ -587,7 +594,7 @@ function F0FormEditableTableBase<R extends RecordType>({
             >
               <span className="sr-only">{actionsLabel}</span>
             </TableHead>
-          )}
+          ) : null}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -646,8 +653,8 @@ function F0FormEditableTableBase<R extends RecordType>({
           table
         )}
       </div>
-      {addRow &&
-        (addRow.disabled && addRow.disabledTooltip ? (
+      {addRow ? (
+        addRow.disabled && addRow.disabledTooltip ? (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               {/* A disabled button emits no hover events, so the span wrapper
@@ -683,7 +690,8 @@ function F0FormEditableTableBase<R extends RecordType>({
             onClick={addRow.onClick}
             disabled={addRow.disabled}
           />
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

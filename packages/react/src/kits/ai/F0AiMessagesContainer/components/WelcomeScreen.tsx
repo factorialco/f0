@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
@@ -51,6 +50,83 @@ export interface WelcomeScreenProps {
   fullscreen?: boolean
 }
 
+/**
+ * The phrase, typed out a character at a time — and the whole paragraph is the
+ * call to action when `onClick` is given.
+ *
+ * aria-label is prohibited on a plain paragraph role, so only the interactive
+ * (button) case is named by it; the sr-only span names the static case with
+ * the full, stable phrase instead of the partially-typed slice.
+ */
+const TypedPhrase = ({
+  phrase,
+  typed,
+  phraseIndex,
+  onClick,
+}: {
+  phrase: string
+  /** How many of its characters are on screen. */
+  typed: number
+  /** Remounts the paragraph when the rotation moves on. */
+  phraseIndex: number
+  onClick?: () => void
+}) => {
+  const reducedMotion = useReducedMotion()
+  const interactive = !!onClick
+
+  return (
+    <p
+      key={phraseIndex}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        interactive
+          ? (e: KeyboardEvent<HTMLParagraphElement>) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onClick?.()
+              }
+            }
+          : undefined
+      }
+      className={cn(
+        "relative min-h-[28px] bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+        interactive &&
+          cn(
+            "cursor-pointer transition-transform duration-200",
+            "hover:scale-[1.02] focus-visible:scale-[1.02]",
+            "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+          )
+      )}
+      aria-label={interactive ? phrase : undefined}
+    >
+      {/* THE WHOLE PHRASE, HOLDING ITS SPACE — and what a screen reader reads.
+       *
+       * The typed slice is painted over this rather than laid out itself. Left
+       * in flow, a growing slice grows the paragraph a line at a time (`min-h`
+       * reserves exactly one), and the welcome block is centred — bottom-
+       * anchored in fullscreen — so every wrap steps the composer and the
+       * cards 28px. Sizing on the full phrase fixes the line breaks from the
+       * first character, so nothing below it ever moves.
+       *
+       * It reads as a jump "when the fullscreen animation ends" because the
+       * chat blanks its body across that change (see `useRevealOnChange`)
+       * while this keeps typing underneath: the reveal lands mid-phrase, and
+       * the next wrap arrives just after the panel has settled.
+       *
+       * `opacity-0`, not `invisible` or `sr-only`: it must stay in the layout
+       * AND in the accessibility tree (it replaces the sr-only copy that named
+       * this paragraph before), while painting nothing — the gradient is
+       * clipped to the text, so anything that paints would show through. */}
+      <span className="opacity-0">{phrase}</span>
+      <span aria-hidden="true" className="absolute inset-0">
+        {reducedMotion ? phrase : phrase.slice(0, typed)}
+      </span>
+    </p>
+  )
+}
+
 export const WelcomeScreen = ({
   messages,
   caption,
@@ -87,7 +163,9 @@ export const WelcomeScreen = ({
   useEffect(() => {
     // Reduced motion renders the first phrase statically: no typewriter,
     // no rotation (WCAG 2.2.2 — auto-updating content with no pause control).
-    if (reducedMotion) return
+    if (reducedMotion) {
+      return
+    }
 
     let timer: ReturnType<typeof setTimeout> | undefined
 
@@ -100,7 +178,9 @@ export const WelcomeScreen = ({
         setPhase("holding")
       }
     } else if (phase === "holding") {
-      if (messages.length <= 1) return
+      if (messages.length <= 1) {
+        return
+      }
       timer = setTimeout(() => setPhase("erasing"), HOLD_MS)
     } else if (phase === "erasing") {
       if (chars > 0) {
@@ -114,19 +194,11 @@ export const WelcomeScreen = ({
     }
 
     return () => {
-      if (timer) clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+      }
     }
   }, [phase, chars, current.length, messages.length, reducedMotion])
-
-  const interactive = !!onClick
-  const handleKeyDown = interactive
-    ? (e: KeyboardEvent<HTMLParagraphElement>) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          onClick?.()
-        }
-      }
-    : undefined
 
   return (
     <div
@@ -136,7 +208,7 @@ export const WelcomeScreen = ({
       )}
     >
       <div className="flex flex-col items-center">
-        {cta && (
+        {cta ? (
           <ButtonInternal
             variant="neutral"
             size="sm"
@@ -145,43 +217,23 @@ export const WelcomeScreen = ({
             icon={cta.icon}
             onClick={cta.onClick}
           />
-        )}
-        {caption && (
+        ) : null}
+        {caption ? (
           <p className="animate-in fade-in-0 text-center text-2xl font-semibold leading-[28px] text-f1-foreground-secondary duration-500">
             {caption}
           </p>
-        )}
-        {/* aria-label is prohibited on a plain paragraph role, so only the
-            interactive (button) case is named by it; the sr-only span names
-            the static case with the full, stable phrase instead of the
-            partially-typed slice. */}
-        <p
-          key={index}
-          role={interactive ? "button" : undefined}
-          tabIndex={interactive ? 0 : undefined}
+        ) : null}
+        <TypedPhrase
+          phrase={current}
+          typed={chars}
+          phraseIndex={index}
           onClick={onClick}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            "min-h-[28px] bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
-            interactive &&
-              cn(
-                "cursor-pointer transition-transform duration-200",
-                "hover:scale-[1.02] focus-visible:scale-[1.02]",
-                "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
-              )
-          )}
-          aria-label={interactive ? current : undefined}
-        >
-          <span aria-hidden="true">
-            {reducedMotion ? current : current.slice(0, chars)}
-          </span>
-          <span className="sr-only">{current}</span>
-        </p>
-        {subtitle && (
+        />
+        {subtitle ? (
           <p className="animate-in fade-in-0 mt-3 text-center text-base leading-snug text-f1-foreground-secondary duration-500">
             {subtitle}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   )

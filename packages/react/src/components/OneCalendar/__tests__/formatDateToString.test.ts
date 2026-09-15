@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { DateRange } from "../types"
 import { formatDateToString } from "../utils"
 
@@ -12,22 +11,25 @@ describe("formatDateToString", () => {
     expect(result).toBe("2024-01-15")
   })
 
-  it("should format DateRange with different from and to dates using separator", () => {
-    const dateRange: DateRange = { from: fromDate, to: toDate }
+  it.each<{ name: string; dateRange: DateRange; expected: string }>([
+    {
+      name: "different from and to dates using separator",
+      dateRange: { from: fromDate, to: toDate },
+      expected: "2024-01-15 → 2024-01-31",
+    },
+    {
+      name: "same from and to dates without separator",
+      dateRange: { from: fromDate, to: fromDate },
+      expected: "2024-01-15",
+    },
+    {
+      name: "only from date",
+      dateRange: { from: fromDate },
+      expected: "2024-01-15",
+    },
+  ])("should format DateRange with $name", ({ dateRange, expected }) => {
     const result = formatDateToString(dateRange, "yyyy-MM-dd")
-    expect(result).toBe("2024-01-15 → 2024-01-31")
-  })
-
-  it("should format DateRange with same from and to dates without separator", () => {
-    const dateRange: DateRange = { from: fromDate, to: fromDate }
-    const result = formatDateToString(dateRange, "yyyy-MM-dd")
-    expect(result).toBe("2024-01-15")
-  })
-
-  it("should format DateRange with only from date", () => {
-    const dateRange: DateRange = { from: fromDate }
-    const result = formatDateToString(dateRange, "yyyy-MM-dd")
-    expect(result).toBe("2024-01-15")
+    expect(result).toBe(expected)
   })
 
   it("should return dash when date is undefined", () => {

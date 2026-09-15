@@ -1,5 +1,5 @@
-import { Widget } from "@/experimental/Widgets/Widget"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Widget } from "@/experimental/Widgets/Widget"
 
 export interface DashboardWidgetProps {
   children: React.ReactNode

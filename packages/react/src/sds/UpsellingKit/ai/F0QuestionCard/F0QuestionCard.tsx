@@ -1,12 +1,10 @@
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
-
 import { F0QuestionCardMultiStepProps, F0QuestionCardOption } from "./types"
 
 export const F0QuestionCardMultiStep = ({
@@ -52,7 +50,7 @@ export const F0QuestionCardMultiStep = ({
         // Build message from all selections
         const allSelectedLabels = Object.entries(selections)
           .map(([stepIndex, ids]) => {
-            const step = steps[parseInt(stepIndex)]
+            const step = steps[parseInt(stepIndex, 10)]
             return step.options
               .filter((o) => ids.includes(o.id))
               .map((o) => o.label)
@@ -106,7 +104,7 @@ export const F0QuestionCardMultiStep = ({
       </CardContent>
       <CardFooter className="-mx-4 -mb-4 mt-4 flex items-center justify-between rounded-b-xl border-0 border-t border-t-f1-border bg-f1-background-secondary px-4 py-3">
         <div className="flex min-w-[7.5rem] items-center justify-start gap-1">
-          {showPagination && (
+          {showPagination ? (
             <>
               <button
                 type="button"
@@ -130,10 +128,10 @@ export const F0QuestionCardMultiStep = ({
                 <F0Icon icon={ChevronRight} size="sm" />
               </button>
             </>
-          )}
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
-          {showSkip && (
+          {showSkip ? (
             <F0Button
               type="button"
               variant="ghost"
@@ -143,7 +141,7 @@ export const F0QuestionCardMultiStep = ({
               }
               onClick={onSkip}
             />
-          )}
+          ) : null}
           <F0Button
             type="button"
             variant="outline"

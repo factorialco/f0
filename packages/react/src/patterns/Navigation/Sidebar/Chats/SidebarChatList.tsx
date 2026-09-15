@@ -1,11 +1,9 @@
 import { useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { SidebarTabPanel, SidebarTabPanelGroup } from "../TabPanel"
 import {
   SidebarChatBlankState,
@@ -87,6 +85,14 @@ export const SidebarChatList = ({
           (sum, chat) => sum + (chat.unreadCount ?? 0),
           0
         )
+        // The collapsed total belongs to no single row, so it takes the group's
+        // kind — and only when every row agrees. A mixed group keeps the
+        // conversation wording, which is the safe reading of "3 unread things".
+        const groupKind =
+          group.chats.length > 0 &&
+          group.chats.every((chat) => chat.kind === "community")
+            ? "community"
+            : "conversation"
         return {
           id: group.id,
           title: group.title,
@@ -95,7 +101,10 @@ export const SidebarChatList = ({
           // and surface the group's total unread count as a badge.
           highlightWhenCollapsed: totalUnread > 0,
           collapsedBadge:
-            totalUnread > 0 ? <UnreadBadge count={totalUnread} /> : undefined,
+            totalUnread > 0 ? (
+              <UnreadBadge count={totalUnread} kind={groupKind} />
+            ) : undefined,
+          action: group.action,
           items: group.chats.map((chat) => ({
             id: chat.id,
             searchText: chat.label,
@@ -135,46 +144,48 @@ export const SidebarChatList = ({
           }
         />
       </div>
-      {portalRoots.above &&
-        createPortal(
-          above.count > 0 && (
-            <div className="pointer-events-none absolute inset-x-0 top-2 z-[60] flex justify-center">
-              <div className="flex rounded bg-f1-background">
-                <ButtonInternal
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  className="pointer-events-auto shadow-md"
-                  icon={ArrowUp}
-                  label={getUnreadLabel(above.count)}
-                  aria-label={getDirectionalLabel("above", above.count)}
-                  onClick={(event) => jump("above", event.currentTarget)}
-                />
+      {portalRoots.above
+        ? createPortal(
+            above.count > 0 && (
+              <div className="pointer-events-none absolute inset-x-0 top-2 z-[60] flex justify-center">
+                <div className="flex rounded bg-f1-background">
+                  <ButtonInternal
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    className="pointer-events-auto shadow-md"
+                    icon={ArrowUp}
+                    label={getUnreadLabel(above.count)}
+                    aria-label={getDirectionalLabel("above", above.count)}
+                    onClick={(event) => jump("above", event.currentTarget)}
+                  />
+                </div>
               </div>
-            </div>
-          ),
-          portalRoots.above
-        )}
-      {portalRoots.below &&
-        createPortal(
-          below.count > 0 && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
-              <div className="flex rounded bg-f1-background">
-                <ButtonInternal
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  className="pointer-events-auto shadow-md"
-                  icon={ArrowDown}
-                  label={getUnreadLabel(below.count)}
-                  aria-label={getDirectionalLabel("below", below.count)}
-                  onClick={(event) => jump("below", event.currentTarget)}
-                />
+            ),
+            portalRoots.above
+          )
+        : null}
+      {portalRoots.below
+        ? createPortal(
+            below.count > 0 && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
+                <div className="flex rounded bg-f1-background">
+                  <ButtonInternal
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    className="pointer-events-auto shadow-md"
+                    icon={ArrowDown}
+                    label={getUnreadLabel(below.count)}
+                    aria-label={getDirectionalLabel("below", below.count)}
+                    onClick={(event) => jump("below", event.currentTarget)}
+                  />
+                </div>
               </div>
-            </div>
-          ),
-          portalRoots.below
-        )}
+            ),
+            portalRoots.below
+          )
+        : null}
     </>
   )
 }

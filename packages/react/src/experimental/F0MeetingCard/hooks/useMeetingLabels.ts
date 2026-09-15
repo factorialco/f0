@@ -1,8 +1,6 @@
 import { useMemo } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
-
 import type { MeetingState } from "../types"
 import {
   formatShortDate,

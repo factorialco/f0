@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { fixedScales, nextScaleDown, nextScaleUp } from "../scales"
 
 describe("scales", () => {

@@ -1,10 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ForwardedRef, useCallback, useState } from "react"
-
-import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
-import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
-import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import {
   BaseFetchOptions,
   ItemNeighborsFetchOptions,
@@ -13,14 +8,16 @@ import {
   PaginatedFetchOptions,
   RecordType,
 } from "@/hooks/datasource"
+import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
 import { LinkProps, LinkProvider } from "@/lib/linkHandler"
 import { writeDataCollectionStorage } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { FIRST_NAMES_MOCK, getMockValue, SURNAMES_MOCK } from "@/mocks"
-
+import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
+import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
 import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
-import { PageHeader } from "./index"
+import { PageHeader } from "."
 
 const meta = {
   title: "Navigation/PageHeader",
@@ -357,7 +354,9 @@ const CollectionBoundPageHeaderDemo = () => {
           props.onClick?.(event)
           event.preventDefault()
           const id = props.href?.match(/^#\/employees\/(\d+)$/)?.[1]
-          if (id) setActiveId(id)
+          if (id) {
+            setActiveId(id)
+          }
         }}
       />
     ),

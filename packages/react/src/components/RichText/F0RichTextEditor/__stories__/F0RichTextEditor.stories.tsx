@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { Summary } from "@/icons/ai"
 import { Alert, Globe } from "@/icons/app"
 import { mockEnhanceText, mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-
 import { EnhancementOption, FILE_TYPES, F0RichTextEditor } from ".."
 
 const meta = {

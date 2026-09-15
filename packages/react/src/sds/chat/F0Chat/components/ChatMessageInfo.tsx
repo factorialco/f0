@@ -1,11 +1,9 @@
 import { useEffect, useRef, type ReactNode } from "react"
-
-import { ArrowLeft } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { ArrowLeft } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { formatSeparator } from "../utils/natural-time"
@@ -19,11 +17,11 @@ const InfoRow = ({
 }): ReactNode => (
   <div className="flex flex-col items-start">
     <span className="text-base font-medium text-f1-foreground">{label}</span>
-    {value && (
+    {value ? (
       <span className="text-base font-normal text-f1-foreground-secondary">
         {value}
       </span>
-    )}
+    ) : null}
   </div>
 )
 
@@ -108,11 +106,11 @@ export const ChatMessageInfoView = ({
             label={i18n.chat.delivered}
             value={formatSeparator(new Date(message.createdAt), now, labels)}
           />
-          {message.isMine &&
-            (isGroup ? (
+          {message.isMine ? (
+            isGroup ? (
               <div className="flex flex-col gap-2">
                 <InfoRow label={readByLabel} />
-                {message.readBy && message.readBy.length > 0 && (
+                {message.readBy && message.readBy.length > 0 ? (
                   <ul
                     aria-label={readByLabel}
                     className="m-0 flex list-none flex-col gap-1 p-0"
@@ -124,7 +122,7 @@ export const ChatMessageInfoView = ({
                       </li>
                     ))}
                   </ul>
-                )}
+                ) : null}
               </div>
             ) : (
               message.readAt && (
@@ -133,7 +131,8 @@ export const ChatMessageInfoView = ({
                   value={formatSeparator(new Date(message.readAt), now, labels)}
                 />
               )
-            ))}
+            )
+          ) : null}
         </div>
       </div>
     </div>

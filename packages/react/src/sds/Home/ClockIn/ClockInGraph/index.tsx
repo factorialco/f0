@@ -1,5 +1,4 @@
 import { Cell, Pie, PieChart } from "recharts"
-
 import { getLabels, normalizeData } from "./helpers"
 import { HorizontalBar } from "./HorizontalBar"
 

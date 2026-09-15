@@ -1,7 +1,5 @@
-import { useMemo } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { useMemo } from "react"
 import {
   expect,
   fireEvent,
@@ -10,9 +8,6 @@ import {
   waitFor,
   within,
 } from "storybook/test"
-
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import {
@@ -21,9 +16,9 @@ import {
   useDataSource,
 } from "@/hooks/datasource"
 import { Plus } from "@/icons/app"
-
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { SlotWidget } from "../../SlotWidget"
-import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "."
 
 const POSTS: CommunityPostSummary[] = [
   {
@@ -370,4 +365,29 @@ export const InsideAWidget: Story = {
       }}
     />
   ),
+  /**
+   * The linked title is clickable all the way down. The carousel's shadow bleed
+   * (`CAROUSEL_SHADOW_BLEED`) overhangs 28px upward into the header, and while
+   * that band took pointer events it covered the bottom 16px of the title.
+   * Sampled down the whole title, since one point at its centre would pass
+   * again the moment the type scale moved.
+   */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const title = canvas.getByRole("link", { name: "Go to Communities" })
+
+    await waitFor(() => {
+      const box = title.getBoundingClientRect()
+      expect(box.height).toBeGreaterThan(0)
+
+      const covered = []
+      for (let y = box.top + 1; y < box.bottom - 1; y += 2) {
+        const onTop = document.elementFromPoint(box.left + box.width / 2, y)
+        if (!title.contains(onTop)) {
+          covered.push(`${Math.round(y - box.top)}px: ${onTop?.className}`)
+        }
+      }
+      expect(covered).toEqual([])
+    })
+  },
 }

@@ -1,11 +1,8 @@
 import type * as echarts from "echarts"
 import { useRef } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import type { F0DataChartPointClick } from "../types"
-
 import { usePointClick } from "../utils/usePointClick"
 
 /** Minimal stand-in for an ECharts instance: records handlers so tests can fire them. */

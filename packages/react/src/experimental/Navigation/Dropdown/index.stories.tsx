@@ -1,12 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, userEvent, within } from "storybook/test"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
+import { Dropdown, MobileDropdown as MobileDropdownComponent } from "."
 
 const meta = {
   title: "Dropdown",
@@ -131,8 +128,8 @@ export const WithCustomTrigger: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -286,8 +283,8 @@ export const DisabledWithCustomTrigger: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -382,8 +379,8 @@ export const WithDataTestId: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -411,8 +408,8 @@ export const Snapshot: Story = {
         <button aria-label="Open user menu">
           <F0AvatarPerson
             src="/avatars/person04.jpg"
-            firstName="Dani"
-            lastName="Moreno"
+            firstName="Jordan"
+            lastName="Avery"
             size="lg"
           />
         </button>

@@ -172,7 +172,9 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   const [isPressed, setIsPressed] = useState(false)
 
   const handlePress = async () => {
-    if (!onPress || disabled || loading || isLoading) return
+    if (!onPress || disabled || loading || isLoading) {
+      return
+    }
 
     const result = onPress()
 

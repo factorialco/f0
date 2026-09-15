@@ -22,4 +22,7 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "prettier.semi": false,
+  "files.associations": {
+    ".oxlintrc.json": "jsonc"
+  }
 }

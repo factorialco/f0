@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { getDefaultParamsForQuestionType, getRatingOptions } from "../../lib"
 import {
   getCurrentRatingType,

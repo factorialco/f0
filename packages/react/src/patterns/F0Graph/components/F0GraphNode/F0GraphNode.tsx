@@ -8,17 +8,14 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
-import type { F0GraphNodeProps } from "./types"
-
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeStackedRow } from "./F0GraphNodeStackedRow"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
+import type { F0GraphNodeProps } from "./types"
 import { tagColumn } from "./types"
 import { graphNodeContainerVariants } from "./variants"
 
@@ -419,12 +416,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                           width: isCompact ? 120 : 96,
                         }}
                       />
-                      {!isCompact && !isDot && (
+                      {!isCompact && !isDot ? (
                         <Skeleton
                           className="rounded-xs"
                           style={{ height: 12, width: 64 }}
                         />
-                      )}
+                      ) : null}
                     </div>
                   ) : (
                     <>
@@ -438,7 +435,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                       >
                         {title}
                       </p>
-                      {!isCompact && !isDot && subtitle && (
+                      {!isCompact && !isDot && subtitle ? (
                         <p
                           className="w-full truncate tracking-[-0.07px] text-f1-foreground-secondary"
                           style={{
@@ -449,7 +446,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                         >
                           {subtitle}
                         </p>
-                      )}
+                      ) : null}
                     </>
                   )}
                 </motion.div>
@@ -458,7 +455,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           </div>
         </div>
 
-        {isDetail && actions && (
+        {isDetail && actions ? (
           <NodeToolbar
             nodeId={nodeId}
             isVisible={state === "selected"}
@@ -468,7 +465,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           >
             <div className="flex items-center gap-1">{actions}</div>
           </NodeToolbar>
-        )}
+        ) : null}
 
         {tagRow("max-w-[256px]")}
       </div>

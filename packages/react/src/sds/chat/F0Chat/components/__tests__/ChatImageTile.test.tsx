@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ChatImageTile } from "../ChatImageTile"
 
 const IMAGE = {
@@ -83,6 +81,43 @@ describe("ChatImageTile", () => {
     expect(screen.getByTestId("chat-image-attachment")).toHaveClass(
       "col-span-2"
     )
+  })
+
+  // A lone photo whose ratio the box can't represent is shown whole inside it:
+  // the footprint shrinks, the photo is never cropped to fill the cell.
+  it("sizes a letterboxed photo by its footprint, in percent", () => {
+    render(
+      <ChatImageTile
+        image={IMAGE}
+        aspectRatio={128 / 512}
+        spanFull
+        inset={{ scaleX: 0.4, scaleY: 1 }}
+        label="Open image"
+        onOpen={vi.fn()}
+      />
+    )
+    const tile = screen.getByTestId("chat-image-attachment")
+    expect(tile).toHaveClass("items-center", "justify-center")
+
+    const photo = screen.getByAltText(IMAGE.name)
+    expect(photo).toHaveStyle({ width: "40%", height: "100%" })
+    expect(photo).not.toHaveClass("h-full", "w-full")
+  })
+
+  it("keeps the blur behind a letterboxed photo after it loads", () => {
+    render(
+      <ChatImageTile
+        image={{ ...IMAGE, blurUrl: "https://cdn.example.com/photo.webp?w=40" }}
+        aspectRatio={384 / 128}
+        spanFull
+        inset={{ scaleX: 1, scaleY: 0.6 }}
+        label="Open image"
+        onOpen={vi.fn()}
+      />
+    )
+    fireEvent.load(screen.getByAltText(IMAGE.name))
+    // The bands read as the photo spilling out of itself, not as flat tint.
+    expect(screen.getByTestId("chat-image-blur")).toBeInTheDocument()
   })
 
   it("opens the lightbox on click", () => {

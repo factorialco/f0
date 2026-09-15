@@ -1,9 +1,8 @@
-import type { Scope } from "@radix-ui/react-context"
-
 import { clamp } from "@radix-ui/number"
 import { composeEventHandlers } from "@radix-ui/primitive"
 import { createCollection } from "@radix-ui/react-collection"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import type { Scope } from "@radix-ui/react-context"
 import { createContextScope } from "@radix-ui/react-context"
 import { useDirection } from "@radix-ui/react-direction"
 import { DismissableLayer } from "@radix-ui/react-dismissable-layer"
@@ -27,8 +26,8 @@ import { RemoveScroll } from "react-remove-scroll"
 
 type Direction = "ltr" | "rtl"
 
-const OPEN_KEYS = [" ", "Enter", "ArrowUp", "ArrowDown"]
-const SELECTION_KEYS = [" ", "Enter"]
+const OPEN_KEYS = new Set([" ", "Enter", "ArrowUp", "ArrowDown"])
+const SELECTION_KEYS = new Set([" ", "Enter"])
 const SELECTED_ITEM_FALLBACK_DELAY = 50
 
 /* -------------------------------------------------------------------------------------------------
@@ -105,7 +104,7 @@ type SelectProps<T extends string = string> = SelectSharedProps &
         value?: T
         defaultValue?: T
         onValueChange?(value: T): void
-        multiple?: false | never
+        multiple?: false
       }
     | {
         value?: T[]
@@ -369,10 +368,13 @@ const SelectTrigger = React.forwardRef<
         onKeyDown={composeEventHandlers(triggerProps.onKeyDown, (event) => {
           const isTypingAhead = searchRef.current !== ""
           const isModifierKey = event.ctrlKey || event.altKey || event.metaKey
-          if (!isModifierKey && event.key.length === 1)
+          if (!isModifierKey && event.key.length === 1) {
             handleTypeaheadSearch(event.key)
-          if (isTypingAhead && event.key === " ") return
-          if (OPEN_KEYS.includes(event.key)) {
+          }
+          if (isTypingAhead && event.key === " ") {
+            return
+          }
+          if (OPEN_KEYS.has(event.key)) {
             handleOpen()
             event.preventDefault()
           }
@@ -558,9 +560,8 @@ const [SelectContentProvider, useSelectContentContext] =
 
 const CONTENT_IMPL_NAME = "SelectContentImpl"
 
-type SelectContentImplElement =
-  | SelectPopperPositionElement
-  | SelectItemAlignedPositionElement
+type SelectContentImplElement = SelectPopperPositionElement
+
 type DismissableLayerProps = React.ComponentPropsWithoutRef<
   typeof DismissableLayer
 >
@@ -667,7 +668,9 @@ const SelectContentImpl = React.forwardRef<
   // Only hide others when the select is open and in popper mode (not list mode) to avoid blocking aria-hidden on focused elements
   // Skip hideOthers in list mode (item-aligned) since the content is part of the page, not a modal
   React.useEffect(() => {
-    if (!content) return
+    if (!content) {
+      return
+    }
 
     // Clean up any previous hideOthers call
     if (hideOthersCleanupRef.current) {
@@ -695,7 +698,7 @@ const SelectContentImpl = React.forwardRef<
   useFocusGuards()
 
   const focusFirst = React.useCallback(
-    (candidates: Array<HTMLElement | null>) => {
+    (candidates: (HTMLElement | null)[]) => {
       const [firstItem, ...restItems] = getItems().map(
         (item) => item.ref.current
       )
@@ -704,14 +707,21 @@ const SelectContentImpl = React.forwardRef<
       const PREVIOUSLY_FOCUSED_ELEMENT = document.activeElement
       for (const candidate of candidates) {
         // if focus is already where we want to go, we don't want to keep going through the candidates
-        if (candidate === PREVIOUSLY_FOCUSED_ELEMENT) return
+        if (candidate === PREVIOUSLY_FOCUSED_ELEMENT) {
+          return
+        }
         candidate?.scrollIntoView({ block: "nearest" })
         // viewport might have padding so scroll to its edges when focusing first/last items.
-        if (candidate === firstItem && viewport) viewport.scrollTop = 0
-        if (candidate === lastItem && viewport)
+        if (candidate === firstItem && viewport) {
+          viewport.scrollTop = 0
+        }
+        if (candidate === lastItem && viewport) {
           viewport.scrollTop = viewport.scrollHeight
+        }
         candidate?.focus()
-        if (document.activeElement !== PREVIOUSLY_FOCUSED_ELEMENT) return
+        if (document.activeElement !== PREVIOUSLY_FOCUSED_ELEMENT) {
+          return
+        }
       }
     },
     [getItems, viewport]
@@ -731,7 +741,6 @@ const SelectContentImpl = React.forwardRef<
 
       if (!context.multiple) {
         focusFirst([selectedItem, content])
-        return
       }
     },
     [focusFirst, selectedItem, content, context.multiple]
@@ -753,9 +762,11 @@ const SelectContentImpl = React.forwardRef<
     if (isPositioned && !hasFocusedOnOpenRef.current) {
       let cancelled = false
       let fallbackTimeout: ReturnType<typeof setTimeout> | undefined
-      const selectedValues = (
-        Array.isArray(context.value) ? context.value : [context.value]
-      ).filter((value): value is string => value !== undefined)
+      const selectedValues = new Set(
+        (Array.isArray(context.value) ? context.value : [context.value]).filter(
+          (value): value is string => value !== undefined
+        )
+      )
       const isPlaceholderValue =
         context.value === undefined || context.value === ""
       const selectedItemMatchesCurrentValue =
@@ -765,11 +776,13 @@ const SelectContentImpl = React.forwardRef<
             getItems().some(
               (item) =>
                 item.ref.current === selectedItem &&
-                selectedValues.includes(item.value)
+                selectedValues.has(item.value)
             )))
 
       const timeout = setTimeout(() => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         const activeElement = document.activeElement
         const focusIsInsideContent =
@@ -799,7 +812,9 @@ const SelectContentImpl = React.forwardRef<
 
           if (selectedItem) {
             fallbackTimeout = setTimeout(() => {
-              if (cancelled || hasFocusedOnOpenRef.current) return
+              if (cancelled || hasFocusedOnOpenRef.current) {
+                return
+              }
 
               if (document.activeElement !== focusFallbackRef.current) {
                 hasFocusedOnOpenRef.current = true
@@ -807,7 +822,9 @@ const SelectContentImpl = React.forwardRef<
               }
 
               selectedItem.focus()
-              if (cancelled) return
+              if (cancelled) {
+                return
+              }
 
               if (document.activeElement === selectedItem) {
                 focusFallbackRef.current = selectedItem
@@ -827,7 +844,9 @@ const SelectContentImpl = React.forwardRef<
       return () => {
         cancelled = true
         clearTimeout(timeout)
-        if (fallbackTimeout !== undefined) clearTimeout(fallbackTimeout)
+        if (fallbackTimeout !== undefined) {
+          clearTimeout(fallbackTimeout)
+        }
       }
     }
   }, [
@@ -925,7 +944,9 @@ const SelectContentImpl = React.forwardRef<
         context.value !== undefined && contextValueArray.includes(value)
       if (isSelectedItem || isFirstValidItem) {
         setSelectedItem(node)
-        if (isFirstValidItem) firstValidItemFoundRef.current = true
+        if (isFirstValidItem) {
+          firstValidItemFoundRef.current = true
+        }
       }
     },
     [context.value]
@@ -1038,10 +1059,17 @@ const SelectContentImpl = React.forwardRef<
                     event.target.getAttribute("role") === "searchbox"
 
                   // select should not be navigated using tab key so we prevent it
-                  if (event.key === "Tab") event.preventDefault()
+                  if (event.key === "Tab") {
+                    event.preventDefault()
+                  }
 
-                  if (!isModifierKey && !isSearchbox && event.key.length === 1)
+                  if (
+                    !isModifierKey &&
+                    !isSearchbox &&
+                    event.key.length === 1
+                  ) {
                     handleTypeaheadSearch(event.key)
+                  }
 
                   if (
                     ["ArrowUp", "ArrowDown"].includes(event.key) ||
@@ -1300,7 +1328,9 @@ const SelectItemAlignedPosition = React.forwardRef<
   // copy z-index from content to wrapper
   const [contentZIndex, setContentZIndex] = React.useState<string>()
   useLayoutEffect(() => {
-    if (content) setContentZIndex(window.getComputedStyle(content).zIndex)
+    if (content) {
+      setContentZIndex(window.getComputedStyle(content).zIndex)
+    }
   }, [content])
 
   // When the viewport becomes scrollable at the top, the scroll up button will mount.
@@ -1391,7 +1421,9 @@ const SelectPopperPosition = React.forwardRef<
         // Ensure border-box for floating-ui calculations
         boxSizing: "border-box",
         ...popperProps.style,
-        // re-namespace exposed content custom properties
+        // re-namespace exposed content custom properties. The spread lets the
+        // custom properties past the CSSProperties type.
+        // oxlint-disable-next-line unicorn/no-useless-spread
         ...{
           "--radix-select-content-transform-origin":
             "var(--radix-popper-transform-origin)",
@@ -1678,12 +1710,16 @@ const SelectItem = React.forwardRef<SelectItemElement, SelectItemProps>(
             )}
             onClick={composeEventHandlers(itemProps.onClick, () => {
               // Open on click when using a touch or pen device
-              if (pointerTypeRef.current !== "mouse") handleSelect()
+              if (pointerTypeRef.current !== "mouse") {
+                handleSelect()
+              }
             })}
             onPointerUp={composeEventHandlers(itemProps.onPointerUp, () => {
               // Using a mouse you should be able to do pointer down, move through
               // the list, and release the pointer over the item to select it.
-              if (pointerTypeRef.current === "mouse") handleSelect()
+              if (pointerTypeRef.current === "mouse") {
+                handleSelect()
+              }
             })}
             onPointerDown={composeEventHandlers(
               itemProps.onPointerDown,
@@ -1715,10 +1751,16 @@ const SelectItem = React.forwardRef<SelectItemElement, SelectItemProps>(
             )}
             onKeyDown={composeEventHandlers(itemProps.onKeyDown, (event) => {
               const isTypingAhead = contentContext.searchRef?.current !== ""
-              if (isTypingAhead && event.key === " ") return
-              if (SELECTION_KEYS.includes(event.key)) handleSelect()
+              if (isTypingAhead && event.key === " ") {
+                return
+              }
+              if (SELECTION_KEYS.has(event.key)) {
+                handleSelect()
+              }
               // prevent page scroll if using the space key to select an item
-              if (event.key === " ") event.preventDefault()
+              if (event.key === " ") {
+                event.preventDefault()
+              }
             })}
           />
         </Collection.ItemSlot>
@@ -2093,10 +2135,14 @@ function doValuesMatch(
   b: SwitchBubbleInputProps["value"]
 ) {
   if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false
+    if (a.length !== b.length) {
+      return false
+    }
     return a.every((item, index) => item === b[index])
   }
-  if (Array.isArray(a) || Array.isArray(b)) return false
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return false
+  }
   return a === b
 }
 
@@ -2115,8 +2161,12 @@ const SelectBubbleInput = React.forwardRef<
     // Bubble value change to parents (e.g form change event)
     React.useEffect(() => {
       const select = ref.current
-      if (!select) return
-      if (doValuesMatch(prevValue, value)) return
+      if (!select) {
+        return
+      }
+      if (doValuesMatch(prevValue, value)) {
+        return
+      }
 
       const setOptionSelected = Object.getOwnPropertyDescriptor(
         window.HTMLOptionElement.prototype,
@@ -2162,7 +2212,7 @@ SelectBubbleInput.displayName = BUBBLE_INPUT_NAME
 
 function shouldShowPlaceholder(value?: string[] | string) {
   if (Array.isArray(value)) {
-    return value.length === 0 || value.every((v) => v === "")
+    return value.every((v) => v === "")
   }
   return value === "" || value === undefined
 }
@@ -2180,8 +2230,9 @@ function useTypeaheadSearch(onSearchChange: (search: string) => void) {
         searchRef.current = value
         window.clearTimeout(timerRef.current)
         // Reset `searchRef` 1 second after it was last updated
-        if (value !== "")
+        if (value !== "") {
           timerRef.current = window.setTimeout(() => updateSearch(""), 1000)
+        }
       })(search)
     },
     [handleSearchChange]
@@ -2227,8 +2278,9 @@ function findNextItem<T extends { textValue: string }>(
   const currentItemIndex = currentItem ? items.indexOf(currentItem) : -1
   let wrappedItems = wrapArray(items, Math.max(currentItemIndex, 0))
   const excludeCurrentItem = normalizedSearch.length === 1
-  if (excludeCurrentItem)
+  if (excludeCurrentItem) {
     wrappedItems = wrappedItems.filter((v) => v !== currentItem)
+  }
   const nextItem = wrappedItems.find((item) =>
     item.textValue.toLowerCase().startsWith(normalizedSearch.toLowerCase())
   )

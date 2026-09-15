@@ -1,5 +1,4 @@
 import { createContext, useContext } from "react"
-
 import { F0DialogContextType, F0DialogProviderProps } from "../internal-types"
 
 export const F0DialogContext = createContext<F0DialogContextType>({

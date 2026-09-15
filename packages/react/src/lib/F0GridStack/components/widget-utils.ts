@@ -1,5 +1,4 @@
 import type { GridStackWidget } from "gridstack"
-
 import type { GridStackReactWidget } from "../F0GridStack"
 
 /**

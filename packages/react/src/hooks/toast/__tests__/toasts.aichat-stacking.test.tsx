@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-
 import { act, screen, within, zeroRender as render } from "@/testing/test-utils"
-
 import { toasts } from "../imperative"
 import { ToastProvider } from "../ToastProvider"
 

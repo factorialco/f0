@@ -1,8 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { BellOff, Pencil } from "@/icons/app"
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatHeaderAction, type F0ChatRuntime } from "../types"
@@ -67,6 +65,26 @@ describe("ChatHeader host actions", () => {
       "＃"
     )
     expect(screen.queryByRole("img", { name: "Product Team" })).toBeNull()
+  })
+
+  it("uses the same hash glyph for a community", () => {
+    // The rule is about the AVATAR, not the channel type: a community with a
+    // name-derived team avatar used to land on an empty initials box here
+    // while the sidebar, one panel away, drew it as ＃.
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "community",
+          title: "Barcelona office",
+          avatar: { type: "team", name: "Barcelona office" },
+        },
+      })
+    )
+
+    expect(screen.getByTestId("chat-group-avatar-fallback")).toHaveTextContent(
+      "＃"
+    )
   })
 
   it("keeps an explicit group emoji instead of the hash fallback", () => {
@@ -264,5 +282,59 @@ describe("ChatHeader host actions", () => {
     expect(
       options.compareDocumentPosition(huddle) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
+  })
+})
+
+describe("ChatHeader identity", () => {
+  it("lights an emoji at full strength, whatever the type around it", () => {
+    // The wrapper used to be `text-f1-foreground-secondary` for both glyphs.
+    // Emoji with TEXT presentation are painted in `currentColor`, so they came
+    // out grey next to the same emoji anywhere else.
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "community",
+          title: "Company news",
+          avatar: { type: "emoji", emoji: "📣" },
+        },
+      })
+    )
+
+    expect(screen.getByRole("img", { name: "📣" })).toHaveClass(
+      "text-f1-foreground"
+    )
+  })
+
+  it("keeps the muted colour on the ＃, which is type and not art", () => {
+    renderChat(makeRuntime())
+
+    expect(screen.getByTestId("chat-group-avatar-fallback")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+  })
+
+  it("holds a skeleton where the name will be, rather than sitting blank", () => {
+    // A community's title is its own request, so it lands after the feed often
+    // enough to be worth saying "coming" instead of showing nothing.
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "community",
+          title: "",
+          avatar: { type: "emoji", emoji: "📣" },
+        },
+      })
+    )
+
+    expect(screen.getByTestId("chat-header-title-skeleton")).toBeInTheDocument()
+  })
+
+  it("drops the skeleton the moment the name arrives", () => {
+    renderChat(makeRuntime())
+
+    expect(screen.queryByTestId("chat-header-title-skeleton")).toBeNull()
+    expect(screen.getByText("Product Team")).toBeVisible()
   })
 })

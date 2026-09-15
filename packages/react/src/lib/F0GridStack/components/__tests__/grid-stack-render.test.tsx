@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { GridStackRender } from "../grid-stack-render"
 
 // Mock react-dom
@@ -49,8 +47,12 @@ describe("grid-stack-render", () => {
     container2.setAttribute("data-testid", "container-2")
 
     mockGetWidgetContainer.mockImplementation((id: string) => {
-      if (id === "widget-1") return container1
-      if (id === "widget-2") return container2
+      if (id === "widget-1") {
+        return container1
+      }
+      if (id === "widget-2") {
+        return container2
+      }
       return null
     })
 
@@ -76,8 +78,12 @@ describe("grid-stack-render", () => {
     const container2 = document.createElement("div")
 
     mockGetWidgetContainer.mockImplementation((id: string) => {
-      if (id === "widget-1") return container1
-      if (id === "widget-2") return container2
+      if (id === "widget-1") {
+        return container1
+      }
+      if (id === "widget-2") {
+        return container2
+      }
       return null
     })
 
@@ -118,7 +124,9 @@ describe("grid-stack-render", () => {
     const container1 = document.createElement("div")
 
     mockGetWidgetContainer.mockImplementation((id: string) => {
-      if (id === "widget-null") return container1
+      if (id === "widget-null") {
+        return container1
+      }
       return null
     })
 

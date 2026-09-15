@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import New from "@/icons/app/New"
 import Search from "@/icons/app/Search"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
-
 import { CollapsibleGroup } from "./components/CollapsibleGroup"
 import { ThreadListSkeleton } from "./components/ThreadListSkeleton"
 import type { DateGroup, F0AiChatHistoryProps } from "./types"
@@ -61,7 +59,9 @@ export const F0AiChatHistory = ({
   )
 
   const filteredThreads = useMemo(() => {
-    if (!search.trim()) return threads
+    if (!search.trim()) {
+      return threads
+    }
     const query = search.toLowerCase()
     return threads.filter((t) => t.title.toLowerCase().includes(query))
   }, [threads, search])
@@ -164,22 +164,22 @@ export const F0AiChatHistory = ({
               </div>
             </Action>
 
-            {isLoading && <ThreadListSkeleton />}
+            {isLoading ? <ThreadListSkeleton /> : null}
 
-            {!isLoading && error && (
+            {!isLoading && error ? (
               <p className="py-8 text-center text-base text-f1-foreground-tertiary">
                 {error}
               </p>
-            )}
+            ) : null}
 
-            {!isLoading && !error && !hasResults && (
+            {!isLoading && !error && !hasResults ? (
               <p className="py-8 text-center text-base text-f1-foreground-tertiary">
                 {translations.ai.noPreviousChats}
               </p>
-            )}
+            ) : null}
 
             {/* Pinned group */}
-            {!isLoading && !error && pinnedThreads.length > 0 && (
+            {!isLoading && !error && pinnedThreads.length > 0 ? (
               <CollapsibleGroup
                 label={translations.ai.pinnedChats}
                 threads={pinnedThreads}
@@ -189,23 +189,23 @@ export const F0AiChatHistory = ({
                 onUnpin={onUnpinThread}
                 onDelete={handleDelete}
               />
-            )}
+            ) : null}
 
             {/* Date groups (unpinned threads) */}
-            {!isLoading &&
-              !error &&
-              groups.map((group) => (
-                <CollapsibleGroup
-                  key={group.key}
-                  label={groupLabels[group.key]}
-                  threads={group.threads}
-                  pinnedIds={pinnedIds}
-                  onSelect={handleSelectThread}
-                  onPin={onPinThread}
-                  onUnpin={onUnpinThread}
-                  onDelete={handleDelete}
-                />
-              ))}
+            {!isLoading && !error
+              ? groups.map((group) => (
+                  <CollapsibleGroup
+                    key={group.key}
+                    label={groupLabels[group.key]}
+                    threads={group.threads}
+                    pinnedIds={pinnedIds}
+                    onSelect={handleSelectThread}
+                    onPin={onPinThread}
+                    onUnpin={onUnpinThread}
+                    onDelete={handleDelete}
+                  />
+                ))
+              : null}
           </div>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import isEqual from "lodash/isEqual"
-
 import { FiltersDefinition, FiltersState, PresetDefinition } from "../types"
 
 /**

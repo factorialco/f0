@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   CHAT_MEDIA_WIDE_WIDTH_CLASS,
   CHAT_MEDIA_WIDTH_CLASS,

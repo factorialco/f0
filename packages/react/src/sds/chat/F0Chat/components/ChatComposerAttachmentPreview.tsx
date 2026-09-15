@@ -1,18 +1,16 @@
 import { type ReactNode, useEffect, useState } from "react"
-
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Spinner } from "@/ui/Spinner"
-
+import { ChatSurfaceProvider } from "../providers/ChatSurfaceProvider"
 import { type F0ChatComposableAttachment } from "../types"
 import {
   documentPreviewKind,
   isVideoFileAttachment,
   withinPreviewSizeLimit,
 } from "../utils/attachments"
-import { ChatSurfaceProvider } from "../providers/ChatSurfaceProvider"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
 import { ChatVoiceAttachment } from "./ChatVoiceAttachment"
@@ -82,7 +80,7 @@ const ChatComposerAttachmentPreviewContent = ({
             onClick={removeAction.onClick}
           />
         </div>
-        {uploading && <PreviewProgress />}
+        {uploading ? <PreviewProgress /> : null}
         <figcaption className="sr-only">{attachment.name}</figcaption>
       </figure>
     )
@@ -133,7 +131,7 @@ const ChatComposerAttachmentPreviewContent = ({
               onClick={removeAction.onClick}
             />
           </div>
-          {uploading && <PreviewProgress />}
+          {uploading ? <PreviewProgress /> : null}
           <figcaption className="sr-only">{attachment.name}</figcaption>
         </figure>
       )
@@ -155,7 +153,7 @@ const ChatComposerAttachmentPreviewContent = ({
             previewDisabled={uploading}
             compact
           />
-          {uploading && <PreviewProgress />}
+          {uploading ? <PreviewProgress /> : null}
         </div>
       )
     }
@@ -183,7 +181,7 @@ const ChatComposerAttachmentPreviewContent = ({
             onClick={removeAction.onClick}
           />
         </div>
-        {uploading && <PreviewProgress />}
+        {uploading ? <PreviewProgress /> : null}
         <span className="sr-only">{attachment.name}</span>
       </div>
     )
@@ -211,7 +209,7 @@ const ChatComposerAttachmentPreviewContent = ({
             onClick={removeAction.onClick}
           />
         </div>
-        {uploading && <PreviewProgress />}
+        {uploading ? <PreviewProgress /> : null}
       </div>
     )
   }
@@ -233,7 +231,7 @@ const ChatComposerAttachmentPreviewContent = ({
           onClick={removeAction.onClick}
         />
       </div>
-      {uploading && <PreviewProgress />}
+      {uploading ? <PreviewProgress /> : null}
     </div>
   )
 }

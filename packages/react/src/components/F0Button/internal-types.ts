@@ -6,7 +6,6 @@ import {
   ButtonType,
   NavTarget,
 } from "@/ui/Action"
-
 import { ButtonSize } from "./types"
 
 export type { ButtonType }
@@ -57,9 +56,7 @@ export type ButtonInternalProps = Pick<
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (
-      event: React.MouseEvent<HTMLElement, MouseEvent>
-    ) => void | Promise<unknown>
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>
     /**
      * The title of the button.
      */
@@ -118,7 +115,9 @@ export type ButtonInternalProps = Pick<
     pressed?: boolean
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean
     /**

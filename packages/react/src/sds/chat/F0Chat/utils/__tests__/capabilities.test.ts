@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { chatPermission, type F0ChatPermission } from "../capabilities"
 
 const PERMISSIONS: F0ChatPermission[] = [
@@ -51,5 +50,38 @@ describe("chatPermission", () => {
     expect(
       chatPermission("canReply", "group", { canSend: false, canReply: true })
     ).toBe(true)
+  })
+})
+
+describe("community defaults", () => {
+  // Unlike an announcement, a community inverts only the WRITING verb:
+  // reacting is what everyone came for.
+  it("denies posting with no configuration at all", () => {
+    expect(chatPermission("canSend", "community", undefined)).toBe(false)
+  })
+
+  it("denies replying, since there is no composer to reply into", () => {
+    expect(chatPermission("canReply", "community", undefined)).toBe(false)
+  })
+
+  it("allows reacting, copying and viewing info", () => {
+    expect(chatPermission("canReact", "community", undefined)).toBe(true)
+    expect(chatPermission("canCopy", "community", undefined)).toBe(true)
+    expect(chatPermission("canViewInfo", "community", undefined)).toBe(true)
+  })
+
+  it("does not turn everything off the way an announcement does", () => {
+    expect(chatPermission("canReact", "announcement", undefined)).toBe(false)
+    expect(chatPermission("canReact", "community", undefined)).toBe(true)
+  })
+
+  it("lets the host grant posting to whoever may post", () => {
+    expect(chatPermission("canSend", "community", { canSend: true })).toBe(true)
+  })
+
+  it("keeps canReply following canSend once posting is granted", () => {
+    expect(chatPermission("canReply", "community", { canSend: true })).toBe(
+      true
+    )
   })
 })

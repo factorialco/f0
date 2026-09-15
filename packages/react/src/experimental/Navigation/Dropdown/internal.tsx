@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -18,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { NavigationItem } from "../utils"
 import { DropdownItemContent } from "./DropdownItem"
 
@@ -64,6 +62,14 @@ export type DropdownInternalProps = {
    * @default false
    */
   disabled?: boolean
+  /**
+   * Where the menu is portalled. Defaults to the document body; pass the
+   * element of a surrounding modal layer — a dialog's own content node, which
+   * it publishes as `portalContainer` — so that layer's focus trap CONTAINS
+   * the menu instead of fighting it. Two traps over the same document push
+   * focus back and forth until the call stack gives out.
+   */
+  container?: HTMLElement | null
 } & DataAttributes
 
 const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
@@ -169,6 +175,7 @@ export function DropdownInternal({
   onOpenChange: controlledOnOpenChange,
   label,
   disabled,
+  container,
   ...rest
 }: DropdownInternalProps) {
   const i18n = useI18n()
@@ -183,7 +190,9 @@ export function DropdownInternal({
   // `disabled` flips back to false. In controlled mode this fires the
   // consumer's `onOpenChange(false)` — a disabled menu must never stay open.
   useEffect(() => {
-    if (disabled && rawOpen) setOpen(false)
+    if (disabled && rawOpen) {
+      setOpen(false)
+    }
   }, [disabled, rawOpen, setOpen])
   // Mask the value passed to Radix during render so a disabled menu cannot
   // flash open before the effect above commits the state reset.
@@ -235,7 +244,7 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align}>
+      <DropdownMenuContent align={align} container={container}>
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>

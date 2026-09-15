@@ -30,7 +30,9 @@ export function useFullscreen({
 
   const toggleFullscreen = useCallback(async () => {
     const target = targetRef.current
-    if (!target) return
+    if (!target) {
+      return
+    }
     try {
       if (document.fullscreenElement) {
         await document.exitFullscreen()

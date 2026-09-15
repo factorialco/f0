@@ -85,7 +85,9 @@ export const moveActiveIndex = (
   key: "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown" | "Home" | "End"
 ): number => {
   const last = layout.flat.length - 1
-  if (last < 0) return 0
+  if (last < 0) {
+    return 0
+  }
 
   switch (key) {
     case "Home":
@@ -100,10 +102,14 @@ export const moveActiveIndex = (
     case "ArrowDown": {
       const rowIndex = layout.rowByIndex[index] ?? 0
       const row = layout.rows[rowIndex]
-      if (!row) return index
+      if (!row) {
+        return index
+      }
       const column = index - row.startIndex
       const targetRow = layout.rows[rowIndex + (key === "ArrowDown" ? 1 : -1)]
-      if (!targetRow) return index
+      if (!targetRow) {
+        return index
+      }
       return (
         targetRow.startIndex + Math.min(column, targetRow.emojis.length - 1)
       )

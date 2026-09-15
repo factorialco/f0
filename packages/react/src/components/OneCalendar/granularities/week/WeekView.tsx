@@ -5,13 +5,11 @@ import {
   SelectRangeEventHandler,
   DateRange as DayPickerDateRange,
 } from "react-day-picker"
-
 import { Calendar } from "@/ui/calendar"
-
 import { useDateFnsLocale, useL10n } from "../../../../lib/providers/l10n"
 import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
 import { toCalendarPickerMatcher } from "../../utils"
-import { getEndOfWeek, getStartOfWeek } from "./index"
+import { getEndOfWeek, getStartOfWeek } from "."
 
 interface WeekViewProps {
   selected?: Date | DateRange | null
@@ -82,7 +80,9 @@ export function WeekView({
   }
 
   const selectedValue: DayPickerDateRange | undefined = useMemo(() => {
-    if (!selected) return undefined
+    if (!selected) {
+      return undefined
+    }
 
     const dateToUse = selected instanceof Date ? selected : selected.from
     return getWeekRangeFromDate(dateToUse)

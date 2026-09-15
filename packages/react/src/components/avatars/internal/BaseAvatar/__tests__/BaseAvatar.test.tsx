@@ -1,9 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
-
 import { Check } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { BaseAvatar } from "../BaseAvatar"
 
 /**

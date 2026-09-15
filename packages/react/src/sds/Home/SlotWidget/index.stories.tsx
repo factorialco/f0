@@ -1,7 +1,5 @@
-import { useState } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { useState } from "react"
 import {
   Clock,
   Comment,
@@ -14,14 +12,13 @@ import {
   Sparkles,
 } from "@/icons/app"
 import { Skeleton } from "@/ui/skeleton"
-
 import {
   homeSlot,
   listSlot,
   type HomeWidgetSlot,
   type SlotRenderers,
 } from "../slotRenderers"
-import { SlotWidget } from "./index"
+import { SlotWidget } from "."
 
 const meta = {
   title: "Home/SlotWidget",
@@ -674,6 +671,63 @@ export const SegmentedDescriptions: Story = {
               { text: "€1,240 for flights" },
               { text: "2 days overdue", critical: true },
             ],
+            avatar: { icon: Receipt, color: "army" },
+            href: "/expenses/3",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
+/**
+ * WHAT THE ROW HAD NO ROOM FOR. A row's `tooltipDescription` is its own line of
+ * plain text, drawn as a tooltip over the whole row — hover the first two.
+ *
+ * Written separately rather than repeating the second line, which is the point:
+ * the line states the facts you triage by ("2 days overdue · €1,240"), the
+ * tooltip the fuller thing it abbreviates. Unlike `compact`, which trades the
+ * line away to get a tooltip, this costs the row nothing — the parts stay drawn
+ * and the critical one stays red.
+ *
+ * The last row wrote none and so hovers silently; an empty tooltip would be a
+ * promise of information that isn't there.
+ */
+export const TooltipDescriptions: Story = {
+  args: {
+    header: { title: "Needs you", count: 3 },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          descriptionOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "long",
+            title: "Q3 travel expenses",
+            description: [
+              { text: "2 days overdue", critical: true },
+              { text: "€1,240 for flights" },
+            ],
+            tooltipDescription:
+              "Flights and two nights in Berlin for the Q3 partner summit, submitted by Ada Lovelace on 12 September",
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses/1",
+          },
+          {
+            id: "short",
+            title: "Client dinner",
+            description: [{ text: "€82" }],
+            tooltipDescription:
+              "Dinner with the Meridian account team after the renewal call",
+            avatar: { icon: Receipt, color: "purple" },
+            href: "/expenses/2",
+          },
+          {
+            id: "bare",
+            title: "Conference budget",
             avatar: { icon: Receipt, color: "army" },
             href: "/expenses/3",
           },

@@ -55,9 +55,12 @@ coachmarks.open({
         <td>—</td>
         <td>Yes*</td>
         <td>
-          What the panel points at: a CSS selector matching exactly one element,
-          or the element itself. With <code>steps</code> it is the fallback for
-          steps that do not name their own.
+          What the panel points at: ANY CSS selector — an id (
+          <code>#filters-button</code>), a class (<code>.js-filters</code>), an
+          attribute (<code>{'[data-add-widget="right"]'}</code>) — or the
+          element itself. It must match exactly one element. With{" "}
+          <code>steps</code> it is the fallback for steps that do not name their
+          own.
         </td>
       </tr>
       <tr>
@@ -134,6 +137,26 @@ coachmarks.open({
       </tr>
       <tr>
         <td>
+          <code>onEnd</code>
+        </td>
+        <td>
+          <code>{"(end: CoachmarkEnd) => void"}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          How it ended, in one place:{" "}
+          <code>
+            {
+              '{ reason: "completed" | "dismissed" | "skipped" | "unavailable", step, totalSteps, outsidePresses }'
+            }
+          </code>
+          . Fires exactly once per ending — the callback to track a walkthrough
+          with. See Tracking.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <code>onDismiss</code>
         </td>
         <td>
@@ -158,6 +181,60 @@ coachmarks.open({
         <td>
           Called when the user presses the action on the last step. The other
           half of the same tracking pair.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>overlay</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Dims the whole page except the element this step points at, and
+          swallows every press on the page while the coachmark is up. For a
+          walkthrough that has to be followed in order — one coachmark pointing
+          something out should not take the page hostage.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>focusTarget</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Puts the caret in the element the step points at — or in the first
+          field inside it — instead of on the panel, so a composer starts with
+          its cursor in it and its own focus glow. Per step. Trades the step's
+          announcement for the caret, so use it only where the field <em>is</em>{" "}
+          the step (see Accessibility).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>skipAfterOutsideClicks</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          <code>5</code>
+        </td>
+        <td>—</td>
+        <td>
+          How many presses on the dimmed page end the coachmark, reported to{" "}
+          <code>onDismiss</code>. The panel wiggles at each one; <code>0</code>{" "}
+          never gives up. Only has an effect alongside <code>overlay</code>.
         </td>
       </tr>
       <tr>
@@ -224,7 +301,139 @@ coachmarks.open({
 
 \* `title` and a `targetElement` are required for a single coachmark. With `steps`, each step brings its own `title` and either its own `targetElement` or the shared one.
 
+### Tracking
+
+`onEnd` fires **once per ending**, with the whole outcome — so a funnel is one event carrying a `reason` rather than two callbacks to join up afterwards:
+
+```tsx
+coachmarks.open({
+  steps: [...],
+  onEnd: ({ reason, step, totalSteps, outsidePresses }) =>
+    track("home-tour-ended", { reason, step, totalSteps, outsidePresses }),
+})
+```
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">reason</th>
+        <th className="text-left">What the reader did</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>completed</code>
+        </td>
+        <td>Pressed the action on the last step. They saw the whole thing</td>
+      </tr>
+      <tr>
+        <td>
+          <code>dismissed</code>
+        </td>
+        <td>
+          Closed it or pressed <kbd>Escape</kbd> part-way through —{" "}
+          <code>step</code> is where they dropped out
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>skipped</code>
+        </td>
+        <td>
+          Pressed past it on the dimmed page until it gave up (
+          <code>skipAfterOutsideClicks</code>). They never used the way out they
+          were offered
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>unavailable</code>
+        </td>
+        <td>
+          It never opened — nothing it points at was on the page. Only a
+          guidance reports this, and it is what separates "nobody finished the
+          tour" from "the tour never ran"
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+`step` / `totalSteps` say how far they got out of what they were actually offered (a guidance leaves out steps whose element was absent, so `totalSteps` is what the panel's own counter showed). `outsidePresses` is how many times they pressed the dimmed page and got a wiggle back: a tour that completed with six of those was fought with, one that completed with none was followed.
+
+Nothing fires when the app itself closes the coachmark (`coachmarks.close`, a guidance's `stop()`, the page unmounting) — nobody ended it, and counting a navigation as a drop-off blames the reader for it.
+
+`onDismiss` and `onComplete` still exist as the narrow pair, and still fire; `onEnd` is the one to reach for when you want the whole picture.
+
+### Naming the element
+
+`targetElement` is handed straight to `querySelector`, so anything the DOM understands works — the question is only what the page can promise to keep stable:
+
+```tsx
+targetElement: "#filters-button" // an id
+targetElement: ".js-onboarding-filters" // a class
+targetElement: '[data-add-widget="right"]' // an attribute (f0's own handles)
+targetElement: buttonRef.current // the element itself
+```
+
+It must match **exactly one** element. A selector that matches several anchors to the first and warns in development — a coachmark pointing at "one of these six cards" is pointing at nothing in particular. A selector is re-resolved while the coachmark is queued, so it can name something that mounts a moment later; an element cannot be re-resolved, so one that unmounts takes its coachmark off screen with it.
+
+For a walkthrough, prefer `defineStepByStepCoachmarkGuidance`'s `anchor()` over hand-written selectors: it marks the elements for you and the compiler holds the two sides together.
+
 `coachmarks.close(id)` removes a coachmark whether it is on screen or still queued, and `coachmarks.closeAll()` clears the lot. Both are for the app's own bookkeeping — the user never needs them, because the panel closes itself.
+
+## Walking a page step by step
+
+`coachmarks.open({ steps })` takes a CSS selector per step, which means every walkthrough invents its own convention for marking the elements it walks — and a selector written against someone else's markup breaks the next time that markup is refactored, with no type error to say so.
+
+`defineStepByStepCoachmarkGuidance` closes that loop. The steps **name** their targets, `anchor()` marks them, and the names are a union the compiler holds both sides to:
+
+```tsx
+import { defineStepByStepCoachmarkGuidance } from "@factorialco/f0-react/experimental"
+
+const tour = defineStepByStepCoachmarkGuidance({
+  id: "home-tour",
+  steps: [
+    { element: "composer", title: "Let One do it for you", side: "bottom" },
+    { element: "needs-you", title: "Everything that needs you", side: "right" },
+    // Something a component further down renders: point at it directly.
+    { targetElement: '[data-add-widget="right"]', title: "Make the rail yours" },
+  ],
+  onEnd: ({ reason, step, totalSteps, outsidePresses }) =>
+    track("home-tour-ended", { reason, step, totalSteps, outsidePresses }),
+})
+
+// In the page — only the names the steps declared type-check
+<div {...tour.anchor("composer")}>…</div>
+<section {...tour.anchor("needs-you")}>…</section>
+
+// Whenever it should run
+useEffect(() => {
+  tour.start()
+  return () => tour.stop()
+}, [])
+```
+
+**Steps whose element is not there are left out.** A walkthrough is written once and runs on pages that differ: a control the reader has no permission for, a widget they removed, a block behind a flag. `start()` looks for every step's element, keeps looking for `lookForTargetsMs` (2000ms by default) while the page settles, then opens with the ones that turned up — the reader cannot tell there was ever another step, and the count is honest, because a walkthrough that says `1/3` has three steps to give. If none of them are there it does not open at all, and reports nothing: there was no walkthrough to dismiss.
+
+That waiting is not incidental. A walkthrough started on mount runs before the things it walks have arrived — a rail still measuring itself, a widget waiting on data — and opening on the first frame would drop those steps.
+
+A guidance also arrives with the manners a walkthrough needs, because those belong to walking someone through a page rather than to one coachmark:
+
+- **The page is dimmed except the step's element** (`overlay` defaults to `true` here). The lit area is the real element at full strength, not a copy of it.
+- **A shield swallows every press on the page**, the lit element included: the highlight says where to look, and a walkthrough that let you act on the thing it is still explaining would read as done with. The shield is `[data-f0-coachmark-blocker]` if you need to find it in a test.
+- **A press that went nowhere makes the panel wiggle** — the panel answering for a press the page could not.
+- **Five of those end it** (`skipAfterOutsideClicks`), reported as a dismissal — and to `onEnd` as its own `skipped`, which is not the same thing as closing it. Someone pressing past the panel five times is asking to be out, and the way out cannot be the button they are ignoring.
+
+Whatever happens, `onEnd` says so once: finished, dropped out at step N, pressed past it, or never opened at all (see Tracking).
+
+`start()` opens the walkthrough under the guidance's own id, so starting it twice — an effect that runs twice, a re-render — shows one walkthrough rather than queueing a copy behind it. `stop()` ends it wherever it is and reports nothing: nobody dismissed it.
+
+<Canvas of={Stories.Guidance} />
+
+Press the dimmed page to see the wiggle, and keep pressing to see it give up.
 
 ## Guidelines
 
@@ -328,7 +537,7 @@ Reach for a coachmark when a feature is already on screen but users are walking 
     description: "Show at most one coachmark on a screen.",
     guidelines: [
       "Anchor it to the control it describes, so the arrow points somewhere meaningful",
-      "Give it an id and persist the dismissal from onDismiss / onComplete",
+      "Give it an id and persist the outcome from onEnd, so it is not shown twice",
       "Open it at a natural pause, not in the middle of a task",
     ],
   }}
@@ -370,13 +579,16 @@ Reach for a coachmark when a feature is already on screen but users are walking 
 
 ### Behavior
 
-- **It closes itself.** The close button and Escape always close it, whether or not `onDismiss` is passed. There is no `open` prop, so there is no state for a consumer to get out of sync. `onDismiss` and `onComplete` are told what happened after the fact — persist the decision there, since nothing is remembered between sessions.
+- **It closes itself.** The close button and Escape always close it, whether or not a callback is passed. There is no `open` prop, so there is no state for a consumer to get out of sync. `onEnd` (and the narrower `onDismiss` / `onComplete`) is told what happened after the fact — persist the decision there, since nothing is remembered between sessions.
 - **The action ends or advances.** Pressing it runs `action.onClick`, then moves to the next step, or closes on the last one. It never leaves the panel sitting open.
+- **Steps hand over through a fade.** Advancing fades the panel down, commits the next step while it is invisible — its copy, the element it is anchored to, the scroll that brings that element into view — and fades the same panel back up already in place. Nothing swaps under the reader's eyes, and the spotlight travels to the next element rather than the page coming up to full brightness in between. Under `prefers-reduced-motion` the step simply changes.
 - **One at a time.** A second `coachmarks.open` queues behind the first and appears once it is closed. Two panels competing for the same attention is worse than a wait.
 - **The target is re-resolved, not resolved once.** A selector is matched against the live DOM, so a coachmark opened during start-up shows as soon as its element mounts, and hides again if the element goes away — instead of pointing at nothing. A coachmark whose target never appears simply never shows; `coachmarks.close(id)` drops it.
 - **`side` is a preference.** The panel flips to the opposite side and shifts along the target when it would overflow the viewport, so the side you pass is not guaranteed.
-- **Outside clicks do not dismiss.** A coachmark stays until it is acknowledged. The page behind stays interactive; the panel is not modal and does not trap focus.
+- **Outside clicks do not dismiss.** A coachmark stays until it is acknowledged. By default the page behind stays interactive; the panel is not modal and does not trap focus.
+- **`overlay` makes the page unpressable, not the coachmark modal.** The dim and its shield stop presses reaching the page and wiggle the panel instead, and give up after `skipAfterOutsideClicks` of them. Focus is still not trapped, and <kbd>Escape</kbd> still closes — the shield is about the pointer.
 - **Focus moves to the panel on open,** not to the close button, so a screen reader announces the message and Enter does not immediately discard it. On close, focus returns to whatever had it before.
+- **`focusTarget` moves it to the step's own element instead.** For a step whose subject is a field: the caret lands in it, so it wears its own focus state rather than being described from outside, and the reader can start typing the thing the panel is describing. The panel stays one Tab away and Escape still closes from anywhere — but the step is no longer announced, so this is per step and off by default.
 - **The target is an anchor, not a trigger.** It is never made clickable and never wrapped — clicking it does whatever it already did.
 
 ### Usage examples
@@ -397,8 +609,9 @@ coachmarks.open({
     { targetElement: "#filters-button", title: "Start with a filter" },
     { targetElement: "#save-view", title: "Then save it as a view" },
   ],
-  onComplete: () => track("filters-tour-finished"),
-  onDismiss: () => track("filters-tour-abandoned"),
+  // One event, whichever way it ends — see Tracking.
+  onEnd: ({ reason, step, totalSteps }) =>
+    track("filters-tour-ended", { reason, step, totalSteps }),
 })
 ```
 
@@ -472,5 +685,6 @@ The panel is a non-modal `dialog`, named by `title` and described by `descriptio
 - Opening moves focus to the panel itself, so the title and description are announced as a unit. The dismiss button is reached by tabbing, which keeps <kbd>Enter</kbd> from discarding the message the moment it appears.
 - Because focus is moved, only open a coachmark in response to something the user did or at a natural pause. One appearing mid-task pulls focus away from what they were doing.
 - Advancing a sequence pulls focus back to the panel, so the new step is announced as a message of its own and a second <kbd>Enter</kbd> cannot fire the next action before it has been read.
+- A step with `focusTarget` moves focus to its own element rather than to the panel, so THAT step is not announced — a screen reader reads the field the reader just landed in instead of the coachmark. It is a real trade, and it is the page's to make: take it where the field IS the step (a composer the reader is being invited to type into), and leave every other step to the panel. The panel is still one Tab away and Escape still closes, so the way on is never lost.
 - The close button is icon-only and carries a translated `Close` label for screen readers.
 - The arrow is decorative and conveys no information beyond the anchoring already implied by focus order.

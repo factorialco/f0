@@ -1,11 +1,9 @@
 import { PopoverContentProps } from "@radix-ui/react-popover"
 import { useState } from "react"
-
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
-import { withDataTestId } from "@/lib/data-testid"
 import { IconType } from "@/components/F0Icon"
+import { withDataTestId } from "@/lib/data-testid"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { Upsell } from "../../../icons/app"
 import { Action, ProductWidget } from "../ProductWidget"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"
@@ -63,7 +61,9 @@ function _UpsellingPopover({
   }
 
   const handleUpsellRequest = async (action: Action) => {
-    if (action.type !== "upsell") return
+    if (action.type !== "upsell") {
+      return
+    }
 
     setCurrentAction(action)
 
@@ -131,19 +131,19 @@ function _UpsellingPopover({
       </Popover>
 
       {currentAction?.type === "upsell" &&
-        currentAction.showConfirmation &&
-        responseStatus && (
-          <UpsellRequestResponseDialog
-            open={true}
-            onClose={handleModalClose}
-            success={responseStatus === "success"}
-            errorMessage={currentAction.errorMessage}
-            successMessage={currentAction.successMessage}
-            nextSteps={currentAction.nextSteps}
-            closeLabel={currentAction.closeLabel}
-            portalContainer={null}
-          />
-        )}
+      currentAction.showConfirmation &&
+      responseStatus ? (
+        <UpsellRequestResponseDialog
+          open={true}
+          onClose={handleModalClose}
+          success={responseStatus === "success"}
+          errorMessage={currentAction.errorMessage}
+          successMessage={currentAction.successMessage}
+          nextSteps={currentAction.nextSteps}
+          closeLabel={currentAction.closeLabel}
+          portalContainer={null}
+        />
+      ) : null}
     </>
   )
 }
