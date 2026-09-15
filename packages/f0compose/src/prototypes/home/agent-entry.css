@@ -581,6 +581,33 @@ body[data-nav-instant] main#content > * {
   transition: opacity 420ms ease-out;
 }
 
+/* The clock is running: the dot breathes once every two seconds, which
+   is slow enough to read as "time is passing" rather than as an alert. */
+@keyframes home-clock-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+.home-clock-dot {
+  animation: home-clock-pulse 2s ease-in-out infinite;
+}
+/* The same breathing dot inside the clock-in card, a size down, and the
+   ring with its counter dialled back to 90% (Angel, 2026-09-15). */
+[data-home-floating] .aspect-square.h-4 {
+  height: 12px;
+  width: 12px;
+  animation: home-clock-pulse 2s ease-in-out infinite;
+}
+[data-home-floating] .h-40.w-40 {
+  transform: scale(0.9);
+}
+
 /* Dark keeps the ramp the light hexes describe: the ground is f0's dark
    base and the sheets are lifted off it by --page. */
 .dark [data-hybrid-canvas] {

@@ -40,7 +40,14 @@ export function FloatingWindow({
 
   // Position before paint, or the card flashes at 0,0 for a frame.
   useLayoutEffect(() => {
-    const anchorEl = document.querySelector(anchorSelector)
+    // Each selector is tried IN ORDER, rather than handing the comma to
+    // querySelector: that would return whichever anchor comes first in
+    // the document, and the rail's timer is always ahead of the
+    // composer's pill (Angel, 2026-09-15).
+    const anchorEl = anchorSelector
+      .split(",")
+      .map((selector) => document.querySelector(selector.trim()))
+      .find((element) => element !== null)
     const anchor = anchorEl?.getBoundingClientRect()
     const GAP = 8
     if (anchor) {
@@ -50,6 +57,13 @@ export function FloatingWindow({
       // 2026-09-15 — "opens the widget for clock-in next to it").
       if (anchorEl?.matches("[data-home-clockin-rail]")) {
         setPos({ x: anchor.right + GAP, y: anchor.top })
+        return
+      }
+      // The composer's own clock pill: the card drops straight under it,
+      // LEFT edges flush, because the pill sits at the start of the row
+      // rather than at the end of a toolbar (Angel, 2026-09-15).
+      if (anchorEl?.matches("[data-home-clockin-pill]")) {
+        setPos({ x: anchor.left, y: anchor.bottom + GAP })
         return
       }
       setPos({ x: anchor.right - width, y: anchor.bottom + GAP })

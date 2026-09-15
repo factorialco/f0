@@ -22,7 +22,6 @@ import {
   Reaction,
   Receipt,
   Settings,
-  SolidPlay,
   Timer,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
@@ -72,6 +71,7 @@ import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import { Onboarding } from "./onboarding/Onboarding"
 import { getOnboarding, useOnboarding } from "./onboarding/state"
+import { ClockInPill } from "./one/ClockInPill"
 import { completeOnboardingHome, enterHome } from "./one/conversationStore"
 import {
   goHome,
@@ -80,7 +80,6 @@ import {
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import { HomeRecommendationCarousel } from "./one/HomeRecommendationCarousel"
-import { OneHomeRecommendation } from "./one/OneHomeRecommendation"
 import { PanelExpand } from "./PanelCollapse"
 import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
@@ -93,7 +92,7 @@ import { readSelection } from "./widget-editor/model"
 import { StaticWidgets } from "./widget-editor/StaticWidgets"
 import { WidgetEditor } from "./widget-editor/WidgetEditor"
 import { ClockInButton } from "./windows/ClockInButton"
-import { toggleClockIn, useClockInWidgetRequests } from "./windows/clockInStore"
+import { useClockIn, useClockInWidgetRequests } from "./windows/clockInStore"
 import { ClockInWindow } from "./windows/ClockInWindow"
 import { FloatingWindow } from "./windows/FloatingWindow"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
@@ -1046,23 +1045,12 @@ const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
 ]
 
 function HomeRecommendations() {
-  const [clockedIn, setClockedIn] = useState(false)
+  const clockedIn = useClockIn().clockedInAt !== null
   return (
     <HomeRecommendationCarousel
-      // Clock-in leads until it is done, and it never rotates away
-      // (Angel, 2026-09-15).
-      pinned={
-        clockedIn ? undefined : (
-          <OneHomeRecommendation
-            variant="primary"
-            icon={SolidPlay}
-            label="Clock-in"
-            dismissOnClick
-            onClick={toggleClockIn}
-            onDismissed={() => setClockedIn(true)}
-          />
-        )
-      }
+      // Clock-in leads and stays: once it is running it becomes the
+      // outline timer rather than leaving (Angel, 2026-09-15).
+      pinned={<ClockInPill />}
       items={RECOMMENDATIONS.map((item, index) => ({
         ...item,
         // With the clock running the digest is what leads the queue.
@@ -1732,7 +1720,7 @@ function HomeCanvas() {
           <FloatingWindow
             title="Clock in"
             width={240}
-            anchorSelector="[data-home-clockin-rail]"
+            anchorSelector="[data-home-clockin-pill], [data-home-clockin-rail]"
             onDock={() => setClockInCard(false)}
             onClose={() => setClockInCard(false)}
           >

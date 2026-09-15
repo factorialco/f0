@@ -70,9 +70,10 @@ export function ClockInWindow({ compact = false }: { compact?: boolean }) {
         locations={LOCATIONS}
         locationId={locationId}
         onChangeLocationId={setLocationId}
-        // The 188px floating card has no room for the location row or the
-        // day graph (Figma 2694:55372).
-        canShowLocation={!compact}
+        // No location row at all (Angel, 2026-09-15): the prototype has one
+        // workplace, so "Barcelona HQ" was a control that never did
+        // anything.
+        canShowLocation={false}
         canShowProject={false}
         canShowBreakButton={!compact}
         canSeeGraph={!compact}

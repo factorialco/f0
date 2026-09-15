@@ -28,8 +28,8 @@ export type Recommendation = {
 const GAP = 8
 /** Kept clear on the right, so nothing is legible under the chevron. */
 const CHEVRON_ROOM = 12
-/** Where an item starts fading, measured back from the viewport's edge. */
-const FADE_SPAN = 120
+/** How steep the fade into the chevron is (Angel, 2026-09-15). */
+const FADE_SPAN = 64
 
 export function HomeRecommendationCarousel({
   pinned,
@@ -41,9 +41,10 @@ export function HomeRecommendationCarousel({
 }) {
   const viewRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const [scrolled, setScrolled] = useState(0)
+  const [canGoBack, setCanGoBack] = useState(false)
   /** Where the row is heading, so spammed clicks keep stepping. */
   const target = useRef(0)
+  const settle = useRef(0)
   const [atEnd, setAtEnd] = useState(false)
 
   const sync = () => {
@@ -51,7 +52,17 @@ export function HomeRecommendationCarousel({
     const track = trackRef.current
     if (!view || !track) return
     const left = view.scrollLeft
-    setScrolled(left)
+    // Only the ARRIVAL at zero is delayed: the button appears the moment
+    // you move, and leaves once the row has settled back home, so it does
+    // not vanish mid-glide and shunt the row sideways (Angel,
+    // 2026-09-15).
+    if (left > 0) {
+      window.clearTimeout(settle.current)
+      setCanGoBack(true)
+    } else {
+      window.clearTimeout(settle.current)
+      settle.current = window.setTimeout(() => setCanGoBack(false), 260)
+    }
     setAtEnd(left >= view.scrollWidth - view.clientWidth - 1)
     const edge = view.clientWidth - CHEVRON_ROOM
     for (const child of track.children) {
@@ -99,15 +110,15 @@ export function HomeRecommendationCarousel({
   }
 
   return (
-    <div className="-mt-1 flex w-[712px] max-w-full items-center gap-2">
+    <div className="mt-3 flex w-[712px] max-w-full items-center gap-2">
       {pinned}
       {/* Clock-in is its own control, not a recommendation, so the two
           groups are split the way f0's headers split theirs. */}
       {pinned && <div className="mx-1 h-4 w-px bg-f1-border-secondary" />}
-      {scrolled > 0 && (
+      {canGoBack && (
         <F0Button
           variant="outline"
-          size="md"
+          size="sm"
           icon={ChevronLeft}
           hideLabel
           label="Previous recommendations"
@@ -143,7 +154,7 @@ export function HomeRecommendationCarousel({
       {!atEnd && (
         <F0Button
           variant="outline"
-          size="md"
+          size="sm"
           icon={ChevronRight}
           hideLabel
           label="More recommendations"

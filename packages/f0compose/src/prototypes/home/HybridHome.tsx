@@ -376,7 +376,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
                         top: "auto",
                         transform: "none",
                         width: "100%",
-                        height: asking ? "auto" : expandedComposer ? 192 : 144,
+                        // The container is the SHEET: any extra height here is invisible
+                        // padding that the recommendations then sit under, which
+                        // is what was clipping them (Angel, 2026-09-15).
+                        height: asking ? "auto" : expandedComposer ? 176 : 128,
                         transition:
                           "height 260ms cubic-bezier(0.22, 1, 0.36, 1)",
                       }
