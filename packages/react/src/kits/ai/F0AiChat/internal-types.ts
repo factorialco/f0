@@ -3,6 +3,7 @@ import {
   type CanvasEntityDefinition,
 } from "../canvas/types"
 import {
+  type AiChatFileIntake,
   type AiChatDisclaimer,
   type AiChatMode,
   type AiChatFileAttachmentConfig,
@@ -208,9 +209,10 @@ export type AiChatProviderReturnValue = {
    * `processFiles` callback registered by `ChatTextarea`'s file-attachment
    * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
    */
+  prepareFiles: AiChatFileIntake
   processDroppedFiles: (files: File[]) => void
   /** @internal Registers the processFiles callback owned by ChatTextarea */
-  setProcessDroppedFilesFunction: (fn: ((files: File[]) => void) | null) => void
+  setProcessDroppedFilesFunction: (fn: AiChatFileIntake | null) => void
   /**
    * Move focus into the mounted chat composer, or queue it until mount.
    * Returns whether focus moved synchronously.

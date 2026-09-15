@@ -16,6 +16,7 @@ import {
   Upsell,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
@@ -35,6 +36,10 @@ import type {
   AiChatTextAreaUsageLimits,
   F0AiChatTextAreaSubmitPayload,
 } from "../types"
+import {
+  partialUploadRecoveryStory,
+  preparedFileIntakeStory,
+} from "./F0AiChatTextArea.uploadLifecycle"
 
 const ROTATING_PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",
@@ -312,6 +317,7 @@ const buildClarifyingState = (
 })
 
 type WrapperProps = {
+  draftKey?: string
   placeholders?: string[]
   fileAttachments?: AiChatFileAttachmentConfig
   onTranscribe?: TranscribeFn
@@ -335,6 +341,7 @@ type WrapperProps = {
 }
 
 const Wrapper = ({
+  draftKey,
   placeholders,
   fileAttachments,
   onTranscribe,
@@ -393,8 +400,9 @@ const Wrapper = ({
   })
 
   return (
-    <div className="flex flex-col gap-4 w-[640px]">
+    <div className="flex w-[640px] flex-col gap-4">
       <F0AiChatTextArea
+        draftKey={draftKey}
         ref={composerRef}
         onSubmit={handleSubmit}
         onStop={() => console.log("stop")}
@@ -438,8 +446,8 @@ const Wrapper = ({
       />
       {submissions.length > 0 ? (
         <div className="rounded-md border border-f1-border p-3 text-sm">
-          <div className="font-medium pb-2">Last submission</div>
-          <pre className="text-xs whitespace-pre-wrap">
+          <div className="pb-2 font-medium">Last submission</div>
+          <pre className="whitespace-pre-wrap text-xs">
             {JSON.stringify(submissions[submissions.length - 1], null, 2)}
           </pre>
         </div>
@@ -454,7 +462,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs", "experimental"],
 } satisfies Meta<typeof Wrapper>
 
 export default meta
@@ -462,8 +470,45 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-// Interactive story to inspect the textarea ↔ clarifying panel transition.
-// Click "Trigger clarifying mode" to see the swap animation.
+export const Snapshot: Story = {
+  args: {
+    initialPendingContext: PENDING_CONTEXT,
+    fileAttachments: FILE_UPLOAD_CONFIG,
+  },
+  parameters: withSnapshot({}),
+}
+
+export const PartialUploadRecovery: Story = {
+  tags: ["upload-lifecycle"],
+  render: partialUploadRecoveryStory.render,
+  play: partialUploadRecoveryStory.play,
+}
+
+export const PreparedFileIntake: Story = {
+  tags: ["upload-lifecycle"],
+  render: preparedFileIntakeStory.render,
+  play: preparedFileIntakeStory.play,
+}
+
+export const DraftScopes: Story = {
+  render: () => {
+    const [scope, setScope] = useState("first")
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setScope("first")}>
+            First conversation
+          </button>
+          <button type="button" onClick={() => setScope("second")}>
+            Second conversation
+          </button>
+        </div>
+        <Wrapper draftKey={scope} fileAttachments={FILE_UPLOAD_CONFIG} />
+      </div>
+    )
+  },
+}
+
 export const TransitionDemo: Story = {
   render: () => {
     const ref = useRef<HTMLDivElement>(null)
@@ -475,10 +520,10 @@ export const TransitionDemo: Story = {
     }
 
     return (
-      <div className="flex flex-col gap-4 w-[640px]">
+      <div className="flex w-[640px] flex-col gap-4">
         <button
           onClick={toggle}
-          className="self-start rounded border border-f1-border bg-f1-background px-3 py-1.5 text-sm font-medium text-f1-foreground hover:bg-f1-background-hover transition-colors"
+          className="self-start rounded border border-f1-border bg-f1-background px-3 py-1.5 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover"
         >
           {clarifyingQuestion
             ? "← Volver al textarea"
@@ -501,10 +546,6 @@ export const TransitionDemo: Story = {
   },
 }
 
-// The composer with no inset of its own, for hosts that already own the
-// spacing (a home hero, a card). The dashed frame stands in for that host:
-// note the field now runs edge to edge, and the focus glow needs the host to
-// leave it a few pixels of room and not clip overflow.
 export const NoPadding: Story = {
   args: {
     padding: "none",
@@ -550,7 +591,7 @@ export const WithFooter: Story = {
     isWelcomeScreen: true,
     fullscreen: true,
     footer: (
-      <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
+      <p className="text-center text-sm font-medium text-f1-foreground-tertiary">
         Powered by Factorial AI · v0.1.0
       </p>
     ),
@@ -562,7 +603,7 @@ export const WithDisclaimerAndFooter: Story = {
     disclaimer: DISCLAIMER,
     isWelcomeScreen: true,
     footer: (
-      <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
+      <p className="text-center text-sm font-medium text-f1-foreground-tertiary">
         Powered by Factorial AI · v0.1.0
       </p>
     ),
@@ -575,7 +616,7 @@ export const FullscreenWelcome: Story = {
     isWelcomeScreen: true,
     fullscreen: true,
     footer: (
-      <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
+      <p className="text-center text-sm font-medium text-f1-foreground-tertiary">
         Powered by Factorial AI · v0.1.0
       </p>
     ),

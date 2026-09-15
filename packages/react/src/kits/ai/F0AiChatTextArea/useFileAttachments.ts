@@ -1,190 +1,182 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useChatComposerController } from "@/lib/chat/useChatComposerController"
 import { useI18n } from "@/lib/providers/i18n"
-import { type AiChatFileAttachmentConfig } from "../F0AiChat/types"
+import {
+  type AiChatFileAttachmentConfig,
+  type AiChatFileIntake,
+  type UploadedFile,
+} from "../F0AiChat/types"
 import { filterByMimeType } from "./file-utils"
 import { type AttachedFile } from "./types"
 
 const TRANSIENT_ERROR_MS = 4000
 
 export function useFileAttachments(
-  fileAttachments: AiChatFileAttachmentConfig | undefined
+  fileAttachments: AiChatFileAttachmentConfig | undefined,
+  scopeKey = "default"
 ) {
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const [transientError, setTransientError] = useState<string | null>(null)
-  const transientErrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const translation = useI18n()
-
   const onUploadFiles = fileAttachments?.onUploadFiles
   const allowedMimeTypes = fileAttachments?.allowedMimeTypes
   const maxFiles = fileAttachments?.maxFiles
 
-  const acceptValue = useMemo(() => {
-    if (!allowedMimeTypes) {
-      return undefined
-    }
-    if (Array.isArray(allowedMimeTypes)) {
-      return allowedMimeTypes.join(",")
-    }
-    return allowedMimeTypes
-  }, [allowedMimeTypes])
-
-  const isAtMaxFiles =
-    maxFiles !== undefined && attachedFiles.length >= maxFiles
-
-  // Mirror attachedFiles.length in a ref so processFiles can read the current
-  // count without depending on it. Keeping length out of processFiles's deps
-  // means the callback identity stays stable across uploads — parents that
-  // register it via onProcessFilesRef won't see their handler de- and
-  // re-registered every time a file lands, which previously opened a window
-  // where a concurrent drop could be dropped silently.
-  const attachedCountRef = useRef(0)
-  useEffect(() => {
-    attachedCountRef.current = attachedFiles.length
-  }, [attachedFiles])
+  const acceptValue = useMemo(
+    () =>
+      Array.isArray(allowedMimeTypes)
+        ? allowedMimeTypes.join(",")
+        : allowedMimeTypes,
+    [allowedMimeTypes]
+  )
 
   const showTransientError = useCallback((message: string) => {
-    if (transientErrorTimeoutRef.current) {
-      clearTimeout(transientErrorTimeoutRef.current)
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current)
     }
     setTransientError(message)
-    transientErrorTimeoutRef.current = setTimeout(() => {
+    errorTimerRef.current = setTimeout(() => {
       setTransientError(null)
-      transientErrorTimeoutRef.current = null
+      errorTimerRef.current = null
     }, TRANSIENT_ERROR_MS)
   }, [])
 
   useEffect(
     () => () => {
-      if (transientErrorTimeoutRef.current) {
-        clearTimeout(transientErrorTimeoutRef.current)
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current)
       }
     },
     []
   )
 
-  const processFiles = useCallback(
-    async (rawFiles: File[]) => {
-      if (rawFiles.length === 0 || !onUploadFiles) {
-        return
-      }
-
-      const files = filterByMimeType(rawFiles, allowedMimeTypes)
-      if (files.length === 0) {
-        return
-      }
-
-      // Reject the whole batch when it would exceed the cap — surfacing a
-      // transient banner is friendlier than silently truncating the user's
-      // selection.
-      if (
-        maxFiles !== undefined &&
-        attachedCountRef.current + files.length > maxFiles
-      ) {
-        showTransientError(
-          translation.ai.tooManyFilesError.replace(
-            "{{maxFiles}}",
-            String(maxFiles)
-          )
-        )
-        return
-      }
-
-      const newAttached: AttachedFile[] = files.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        status: "uploading" as const,
-      }))
-      const errorIds = new Set(newAttached.map((n) => n.id))
-
-      setAttachedFiles((prev) => [...prev, ...newAttached])
-
-      const markBatchAsError = (errorMessage: string) =>
-        setAttachedFiles((prev) =>
-          prev.map((att) =>
-            errorIds.has(att.id)
-              ? { ...att, status: "error" as const, errorMessage }
-              : att
-          )
-        )
-
-      try {
-        const uploaded = await onUploadFiles(files)
-        // The contract is length-and-order parity with `files`. If a consumer
-        // returns a shorter/longer array we'd silently send the message with
-        // `files: []` (uploadedFile would be undefined → filtered out at send
-        // time), so fail loud instead and let the user retry.
-        if (!Array.isArray(uploaded) || uploaded.length !== files.length) {
-          markBatchAsError(translation.ai.fileUploadError)
-          return
-        }
-        setAttachedFiles((prev) =>
-          prev.map((att) => {
-            const idx = newAttached.findIndex((n) => n.id === att.id)
-            if (idx === -1) {
-              return att
-            }
-            if (uploaded[idx]) {
-              return {
-                ...att,
-                status: "uploaded" as const,
-                uploadedFile: uploaded[idx],
-              }
-            }
-            return {
-              ...att,
-              status: "error" as const,
-              errorMessage: translation.ai.fileUploadError,
-            }
-          })
-        )
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error && err.message
-            ? err.message
-            : translation.ai.fileUploadError
-        markBatchAsError(errorMessage)
-      }
+  const validateFiles = useCallback(
+    (files: File[]) => filterByMimeType(files, allowedMimeTypes),
+    [allowedMimeTypes]
+  )
+  const onError = useCallback(
+    (reason: "too-many" | "too-large" | "upload") => {
+      showTransientError(
+        reason === "too-many"
+          ? translation.ai.tooManyFilesError.replace(
+              "{{maxFiles}}",
+              String(maxFiles)
+            )
+          : translation.ai.fileUploadError
+      )
     },
     [
-      onUploadFiles,
       maxFiles,
-      allowedMimeTypes,
-      translation.ai.tooManyFilesError,
-      translation.ai.fileUploadError,
       showTransientError,
+      translation.ai.fileUploadError,
+      translation.ai.tooManyFilesError,
     ]
   )
 
-  const handleFileSelect = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      await processFiles(Array.from(e.target.files ?? []))
-      e.target.value = ""
+  const composerFiles = useChatComposerController<UploadedFile>({
+    scopeKey,
+    uploadFiles: onUploadFiles,
+    maxFiles,
+    maxStoredFiles: fileAttachments?.maxStoredFiles,
+    maxStoredBytes: fileAttachments?.maxStoredBytes,
+    maxFileSizeBytes: fileAttachments?.maxFileSizeBytes,
+    getFileExpiry: fileAttachments?.getFileExpiry,
+    validateFiles,
+    onSubmitBlocked: () =>
+      showTransientError(translation.ai.fileUploadBlockedSubmit),
+    uploadErrorMessage: translation.ai.fileUploadError,
+    onError,
+  })
+  const intakeFiles: AiChatFileIntake = useCallback(
+    async (files, options) => {
+      const preserveText = () => {
+        if (options?.text) {
+          composerFiles.updateValueForScope(
+            scopeKey,
+            (current) => current || options.text || ""
+          )
+        }
+      }
+      try {
+        const prepared = await composerFiles.addFiles(
+          files,
+          options?.preparedFiles
+        )
+        if (
+          !prepared ||
+          prepared.length !== files.length ||
+          prepared.some((item) => item.status !== "ready" || !item.value)
+        ) {
+          throw new Error(translation.ai.fileUploadError)
+        }
+        const values = prepared.map((item) => item.value!)
+        if (options?.onPrepared) {
+          const accepted = await composerFiles.submit(
+            () => options.onPrepared!(values),
+            { scopeKey, text: "", files: prepared }
+          )
+          if (!accepted) {
+            throw new Error(translation.ai.fileUploadError)
+          }
+        }
+        return values
+      } catch (error) {
+        preserveText()
+        throw error
+      }
     },
-    [processFiles]
+    [
+      composerFiles.addFiles,
+      composerFiles.submit,
+      composerFiles.updateValueForScope,
+      scopeKey,
+      translation.ai.fileUploadError,
+    ]
   )
 
-  const handleRemoveFile = useCallback((id: string) => {
-    setAttachedFiles((prev) => prev.filter((att) => att.id !== id))
-  }, [])
+  const attachedFiles: AttachedFile[] = composerFiles.files.map((item) => ({
+    id: item.id,
+    file: item.file,
+    previewUrl: item.previewUrl,
+    status: item.status === "ready" ? "uploaded" : item.status,
+    uploadedFile: item.value,
+    errorMessage: item.errorMessage,
+  }))
+  const isAtMaxFiles =
+    maxFiles !== undefined && attachedFiles.length >= maxFiles
 
-  const clearFiles = useCallback(() => {
-    setAttachedFiles([])
-  }, [])
+  const handleFileSelect = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      await composerFiles.addFiles(Array.from(event.target.files ?? []))
+      event.target.value = ""
+    },
+    [composerFiles.addFiles]
+  )
 
   return {
+    renderedScopeKey: composerFiles.renderedScopeKey,
+    value: composerFiles.value,
+    cursorPosition: composerFiles.cursorPosition,
+    setValue: composerFiles.setValue,
+    setCursorPosition: composerFiles.setCursorPosition,
+    updateValueForScope: composerFiles.updateValueForScope,
+    paste: composerFiles.paste,
+    submit: composerFiles.submit,
+    isSubmitting: composerFiles.isSubmitting,
+    isQueued: composerFiles.isQueued,
     attachedFiles,
     fileInputRef,
     onUploadFiles,
     acceptValue,
     isAtMaxFiles,
     maxFiles,
-    processFiles,
+    processFiles: composerFiles.addFiles,
+    intakeFiles,
     handleFileSelect,
-    handleRemoveFile,
-    clearFiles,
+    handleRemoveFile: composerFiles.removeFile,
+    clearFiles: composerFiles.clearFiles,
+    retryFile: composerFiles.retryFile,
     transientError,
     showTransientError,
   }

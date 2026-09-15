@@ -19,6 +19,7 @@ import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
+import { useChatComposerController } from "@/lib/chat/useChatComposerController"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { buildHighlightSegments } from "../hooks/highlight-utils"
@@ -68,15 +69,12 @@ import {
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
 
-type UploadingAttachment = {
-  id: string
-  status: "uploading"
-  attachment: F0ChatFileAttachment | F0ChatImageAttachment
-}
-
-/** An attachment shown immediately from a local URL while its upload resolves. */
 type PendingAttachment =
-  | UploadingAttachment
+  | {
+      id: string
+      status: "uploading" | "error"
+      attachment: F0ChatFileAttachment | F0ChatImageAttachment
+    }
   | { id: string; status: "ready"; attachment: F0ChatComposableAttachment }
 
 const isImagePending = (att: PendingAttachment): boolean =>
@@ -130,16 +128,54 @@ export const ChatComposer = (): ReactNode => {
   const emit = useF0ChatEmit()
   const { reducedMotion: shouldReduceMotion } = useChatRenderConfig()
 
-  const [value, setValue] = useState("")
-  const [cursorPosition, setCursorPosition] = useState(0)
-  const [attachments, setAttachments] = useState<PendingAttachment[]>([])
+  const [existingAttachments, setExistingAttachments] = useState<
+    PendingAttachment[]
+  >([])
+  const voiceDurations = useRef(new WeakMap<File, number>())
+  const prepareAttachments = useCallback(
+    async (files: File[], request?: { signal: AbortSignal }) => {
+      const uploaded = await uploadFiles!(files, request)
+      return uploaded.map((attachment, index): F0ChatComposableAttachment => {
+        const duration = voiceDurations.current.get(files[index])
+        return duration === undefined || !("url" in attachment)
+          ? attachment
+          : {
+              kind: "voice",
+              url: attachment.url,
+              durationSeconds: duration,
+              mimeType: files[index].type,
+              name: files[index].name,
+            }
+      })
+    },
+    [uploadFiles]
+  )
+  const composerFiles = useChatComposerController<F0ChatComposableAttachment>({
+    scopeKey: channel.id,
+    uploadFiles: canUpload ? prepareAttachments : undefined,
+    maxFiles:
+      maxFiles === undefined
+        ? undefined
+        : Math.max(0, maxFiles - existingAttachments.length),
+    maxFileSizeBytes,
+    onAdded: (item) => onFileAdded(item),
+    onError: (reason) => onFileError(reason),
+    releasePreviewOnReady: true,
+    uploadErrorMessage: i18n.chat.fileUploadError,
+  })
+  const {
+    value,
+    setValue,
+    cursorPosition,
+    setCursorPosition,
+    updateValueForScope,
+  } = composerFiles
   const [isStartingRecording, setIsStartingRecording] = useState(false)
   const [showMessageLengthError, setShowMessageLengthError] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const attachmentStripRef = useRef<HTMLDivElement>(null)
-  const localPreviewUrlsRef = useRef(new Set<string>())
   // Where the caret belongs once React has written `forText`. A rAF is too
   // early — it can land before the commit, so the selection is set on the old
   // string and React's own value write then drops the caret at the end. The
@@ -192,6 +228,26 @@ export const ChatComposer = (): ReactNode => {
     everyoneLabel:
       channel.type === "group" ? i18n.chat.mentionEveryone : undefined,
   })
+  const mentionScopeRef = useRef(channel.id)
+  const mentionsByScopeRef = useRef(new Map<string, ComposerSnapshot>())
+  useLayoutEffect(() => {
+    if (mentionScopeRef.current === channel.id) {
+      return
+    }
+    mentionsByScopeRef.current.set(mentionScopeRef.current, {
+      value,
+      caret: cursorPosition,
+      mentions: mentions.mentions,
+    })
+    const next = mentionsByScopeRef.current.get(channel.id)
+    mentionScopeRef.current = channel.id
+    mentions.close()
+    mentions.restoreMentions(next?.mentions ?? [], next?.value ?? "")
+    history.reset()
+    lastSnapshotRef.current = next ?? { value: "", caret: 0, mentions: [] }
+    historyBreakRef.current = true
+    setExistingAttachments([])
+  }, [channel.id])
   const closeEmojiAutocomplete = emojiAutocomplete.close
   const handleEmojiAutocompleteKeyDown = emojiAutocomplete.handleKeyDown
   const handleEmojiAutocompleteFocus = emojiAutocomplete.handleFocus
@@ -233,37 +289,7 @@ export const ChatComposer = (): ReactNode => {
   // textarea behind a transparent copy and took IME composition with it.
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
-  // Monotonic id for pending attachments (avoids Date.now/random in render).
   const attachmentSeq = useRef(0)
-
-  const releaseLocalPreview = useCallback((url: string) => {
-    if (!localPreviewUrlsRef.current.delete(url)) {
-      return
-    }
-    URL.revokeObjectURL(url)
-  }, [])
-
-  useEffect(
-    () => () => {
-      for (const url of localPreviewUrlsRef.current) {
-        URL.revokeObjectURL(url)
-      }
-      localPreviewUrlsRef.current.clear()
-    },
-    []
-  )
-
-  const isUploading = attachments.some((a) => a.status === "uploading")
-
-  // Images render grouped first: mixing thumbnails and file chips in arrival
-  // order makes the row jump in height at every boundary between the two.
-  const orderedAttachments = useMemo(
-    () => [
-      ...attachments.filter(isImagePending),
-      ...attachments.filter((att) => !isImagePending(att)),
-    ],
-    [attachments]
-  )
 
   // Transient error flashed in the textarea (too many files, upload/voice
   // failure), auto-cleared after a few seconds — same pattern as the AI chat.
@@ -272,6 +298,65 @@ export const ChatComposer = (): ReactNode => {
     show: showTransientError,
     clear: clearTransientError,
   } = useTransientError()
+  const onFileError = useCallback(
+    (reason: "too-many" | "too-large" | "upload") => {
+      if (reason === "too-many") {
+        showTransientError(
+          i18n.chat.tooManyFilesError.replace("{{maxFiles}}", String(maxFiles))
+        )
+      } else if (reason === "too-large" && maxFileSizeBytes !== undefined) {
+        showTransientError(
+          i18n.chat.fileTooLargeError.replace(
+            "{{maxFileSize}}",
+            formatFileSize(maxFileSizeBytes)
+          ),
+          { persistent: true }
+        )
+      } else {
+        showTransientError(i18n.chat.fileUploadError)
+      }
+    },
+    [
+      i18n.chat.fileTooLargeError,
+      i18n.chat.fileUploadError,
+      i18n.chat.tooManyFilesError,
+      maxFileSizeBytes,
+      maxFiles,
+      showTransientError,
+    ]
+  )
+  const onFileAdded = useCallback(
+    (item: { file: File }) => {
+      emit.onFileAttached({
+        kind: item.file.type.startsWith("image/") ? "image" : "file",
+        source: fileSourceRef.current,
+      })
+    },
+    [emit]
+  )
+  const fileSourceRef = useRef<F0ChatAttachSource>("button")
+  const attachments: PendingAttachment[] = [
+    ...existingAttachments,
+    ...composerFiles.files.map(
+      (item): PendingAttachment =>
+        item.status === "ready" && item.value
+          ? { id: item.id, status: "ready", attachment: item.value }
+          : {
+              id: item.id,
+              status: item.status === "error" ? "error" : "uploading",
+              attachment: localAttachmentFromFile(
+                item.file,
+                item.previewUrl ?? ""
+              ),
+            }
+    ),
+  ]
+  const isUploading = attachments.some((item) => item.status === "uploading")
+  const hasFileError = attachments.some((item) => item.status === "error")
+  const orderedAttachments = [
+    ...attachments.filter(isImagePending),
+    ...attachments.filter((att) => !isImagePending(att)),
+  ]
   const messageIsTooLong =
     maxMessageCharacters !== undefined &&
     value.trim().length > maxMessageCharacters
@@ -291,13 +376,6 @@ export const ChatComposer = (): ReactNode => {
       setShowMessageLengthError(false)
     }
   }, [messageIsTooLong])
-
-  // Mirror the attachment count in a ref so the upload handler can read the
-  // current total without depending on it (keeps its identity stable).
-  const attachedCountRef = useRef(0)
-  useEffect(() => {
-    attachedCountRef.current = attachments.length
-  }, [attachments])
 
   // Voice dictation — same recorder + waveform the AI chat (and RichText) use.
   // Partials stream into the textarea, appended to whatever was already typed.
@@ -339,21 +417,19 @@ export const ChatComposer = (): ReactNode => {
           ? "ogg"
           : "webm"
       const file = new File([audio], `voice-note.${ext}`, { type })
+      voiceDurations.current.set(
+        file,
+        Math.max(1, Math.round(durationMs / 1000))
+      )
       try {
-        const [uploaded] = await uploadFiles([file])
-        if (uploaded && "url" in uploaded) {
-          sendMessage({
-            body: "",
-            attachments: [
-              {
-                kind: "voice",
-                url: uploaded.url,
-                durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
-                mimeType: type,
-                name: file.name,
-              },
-            ],
-          })
+        const scope = composerFiles.renderedScopeKey
+        const [item] = (await composerFiles.addFiles([file])) ?? []
+        const uploaded = item?.value
+        if (item?.status === "ready" && uploaded && "url" in uploaded) {
+          await composerFiles.submit(
+            () => sendMessage({ body: "", attachments: [uploaded] }),
+            { scopeKey: scope, text: "", files: [item] }
+          )
         }
       } catch {
         showTransientError(i18n.chat.fileUploadError)
@@ -361,7 +437,15 @@ export const ChatComposer = (): ReactNode => {
         setIsSendingVoiceNote(false)
       }
     },
-    [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
+    [
+      uploadFiles,
+      composerFiles.addFiles,
+      composerFiles.submit,
+      composerFiles.renderedScopeKey,
+      sendMessage,
+      showTransientError,
+      i18n.chat.fileUploadError,
+    ]
   )
 
   const recorder = useAudioRecorder({
@@ -381,6 +465,7 @@ export const ChatComposer = (): ReactNode => {
     (value.trim().length > 0 || attachments.length > 0) &&
     !isTranscribing &&
     !isUploading &&
+    !hasFileError &&
     !isSendingVoiceNote
 
   // `value === ""`, not trimmed: with any character present ↑ already moves the
@@ -518,99 +603,14 @@ export const ChatComposer = (): ReactNode => {
 
   const handleUpload = useCallback(
     async (files: File[], source: F0ChatAttachSource) => {
-      if (files.length === 0 || !uploadFiles || !canUpload) {
+      if (!canUpload) {
         return
       }
       clearTransientError()
-      // Reject the whole batch when it would exceed the cap — a transient banner
-      // is friendlier than silently truncating the user's selection.
-      if (
-        maxFiles !== undefined &&
-        attachedCountRef.current + files.length > maxFiles
-      ) {
-        showTransientError(
-          i18n.chat.tooManyFilesError.replace("{{maxFiles}}", String(maxFiles))
-        )
-        return
-      }
-      // Keep validation transport-agnostic and reject the whole batch before
-      // starting any upload when one file exceeds the host-provided cap.
-      if (
-        maxFileSizeBytes !== undefined &&
-        files.some((file) => file.size > maxFileSizeBytes)
-      ) {
-        showTransientError(
-          i18n.chat.fileTooLargeError.replace(
-            "{{maxFileSize}}",
-            formatFileSize(maxFileSizeBytes)
-          ),
-          { persistent: true }
-        )
-        return
-      }
-      // Render every previewable format immediately from a local object URL,
-      // then swap it for the host attachment without changing its stable key.
-      const pending = files.map((file): UploadingAttachment => {
-        const url = URL.createObjectURL(file)
-        localPreviewUrlsRef.current.add(url)
-        return {
-          id: `att-${attachmentSeq.current++}`,
-          status: "uploading",
-          attachment: localAttachmentFromFile(file, url),
-        }
-      })
-      // One per file, and only once the batch passed validation — but BEFORE
-      // the upload resolves, so a failed upload still records which affordance
-      // the person reached for.
-      for (const item of pending) {
-        emit.onFileAttached({
-          kind: attachedKindOf(item.attachment),
-          source,
-        })
-      }
-      setAttachments((prev) => [...prev, ...pending])
-      const pendingIds = new Set(pending.map((p) => p.id))
-      try {
-        const uploaded = await uploadFiles(files)
-        const ready: PendingAttachment[] = uploaded.map((attachment, i) => ({
-          id: pending[i]?.id ?? `att-${attachmentSeq.current++}`,
-          status: "ready",
-          attachment,
-        }))
-        setAttachments((prev) => {
-          const readyById = new Map(ready.map((item) => [item.id, item]))
-          return prev.flatMap((item) => {
-            if (!pendingIds.has(item.id)) {
-              return [item]
-            }
-            const replacement = readyById.get(item.id)
-            return replacement ? [replacement] : []
-          })
-        })
-        for (const item of pending) {
-          releaseLocalPreview(item.attachment.url)
-        }
-      } catch {
-        setAttachments((prev) => prev.filter((a) => !pendingIds.has(a.id)))
-        for (const item of pending) {
-          releaseLocalPreview(item.attachment.url)
-        }
-        showTransientError(i18n.chat.fileUploadError)
-      }
+      fileSourceRef.current = source
+      await composerFiles.addFiles(files)
     },
-    [
-      uploadFiles,
-      canUpload,
-      maxFiles,
-      maxFileSizeBytes,
-      clearTransientError,
-      showTransientError,
-      i18n.chat.tooManyFilesError,
-      i18n.chat.fileTooLargeError,
-      i18n.chat.fileUploadError,
-      releaseLocalPreview,
-      emit,
-    ]
+    [canUpload, clearTransientError, composerFiles.addFiles]
   )
 
   const removeAttachment = useCallback(
@@ -626,10 +626,8 @@ export const ChatComposer = (): ReactNode => {
       const hasRemainingAttachments = attachments.some(
         (attachment) => attachment.id !== id
       )
-      if (item?.status === "uploading") {
-        releaseLocalPreview(item.attachment.url)
-      }
-      setAttachments((prev) =>
+      composerFiles.removeFile(id)
+      setExistingAttachments((prev) =>
         prev.filter((attachment) => attachment.id !== id)
       )
       requestAnimationFrame(() => {
@@ -640,18 +638,7 @@ export const ChatComposer = (): ReactNode => {
         }
       })
     },
-    [attachments, releaseLocalPreview, emit]
-  )
-
-  const releaseUploadingPreviews = useCallback(
-    (items: PendingAttachment[]) => {
-      for (const item of items) {
-        if (item.status === "uploading") {
-          releaseLocalPreview(item.attachment.url)
-        }
-      }
-    },
-    [releaseLocalPreview]
+    [attachments, composerFiles.removeFile, emit]
   )
 
   // Files dropped anywhere on the panel (F0Chat owns the drop zone) land here.
@@ -664,17 +651,11 @@ export const ChatComposer = (): ReactNode => {
       if (!canUpload) {
         return
       }
-      const files = Array.from(event.clipboardData.files)
-      if (files.length === 0) {
-        return
-      }
-
-      // File pastes (Cmd/Ctrl+V) become attachments. Text-only clipboard
-      // content keeps the textarea's native paste behavior.
-      event.preventDefault()
-      void handleUpload(files, "paste")
+      clearTransientError()
+      fileSourceRef.current = "paste"
+      composerFiles.paste(event, handleChange)
     },
-    [canUpload, handleUpload]
+    [canUpload, clearTransientError, composerFiles.paste, handleChange]
   )
 
   const isEditing = target.kind === "edit"
@@ -693,19 +674,35 @@ export const ChatComposer = (): ReactNode => {
 
   // Must not touch the target: the provider owns it, and calling back would
   // recurse through `retarget`.
-  const discardDraft = useCallback(() => {
-    clearComposerText()
-    releaseUploadingPreviews(attachments)
-    setAttachments([])
-    historyBreakRef.current = true
-  }, [clearComposerText, releaseUploadingPreviews, attachments])
+  const discardDraft = useCallback(
+    (scope?: string) => {
+      if (scope) {
+        updateValueForScope(scope, () => "")
+        composerFiles.clearFiles(
+          composerFiles.files.map((file) => file.id),
+          scope
+        )
+      } else {
+        clearComposerText()
+        composerFiles.clearFiles(composerFiles.files.map((file) => file.id))
+      }
+      setExistingAttachments([])
+      historyBreakRef.current = true
+    },
+    [
+      clearComposerText,
+      composerFiles.clearFiles,
+      composerFiles.files,
+      updateValueForScope,
+    ]
+  )
 
   const loadEditDraft = useCallback(
     (message: F0ChatMessage) => {
       setValue(message.body)
       setCursorPosition(message.body.length)
-      setAttachments((prev) => {
-        releaseUploadingPreviews(prev)
+      composerFiles.clearFiles(composerFiles.files.map((file) => file.id))
+      setExistingAttachments(() => {
         // Cards can't be composed, so they can't come back through the composer
         // either. Unreachable in practice — a message carrying one isn't
         // editable (see `canEditAction`) — but it keeps the state honest.
@@ -740,7 +737,8 @@ export const ChatComposer = (): ReactNode => {
       channel.type,
       i18n.chat.mentionEveryone,
       mentions.seedMentions,
-      releaseUploadingPreviews,
+      composerFiles.clearFiles,
+      composerFiles.files,
     ]
   )
 
@@ -831,23 +829,28 @@ export const ChatComposer = (): ReactNode => {
       return
     }
 
-    sendMessage({
-      body,
-      attachments: ready.length > 0 ? ready : undefined,
-      replyToId: replyTo?.id,
-      mentions: mentioned.length > 0 ? mentioned : undefined,
-      mentionedEveryone: mentionedEveryone || undefined,
+    const accepted = composerFiles.submit((snapshot) => {
+      sendMessage({
+        body: snapshot.text.trim(),
+        attachments: ready.length > 0 ? ready : undefined,
+        replyToId: replyTo?.id,
+        mentions: mentioned.length > 0 ? mentioned : undefined,
+        mentionedEveryone: mentionedEveryone || undefined,
+      })
     })
+    if (accepted === false) {
+      return
+    }
     mentions.close()
     mentions.seedMentions([], "")
-    setValue("")
     setCursorPosition(0)
-    setAttachments([])
+    setExistingAttachments([])
     // The message is out; undo must not put the sent draft back.
     historyBreakRef.current = true
     clearComposeTarget()
   }, [
     attachments,
+    composerFiles.submit,
     canSend,
     mentions,
     replyTo,
@@ -1265,6 +1268,8 @@ export const ChatComposer = (): ReactNode => {
                           <ChatComposerAttachmentPreview
                             attachment={att.attachment}
                             uploading={att.status === "uploading"}
+                            error={att.status === "error"}
+                            onRetry={() => void composerFiles.retryFile(att.id)}
                             onRemove={() => removeAttachment(att.id)}
                           />
                         </motion.div>

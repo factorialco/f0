@@ -156,3 +156,33 @@ describe("ChatComposer voice notes", () => {
     ).toBeInTheDocument()
   })
 })
+
+it("retains voice metadata when sending fails and the composer retries", async () => {
+  const uploadFiles = vi.fn(
+    async (): Promise<F0ChatAttachment[]> => [
+      {
+        kind: "file",
+        url: "https://cdn.example.com/voice.webm",
+        name: "voice-note.webm",
+      },
+    ]
+  )
+  const sendMessage = vi
+    .fn()
+    .mockRejectedValueOnce(new Error("offline"))
+    .mockResolvedValue(undefined)
+  const user = userEvent.setup()
+  renderChat(makeRuntime({ uploadFiles, sendMessage }))
+  await recordVoiceNote(user)
+  await screen.findByText("Upload failed")
+  await user.click(screen.getByRole("button", { name: "Send" }))
+  await waitFor(() => expect(sendMessage).toHaveBeenCalledTimes(2))
+  expect(sendMessage.mock.calls[1][0].attachments).toEqual([
+    expect.objectContaining({
+      kind: "voice",
+      durationSeconds: 1,
+      mimeType: "audio/webm",
+    }),
+  ])
+  expect(uploadFiles).toHaveBeenCalledTimes(1)
+})

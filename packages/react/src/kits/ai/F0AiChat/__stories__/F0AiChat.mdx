@@ -235,3 +235,9 @@ they are unavailable to keyboard and assistive-technology navigation.
     </tbody>
   </table>
 </Unstyled>
+
+## Preparing files from another product surface
+
+`useAiChat().prepareFiles(files, options)` sends files through the shared composer lifecycle and returns a promise of uploaded values. Calls made before the composer registers are buffered until it mounts; unmounting the provider rejects pending requests. Open the chat before awaiting preparation.
+
+Pass `preparedFiles` to adopt previously prepared values, and `onPrepared` to deliver a producer-owned message after preparation. Acceptance clears only that intake's files. Rejection retains them for recovery. Ordinary Send and producer acceptance share the submission guard.
