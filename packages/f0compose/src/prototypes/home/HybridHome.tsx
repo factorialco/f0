@@ -441,7 +441,10 @@ export function HybridHome({ children }: { children: ReactNode }) {
                   data-home-input-surface
                   background="primary"
                   border="default"
-                  borderColor="secondary"
+                  // The DEFAULT border, not secondary (Angel,
+                  // 2026-09-14): on the dotted backdrop a 6% edge
+                  // disappeared into the pattern.
+                  borderColor="default"
                   borderRadius="xl"
                 >
                   {!view && questionReady && (homeLanding || suggestReport) && (
