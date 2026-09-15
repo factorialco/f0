@@ -2,7 +2,7 @@ import { cP as hk, cQ as x0, cR as mk, cS as pk, cT as Bk, cU as Fk, cV as Jh, c
 import { jsx as h, jsxs as te, Fragment as Bi } from "react/jsx-runtime";
 import Yt, { forwardRef as _i, useRef as xe, useTransition as pD, useState as Ee, useLayoutEffect as Rn, useId as lo, useContext as wg, createContext as Zn, useEffect as it, useCallback as Ve, useMemo as vt, useImperativeHandle as BD, Fragment as Rg, isValidElement as mm, cloneElement as w1, Suspense as Gd, lazy as Vs, createElement as Jc, memo as Ed, Children as pm } from "react";
 import { d as me, T as FD, a as yD, b as UD, f as qi, c as QD, g as v1 } from "./tooltip-CMBdJvJA.js";
-import { C as wD, P as vD, c as Td, n as b1, E as bD, a as _D, u as kD, b as _1, e as xD, f as DD, g as SD, h as RD, i as M0, M as MD, p as PD, j as k1, R as P0, k as x1, l as VD, m as GD, o as ED, q as TD, r as ND, t as D1, s as ZD, O as S1, v as R1, F as KD, W as ks, A as WD, B as zD, L as YD, w as HD, V as OD, x as JD, y as jD, z as LD, D as Bm, S as XD, G as M1, H as P1, I as qD, J as $D, K as eS, N as tS, Q as iS, T as nS, U as gS, X as aS, Y as oS, Z as V0, _ as rS, $ as sS } from "./CoachmarkProvider-CmBcq3yV.js";
+import { C as wD, P as vD, c as Td, n as b1, E as bD, a as _D, u as kD, b as _1, e as xD, f as DD, g as SD, h as RD, i as M0, M as MD, p as PD, j as k1, R as P0, k as x1, l as VD, m as GD, o as ED, q as TD, r as ND, t as D1, s as ZD, O as S1, v as R1, F as KD, W as ks, A as WD, B as zD, L as YD, w as HD, V as OD, x as JD, y as jD, z as LD, D as Bm, S as XD, G as M1, H as P1, I as qD, J as $D, K as eS, N as tS, Q as iS, T as nS, U as gS, X as aS, Y as oS, Z as V0, _ as rS, $ as sS } from "./CoachmarkProvider-B69KZciQ.js";
 import IS, { createPortal as sd } from "react-dom";
 import { g as CS } from "./_commonjsHelpers-ByX85dGu.js";
 import './experimental.css';const AS = hk("Search", [
@@ -38286,7 +38286,7 @@ const qG = /* @__PURE__ */ new Set(["blob:", "data:"]), $G = /* @__PURE__ */ new
     ),
     children: g
   }
-), gE = () => import("./ChatPdfThumbnail-BUcldVe4.js"), aE = () => import("./ChatSheetThumbnail-D8aN1W_0.js"), oE = () => import("./ChatDocxThumbnail-D5hDwmp7.js"), rE = () => import("./ChatTextThumbnail-B53pSYUy.js"), sE = Vs(gE), IE = Vs(aE), CE = Vs(oE), AE = Vs(rE), lE = 384, cE = 160, dE = ({
+), gE = () => import("./ChatPdfThumbnail-DRi1XoO3.js"), aE = () => import("./ChatSheetThumbnail-D8aN1W_0.js"), oE = () => import("./ChatDocxThumbnail-D5hDwmp7.js"), rE = () => import("./ChatTextThumbnail-B53pSYUy.js"), sE = Vs(gE), IE = Vs(aE), CE = Vs(oE), AE = Vs(rE), lE = 384, cE = 160, dE = ({
   kind: g,
   url: s,
   width: c,
@@ -38480,7 +38480,7 @@ const qG = /* @__PURE__ */ new Set(["blob:", "data:"]), $G = /* @__PURE__ */ new
     });
     y.observe(v), c.current = y;
   }, []), shouldMount: g };
-}, Hd = "w-[24rem] max-w-full", hE = "w-[32rem] max-w-full", mE = "gap-0.5", pE = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", BE = "bg-[hsl(222_31%_11%)]", FE = "bg-[hsl(220_39%_6%/0.72)]", yE = "bg-[hsl(220_39%_6%/0.6)]", UE = "bg-[hsl(220_39%_6%/0.55)]", QE = () => import("./LocationMap-CW0QmcF5.js"), wE = Vs(QE), vE = 3 / 2, bE = ({ latitude: g, longitude: s }) => `https://www.google.com/maps?q=${g},${s}`, PQ = ({
+}, Hd = "w-[24rem] max-w-full", hE = "w-[32rem] max-w-full", mE = "gap-0.5", pE = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", BE = "bg-[hsl(222_31%_11%)]", FE = "bg-[hsl(220_39%_6%/0.72)]", yE = "bg-[hsl(220_39%_6%/0.6)]", UE = "bg-[hsl(220_39%_6%/0.55)]", QE = () => import("./LocationMap-iuKj9rL3.js"), wE = Vs(QE), vE = 3 / 2, bE = ({ latitude: g, longitude: s }) => `https://www.google.com/maps?q=${g},${s}`, PQ = ({
   location: g,
   cornerClass: s = "rounded-xl",
   surfaceClassName: c,
@@ -44078,7 +44078,7 @@ const xT = {
     }
   ) }) });
 }, ET = Vs(
-  () => import("./index-DDMa_A10.js").then((g) => g.i).then((g) => ({
+  () => import("./index-BnE5lR1_.js").then((g) => g.i).then((g) => ({
     default: g.F0PdfViewer
   }))
 ), TT = () => {
