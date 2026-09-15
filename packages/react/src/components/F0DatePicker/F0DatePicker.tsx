@@ -27,6 +27,7 @@ type F0DatePickerImplProps = F0DatePickerSharedProps & {
   showIcon?: boolean
   onRequestChange?: () => void
   onModeChange?: (mode: DatePickerMode) => void
+  copyable?: boolean
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 export function F0DatePicker(props: F0DatePickerProps) {
@@ -42,6 +43,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
     variant = "default",
     onModeChange,
     onRequestChange,
+    copyable,
     open = false,
     showIcon = true,
     ...inputProps
@@ -200,6 +202,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
           i18n,
           resolvedDisplayFormat ?? "default"
         )}
+        copyable={copyable}
         onEdit={startEditing}
         onRequestChange={onRequestChange}
       />

@@ -163,6 +163,100 @@ describe("F0DatePicker inline variant", () => {
     })
   })
 
+  describe("when readonly and reachable", () => {
+    it("lets the keyboard land on the value, announced as read-only", async () => {
+      const user = userEvent.setup()
+      renderInline({ readonly: true })
+
+      await user.tab()
+
+      const value = screen.getByRole("textbox", { name: "Date" })
+      expect(value).toHaveFocus()
+      expect(value).toHaveAttribute("aria-readonly", "true")
+      expect(value).toHaveTextContent("01/09/2018")
+    })
+
+    it("offers the date for copying when asked", async () => {
+      const user = userEvent.setup()
+      renderInline({ readonly: true, copyable: true })
+
+      await user.click(screen.getByRole("button", { name: "Copy Date" }))
+
+      expect(await navigator.clipboard.readText()).toBe("01/09/2018")
+    })
+
+    it("puts copy after the value in the tab order", async () => {
+      const user = userEvent.setup()
+      renderInline({ readonly: true, copyable: true })
+
+      await user.tab()
+      expect(screen.getByRole("textbox", { name: "Date" })).toHaveFocus()
+
+      await user.tab()
+      expect(screen.getByRole("button", { name: "Copy Date" })).toHaveFocus()
+    })
+
+    it("confirms the copy, and holds it after the pointer leaves", async () => {
+      const user = userEvent.setup()
+      renderInline({ readonly: true, copyable: true })
+
+      const copy = screen.getByRole("button", { name: "Copy Date" })
+      await user.click(copy)
+
+      const confirmed = screen.getByRole("button", { name: "Copied Date" })
+      expect(confirmed).toHaveClass("text-f1-icon-positive")
+      expect(confirmed).toHaveAttribute("aria-live", "polite")
+      // The strip is pinned open, so moving away does not take the check away.
+      expect(confirmed.parentElement).toHaveClass("opacity-100")
+      expect(screen.getByTestId("date-display-row")).toHaveClass(
+        "bg-f1-background-positive"
+      )
+    })
+
+    it("leaves copy as the only action on a readonly row", () => {
+      renderInline({ readonly: true, copyable: true })
+
+      expect(screen.getAllByRole("button")).toHaveLength(1)
+      expect(
+        screen.queryByRole("button", { name: "Edit Date" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("sits beside the request action when both apply", () => {
+      renderInline({ readonly: true, copyable: true, onRequestChange: vi.fn() })
+
+      expect(
+        screen.getByRole("button", { name: "Request a change to Date" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Copy Date" })
+      ).toBeInTheDocument()
+    })
+  })
+
+  describe("when copyable and editable", () => {
+    it("keeps both actions, edit first", () => {
+      renderInline({ copyable: true })
+
+      expect(
+        screen.getByRole("button", { name: "Edit Date" })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Copy Date" })
+      ).toBeInTheDocument()
+    })
+
+    it("copies without opening the calendar", async () => {
+      const user = userEvent.setup()
+      renderInline({ copyable: true })
+
+      await user.click(screen.getByRole("button", { name: "Copy Date" }))
+
+      expect(await navigator.clipboard.readText()).toBe("01/09/2018")
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+    })
+  })
+
   describe("validation and messaging", () => {
     it("rejects clearing a required date", async () => {
       const user = userEvent.setup()

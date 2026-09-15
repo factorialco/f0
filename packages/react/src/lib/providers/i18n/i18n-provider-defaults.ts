@@ -44,6 +44,8 @@ export const defaultTranslations = {
     },
     edit: "Edit {{label}}",
     requestChange: "Request a change to {{label}}",
+    copy: "Copy {{label}}",
+    copied: "Copied {{label}}",
   },
   link: {
     opensInNewTab: "opens in new tab",

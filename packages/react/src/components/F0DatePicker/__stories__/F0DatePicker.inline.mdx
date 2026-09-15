@@ -43,6 +43,16 @@ The inline variant keeps the props a record row still needs — `required`, `cle
 
 <Canvas of={Stories.DetailRowReadOnly} />
 
+### Copying
+
+`copyable` gives the row the same hover treatment an editable one has, and puts a copy action in the strip. On a `readonly` row it is the only action there; alongside an editable one it follows the calendar, the way the prototype's Employee number row carries both.
+
+<Canvas of={Stories.DetailRowCopyable} />
+
+<Canvas of={Stories.DetailRowEditableAndCopyable} />
+
+Copying turns the row and the icon positive and swaps the icon for a check for 1.4s. The strip is pinned open for that stretch, so moving the pointer away does not take the confirmation with it, and the button carries `aria-live="polite"` so it is announced. A clipboard write the browser blocks produces no confirmation at all — a check the reader cannot trust is worse than none.
+
 ## Guidelines
 
 ### Design best practices
@@ -135,5 +145,6 @@ Inside the calendar, keyboard behavior is the default `F0DatePicker`'s.
 
 - Where the date can be set, the whole row is a single `button` named `Edit {label}`, and the calendar icon is `aria-hidden` — one control with one name, rather than a row wrapping a button.
 - Where it can only be requested, the row is not a control; the action is a `button` named `Request a change to {label}`.
-- A read-only row with no request exposes no control at all, which is what "you cannot act on this" should sound like.
+- A `readonly` value is a `textbox` with `aria-readonly="true"`, named by `label`, so it is reachable and announced with its value rather than skipped.
+- The copy action is named `Copy {label}`, becoming `Copied {label}` with `aria-live="polite"` once the write succeeds.
 - Both names are built from `label` through `useI18n()`, so they translate with the rest of the app.

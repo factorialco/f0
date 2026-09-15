@@ -43,6 +43,7 @@ export type F0DatePickerDefaultProps = F0DatePickerSharedProps &
     showIcon?: boolean
     onRequestChange?: never
     onModeChange?: never
+    copyable?: never
   } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 export type F0DatePickerInlineProps = F0DatePickerSharedProps &
@@ -76,6 +77,12 @@ export type F0DatePickerInlineProps = F0DatePickerSharedProps &
      * has no reason to request it.
      */
     onRequestChange?: () => void
+    /**
+     * Offers the date for copying. The row picks up the same hover treatment an
+     * editable one has, and the copy action sits beside whatever else the row
+     * carries — on a `readonly` row, it is the only action there is.
+     */
+    copyable?: boolean
     /** Called whenever the row moves between reading the date and editing it. */
     onModeChange?: (mode: DatePickerMode) => void
     open?: never

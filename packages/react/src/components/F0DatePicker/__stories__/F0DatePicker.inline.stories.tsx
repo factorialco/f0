@@ -26,6 +26,7 @@ function DateRow({
   clearable,
   status,
   hint,
+  copyable,
 }: {
   label?: string
   placeholder?: string
@@ -36,6 +37,7 @@ function DateRow({
   clearable?: boolean
   status?: InputFieldStatus
   hint?: string
+  copyable?: boolean
 }) {
   const [value, setValue] = useState<DatePickerValue | undefined>(initialValue)
 
@@ -54,6 +56,7 @@ function DateRow({
           clearable={clearable}
           status={status}
           hint={hint}
+          copyable={copyable}
           onChange={setValue}
         />
       </div>
@@ -110,7 +113,11 @@ export const DetailRow: Story = {
       expect(calendar).toHaveClass("group-focus-within:opacity-100")
     })
 
-    const readHeight = row.getBoundingClientRect().height
+    // The row wrapper is what must not resize; the value button inside it is
+    // only as tall as its content.
+    const readHeight = canvas
+      .getByTestId("date-display-row")
+      .getBoundingClientRect().height
 
     await step("Open the calendar on the date already set", async () => {
       await userEvent.click(row)
@@ -164,8 +171,12 @@ export const DetailRowRequestChange: Story = {
     await step("Reach the request with the keyboard alone", async () => {
       // Reaching it is the other half of the reveal, and the half a play
       // function can drive: focus is real state where `:hover` is not.
+      // The readonly value takes focus first, the way a native readonly input
+      // does; the action is the next stop.
       await userEvent.tab()
+      expect(canvas.getByRole("textbox", { name: "Date" })).toHaveFocus()
 
+      await userEvent.tab()
       const request = canvas.getByRole("button", {
         name: "Request a change to Date",
       })
@@ -191,6 +202,75 @@ export const DetailRowReadOnly: Story = {
       expect(
         within(canvasElement.closest("body")!).queryByRole("grid")
       ).not.toBeInTheDocument()
+    })
+  },
+}
+
+/**
+ * A date the reader can only take away with them. The row picks up the same
+ * hover treatment an editable one has, but the only action is copy.
+ */
+export const DetailRowCopyable: Story = {
+  args: { readonly: true, copyable: true },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Offer copy, and nothing else", () => {
+      expect(
+        canvas.getByRole("button", { name: "Copy Date" })
+      ).toBeInTheDocument()
+      expect(
+        canvas.queryByRole("button", { name: "Edit Date" })
+      ).not.toBeInTheDocument()
+    })
+
+    await step(
+      "Let the keyboard reach the value, then the action",
+      async () => {
+        await userEvent.tab()
+        const value = canvas.getByRole("textbox", { name: "Date" })
+        expect(value).toHaveFocus()
+        expect(value).toHaveAttribute("aria-readonly", "true")
+
+        await userEvent.tab()
+        expect(canvas.getByRole("button", { name: "Copy Date" })).toHaveFocus()
+      }
+    )
+  },
+}
+
+/**
+ * Both actions at once, the way the prototype's Employee number row carries
+ * them: the calendar first, copy second, in one strip.
+ */
+export const DetailRowEditableAndCopyable: Story = {
+  args: { copyable: true },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Carry the calendar and copy side by side", () => {
+      expect(
+        canvas.getByRole("button", { name: "Edit Date" })
+      ).toBeInTheDocument()
+      expect(
+        canvas.getByRole("button", { name: "Copy Date" })
+      ).toBeInTheDocument()
+    })
+
+    await step("Copy without opening the calendar", async () => {
+      // Reached by keyboard: the strip is `pointer-events-none` until revealed,
+      // and `:hover` is not something a play function can enter.
+      await userEvent.tab()
+      await userEvent.tab()
+      const copy = canvas.getByRole("button", { name: "Copy Date" })
+      expect(copy).toHaveFocus()
+
+      await userEvent.click(copy)
+
+      // Only that the calendar stayed shut. The confirmed state needs a real
+      // clipboard write, which the headless runner does not grant — it is
+      // asserted in the unit tests, where userEvent stubs the clipboard.
+      expect(canvas.queryByRole("textbox")).not.toBeInTheDocument()
     })
   },
 }
@@ -237,6 +317,8 @@ export const Snapshot: Story = {
       <DateRow value={undefined} placeholder="no date" />
       <DateRow status={{ type: "error", message: "Could not save" }} />
       <DateRow hint="Used by years-of-service reports" />
+      <DateRow readonly copyable />
+      <DateRow copyable />
     </div>
   ),
 }
