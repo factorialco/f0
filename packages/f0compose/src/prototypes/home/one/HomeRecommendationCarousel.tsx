@@ -25,7 +25,8 @@ export type Recommendation = {
   primary?: boolean
 }
 
-const GAP = 8
+/** Between the pills themselves (Angel, 2026-09-15). */
+const GAP = 2
 /** Kept clear on the right, so nothing is legible under the chevron. */
 const CHEVRON_ROOM = 12
 /** How steep the fade into the chevron is (Angel, 2026-09-15). */

@@ -1262,6 +1262,7 @@ function HomeCanvas() {
   const pinRef = useRef<HTMLDivElement>(null)
   const firstScreenRef = useRef<HTMLDivElement>(null)
   const digestRef = useRef<HTMLDivElement>(null)
+  const recommendationsRef = useRef<HTMLDivElement>(null)
   /** How far the first screen is held, which is also how long the dotted
    *  grid takes to fade out. */
   const pinned = useRef(0)
@@ -1308,6 +1309,16 @@ function HomeCanvas() {
       // top of the content: the screen is held for `pin`, and only then
       // does the composer start climbing towards that edge (Angel,
       // 2026-09-15).
+      const row = recommendationsRef.current
+      const sheet = scroller.querySelector("[data-home-input-surface]")
+      if (row && sheet) {
+        row.style.top = "0px"
+        row.style.top = `${
+          sheet.getBoundingClientRect().bottom -
+          row.getBoundingClientRect().top +
+          20
+        }px`
+      }
       const composer = scroller.querySelector("[data-home-promptbar]")
       hideComposerAt.current = composer
         ? pin + Math.max(0, composer.getBoundingClientRect().top - top)
@@ -1345,6 +1356,7 @@ function HomeCanvas() {
       if (pinBox) pinBox.style.height = ""
       if (screen) screen.style.height = ""
       if (digest) digest.style.marginTop = ""
+      if (recommendationsRef.current) recommendationsRef.current.style.top = ""
       if (backdrop) backdrop.style.opacity = ""
       setHomeScrolled(false)
     }
@@ -1812,13 +1824,14 @@ function HomeCanvas() {
                       >
                         <div data-hybrid-target />
                       </div>
-                      {/* Hung off the midline rather than stacked under the
-                        input: in the flow its height would push the input
-                        off centre, and the input owns the midline (Angel,
-                        2026-09-15). 84px = half the sheet plus the 20px
-                        gap. It scrolls with this block like everything
-                        else. */}
-                      <div className="absolute inset-x-0 top-1/2 mt-[84px] flex justify-center">
+                      {/* Measured off the SHEET rather than the midline,
+                        so the 20px under the input survives whatever
+                        padding the screen carries (Angel, 2026-09-15),
+                        while still taking no part in the centring. */}
+                      <div
+                        ref={recommendationsRef}
+                        className="absolute inset-x-0 flex justify-center"
+                      >
                         <HomeRecommendations />
                       </div>
                     </div>
