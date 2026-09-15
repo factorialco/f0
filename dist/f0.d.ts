@@ -6016,8 +6016,6 @@ export declare const defaultTranslations: {
             readonly reasonPlaceholder: "Anything that helps them decide";
             readonly submit: "Send request";
             readonly pending: "Requested: {{value}}";
-            readonly approve: "Approve";
-            readonly decline: "Decline";
         };
         readonly validation: {
             readonly required: "This field is required";
@@ -10800,12 +10798,6 @@ declare type F0FieldChangeRequest = {
 };
 
 /**
- * How a change request ends. `cancelled` is the asker withdrawing it; the other
- * two are whoever administers the record answering.
- */
-declare type F0FieldChangeResolution = "approved" | "declined" | "cancelled";
-
-/**
  * Complete F0 field configuration (union of all possible configs)
  * @typeParam T - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
@@ -10839,21 +10831,20 @@ declare type F0FieldPendingChange = {
  * Lets a reader who may not edit the field ask whoever administers the record
  * to change it.
  *
+ * Answering a request is not part of this: the record screen is where someone
+ * asks and where they see they have asked, and the approving happens wherever
+ * the product already handles approvals. `onCancel` is the one resolution that
+ * belongs here, because withdrawing is the asker taking back their own ask.
+ *
  * `pending` is app state on a field definition that is otherwise static config.
  * `status` and the functional `disabled` already work that way, and the
- * alternative — the row asking a second source who has asked for what — puts
- * the ask and its answer in two different places.
+ * alternative puts the ask and its answer in two different places.
  */
 declare type F0FieldRequestChange = {
     onSubmit: (change: F0FieldChangeRequest) => void | Promise<void>;
     pending?: F0FieldPendingChange;
-    onResolve?: (id: string, resolution: F0FieldChangeResolution) => void;
-    /**
-     * Whether this reader answers the request rather than only withdrawing it.
-     * A capability, not a role: the same person may resolve one record and not
-     * another.
-     */
-    canResolve?: boolean;
+    /** Withdraws the pending request. Omit where the asker cannot take it back. */
+    onCancel?: (id: string) => void;
 };
 
 /**

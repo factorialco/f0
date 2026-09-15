@@ -6044,8 +6044,6 @@ declare const defaultTranslations: {
             readonly reasonPlaceholder: "Anything that helps them decide";
             readonly submit: "Send request";
             readonly pending: "Requested: {{value}}";
-            readonly approve: "Approve";
-            readonly decline: "Decline";
         };
         readonly validation: {
             readonly required: "This field is required";

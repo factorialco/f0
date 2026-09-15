@@ -1220,9 +1220,7 @@ const e = {
       reasonLabel: "Why (optional)",
       reasonPlaceholder: "Anything that helps them decide",
       submit: "Send request",
-      pending: "Requested: {{value}}",
-      approve: "Approve",
-      decline: "Decline"
+      pending: "Requested: {{value}}"
     },
     validation: {
       required: "This field is required",
