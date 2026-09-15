@@ -217,6 +217,10 @@ export const defaultTranslations = {
     actions: {
       actions: "Actions",
     },
+    search: {
+      searching: "Searching for {{query}}\u2026",
+      suggestionsHeader: "Try searching for",
+    },
     presets: {
       createTitle: "Save view",
       createDescription:

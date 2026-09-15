@@ -40,10 +40,23 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
+  /** Fired when the query is submitted — Enter, or picking a suggestion. */
+  onSubmit?: (query: string) => void
+  /** Example queries offered while the input is focused and empty. */
+  suggestions?: string[]
+  /** Placeholders cycled while the field sits idle and empty. */
+  placeholderRotation?: string[]
+  /** Holds the in-input searching state while a submitted query resolves. */
+  status?: "idle" | "searching"
+  /** Aborts the in-flight query (the clear button while searching). */
+  onCancel?: () => void
 }
 
 // Trigger the next page when the user scrolls within this many px of the bottom.
 const LOAD_MORE_SCROLL_MARGIN = 56
+
+// Long enough to read a whole example query before it is swapped out.
+const PLACEHOLDER_ROTATION_MS = 4000
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
@@ -63,10 +76,16 @@ export const Search = ({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
+  onSubmit,
+  suggestions,
+  placeholderRotation,
+  status = "idle",
+  onCancel,
 }: SearchProps) => {
   const [open, setOpen] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [placeholderIndex, setPlaceholderIndex] = useState(0)
   const uniqueId = useId()
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -77,6 +96,22 @@ export const Search = ({
   const resultItems = results ?? []
   const resultsVisible =
     open && showResults && Boolean(value) && resultItems.length > 0
+
+  const searching = status === "searching"
+  // An in-flight query holds the field open: collapsing would hide the spinner
+  // and the only affordance to abort it.
+  const expanded = open || searching
+  const suggestionItems = suggestions ?? []
+  // Suggestions are the empty-input counterpart of the results list: they go as
+  // soon as there is something to match against.
+  const suggestionsVisible =
+    open && showResults && !value && !searching && suggestionItems.length > 0
+
+  const rotation = placeholderRotation ?? []
+  const placeholder =
+    rotation.length > 0
+      ? (rotation[placeholderIndex % rotation.length] ?? i18n.actions.search)
+      : i18n.actions.search
 
   const handleResultsScroll = (e: React.UIEvent<HTMLUListElement>) => {
     if (!hasMore || loadingMore || !onLoadMore) {
@@ -90,6 +125,18 @@ export const Search = ({
       onLoadMore()
     }
   }
+
+  // Cycle the example placeholders only while the field is idle — a typed value
+  // or an in-flight query owns the text instead.
+  useEffect(() => {
+    if (rotation.length < 2 || value || searching) {
+      return
+    }
+    const timer = setInterval(() => {
+      setPlaceholderIndex((index) => (index + 1) % rotation.length)
+    }, PLACEHOLDER_ROTATION_MS)
+    return () => clearInterval(timer)
+  }, [rotation.length, value, searching])
 
   // Highlight the first row whenever results change, so a plain Enter jumps to
   // the top match without the user having to arrow down or click first.
@@ -112,6 +159,26 @@ export const Search = ({
     }
   }
 
+  const submitQuery = (query: string) => {
+    if (!query) {
+      return
+    }
+    onChange(query)
+    setShowResults(false)
+    setActiveIndex(-1)
+    onSubmit?.(query)
+  }
+
+  // While a query is in flight the clear button aborts it rather than wiping
+  // the field, so the user keeps what they typed.
+  const handleClearOrCancel = () => {
+    if (searching) {
+      onCancel?.()
+      return
+    }
+    handleClear()
+  }
+
   const selectResult = (result: SearchResultItem) => {
     onChange(result.title) // auto-fill the input with the picked result
     onResultSelect?.(result.id)
@@ -120,7 +187,7 @@ export const Search = ({
   }
 
   useOnClickOutside(ref, () => {
-    if (open) {
+    if (open && !searching) {
       setOpen(false)
     }
     setShowResults(false)
@@ -129,6 +196,7 @@ export const Search = ({
   const handleOpen = () => {
     if (!open) {
       setOpen(true)
+      setShowResults(true)
       setTimeout(() => {
         inputRef.current?.focus()
       }, 0)
@@ -164,6 +232,31 @@ export const Search = ({
     }
   }
 
+  /** Arrows and Enter, while the example queries are the thing being driven. */
+  const handleSuggestionsKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      setActiveIndex((index) =>
+        index < suggestionItems.length - 1 ? index + 1 : index
+      )
+      return
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault()
+      setActiveIndex((index) => (index > 0 ? index - 1 : 0))
+      return
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault()
+      const suggestion = suggestionItems[activeIndex]
+      if (suggestion) {
+        submitQuery(suggestion)
+      }
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!open) {
       if (e.key === "Enter" || e.key === " ") {
@@ -184,11 +277,22 @@ export const Search = ({
       return
     }
 
-    if (!resultsVisible) {
+    if (suggestionsVisible) {
+      handleSuggestionsKeyDown(e)
       return
     }
 
-    handleResultsKeyDown(e)
+    if (resultsVisible) {
+      handleResultsKeyDown(e)
+      return
+    }
+
+    // No list is driving the field, so Enter hands the raw query to the
+    // consumer — the caller decides what to do with it.
+    if (e.key === "Enter" && value) {
+      e.preventDefault()
+      onSubmit?.(value)
+    }
   }
 
   return (
@@ -201,11 +305,14 @@ export const Search = ({
             layout
             ref={ref}
             className={cn(
-              "relative flex h-8 w-fit min-w-8 max-w-[180px] items-center justify-center",
-              (open || value) && "w-[180px]"
+              "relative flex h-8 w-fit min-w-8 items-center justify-center",
+              // The toolbar slot is content-sized (`shrink-0`), so there is no
+              // free space for `flex-1` to claim — size against the viewport
+              // instead and cap it so wide screens do not get a runaway field.
+              (expanded || value) && "w-[min(340px,40vw)] min-w-[180px]"
             )}
           >
-            {open ? (
+            {expanded ? (
               <motion.div
                 layout
                 layoutId="search-container"
@@ -222,27 +329,43 @@ export const Search = ({
                     layoutId="search-icon"
                   >
                     <IconComponent
-                      loading={loading || resultsLoading}
+                      loading={loading || resultsLoading || searching}
                       key="loading"
                     />
                   </motion.div>
-                  <motion.input
-                    layout
-                    ref={inputRef}
-                    type="text"
-                    value={value}
-                    placeholder={i18n.actions.search}
-                    onChange={(e) => {
-                      onChange(e.target.value)
-                      setShowResults(true)
-                      setActiveIndex(0)
-                    }}
-                    className="h-full w-full appearance-none rounded border-none bg-f1-background py-2 pl-7 text-base text-f1-foreground"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onKeyDown={handleKeyDown}
-                  />
+                  {searching ? (
+                    <motion.div
+                      layout
+                      className="flex h-full w-full items-center overflow-hidden py-2 pl-7 text-base text-f1-foreground-secondary"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <span className="truncate">
+                        {i18n.t("collections.search.searching", {
+                          query: value ?? "",
+                        })}
+                      </span>
+                    </motion.div>
+                  ) : (
+                    <motion.input
+                      layout
+                      ref={inputRef}
+                      type="text"
+                      value={value}
+                      placeholder={placeholder}
+                      onChange={(e) => {
+                        onChange(e.target.value)
+                        setShowResults(true)
+                        setActiveIndex(0)
+                      }}
+                      className="h-full w-full appearance-none rounded border-none bg-f1-background py-2 pl-7 text-base text-f1-foreground"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onKeyDown={handleKeyDown}
+                    />
+                  )}
                   <motion.div
                     tabIndex={0}
                     className={cn(
@@ -251,15 +374,17 @@ export const Search = ({
                     )}
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleClear()
+                      handleClearOrCancel()
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
-                        handleClear()
+                        handleClearOrCancel()
                       }
                     }}
                     role="button"
-                    aria-label={i18n.actions.clear}
+                    aria-label={
+                      searching ? i18n.actions.cancel : i18n.actions.clear
+                    }
                   >
                     <F0Icon icon={CrossedCircle} size="md" color="secondary" />
                   </motion.div>
@@ -328,6 +453,34 @@ export const Search = ({
                 </motion.div>
               </motion.div>
             )}
+            {suggestionsVisible ? (
+              <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-full min-w-[248px] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
+                <li className="px-2 py-1.5 text-sm text-f1-foreground-secondary">
+                  {i18n.t("collections.search.suggestionsHeader")}
+                </li>
+                {suggestionItems.map((suggestion, index) => (
+                  <li key={suggestion}>
+                    <button
+                      ref={index === activeIndex ? activeItemRef : null}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onClick={() => submitQuery(suggestion)}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-f1-background-secondary",
+                        index === activeIndex && "bg-f1-background-secondary",
+                        focusRing()
+                      )}
+                    >
+                      <F0Icon icon={SearchIcon} size="md" color="secondary" />
+                      <span className="truncate text-sm text-f1-foreground">
+                        {suggestion}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             {resultsVisible ? (
               <ul
                 className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
