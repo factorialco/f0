@@ -1244,7 +1244,25 @@ function HomeCanvas() {
   // PAIR overflows — when it is the wider of the two. The narrower one
   // keeps pushing, so the canvas always has one side to rest against.
 
-  const rightWidth = hideWidgets ? 0 : 384
+  /**
+   * The widget column's REAL width, not the 384 it takes when every
+   * widget is open: fold them all and it renders as an 88px rail, and a
+   * hard-coded 384 made the push-vs-overlay math think it still needed
+   * the full column — so the canvas parked at its 480 floor with ~280px
+   * of dead space to its right (Angel, 2026-09-14: "smudged to the left").
+   */
+  const rightRef = useRef<HTMLDivElement>(null)
+  const [rightMeasured, setRightMeasured] = useState(0)
+  useLayoutEffect(() => {
+    const el = rightRef.current
+    if (!el) return
+    const measure = () => setRightMeasured(el.getBoundingClientRect().width)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  })
+  const rightWidth = hideWidgets ? 0 : rightMeasured || 384
   const leftWidth = stackWidth(chats.state)
   const room = shellWidth - CANVAS_MIN_WIDTH
   const soloOverflows = (width: number) => shellWidth > 0 && width > room
@@ -1555,13 +1573,15 @@ function HomeCanvas() {
           (per Oskar) — its card lives outside the column, over the
           canvas, hanging from the navbar button that opened it. */}
         {!hideWidgets && (
-          <StaticWidgets
-            onCloseConversation={
-              activeConversation && !activeConversation.homeBriefing
-                ? goHome
-                : undefined
-            }
-          />
+          <div ref={rightRef} className="flex h-full min-h-0 shrink-0">
+            <StaticWidgets
+              onCloseConversation={
+                activeConversation && !activeConversation.homeBriefing
+                  ? goHome
+                  : undefined
+              }
+            />
+          </div>
         )}
       </div>
     </div>

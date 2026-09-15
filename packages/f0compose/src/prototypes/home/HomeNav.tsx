@@ -8,7 +8,6 @@ import {
 } from "@factorialco/f0-react"
 import { SearchBar } from "@factorialco/f0-react/dist/experimental"
 import {
-  Archive,
   Calendar,
   ChartLine,
   Check,
@@ -732,7 +731,7 @@ function HomePanelBody() {
             analytics in one place, while the Files MODULE lives on the
             rail. */}
           <NavRow
-            icon={Archive}
+            icon={Folder}
             label="Artifacts"
             active={activeId === null && view === "artifacts"}
             onClick={() => openScreen("artifacts")}
