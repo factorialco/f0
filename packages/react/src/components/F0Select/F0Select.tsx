@@ -1360,6 +1360,24 @@ const F0SelectComponent = forwardRef(function Select<
     .filter(Boolean)
     .join(", ")
 
+  /**
+   * Whether the trigger is ALREADY showing the whole selection — reported up by
+   * `SelectedItems`, which is the only place that can tell: it knows which
+   * reading it rendered (names, a count, a tag, `…`) and measures whether the
+   * text survived its box.
+   *
+   * The same rule the field's label has always followed, now applied to the
+   * selection too: say what the trigger cannot, stay shut otherwise. So the
+   * tooltip keeps the selection line only where it adds something — text the
+   * box clipped, or a count standing in for the names — and drops it where the
+   * trigger spells it out in full. With `hideLabel` the tooltip still opens on
+   * the field's name alone, which is nowhere on screen.
+   *
+   * Starts `false` so the tooltip is present until measurement says otherwise:
+   * a tooltip that arrives a frame late beats a hover that explains nothing.
+   */
+  const [selectionSpelledOut, setSelectionSpelledOut] = useState(false)
+
   const withTriggerTooltip = (trigger: React.ReactNode) => {
     /**
      * The tooltip needs ONE DOM element to hang its handlers on, and the real
@@ -1392,7 +1410,10 @@ const F0SelectComponent = forwardRef(function Select<
     return (
       <TooltipInternal
         label={hideLabel ? label : undefined}
-        description={selectedTooltipText}
+        // Empty rather than absent: `TooltipCopyProps` demands at least one of
+        // label/description, and this tooltip stays mounted with nothing to say
+        // by design — `hasContent` treats "" as nothing and never opens on it.
+        description={selectionSpelledOut ? "" : selectedTooltipText}
       >
         {box}
       </TooltipInternal>
@@ -1551,6 +1572,12 @@ const F0SelectComponent = forwardRef(function Select<
                     // both put two icons 4px apart on one trigger. Options keep
                     // their icons for the rows regardless.
                     hideItemIcon={!!icon}
+                    // `withTriggerTooltip` below already wraps this whole
+                    // trigger in a tooltip that reads out the label and the
+                    // full selection. A second one on the clipped text would
+                    // share the hover target and fight it — see the prop.
+                    noTooltip
+                    onSpelledOutChange={setSelectionSpelledOut}
                   />
                 ) : null}
               </button>
