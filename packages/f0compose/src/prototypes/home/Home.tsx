@@ -144,7 +144,7 @@ const FULL_BLEED_CSS = `
      a contrast device.
        ground    #F7F7F7  hsl(0 0% 97%) — sidebars AND the surface behind
                           the content sheet
-       sheet     #FAFAFA  hsl(0 0% 98%) — the content itself, with a
+       sheet     #FCFCFC  hsl(0 0% 99%) — the content itself, with a
                           secondary border and a shadow
        cards     #FFFFFF  widgets, windows and menus, one step above the
                           sheet they sit on
@@ -426,7 +426,7 @@ const FULL_BLEED_CSS = `
   /* Home is a white sheet now like every other view, so its sticky
      greeting bar takes the sheet rather than the page tone — otherwise it
      reads as a grey band behind "Welcome to your new Home". */
-  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: #fafafa; }
+  [data-hybrid-root][data-view="home"] .f0c-canvas-surface { background: #fcfcfc; }
   .dark [data-hybrid-root][data-view="home"] .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
@@ -462,7 +462,7 @@ const FULL_BLEED_CSS = `
      sheet is transparent and the bar sits on the page itself. */
   main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] thead th,
   main#content [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] .f0c-canvas-surface {
-    background: #fafafa;
+    background: #fcfcfc;
   }
 
   .f0c-window-overlay {

@@ -273,7 +273,7 @@
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: #fafafa;
+  background: #fcfcfc;
 }
 [data-hybrid-dock] {
   position: absolute;
@@ -515,7 +515,7 @@ body:has([data-hybrid-root]:not([data-view="home"])) [data-home-panel] {
    (Angel, 2026-09-14: "ahora está flotando free"). Its canvas keeps its
    own scroller and its in-flow composer, so only the surface changes. */
 [data-hybrid-root][data-view="home"] [data-hybrid-canvas] {
-  background: #fafafa;
+  background: #fcfcfc;
   overflow: hidden;
 }
 body:has([data-hybrid-root][data-view="home"]) main#content,

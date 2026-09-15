@@ -1149,7 +1149,7 @@ function HubRow({
         <F0Icon
           icon={pinned ? PushPinSolid : PushPin}
           size="sm"
-          color={pinned ? "info" : "secondary"}
+          color="secondary"
         />
       </button>
     </div>
@@ -1310,10 +1310,14 @@ function RailItem({
             36x36 icon chip at radius 8, a 20px glyph inside it, and an
             11/12 label 4px below. The button stays the target — the
             chip is only what lights up. */}
+        {/* Active is RADICAL, not grey (Angel, 2026-09-14): f0's accent
+            ramp is radical red, so the chip takes its 5% background and
+            the glyph its 70 foreground. Hover stays neutral — only where
+            you ARE is branded. */}
         <span
           className={`flex size-9 items-center justify-center rounded-lg ${
             active
-              ? "bg-f1-background-secondary"
+              ? "bg-f1-background-accent text-f1-icon-accent"
               : "group-hover:bg-f1-background-secondary"
           }`}
         >
@@ -1328,13 +1332,21 @@ function RailItem({
               inside a 36px chip, which is what made the rail read small
               beside Slack's. Filled when active, outline otherwise —
               see `filledRailIcons`. */}
+          {/* `currentColor` when active, inheriting the chip's accent:
+              F0Icon's own color prop compiles a class out of f0's dist,
+              which this prototype's Tailwind pass never scans, so accent
+              came out grey. */}
           <F0Icon
             icon={filled && active ? filled : icon}
             size="lg"
-            color="default"
+            color={active ? "currentColor" : "default"}
           />
         </span>
-        <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
+        <span
+          className={`w-full truncate text-center text-[11px] font-semibold leading-3 ${
+            active ? "text-f1-foreground-accent" : "text-f1-foreground-secondary"
+          }`}
+        >
           {label}
         </span>
       </button>
@@ -1588,16 +1600,21 @@ export function HomeNav() {
           <CompanySwitcher />
         </div>
         <div className="flex w-full flex-col px-1.5">
-          {railSections.map((s) => (
-            <RailItem
-              key={s.id}
-              icon={s.icon}
-              filled={FILLED_RAIL_ICONS[s.id]}
-              label={s.label}
-              active={s.id === activeSection}
-              onClick={() => pickSection(s.id)}
-            />
-          ))}
+          {/* Tools is the drawer everything else came out of, so it sits
+              at the bottom of the list whatever is pinned above it
+              (Angel, 2026-09-14). */}
+          {railSections
+            .filter((s) => s.id !== "hub")
+            .map((s) => (
+              <RailItem
+                key={s.id}
+                icon={s.icon}
+                filled={FILLED_RAIL_ICONS[s.id]}
+                label={s.label}
+                active={s.id === activeSection}
+                onClick={() => pickSection(s.id)}
+              />
+            ))}
           {/* The modules this company actually has, in place of a generic
               "Tools" door. */}
           {promoted?.map((label) => (
@@ -1609,20 +1626,27 @@ export function HomeNav() {
               onClick={() => openModule(label)}
             />
           ))}
-          {railPins.length > 0 && (
-            <>
-              <PanelDivider />
-              {railPins.map((label) => (
-                <RailItem
-                  key={label}
-                  icon={HUB_ICONS[label] ?? HubIcon}
-                  label={railLabel(label)}
-                  active={view === hubSlug(label)}
-                  onClick={() => openModule(label)}
-                />
-              ))}
-            </>
-          )}
+          {railPins.map((label) => (
+            <RailItem
+              key={label}
+              icon={HUB_ICONS[label] ?? HubIcon}
+              label={railLabel(label)}
+              active={view === hubSlug(label)}
+              onClick={() => openModule(label)}
+            />
+          ))}
+          {railSections
+            .filter((s) => s.id === "hub")
+            .map((s) => (
+              <RailItem
+                key={s.id}
+                icon={s.icon}
+                filled={FILLED_RAIL_ICONS[s.id]}
+                label={s.label}
+                active={s.id === activeSection}
+                onClick={() => pickSection(s.id)}
+              />
+            ))}
         </div>
         {/* Marketplace moved into Tools and Notifications into the Inbox,
             so what is left down here is Settings and you. Help lives in
