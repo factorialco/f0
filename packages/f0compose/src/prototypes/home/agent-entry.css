@@ -381,6 +381,12 @@
 [data-home-rail] {
   background: #f7f7f7 !important;
 }
+/* Alone, the rail rejoins the ground: the darker tone is there to sit
+   BEHIND a second level, and with nothing beside it it just reads as a
+   stripe (Angel, 2026-09-14). */
+[data-home-rail][data-panel="closed"] {
+  background: #fafafa !important;
+}
 /* The second sidebar and the surface behind the content sit a point
    above the rail (Angel, 2026-09-14). */
 [data-home-panel] {

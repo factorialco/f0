@@ -12,13 +12,13 @@ export function HomeBackdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 z-0">
       <DotGrid
-        dotSize={2}
-        gap={19}
+        dotSize={3}
+        gap={26}
         baseColor="#D4D6DC"
         activeColor="#E61942"
         proximity={70}
         shockRadius={250}
-        shockStrength={3}
+        shockStrength={4}
         resistance={1600}
         returnDuration={1.5}
       />

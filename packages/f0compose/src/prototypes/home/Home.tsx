@@ -175,6 +175,9 @@ const FULL_BLEED_CSS = `
   [data-home-rail] {
     background: #f7f7f7;
   }
+  [data-home-rail][data-panel="closed"] {
+    background: #fafafa;
+  }
   [data-home-panel] {
     background: #fafafa;
   }
