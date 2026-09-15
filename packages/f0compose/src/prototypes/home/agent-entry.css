@@ -566,6 +566,21 @@ body[data-nav-instant] main#content > * {
   transform: none !important;
 }
 
+/* The recommendation row glides instead of jumping, and each pill fades
+   as it nears the chevron (the opacity itself is set per item in
+   HomeRecommendationCarousel, which cannot use a mask without killing the
+   pills' backdrop blur). */
+.home-recommendations {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.home-recommendations::-webkit-scrollbar {
+  display: none;
+}
+.home-recommendations > div > * {
+  transition: opacity 420ms ease-out;
+}
+
 /* Dark keeps the ramp the light hexes describe: the ground is f0's dark
    base and the sheets are lifted off it by --page. */
 .dark [data-hybrid-canvas] {

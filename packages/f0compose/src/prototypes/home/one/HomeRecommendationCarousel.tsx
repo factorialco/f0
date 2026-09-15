@@ -2,26 +2,21 @@ import type { IconType } from "@factorialco/f0-react"
 
 import { F0Button } from "@factorialco/f0-react"
 import { ChevronLeft, ChevronRight } from "@factorialco/f0-react/icons/app"
-import { useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 import { OneHomeRecommendation } from "./OneHomeRecommendation"
 
 /**
  * The recommendations as a one-line carousel under the composer (Angel,
- * 2026-09-15). The row is masked on the RIGHT only, so an item is already
- * at zero opacity by the time it reaches the chevron; the left edge never
- * fades, because the row always starts on a whole pill.
+ * 2026-09-15). It SCROLLS, it does not loop: the back arrow only appears
+ * once you have moved, and the forward one leaves at the end.
  *
- * Turning is a ROTATION, not a scroll: the right chevron sends the first
- * item to the back of the queue and the left one brings it round again,
- * so the row can never run out. Each turn
- * is a FLIP — the track is animated by the outgoing item's own width,
- * then the order is committed with the transition off, so the swap is
- * invisible.
- *
- * Clock-in is not part of it: it is pinned in front while it is still
- * outstanding, so the first thing under the input is always the thing you
- * have not done yet.
+ * It moves by SCROLLING the viewport, and the right-hand fade is per-item
+ * opacity — neither is a stylistic choice. A mask and a transform both
+ * make their element a BACKDROP ROOT, which is what left the pills'
+ * `backdrop-filter` with nothing behind it to blur: the dotted grid was
+ * showing through them untouched (Angel, 2026-09-15). Scrolling moves the
+ * row without either.
  */
 
 export type Recommendation = {
@@ -30,102 +25,112 @@ export type Recommendation = {
   primary?: boolean
 }
 
-/** Matches the turn's transition below. */
-const TURN_MS = 420
 const GAP = 8
+/** Kept clear on the right, so nothing is legible under the chevron. */
+const CHEVRON_ROOM = 12
+/** Where an item starts fading, measured back from the viewport's edge. */
+const FADE_SPAN = 120
 
 export function HomeRecommendationCarousel({
   pinned,
   items,
 }: {
-  /** Rendered before the carousel and never rotated. */
+  /** Rendered before the carousel and never scrolled. */
   pinned?: React.ReactNode
   items: Recommendation[]
 }) {
-  const [order, setOrder] = useState(items)
-  const [shift, setShift] = useState(0)
-  const [animating, setAnimating] = useState(false)
+  const viewRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const busy = useRef(false)
+  const [scrolled, setScrolled] = useState(0)
+  /** Where the row is heading, so spammed clicks keep stepping. */
+  const target = useRef(0)
+  const [atEnd, setAtEnd] = useState(false)
 
-  const widthOf = (index: number) => {
-    const child = trackRef.current?.children[index]
-    return child instanceof HTMLElement
-      ? child.getBoundingClientRect().width + GAP
-      : 0
+  const sync = () => {
+    const view = viewRef.current
+    const track = trackRef.current
+    if (!view || !track) return
+    const left = view.scrollLeft
+    setScrolled(left)
+    setAtEnd(left >= view.scrollWidth - view.clientWidth - 1)
+    const edge = view.clientWidth - CHEVRON_ROOM
+    for (const child of track.children) {
+      if (!(child instanceof HTMLElement)) continue
+      const fade = (edge - (child.offsetLeft - left)) / FADE_SPAN
+      child.style.opacity = String(Math.max(0, Math.min(1, fade)))
+    }
   }
 
-  /** Forward: the first item slides out to the LEFT and rejoins the back. */
-  const next = () => {
-    if (busy.current || order.length < 2) return
-    busy.current = true
-    setAnimating(true)
-    setShift(-widthOf(0))
-    window.setTimeout(() => {
-      setAnimating(false)
-      setShift(0)
-      setOrder((current) => [...current.slice(1), current[0]])
-      busy.current = false
-    }, TURN_MS)
-  }
+  useLayoutEffect(() => {
+    sync()
+    // Widths move after the webfont lands and whenever the canvas
+    // resizes, and a stale measurement fades pills that are in plain
+    // sight, so re-run on both.
+    const track = trackRef.current
+    if (!track) return
+    const observer = new ResizeObserver(sync)
+    observer.observe(track)
+    void document.fonts?.ready.then(sync)
+    return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items])
 
-  /** Back: the last item is put in front and eased in from the left. */
-  const previous = () => {
-    if (busy.current || order.length < 2) return
-    busy.current = true
-    const incoming = order[order.length - 1]
-    setOrder((current) => [incoming, ...current.slice(0, -1)])
-    // The new first item is in the DOM but not yet on screen: park the
-    // track one item to the left without a transition, then release it.
-    requestAnimationFrame(() => {
-      setAnimating(false)
-      setShift(-widthOf(0))
-      requestAnimationFrame(() => {
-        setAnimating(true)
-        setShift(0)
-        window.setTimeout(() => {
-          busy.current = false
-        }, TURN_MS)
-      })
-    })
+  const go = (direction: 1 | -1) => {
+    const view = viewRef.current
+    const track = trackRef.current
+    if (!view || !track) return
+    const lefts = [...track.children]
+      .filter((child): child is HTMLElement => child instanceof HTMLElement)
+      .map((child) => child.offsetLeft)
+    // Measured from where the row is HEADED, not from where it currently
+    // is: a second click during the glide would otherwise step from a
+    // mid-flight position and barely move (Angel, 2026-09-15).
+    const from = target.current
+    const stop =
+      direction === 1
+        ? lefts.find((left) => left > from + 1)
+        : [...lefts].reverse().find((left) => left < from - 1)
+    const max = view.scrollWidth - view.clientWidth
+    target.current = Math.max(
+      0,
+      Math.min(max, stop ?? (direction === 1 ? max : 0))
+    )
+    view.scrollTo({ left: target.current })
   }
-
-  // Right edge only: the row always starts ON an item, so a left fade
-  // would be eating into a pill that is simply there (Angel, 2026-09-15).
-  const mask =
-    "linear-gradient(to right, black 0px, black calc(100% - 96px), transparent 100%)"
 
   return (
-    <div className="flex w-[712px] max-w-full items-center gap-2">
+    <div className="-mt-1 flex w-[712px] max-w-full items-center gap-2">
       {pinned}
       {/* Clock-in is its own control, not a recommendation, so the two
-          groups are split the way f0's headers split theirs: a 16px
-          hairline (Angel, 2026-09-15). */}
+          groups are split the way f0's headers split theirs. */}
       {pinned && <div className="mx-1 h-4 w-px bg-f1-border-secondary" />}
-      <F0Button
-        variant="outline"
-        size="md"
-        icon={ChevronLeft}
-        hideLabel
-        label="Previous recommendations"
-        onClick={previous}
-      />
+      {scrolled > 0 && (
+        <F0Button
+          variant="outline"
+          size="md"
+          icon={ChevronLeft}
+          hideLabel
+          label="Previous recommendations"
+          onClick={() => go(-1)}
+        />
+      )}
       <div
-        className="min-w-0 flex-1 overflow-hidden"
-        style={{ maskImage: mask, WebkitMaskImage: mask }}
+        ref={viewRef}
+        onScroll={sync}
+        // `overflow-x: hidden` still scrolls programmatically, and the
+        // smooth behaviour is the browser's own, so a second click during
+        // the glide simply retargets it instead of being swallowed.
+        className="home-recommendations min-w-0 flex-1 overflow-x-hidden"
       >
         <div
           ref={trackRef}
-          className="flex w-max items-center"
-          style={{
-            gap: GAP,
-            transform: `translateX(${shift}px)`,
-            transition: animating
-              ? `transform ${TURN_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
-              : "none",
-          }}
+          // `relative`, so each pill's offsetLeft is measured against the
+          // TRACK: without a positioned parent it resolves against a far
+          // ancestor and every fade computes as zero.
+          className="relative flex w-max items-center"
+          style={{ gap: GAP }}
         >
-          {order.map((item) => (
+          {items.map((item) => (
             <OneHomeRecommendation
               key={item.label}
               variant={item.primary ? "primary" : "ghost"}
@@ -135,14 +140,16 @@ export function HomeRecommendationCarousel({
           ))}
         </div>
       </div>
-      <F0Button
-        variant="outline"
-        size="md"
-        icon={ChevronRight}
-        hideLabel
-        label="More recommendations"
-        onClick={next}
-      />
+      {!atEnd && (
+        <F0Button
+          variant="outline"
+          size="md"
+          icon={ChevronRight}
+          hideLabel
+          label="More recommendations"
+          onClick={() => go(1)}
+        />
+      )}
     </div>
   )
 }

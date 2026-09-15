@@ -8,18 +8,26 @@ import { DotGrid } from "./DotGrid"
  *   base    #D4D6DC  a neutral a shade under the sheet it sits on
  *   active  #E61942  radical 50
  */
+/** Falls off towards both edges, at every height. */
+const SIDES =
+  "linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%)"
+/** Falls off towards the TOP only, so the foot of the grid stays solid. */
+const TOP = "linear-gradient(to bottom, transparent 0%, black 38%, black 100%)"
+
 export function HomeBackdrop() {
   return (
     <div
       className="pointer-events-none absolute inset-0 z-0"
       style={{
-        // Densest around the composer, gone by the edges (Angel,
-        // 2026-09-14): the grid is there to give the input a place to
-        // sit, not to tile the whole sheet.
-        maskImage:
-          "radial-gradient(60% 55% at 50% 50%, black 0%, black 30%, transparent 100%)",
-        WebkitMaskImage:
-          "radial-gradient(60% 55% at 50% 50%, black 0%, black 30%, transparent 100%)",
+        // Rounded over the input, flat under it (Angel, 2026-09-15): the
+        // sides fade at every height, while the vertical fade only works
+        // on the way UP. Their intersection curves the top corners in and
+        // leaves the bottom two square, so the grid runs off the foot of
+        // the canvas instead of closing into a disc.
+        maskImage: `${SIDES}, ${TOP}`,
+        maskComposite: "intersect",
+        WebkitMaskImage: `${SIDES}, ${TOP}`,
+        WebkitMaskComposite: "source-in",
       }}
     >
       <DotGrid
