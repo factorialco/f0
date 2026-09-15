@@ -280,6 +280,12 @@ export function HybridHome({ children }: { children: ReactNode }) {
         // once the composer has scrolled away (Angel, 2026-09-15).
         visible: !!view || homeScrolled,
         open: () => {
+          // On HOME the switch changes NOTHING about the canvas: the
+          // input in the middle of it is One's own, and lifting it into
+          // the side panel is what made it appear and disappear under the
+          // toggle (Angel, 2026-09-15). The switch opens its own chat and
+          // leaves the page alone.
+          if (!view) return
           setMode("side")
           setNotice("")
           if (view) {

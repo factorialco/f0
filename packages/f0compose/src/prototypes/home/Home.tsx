@@ -1277,8 +1277,19 @@ function HomeCanvas() {
     const recommendations = scroller.querySelector(
       "[data-home-recommendations]"
     )
+    // Every measurement below reads rects, which are only content
+    // coordinates while the scroller sits at the top. A resize mid-scroll
+    // (the One panel opening, say) would otherwise compute a pin of
+    // hundreds of pixels and shove the input back on screen (Angel,
+    // 2026-09-15), so a measure that cannot be trusted is deferred to the
+    // next time the page is home.
+    let stale = false
     const measure = () => {
       if (!pinBox || !screen || !digest || !recommendations) return
+      if (scroller.scrollTop > 0) {
+        stale = true
+        return
+      }
       const height = scroller.clientHeight
       // The screen is exactly one viewport and STICKS to the top, so it
       // holds still for as long as the box around it is taller than it
@@ -1311,6 +1322,10 @@ function HomeCanvas() {
     const backdrop = document.querySelector<HTMLElement>("[data-home-backdrop]")
     const follow = () => {
       const offset = scroller.scrollTop
+      if (offset === 0 && stale) {
+        stale = false
+        measure()
+      }
       setAtTop(offset < 8)
       setHomeScrolled(offset >= hideComposerAt.current)
       // Gone by the time the digest has climbed into place.
