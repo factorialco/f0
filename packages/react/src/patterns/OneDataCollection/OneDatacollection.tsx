@@ -933,6 +933,15 @@ const OneDataCollectionComp = <
     return hasActiveFilters || search ? "no-results" : "no-data"
   }
 
+  // A query that became chips stops being applied as text: leaving both on
+  // would cross-filter the collection down to nothing.
+  const parsedSearchQuery = source.searchPresentation?.displayValue
+  useEffect(() => {
+    if (parsedSearchQuery) {
+      setCurrentSearch(undefined)
+    }
+  }, [parsedSearchQuery, setCurrentSearch])
+
   const onLoadData = ({
     totalItems,
     filters,
@@ -1768,7 +1777,7 @@ const OneDataCollectionComp = <
                 ) : null}
                 {search ? (
                   <Search
-                    {...source.searchOptions}
+                    {...source.searchPresentation}
                     onChange={setCurrentSearch}
                     value={currentSearch}
                     results={searchPreview.results}
@@ -1823,6 +1832,11 @@ const OneDataCollectionComp = <
                 ) : null}
               </div>
             </OneFilterPicker>
+            {source.searchPresentation?.note ? (
+              <p className="mt-2 text-sm text-f1-foreground-secondary">
+                {source.searchPresentation.note}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}

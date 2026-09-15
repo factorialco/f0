@@ -50,16 +50,43 @@ interface SearchProps {
   status?: "idle" | "searching"
   /** Aborts the in-flight query (the clear button while searching). */
   onCancel?: () => void
+  /**
+   * Text to show in place of `value`, for a query that has been turned into
+   * filters. The chips are what filters from then on, so the query has to stop
+   * being applied as plain text while staying readable in the field.
+   */
+  displayValue?: string
+  /**
+   * The field was reset. A query that became filters leaves those filters
+   * behind, so clearing the text alone would leave the collection filtered by
+   * something no longer written anywhere.
+   */
+  onClear?: () => void
 }
 
 /**
  * The presentational half of the search a consumer can drive: everything the
  * natural-language flow needs to render, with none of the parsing behind it.
+ * Named apart from the datasource's own `SearchOptions`, which configures
+ * whether the search runs at all.
  */
-export type SearchOptions = Pick<
+export type SearchPresentation = Pick<
   SearchProps,
-  "suggestions" | "placeholderRotation" | "onSubmit" | "status" | "onCancel"
->
+  | "suggestions"
+  | "placeholderRotation"
+  | "onSubmit"
+  | "status"
+  | "onCancel"
+  | "displayValue"
+  | "onClear"
+> & {
+  /**
+   * What the parser could not turn into a filter, rendered under the chips.
+   * Never leave an unparsed fragment silent: the chips are what filters, so a
+   * query the user believes was understood must say where it fell short.
+   */
+  note?: string
+}
 
 // Trigger the next page when the user scrolls within this many px of the bottom.
 const LOAD_MORE_SCROLL_MARGIN = 56
@@ -94,6 +121,8 @@ export const Search = ({
   placeholderRotation,
   status = "idle",
   onCancel,
+  displayValue,
+  onClear,
 }: SearchProps) => {
   const [open, setOpen] = useState(false)
   const [showResults, setShowResults] = useState(false)
@@ -110,6 +139,9 @@ export const Search = ({
   const resultsVisible =
     open && showResults && Boolean(value) && resultItems.length > 0
 
+  // What the field shows: the applied query while typing, otherwise the parsed
+  // query the chips now stand for.
+  const text = value ?? displayValue
   const searching = status === "searching"
   // An in-flight query holds the field open: collapsing would hide the spinner
   // and the only affordance to abort it.
@@ -118,7 +150,7 @@ export const Search = ({
   // Suggestions are the empty-input counterpart of the results list: they go as
   // soon as there is something to match against.
   const suggestionsVisible =
-    open && showResults && !value && !searching && suggestionItems.length > 0
+    open && showResults && !text && !searching && suggestionItems.length > 0
 
   const rotation = placeholderRotation ?? []
   const placeholder =
@@ -164,6 +196,7 @@ export const Search = ({
 
   const handleClear = () => {
     onChange(undefined)
+    onClear?.()
     setOpen(false)
     setShowResults(false)
     setActiveIndex(-1)
@@ -307,9 +340,9 @@ export const Search = ({
 
     // No list is driving the field, so Enter hands the raw query to the
     // consumer — the caller decides what to do with it.
-    if (e.key === "Enter" && value) {
+    if (e.key === "Enter" && text) {
       e.preventDefault()
-      onSubmit?.(value)
+      onSubmit?.(text)
     }
   }
 
@@ -327,7 +360,7 @@ export const Search = ({
               // The toolbar slot is content-sized (`shrink-0`), so there is no
               // free space for `flex-1` to claim — size against the viewport
               // instead and cap it so wide screens do not get a runaway field.
-              (expanded || value) && "w-[min(340px,40vw)] min-w-[180px]"
+              (expanded || text) && "w-[min(340px,40vw)] min-w-[180px]"
             )}
           >
             {expanded ? (
@@ -361,7 +394,7 @@ export const Search = ({
                     >
                       <span className="truncate">
                         {i18n.t("collections.search.searching", {
-                          query: value ?? "",
+                          query: text ?? "",
                         })}
                       </span>
                     </motion.div>
@@ -370,7 +403,7 @@ export const Search = ({
                       layout
                       ref={inputRef}
                       type="text"
-                      value={value}
+                      value={text ?? ""}
                       placeholder={placeholder}
                       onChange={(e) => {
                         onChange(e.target.value)
@@ -434,13 +467,13 @@ export const Search = ({
                   >
                     <IconComponent loading={loading || resultsLoading} />
                   </motion.div>
-                  {value ? (
+                  {text ? (
                     <div className="flex h-7 w-full items-center justify-between gap-1.5 overflow-hidden pr-1.5">
                       <motion.div
                         layout
                         className="line-clamp-1 overflow-hidden py-2 pl-7"
                       >
-                        {value}
+                        {text}
                       </motion.div>
                       <motion.div
                         tabIndex={0}
