@@ -1044,10 +1044,48 @@ const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
   { icon: ChartLine, label: "Finish my performance review" },
 ]
 
+/** Four land with the page; the rest arrive one at a time, so the list
+ *  does not open as a wall (Angel, 2026-09-15). */
+const FIRST_BATCH = 4
+const REVEAL_DELAY_MS = 900
+const REVEAL_STEP_MS = 450
+
+function Reveal({ children }: { children: React.ReactNode }) {
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setShown(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
+  return (
+    <div
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "none" : "translateY(6px)",
+        transition: "opacity 260ms ease-out, transform 260ms ease-out",
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 function HomeRecommendations() {
   const [clockedIn, setClockedIn] = useState(false)
+  // Clock-in counts as one of the four, and it holds its slot even after
+  // it has been acted on, so the list never jumps a row up.
+  const [count, setCount] = useState(FIRST_BATCH - 1)
+
+  useEffect(() => {
+    if (count >= RECOMMENDATIONS.length) return
+    const timer = window.setTimeout(
+      () => setCount((current) => current + 1),
+      count === FIRST_BATCH - 1 ? REVEAL_DELAY_MS : REVEAL_STEP_MS
+    )
+    return () => window.clearTimeout(timer)
+  }, [count])
+
   return (
-    <div className="flex flex-col items-start gap-1.5 px-1 pt-1">
+    <div className="flex w-[712px] max-w-full flex-col items-start gap-1.5 px-1 pb-8 pt-3">
       {!clockedIn && (
         <OneHomeRecommendation
           variant="primary"
@@ -1058,14 +1096,15 @@ function HomeRecommendations() {
           onDismissed={() => setClockedIn(true)}
         />
       )}
-      {RECOMMENDATIONS.map((item, index) => (
-        <OneHomeRecommendation
-          key={item.label}
-          // Once the clock is running the digest is what leads the list.
-          variant={clockedIn && index === 0 ? "primary" : "ghost"}
-          icon={item.icon}
-          label={item.label}
-        />
+      {RECOMMENDATIONS.slice(0, count).map((item, index) => (
+        <Reveal key={item.label}>
+          <OneHomeRecommendation
+            // Once the clock is running the digest is what leads the list.
+            variant={clockedIn && index === 0 ? "primary" : "ghost"}
+            icon={item.icon}
+            label={item.label}
+          />
+        </Reveal>
       ))}
     </div>
   )
@@ -1623,7 +1662,14 @@ function HomeCanvas() {
                   : "home-canvas-scroll overflow-y-auto"
               }`}
             >
-              {homeLanding ? null : activeConversation ? (
+              {/* The recommendations live in the SCROLLER, not beside the
+                  composer: the composer is centred between two flex-1
+                  siblings, so anything sharing its slot would push it off
+                  the midline as the list grows (Angel, 2026-09-15). Here
+                  they hang under it and scroll. */}
+              {homeLanding ? (
+                <HomeRecommendations />
+              ) : activeConversation ? (
                 <div
                   data-home-inline-conversation
                   className="flex w-full min-w-0 flex-col"
@@ -1715,9 +1761,6 @@ function HomeCanvas() {
                 className="relative z-10 order-2 w-[712px] max-w-full shrink-0"
               >
                 <div data-hybrid-target />
-                {/* What One suggests you do next, under the input rather
-                    than inside it (Angel, 2026-09-15). */}
-                {homeLanding && <HomeRecommendations />}
               </div>
             )}
           </div>
