@@ -13,7 +13,12 @@ import {
 } from "@/ui/form"
 import { generateAnchorId, useF0FormContext } from "../context"
 import type { RenderCustomFieldSelectConfig } from "../types"
-import { renderFieldInput } from "./renderFieldInput"
+import { InlineFieldRow } from "./inline/InlineFieldRow"
+import { resolveInlineConfig } from "./inline/types"
+import {
+  renderFieldInput,
+  type RenderFieldInputOptions,
+} from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
 import { evaluateDisabled, evaluateRenderIf, resolveFieldAlert } from "./utils"
@@ -101,16 +106,33 @@ function renderFieldContent({
   }
 
   // Default: delegate to renderFieldInput
-  return renderFieldInput({
-    field,
-    formField,
-    fieldState,
-    fieldStatus: field.status,
-    isSubmitting,
-    isRequired,
-    values,
-    isFormLoading,
-  })
+  const renderInput = (extra?: Partial<RenderFieldInputOptions>) =>
+    renderFieldInput({
+      field,
+      formField,
+      fieldState,
+      fieldStatus: field.status,
+      isSubmitting,
+      isRequired,
+      values,
+      isFormLoading,
+      ...extra,
+    })
+
+  const inline = resolveInlineConfig(field.inline)
+  if (inline) {
+    return (
+      <InlineFieldRow
+        field={field}
+        config={inline}
+        value={formField.value}
+        hasError={!!fieldState.error}
+        renderEditor={renderInput}
+      />
+    )
+  }
+
+  return renderInput()
 }
 
 interface FieldRendererProps {

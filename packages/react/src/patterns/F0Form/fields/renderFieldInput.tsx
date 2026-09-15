@@ -38,6 +38,31 @@ export interface RenderFieldInputOptions {
   initialFiles?: InitialFile[]
   /** Whether the form is loading async defaultValues */
   isFormLoading?: boolean
+  /**
+   * Inline detail-row plumbing. The row swaps the editor in when someone
+   * activates it, so the editor has to arrive ready to use: focused, and for
+   * the types whose editor is a popup, already open. `onOpenChange` is how the
+   * row learns the popup closed and the value is text again.
+   *
+   * Only the types an inline row supports forward these — text and number take
+   * `autoFocus`; date and select take `open`/`onOpenChange`.
+   */
+  autoFocus?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /**
+   * The editor is standing in for a detail row, so it drops the chrome the row
+   * does not have: a select uses its own borderless `inline` trigger, and a
+   * date reads in the numeric format the row printed, so the text does not
+   * change shape the moment someone clicks it.
+   */
+  inline?: boolean
+  /**
+   * Forces the control off regardless of the field's own `disabled`. A detail
+   * row uses it for a toggle nobody may change: a toggle has no read-as-text
+   * state to fall back on, so read-only has to be the control itself.
+   */
+  disabled?: boolean
 }
 
 /**
@@ -53,13 +78,21 @@ export function renderFieldInput({
   values,
   initialFiles,
   isFormLoading,
+  autoFocus,
+  open,
+  onOpenChange,
+  inline,
+  disabled,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
 
   // Evaluate disabled (can be boolean or function) and combine with submitting/loading state
   const isDisabled =
-    evaluateDisabled(field.disabled, values) || isSubmitting || !!isFormLoading
+    evaluateDisabled(field.disabled, values) ||
+    isSubmitting ||
+    !!isFormLoading ||
+    !!disabled
 
   const errorAndLoadingProps = {
     error: hasError,
@@ -80,6 +113,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          autoFocus={autoFocus}
         />
       )
     case "number":
@@ -89,6 +123,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          autoFocus={autoFocus}
         />
       )
     case "duration":
@@ -116,6 +151,9 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          open={open}
+          onOpenChange={onOpenChange}
+          inline={inline}
         />
       )
     case "checkbox":
@@ -145,6 +183,9 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          open={open}
+          onOpenChange={onOpenChange}
+          inline={inline}
         />
       )
     case "time":

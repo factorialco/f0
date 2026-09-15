@@ -168,6 +168,10 @@ export const WithDataTestId: Story = {
 }
 
 export const InsideDialog: Story = {
+  // The dialog mounts open and portals to the body, so on the Docs page — which
+  // renders every story at once — it floats over the whole page. It stays a
+  // story, and its play function still runs; it just stops hijacking the docs.
+  tags: ["!autodocs"],
   parameters: {
     docs: {
       description: {

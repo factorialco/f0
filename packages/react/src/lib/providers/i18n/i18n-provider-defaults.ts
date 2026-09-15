@@ -46,6 +46,10 @@ export const defaultTranslations = {
       show: "Show {{label}}",
       hide: "Hide {{label}}",
     },
+    edit: "Edit {{label}}",
+    requestChange: "Request a change to {{label}}",
+    copy: "Copy {{label}}",
+    copied: "Copied {{label}}",
   },
   link: {
     opensInNewTab: "opens in new tab",
@@ -1210,6 +1214,23 @@ export const defaultTranslations = {
       removeErrorTitle: "Remove failed",
     },
     moreInformation: "More information",
+    /** What a field value reads as in a detail row that has no editor open. */
+    inline: {
+      yes: "Yes",
+      no: "No",
+    },
+    /** The ask a detail row offers a reader who may not change the value. */
+    requestChange: {
+      title: "Request a change to {{label}}",
+      description:
+        "This goes to whoever administers this record. They can apply it or turn it down.",
+      currentLabel: "It says now",
+      newLabel: "It should say",
+      reasonLabel: "Why (optional)",
+      reasonPlaceholder: "Anything that helps them decide",
+      submit: "Send request",
+      pending: "Requested: {{value}}",
+    },
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",
