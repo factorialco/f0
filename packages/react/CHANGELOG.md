@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.105.0](https://github.com/factorialco/f0/compare/f0-react-v6.104.0...f0-react-v6.105.0) (2026-09-15)
+
+
+### Features
+
+* **Home:** add tooltipDescription to list rows ([#5547](https://github.com/factorialco/f0/issues/5547)) ([84950a3](https://github.com/factorialco/f0/commit/84950a38464ecb4698212e26fea8962204a8b103))
+
 ## [6.104.0](https://github.com/factorialco/f0/compare/f0-react-v6.103.1...f0-react-v6.104.0) (2026-09-15)
 
 
