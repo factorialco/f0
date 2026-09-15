@@ -1464,21 +1464,17 @@ function HomeCanvas() {
               // turn away from the navbar for no reason. The greeting
               // canvas still wants it — that one is a page, not a thread.
               fullWidthView ? "" : activeConversation ? "px-4" : "px-4 pt-6"
-            } ${
-              // Home centres its content and its composer as ONE block
-              // (Angel, 2026-09-14: the input "should be centered in the
-              // middle of the screen"). With the greeting gone there is
-              // nothing pinning the column to the top, and an input on
-              // the floor of an empty canvas read as a leftover.
-              showPromptBar ? "justify-center" : ""
             }`}
           >
+            {/* Home's composer sits on the VIEWPORT's midline with the
+                content under it (Angel, 2026-09-14). Two flex-1 siblings
+                — this spacer above, the content scroller below — always
+                split the leftover room equally, so the input stays
+                centred however long the briefing runs. */}
+            {showPromptBar && <div className="order-1 w-full flex-1" />}
             <div
-              className={`flex min-h-0 w-full min-w-0 flex-col items-center ${
-                // On Home the content takes only the room it needs, so
-                // the block it forms with the composer can sit in the
-                // middle; everywhere else it still fills the canvas.
-                showPromptBar ? "max-h-full flex-none" : "flex-1"
+              className={`flex min-h-0 w-full min-w-0 flex-1 flex-col items-center ${
+                showPromptBar ? "order-3" : ""
               } ${
                 fullWidthView
                   ? "overflow-hidden"
@@ -1574,7 +1570,7 @@ function HomeCanvas() {
             {showPromptBar && (
               <div
                 data-home-promptbar
-                className="relative w-[712px] max-w-full shrink-0"
+                className="relative order-2 z-10 w-[712px] max-w-full shrink-0"
               >
                 <div data-hybrid-target />
               </div>
