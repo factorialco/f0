@@ -271,6 +271,11 @@ export const DetailRowSelect: Story = {
         const trigger = boxOf(canvasElement, '[role="combobox"]')
         expect(trigger.width).toBe(atRest.width)
         expect(trigger.height).toBe(atRest.height)
+
+        // And the chevron sits at the row's trailing edge, not against the
+        // text with the rest of the row empty beside it.
+        const chevron = boxOf(canvasElement, '[role="combobox"] svg')
+        expect(Math.round(trigger.right - chevron.right)).toBeLessThan(16)
       }
     )
   },

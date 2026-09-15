@@ -139,7 +139,16 @@ const InlineSelectTrigger = forwardRef<
         focusRing()
       )}
     >
-      <span className="flex min-w-0 max-w-full items-center">
+      <span
+        className={cn(
+          "flex min-w-0 max-w-full items-center",
+          // Filling the container puts the chevron at the far edge, where a row
+          // expects it. Left alone it would sit against the text with the rest
+          // of the row empty beside it, which reads as the control having
+          // shrunk rather than as the row having a trailing affordance.
+          fillContainer && "flex-1"
+        )}
+      >
         {hasValue ? (
           <SelectedItems selection={selection} totalSelectedCount={1} />
         ) : (
