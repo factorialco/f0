@@ -639,6 +639,16 @@ const e = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    // How long the turn has been thinking, shown beside the step that is
+    // running. Two keys rather than one unbounded second count, because "137s"
+    // reads badly past a couple of minutes — the consumer picks.
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
+    attribution: "Suggested by One",
+    evidence: {
+      show: "See {{name}}",
+      hide: "Hide {{name}}"
+    },
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -687,6 +697,13 @@ const e = {
       creditsError: "Could not load credits",
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?"
+    },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage"
     },
     reportCard: {
       tableLabel: "Table",
@@ -830,6 +847,7 @@ const e = {
     // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
+    messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
     fileUploadError: "Upload failed",
     micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
     micError: "Couldn't access the microphone.",
@@ -998,6 +1016,31 @@ const e = {
     countryWithDialCode: "{{country}} {{dialCode}}",
     searchCountry: "Search country or dial code",
     noResults: "No country found"
+  },
+  locationInput: {
+    country: "Country",
+    addressLine1: "Address line 1",
+    addressLine2: "Address line 2",
+    city: "City",
+    state: "Region",
+    postalCode: "Postal code",
+    placeholder: "Enter an address",
+    selectCountry: "Select a country",
+    searchCountry: "Search country",
+    noCountryResults: "No country found",
+    noResults: "No addresses found",
+    searchHint: "Type an address to search",
+    noResultsHelp: "Can't find an address?",
+    enterManually: "Enter it manually",
+    addressLine1Placeholder: "Enter a street and number",
+    addressLine2Placeholder: "Enter a floor or unit",
+    postalCodePlaceholder: "e.g., 08001",
+    searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found"
+    }
   },
   imageUpload: {
     uploading: "Uploading...",
