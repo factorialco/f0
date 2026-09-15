@@ -99,6 +99,10 @@ function FieldCard({ children }: { children: React.ReactNode }) {
  * no state to observe, and polling ancestors for opacity 1 breaks the story
  * outside the test runner, where the animation is still running.
  */
+/** The control's own box, which is what a reader sees move if it changes. */
+const boxOf = (root: HTMLElement, selector: string) =>
+  (root.querySelector(selector) as HTMLElement).getBoundingClientRect()
+
 const MONTH_FADE_MS = 300
 const settleMonthFade = () =>
   new Promise((resolve) => setTimeout(resolve, MONTH_FADE_MS))
@@ -158,23 +162,22 @@ export const DetailRow: Story = {
       }
     )
 
-    await step("Hold the row's height when the editor takes over", async () => {
-      const row = canvasElement.querySelector(
-        '[data-slot="inline-field-row"]'
-      ) as HTMLElement
-      const readHeight = row.getBoundingClientRect().height
+    await step("Hold the row's box when the editor takes over", async () => {
+      const atRest = boxOf(canvasElement, '[data-slot="inline-field-row"]')
 
       await userEvent.click(
         canvas.getByRole("button", { name: "Edit Reference" })
       )
 
-      const input = canvas.getByRole("textbox")
-      expect(document.activeElement).toBe(input)
-
-      const editor = input.closest(
+      expect(document.activeElement).toBe(canvas.getByRole("textbox"))
+      // The control itself, not the box around it: a wrapper that is `w-full`
+      // either way would agree with anything and catch nothing.
+      const editing = boxOf(
+        canvasElement,
         "[data-testid='input-field-wrapper']"
-      ) as HTMLElement
-      expect(editor.getBoundingClientRect().height).toBe(readHeight)
+      )
+      expect(editing.height).toBe(atRest.height)
+      expect(editing.width).toBe(atRest.width)
     })
 
     await step("Put the value back to text on Escape", async () => {
@@ -248,6 +251,8 @@ export const DetailRowSelect: Story = {
     await step(
       "Offer the options, with no field chrome around them",
       async () => {
+        const atRest = boxOf(canvasElement, '[data-slot="inline-field-row"]')
+
         await userEvent.click(
           canvas.getByRole("button", { name: "Edit Contract" })
         )
@@ -260,6 +265,12 @@ export const DetailRowSelect: Story = {
         expect(
           canvasElement.querySelector("[data-testid='input-field-wrapper']")
         ).toBeNull()
+        // And it sits exactly where the value sat. The inline trigger sizes to
+        // its content and stands 32px tall by default, so both of these move
+        // unless the row asks it to fill the row and holds the height itself.
+        const trigger = boxOf(canvasElement, '[role="combobox"]')
+        expect(trigger.width).toBe(atRest.width)
+        expect(trigger.height).toBe(atRest.height)
       }
     )
   },

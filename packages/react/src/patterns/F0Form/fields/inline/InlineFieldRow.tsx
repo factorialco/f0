@@ -355,7 +355,16 @@ export function InlineFieldRow({
   if (!isToggle && !isReading) {
     return (
       <div
-        className="w-full"
+        // The row's own height, held by the box rather than by whichever editor
+        // lands in it: an F0InputField is already 40px, F0Select's inline
+        // trigger is 32px, and a row that resized on a click would be the whole
+        // point of this missed. A column, so the editor stretches to the row's
+        // width — `items-center` on a row would leave `F0InputField`'s
+        // `flex-none` root sizing to its content instead.
+        className={cn(
+          "flex w-full flex-col justify-center",
+          rowSizes[FORM_SIZE]
+        )}
         data-slot="inline-field-editor"
         {...editorContainerProps}
       >

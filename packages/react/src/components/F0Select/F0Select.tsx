@@ -110,7 +110,7 @@ const asListContainerVariants = cva({
 })
 
 const inlineSelectTriggerClassName = cn(
-  "group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  "group inline-flex max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
   textVariants({ variant: "label" })
 )
 
@@ -119,20 +119,25 @@ type InlineSelectTriggerProps = {
   placeholder?: string
   selection: F0SelectItemObject<string>[]
   hasValue: boolean
+  fillContainer?: boolean
 }
 
 const InlineSelectTrigger = forwardRef<
   HTMLButtonElement,
   InlineSelectTriggerProps
 >(function InlineSelectTrigger(
-  { label, placeholder, selection, hasValue },
+  { label, placeholder, selection, hasValue, fillContainer },
   ref
 ) {
   return (
     <SelectTrigger
       ref={ref}
       aria-label={label}
-      className={cn(inlineSelectTriggerClassName, focusRing())}
+      className={cn(
+        inlineSelectTriggerClassName,
+        fillContainer ? "h-full w-full" : "h-8 w-fit",
+        focusRing()
+      )}
     >
       <span className="flex min-w-0 max-w-full items-center">
         {hasValue ? (
@@ -161,6 +166,7 @@ const F0SelectComponent = forwardRef(function Select<
 >(
   {
     variant = "field",
+    fillContainer,
     placeholder,
     onChange,
     withApplySelection = false,
@@ -1406,6 +1412,7 @@ const F0SelectComponent = forwardRef(function Select<
           placeholder={placeholder}
           selection={getDisplayItemsForSelection}
           hasValue={!!localValue[0]}
+          fillContainer={fillContainer}
         />
       ) : (
         <SelectTrigger ref={composedTriggerRef} asChild>

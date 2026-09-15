@@ -201,6 +201,8 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
      * @default false
      */
     showPreview?: boolean
+    /** Only the inline variant sizes itself this way; a field select fills its container already. */
+    fillContainer?: never
   } & Pick<
     InputFieldProps<T>,
     | "required"
@@ -229,6 +231,14 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
      * The required label is used as the accessible name and is not shown visually.
      */
     variant: "inline"
+    /**
+     * Fills its container in both axes instead of sizing to the selected
+     * option. For a row whose value column has a box of its own — a record
+     * detail row, where the control has to sit exactly where the value sat and
+     * not resize the moment someone uses it.
+     * @default false
+     */
+    fillContainer?: boolean
     size?: never
     disableSelectAll?: never
     withApplySelection?: never

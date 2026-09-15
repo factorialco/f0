@@ -64,6 +64,7 @@ function SelectWithOptions({
     return (
       <F0Select
         variant="inline"
+        fillContainer
         label={field.label}
         placeholder={field.placeholder}
         disabled={field.disabled}
@@ -169,6 +170,7 @@ function SelectWithSource({
     return (
       <F0Select
         variant="inline"
+        fillContainer
         label={field.label}
         placeholder={field.placeholder}
         disabled={field.disabled}
