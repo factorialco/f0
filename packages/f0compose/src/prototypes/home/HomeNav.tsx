@@ -1332,14 +1332,10 @@ function RailItem({
             36x36 icon chip at radius 8, a 20px glyph inside it, and an
             11/12 label 4px below. The button stays the target — the
             chip is only what lights up. */}
-        {/* Active is RADICAL, not grey (Angel, 2026-09-14): f0's accent
-            ramp is radical red, so the chip takes its 5% background and
-            the glyph its 70 foreground. Hover stays neutral — only where
-            you ARE is branded. */}
         <span
           className={`flex size-9 items-center justify-center rounded-lg ${
             active
-              ? "bg-f1-background-accent text-f1-icon-accent"
+              ? "bg-f1-background-secondary"
               : "group-hover:bg-f1-background-secondary"
           }`}
         >
@@ -1354,23 +1350,14 @@ function RailItem({
               inside a 36px chip, which is what made the rail read small
               beside Slack's. Filled when active, outline otherwise —
               see `filledRailIcons`. */}
-          {/* `currentColor` when active, inheriting the chip's accent:
-              F0Icon's own color prop compiles a class out of f0's dist,
-              which this prototype's Tailwind pass never scans, so accent
-              came out grey. */}
           <F0Icon
             icon={filled && active ? filled : icon}
             size="lg"
-            color={active ? "currentColor" : "default"}
+            color="default"
           />
         </span>
         <span
-          className={`w-full truncate text-center text-[11px] font-semibold leading-3 ${
-            // The glyph carries the accent; the label just goes to full
-            // foreground (Angel, 2026-09-14) — a red word under a red
-            // mark was saying the same thing twice.
-            active ? "text-f1-foreground" : "text-f1-foreground-secondary"
-          }`}
+          className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary"
         >
           {label}
         </span>
