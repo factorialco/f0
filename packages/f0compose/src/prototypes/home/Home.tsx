@@ -1033,8 +1033,9 @@ function HomeNavbar({
  */
 /** What a Factorial user actually opens Home to do, in the order the day
  *  tends to need them. Clock-in leads and is the only one that acts. */
-/** Where the digest settles, measured from the suggestions. */
-const DIGEST_GAP = 256
+/** Where the digest settles, measured from the suggestions (Angel,
+ *  2026-09-15). */
+const DIGEST_GAP = 128
 
 const RECOMMENDATIONS: { icon: IconType; label: string }[] = [
   { icon: Timer, label: "Review this week's timesheet" },
