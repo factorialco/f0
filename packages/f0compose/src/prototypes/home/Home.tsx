@@ -1265,6 +1265,8 @@ function HomeCanvas() {
   /** How far the first screen is held, which is also how long the dotted
    *  grid takes to fade out. */
   const pinned = useRef(0)
+  /** Scroll offset at which the composer meets the top of the content. */
+  const hideComposerAt = useRef(0)
   const [atTop, setAtTop] = useState(true)
   useLayoutEffect(() => {
     const scroller = scrollerRef.current
@@ -1291,6 +1293,14 @@ function HomeCanvas() {
         recommendations.getBoundingClientRect().bottom - top + DIGEST_GAP
       const parked = height + 24
       const pin = Math.max(0, parked - base)
+      // The One switch waits until the INPUT itself has gone under the
+      // top of the content: the screen is held for `pin`, and only then
+      // does the composer start climbing towards that edge (Angel,
+      // 2026-09-15).
+      const composer = scroller.querySelector("[data-home-promptbar]")
+      hideComposerAt.current = composer
+        ? pin + Math.max(0, composer.getBoundingClientRect().top - top)
+        : pin + height / 2
       pinBox.style.height = `${height + pin}px`
       pinned.current = pin
       // The digest parks 24px below the fold and climbs into its base
@@ -1302,7 +1312,7 @@ function HomeCanvas() {
     const follow = () => {
       const offset = scroller.scrollTop
       setAtTop(offset < 8)
-      setHomeScrolled(offset)
+      setHomeScrolled(offset >= hideComposerAt.current)
       // Gone by the time the digest has climbed into place.
       if (backdrop && pinned.current > 0)
         backdrop.style.opacity = String(
@@ -1321,7 +1331,7 @@ function HomeCanvas() {
       if (screen) screen.style.height = ""
       if (digest) digest.style.marginTop = ""
       if (backdrop) backdrop.style.opacity = ""
-      setHomeScrolled(0)
+      setHomeScrolled(false)
     }
   }, [homeLanding])
   /**
@@ -1339,7 +1349,10 @@ function HomeCanvas() {
    * closing the window restores exactly what was open.
    */
   const onModuleScreen = view !== null
-  const hideWidgets = onModuleScreen || chats.state.open.length > 0
+  // Nothing floats at the top right of Home any more (Angel,
+  // 2026-09-15): the digest below carries those widgets now.
+  const hideWidgets =
+    onModuleScreen || chats.state.open.length > 0 || homeLanding
 
   // Replies and nav panel rows can call for a window — e.g. the survey
   // preview opens itself the moment One says it created the survey. A

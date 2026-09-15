@@ -1,18 +1,17 @@
 import { useSyncExternalStore } from "react"
 
 /**
- * Whether Home has been scrolled past its composer (Angel, 2026-09-15).
+ * Whether Home's composer has scrolled out of sight (Angel, 2026-09-15).
  * It lives out here because the canvas owns the scroll while the navbar's
  * One switch and the entry context that gates it are elsewhere in the
- * tree: once the input has left, the switch is how you reach One.
+ * tree: once the input has gone under the top of the content, the switch
+ * is how you reach One. The threshold is measured, not a constant: it is
+ * the point where the input meets that edge.
  */
-const PAST = 128
-
 let scrolled = false
 const listeners = new Set<() => void>()
 
-export function setHomeScrolled(offset: number) {
-  const next = offset >= PAST
+export function setHomeScrolled(next: boolean) {
   if (next === scrolled) return
   scrolled = next
   listeners.forEach((listener) => listener())
