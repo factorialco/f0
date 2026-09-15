@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.104.0](https://github.com/factorialco/f0/compare/f0-react-v6.103.1...f0-react-v6.104.0) (2026-09-15)
+
+
+### Features
+
+* **datasource:** let a list be grouped without being uniformly grouped ([#5534](https://github.com/factorialco/f0/issues/5534)) ([217d6cf](https://github.com/factorialco/f0/commit/217d6cf6c8eb798daf7da9a0b35e32cb469615dd))
+
 ## [6.103.1](https://github.com/factorialco/f0/compare/f0-react-v6.103.0...f0-react-v6.103.1) (2026-09-15)
 
 
