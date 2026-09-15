@@ -779,7 +779,13 @@ declare type AiChatEmployeeCredits = {
 };
 
 declare type AiChatFileAttachmentConfig = {
-    onUploadFiles: (files: File[]) => Promise<UploadedFile[]>;
+    maxStoredFiles?: number;
+    maxStoredBytes?: number;
+    maxFileSizeBytes?: number;
+    getFileExpiry?: (file: UploadedFile) => number | undefined;
+    onUploadFiles: (files: File[], options?: {
+        signal: AbortSignal;
+    }) => Promise<UploadedFile[]>;
     allowedMimeTypes?: string | string[];
     /**
      * Maximum number of files that can be attached at once.
@@ -8189,7 +8195,9 @@ export declare type F0ChatRuntime = {
      * `channel.stopTyping()`).
      */
     stopTyping?: () => void | Promise<void>;
-    uploadFiles?: (files: File[]) => Promise<F0ChatComposableAttachment[]>;
+    uploadFiles?: (files: File[], request?: {
+        signal: AbortSignal;
+    }) => Promise<F0ChatComposableAttachment[]>;
     /**
      * Max files attachable at once. When a selection/drop would exceed it, the
      * composer rejects the whole batch and flashes a transient error in the

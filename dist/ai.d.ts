@@ -249,13 +249,27 @@ declare type AiChatEmployeeCredits = {
 };
 
 export declare type AiChatFileAttachmentConfig = {
-    onUploadFiles: (files: File[]) => Promise<UploadedFile[]>;
+    maxStoredFiles?: number;
+    maxStoredBytes?: number;
+    maxFileSizeBytes?: number;
+    getFileExpiry?: (file: UploadedFile) => number | undefined;
+    onUploadFiles: (files: File[], options?: {
+        signal: AbortSignal;
+    }) => Promise<UploadedFile[]>;
     allowedMimeTypes?: string | string[];
     /**
      * Maximum number of files that can be attached at once.
      * Omit or pass undefined for no limit.
      */
     maxFiles?: number;
+};
+
+declare type AiChatFileIntake = (files: File[], options?: AiChatFileIntakeOptions) => Promise<UploadedFile[]>;
+
+declare type AiChatFileIntakeOptions = {
+    text?: string;
+    preparedFiles?: UploadedFile[];
+    onPrepared?: (files: UploadedFile[]) => boolean | void | Promise<boolean | void>;
 };
 
 /**
@@ -565,6 +579,7 @@ declare type AiChatProviderReturnValue = {
      * `processFiles` callback registered by `ChatTextarea`'s file-attachment
      * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
      */
+    prepareFiles: AiChatFileIntake;
     processDroppedFiles: (files: File[]) => void;
     /* Excluded from this release type: setProcessDroppedFilesFunction */
     /**
@@ -3694,7 +3709,7 @@ export declare type F0AiChatTextAreaProps = {
      * files to this textarea's file-attachment pipeline. The textarea calls
      * the registrar with the handler on mount and with `null` on unmount.
      */
-    onProcessFilesRef?: (handler: ((files: File[]) => void) | null) => void;
+    onProcessFilesRef?: (handler: AiChatFileIntake | null) => void;
     /**
      * Optional disclaimer text + link rendered below the textarea. Hidden on
      * the welcome screen of the fullscreen layout to give the footer room.
