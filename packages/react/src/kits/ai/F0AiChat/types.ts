@@ -253,6 +253,33 @@ export type AiChatFileAttachmentConfig = {
   maxFiles?: number
 }
 
+/**
+ * An entry in the composer's attachment menu — see `composerActions` on
+ * `F0AiChatTextArea`. Attaching a file is NOT one of these: the composer
+ * contributes that entry itself from `fileAttachments`, so a host adding
+ * "Connectors" doesn't have to rewire the file picker to keep it.
+ */
+export type AiChatComposerAction = {
+  /**
+   * Host-side bookkeeping — a key for the host's own list, and what it reads
+   * back in analytics. The composer neither renders it nor keys the menu by it.
+   */
+  id: string
+  label: string
+  icon?: IconType
+  /** Secondary line under the label. */
+  description?: string
+  onClick: () => void
+  disabled?: boolean
+  /**
+   * Shown on hover while `disabled` — say why the action is unavailable.
+   * HOVER-ONLY: a disabled menu entry is not focusable, so this text never
+   * reaches the keyboard or a screen reader. Never put anything here that the
+   * label alone doesn't already imply.
+   */
+  disabledTooltip?: string
+}
+
 export type TranscribeOptions = {
   /**
    * Primary channel for live dictation: fires with the cumulative transcript

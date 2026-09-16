@@ -502,6 +502,7 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
     attachFile: "Attach file",
+    addToMessage: "Add to message",
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",

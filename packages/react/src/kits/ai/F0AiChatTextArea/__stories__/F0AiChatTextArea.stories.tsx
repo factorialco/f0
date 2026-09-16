@@ -17,6 +17,7 @@ import {
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import type {
+  AiChatComposerAction,
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
@@ -103,6 +104,48 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
   allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
   maxFiles: 3,
 }
+
+const COMPOSER_ACTIONS: AiChatComposerAction[] = [
+  {
+    id: "connectors",
+    label: "Connectors",
+    icon: Marketplace,
+    onClick: () => console.log("connectors clicked"),
+  },
+  {
+    id: "saved-prompts",
+    label: "Saved prompts",
+    icon: Pencil,
+    onClick: () => console.log("saved prompts clicked"),
+  },
+]
+
+// The same actions carrying the type's remaining fields: a secondary line, and
+// an entry the host has switched off with the reason on hover.
+const COMPOSER_ACTIONS_FULL: AiChatComposerAction[] = [
+  {
+    id: "connectors",
+    label: "Connectors",
+    description: "Pull context from Drive, Notion or Slack",
+    icon: Marketplace,
+    onClick: () => console.log("connectors clicked"),
+  },
+  {
+    id: "saved-prompts",
+    label: "Saved prompts",
+    description: "Reuse a prompt from your library",
+    icon: Pencil,
+    onClick: () => console.log("saved prompts clicked"),
+  },
+  {
+    id: "screenshot",
+    label: "Capture screen",
+    icon: Search,
+    disabled: true,
+    disabledTooltip: "Screen capture needs the desktop app",
+    onClick: () => console.log("screenshot clicked"),
+  },
+]
 
 const CREDIT_WARNING: AiChatCreditWarning = {
   level: "soft",
@@ -331,12 +374,19 @@ type WrapperProps = {
   fullscreen?: boolean
   inProgress?: boolean
   toolbarStart?: React.ReactNode
+  /**
+   * Extra entries in the composer's attachment control. Omitted or empty keeps
+   * the paperclip; non-empty turns it into a `+` menu whose first entry is
+   * still the file picker (when `fileAttachments` is set).
+   */
+  composerActions?: AiChatComposerAction[]
   padding?: "default" | "none"
 }
 
 const Wrapper = ({
   placeholders,
   fileAttachments,
+  composerActions,
   onTranscribe,
   searchPersons,
   initialPendingContext = null,
@@ -412,6 +462,7 @@ const Wrapper = ({
         onPendingQuoteChange={setPendingQuote}
         fileAttachments={fileAttachments}
         toolbarStart={toolbarStart}
+        composerActions={composerActions}
         onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
@@ -895,6 +946,67 @@ export const WithToolbarStart: Story = {
         ]}
       />
     ),
+  },
+}
+
+// `composerActions` turns the paperclip into a `+` that opens a menu. Attaching
+// a file is not lost in the trade — the composer contributes it as the first
+// entry, so a host adding "Connectors" never rewires the file picker.
+export const WithComposerActions: Story = {
+  args: {
+    fileAttachments: FILE_UPLOAD_CONFIG,
+    composerActions: COMPOSER_ACTIONS,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("The paperclip is gone, replaced by the + trigger", async () => {
+      await expect(
+        page.queryByRole("button", { name: "Attach file" })
+      ).not.toBeInTheDocument()
+    })
+
+    await step("Attaching leads the menu, host actions follow", async () => {
+      await userEvent.click(
+        page.getByRole("button", { name: "Add to message" })
+      )
+
+      const items = await page.findAllByRole("menuitem")
+      await expect(items.map((item) => item.textContent)).toEqual([
+        "Attach file",
+        "Connectors",
+        "Saved prompts",
+      ])
+    })
+  },
+}
+
+// No `fileAttachments`: the menu holds only the host's actions and no file
+// entry — how a composer that takes no uploads still offers "add context".
+// These actions also carry `description`, `disabled` and `disabledTooltip`.
+export const WithComposerActionsWithoutAttachments: Story = {
+  args: {
+    composerActions: COMPOSER_ACTIONS_FULL,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("The menu holds only the host's actions", async () => {
+      await userEvent.click(
+        page.getByRole("button", { name: "Add to message" })
+      )
+
+      await expect(
+        page.queryByRole("menuitem", { name: /Attach file/ })
+      ).not.toBeInTheDocument()
+      await expect(await page.findAllByRole("menuitem")).toHaveLength(3)
+    })
+
+    await step("A host action can be switched off", async () => {
+      await expect(
+        page.getByRole("menuitem", { name: /Capture screen/ })
+      ).toHaveAttribute("aria-disabled", "true")
+    })
   },
 }
 

@@ -9,6 +9,7 @@ export {
 
 // Types
 export type {
+  AiChatComposerAction,
   AiChatCredits,
   AiChatCreditWarning,
   AiChatMode,
