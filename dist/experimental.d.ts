@@ -7827,8 +7827,12 @@ declare type F0ChatCall = {
      * Present only while the call can be joined. Its absence is what removes the
      * button — the same convention as the rest of the contract: no callback, no
      * action. A host that omits it on an `ended` call needs no other flag.
+     *
+     * Return the promise and the button spins until it settles. Joining is never
+     * instant — a room has to be asked for first — so a host that drops the
+     * promise leaves the card looking as if the press did nothing.
      */
-    join?: () => void;
+    join?: () => void | Promise<unknown>;
     /**
      * What the call was about, shown once it has `ended`. Plain text: the card
      * renders it whole, and a transcript-sized block does not belong in a row of
@@ -8278,8 +8282,14 @@ export declare type F0ChatHeaderAction = {
     label: string;
     icon?: IconType;
     /** The host decides what happens: call a runtime method (togglePin,
-     * toggleMute), open its own modal, navigate… */
-    onClick: (channel: F0ChatChannel) => void;
+     * toggleMute), open its own modal, navigate…
+     *
+     * An `inline` action that returns a promise spins until it settles, and
+     * refuses further presses while it does. Actions that only toggle something
+     * local return nothing and never spin; the ones worth returning are those
+     * that go to a server before anything visibly happens — starting a huddle
+     * being the case this was built for. */
+    onClick: (channel: F0ChatChannel) => void | Promise<unknown>;
     /** Where the action renders: inside the ellipsis overflow menu (default) or
      * as its own icon button next to it. Inline requires `icon` — an inline
      * action without one falls back to the menu. */
@@ -13745,8 +13755,15 @@ export declare type MeetingAttendee = {
 };
 
 export declare interface MeetingJoin {
-    /** Called when the Join button is pressed. */
-    onJoin?: () => void;
+    /**
+     * Called when the Join button is pressed.
+     *
+     * Return the promise and the button shows a spinner until it settles, which
+     * is what joining actually needs: a room has to be asked for before there is
+     * anything to walk into, and without this the card sits there looking as if
+     * the press did nothing.
+     */
+    onJoin?: () => void | Promise<unknown>;
     /** Navigates to the meeting room instead of handling the click. */
     href?: string;
     /**
