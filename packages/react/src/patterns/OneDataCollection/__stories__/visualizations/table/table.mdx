@@ -7,6 +7,7 @@ import {
 } from "@storybook/addon-docs/blocks"
 import LinkTo from "@storybook/addon-links/react"
 import * as TableStories from "./table.stories"
+import * as ExpandedContentStories from "./expanded-content.stories"
 
 <Meta title="Data Collection/Visualizations/Table" />
 
@@ -141,6 +142,31 @@ type TableVisualizationOptions<T> = {
    * Called after the user collapses or expands a header group.
    */
   onHeaderGroupCollapsedChange?: (groupId: string, collapsed: boolean) => void
+
+  /**
+   * For nested tables, which rows start out expanded.
+   * `true` / a depth / a predicate.
+   */
+  defaultExpanded?: boolean | number | ((record: T, ctx: { depth: number }) => boolean)
+
+  /** In a nested table, renders root rows (depth 0) in bold. */
+  boldRootRows?: boolean
+
+  /**
+   * Gives a row an expander that opens a full-width panel beneath it.
+   * Return undefined for a row that has nothing to reveal.
+   */
+  renderExpandedContent?: (item: T, context: ExpandedContentContext) => ReactNode
+
+  /** Called after the table has opened or closed a row's panel. */
+  onExpandedContentChange?: (item: T, expanded: boolean) => void
+}
+
+type ExpandedContentContext = {
+  /** The row's nesting depth; 0 for a flat or root row. */
+  depth: number
+  /** Closes this row's panel. Focus returns to the row's expander. */
+  collapse: () => void
 }
 
 type HeaderGroupDefinition = {
@@ -833,6 +859,56 @@ visualizations={[
   `fetchChildren` per opened row on first paint.
 
 See the **Default expanded** stories for `true`, a depth, and a predicate.
+
+### Expanded row content
+
+A row can reveal more than rows. `renderExpandedContent` gives it an expander
+that opens a full-width panel underneath — a free-form region spanning every
+column, for detail that does not fit in a cell.
+
+```tsx
+visualizations={[
+  {
+    type: "table",
+    options: {
+      columns: [
+        // ... your columns
+      ],
+      renderExpandedContent: (day, { collapse }) =>
+        day.editable ? <ShiftPanel day={day} onSaved={collapse} /> : undefined,
+    },
+  },
+]}
+```
+
+<Canvas
+  of={ExpandedContentStories.Default}
+  meta={ExpandedContentStories}
+/>
+
+- Return `undefined` for a row with nothing to reveal; that row gets no
+  expander. The renderer runs for every rendered row on every render, so return
+  early and keep it pure.
+- **Only rows without children get one.** A row that `itemsWithChildren` claims
+  already owns the chevron for its children, and its panel would sit between
+  that row and its first child.
+- **Panels start closed.** `defaultExpanded` speaks for the nested tree, not for
+  panels — otherwise a policy that opens the tree would mount every panel on
+  first paint.
+- **Rows need a stable `id`.** Panel state is keyed by record id; an
+  index-keyed panel would follow the wrong row across a page change.
+- `context.collapse` closes the panel from inside it — what a Save or Cancel
+  button calls. Focus returns to the row's expander.
+- Changing filters, sortings or navigation filters **closes every panel** and
+  discards whatever it held. Persist drafts yourself;
+  `onExpandedContentChange` is the hook.
+- The panel spans the full table width and scrolls horizontally with the table
+  body — `frozenColumns` does not pin it. Keep its content within the first
+  screenful, or give the panel its own internal layout.
+- Pass a stable function reference. An inline arrow defeats the per-row memo
+  and re-renders every row on every parent render.
+
+See the **Expanded content** stories for the nested and frozen-column cases.
 
 ### Response Types: `basic` vs `detailed`
 
