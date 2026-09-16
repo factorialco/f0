@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 import type { QueryAnalysis } from "./Search"
@@ -13,9 +14,9 @@ export type AssistedQueryPanelProps = {
   analysis?: QueryAnalysis
   placeholder?: string
   /**
-   * Called once the typing has settled. Marking the filters re-renders the
-   * whole popover, and doing that on every keystroke costs the field
-   * characters — the text has to stay ahead of the reading.
+   * Called once the typing has settled. Reading the query re-renders the whole
+   * popover, and doing that on every keystroke costs the field characters —
+   * the text has to stay ahead of the reading.
    */
   onSettle?: (value: string) => void
   /** Queries already run here, newest first. */
@@ -24,10 +25,9 @@ export type AssistedQueryPanelProps = {
 }
 
 /**
- * The assisted query as a pane of the filters popover. What it understood is
- * shown by the filters themselves, ticked in the list beside this one, so the
- * field stays a plain field. Nothing is applied here — the popover's own apply
- * button commits it, the same as every other filter.
+ * The assisted query as a pane of the filters popover, built like the panes
+ * beside it: the same search box at the top, and rows under it that are picked
+ * the same way. What it understood is said by the filters themselves.
  */
 export const AssistedQueryPanel = ({
   value,
@@ -38,34 +38,29 @@ export const AssistedQueryPanel = ({
   recent,
   recentTitle,
 }: AssistedQueryPanelProps) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  // The pane opens with nothing else in it to click, so the field takes the
-  // caret rather than making the user find it.
-  useEffect(() => {
-    textareaRef.current?.focus()
-  }, [])
-
   const onSettleRef = useRef(onSettle)
   onSettleRef.current = onSettle
+
   useEffect(() => {
     const timer = setTimeout(() => onSettleRef.current?.(value), 200)
     return () => clearTimeout(timer)
   }, [value])
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={2}
-        spellCheck={false}
-        className="w-full resize-none appearance-none rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-base text-f1-foreground outline-none placeholder:text-f1-foreground-secondary focus:border-f1-border-hover"
-      />
+    <div className="flex h-full w-full flex-col">
+      <div className="rounded-tr-xl p-2">
+        <F0SearchInput
+          placeholder={placeholder}
+          value={value}
+          onChange={(next) => onChange(next ?? "")}
+          clearable
+          autoFocus
+          tabIndex={0}
+        />
+      </div>
+
       {value && analysis?.note ? (
-        <p className="text-base text-f1-foreground-secondary">
+        <p className="px-3.5 pb-1 text-base text-f1-foreground-secondary">
           {analysis.note}
         </p>
       ) : null}

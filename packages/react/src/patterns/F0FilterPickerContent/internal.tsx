@@ -54,7 +54,7 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           onQuickFilterSelect={onQuickFilterSelect}
         />
         {quickFilterSelected && quickFilter ? (
-          <div className="min-w-[340px] flex-1 p-3">
+          <div className="min-w-[340px] flex-1">
             {quickFilter.render({ stage: onStageFilters ?? (() => {}) })}
           </div>
         ) : null}

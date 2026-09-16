@@ -956,12 +956,28 @@ const OneDataCollectionComp = <
   const setFiltersRef = useRef(setFilters)
   setFiltersRef.current = setFilters
   const lastAppliedRef = useRef<string>()
+
+  // Each way in owns only the filters its own query named. Replacing the whole
+  // state instead would have the field on the right undoing the panel on the
+  // left, and either of them undoing what was ticked by hand.
+  const ownedByRef = useRef<Record<string, string[]>>({})
+  const applyFromQuery = (
+    origin: string,
+    named: Record<string, unknown>
+  ): Record<string, unknown> => {
+    const owned = new Set(ownedByRef.current[origin] ?? [])
+    const kept = Object.entries(
+      (source.currentFilters ?? {}) as Record<string, unknown>
+    ).filter(([key]) => !owned.has(key))
+    ownedByRef.current[origin] = Object.keys(named)
+    return { ...Object.fromEntries(kept), ...named }
+  }
   useEffect(() => {
     if (!analyze || assistedValue === undefined) {
       return
     }
     const timer = setTimeout(() => {
-      const next = analyze(assistedValue).filters
+      const next = applyFromQuery("toolbar", analyze(assistedValue).filters)
       const serialized = JSON.stringify(next)
       if (serialized === lastAppliedRef.current) {
         return
@@ -1879,9 +1895,11 @@ const OneDataCollectionComp = <
                           value={panelQuery}
                           onChange={setPanelQuery}
                           onSettle={(settled) => {
-                            const staged =
+                            const staged = applyFromQuery(
+                              "panel",
                               source.searchPresentation?.analyze?.(settled)
                                 ?.filters ?? {}
+                            )
                             stage(staged)
                             const serialized = JSON.stringify(staged)
                             if (serialized === lastAppliedRef.current) {
@@ -1924,7 +1942,9 @@ const OneDataCollectionComp = <
                     onChange={
                       assistedSearchProps ? searchByName : setCurrentSearch
                     }
-                    value={assistedSearchProps ? typedSearch : currentSearch}
+                    value={
+                      assistedSearchProps ? (typedSearch ?? "") : currentSearch
+                    }
                     onClear={
                       assistedSearchProps
                         ? () => searchByName(undefined)
@@ -1937,7 +1957,6 @@ const OneDataCollectionComp = <
                       assistedSearchProps
                         ? {
                             label: i18n.collections.search.filterWithAssistant,
-                            icon: AiFilterIcon,
                             hint: assistedHintFor(currentSearch),
                             onClick: (query) => {
                               // The text stops being a name search and becomes

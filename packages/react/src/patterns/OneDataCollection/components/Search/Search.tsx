@@ -317,7 +317,7 @@ const InlineAction = ({
       onClick={() => (query ? action.onClick(query) : onEmpty())}
       title={action.hint}
       className={cn(
-        "flex h-6 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover",
+        "flex h-6 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-xs border-none bg-f1-background-secondary px-2 text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary-hover",
         focusRing()
       )}
     >
@@ -668,7 +668,10 @@ export const Search = ({
               >
                 <motion.div
                   layout
-                  className="relative flex h-full w-full items-center justify-between gap-1 overflow-hidden bg-f1-background pr-1.5"
+                  className={cn(
+                    "relative flex h-full w-full items-center justify-between overflow-hidden bg-f1-background",
+                    inlineAction ? "gap-1.5 pr-[3px]" : "gap-1 pr-1.5"
+                  )}
                   style={{ borderRadius: 11 }}
                 >
                   <motion.div
