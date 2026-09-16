@@ -10,6 +10,7 @@ import {
 } from "vitest"
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
 import { type ChatRow } from "../../utils/grouping"
+import { TELEPORT_FADE_MS } from "../useChatTeleport"
 import {
   lastSeenRowIndex,
   topVisibleRowIndex,
@@ -17,6 +18,16 @@ import {
 } from "../useChatVirtuoso"
 
 let frameCallbacks: FrameRequestCallback[]
+
+const runFrames = (count: number) => {
+  for (let index = 0; index < count; index += 1) {
+    const pending = frameCallbacks
+    frameCallbacks = []
+    act(() => {
+      pending.forEach((callback) => callback(0))
+    })
+  }
+}
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -378,6 +389,14 @@ describe("useChatVirtuoso wheel takeover", () => {
     scrollToIndex.mockClear()
     const writesBeforeJump = viewport.getScrollWrites()
     act(() => {
+      result.current.handleItemsRendered([
+        {
+          index: result.current.firstItemIndex,
+          offset: 0,
+          size: 1_000,
+          data: undefined,
+        } as ListItem<ChatRow>,
+      ])
       viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }))
       result.current.scrollToBottom()
     })
@@ -389,6 +408,216 @@ describe("useChatVirtuoso wheel takeover", () => {
       align: "end",
       behavior: "smooth",
     })
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  it("teleports a distant jump to bottom: land hidden, step back, glide, re-arm", () => {
+    const { result } = renderHook(() =>
+      useChatVirtuoso({
+        ...hookOptions([{ id: "message-1" }]),
+        itemCount: 100,
+      })
+    )
+    const viewport = attachScroller(result.current.handleScrollerRef)
+    const { scrollToIndex, scrollBy } = stubVirtuosoHandle(
+      result.current.virtuosoRef
+    )
+
+    act(() => {
+      result.current.handleTotalListHeightChanged(1000)
+      result.current.handleItemsRendered([
+        {
+          index: result.current.firstItemIndex,
+          offset: 0,
+          size: 1_000,
+          data: undefined,
+        } as ListItem<ChatRow>,
+      ])
+      // The reader had taken over; the jump is what hands the tail back.
+      viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }))
+      viewport.setScrollTop(470)
+      viewport.scroller.dispatchEvent(new Event("scroll"))
+    })
+    expect(result.current.followOutput).toBe(false)
+
+    act(() => result.current.scrollToBottom())
+    expect(result.current.teleporting).toBe(true)
+    expect(scrollToIndex).not.toHaveBeenCalled()
+
+    // Hidden: land on the tail (the stub scroller is already at its bottom), and
+    // once still, step back. No approach rows are measured here, so the step is
+    // three quarters of the 500px viewport.
+    act(() => vi.advanceTimersByTime(TELEPORT_FADE_MS))
+    expect(scrollToIndex).toHaveBeenCalledWith({
+      index: "LAST",
+      align: "end",
+      behavior: "auto",
+    })
+    viewport.setScrollTop(500)
+    runFrames(3)
+    expect(scrollBy).toHaveBeenCalledWith({ top: -375 })
+    expect(result.current.teleporting).toBe(true)
+
+    // Revealed as the glide is issued.
+    runFrames(3)
+    expect(scrollToIndex).toHaveBeenLastCalledWith({
+      index: "LAST",
+      align: "end",
+      behavior: "smooth",
+    })
+    expect(result.current.teleporting).toBe(false)
+
+    // Arrival, verified at the bottom: following is armed again.
+    runFrames(6)
+    expect(result.current.followOutput).not.toBe(false)
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  it("hands the position back to a reader who wheels during the glide", () => {
+    const { result } = renderHook(() =>
+      useChatVirtuoso({
+        ...hookOptions([{ id: "message-1" }]),
+        itemCount: 100,
+      })
+    )
+    const viewport = attachScroller(result.current.handleScrollerRef)
+    const { scrollToIndex } = stubVirtuosoHandle(result.current.virtuosoRef)
+
+    act(() =>
+      result.current.handleItemsRendered([
+        {
+          index: result.current.firstItemIndex,
+          offset: 0,
+          size: 1_000,
+          data: undefined,
+        } as ListItem<ChatRow>,
+      ])
+    )
+    act(() => result.current.scrollToBottom())
+    act(() => vi.advanceTimersByTime(TELEPORT_FADE_MS))
+    runFrames(6)
+    expect(scrollToIndex).toHaveBeenLastCalledWith({
+      index: "LAST",
+      align: "end",
+      behavior: "smooth",
+    })
+    scrollToIndex.mockClear()
+
+    act(() => {
+      viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }))
+    })
+    runFrames(12)
+
+    // No arrival check, no snap, and following stays paused for the reader.
+    expect(scrollToIndex).not.toHaveBeenCalled()
+    expect(result.current.teleporting).toBe(false)
+    expect(result.current.followOutput).toBe(false)
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  it("refreshes the jump button when the tail grows away from a reader who is not following", () => {
+    const { result } = renderVirtuoso()
+    const viewport = attachScroller(result.current.handleScrollerRef)
+
+    act(() => result.current.handleTotalListHeightChanged(1000))
+    // Scrolled up a little: inside the at-bottom band, not "scrolled up" yet.
+    act(() => {
+      viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }))
+      viewport.setScrollTop(440)
+      viewport.scroller.dispatchEvent(new Event("scroll"))
+    })
+    runFrames(1)
+    expect(result.current.scrolledUp).toBe(false)
+
+    // Messages keep arriving below: no scroll event, but the distance grew.
+    viewport.setScrollHeight(1400)
+    act(() => result.current.handleTotalListHeightChanged(1400))
+    runFrames(1)
+
+    expect(result.current.scrolledUp).toBe(true)
+    expect(viewport.getScrollTop()).toBe(440)
+    act(() => result.current.handleScrollerRef(null))
+  })
+
+  it("cancels an active teleport before replacing an old window with the live tail", () => {
+    const row = (key: string): ChatRow => ({
+      type: "separator",
+      key,
+      at: "2026-01-01T12:00:00.000Z",
+      forId: key,
+    })
+    const oldMessages = [{ id: "old-head" }, { id: "far" }]
+    const oldRows = [row("old-head"), row("far")]
+    const oldIndexById = new Map([
+      ["old-head", 0],
+      ["far", 99],
+    ])
+    const { result, rerender } = renderHook(
+      ({
+        messages,
+        rows,
+        indexById,
+        itemCount,
+        hasMoreNewer,
+      }: {
+        messages: { id: string }[]
+        rows: ChatRow[]
+        indexById: Map<string, number>
+        itemCount: number
+        hasMoreNewer: boolean
+      }) =>
+        useChatVirtuoso({
+          ...hookOptions(messages),
+          rows,
+          indexById,
+          itemCount,
+          hasMoreNewer,
+        }),
+      {
+        initialProps: {
+          messages: oldMessages,
+          rows: oldRows,
+          indexById: oldIndexById,
+          itemCount: 100,
+          hasMoreNewer: true,
+        },
+      }
+    )
+    attachScroller(result.current.handleScrollerRef)
+    const { scrollToIndex } = stubVirtuosoHandle(result.current.virtuosoRef)
+    act(() =>
+      result.current.handleItemsRendered([
+        {
+          index: result.current.firstItemIndex,
+          offset: 0,
+          size: 1_000,
+          data: undefined,
+        } as ListItem<ChatRow>,
+      ])
+    )
+    act(() => result.current.scrollToMessage("far"))
+    expect(result.current.teleporting).toBe(true)
+
+    act(() => result.current.pendBottom())
+    expect(result.current.teleporting).toBe(false)
+
+    const previousListKey = result.current.listKey
+    rerender({
+      messages: [{ id: "live-tail" }],
+      rows: [row("live-tail")],
+      indexById: new Map([["live-tail", 0]]),
+      itemCount: 1,
+      hasMoreNewer: false,
+    })
+
+    expect(result.current.listKey).not.toBe(previousListKey)
+    expect(result.current.initialLocation).toEqual({
+      index: "LAST",
+      align: "end",
+    })
+    runFrames(3)
+    act(() => vi.advanceTimersByTime(TELEPORT_FADE_MS))
+    expect(scrollToIndex).not.toHaveBeenCalled()
     act(() => result.current.handleScrollerRef(null))
   })
 
@@ -425,6 +654,14 @@ describe("useChatVirtuoso wheel takeover", () => {
 
     act(() => {
       result.current.handleTotalListHeightChanged(1000)
+      result.current.handleItemsRendered([
+        {
+          index: result.current.firstItemIndex,
+          offset: 0,
+          size: 1_000,
+          data: undefined,
+        } as ListItem<ChatRow>,
+      ])
       viewport.scroller.dispatchEvent(new WheelEvent("wheel", { deltaY: -120 }))
       viewport.setScrollTop(470)
       viewport.scroller.dispatchEvent(new Event("scroll"))

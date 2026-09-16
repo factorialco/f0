@@ -395,7 +395,7 @@ const BurstConversation = (): ReactNode => {
   }
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat />
         </F0ChatProvider>
@@ -434,7 +434,7 @@ const FlakyNetworkConversation = (): ReactNode => {
   }
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat />
         </F0ChatProvider>
@@ -567,7 +567,7 @@ const StormConversation = ({
 
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <Profiler
           id="f0chat-storm"
           onRender={(_id, _phase, actualDuration) => {
@@ -799,7 +799,7 @@ const MembershipConversation = (): ReactNode => {
   })
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat headerActions={headerActions} />
         </F0ChatProvider>
@@ -1412,9 +1412,11 @@ export const Snapshot: Story = {
       })
       await userEvent.type(composer, "12345678901")
       await userEvent.keyboard("{Enter}")
-      await expect(
-        messageLimit.getByText("Messages can be up to 10 characters")
-      ).toBeVisible()
+      await waitFor(() =>
+        expect(
+          messageLimit.getByText("Messages can be up to 10 characters")
+        ).toBeVisible()
+      )
     })
 
     await step("Render document snapshots", async () => {
@@ -2056,13 +2058,103 @@ export const StormFast: Story = {
 }
 
 /**
- * Stress test: the transcript is virtualized, so even a very large history stays
- * smooth (only the visible window is in the DOM). Scroll, jump-to-bottom and
- * load-older should all feel instant.
+ * Stress test: the transcript is virtualized, so even a very large history
+ * stays smooth. A distant jump-to-bottom fades, repositions near the live tail,
+ * and shows only the short final glide; nearby navigation remains continuous.
  */
 export const HugeConversation: Story = {
   name: "200k messages (virtualized)",
   render: () => <Conversation initialCount={200_000} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const viewport = canvasElement.querySelector<HTMLElement>(
+      "[data-chat-viewport]"
+    )
+    await expect(viewport).not.toBeNull()
+    if (!viewport) {
+      return
+    }
+    const transcript = viewport.parentElement
+    await expect(transcript).not.toBeNull()
+    if (!transcript) {
+      return
+    }
+
+    await step(
+      "Teleport near the tail before the short bottom glide",
+      async () => {
+        await waitFor(() =>
+          expect(viewport.scrollHeight).toBeGreaterThan(10_000)
+        )
+        // Let Virtuoso's entry measurements settle before imitating a reader
+        // moving two dozen viewports back through the loaded history.
+        await new Promise<void>((resolve) => setTimeout(resolve, 250))
+        for (let page = 0; page < 24; page += 1) {
+          viewport.dispatchEvent(
+            new WheelEvent("wheel", {
+              deltaY: -viewport.clientHeight,
+              bubbles: true,
+            })
+          )
+          viewport.scrollTop = Math.max(
+            0,
+            viewport.scrollTop - viewport.clientHeight
+          )
+          viewport.dispatchEvent(new Event("scroll", { bubbles: true }))
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          )
+        }
+        await waitFor(() =>
+          expect(
+            viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+          ).toBeGreaterThan(viewport.clientHeight * 2)
+        )
+
+        const jumpButton = await canvas.findByRole(
+          "button",
+          { name: "Scroll to bottom" },
+          { timeout: 2_000 }
+        )
+        await userEvent.click(jumpButton)
+
+        // The far part of the trip happens behind the fade.
+        await waitFor(() => expect(transcript).toHaveClass("opacity-0"), {
+          timeout: 2_000,
+        })
+
+        // The transcript comes back a short, measured distance above the tail
+        // and glides the rest: visible, moving, not yet at the bottom. This
+        // catches both a direct smooth scroll through the full history and a
+        // glide that finished behind the fade.
+        let glideScrollTop = 0
+        await waitFor(
+          () => {
+            const distanceFromBottom =
+              viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+            expect(transcript).toHaveClass("opacity-100")
+            expect(distanceFromBottom).toBeGreaterThan(64)
+            expect(distanceFromBottom).toBeLessThanOrEqual(
+              viewport.clientHeight + 64
+            )
+            glideScrollTop = viewport.scrollTop
+          },
+          { timeout: 2_000 }
+        )
+
+        await waitFor(
+          () => {
+            const distanceFromBottom =
+              viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+            expect(distanceFromBottom).toBeLessThanOrEqual(2)
+            expect(viewport.scrollTop).toBeGreaterThan(glideScrollTop)
+            expect(transcript).toHaveClass("opacity-100")
+          },
+          { timeout: 3_000 }
+        )
+      }
+    )
+  },
 }
 
 /** First open: a bubble skeleton instead of a spinner. On re-entry the adapter

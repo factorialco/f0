@@ -547,3 +547,61 @@ export const followDecision = (
   reducedMotion: boolean
 ): "auto" | "smooth" | false =>
   isAtBottom ? (reducedMotion ? "auto" : "smooth") : false
+
+/**
+ * Rows between the reader and a jump target past which a continuous scroll
+ * stops being navigation and becomes a wait. It is a count of rows, not a
+ * fraction of the conversation: a message halfway through a 40,000-message
+ * history is next door if the reader is already standing there, and a world
+ * away if they are not. Distance from the viewport is the only thing that
+ * decides.
+ */
+export const CHAT_TELEPORT_THRESHOLD_ROWS = 40
+
+/**
+ * Rows the visible part of a far jump travels. The hidden phase lands ON the
+ * target, then steps back by the measured span of this many rows, so the
+ * approach is a short scroll in the direction of travel — what makes the
+ * arrival read as movement rather than a cut. The span is capped at one
+ * viewport, so tall rows never turn the approach into a tour.
+ */
+export const CHAT_TELEPORT_APPROACH_ROWS = 10
+
+/**
+ * How a jump to a message should be performed, given where the reader is.
+ *
+ *   - `instant`  nothing measured to travel from, so there is no motion to
+ *                convey; animating from an unknown position is just latency.
+ *   - `smooth`   near enough to scroll continuously.
+ *   - `teleport` far: land on `index` while hidden, step back by the approach
+ *                rows, then glide them into view.
+ */
+export type ChatJumpPlan =
+  | { kind: "instant"; index: number }
+  | { kind: "smooth"; index: number }
+  | { kind: "teleport"; index: number }
+
+export function planJump({
+  from,
+  to,
+  rowCount,
+  threshold = CHAT_TELEPORT_THRESHOLD_ROWS,
+}: {
+  /** Top visible row, in local index space, or null when nothing is measured. */
+  from: number | null
+  /** Target row, in the same space. */
+  to: number
+  rowCount: number
+  threshold?: number
+}): ChatJumpPlan {
+  const last = Math.max(0, rowCount - 1)
+  const target = Math.min(Math.max(to, 0), last)
+
+  if (from === null) {
+    return { kind: "instant", index: target }
+  }
+  if (Math.abs(target - from) <= threshold) {
+    return { kind: "smooth", index: target }
+  }
+  return { kind: "teleport", index: target }
+}
