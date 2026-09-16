@@ -42,6 +42,11 @@ interface SearchProps {
   onLoadMore?: () => void
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
+  /**
+   * Ways of finishing what is being typed. The consumer decides which ones to
+   * offer for the current text; the field only draws them.
+   */
+  suggestions?: string[]
   /** Placeholders cycled while the field sits idle and empty. */
   placeholderRotation?: string[]
   /** Holds the in-input searching state while a submitted query resolves. */
@@ -72,6 +77,7 @@ export type SearchPresentation = Pick<
   SearchProps,
   | "placeholderRotation"
   | "onSubmit"
+  | "suggestions"
   | "status"
   | "onCancel"
   | "displayValue"
@@ -118,6 +124,61 @@ const useRotatingPlaceholder = (
 
   return examples[index % Math.max(count, 1)] ?? fallback
 }
+
+/**
+ * Splits a completion into what has already been typed and what it adds, so
+ * the new part is what stands out — the typed half is on screen just above.
+ */
+const renderCompletion = (suggestion: string, typed: string | undefined) => {
+  if (!typed || !suggestion.toLowerCase().startsWith(typed.toLowerCase())) {
+    return suggestion
+  }
+  return (
+    <>
+      {suggestion.slice(0, typed.length)}
+      <span className="font-semibold">{suggestion.slice(typed.length)}</span>
+    </>
+  )
+}
+
+const SuggestionList = ({
+  items,
+  activeIndex,
+  activeItemRef,
+  typed,
+  onHover,
+  onPick,
+}: {
+  items: string[]
+  activeIndex: number
+  activeItemRef: React.RefObject<HTMLButtonElement>
+  typed: string | undefined
+  onHover: (index: number) => void
+  onPick: (suggestion: string) => void
+}) => (
+  <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-full min-w-[248px] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
+    {items.map((suggestion, index) => (
+      <li key={suggestion}>
+        <button
+          ref={index === activeIndex ? activeItemRef : undefined}
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onMouseEnter={() => onHover(index)}
+          onClick={() => onPick(suggestion)}
+          className={cn(
+            "flex w-full items-center rounded-[10px] p-2 text-left hover:bg-f1-background-hover",
+            index === activeIndex && "bg-f1-background-hover",
+            focusRing()
+          )}
+        >
+          <span className="truncate text-base font-normal text-f1-foreground">
+            {renderCompletion(suggestion, typed)}
+          </span>
+        </button>
+      </li>
+    ))}
+  </ul>
+)
 
 /** The round clear affordance, shared by the open field and its collapsed form. */
 const DismissButton = ({
@@ -168,6 +229,7 @@ export const Search = ({
   loadingMore = false,
   onLoadMore,
   onSubmit,
+  suggestions,
   placeholderRotation,
   status = "idle",
   onCancel,
@@ -195,6 +257,17 @@ export const Search = ({
   // An in-flight query holds the field open: collapsing would hide the spinner
   // and the only affordance to abort it.
   const expanded = open || searching
+  const suggestionItems = suggestions ?? []
+  // Only once there is something to finish: an empty field has the rotating
+  // placeholder, and a panel over the collection would be in the way. Preview
+  // results win when there are any — those are records, these are phrasings.
+  const suggestionsVisible =
+    open &&
+    showResults &&
+    !searching &&
+    !resultsVisible &&
+    Boolean(text) &&
+    suggestionItems.length > 0
   const placeholder = useRotatingPlaceholder(
     placeholderRotation,
     Boolean(text) || searching,
@@ -309,6 +382,30 @@ export const Search = ({
     }
   }
 
+  /** Arrows and Enter, while the completions are the thing being driven. */
+  const handleSuggestionsKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      setActiveIndex((index) =>
+        index < suggestionItems.length - 1 ? index + 1 : index
+      )
+      return
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault()
+      setActiveIndex((index) => (index > 0 ? index - 1 : 0))
+      return
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault()
+      // Only a row the user actually moved to wins over what they typed.
+      const picked = activeIndex >= 0 ? suggestionItems[activeIndex] : undefined
+      submitQuery(picked ?? text ?? "")
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!open) {
       if (e.key === "Enter" || e.key === " ") {
@@ -326,6 +423,11 @@ export const Search = ({
       } else {
         handleClear()
       }
+      return
+    }
+
+    if (suggestionsVisible) {
+      handleSuggestionsKeyDown(e)
       return
     }
 
@@ -462,6 +564,16 @@ export const Search = ({
                 </motion.div>
               </motion.div>
             )}
+            {suggestionsVisible ? (
+              <SuggestionList
+                items={suggestionItems}
+                activeIndex={activeIndex}
+                activeItemRef={activeItemRef}
+                typed={text}
+                onHover={setActiveIndex}
+                onPick={submitQuery}
+              />
+            ) : null}
             {resultsVisible ? (
               <ul
                 className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
