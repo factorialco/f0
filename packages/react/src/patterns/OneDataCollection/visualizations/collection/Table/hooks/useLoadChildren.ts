@@ -17,7 +17,10 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-import { useNestedDataContext } from "../providers/NestedProvider"
+import {
+  useNestedDataContext,
+  useNestedExpansionContext,
+} from "../providers/NestedProvider"
 
 interface UseLoadChildrenProps<
   R extends RecordType,
@@ -92,11 +95,9 @@ export const useLoadChildren = <
   NavigationFilters,
   Grouping
 >) => {
-  const {
-    fetchedData: nestedFetchedData,
-    updateFetchedData,
-    resetGeneration,
-  } = useNestedDataContext<R>()
+  const { fetchedData: nestedFetchedData, updateFetchedData } =
+    useNestedDataContext<R>()
+  const { resetGeneration } = useNestedExpansionContext<R>()
 
   const restoredData = nestedFetchedData?.[rowId]
   const restoredChildren = getChildren(restoredData)

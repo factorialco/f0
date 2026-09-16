@@ -36,7 +36,7 @@ import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { getRowExpansionId } from "../lib/rowExpansion"
-import { useNestedDataContext } from "../providers/NestedProvider"
+import { useNestedExpansionContext } from "../providers/NestedProvider"
 import type {
   CellRendererProps,
   ColId,
@@ -154,7 +154,7 @@ const NestedRowContent = <
     setRowExpanded,
     isExpandedByDefault,
     resetGeneration,
-  } = useNestedDataContext()
+  } = useNestedExpansionContext()
   // An absent entry means the user has not decided for this row, and only then
   // does the default policy apply. `??` is deliberate over `||`: a recorded
   // `false` is a deliberate collapse and must win over an opening policy.

@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -32,6 +33,14 @@ interface NestedDataContextValue<R extends RecordType> {
   fetchedData: Record<string, ChildrenResponse<R>>
   updateFetchedData: (rowId: string, data: ChildrenResponse<R>) => void
   clearFetchedData: () => void
+}
+
+/**
+ * Split from the fetched-children context so a consumer that only cares whether
+ * a row is open — an expanded-content panel, say — does not re-render every
+ * time any row's children land.
+ */
+interface NestedExpansionContextValue<R extends RecordType> {
   /**
    * Rows the user has explicitly opened or closed, persisted here so they
    * survive a row unmounting (collapsing a parent) or the parent re-rendering
@@ -56,6 +65,10 @@ interface NestedDataContextValue<R extends RecordType> {
 
 const NestedDataContext = createContext<
   NestedDataContextValue<RecordType> | undefined
+>(undefined)
+
+const NestedExpansionContext = createContext<
+  NestedExpansionContextValue<RecordType> | undefined
 >(undefined)
 
 export const NestedDataProvider = <R extends RecordType>({
@@ -150,21 +163,32 @@ export const NestedDataProvider = <R extends RecordType>({
     [defaultExpanded]
   )
 
+  const dataValue = useMemo(
+    () =>
+      ({
+        fetchedData,
+        updateFetchedData,
+        clearFetchedData,
+      }) as NestedDataContextValue<RecordType>,
+    [fetchedData, updateFetchedData, clearFetchedData]
+  )
+
+  const expansionValue = useMemo(
+    () =>
+      ({
+        expandedRowIds,
+        setRowExpanded,
+        isExpandedByDefault,
+        resetGeneration,
+      }) as NestedExpansionContextValue<RecordType>,
+    [expandedRowIds, setRowExpanded, isExpandedByDefault, resetGeneration]
+  )
+
   return (
-    <NestedDataContext.Provider
-      value={
-        {
-          fetchedData,
-          updateFetchedData,
-          clearFetchedData,
-          expandedRowIds,
-          setRowExpanded,
-          isExpandedByDefault,
-          resetGeneration,
-        } as NestedDataContextValue<RecordType>
-      }
-    >
-      {children}
+    <NestedDataContext.Provider value={dataValue}>
+      <NestedExpansionContext.Provider value={expansionValue}>
+        {children}
+      </NestedExpansionContext.Provider>
     </NestedDataContext.Provider>
   )
 }
@@ -177,4 +201,14 @@ export const useNestedDataContext = <R extends RecordType>() => {
     )
   }
   return context as NestedDataContextValue<R>
+}
+
+export const useNestedExpansionContext = <R extends RecordType>() => {
+  const context = useContext(NestedExpansionContext)
+  if (!context) {
+    throw new Error(
+      "useNestedExpansionContext must be used within NestedDataProvider"
+    )
+  }
+  return context as NestedExpansionContextValue<R>
 }
