@@ -250,6 +250,8 @@ export const defaultTranslations = {
     },
     table: {
       seeMoreChildren: "See more",
+      expandRow: "Show details",
+      collapseRow: "Hide details",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",

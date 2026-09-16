@@ -3,7 +3,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Add, ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 import {
   CHEVRON_PARENT_SIZE,
@@ -65,6 +65,12 @@ export const NestedCell = ({
     : undefined
 
   const isActionRow = onLoadMoreChildren || onAddRow
+
+  const chevronBoxVars = {
+    "--chevron-parent-size": `${CHEVRON_PARENT_SIZE}px`,
+    "--chevron-size": `${CHEVRON_SIZE}px`,
+    "--spacing-factor": `${SPACING_FACTOR}px`,
+  } as React.CSSProperties
 
   return (
     <div
@@ -165,40 +171,48 @@ export const NestedCell = ({
         </div>
       ) : (
         <>
-          <div
-            className={cn(
-              "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] min-w-[var(--chevron-parent-size)] items-center justify-center",
-              firstCellWithChildren &&
-                "pointer-events-auto cursor-pointer rounded-sm hover:bg-f1-foreground-disabled"
-            )}
-            style={
-              {
-                "--chevron-parent-size": `${CHEVRON_PARENT_SIZE}px`,
-                "--chevron-size": `${CHEVRON_SIZE}px`,
-                "--spacing-factor": `${SPACING_FACTOR}px`,
-              } as React.CSSProperties
-            }
-            onClick={(e) => {
-              if (firstCellWithChildren) {
+          {firstCellWithChildren ? (
+            <button
+              type="button"
+              aria-expanded={!!nestedRowProps?.expanded}
+              className={cn(
+                "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] min-w-[var(--chevron-parent-size)] items-center justify-center",
+                "pointer-events-auto cursor-pointer rounded-sm hover:bg-f1-foreground-disabled",
+                focusRing()
+              )}
+              style={chevronBoxVars}
+              // The cell forwards clicks to the row's link; the expander must
+              // not navigate.
+              onClick={(e) => {
                 e.stopPropagation()
                 nestedRowProps?.onExpand?.()
-              }
-            }}
-          >
-            {firstCellWithChildren ? (
-              nestedRowProps?.expanded ? (
+              }}
+            >
+              <span className="sr-only">
+                {nestedRowProps?.expanded
+                  ? collections.table.collapseRow
+                  : collections.table.expandRow}
+              </span>
+              {nestedRowProps?.expanded ? (
                 <ChevronDown
+                  aria-hidden="true"
                   className="pointer-events-none shrink-0"
                   size={CHEVRON_SIZE}
                 />
               ) : (
                 <ChevronRight
+                  aria-hidden="true"
                   className="pointer-events-none shrink-0"
                   size={CHEVRON_SIZE}
                 />
-              )
-            ) : null}
-          </div>
+              )}
+            </button>
+          ) : (
+            <div
+              className="flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] min-w-[var(--chevron-parent-size)] items-center justify-center"
+              style={chevronBoxVars}
+            />
+          )}
           <div
             className={cn(
               firstCellWithChildren && "min-w-0 w-full h-full",
