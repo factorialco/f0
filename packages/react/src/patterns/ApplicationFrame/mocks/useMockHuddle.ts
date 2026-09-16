@@ -35,6 +35,15 @@ const ANSWER_DELAY_MS = 3000
 export const GROUP_ARRIVAL_MS = 2200
 
 /**
+ * How long answering takes before the room exists.
+ *
+ * Roughly what one round trip to mint a token costs. Short enough not to feel
+ * broken, long enough that the join button's spinner is actually seen — which
+ * is the point: it is the only thing standing between a press and the room.
+ */
+export const JOIN_LATENCY_MS = 600
+
+/**
  * How many people actually turn up.
  *
  * Opening a huddle in a channel is not convening the channel: a handful drop
@@ -307,11 +316,20 @@ export const useMockHuddle = ({
       state: "ringing",
       participants: isIncoming ? (caller ? [caller] : []) : [me],
       // An incoming call is joinable; your own outgoing one you are already in.
+      //
+      // Answering is deliberately not instant. A real host asks a server for a
+      // room before there is anything to walk into, and returning that wait is
+      // what puts the spinner on the card — a mock that resolves synchronously
+      // would show a state no real integration ever has.
       join: isIncoming
-        ? () => {
-            answeredRef.current = true
-            setPhase("live")
-          }
+        ? () =>
+            new Promise<void>((resolve) => {
+              setTimeout(() => {
+                answeredRef.current = true
+                setPhase("live")
+                resolve()
+              }, JOIN_LATENCY_MS)
+            })
         : undefined,
     })
   }, [phase, others, me, write])

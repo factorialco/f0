@@ -5,7 +5,7 @@ import { SEEDS } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { isCallMessage, type F0ChatCall } from "@/sds/chat/F0Chat/types"
 import { renderHook } from "@/testing/test-utils"
-import { useMockHuddle } from "../mocks/useMockHuddle"
+import { JOIN_LATENCY_MS, useMockHuddle } from "../mocks/useMockHuddle"
 
 /** The first DM seed — huddles are 1:1 only. */
 const DM = SEEDS.find((seed) => (seed.type ?? "dm") === "dm")!
@@ -73,7 +73,15 @@ describe("useMockHuddle", () => {
     expect(result.current.huddle.runtime?.participants).toHaveLength(2)
   })
 
-  it("keeps the caller as who started it after you answer", () => {
+  /** Answering is a round trip, like a real host's. */
+  const answer = async (call: F0ChatCall | undefined) => {
+    await act(async () => {
+      void call?.join?.()
+      vi.advanceTimersByTime(JOIN_LATENCY_MS)
+    })
+  }
+
+  it("keeps the caller as who started it after you answer", async () => {
     // Reading the phase here made an incoming call claim you started it the
     // moment you answered.
     const { result } = setup()
@@ -83,19 +91,26 @@ describe("useMockHuddle", () => {
     expect(ringing?.startedBy.id).not.toBe("me")
     expect(ringing?.join).toBeTypeOf("function")
 
-    act(() => ringing?.join?.())
+    await answer(ringing)
     expect(callIn(result.current.chat, DM.id)).toMatchObject({
       state: "live",
       startedBy: { id: ringing?.startedBy.id },
     })
   })
 
-  it("hands over no room until an incoming call is answered", () => {
+  it("hands over no room until an incoming call is answered", async () => {
     const { result } = setup()
     act(() => result.current.huddle.receive(DM.id))
     expect(result.current.huddle.runtime).toBeNull()
 
-    act(() => callIn(result.current.chat, DM.id)?.join?.())
+    // Not even while the answer is still in flight — the room is what the round
+    // trip goes to fetch.
+    act(() => void callIn(result.current.chat, DM.id)?.join?.())
+    expect(result.current.huddle.runtime).toBeNull()
+
+    await act(async () => {
+      vi.advanceTimersByTime(JOIN_LATENCY_MS)
+    })
     expect(result.current.huddle.runtime).not.toBeNull()
   })
 

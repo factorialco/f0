@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { render, screen, userEvent } from "@/testing/test-utils"
+import { act, render, screen, userEvent } from "@/testing/test-utils"
 import { type F0ChatCall, type F0ChatCallState } from "../../types"
 import { ChatCallMessage } from "../ChatCallMessage"
 
@@ -31,6 +31,44 @@ describe("ChatCallMessage", () => {
     // there is never a dead control on a finished call.
     rerender(<ChatCallMessage call={build({ state: "ended" })} />)
     expect(screen.queryByRole("button")).toBeNull()
+  })
+
+  // Joining is never instant: a room has to be asked for before there is
+  // anything to walk into. Without this the card sits there looking as if the
+  // press did nothing, and people press it again.
+  it("spins the join button until the host's promise settles", async () => {
+    let settle: () => void = () => {}
+    const join = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          settle = resolve
+        })
+    )
+    render(<ChatCallMessage call={build({ join })} />)
+
+    const button = screen.getByRole("button")
+    await userEvent.click(button)
+    expect(button).toHaveAttribute("aria-busy", "true")
+
+    // And refuses a second press, so one impatient double-click cannot ask for
+    // two rooms.
+    await userEvent.click(button)
+    expect(join).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      settle()
+    })
+    expect(button).toHaveAttribute("aria-busy", "false")
+  })
+
+  it("never spins for a host that has nothing to wait for", async () => {
+    const join = vi.fn()
+    render(<ChatCallMessage call={build({ join })} />)
+
+    const button = screen.getByRole("button")
+    await userEvent.click(button)
+
+    expect(button).toHaveAttribute("aria-busy", "false")
   })
 
   it.each<[F0ChatCallState, string]>([

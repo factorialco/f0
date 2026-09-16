@@ -1,6 +1,11 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import { BellOff, Pencil } from "@/icons/app"
-import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  act,
+  fireEvent,
+  zeroRender as render,
+  screen,
+} from "@/testing/test-utils"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatHeaderAction, type F0ChatRuntime } from "../types"
@@ -192,6 +197,43 @@ describe("ChatHeader host actions", () => {
     const button = screen.getByRole("button", { name: "Edit group" })
     fireEvent.click(button)
     expect(onClick).toHaveBeenCalledWith(runtime.channel)
+  })
+
+  // Starting a huddle goes to a server before anything visibly happens. An
+  // inline action that returns its promise says so; one that drops it leaves
+  // the header looking as if the press missed.
+  it("spins an inline action until the promise it returned settles", async () => {
+    let settle: () => void = () => {}
+    const onClick = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          settle = resolve
+        })
+    )
+    renderChat(makeRuntime(), [
+      {
+        id: "huddle",
+        label: "Start huddle",
+        icon: Pencil,
+        placement: "inline",
+        onClick,
+      },
+    ])
+
+    const button = screen.getByRole("button", { name: "Start huddle" })
+    await act(async () => {
+      fireEvent.click(button)
+    })
+    expect(button).toHaveAttribute("aria-busy", "true")
+
+    // And refuses to start a second one while the first is still coming up.
+    fireEvent.click(button)
+    expect(onClick).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      settle()
+    })
+    expect(button).toHaveAttribute("aria-busy", "false")
   })
 
   it("falls an inline action without an icon back to the overflow menu", () => {

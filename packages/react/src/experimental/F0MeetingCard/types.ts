@@ -56,8 +56,15 @@ export type MeetingAttendee =
     }
 
 export interface MeetingJoin {
-  /** Called when the Join button is pressed. */
-  onJoin?: () => void
+  /**
+   * Called when the Join button is pressed.
+   *
+   * Return the promise and the button shows a spinner until it settles, which
+   * is what joining actually needs: a room has to be asked for before there is
+   * anything to walk into, and without this the card sits there looking as if
+   * the press did nothing.
+   */
+  onJoin?: () => void | Promise<unknown>
   /** Navigates to the meeting room instead of handling the click. */
   href?: string
   /**
