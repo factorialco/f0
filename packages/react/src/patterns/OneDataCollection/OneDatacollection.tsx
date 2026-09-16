@@ -910,6 +910,17 @@ const OneDataCollectionComp = <
   const assistedValue = source.searchPresentation
     ? (source.searchPresentation.value ?? assistedQuery)
     : undefined
+  // What the query would become, counted before it is run: the recognition is
+  // local and free, so the button can promise what the model will be asked for
+  // without anything being applied yet.
+  const assistedHintFor = (query: string | undefined) => {
+    if (!analyze || !query) {
+      return undefined
+    }
+    const found = Object.keys(analyze(query).filters).length
+    return found > 0 ? String(found) : undefined
+  }
+
   // Only the field in the toolbar filters as it is typed. The same query
   // written inside the filters panel waits for the apply button, like every
   // other filter there — the panel would contradict itself otherwise.
@@ -1815,11 +1826,6 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
-              leading={
-                search && assistedSearchProps ? (
-                  <Search {...assistedSearchProps} />
-                ) : null
-              }
               quickFilter={
                 search && assistedSearchProps?.triggerLabel
                   ? {
@@ -1865,6 +1871,23 @@ const OneDataCollectionComp = <
                   <Search
                     onChange={setCurrentSearch}
                     value={currentSearch}
+                    inlineAction={
+                      assistedSearchProps
+                        ? {
+                            label: i18n.collections.search.filterWithAssistant,
+                            icon: AiFilterIcon,
+                            hint: assistedHintFor(currentSearch),
+                            onClick: (query) => {
+                              // The text stops being a name search and becomes
+                              // a question: leaving both on would have the two
+                              // of them narrowing the same table at once.
+                              setCurrentSearch(undefined)
+                              assistedSearchProps.onChange(query)
+                              assistedSearchProps.onSubmit?.(query)
+                            },
+                          }
+                        : undefined
+                    }
                     results={searchPreview.results}
                     resultsLoading={searchPreview.loading}
                     onResultSelect={searchPreview.onSelect}

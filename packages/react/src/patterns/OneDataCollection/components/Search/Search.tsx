@@ -44,6 +44,18 @@ interface SearchProps {
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
   /**
+   * An action offered inside the field once something has been typed. It is a
+   * second thing the text can be used for, next to the search itself — shown
+   * rather than hidden behind a mode, so it never changes what Enter does.
+   */
+  inlineAction?: {
+    label: string
+    icon?: IconType
+    /** What it found in the text, said before it is run. */
+    hint?: string
+    onClick: (query: string) => void
+  }
+  /**
    * Keeps the field open. For a field that already has a surface of its own —
    * a panel it was opened into — where collapsing to a pill would leave an
    * empty panel behind.
@@ -274,6 +286,41 @@ const IconComponent = ({
 }
 
 /**
+ * The second thing the typed text can do, offered in the field rather than
+ * behind a mode: Enter still runs the search, and this runs on a click.
+ */
+const InlineAction = ({
+  action,
+  query,
+  busy,
+}: {
+  action: SearchProps["inlineAction"]
+  query: string | undefined
+  busy: boolean
+}) =>
+  !action || !query || busy ? null : (
+    <motion.button
+      type="button"
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => action.onClick(query)}
+      title={action.hint}
+      className={cn(
+        "flex h-6 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover",
+        focusRing()
+      )}
+    >
+      {action.icon ? <F0Icon icon={action.icon} size="sm" /> : null}
+      {action.label}
+      {action.hint ? (
+        <span className="text-f1-foreground-secondary">{action.hint}</span>
+      ) : null}
+    </motion.button>
+  )
+
+/**
  * The field at rest. With a label it reads as a button that says what the
  * field is for; without one it is the magnifier it has always been, showing
  * whatever was last searched.
@@ -357,6 +404,7 @@ export const Search = ({
   onSubmit,
   icon = SearchIcon,
   triggerLabel,
+  inlineAction,
   alwaysOpen = false,
   suggestions,
   placeholderRotation,
@@ -656,6 +704,11 @@ export const Search = ({
                       onKeyDown={handleKeyDown}
                     />
                   )}
+                  <InlineAction
+                    action={inlineAction}
+                    query={text}
+                    busy={searching}
+                  />
                   <DismissButton
                     label={searching ? i18n.actions.cancel : i18n.actions.clear}
                     onDismiss={handleClearOrCancel}
