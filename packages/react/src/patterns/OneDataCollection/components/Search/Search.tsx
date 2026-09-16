@@ -40,6 +40,11 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
+  /**
+   * Bump to open the field from outside it, so a consumer can offer its own
+   * way in — a labelled button, say — without owning the field's open state.
+   */
+  requestOpen?: number
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
   /**
@@ -83,6 +88,11 @@ export type SearchPresentation = Pick<
   | "displayValue"
   | "onClear"
 > & {
+  /**
+   * Label for a button that opens the field, placed before it. Omit it and
+   * the magnifier is the only way in.
+   */
+  triggerLabel?: string
   /**
    * What the parser could not turn into a filter, rendered under the chips.
    * Never leave an unparsed fragment silent: the chips are what filters, so a
@@ -228,6 +238,7 @@ export const Search = ({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
+  requestOpen,
   onSubmit,
   suggestions,
   placeholderRotation,
@@ -352,6 +363,13 @@ export const Search = ({
       }, 0)
     }
   }
+
+  useEffect(() => {
+    if (requestOpen) {
+      handleOpen()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestOpen])
 
   /** Arrows and Enter, once the results list is the thing being driven. */
   const handleResultsKeyDown = (e: React.KeyboardEvent) => {

@@ -11,6 +11,7 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { F0ActionBar } from "@/components/F0ActionBar"
+import { F0Button } from "@/components/F0Button"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
@@ -19,6 +20,7 @@ import {
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
+import { Search as AiSearchIcon } from "@/icons/ai"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
@@ -895,6 +897,7 @@ const OneDataCollectionComp = <
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [openSearchRequests, setOpenSearchRequests] = useState(0)
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -1775,8 +1778,16 @@ const OneDataCollectionComp = <
                     <Spinner size="small" />
                   </motion.div>
                 ) : null}
+                {search && source.searchPresentation?.triggerLabel ? (
+                  <F0Button
+                    label={source.searchPresentation.triggerLabel}
+                    icon={AiSearchIcon}
+                    onClick={() => setOpenSearchRequests((count) => count + 1)}
+                  />
+                ) : null}
                 {search ? (
                   <Search
+                    requestOpen={openSearchRequests}
                     {...source.searchPresentation}
                     onChange={setCurrentSearch}
                     value={currentSearch}
