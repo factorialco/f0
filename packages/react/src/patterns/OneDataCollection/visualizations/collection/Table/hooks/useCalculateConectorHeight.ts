@@ -124,8 +124,35 @@ export const useCalculateConectorHeight = ({
 
     calculateHeight()
 
-    const observer = new MutationObserver(() => {
-      calculateHeight()
+    // Each measurement forces layout, and the observer below watches the whole
+    // tbody, so a burst of mutations would measure once per mutation.
+    let scheduled = 0
+    const scheduleCalculateHeight = () => {
+      if (scheduled) {
+        return
+      }
+      scheduled = requestAnimationFrame(() => {
+        scheduled = 0
+        calculateHeight()
+      })
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      // Churn inside a row's expanded-content panel cannot move a connector:
+      // the panel is not a data row, and any height change it causes reaches
+      // the ResizeObserver below anyway. Without this, typing in a panel
+      // forces a layout for every mounted nested parent in the table.
+      const movesAConnector = mutations.some(
+        (mutation) =>
+          !(mutation.target instanceof Element) ||
+          !mutation.target.closest("[data-expanded-content]")
+      )
+
+      if (!movesAConnector) {
+        return
+      }
+
+      scheduleCalculateHeight()
     })
 
     const commonParent = firstRow.parentElement
@@ -154,6 +181,9 @@ export const useCalculateConectorHeight = ({
       : undefined
 
     return () => {
+      if (scheduled) {
+        cancelAnimationFrame(scheduled)
+      }
       observer.disconnect()
       resizeObserver.disconnect()
       scrollCleanup?.()
