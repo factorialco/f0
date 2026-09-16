@@ -1372,7 +1372,7 @@ export const EditableTableWithPerRowDateConfig: Story = {
     docs: {
       description: {
         story:
-          "`dateConfig` as a per-row function `(item) => ({ minDate, maxDate })`. The End date picker's `minDate` — and therefore the month it opens on, since the picker's default month follows `minDate` — tracks each row's Start date, so an empty/unset End cell opens the calendar on that row's start. The Start date picker's `maxDate` tracks each row's End date. To test: the three rows have different start dates, so opening each End picker opens on a different month; then change a row's Start date and reopen its End picker — it now opens on the new start month, and earlier dates are disabled.",
+          "`dateConfig` as a per-row function `(item) => ({ minDate, maxDate })`. The End date picker's `minDate` — and therefore the month it opens on, since the picker's default month follows `minDate` — tracks each row's Start date, so an empty/unset End cell opens the calendar on that row's start. The Start date picker's `maxDate` tracks each row's End date. To test: the three rows have different start dates, so opening each End picker opens on a different month; then change a row's Start date and reopen its End picker — it now opens on the new start month, and earlier dates are disabled. The End date column also demos `dateConfig.showIcon: false` (no calendar icon) and `dateConfig.clearable: true` (a clear button empties the date).",
       },
     },
   },
@@ -1477,7 +1477,7 @@ export const EditableTableWithPerRowDateConfig: Story = {
                   inputPlaceholder: "DD/MM/YYYY",
                   render: (item: Hire) => item.startDate,
                   dateConfig: (item: Hire) => ({
-                    maxDate: parseISO(item.endDate),
+                    maxDate: item.endDate ? parseISO(item.endDate) : undefined,
                   }),
                 },
                 {
@@ -1487,7 +1487,11 @@ export const EditableTableWithPerRowDateConfig: Story = {
                   inputPlaceholder: "DD/MM/YYYY",
                   render: (item: Hire) => item.endDate,
                   dateConfig: (item: Hire) => ({
-                    minDate: parseISO(item.startDate),
+                    minDate: item.startDate
+                      ? parseISO(item.startDate)
+                      : undefined,
+                    showIcon: false,
+                    clearable: true,
                   }),
                 },
               ],
