@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.2.0](https://github.com/factorialco/f0/compare/f0-react-v7.1.1...f0-react-v7.2.0) (2026-09-16)
+
+
+### Features
+
+* **F0Chat:** navigate to a distant message without scrolling through it ([#5539](https://github.com/factorialco/f0/issues/5539)) ([f82e7f4](https://github.com/factorialco/f0/commit/f82e7f4262b610d0c8e2637fedde6260f0c1071c))
+
 ## [7.1.1](https://github.com/factorialco/f0/compare/f0-react-v7.1.0...f0-react-v7.1.1) (2026-09-16)
 
 
