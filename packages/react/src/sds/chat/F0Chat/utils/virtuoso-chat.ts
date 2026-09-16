@@ -496,9 +496,11 @@ export const followDecision = (
 export const CHAT_TELEPORT_THRESHOLD_ROWS = 40
 
 /**
- * How far short of the target the hidden reposition lands. The visible part of
- * the jump is then a short scroll in the direction of travel, which is what
- * makes the arrival read as movement rather than a cut.
+ * Rows the visible part of a far jump travels. The hidden phase lands ON the
+ * target, then steps back by the measured span of this many rows, so the
+ * approach is a short scroll in the direction of travel — what makes the
+ * arrival read as movement rather than a cut. The span is capped at one
+ * viewport, so tall rows never turn the approach into a tour.
  */
 export const CHAT_TELEPORT_APPROACH_ROWS = 10
 
@@ -508,20 +510,19 @@ export const CHAT_TELEPORT_APPROACH_ROWS = 10
  *   - `instant`  nothing measured to travel from, so there is no motion to
  *                convey; animating from an unknown position is just latency.
  *   - `smooth`   near enough to scroll continuously.
- *   - `teleport` far: reposition to `staging` while hidden, then scroll the
- *                remaining `approach` rows to `index` in view.
+ *   - `teleport` far: land on `index` while hidden, step back by the approach
+ *                rows, then glide them into view.
  */
 export type ChatJumpPlan =
   | { kind: "instant"; index: number }
   | { kind: "smooth"; index: number }
-  | { kind: "teleport"; staging: number; index: number }
+  | { kind: "teleport"; index: number }
 
 export function planJump({
   from,
   to,
   rowCount,
   threshold = CHAT_TELEPORT_THRESHOLD_ROWS,
-  approach = CHAT_TELEPORT_APPROACH_ROWS,
 }: {
   /** Top visible row, in local index space, or null when nothing is measured. */
   from: number | null
@@ -529,7 +530,6 @@ export function planJump({
   to: number
   rowCount: number
   threshold?: number
-  approach?: number
 }): ChatJumpPlan {
   const last = Math.max(0, rowCount - 1)
   const target = Math.min(Math.max(to, 0), last)
@@ -540,17 +540,5 @@ export function planJump({
   if (Math.abs(target - from) <= threshold) {
     return { kind: "smooth", index: target }
   }
-
-  // Land BEFORE the target when travelling towards newer messages and AFTER it
-  // when travelling towards older ones, so the approach continues the jump's
-  // direction instead of doubling back on it.
-  const staging =
-    target > from
-      ? Math.max(0, target - approach)
-      : Math.min(last, target + approach)
-
-  // `staging` can never collapse onto `target`: a teleport needs the two more
-  // than `threshold` rows apart, which leaves the subtraction room going down
-  // and keeps `target` strictly below `last` going up.
-  return { kind: "teleport", staging, index: target }
+  return { kind: "teleport", index: target }
 }
