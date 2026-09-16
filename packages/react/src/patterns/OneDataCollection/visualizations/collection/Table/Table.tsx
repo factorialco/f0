@@ -919,6 +919,8 @@ export const TableCollection = <
                                     frozenColumnsLeft={frozenColumnsLeft}
                                     checkColumnWidth={checkColumnWidth}
                                     referenceRowType={referenceRowType}
+                                    tableWithChildren={tableWithChildren}
+                                    boldRootRows={boldRootRows}
                                     renderExpandedContent={
                                       renderExpandedContent
                                     }

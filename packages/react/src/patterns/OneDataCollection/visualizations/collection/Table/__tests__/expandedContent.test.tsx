@@ -364,4 +364,70 @@ describe("TableCollection renderExpandedContent", () => {
       before
     )
   })
+
+  describe("in a grouped table", () => {
+    type Grouped = Node & { team: string }
+
+    const GROUPED: Grouped[] = [
+      { id: "ana", name: "Ana", team: "Design" },
+      { id: "ben", name: "Ben", team: "Engineering" },
+    ]
+
+    const createGroupedSource = () =>
+      ({
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        dataAdapter: {
+          fetchData: async () => ({ records: GROUPED }),
+        },
+        grouping: {
+          mandatory: true,
+          collapsible: true,
+          defaultOpenGroups: true,
+          groupBy: {
+            team: {
+              name: "Team",
+              label: (groupId: string) => groupId,
+              itemCount: () => 1,
+            },
+          },
+        },
+        currentGrouping: { field: "team", order: "asc" },
+        setCurrentGrouping: vi.fn(),
+      }) as unknown as TestSource
+
+    it("opens a panel for a row inside a group", async () => {
+      const user = userEvent.setup()
+      renderTable({ source: createGroupedSource() })
+
+      await waitFor(() => expect(screen.getByText("Ana")).toBeInTheDocument())
+
+      await user.click(expanderOf("Ana") as Element)
+
+      expect(screen.getByText(/panel for Ana/)).toBeInTheDocument()
+    })
+
+    it("keeps the first row of each group independent", async () => {
+      const user = userEvent.setup()
+      renderTable({ source: createGroupedSource() })
+
+      await waitFor(() => expect(screen.getByText("Ana")).toBeInTheDocument())
+
+      // Both are index 0, each in its own group: one key must not open both.
+      await user.click(expanderOf("Ana") as Element)
+
+      expect(screen.getByText(/panel for Ana/)).toBeInTheDocument()
+      expect(screen.queryByText(/panel for Ben/)).toBeNull()
+    })
+  })
 })
