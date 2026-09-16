@@ -3,11 +3,21 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 import type { QueryAnalysis } from "./Search"
 
+/** Typed in a hurry, read later: a list reads as a list when it starts alike. */
+const asSentence = (query: string) =>
+  query.charAt(0).toUpperCase() + query.slice(1)
+
 export type AssistedQueryPanelProps = {
   value: string
   onChange: (value: string) => void
   analysis?: QueryAnalysis
   placeholder?: string
+  /**
+   * Called once the typing has settled. Marking the filters re-renders the
+   * whole popover, and doing that on every keystroke costs the field
+   * characters — the text has to stay ahead of the reading.
+   */
+  onSettle?: (value: string) => void
   /** Queries already run here, newest first. */
   recent?: string[]
   recentTitle?: string
@@ -24,6 +34,7 @@ export const AssistedQueryPanel = ({
   onChange,
   analysis,
   placeholder,
+  onSettle,
   recent,
   recentTitle,
 }: AssistedQueryPanelProps) => {
@@ -34,6 +45,13 @@ export const AssistedQueryPanel = ({
   useEffect(() => {
     textareaRef.current?.focus()
   }, [])
+
+  const onSettleRef = useRef(onSettle)
+  onSettleRef.current = onSettle
+  useEffect(() => {
+    const timer = setTimeout(() => onSettleRef.current?.(value), 200)
+    return () => clearTimeout(timer)
+  }, [value])
 
   return (
     <div className="flex h-full flex-col gap-3">
@@ -65,14 +83,14 @@ export const AssistedQueryPanel = ({
             <div key={query} className="w-full px-2">
               <button
                 type="button"
-                onClick={() => onChange(query)}
+                onClick={() => onChange(asSentence(query))}
                 className={cn(
                   "flex w-full min-w-0 flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded border-none bg-transparent p-1.5 text-left text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary",
                   focusRing()
                 )}
               >
                 <span className="min-w-0 flex-1">
-                  <OneEllipsis>{query}</OneEllipsis>
+                  <OneEllipsis>{asSentence(query)}</OneEllipsis>
                 </span>
               </button>
             </div>

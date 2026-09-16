@@ -903,6 +903,10 @@ const OneDataCollectionComp = <
   // empty the table under someone who has not finished writing. The search
   // runs on Enter, the action runs on a click, and typing does neither.
   const [typedSearch, setTypedSearch] = useState<string | undefined>()
+  // The query written inside the filters panel is that panel's own: it stages
+  // filters there and waits for the apply button, so showing it in the field
+  // outside would claim something had been applied that had not.
+  const [panelQuery, setPanelQuery] = useState("")
 
   // Words become filters while they are being typed: a recognised stretch is
   // applied at once, so the chips and the table answer the sentence as it is
@@ -926,12 +930,6 @@ const OneDataCollectionComp = <
     return found > 0 ? String(found) : undefined
   }
 
-  // Only the field in the toolbar filters as it is typed. The same query
-  // written inside the filters panel waits for the apply button, like every
-  // other filter there — the panel would contradict itself otherwise.
-  const [assistedFrom, setAssistedFrom] = useState<"toolbar" | "panel">(
-    "toolbar"
-  )
   // Held in a ref, and compared against what was last applied: applying
   // filters rebuilds the source, so depending on the setter — or re-applying
   // the same reading — would have the table reloading on a loop.
@@ -939,7 +937,7 @@ const OneDataCollectionComp = <
   setFiltersRef.current = setFilters
   const lastAppliedRef = useRef<string>()
   useEffect(() => {
-    if (!analyze || assistedValue === undefined || assistedFrom === "panel") {
+    if (!analyze || assistedValue === undefined) {
       return
     }
     const timer = setTimeout(() => {
@@ -952,7 +950,7 @@ const OneDataCollectionComp = <
       setFiltersRef.current(next as Parameters<typeof setFilters>[0])
     }, 250)
     return () => clearTimeout(timer)
-  }, [analyze, assistedValue, assistedFrom])
+  }, [analyze, assistedValue])
 
   // One field's worth of props, shared by the two places it can be offered
   // from, so whichever one is used they are the same field.
@@ -962,7 +960,6 @@ const OneDataCollectionComp = <
         icon: AiFilterIcon,
         value: source.searchPresentation.value ?? assistedQuery,
         onChange: (next: string | undefined) => {
-          setAssistedFrom("toolbar")
           if (source.searchPresentation?.onChange) {
             source.searchPresentation.onChange(next)
             return
@@ -1852,17 +1849,16 @@ const OneDataCollectionComp = <
                       label: assistedSearchProps.triggerLabel,
                       render: ({ stage }) => (
                         <AssistedQueryPanel
-                          value={assistedValue ?? ""}
-                          onChange={(next) => {
-                            setAssistedFrom("panel")
-                            assistedSearchProps.onChange(next)
+                          value={panelQuery}
+                          onChange={setPanelQuery}
+                          onSettle={(settled) =>
                             stage(
-                              source.searchPresentation?.analyze?.(next)
+                              source.searchPresentation?.analyze?.(settled)
                                 ?.filters ?? {}
                             )
-                          }}
+                          }
                           analysis={source.searchPresentation?.analyze?.(
-                            assistedValue ?? ""
+                            panelQuery
                           )}
                           placeholder={
                             source.searchPresentation?.placeholderRotation?.[0]
