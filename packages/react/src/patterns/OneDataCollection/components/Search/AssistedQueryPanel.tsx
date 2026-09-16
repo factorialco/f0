@@ -70,7 +70,7 @@ export const AssistedQueryPanel = ({
         </p>
       ) : null}
 
-      {!value && recent && recent.length > 0 ? (
+      {recent && recent.length > 0 ? (
         <div className="flex w-full flex-col">
           <div className="flex w-full items-center justify-between gap-1 px-3.5 pb-1">
             <span className="min-w-0 flex-1">
