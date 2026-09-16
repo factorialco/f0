@@ -115,8 +115,6 @@ export type RowProps<
     context: ExpandedContentContext
   ) => ReactNode
   onExpandedContentChange?: (item: R, expanded: boolean) => void
-  /** Column count the expanded-content panel spans. */
-  rowColSpan?: number
   /** Reserves the expander box on every first cell, so they stay aligned. */
   tableWithExpandableRows?: boolean
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
@@ -216,7 +214,6 @@ const RowComponentInner = <
     boldRootRows = false,
     renderExpandedContent,
     onExpandedContentChange,
-    rowColSpan,
     tableWithExpandableRows = false,
     cellRenderer: CellRenderer,
     rowWrapper,
@@ -380,7 +377,6 @@ const RowComponentInner = <
         boldRootRows={boldRootRows}
         renderExpandedContent={renderExpandedContent}
         onExpandedContentChange={onExpandedContentChange}
-        rowColSpan={rowColSpan}
         tableWithExpandableRows={tableWithExpandableRows}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
@@ -597,7 +593,6 @@ const RowComponentInner = <
         <ExpandedContentRow
           id={expandedContent.panelId}
           toggleId={expandedContent.toggleId}
-          colSpan={rowColSpan ?? columns.length}
         >
           {expandedContent.content}
         </ExpandedContentRow>

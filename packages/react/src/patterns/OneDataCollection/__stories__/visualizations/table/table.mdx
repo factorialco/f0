@@ -147,7 +147,10 @@ type TableVisualizationOptions<T> = {
    * For nested tables, which rows start out expanded.
    * `true` / a depth / a predicate.
    */
-  defaultExpanded?: boolean | number | ((record: T, ctx: { depth: number }) => boolean)
+  defaultExpanded?:
+    | boolean
+    | number
+    | ((record: T, ctx: { depth: number }) => boolean)
 
   /** In a nested table, renders root rows (depth 0) in bold. */
   boldRootRows?: boolean
@@ -156,7 +159,10 @@ type TableVisualizationOptions<T> = {
    * Gives a row an expander that opens a full-width panel beneath it.
    * Return undefined for a row that has nothing to reveal.
    */
-  renderExpandedContent?: (item: T, context: ExpandedContentContext) => ReactNode
+  renderExpandedContent?: (
+    item: T,
+    context: ExpandedContentContext
+  ) => ReactNode
 
   /** Called after the table has opened or closed a row's panel. */
   onExpandedContentChange?: (item: T, expanded: boolean) => void
@@ -881,10 +887,7 @@ visualizations={[
 ]}
 ```
 
-<Canvas
-  of={ExpandedContentStories.Default}
-  meta={ExpandedContentStories}
-/>
+<Canvas of={ExpandedContentStories.Default} meta={ExpandedContentStories} />
 
 - Return `undefined` for a row with nothing to reveal; that row gets no
   expander. The renderer runs for every rendered row on every render, so return

@@ -506,12 +506,6 @@ export const TableCollection = <
   const selectionHeaderColSpan =
     columns.length + (showItemActions ? actionColCount : 0)
 
-  // Every cell a body row can emit, for the rows that span the whole table.
-  const rowColSpan =
-    columns.length +
-    (source.selectable ? 1 : 0) +
-    (showItemActions ? actionColCount : 0)
-
   const selectedText =
     allSelectedStatus.selectedCount === 1
       ? i18n.status.selected.singular
@@ -927,7 +921,6 @@ export const TableCollection = <
                                     onExpandedContentChange={
                                       onExpandedContentChange
                                     }
-                                    rowColSpan={rowColSpan}
                                     tableWithExpandableRows={
                                       tableWithExpandableRows
                                     }
@@ -1005,7 +998,6 @@ export const TableCollection = <
                         boldRootRows={boldRootRows}
                         renderExpandedContent={renderExpandedContent}
                         onExpandedContentChange={onExpandedContentChange}
-                        rowColSpan={rowColSpan}
                         tableWithExpandableRows={tableWithExpandableRows}
                         rowWrapper={RowWrapper}
                         cellRenderer={cellRenderer}

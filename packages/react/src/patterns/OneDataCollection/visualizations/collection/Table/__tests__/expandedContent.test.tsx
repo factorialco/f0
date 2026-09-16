@@ -192,7 +192,7 @@ describe("TableCollection renderExpandedContent", () => {
     expect(screen.queryByText(/panel for Bob/)).toBeNull()
   })
 
-  it("puts the panel in a row spanning every column", async () => {
+  it("puts the panel in a row of its own, spanning every column", async () => {
     const user = userEvent.setup()
     renderTable()
 
@@ -202,12 +202,14 @@ describe("TableCollection renderExpandedContent", () => {
     const panelCell = screen
       .getByText(/panel for Bob/)
       .closest("td") as HTMLTableCellElement
-    expect(panelCell).not.toBeNull()
-    // One column, no selection column, no item actions.
-    expect(panelCell.getAttribute("colspan")).toBe("1")
-    expect(panelCell.closest("tr")).toHaveAttribute(
-      "data-expanded-content",
-      "true"
+    const panelRow = panelCell.closest("tr") as HTMLTableRowElement
+
+    expect(panelRow).toHaveAttribute("data-expanded-content", "true")
+    // The one cell in the row, and its span is clamped to the real column
+    // count rather than computed — see ExpandedContentRow.
+    expect(panelRow.children).toHaveLength(1)
+    expect(panelCell.colSpan).toBeGreaterThan(
+      screen.getAllByRole("columnheader").length
     )
   })
 

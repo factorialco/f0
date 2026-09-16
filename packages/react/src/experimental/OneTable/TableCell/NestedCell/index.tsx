@@ -47,6 +47,10 @@ export const NestedCell = ({
   // children: a leaf is handed its parent's handler, and the tree connector
   // keys off `expanded`.
   const showExpander = firstCellWithChildren || (firstCell && contentExpandable)
+  // Every first cell in a table that uses `renderExpandedContent` reserves the
+  // box, so a row that cannot expand still lines up with the rows that can.
+  const reservesExpander =
+    showExpander || (firstCell && !!nestedRowProps?.contentExpanderColumn)
   const expanded = firstCellWithChildren
     ? !!nestedRowProps?.expanded
     : !!nestedRowProps?.contentExpanded
@@ -68,7 +72,7 @@ export const NestedCell = ({
 
   const marginLeft = firstCellWithDepth
     ? getNestedMarginLeft({
-        depth: !showExpander ? depth + 1 : depth,
+        depth: !reservesExpander ? depth + 1 : depth,
       })
     : undefined
 
@@ -85,7 +89,7 @@ export const NestedCell = ({
       className={cn(
         width !== "auto" && "overflow-hidden",
         "relative z-[1] h-full",
-        showExpander && "flex items-center gap-2"
+        reservesExpander && "flex items-center gap-2"
       )}
       style={{
         marginLeft: isActionRow
@@ -239,7 +243,7 @@ export const NestedCell = ({
           )}
           <div
             className={cn(
-              showExpander && "min-w-0 w-full h-full",
+              reservesExpander && "min-w-0 w-full h-full",
               firstCellWithNoChildrenAndTableChildren &&
                 "pl-[var(--spacing-factor)]",
               "relative"

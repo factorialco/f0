@@ -105,7 +105,6 @@ export type RowProps<
     context: ExpandedContentContext
   ) => React.ReactNode
   onExpandedContentChange?: (item: R, expanded: boolean) => void
-  rowColSpan?: number
   tableWithExpandableRows?: boolean
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
