@@ -35,6 +35,7 @@ import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
+import { getRowExpansionId } from "../lib/rowExpansion"
 import { useNestedDataContext } from "../providers/NestedProvider"
 import type {
   CellRendererProps,
@@ -141,9 +142,12 @@ const NestedRowContent = <
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
-  const itemKey =
-    "id" in props.item ? `${String(props.item.id)}-${props.index}` : props.index
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${itemKey}`
+  const rowId = getRowExpansionId({
+    groupIndex: props.groupIndex,
+    depth: props.nestedRowProps?.depth ?? 0,
+    item: props.item,
+    index: props.index,
+  })
 
   const {
     expandedRowIds,
