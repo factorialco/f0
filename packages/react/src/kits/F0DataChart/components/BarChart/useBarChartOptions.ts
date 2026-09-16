@@ -20,6 +20,11 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
+import {
+  REFERENCE_LINE_SERIES,
+  referenceLineSeries,
+  referenceLineTooltip,
+} from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -1021,6 +1026,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber = 2,
+    referenceLines,
     echartsOptions,
   }: F0DataChartBarProps,
   size: BarChartSize,
@@ -1272,7 +1278,17 @@ export function useBarChartOptions(
     const options = buildBaseChartOptions({
       categories,
       theme,
-      series: echartsSeries,
+      // Appended, so a reference line never takes a palette colour from the
+      // data or shifts the bars' own ordering.
+      series: [
+        ...echartsSeries,
+        ...referenceLineSeries(
+          referenceLines,
+          theme,
+          isVertical ? "y" : "x",
+          true
+        ),
+      ],
       legendData,
       isVertical,
       showGrid,
@@ -1382,6 +1398,18 @@ export function useBarChartOptions(
             marker?: string
           }
           const hovered = String(p.seriesName ?? "")
+          // A markLine hover arrives here, not at the series' own tooltip, so
+          // the line answers from inside the chart's one formatter. Without
+          // this the reader is shown the internal series name.
+          if (hovered === REFERENCE_LINE_SERIES) {
+            return referenceLineTooltip(
+              referenceLines,
+              p.dataIndex,
+              formatTooltipValue,
+              theme
+            )
+          }
+
           const dataIndex = p.dataIndex ?? 0
           // Hovering the gradient reads as hovering the bar it tops, so the card
           // is the bar's: its own name, its own value — not the gap's height.
@@ -1569,6 +1597,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber,
+    referenceLines,
     echartsOptions,
     theme,
     i18n,

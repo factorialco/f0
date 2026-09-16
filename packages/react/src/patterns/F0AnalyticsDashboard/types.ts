@@ -7,6 +7,7 @@ import type {
   F0DataChartPieSeries,
   F0DataChartPointClick,
   F0DataChartRadarIndicator,
+  F0DataChartReferenceLine,
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
@@ -218,6 +219,14 @@ export type DashboardChartConfig =
 export interface DashboardChartData {
   /** Category axis labels. Required for bar/line charts. */
   categories?: string[]
+  /**
+   * Constants to draw across the plot — a peer median, a target, an average.
+   *
+   * Part of the DATA, not the config: a figure like this arrives with the
+   * values it is compared against, and changes when they do. Bar and line
+   * charts render them; every other type ignores them.
+   */
+  referenceLines?: F0DataChartReferenceLine[]
   /** X-axis category labels for heatmap charts. */
   xCategories?: string[]
   /** Y-axis category labels for heatmap charts. */
@@ -342,6 +351,30 @@ export interface DashboardMetricData {
   value: number
   /** Optional previous value — used to compute a trend indicator */
   previousValue?: number
+  /**
+   * A reference figure to show the value against, under the number.
+   *
+   * Distinct from {@link DashboardMetricData.previousValue}, which is this
+   * metric at an earlier time and renders as a rise or a fall. A comparison is
+   * a different quantity entirely — a peer median, a target, a company-wide
+   * average — so it is stated rather than turned into a trend: an arrow next to
+   * it would read as "it moved", which it did not.
+   *
+   * `value` is in the metric's own units and is formatted exactly like the
+   * headline number, so the two can be read against each other. `label` says
+   * what the figure is, in the consumer's own words and language.
+   */
+  comparison?: {
+    value: number
+    label: string
+    /**
+     * Where the figure comes from, revealed by an ⓘ icon after it — "the
+     * median across all companies on Factorial", say. A string renders a
+     * plain tooltip; the structured form renders a hoverable card that can
+     * carry a link, the same affordance as `DashboardItemBase.info`.
+     */
+    info?: string | InfoHintContent
+  }
 }
 
 /**
