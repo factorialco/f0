@@ -246,8 +246,13 @@ export const F0MeetingProvider = ({
  * Whether there is a call at all.
  *
  * The providers render with or without one (see {@link F0Meeting}), so being
- * inside them no longer implies a live runtime. Components that sit outside the
- * surface — the panel presenter — need to ask rather than assume.
+ * inside them does NOT imply a live runtime and the three hooks below still
+ * throw. Ask this first from anywhere that can outlive the call.
+ *
+ * Which is not a rare corner: anything the HOST mounts — panel content, a slot,
+ * its own chrome — is removed by an effect, a commit after the runtime went
+ * null. That one render is enough to take the page down, and it is exactly what
+ * hanging up out of `panel` mode used to do.
  */
 export const useHasF0Meeting = (): boolean =>
   useContext(F0MeetingContext) !== null

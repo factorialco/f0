@@ -9,6 +9,7 @@ export {
   useF0Meeting,
   useF0MeetingRoster,
   useF0MeetingStable,
+  useHasF0Meeting,
   type F0MeetingRoster,
   type F0MeetingStable,
 } from "./providers/F0MeetingProvider"

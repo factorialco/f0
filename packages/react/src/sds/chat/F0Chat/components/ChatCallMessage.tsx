@@ -39,13 +39,15 @@ const toAttendee = (user: F0ChatUser) => {
  * virtualized, and a node of unknown height injected by the host is exactly what
  * throws off Virtuoso's measurements.
  *
- * That is also why a live call is `compact` — it occupies one row's worth of
- * space, and it is rewritten on every room event, so its height would otherwise
- * move under the reader. An ENDED call is the one exception: it is written once
- * and never again, and its height is fixed at mount. Nothing in it is
- * collapsible or lazy, which is precisely why the transcript stays OUT of the
- * card and behind an action. Put anything expandable here and the measurement
- * problem `compact` protects against comes straight back.
+ * The card keeps its full layout in every state. What that costs is a height
+ * that changes as a live call is rewritten on each room event, which the
+ * transcript has to absorb; what it buys is one card that reads the same
+ * whether the call is ringing, running or over.
+ *
+ * Nothing in it is collapsible or lazy, and that is not an accident — it is why
+ * the transcript stays OUT of the card and behind an action. Put anything
+ * expandable here and the height stops being knowable at mount, which is the
+ * one thing a virtualized list cannot absorb.
  */
 export const ChatCallMessage = ({ call }: { call: F0ChatCall }): ReactNode => {
   const i18n = useI18n()
@@ -67,7 +69,6 @@ export const ChatCallMessage = ({ call }: { call: F0ChatCall }): ReactNode => {
   return (
     <div className="px-4 py-2">
       <F0MeetingCard
-        compact={!isEnded}
         state={CARD_STATE[call.state]}
         title={title}
         startsAt={new Date(call.startedAt)}
