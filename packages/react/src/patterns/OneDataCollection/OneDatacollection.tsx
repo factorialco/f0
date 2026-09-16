@@ -19,7 +19,6 @@ import {
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { One as OneIcon } from "@/icons/ai"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
@@ -896,7 +895,6 @@ const OneDataCollectionComp = <
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
-  const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -934,6 +932,15 @@ const OneDataCollectionComp = <
       : false
     return hasActiveFilters || search ? "no-results" : "no-data"
   }
+
+  // A query that became chips stops being applied as text: leaving both on
+  // would cross-filter the collection down to nothing.
+  const parsedSearchQuery = source.searchPresentation?.displayValue
+  useEffect(() => {
+    if (parsedSearchQuery) {
+      setCurrentSearch(undefined)
+    }
+  }, [parsedSearchQuery, setCurrentSearch])
 
   const onLoadData = ({
     totalItems,
@@ -1768,25 +1775,9 @@ const OneDataCollectionComp = <
                     <Spinner size="small" />
                   </motion.div>
                 ) : null}
-                {/* Asking is its own field. Sharing one with the plain text
-                    search meant a query had to be readable while the chips did
-                    the filtering, and neither cost was ever visible. */}
-                {source.searchPresentation ? (
-                  <Search
-                    {...source.searchPresentation}
-                    icon={OneIcon}
-                    value={source.searchPresentation.value ?? assistedQuery}
-                    onChange={
-                      source.searchPresentation.onChange ?? setAssistedQuery
-                    }
-                    onClear={() => {
-                      setAssistedQuery(undefined)
-                      source.searchPresentation?.onClear?.()
-                    }}
-                  />
-                ) : null}
                 {search ? (
                   <Search
+                    {...source.searchPresentation}
                     onChange={setCurrentSearch}
                     value={currentSearch}
                     results={searchPreview.results}

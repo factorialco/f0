@@ -9,7 +9,6 @@ import { useOnClickOutside } from "usehooks-ts"
 import { F0Avatar } from "../../../../components/avatars/F0Avatar"
 import type { AvatarVariant } from "../../../../components/avatars/F0Avatar"
 import { F0Icon } from "../../../../components/F0Icon"
-import type { IconType } from "../../../../components/F0Icon"
 import {
   CrossedCircle,
   Search as SearchIcon,
@@ -41,13 +40,11 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
-  /** The magnifier to draw. Lets a field say what is on the other end of it. */
-  icon?: IconType
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
   /**
    * Ways of finishing what is being typed. The consumer decides which ones to
-   * offer for the current value; the field only draws them.
+   * offer for the current text; the field only draws them.
    */
   suggestions?: string[]
   /** Placeholders cycled while the field sits idle and empty. */
@@ -57,8 +54,14 @@ interface SearchProps {
   /** Aborts the in-flight query (the clear button while searching). */
   onCancel?: () => void
   /**
+   * Text to show in place of `value`, for a query that has been turned into
+   * filters. The chips are what filters from then on, so the query has to stop
+   * being applied as plain text while staying readable in the field.
+   */
+  displayValue?: string
+  /**
    * The field was reset. A query that became filters leaves those filters
-   * behind, so clearing the value alone would leave the collection filtered by
+   * behind, so clearing the text alone would leave the collection filtered by
    * something no longer written anywhere.
    */
   onClear?: () => void
@@ -77,14 +80,9 @@ export type SearchPresentation = Pick<
   | "suggestions"
   | "status"
   | "onCancel"
+  | "displayValue"
   | "onClear"
 > & {
-  /**
-   * The query being written. Provide it to drive completions from what is
-   * typed; omit it and the collection keeps the text itself.
-   */
-  value?: string
-  onChange?: (value: string | undefined) => void
   /**
    * What the parser could not turn into a filter, rendered under the chips.
    * Never leave an unparsed fragment silent: the chips are what filters, so a
@@ -102,7 +100,7 @@ const PLACEHOLDER_ROTATION_MS = 3000
 /**
  * Cycles the example queries while the field has nothing in it. The examples
  * only show once the field is open, so pausing on focus would mean they never
- * visibly changed; typing is what stops them, since the value is then the
+ * visibly changed; typing is what stops them, since the text is then the
  * user's own.
  */
 const useRotatingPlaceholder = (
@@ -212,17 +210,11 @@ const DismissButton = ({
   </motion.div>
 )
 
-const IconComponent = ({
-  loading,
-  icon,
-}: {
-  loading: boolean
-  icon: IconType
-}) => {
+const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
     <F0Icon icon={Spinner} className="animate-spin" />
   ) : (
-    <F0Icon icon={icon} className="text" />
+    <F0Icon icon={SearchIcon} className="text" />
   )
 }
 
@@ -236,12 +228,12 @@ export const Search = ({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
-  icon = SearchIcon,
   onSubmit,
   suggestions,
   placeholderRotation,
   status = "idle",
   onCancel,
+  displayValue,
   onClear,
 }: SearchProps) => {
   const [open, setOpen] = useState(false)
@@ -258,6 +250,9 @@ export const Search = ({
   const resultsVisible =
     open && showResults && Boolean(value) && resultItems.length > 0
 
+  // What the field shows: the applied query while typing, otherwise the parsed
+  // query the chips now stand for.
+  const text = value ?? displayValue
   const searching = status === "searching"
   // An in-flight query holds the field open: collapsing would hide the spinner
   // and the only affordance to abort it.
@@ -271,11 +266,11 @@ export const Search = ({
     showResults &&
     !searching &&
     !resultsVisible &&
-    Boolean(value) &&
+    Boolean(text) &&
     suggestionItems.length > 0
   const placeholder = useRotatingPlaceholder(
     placeholderRotation,
-    Boolean(value) || searching,
+    Boolean(text) || searching,
     i18n.actions.search
   )
 
@@ -407,7 +402,7 @@ export const Search = ({
       e.preventDefault()
       // Only a row the user actually moved to wins over what they typed.
       const picked = activeIndex >= 0 ? suggestionItems[activeIndex] : undefined
-      submitQuery(picked ?? value ?? "")
+      submitQuery(picked ?? text ?? "")
     }
   }
 
@@ -443,9 +438,9 @@ export const Search = ({
 
     // No list is driving the field, so Enter hands the raw query to the
     // consumer — the caller decides what to do with it.
-    if (e.key === "Enter" && value) {
+    if (e.key === "Enter" && text) {
       e.preventDefault()
-      submitQuery(value)
+      submitQuery(text)
     }
   }
 
@@ -463,7 +458,7 @@ export const Search = ({
               // The toolbar slot is content-sized (`shrink-0`), so there is no
               // free space for `flex-1` to claim — size against the viewport
               // instead and cap it so wide screens do not get a runaway field.
-              (expanded || value) && "w-[min(340px,40vw)] min-w-[180px]"
+              (expanded || text) && "w-[min(340px,40vw)] min-w-[180px]"
             )}
           >
             {expanded ? (
@@ -483,7 +478,6 @@ export const Search = ({
                     layoutId="search-icon"
                   >
                     <IconComponent
-                      icon={icon}
                       loading={loading || resultsLoading || searching}
                       key="loading"
                     />
@@ -498,7 +492,7 @@ export const Search = ({
                     >
                       <span className="truncate">
                         {i18n.t("collections.search.searching", {
-                          query: value ?? "",
+                          query: text ?? "",
                         })}
                       </span>
                     </motion.div>
@@ -506,8 +500,8 @@ export const Search = ({
                     <motion.input
                       layout
                       ref={inputRef}
-                      type="value"
-                      value={value ?? ""}
+                      type="text"
+                      value={text ?? ""}
                       placeholder={placeholder}
                       onChange={(e) => {
                         onChange(e.target.value)
@@ -551,18 +545,15 @@ export const Search = ({
                     className="absolute left-[5px] top-[5px] flex h-5 w-5 items-center justify-center text-f1-icon-bold"
                     layoutId="search-icon"
                   >
-                    <IconComponent
-                      icon={icon}
-                      loading={loading || resultsLoading}
-                    />
+                    <IconComponent loading={loading || resultsLoading} />
                   </motion.div>
-                  {value ? (
+                  {text ? (
                     <div className="flex h-7 w-full items-center justify-between gap-1.5 overflow-hidden pr-1.5">
                       <motion.div
                         layout
                         className="line-clamp-1 overflow-hidden py-2 pl-7"
                       >
-                        {value}
+                        {text}
                       </motion.div>
                       <DismissButton
                         label={i18n.actions.clear}
@@ -578,7 +569,7 @@ export const Search = ({
                 items={suggestionItems}
                 activeIndex={activeIndex}
                 activeItemRef={activeItemRef}
-                typed={value}
+                typed={text}
                 onHover={setActiveIndex}
                 onPick={submitQuery}
               />
