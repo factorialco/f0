@@ -1072,14 +1072,36 @@ declare const ANCHOR_ATTRIBUTE = "data-f0-coachmark";
  */
 export declare const ApplicationFrame: typeof _ApplicationFrame;
 
-declare function _ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, }: ApplicationFrameProps): JSX_2.Element;
+declare function _ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, sidePanel, }: ApplicationFrameProps): JSX_2.Element;
 
 export declare interface ApplicationFrameProps {
     ai?: Omit<AiChatProviderProps, "children">;
     aiPromotion?: Omit<AiPromotionChatProviderProps, "children">;
+    /**
+     * The side panel, independently of the AI chat. Omit it and the panel
+     * behaves exactly as before: present when `ai.enabled`, absent otherwise.
+     */
+    sidePanel?: ApplicationFrameSidePanelProps;
     banner?: React.ReactNode;
     sidebar: React.ReactNode;
     children: React.ReactNode;
+}
+
+export declare interface ApplicationFrameSidePanelProps {
+    /**
+     * What may occupy the side panel. The AI chat adds itself when `ai.enabled`;
+     * anything else — a conversation list, an inspector — declares itself here.
+     *
+     * When nothing is available the panel does not exist: no chrome, no reserved
+     * width, no DOM. That is what keeps a product with no assistant from getting
+     * an empty column, and a product with an assistant it cannot use from
+     * getting no column at all.
+     */
+    views?: SidePanelViewDefinition[];
+    /** Edge the panel docks to. @default "right" */
+    side?: "left" | "right";
+    /** Whether the panel may be resized. */
+    resizable?: boolean;
 }
 
 /**
@@ -1352,7 +1374,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, hideGroup, pinned, pinnedLabel, relativeDate, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -3984,7 +4006,7 @@ export declare type CommandRunContext = {
     ask: (prompt: string) => void;
 };
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, hideGroup, pinned, pinnedLabel, relativeDate, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -4047,6 +4069,16 @@ export declare type CommunityPostProps = {
      */
     noDescriptionClamp?: boolean;
     /**
+     * Drops "in <community>" from the header — for a container that already names
+     * the community, like a single community's feed, whose channel header carries
+     * that name an inch above every card. Without this the link repeats what you
+     * are already reading and leads nowhere you aren't.
+     *
+     * `group` stays required: it is still the post's community, and a caller that
+     * hides the line today may show it tomorrow without changing what it passes.
+     */
+    hideGroup?: boolean;
+    /**
      * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
      * for a container that already shows it, like a dialog carrying the post's
      * title in its own header. Without this the same words appear twice, an inch
@@ -4057,6 +4089,25 @@ export declare type CommunityPostProps = {
      * break that as well as the post's name.
      */
     hideTitle?: boolean;
+    /**
+     * Marks the post as pinned in its community: a pin beside the date.
+     *
+     * A BADGE, not a control — pinning and unpinning are decisions the container
+     * owns (they need to know who may), and this only says what is already true.
+     */
+    pinned?: boolean;
+    /** Accessible name for the pin badge, e.g. "Pinned post". Required with
+     * `pinned`, since the icon alone says nothing to a screen reader. */
+    pinnedLabel?: string;
+    /**
+     * "2 days ago" instead of "August 25th, 2026 at 3:00 PM".
+     *
+     * For a FEED, where the question a date answers is "how fresh is this" and
+     * the posts scroll past in one column — a full timestamp on every row is
+     * four lines of clerical detail nobody reads. A page or a dialog showing one
+     * post keeps the exact date, which is the default.
+     */
+    relativeDate?: boolean;
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -4314,6 +4365,15 @@ declare type Data<R extends RecordType> = {
     records: WithGroupId<R>[];
     type: "grouped" | "flat";
     groups: GroupRecord<R>[];
+    /**
+     * The records with no value at the FIRST grouping level — they belong to no
+     * group at all, and read as plain rows above the ones that do.
+     *
+     * The counterpart of a group's `ownRecords` one level up: between them a list
+     * can be grouped without being uniformly grouped, which is what a real
+     * hierarchy looks like — some rows nested two deep, some one, some loose.
+     */
+    ungroupedRecords?: WithGroupId<R>[];
 };
 
 /**
@@ -5129,6 +5189,10 @@ declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -5575,12 +5639,6 @@ declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -5794,6 +5852,52 @@ declare const defaultTranslations: {
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledEvent: "Event";
+            readonly draftPosts: "Drafts";
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -6121,19 +6225,14 @@ declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -6423,6 +6522,14 @@ declare type DropdownInternalProps = {
      * @default false
      */
     disabled?: boolean;
+    /**
+     * Where the menu is portalled. Defaults to the document body; pass the
+     * element of a surrounding modal layer — a dialog's own content node, which
+     * it publishes as `portalContainer` — so that layer's focus trap CONTAINS
+     * the menu instead of fighting it. Two traps over the same document push
+     * focus back and forth until the call stack gives out.
+     */
+    container?: HTMLElement | null;
 } & DataAttributes_3;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
@@ -7685,6 +7792,28 @@ export declare type F0ChatChannel = {
      * generic i18n line.
      */
     readOnlyNotice?: string;
+    /**
+     * Community only. The posts kept at the top of this community, newest pin
+     * first — SUMMARIES, not the posts themselves.
+     *
+     * Not derived from `messages` on purpose: the whole point of pinning is that
+     * the post is far enough back to be hard to find, which usually means outside
+     * the loaded window. Deriving it would make the bar appear and disappear as
+     * the reader scrolls. Empty or absent ⇒ no bar.
+     */
+    pinnedPosts?: F0ChatPinnedPost[];
+    /**
+     * Community only. Posts written but not yet visible to anyone — scheduled for
+     * a moment that hasn't arrived. They are NOT in `messages` (nobody can read
+     * them yet), so this is the only place they exist for the panel.
+     */
+    scheduledPosts?: F0ChatScheduledPost[];
+    /**
+     * Community only. The current user's own unfinished posts — see
+     * {@link F0ChatDraftPost} for why they are not scheduled posts without a
+     * date. Only ever THEIRS: nobody sees anyone else's drafts.
+     */
+    draftPosts?: F0ChatDraftPost[];
 };
 
 /** A status badge shown in the header next to the title (e.g. on vacation, away).
@@ -7702,7 +7831,15 @@ export declare type F0ChatChannelStatus = {
  * {@link F0ChatCapabilities}), so a read-only channel needs no configuration at
  * all while a host that has a poster still turns `canSend` back on.
  */
-export declare type F0ChatChannelType = "dm" | "group" | "announcement";
+/**
+ * `community` is a FEED: its items are {@link F0ChatPost}s — a title, a body
+ * with formatting, a cover — rather than chat bubbles, and what you do at the
+ * bottom is publish rather than send. Reading and reacting are on by default;
+ * posting is off until the host grants it, because a community is a place most
+ * people read and a few write in. It differs from an `announcement` in exactly
+ * that: a noticeboard is written by the product, a community by its members.
+ */
+export declare type F0ChatChannelType = "dm" | "group" | "announcement" | "community";
 
 /**
  * What the composer can produce. Cards are authored by the host (a seeded
@@ -7710,6 +7847,71 @@ export declare type F0ChatChannelType = "dm" | "group" | "announcement";
  * attach one, so they're excluded from sending, editing and uploading.
  */
 export declare type F0ChatComposableAttachment = Exclude<F0ChatAttachment, F0ChatCardAttachment>;
+
+/**
+ * What a post composer produces.
+ *
+ * F0's own built-in dialog fills only `title`, `description` and `mentions` —
+ * the rest is the contract a HOST's composer fills when it answers
+ * `composePost`, and the shape `createPost` will grow into. All of it is
+ * optional, so neither side has to know about the other's fields.
+ *
+ * Files go RAW, un-uploaded: a post's media belongs in its own storage rather
+ * than the chat's attachment bucket, so reusing `uploadFiles` would leave it in
+ * the wrong place — and this lets the host publish atomically (upload + create)
+ * in one transaction it can roll back whole.
+ */
+export declare type F0ChatCreatePostInput = {
+    title: string;
+    /** Sanitized HTML from the editor. Empty is valid: a headline with a photo
+     * is a post. */
+    description?: string;
+    /** The cover, raw. One file: an image or a video, never both. */
+    cover?: File | null;
+    /** Files attached to the body. */
+    files?: File[];
+    mentions?: F0ChatMention[];
+    /** Which community it goes to. The composer only ever offers the ones the
+     * host said the user can post in. */
+    communityId?: string;
+    /** Present ⇒ the post announces an event, and its card draws that instead of
+     * the cover. */
+    event?: F0ChatPostEvent;
+    /** @default true */
+    allowCommentsAndReactions?: boolean;
+    /** @default false — mailing everyone is opt-in, not opt-out. */
+    sendNotifications?: boolean;
+    /** Present ⇒ readers must acknowledge it. */
+    requiredAction?: F0ChatPostRequiredAction["type"];
+    /**
+     * When it becomes visible. `undefined` publishes now, an ISO string schedules
+     * it, and `null` saves a draft — the three modes the composer offers, in one
+     * field, exactly as the product's own API models them.
+     */
+    publishedAt?: string | null;
+};
+
+/**
+ * A post written and kept, with no date and no audience yet.
+ *
+ * ITS OWN LIST, not a scheduled post without a date. Pinned and scheduled are
+ * facts about the CHANNEL — everyone who publishes there sees the same queue —
+ * while a draft is one person's, and folding them together leaves "whose
+ * drafts?" unanswered in the one place it must not be. The verbs differ for the
+ * same reason: a draft has no moment to bring forward, so it is published or
+ * deleted, never "published NOW" or "cancelled".
+ */
+export declare type F0ChatDraftPost = {
+    id: string;
+    /** May be empty — a draft is unfinished by definition, title included. */
+    title: string;
+    /** ISO — when it was last written to, which is how drafts are ordered. */
+    savedAt: string;
+    /** As {@link F0ChatPinnedPost.excerpt}. */
+    excerpt?: string;
+    /** As {@link F0ChatPinnedPost.thumbnailUrl}. */
+    thumbnailUrl?: string;
+};
 
 /**
  * Edits applied to an existing message. Text, mentions and attachments are all
@@ -7822,12 +8024,37 @@ export declare type F0ChatEvents = {
     onCardActivated?: (p: {
         source: "card" | "action";
     }) => void;
+    /** Opening a post from the feed. `source` separates a click on the card from
+     * one on the Comment button. Carries no title. */
+    onPostOpened?: (p: {
+        source: "card" | "comment";
+    }) => void;
+    /** An entry of a post's overflow menu was chosen. The host already knows what
+     * its own action does — this is here so the MENU's use is measurable. */
+    onPostActionInvoked?: (p: {
+        actionId: string;
+    }) => void;
+    /** The post composer was opened. Pair with `onPostCompositionCancelled` to
+     * measure abandonment — the host only sees posts that were published. */
+    onPostCompositionStarted?: () => void;
+    /** The composer was dismissed without publishing. `hadDraft` distinguishes
+     * an accidental open from giving up on written text. */
+    onPostCompositionCancelled?: (p: {
+        hadDraft: boolean;
+    }) => void;
     onSearchOpened?: () => void;
     onSearchResultNavigated?: (p: {
         direction: "next" | "prev";
     }) => void;
     onJumpedToQuotedMessage?: () => void;
     onJumpedToBottom?: () => void;
+    /** The community shelf was opened on one of its two lists. */
+    onShelfOpened?: (p: {
+        list: "pinned" | "scheduled" | "draft";
+    }) => void;
+    /** A scheduled post was opened from the shelf. Its counterpart for pinned
+     * posts is `openPost`'s `source: "pinned"`. */
+    onScheduledPostOpened?: () => void;
 };
 
 export declare type F0ChatFileAttachment = {
@@ -7900,7 +8127,7 @@ export declare type F0ChatImageAttachment = {
 };
 
 /** Anything that can appear in the transcript, oldest → newest. */
-export declare type F0ChatItem = F0ChatMessage | F0ChatSystemMessage;
+export declare type F0ChatItem = F0ChatMessage | F0ChatSystemMessage | F0ChatPost;
 
 /**
  * Open Graph preview of a URL in the body (WhatsApp-style card above the text).
@@ -8039,6 +8266,213 @@ export declare type F0ChatMessageReply = {
  * `readBy` / `readByCount`.
  */
 export declare type F0ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
+
+/**
+ * A pinned post as the bar needs it: enough to name it, and its id to jump to.
+ * The post itself is fetched by the jump, not carried here.
+ */
+export declare type F0ChatPinnedPost = {
+    id: string;
+    title: string;
+    /** ISO — when it was pinned, which is what orders the list. */
+    pinnedAt: string;
+    /**
+     * The opening of the body as PLAIN TEXT — the row clamps it to two lines.
+     * Titles alone read as a list of headlines, and two lines of the post is
+     * usually what tells you whether this is the one you were looking for.
+     *
+     * Plain text, not the post's HTML: this is a preview, so the host strips
+     * (`stripHtml`) rather than F0 rendering markup it would then have to clamp.
+     */
+    excerpt?: string;
+    /**
+     * The post's cover, as a THUMBNAIL beside the title. A feed of photographs is
+     * remembered as photographs — the picture finds the post faster than the
+     * headline does. Absent ⇒ the row is text, full width.
+     */
+    thumbnailUrl?: string;
+};
+
+/**
+ * A COMMUNITY POST: the third kind of transcript item, and the only one that is
+ * neither a bubble nor a centered line.
+ *
+ * It's an item rather than a separate `runtime.posts` list because everything a
+ * feed needs is already built around {@link F0ChatItem}: day separators, the
+ * unread divider, `markRead`, pagination, jump-to-item, the sticky date pill
+ * and the sidebar badge all fall out of `id` + `createdAt`, and each would need
+ * a second implementation if posts lived outside.
+ *
+ * The payload is DATA AND NOTHING ELSE — no handlers, no ReactNode: it is what
+ * a transport can carry, the same rule as {@link F0ChatCardAttachment}. What a
+ * click does comes from {@link F0ChatRuntime.openPost}; what its menu offers,
+ * from {@link F0ChatRuntime.postActions}.
+ *
+ * What F0 DERIVES and the host must not send: the words "in" and "Comment"
+ * (i18n), and the wording of the counters (numbers on the wire,
+ * `{{count}} comments` at the edge; otherwise the host translates what F0
+ * already translates). The community's name is the one exception, and only in
+ * an aggregated feed — see {@link F0ChatPost.community}.
+ */
+export declare type F0ChatPost = {
+    type: "post";
+    id: string;
+    /** ISO — feeds day separators, ordering and unread exactly like a message's. */
+    createdAt: string;
+    /**
+     * Who wrote it. The SAME identity type as a message's author, so hover cards,
+     * mentions and read receipts keep meaning one thing across the union. Omit it
+     * when the community itself publishes (there is no person to name).
+     */
+    author?: F0ChatUser;
+    /**
+     * Whether the current user wrote it. F0 reads nothing from it — `postActions`
+     * is entirely the host's, and there is no default edit/delete policy. It is
+     * here so a consumer can ask "mine?" across the whole `F0ChatItem` union
+     * without narrowing first. NOT alignment: a post is never tinted "mine", it
+     * takes the full width for everyone.
+     */
+    isMine?: boolean;
+    /** One-line headline, always visible (the card clamps it to two lines). */
+    title: string;
+    /**
+     * The body, as SANITIZED HTML — posts are written in a rich text editor, so
+     * unlike a message's plain `body` this one carries formatting. Sanitizing is
+     * the host's job: F0 hands it straight to the card (`PostDescription`), and a
+     * transport that returns raw user HTML would inject it here.
+     */
+    description?: string;
+    /**
+     * An image or a video. Drawn in a 16:9 box RESERVED BEFORE it loads, so a
+     * post never changes height after being measured — which is what a
+     * virtualized transcript demands of any row (see `chatRowHeightEstimate`).
+     */
+    mediaUrl?: string;
+    /** An event announcement, drawn INSTEAD of `mediaUrl`. */
+    event?: F0ChatPostEvent;
+    /** How many people opened it. Omit when the host doesn't count visits — the
+     * counters line then shows comments alone. */
+    viewCount?: number;
+    /**
+     * How many comments it has. Always present: "0 comments" is information (it's
+     * an invitation), whereas a missing counter reads as a broken card.
+     */
+    commentCount: number;
+    /**
+     * Reactions, in the SAME shape as a message's — so they go through the same
+     * {@link F0ChatRuntime.toggleReaction} and {@link F0ChatRuntime.loadReactionUsers}
+     * with the post's id as the item id. A post with no reactions still shows the
+     * picker: that is the affordance for adding the first.
+     */
+    reactions?: F0ChatReaction[];
+    /**
+     * Files hanging off the post. Not shown on the feed card — a row of download
+     * chips is not something you skim past — so these only ever paint in the
+     * detail view.
+     */
+    attachments?: F0ChatPostAttachment[];
+    /**
+     * Whether this post takes comments and reactions at all. The author can turn
+     * them off per post, and when they are off BOTH disappear — the reaction bar
+     * and the comment section are one block, and half of it is worse than none.
+     * @default true
+     */
+    allowCommentsAndReactions?: boolean;
+    /**
+     * An action the reader has to take before the post counts as done. Present
+     * ⇒ the detail view shows the acknowledgement bar; `completedAt` decides
+     * whether it asks or confirms.
+     */
+    requiredAction?: F0ChatPostRequiredAction;
+    /**
+     * Whether the current user may edit, delete or reconfigure this post — the
+     * host's own policy, not something F0 can infer from `isMine` (a moderator
+     * manages posts that aren't theirs). Drives the detail view's overflow menu.
+     */
+    canManage?: boolean;
+    /**
+     * ISO ⇒ this post is pinned in its community, and its card says so.
+     *
+     * Only the badge: the BAR reads {@link F0ChatChannel.pinnedPosts}, because a
+     * pinned post is usually not in the loaded window at all.
+     */
+    pinnedAt?: string;
+    /**
+     * Where the post was published, named on the card as "… in Barcelona".
+     *
+     * ONLY for an aggregated feed — a channel that gathers posts from several
+     * communities at once. In a single community's channel the answer is already
+     * the channel title an inch above every card, so sending it there prints the
+     * same word twice per post; omit it and F0 draws no origin at all.
+     *
+     * That makes this the one field where the host tells F0 something F0 would
+     * otherwise derive, and the reason is that an aggregated feed is the one
+     * place where the derivation is wrong: "which of my communities is this
+     * from?" is the question the reader actually has, and the channel can't
+     * answer it.
+     *
+     * Clicking it calls {@link F0ChatRuntime.openCommunity}; without that
+     * handler the name is still drawn, just not as a link.
+     */
+    community?: F0ChatPostCommunity;
+};
+
+/**
+ * A single entry in a post's overflow menu (edit, delete, pin, report). Already
+ * localized, like {@link F0ChatHeaderAction.label} — F0 never knows which of
+ * these the current user is allowed, so the host builds the list per post.
+ */
+export declare type F0ChatPostAction = {
+    id: string;
+    label: string;
+    icon?: IconType;
+    onClick: (post: F0ChatPost) => void;
+    /** Renders the entry in red (delete, report). */
+    critical?: boolean;
+};
+
+/** A file attached to a post: the chip is a download link, nothing more. */
+export declare type F0ChatPostAttachment = {
+    id: string;
+    filename: string;
+    url: string;
+};
+
+/** The community a post came from, for an aggregated feed's origin label. */
+export declare type F0ChatPostCommunity = {
+    id: string;
+    /** As the reader knows it — "Barcelona", "Company news". No `#`. */
+    name: string;
+};
+
+/**
+ * An event a post announces (a talk, an offsite, a townhall). It takes the
+ * card's MEDIA SLOT — it replaces the cover rather than stacking under it —
+ * which is why both are optional and only one is ever drawn.
+ *
+ * `date` is ISO like every other timestamp in this file: the item has to
+ * survive a transport, and a `Date` doesn't. F0 parses it once, at the render
+ * edge.
+ */
+export declare type F0ChatPostEvent = {
+    title: string;
+    /** When the event HAPPENS — not when the post was published. */
+    date: string;
+    /** Where: a room, an office, a URL if it's remote. */
+    place?: string;
+    mediaUrl?: string;
+};
+
+/**
+ * "Read and acknowledge" — the only action type that exists. A union of one on
+ * purpose: the product ships two more as "Coming soon", and a bare string here
+ * would let a host send one that nothing renders.
+ */
+export declare type F0ChatPostRequiredAction = {
+    type: "acknowledge";
+    /** ISO, when the CURRENT user completed it. Absent ⇒ still pending. */
+    completedAt?: string;
+};
 
 export declare type F0ChatProps = {
     /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
@@ -8223,6 +8657,107 @@ export declare type F0ChatRuntime = {
      */
     markRead?: (untilMessageId?: string) => void | Promise<void>;
     /**
+     * Publish a post (community channels). Same optimistic contract as
+     * `sendMessage` — client-side id, synchronous echo with `type: "post"`,
+     * reconcile by id — with ONE deliberate difference: it returns a promise the
+     * composer AWAITS. A post is written in a dialog, and the dialog has to stay
+     * open until it knows the post landed; losing a page of text to a dropped
+     * request is a different order of loss from losing a line.
+     *
+     * Omit it and the publish affordance never mounts, even where `canSend` is
+     * true — there would be nowhere for the post to go.
+     */
+    createPost?: (input: F0ChatCreatePostInput) => Promise<void>;
+    /**
+     * Open a post — its page or its dialog, with the comments. F0 owns no
+     * navigation, so the card, the Comment button and the counter all call here;
+     * `source` tells them apart for the host's telemetry.
+     *
+     * Without it the card is not clickable — and `CommunityPost` drops the
+     * pointer cursor, the hover tint and the focus ring on its own, which is
+     * exactly what should happen when there is nowhere to go.
+     */
+    openPost?: (id: string, context: {
+        source: "card" | "comment" | "pinned";
+    }) => void;
+    /**
+     * Go to a community, from the origin label an aggregated feed puts on each
+     * card (see {@link F0ChatPost.community}).
+     *
+     * Separate from `openPost` because it is a different destination — the
+     * community, not the post — and hosts wire the two to different routes.
+     * Omit it and the name is still drawn, just not clickable: an aggregated feed
+     * that cannot navigate should still say where each post came from.
+     */
+    openCommunity?: (communityId: string) => void;
+    /**
+     * Each post's overflow menu. FUNCTION form, like `headerActions`: every post
+     * offers exactly what the user may do to THAT post, and only the host knows.
+     * F0 keeps it behind a ref (like {@link F0ChatEvents}), so it can be rebuilt
+     * every render without re-rendering the feed.
+     */
+    postActions?: (post: F0ChatPost) => F0ChatPostAction[];
+    /**
+     * The post whose page is open right now, beside the feed. Its card is drawn
+     * SELECTED, so the feed keeps saying where you are in it.
+     *
+     * The host's to tell, not F0's: `openPost` hands over and F0 hears nothing
+     * back — where it opened, whether the reader then navigated somewhere else,
+     * whether they arrived on that post by a link instead of from this feed. A
+     * card that lit up on click and stayed lit would be lying by the second page.
+     *
+     * Omit and no card is ever selected.
+     */
+    activePostId?: string;
+    /**
+     * Take a post off the community's pinned list.
+     *
+     * PINNING is not here: it is a decision about one post, taken where that post
+     * is, so it belongs in `postActions` alongside edit and delete — where the
+     * host already decides who may do what. Unpinning is taken looking at ALL the
+     * pins at once, and that place — the pinned list — exists only inside F0, so
+     * there is nowhere else to put it.
+     *
+     * Omit and the pinned list is read-only (still a way to find them).
+     */
+    unpinPost?: (postId: string) => void | Promise<void>;
+    /**
+     * Each scheduled post's menu — publish now, edit, cancel. Same story as
+     * `postActions`: only the host knows what its API allows, and every one of
+     * these writes to the post backend rather than the chat transport.
+     */
+    scheduledActions?: (post: F0ChatScheduledPost) => F0ChatShelfAction[];
+    /**
+     * Open a scheduled post. Separate from `openPost` because it is NOT an
+     * {@link F0ChatPost}: it has no counters, no reactions and no comments —
+     * nothing has happened to it yet. The host decides what it shows; a
+     * PREVIEW of the post as the community will see it is the useful answer.
+     *
+     * Without it the shelf's scheduled rows are not clickable, and the row's
+     * menu is the only way in.
+     */
+    openScheduledPost?: (postId: string) => void;
+    /**
+     * Each draft's menu — publish, delete. Kept apart from `scheduledActions`
+     * because the verbs are not the same ones: there is no moment to bring
+     * forward and nothing to cancel.
+     */
+    draftActions?: (post: F0ChatDraftPost) => F0ChatShelfAction[];
+    /**
+     * Open a draft. The useful answer is the COMPOSER with the draft loaded —
+     * what you want from something half-written is to keep writing it — which is
+     * also why this is not `openScheduledPost` with a different argument: that
+     * one previews, this one edits.
+     *
+     * Without it the shelf's draft rows are not clickable.
+     */
+    openDraftPost?: (postId: string) => void;
+    /**
+     * Escape hatch: a host with its own post-creation flow opens it here, and F0
+     * does not mount its dialog. Present ⇒ `createPost` is never called.
+     */
+    composePost?: () => void;
+    /**
      * Per-channel permissions (frozen / read-only channels, moderation…). Omit
      * for the default policy — see {@link F0ChatCapabilities}.
      */
@@ -8274,6 +8809,20 @@ export declare type F0ChatRuntime = {
     loadMessageContext?: (idOrLatest: string) => Promise<void>;
 };
 
+/** A post waiting for its moment. */
+export declare type F0ChatScheduledPost = {
+    id: string;
+    title: string;
+    /** ISO — when it becomes visible. */
+    scheduledFor: string;
+    /** Present ⇒ it announces an event, and the row says so. */
+    event?: F0ChatPostEvent;
+    /** As {@link F0ChatPinnedPost.excerpt} — plain text, clamped to two lines. */
+    excerpt?: string;
+    /** As {@link F0ChatPinnedPost.thumbnailUrl}. An event's own image counts. */
+    thumbnailUrl?: string;
+};
+
 /** A message that matched an in-conversation search (room to grow: preview, author…). */
 export declare type F0ChatSearchResult = {
     id: string;
@@ -8293,6 +8842,23 @@ export declare type F0ChatSendInput = {
     /** Whether the message mentions the whole group (`@here`). The host fans this
      * out to every member so they all get notified. */
     mentionedEveryone?: boolean;
+};
+
+/**
+ * An entry in a shelf row's menu — publish now, edit, cancel, delete.
+ *
+ * Same shape as {@link F0ChatPostAction} minus the post argument: neither a
+ * scheduled post nor a draft is an {@link F0ChatPost} (no author line, no
+ * counters, no reactions — nothing has happened yet), so the host closes over
+ * the one it is building the menu for instead of being handed it back.
+ */
+export declare type F0ChatShelfAction = {
+    id: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    /** Renders the entry in red (cancel). */
+    critical?: boolean;
 };
 
 /**
@@ -8550,6 +9116,23 @@ declare type F0DialogInternalProps = {
      * @default true
      */
     dismissable?: boolean;
+    /**
+     * Whether pressing OUTSIDE the dialog closes it. Escape and the close button
+     * are unaffected — this is the narrow version of {@link dismissable}, which
+     * takes all three away at once.
+     *
+     * Turn it off for a SIDE PANEL that sits beside something the reader is meant
+     * to keep using. A left/right dialog is already non-modal — no overlay, no
+     * focus trap — so the surface next to it is live; but Radix still treats a
+     * click there as "dismiss", which means using the thing beside the panel
+     * closes the panel. That is the case this exists for: a post open next to an
+     * open chat.
+     *
+     * Leave it on (the default) for an ordinary drawer, where clicking away IS
+     * how you close it.
+     * @default true
+     */
+    dismissOnInteractOutside?: boolean;
     asBottomSheetInMobile?: boolean;
     position?: DialogPosition;
     width?: DialogWidth;
@@ -10995,6 +11578,18 @@ declare type GroupRecord<RecordType> = {
      * before nesting existed.
      */
     subGroups?: GroupRecord<RecordType>[];
+    /**
+     * The records that belong to THIS group and to none of its `subGroups` —
+     * the ones with no value at the next level down.
+     *
+     * A tree whose branches differ in depth has these: a subproject with tasks
+     * under it becomes a sub-group, while one without stays a row of its parent.
+     * Without somewhere to put them they would bucket under the missing value
+     * and surface beneath a heading with no name.
+     *
+     * Only set when `subGroups` is, and only when some record lacks that value.
+     */
+    ownRecords?: RecordType[];
 };
 
 /**
@@ -11833,8 +12428,18 @@ declare const internalAvatarTypes: readonly ["base", "rounded"];
 
 export declare const isPossiblePhoneValue: (value: F0PhoneInputValue | undefined, fallbackCountry?: CountryCode) => boolean;
 
+export declare const isPost: (item: F0ChatItem) => item is F0ChatPost;
+
 export declare const isSystemMessage: (item: F0ChatItem) => item is F0ChatSystemMessage;
 
+/**
+ * A WHITELIST, not "anything that isn't a system row". The transcript's item
+ * union grows (posts, and whatever comes after), and every growth would
+ * otherwise be classified as a message here — silently, with no compile error,
+ * across the ~40 call sites that narrow through this guard. A post would come
+ * out with a delivery footer, editable with ↑, and would crash the client-side
+ * search on a `body` it doesn't have.
+ */
 export declare const isUserMessage: (item: F0ChatItem) => item is F0ChatMessage;
 
 /**
@@ -12041,6 +12646,25 @@ export declare type ListItem<S extends ListSchema = ListSchema> = {
     id: string | number;
     /** An accent dot on the left glyph — unseen/pending. */
     unread?: boolean;
+    /**
+     * What this row says ON HOVER: its own line of plain text, drawn as a tooltip
+     * over the whole row.
+     *
+     * For what the row could not fit. A second line is ONE truncating line —
+     * around 40 characters at the rail's width — so a row with more to say ends
+     * in an ellipsis; this is where the rest can live. Written SEPARATELY rather
+     * than repeating the description, so the tooltip can say the fuller thing (a
+     * task's actual detail, an expense's full breakdown) instead of the
+     * abbreviation the line had room for.
+     *
+     * Per ROW, like `unread` and `actions`: whether there is more to say is a
+     * state of the row's own data. Rows without it hover silently — an empty
+     * tooltip promises information that isn't there.
+     *
+     * It also OVERRIDES what a {@link ListSchema.compact} row would otherwise
+     * surface, which is its folded-away description.
+     */
+    tooltipDescription?: string;
     /**
      * What can be DONE to this row, revealed on hover (and on focus, so they are
      * reachable by keyboard) behind a fade over whatever the row trails. Keep it
@@ -13651,6 +14275,22 @@ export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "
  */
 export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
 
+declare type PanelBounds = {
+    min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
+    max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
+    /** The frame is too narrow to split: the panel should cover it instead. */
+    shouldOverlay: boolean;
+};
+
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
@@ -14477,6 +15117,11 @@ export declare type SidebarChat = {
     id: string;
     label: string;
     /**
+     * What the row stands for — see {@link SidebarChatKind}.
+     * @default "conversation"
+     */
+    kind?: SidebarChatKind;
+    /**
      * Person / team / company avatar (F0Avatar variant). Optional: omit it for
      * avatar-less rows (e.g. an AI chat history that shows titles only).
      */
@@ -14578,6 +15223,14 @@ export declare type SidebarChatGroup = {
     title: string;
     /** Initial open state of the collapsible group. @default true */
     isOpen?: boolean;
+    /**
+     * One action on the group's own header, revealed on hover like a row's pin
+     * — "new channel" beside Channels, "new community" beside Communities.
+     *
+     * Distinct from the panel's top-of-list `actions`: those belong to the whole
+     * tab, this one belongs to the group it sits on, and says so by being there.
+     */
+    action?: SidebarSectionAction;
     chats: SidebarChat[];
 };
 
@@ -14596,6 +15249,17 @@ export declare const SidebarChatItem: ({ chat, isActive, onClick, }: {
 export declare const SidebarChatItemSkeleton: ({ className, }: {
     className?: string;
 }) => JSX_2.Element;
+
+/**
+ * What a row stands for. `community` is a channel whose contents are POSTS
+ * rather than messages: its badge counts posts and says so, and the row never
+ * carries presence, typing or a mention prefix — none of which mean anything
+ * for a place rather than a person.
+ *
+ * Purely semantic. The layout is identical, so a host can set it without
+ * redesigning anything.
+ */
+export declare type SidebarChatKind = "conversation" | "community";
 
 /**
  * Body of the "Messages" tab: chat groups read from `SidebarChatProvider`,
@@ -14686,7 +15350,7 @@ export declare type SidebarChatStore = {
  * Collapsible titled section used across the Sidebar (navigation categories,
  * chat groups). Title + rotating chevron + animated height.
  */
-export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, collapsedBadge, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
+export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, collapsedBadge, action, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
 
 export declare interface SidebarCollapsibleSectionProps {
     title: string;
@@ -14706,6 +15370,8 @@ export declare interface SidebarCollapsibleSectionProps {
      * unread badge) — surfaces what's hidden inside without expanding.
      */
     collapsedBadge?: ReactNode;
+    /** Shown on hover at the end of the header — see {@link SidebarSectionAction}. */
+    action?: SidebarSectionAction;
     /** Drag-aware guards used by the sortable Menu; safe to omit elsewhere. */
     isDragging?: boolean;
     wasDragging?: RefObject<boolean>;
@@ -14742,6 +15408,18 @@ declare interface SidebarProps {
     footer?: ReactNode;
     onFooterDropdownClick?: () => void;
 }
+
+/**
+ * One action on a section's own header — "new channel" beside Channels, "new
+ * community" beside Communities. Icon-only, and revealed on hover like the
+ * row's pin, so the header stays a title until somebody reaches for it.
+ */
+export declare type SidebarSectionAction = {
+    /** Names the button for a screen reader, and shows as its tooltip. */
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+};
 
 declare type SidebarState = "locked" | "unlocked" | "hidden";
 
@@ -14797,6 +15475,8 @@ export declare type SidebarTabPanelGroup = {
     highlightWhenCollapsed?: boolean;
     /** Content shown at the end of the header only while collapsed. */
     collapsedBadge?: ReactNode;
+    /** Hover-revealed action on the group's own header. */
+    action?: SidebarSectionAction;
     items: SidebarTabPanelItem[];
 };
 
@@ -14860,6 +15540,101 @@ export declare type SidebarTabsProps = {
      * (e.g. a tab that no longer ships) are ignored. Omit for session-only tabs.
      */
     persistKey?: string;
+};
+
+/**
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
+ */
+export declare type SidePanelContent = {
+    id: string;
+    content: React.ReactNode;
+};
+
+declare type SidePanelContextValue = {
+    /**
+     * Whether anything can occupy the panel. False means the panel does not
+     * exist: no chrome, no reserved width, no DOM.
+     */
+    hasAvailableView: boolean;
+    /** Whether the panel is showing at all. Persisted. */
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    /** Docked beside the page, or covering it. Persisted. */
+    layout: SidePanelLayout;
+    setLayout: React.Dispatch<React.SetStateAction<SidePanelLayout>>;
+    /** Edge the panel docks to. @default "right" */
+    side: "left" | "right";
+    setSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /**
+     * Edge hosted content docks to. Defaults to `side`; when the two differ the
+     * frame renders a window on each edge and keeps them mutually exclusive.
+     */
+    contentSide: "left" | "right";
+    setContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /** Content currently hosted in the panel, or `null`. */
+    activeContent: SidePanelContent | null;
+    /** Mount content (replacing whatever was there) and open the panel. */
+    present: (content: SidePanelContent | null) => void;
+    /** Remove the hosted content without closing the panel. */
+    clear: () => void;
+    /**
+     * Id persisted from the last session, waiting for its host to re-mount it.
+     * The panel holds a placeholder until the host calls `present`, calls
+     * `cancelRestore` (the content is gone), or a safety timeout fires.
+     */
+    restoringViewId: string | null;
+    cancelRestore: () => void;
+    /** The user's width PREFERENCE, against the absolute range. Persisted. */
+    width: number;
+    setWidth: React.Dispatch<React.SetStateAction<number>>;
+    resetWidth: () => void;
+    /** `width` held inside what the measured frame can actually give it. */
+    effectiveWidth: number;
+    /** The range the panel may be dragged to at the frame's current width. */
+    widthBounds: PanelBounds;
+    /** True when the panel covers the frame rather than sitting beside it. */
+    panelOverlays: boolean;
+    /** Published by the frame from its measured content box. */
+    setFrameWidth: React.Dispatch<React.SetStateAction<number>>;
+    /** Live state of a pointer drag, not a preference. */
+    isResizing: boolean;
+    setIsResizing: React.Dispatch<React.SetStateAction<boolean>>;
+    /** Whether the panel may be resized at all. */
+    resizable: boolean;
+    shouldPlayEntranceAnimation: boolean;
+    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+/**
+ * How the panel is laid out. Deliberately two values: the AI chat's `canvas`
+ * is a third thing the AI kit derives on top of this, not a panel concern.
+ */
+export declare type SidePanelLayout = "sidepanel" | "fullscreen";
+
+/**
+ * A product's claim on the panel.
+ *
+ * Declaring this is what lets the frame answer "is there anything at all to
+ * show?" without the host computing it. The distinction that matters is
+ * between a view that COULD open and one that is not installed at all — with
+ * only `present()` those look identical (no content either way), which is why
+ * the panel used to need a global `enabled` flag and why a customer with
+ * communications and no assistant got no panel.
+ */
+export declare type SidePanelViewDefinition = {
+    /**
+     * Names the claim on the panel — `"ai"` is f0's own. Host bookkeeping: the
+     * panel never looks a view up by it, and the id it restores on reload is the
+     * CONTENT's, not this one.
+     */
+    id: string;
+    /** Can this view occupy the panel at all? @default true */
+    available?: boolean;
+    /** Edge this view docks to. Falls back to the panel's `side`. */
+    side?: "left" | "right";
 };
 
 /**
@@ -16224,6 +16999,14 @@ export declare const useSidebarChatActions: () => SidebarChatActions;
 /** Read the chat state (groups, active chat) and the imperative store API. */
 export declare const useSidebarChats: () => SidebarChatStore;
 
+/**
+ * Read and control the frame's side panel.
+ *
+ * Returns an inert value when no panel is mounted, so a component can be used
+ * both inside and outside a frame without guarding.
+ */
+export declare function useSidePanel(): SidePanelContextValue;
+
 export declare const useWidgetIsWide: () => boolean;
 
 /**
@@ -16489,18 +17272,22 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
 };
 
 /**
- * Optional per-visualization label override for built-in visualization types.
+ * Optional per-visualization overrides for built-in visualization types.
  * When omitted, the localized built-in label from
- * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
+ * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") and the icon
+ * from the built-in registry are used.
  *
- * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
- * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
- * comes from the built-in registry for the visualization type.
+ * Lets consumers tailor the view switcher chip per instance, e.g. show "Org chart"
+ * instead of "Graph" for employees, or give an editable table the table icon
+ * rather than the built-in pencil.
  */
 declare type VisualizationLabelOverrides = {
     /** Custom label shown in the view switcher chip and Settings selector.
      *  Defaults to the localized built-in label for this visualization type. */
     label?: string;
+    /** Custom icon shown in the view switcher chip and Settings selector.
+     *  Defaults to the built-in icon for this visualization type. */
+    icon?: IconType;
 };
 
 /**
