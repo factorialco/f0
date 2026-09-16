@@ -88,7 +88,6 @@ export const AssistedQueryPanel = ({
     textareaRef.current?.focus()
   }, [])
   const keys = [...new Set((analysis?.spans ?? []).map((span) => span.key))]
-  const preview = analysis?.preview ?? []
 
   return (
     <div className="flex h-full flex-col gap-3">
@@ -115,35 +114,15 @@ export const AssistedQueryPanel = ({
         />
       </div>
 
-      {preview.length > 0 ? (
-        <div className="flex flex-col gap-1.5">
-          {preview.map((row) => (
-            <div
-              key={`${row.key}-${row.value}`}
-              className="flex items-center gap-2"
-            >
-              <span
-                className={cn(
-                  "h-2 w-2 shrink-0 rounded-full",
-                  toneFor(keys, row.key).dot
-                )}
-              />
-              <span className="text-sm text-f1-foreground-secondary">
-                {row.label}
-              </span>
-              <span className="text-base text-f1-foreground">{row.value}</span>
-            </div>
-          ))}
-        </div>
+      {value ? (
+        analysis?.note ? (
+          <p className="text-base text-f1-foreground-secondary">
+            {analysis.note}
+          </p>
+        ) : null
       ) : (
-        <p className="text-base text-f1-foreground-secondary">
-          {value ? analysis?.note : emptyHint}
-        </p>
+        <p className="text-base text-f1-foreground-secondary">{emptyHint}</p>
       )}
-
-      {preview.length > 0 && analysis?.note ? (
-        <p className="text-sm text-f1-foreground-secondary">{analysis.note}</p>
-      ) : null}
     </div>
   )
 }

@@ -927,17 +927,27 @@ const OneDataCollectionComp = <
   const [assistedFrom, setAssistedFrom] = useState<"toolbar" | "panel">(
     "toolbar"
   )
+  // Held in a ref, and compared against what was last applied: applying
+  // filters rebuilds the source, so depending on the setter — or re-applying
+  // the same reading — would have the table reloading on a loop.
+  const setFiltersRef = useRef(setFilters)
+  setFiltersRef.current = setFilters
+  const lastAppliedRef = useRef<string>()
   useEffect(() => {
     if (!analyze || assistedValue === undefined || assistedFrom === "panel") {
       return
     }
     const timer = setTimeout(() => {
-      setFilters(
-        analyze(assistedValue).filters as Parameters<typeof setFilters>[0]
-      )
+      const next = analyze(assistedValue).filters
+      const serialized = JSON.stringify(next)
+      if (serialized === lastAppliedRef.current) {
+        return
+      }
+      lastAppliedRef.current = serialized
+      setFiltersRef.current(next as Parameters<typeof setFilters>[0])
     }, 250)
     return () => clearTimeout(timer)
-  }, [analyze, assistedValue, assistedFrom, setFilters])
+  }, [analyze, assistedValue, assistedFrom])
 
   // One field's worth of props, shared by the two places it can be offered
   // from, so whichever one is used they are the same field.
