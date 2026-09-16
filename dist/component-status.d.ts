@@ -51,6 +51,8 @@ export declare interface ComponentEntry {
     hasStories: boolean;
     hasUnitTests: boolean;
     hasPlayFunction: boolean;
+    /** Has a Chromatic visual-regression snapshot story (`withSnapshot(...)`). */
+    hasSnapshot: boolean;
     hasMdxDocs: boolean;
     docQuality: DocQuality;
     docSignals: DocSignals;
@@ -58,6 +60,14 @@ export declare interface ComponentEntry {
     a11yTier: A11yTier;
     storyFile: string;
 }
+
+/**
+ * The component's code name — the leaf of its folder, given its story file
+ * path (a story in `__stories__/` maps to the parent folder). Story titles
+ * legitimately drop the F0 prefix ("Checkbox" ↔ `F0Checkbox/`), so naming is
+ * checked against the folder, which matches the exported symbol.
+ */
+export declare function componentFolderName(storyFile: string): string;
 
 /**
  * The maturity status badge, sized to sit inline next to a component title. On
@@ -166,6 +176,9 @@ export declare interface DocSignals {
  */
 export declare function evaluateComponentStatus(entry: ComponentEntry): ComponentStatus;
 
+/** Component naming convention: "F0" followed by an uppercase letter. */
+export declare const F0_NAME_PATTERN: RegExp;
+
 /**
  * Evaluate every tracked component.
  *
@@ -222,16 +235,16 @@ export declare interface RequirementResult {
  * changes for 60 days, and Foundations approval. Those remain manual promotion
  * gates (see Lifecycle/Definition of Done).
  */
-export declare const STABLE_REQUIREMENTS: ReadonlyArray<{
+export declare const STABLE_REQUIREMENTS: readonly {
     key: string;
     label: string;
     detail: string;
-    criteria?: Array<{
+    criteria?: {
         label: string;
         isMet: (c: ComponentEntry) => boolean;
-    }>;
+    }[];
     isMet: (c: ComponentEntry) => boolean;
-}>;
+}[];
 
 /** Human-readable badge label per maturity level. */
 export declare const STATUS_LABELS: Record<ApiStatus, string>;
@@ -261,23 +274,33 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
 
 declare namespace Calendar {
     var displayName: string;
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
 }
 
 
@@ -295,9 +318,20 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -343,5 +377,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }

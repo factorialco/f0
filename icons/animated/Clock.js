@@ -30,7 +30,7 @@ const handMinuteVariants = {
     },
 };
 const ClockAnimated = React.forwardRef(({ animate = "normal", ...props }, ref) => {
-    return (_jsxs("svg", { ref: ref, viewBox: "0 0 24 24", fill: "none", xmlns: "http://www.w3.org/2000/svg", strokeWidth: "1.3", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", ...props, children: [_jsx("circle", { cx: "12", cy: "12", r: "8" }), _jsx(motion.line, { x1: "12", y1: "12", x2: "12", y2: "9", variants: handVariants, animate: animate, initial: "normal", transition: handTransition, vectorEffect: "non-scaling-stroke" }), _jsx(motion.line, { x1: "12", y1: "12", x2: "12", y2: "8", variants: handMinuteVariants, animate: animate, initial: "normal", transition: handMinuteTransition, vectorEffect: "non-scaling-stroke" })] }));
+    return (_jsxs("svg", { ref: ref, viewBox: "0 0 24 24", fill: "none", xmlns: "http://www.w3.org/2000/svg", strokeWidth: "1.3", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", ...props, children: [_jsx("circle", { cx: "12", cy: "12", r: "8" }), _jsx(motion.line, { x1: "12", y1: "12", x2: "12", y2: "9", variants: handVariants, animate: animate, initial: "normal", transition: handTransition }), _jsx(motion.line, { x1: "12", y1: "12", x2: "12", y2: "8", variants: handMinuteVariants, animate: animate, initial: "normal", transition: handMinuteTransition })] }));
 });
 ClockAnimated.displayName = "ClockAnimated";
 export default ClockAnimated;
