@@ -299,19 +299,22 @@ const InlineAction = ({
   action,
   query,
   busy,
+  onEmpty,
 }: {
   action: SearchProps["inlineAction"]
   query: string | undefined
   busy: boolean
+  /** Clicked with nothing written: the field is what is missing, not the action. */
+  onEmpty: () => void
 }) =>
-  !action || !query || busy ? null : (
+  !action || busy ? null : (
     <motion.button
       type="button"
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onClick={() => action.onClick(query)}
+      onClick={() => (query ? action.onClick(query) : onEmpty())}
       title={action.hint}
       className={cn(
         "flex h-6 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover",
@@ -719,6 +722,7 @@ export const Search = ({
                     action={inlineAction}
                     query={text}
                     busy={searching}
+                    onEmpty={() => inputRef.current?.focus()}
                   />
                 </motion.div>
               </motion.div>

@@ -898,6 +898,11 @@ const OneDataCollectionComp = <
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
+  // Where the field carries a second action, the text is not a live search:
+  // half a sentence is not a name, and narrowing on every keystroke would
+  // empty the table under someone who has not finished writing. The search
+  // runs on Enter, the action runs on a click, and typing does neither.
+  const [typedSearch, setTypedSearch] = useState<string | undefined>()
 
   // Words become filters while they are being typed: a recognised stretch is
   // applied at once, so the chips and the table answer the sentence as it is
@@ -1885,8 +1890,23 @@ const OneDataCollectionComp = <
                 ) : null}
                 {search ? (
                   <Search
-                    onChange={setCurrentSearch}
-                    value={currentSearch}
+                    onChange={
+                      assistedSearchProps ? setTypedSearch : setCurrentSearch
+                    }
+                    value={assistedSearchProps ? typedSearch : currentSearch}
+                    onSubmit={
+                      assistedSearchProps
+                        ? (query) => setCurrentSearch(query)
+                        : undefined
+                    }
+                    onClear={
+                      assistedSearchProps
+                        ? () => {
+                            setTypedSearch(undefined)
+                            setCurrentSearch(undefined)
+                          }
+                        : undefined
+                    }
                     placeholderRotation={
                       source.searchPresentation?.placeholderRotation
                     }
@@ -1901,6 +1921,7 @@ const OneDataCollectionComp = <
                               // a question: leaving both on would have the two
                               // of them narrowing the same table at once.
                               setCurrentSearch(undefined)
+                              setTypedSearch(undefined)
                               assistedSearchProps.onChange(query)
                               assistedSearchProps.onSubmit?.(query)
                             },
