@@ -13807,6 +13807,15 @@ declare type MeetingNotesProps = {
  * in the panel's state, so it must be referentially stable — a fresh element on
  * every render would re-present in a loop. Everything the chrome needs comes
  * from {@link useMeetingChrome} instead.
+ *
+ * ## Why it renders nothing when there is no call
+ *
+ * That same `present()` is what makes this OUTLIVE the call. The element lives
+ * in the side panel's state, in the host's tree, so it is not removed with the
+ * meeting surface — it is taken out by `MeetingPanelPresenter`'s effect cleanup,
+ * a whole commit after the runtime became null. There is therefore exactly one
+ * render where this is on screen with no call behind it, and reading the meeting
+ * there used to throw and take the page down on hanging up.
  */
 export declare const MeetingPanelContent: () => ReactNode;
 
@@ -18078,6 +18087,20 @@ export declare const useF0Meeting: () => F0MeetingRuntime;
 export declare const useF0MeetingRoster: () => F0MeetingRoster;
 
 export declare const useF0MeetingStable: () => F0MeetingStable;
+
+/**
+ * Whether there is a call at all.
+ *
+ * The providers render with or without one (see {@link F0Meeting}), so being
+ * inside them does NOT imply a live runtime and the three hooks below still
+ * throw. Ask this first from anywhere that can outlive the call.
+ *
+ * Which is not a rare corner: anything the HOST mounts — panel content, a slot,
+ * its own chrome — is removed by an effect, a commit after the runtime went
+ * null. That one render is enough to take the page down, and it is exactly what
+ * hanging up out of `panel` mode used to do.
+ */
+export declare const useHasF0Meeting: () => boolean;
 
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
