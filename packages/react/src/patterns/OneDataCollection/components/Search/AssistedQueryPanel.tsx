@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 import type { QueryAnalysis } from "./Search"
 
@@ -52,22 +53,29 @@ export const AssistedQueryPanel = ({
       ) : null}
 
       {!value && recent && recent.length > 0 ? (
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-f1-foreground-secondary">
-            {recentTitle}
-          </span>
+        <div className="flex w-full flex-col">
+          <div className="flex w-full items-center justify-between gap-1 px-3.5 pb-1">
+            <span className="min-w-0 flex-1">
+              <OneEllipsis className="text-base font-normal text-f1-foreground-secondary">
+                {recentTitle ?? ""}
+              </OneEllipsis>
+            </span>
+          </div>
           {recent.map((query) => (
-            <button
-              key={query}
-              type="button"
-              onClick={() => onChange(query)}
-              className={cn(
-                "cursor-pointer appearance-none truncate rounded border-none bg-transparent px-2 py-1.5 text-left text-base text-f1-foreground transition-colors hover:bg-f1-background-secondary",
-                focusRing()
-              )}
-            >
-              {query}
-            </button>
+            <div key={query} className="w-full px-2">
+              <button
+                type="button"
+                onClick={() => onChange(query)}
+                className={cn(
+                  "flex w-full min-w-0 flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded border-none bg-transparent p-1.5 text-left text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary",
+                  focusRing()
+                )}
+              >
+                <span className="min-w-0 flex-1">
+                  <OneEllipsis>{query}</OneEllipsis>
+                </span>
+              </button>
+            </div>
           ))}
         </div>
       ) : null}
