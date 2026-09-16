@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
 
 /**
@@ -37,4 +38,10 @@ export interface FilterPickerInternalProps<
   onApply: () => void
   /** Callback when clear filters button is clicked */
   onClear?: () => void
+  /** An entry listed before the filters, with a pane of its own */
+  quickFilter?: { label: string; content: ReactNode }
+  /** Whether that entry is the selected one */
+  quickFilterSelected?: boolean
+  /** Callback when that entry is picked */
+  onQuickFilterSelect?: () => void
 }

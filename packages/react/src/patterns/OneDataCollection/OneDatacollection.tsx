@@ -19,7 +19,7 @@ import {
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { Search as AiSearchIcon } from "@/icons/ai"
+import { Filter as AiFilterIcon } from "@/icons/ai"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
@@ -898,6 +898,23 @@ const OneDataCollectionComp = <
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
 
+  // One field's worth of props, shared by the two places it can be offered
+  // from, so whichever one is used they are the same field.
+  const assistedSearchProps = source.searchPresentation
+    ? {
+        ...source.searchPresentation,
+        icon: AiFilterIcon,
+        value: source.searchPresentation.value ?? assistedQuery,
+        onChange:
+          source.searchPresentation.onChange ??
+          ((next: string | undefined) => setAssistedQuery(next)),
+        onClear: () => {
+          setAssistedQuery(undefined)
+          source.searchPresentation?.onClear?.()
+        },
+      }
+    : undefined
+
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
     [search, visualizations]
@@ -1763,6 +1780,25 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
+              leading={
+                search && assistedSearchProps ? (
+                  <Search {...assistedSearchProps} />
+                ) : null
+              }
+              quickFilter={
+                search && assistedSearchProps?.triggerLabel
+                  ? {
+                      label: assistedSearchProps.triggerLabel,
+                      content: (
+                        <Search
+                          {...assistedSearchProps}
+                          triggerLabel={undefined}
+                          alwaysOpen
+                        />
+                      ),
+                    }
+                  : undefined
+              }
             >
               <div ref={headerActionsRef} className="flex items-center gap-2">
                 {isLoading ? (
@@ -1776,20 +1812,6 @@ const OneDataCollectionComp = <
                   >
                     <Spinner size="small" />
                   </motion.div>
-                ) : null}
-                {search && source.searchPresentation ? (
-                  <Search
-                    {...source.searchPresentation}
-                    icon={AiSearchIcon}
-                    value={source.searchPresentation.value ?? assistedQuery}
-                    onChange={
-                      source.searchPresentation.onChange ?? setAssistedQuery
-                    }
-                    onClear={() => {
-                      setAssistedQuery(undefined)
-                      source.searchPresentation?.onClear?.()
-                    }}
-                  />
                 ) : null}
                 {search ? (
                   <Search

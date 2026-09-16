@@ -43,6 +43,12 @@ interface SearchProps {
   onLoadMore?: () => void
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
+  /**
+   * Keeps the field open. For a field that already has a surface of its own —
+   * a panel it was opened into — where collapsing to a pill would leave an
+   * empty panel behind.
+   */
+  alwaysOpen?: boolean
   /** The magnifier to draw. Lets a field say what is on the other end of it. */
   icon?: IconType
   /**
@@ -255,6 +261,7 @@ const ClosedField = ({
   value,
   loading,
   clearLabel,
+  searchLabel,
   onOpen,
   onKeyDown,
   onClear,
@@ -264,13 +271,14 @@ const ClosedField = ({
   value: string | undefined
   loading: boolean
   clearLabel: string
+  searchLabel: string
   onOpen: () => void
   onKeyDown: (e: React.KeyboardEvent) => void
   onClear: () => void
 }) => (
   <motion.div
     role="button"
-    aria-label={label ?? clearLabel}
+    aria-label={label ?? searchLabel}
     tabIndex={0}
     layout
     layoutId="search-container"
@@ -326,6 +334,7 @@ export const Search = ({
   onSubmit,
   icon = SearchIcon,
   triggerLabel,
+  alwaysOpen = false,
   suggestions,
   placeholderRotation,
   status = "idle",
@@ -333,7 +342,8 @@ export const Search = ({
   displayValue,
   onClear,
 }: SearchProps) => {
-  const [open, setOpen] = useState(false)
+  const [isOpen, setOpen] = useState(alwaysOpen)
+  const open = alwaysOpen || isOpen
   const [showResults, setShowResults] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const uniqueId = useId()
@@ -439,6 +449,15 @@ export const Search = ({
     }
     setShowResults(false)
   })
+
+  // A field that is already open has had no click to focus it, and it is the
+  // only thing in the pane it was opened into.
+  useEffect(() => {
+    if (!alwaysOpen) {
+      return
+    }
+    inputRef.current?.focus()
+  }, [alwaysOpen])
 
   const handleOpen = () => {
     if (!open) {
@@ -600,7 +619,7 @@ export const Search = ({
                       layout
                       ref={inputRef}
                       type="text"
-                      value={text ?? ""}
+                      value={text}
                       placeholder={placeholder}
                       onChange={(e) => {
                         onChange(e.target.value)
@@ -627,6 +646,7 @@ export const Search = ({
                 value={text}
                 loading={loading || resultsLoading}
                 clearLabel={i18n.actions.clear}
+                searchLabel={i18n.actions.search}
                 onOpen={handleOpen}
                 onKeyDown={handleKeyDown}
                 onClear={handleClear}

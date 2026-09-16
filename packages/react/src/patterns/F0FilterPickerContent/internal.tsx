@@ -24,6 +24,9 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
   showApplyButton = true,
   applyButtonLabel,
   className,
+  quickFilter,
+  quickFilterSelected,
+  onQuickFilterSelect,
 }: FilterPickerInternalProps<Filters>) {
   const i18n = useI18n()
 
@@ -45,7 +48,13 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           selectedFilterKey={selectedFilterKey}
           onFilterSelect={onFilterSelect}
           onClickApplyFilters={onApply}
+          quickFilterLabel={quickFilter?.label}
+          quickFilterSelected={quickFilterSelected}
+          onQuickFilterSelect={onQuickFilterSelect}
         />
+        {quickFilterSelected && quickFilter ? (
+          <div className="min-w-[340px] flex-1 p-3">{quickFilter.content}</div>
+        ) : null}
         {selectedFilterKey ? (
           <div className="min-w-[340px] flex-1">
             <FilterContent

@@ -31,6 +31,16 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
   children?: React.ReactNode
+  /**
+   * An entry listed before the filters inside the panel, with a pane of its
+   * own. For a way of filtering that is not one filter.
+   */
+  quickFilter?: { label: string; content: React.ReactNode }
+  /**
+   * Rendered immediately after the filter button, before the divider the
+   * presets sit behind.
+   */
+  leading?: React.ReactNode
   /** The mode of the component */
   mode?: FiltersMode
   /** Callback fired when filters open state is changed */
@@ -218,6 +228,8 @@ const FiltersControls = () => {
     emitFilterChange,
     mode,
     displayCounter,
+    quickFilter,
+    leading,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -247,7 +259,9 @@ const FiltersControls = () => {
         hideLabel={!!presets || mode === "simple"}
         mode={mode}
         displayCounter={displayCounter}
+        quickFilter={quickFilter}
       />
+      {leading}
       {presets?.length ? (
         <div className="flex items-center">
           <div className="mx-2 h-4 w-px bg-f1-background-secondary-hover" />

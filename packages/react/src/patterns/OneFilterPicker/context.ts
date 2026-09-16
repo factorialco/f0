@@ -1,4 +1,4 @@
-import { createContext } from "react"
+import { createContext, type ReactNode } from "react"
 import {
   FiltersDefinition,
   FiltersMode,
@@ -19,6 +19,10 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   emitPresetClick: (filters: FiltersState<Definition>) => void
   mode?: FiltersMode
   displayCounter?: boolean
+  /** An entry listed before the filters inside the panel, with its own pane */
+  quickFilter?: { label: string; content: ReactNode }
+  /** Rendered next to the filter button, before the presets divider */
+  leading?: ReactNode
   /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
   resultCount?: number
   /**

@@ -1,6 +1,7 @@
 export { default as Calendar } from "./Calendar"
 export { default as ChangeTone } from "./ChangeTone"
 export { default as ChartLine } from "./ChartLine"
+export { default as Filter } from "./Filter"
 export { default as One } from "./One"
 export { default as ReceiptAi } from "./ReceiptAi"
 export { default as Rewrite } from "./Rewrite"

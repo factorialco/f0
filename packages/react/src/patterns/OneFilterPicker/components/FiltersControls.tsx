@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import {
   type ComponentPropsWithoutRef,
   forwardRef,
+  type ReactNode,
   useContext,
   useEffect,
   useId,
@@ -45,6 +46,8 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
   hideLabel?: boolean
   mode?: FiltersMode
   displayCounter?: boolean
+  /** An entry listed before the filters, with its own pane */
+  quickFilter?: { label: string; content: ReactNode }
 }
 
 const DEFAULT_FORM_HEIGHT = 388
@@ -79,6 +82,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   hideLabel,
   mode = "default",
   displayCounter = false,
+  quickFilter,
 }: FiltersControlsProps<Filters>) {
   // The value to emit must consider every filter — including `hideSelector`
   // siblings that store nested/grouped selections — otherwise those selections
@@ -88,7 +92,20 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
-  >(mode === "compact" ? null : firstFilterKey)
+  >(mode === "compact" || quickFilter ? null : firstFilterKey)
+  // The quick filter is not one of the filters, so it cannot be held in
+  // `selectedFilterKey`; the two selections exclude each other.
+  const [quickFilterSelected, setQuickFilterSelected] = useState(
+    mode !== "compact" && Boolean(quickFilter)
+  )
+  const selectQuickFilter = () => {
+    setSelectedFilterKey(null)
+    setQuickFilterSelected(true)
+  }
+  const selectFilter = (key: keyof Filters) => {
+    setQuickFilterSelected(false)
+    setSelectedFilterKey(key)
+  }
   const i18n = useI18n()
 
   // Auto-detect if we're inside a dialog and use its portal container
@@ -207,6 +224,12 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     }
 
     if (isOpen && mode === "default") {
+      // The quick filter opens selected, so nothing else may claim the pane.
+      if (quickFilter) {
+        setQuickFilterSelected(true)
+        setSelectedFilterKey(null)
+        return
+      }
       const firstFilterWithValue = getFirstFilterNotEmpty()
       if (firstFilterWithValue) {
         setSelectedFilterKey(firstFilterWithValue[0] as keyof Filters)
@@ -312,11 +335,17 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     definition={filters}
                     tempFilters={localFiltersValue}
                     selectedFilterKey={selectedFilterKey}
-                    onFilterSelect={(key: keyof Filters) =>
-                      setSelectedFilterKey(key)
-                    }
+                    onFilterSelect={selectFilter}
                     onClickApplyFilters={handleApplyFilters}
+                    quickFilterLabel={quickFilter?.label}
+                    quickFilterSelected={quickFilterSelected}
+                    onQuickFilterSelect={selectQuickFilter}
                   />
+                  {quickFilterSelected && quickFilter ? (
+                    <div className="flex-1 min-w-0 overflow-hidden p-3">
+                      {quickFilter.content}
+                    </div>
+                  ) : null}
                   {selectedFilterKey ? (
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <FilterContent
@@ -506,7 +535,10 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             filters={filters}
             tempFilters={localFiltersValue}
             selectedFilterKey={selectedFilterKey}
-            onFilterSelect={setSelectedFilterKey}
+            onFilterSelect={selectFilter}
+            quickFilter={quickFilter}
+            quickFilterSelected={quickFilterSelected}
+            onQuickFilterSelect={selectQuickFilter}
             onFilterChange={updateFilterValue}
             onApply={handleApplyFilters}
             onClear={handleClearFilters}
