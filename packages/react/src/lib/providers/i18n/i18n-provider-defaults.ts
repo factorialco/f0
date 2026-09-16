@@ -219,8 +219,9 @@ export const defaultTranslations = {
     },
     search: {
       searching: "Searching for {{query}}\u2026",
-      assistedHint: "Describe who you are looking for.",
+      assistedHint: "Describe who you are looking for, in your own words.",
       filterWithAssistant: "Filter with One",
+      recent: "Recent",
     },
     presets: {
       createTitle: "Save view",

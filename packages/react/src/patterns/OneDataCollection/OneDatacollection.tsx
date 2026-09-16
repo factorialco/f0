@@ -1836,6 +1836,11 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
+              leading={
+                search && assistedSearchProps?.triggerLabel ? (
+                  <Search {...assistedSearchProps} />
+                ) : null
+              }
               quickFilter={
                 search && assistedSearchProps?.triggerLabel
                   ? {
@@ -1858,6 +1863,8 @@ const OneDataCollectionComp = <
                             source.searchPresentation?.placeholderRotation?.[0]
                           }
                           emptyHint={i18n.collections.search.assistedHint}
+                          recent={source.searchPresentation?.recent}
+                          recentTitle={i18n.collections.search.recent}
                         />
                       ),
                     }

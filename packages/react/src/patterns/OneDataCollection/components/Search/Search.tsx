@@ -139,6 +139,12 @@ export type SearchPresentation = Pick<
    */
   analyze?: (query: string) => QueryAnalysis
   /**
+   * Queries this person already ran on this collection, newest first. Offered
+   * before any example we could invent: they are the proof the thing works,
+   * and running one again costs nothing.
+   */
+  recent?: string[]
+  /**
    * The query being written. Provide it to drive completions from what is
    * typed; omit it and the collection keeps the text itself.
    */
