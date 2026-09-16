@@ -115,7 +115,13 @@ export const F0MeetingProvider = ({
   runtime,
   children,
 }: {
-  runtime: F0MeetingRuntime
+  /**
+   * `null` while there is no call. The provider still renders, so `children`
+   * keep their position in the tree — see {@link F0Meeting}. Every hook below
+   * throws on a null context, which keeps the contract intact: you may only read
+   * a meeting from inside one.
+   */
+  runtime: F0MeetingRuntime | null
   children: ReactNode
 }): ReactNode => {
   const runtimeRef = useRef(runtime)
@@ -124,7 +130,7 @@ export const F0MeetingProvider = ({
   const bindingsRef = useRef<BindingMap>(new Map())
   const bindings = bindingsRef.current
   const seen = new Set<string>()
-  for (const participant of runtime.participants) {
+  for (const participant of runtime?.participants ?? []) {
     for (const track of participant.tracks) {
       seen.add(track.bindingKey)
       if (track.binding) {
@@ -138,80 +144,88 @@ export const F0MeetingProvider = ({
     }
   }
 
-  const capabilities = useStableCapabilities(runtime.capabilities)
+  const capabilities = useStableCapabilities(runtime?.capabilities)
 
-  const stable = useMemo<F0MeetingStable>(
-    () => ({
-      roomId: runtime.room.id,
-      localParticipantId: runtime.localParticipantId,
-      capabilities,
-      hasScreenShare: Boolean(runtimeRef.current.setScreenShareEnabled),
-      hasRecording: Boolean(runtimeRef.current.startRecording),
-      hasReactions: Boolean(runtimeRef.current.sendReaction),
-      hasRaiseHand: Boolean(runtimeRef.current.setHandRaised),
-      hasModeration: Boolean(
-        runtimeRef.current.muteParticipant ??
-        runtimeRef.current.removeParticipant
-      ),
-      hasReconnect: Boolean(runtimeRef.current.reconnect),
-      setMicrophoneEnabled: (enabled) => {
-        void runtimeRef.current.setMicrophoneEnabled(enabled)
-      },
-      setCameraEnabled: (enabled) => {
-        void runtimeRef.current.setCameraEnabled(enabled)
-      },
-      setScreenShareEnabled: (enabled) => {
-        void runtimeRef.current.setScreenShareEnabled?.(enabled)
-      },
-      setHandRaised: (raised) => {
-        void runtimeRef.current.setHandRaised?.(raised)
-      },
-      sendReaction: (emoji) => {
-        void runtimeRef.current.sendReaction?.(emoji)
-      },
-      muteParticipant: (participantId) => {
-        void runtimeRef.current.muteParticipant?.(participantId)
-      },
-      removeParticipant: (participantId) => {
-        void runtimeRef.current.removeParticipant?.(participantId)
-      },
-      reconnect: () => {
-        void runtimeRef.current.reconnect?.()
-      },
-      leave: () => {
-        void runtimeRef.current.leave()
-      },
-    }),
+  const stable = useMemo<F0MeetingStable | null>(
+    () =>
+      runtime === null
+        ? null
+        : {
+            roomId: runtime.room.id,
+            localParticipantId: runtime.localParticipantId,
+            capabilities,
+            hasScreenShare: Boolean(runtimeRef.current?.setScreenShareEnabled),
+            hasRecording: Boolean(runtimeRef.current?.startRecording),
+            hasReactions: Boolean(runtimeRef.current?.sendReaction),
+            hasRaiseHand: Boolean(runtimeRef.current?.setHandRaised),
+            hasModeration: Boolean(
+              runtimeRef.current?.muteParticipant ??
+              runtimeRef.current?.removeParticipant
+            ),
+            hasReconnect: Boolean(runtimeRef.current?.reconnect),
+            setMicrophoneEnabled: (enabled) => {
+              void runtimeRef.current?.setMicrophoneEnabled(enabled)
+            },
+            setCameraEnabled: (enabled) => {
+              void runtimeRef.current?.setCameraEnabled(enabled)
+            },
+            setScreenShareEnabled: (enabled) => {
+              void runtimeRef.current?.setScreenShareEnabled?.(enabled)
+            },
+            setHandRaised: (raised) => {
+              void runtimeRef.current?.setHandRaised?.(raised)
+            },
+            sendReaction: (emoji) => {
+              void runtimeRef.current?.sendReaction?.(emoji)
+            },
+            muteParticipant: (participantId) => {
+              void runtimeRef.current?.muteParticipant?.(participantId)
+            },
+            removeParticipant: (participantId) => {
+              void runtimeRef.current?.removeParticipant?.(participantId)
+            },
+            reconnect: () => {
+              void runtimeRef.current?.reconnect?.()
+            },
+            leave: () => {
+              void runtimeRef.current?.leave()
+            },
+          },
     [
-      runtime.room.id,
-      runtime.localParticipantId,
+      runtime === null,
+      runtime?.room.id,
+      runtime?.localParticipantId,
       capabilities,
       // Presence, not identity: adding or losing a capability changes the UI.
-      Boolean(runtime.setScreenShareEnabled),
-      Boolean(runtime.startRecording),
-      Boolean(runtime.sendReaction),
-      Boolean(runtime.setHandRaised),
-      Boolean(runtime.muteParticipant ?? runtime.removeParticipant),
-      Boolean(runtime.reconnect),
+      Boolean(runtime?.setScreenShareEnabled),
+      Boolean(runtime?.startRecording),
+      Boolean(runtime?.sendReaction),
+      Boolean(runtime?.setHandRaised),
+      Boolean(runtime?.muteParticipant ?? runtime?.removeParticipant),
+      Boolean(runtime?.reconnect),
     ]
   )
 
-  const roster = useMemo<F0MeetingRoster>(
-    () => ({
-      room: runtime.room,
-      status: runtime.status,
-      participants: runtime.participants,
-      localMedia: runtime.localMedia,
-      recording: runtime.recording,
-      signals: runtime.signals,
-    }),
+  const roster = useMemo<F0MeetingRoster | null>(
+    () =>
+      runtime === null
+        ? null
+        : {
+            room: runtime.room,
+            status: runtime.status,
+            participants: runtime.participants,
+            localMedia: runtime.localMedia,
+            recording: runtime.recording,
+            signals: runtime.signals,
+          },
     [
-      runtime.room,
-      runtime.status,
-      runtime.participants,
-      runtime.localMedia,
-      runtime.recording,
-      runtime.signals,
+      runtime === null,
+      runtime?.room,
+      runtime?.status,
+      runtime?.participants,
+      runtime?.localMedia,
+      runtime?.recording,
+      runtime?.signals,
     ]
   )
 
@@ -227,6 +241,16 @@ export const F0MeetingProvider = ({
     </F0MeetingContext.Provider>
   )
 }
+
+/**
+ * Whether there is a call at all.
+ *
+ * The providers render with or without one (see {@link F0Meeting}), so being
+ * inside them no longer implies a live runtime. Components that sit outside the
+ * surface — the panel presenter — need to ask rather than assume.
+ */
+export const useHasF0Meeting = (): boolean =>
+  useContext(F0MeetingContext) !== null
 
 export const useF0Meeting = (): F0MeetingRuntime => {
   const context = useContext(F0MeetingContext)

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { MeetingPanelContent } from "@/sds/meetings/F0Meeting"
+import { useHasF0Meeting } from "@/sds/meetings/F0Meeting/providers/F0MeetingProvider"
 import { useMeetingSurfaceOptional } from "@/sds/meetings/F0Meeting/providers/MeetingSurfaceProvider"
 import { useHasSidePanel, useSidePanel } from "./SidePanel/SidePanelProvider"
 
@@ -41,12 +42,16 @@ const MEETING_PANEL_CONTENT = {
  */
 export const MeetingPanelPresenter = (): null => {
   const surface = useMeetingSurfaceOptional()
+  // The surface provider now renders with or without a call, so its presence no
+  // longer means there is one to dock. Presenting without a runtime would put a
+  // call UI in the panel for a call that does not exist.
+  const hasMeeting = useHasF0Meeting()
   const hasPanel = useHasSidePanel()
   const { activeContent, present, clear, open, setOpen, setLayout } =
     useSidePanel()
 
-  const mode = surface?.mode
-  const effectiveMode = surface?.effectiveMode
+  const mode = hasMeeting ? surface?.mode : undefined
+  const effectiveMode = hasMeeting ? surface?.effectiveMode : undefined
   const setMode = surface?.setMode
   const setPanelSlot = surface?.setPanelSlot
   const isOurs = activeContent?.id === MEETING_PANEL_ID
