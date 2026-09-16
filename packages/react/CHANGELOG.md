@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.0](https://github.com/factorialco/f0/compare/f0-react-v7.0.0...f0-react-v7.1.0) (2026-09-16)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** compare a widget against a figure it is measured by ([#5522](https://github.com/factorialco/f0/issues/5522)) ([bcb189f](https://github.com/factorialco/f0/commit/bcb189ffd6bf51b4f095ac2423477ee539550b54))
+
 ## [7.0.0](https://github.com/factorialco/f0/compare/f0-react-v6.106.2...f0-react-v7.0.0) (2026-09-15)
 
 
