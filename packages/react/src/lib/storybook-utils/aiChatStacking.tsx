@@ -35,8 +35,8 @@ const fullscreenChatAi: ComponentProps<typeof ApplicationFrame>["ai"] = {
 // override `defaultVisualizationMode: "fullscreen"`. Clearing the keys before
 // the Ai provider initializes lets the fullscreen default take effect — with
 // no flash, since this runs in the parent's render before the provider mounts.
-const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
-const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
+const CHAT_OPEN_STORAGE_KEY = "f0-side-panel-open"
+const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "f0-side-panel-layout"
 
 /**
  * Renders the app shell with the AI chat locked open in fullscreen, then drops

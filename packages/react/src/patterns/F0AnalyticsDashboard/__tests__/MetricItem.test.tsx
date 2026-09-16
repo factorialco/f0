@@ -1,6 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { MetricItem, MetricValue } from "../components/MetricItem/MetricItem"
 import type { DashboardMetricItem } from "../types"
 
@@ -9,6 +9,13 @@ const containerSize = vi.hoisted(() => ({ width: 320, height: 0 }))
 vi.mock("@/kits/F0DataChart/utils/useContainerSize", () => ({
   useContainerSize: () => containerSize,
 }))
+
+/**
+ * The scrolling body of the widget, found by the property under test rather
+ * than by walking a fixed number of parents — the markup inside it changes
+ * when a metric carries a comparison.
+ */
+const metricBox = (value: HTMLElement) => value.closest(".overflow-auto")
 
 const metricItem = (
   overrides: Partial<DashboardMetricItem> = {}
@@ -62,17 +69,163 @@ describe("MetricItem", () => {
     )
   })
 
+  describe("comparison", () => {
+    it("states the reference figure under the value, in the same units", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            format: { type: "percent" },
+            decimals: 1,
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: { value: 13.5, label: "Peer median" },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      await waitFor(() => expect(screen.getByText("16.4%")).toBeInTheDocument())
+      expect(screen.getByText("Peer median 13.5%")).toBeInTheDocument()
+    })
+
+    it("formats it with the consumer's own formatter, like the value", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            valueFormatter: (value) => `${value.toFixed(1)} pp`,
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: { value: 13.5, label: "Peers" },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      await waitFor(() =>
+        expect(screen.getByText("16.4 pp")).toBeInTheDocument()
+      )
+      expect(screen.getByText("Peers 13.5 pp")).toBeInTheDocument()
+    })
+
+    // A comparison is a different quantity from this metric's own past, so it
+    // must never borrow the trend arrow: an arrow would say the number moved.
+    it("draws no trend arrow for it", async () => {
+      const { container } = render(
+        <MetricItem
+          item={metricItem({
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: { value: 13.5, label: "Peer median" },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      await waitFor(() =>
+        expect(screen.getByText("Peer median 14")).toBeInTheDocument()
+      )
+      expect(container.querySelectorAll("svg")).toHaveLength(0)
+    })
+
+    it("explains the reference figure on hover when the comparison carries info", async () => {
+      const user = userEvent.setup()
+      render(
+        <MetricItem
+          item={metricItem({
+            format: { type: "percent" },
+            decimals: 1,
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: {
+                  value: 13.5,
+                  label: "Peer median",
+                  info: "The median across all companies on Factorial.",
+                },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      const line = await screen.findByText("Peer median 13.5%")
+      const trigger = line.parentElement?.querySelector('[tabindex="0"]')
+      expect(trigger).not.toBeNull()
+
+      await user.hover(trigger as HTMLElement)
+
+      const tooltip = await waitFor(() => screen.getByRole("tooltip"), {
+        timeout: 2000,
+      })
+      expect(tooltip).toHaveTextContent(
+        "The median across all companies on Factorial."
+      )
+    })
+
+    it("renders no info trigger when the comparison has none", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            format: { type: "percent" },
+            decimals: 1,
+            fetchData: () =>
+              Promise.resolve({
+                value: 16.4,
+                comparison: { value: 13.5, label: "Peer median" },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      const line = await screen.findByText("Peer median 13.5%")
+      expect(line.parentElement?.querySelector('[tabindex="0"]')).toBeNull()
+    })
+
+    it("shows both when a metric carries a comparison and a previous value", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            fetchData: () =>
+              Promise.resolve({
+                value: 100,
+                previousValue: 80,
+                comparison: { value: 90, label: "Peer median" },
+              }),
+          })}
+          filters={{}}
+        />
+      )
+
+      await waitFor(() => expect(screen.getByText("100")).toBeInTheDocument())
+      expect(screen.getByText("25.0%")).toBeInTheDocument()
+      expect(screen.getByText("Peer median 90")).toBeInTheDocument()
+    })
+
+    it("renders nothing extra when a metric carries none", async () => {
+      render(<MetricItem item={metricItem()} filters={{}} />)
+
+      await waitFor(() =>
+        expect(screen.getByText("46,273")).toBeInTheDocument()
+      )
+      expect(screen.queryByText(/Peer/)).not.toBeInTheDocument()
+    })
+  })
+
   it("keeps the value bottom-left when the body is exactly 220px tall", async () => {
     containerSize.height = 220
 
     render(<MetricItem item={metricItem()} filters={{}} />)
 
     const value = await screen.findByText("46,273")
-    expect(value.parentElement?.parentElement).toHaveClass("items-end")
-    expect(value.parentElement?.parentElement).not.toHaveClass(
-      "items-center",
-      "justify-center"
-    )
+    expect(metricBox(value)).toHaveClass("items-end")
+    expect(metricBox(value)).not.toHaveClass("items-center", "justify-center")
   })
 
   it("centers the value when the body grows beyond 220px", async () => {
@@ -81,9 +234,11 @@ describe("MetricItem", () => {
     render(<MetricItem item={metricItem()} filters={{}} />)
 
     const value = await screen.findByText("46,273")
-    expect(value.parentElement?.parentElement).toHaveClass("items-center")
-    expect(value.parentElement?.parentElement).not.toHaveClass("justify-center")
-    expect(value.parentElement).toHaveClass("mx-auto")
+    expect(metricBox(value)).toHaveClass("items-center")
+    expect(metricBox(value)).not.toHaveClass("justify-center")
+    // The centering lives on the box that holds the value, whatever is
+    // stacked inside it.
+    expect(value.closest(".mx-auto")).not.toBeNull()
   })
 
   it.each([
@@ -120,14 +275,14 @@ describe("MetricItem", () => {
     render(<MetricItem item={metricItem()} filters={{}} />)
 
     const value = await screen.findByText("46,273")
-    expect(value.parentElement?.parentElement).toHaveAttribute("tabindex", "0")
+    expect(metricBox(value)).toHaveAttribute("tabindex", "0")
   })
 
   it("keeps a metric that fits out of the tab order", async () => {
     render(<MetricItem item={metricItem()} filters={{}} />)
 
     const value = await screen.findByText("46,273")
-    expect(value.parentElement?.parentElement).not.toHaveAttribute("tabindex")
+    expect(metricBox(value)).not.toHaveAttribute("tabindex")
   })
 
   it("makes a vertically overflowing metric keyboard-scrollable", async () => {
@@ -139,7 +294,7 @@ describe("MetricItem", () => {
     render(<MetricItem item={metricItem()} filters={{}} />)
 
     const value = await screen.findByText("46,273")
-    expect(value.parentElement?.parentElement).toHaveAttribute("tabindex", "0")
+    expect(metricBox(value)).toHaveAttribute("tabindex", "0")
   })
 
   it("rechecks overflow when a trend changes without changing the value", async () => {
@@ -153,7 +308,7 @@ describe("MetricItem", () => {
     const { rerender } = render(<MetricValue value="100" />)
 
     const value = await screen.findByText("100")
-    const container = value.parentElement?.parentElement
+    const container = metricBox(value)
     expect(container).not.toHaveAttribute("tabindex")
 
     rerender(
@@ -161,8 +316,7 @@ describe("MetricItem", () => {
     )
 
     await screen.findByText("+100.0%")
-    const currentContainer =
-      screen.getByText("100").parentElement?.parentElement
+    const currentContainer = metricBox(screen.getByText("100"))
     expect(currentContainer).toBe(container)
     await waitFor(() =>
       expect(currentContainer).toHaveAttribute("tabindex", "0")
@@ -178,7 +332,7 @@ describe("MetricItem", () => {
 
     const { rerender } = render(<MetricValue value="100" />)
 
-    const container = screen.getByText("100").parentElement?.parentElement
+    const container = metricBox(screen.getByText("100"))
     expect(container).not.toHaveAttribute("tabindex")
 
     containerSize.width = 320

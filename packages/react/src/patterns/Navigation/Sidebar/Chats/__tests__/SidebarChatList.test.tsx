@@ -1,6 +1,6 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { BellOff, Clock, PalmTree } from "@/icons/app"
+import { BellOff, Clock, PalmTree, Plus } from "@/icons/app"
 import {
   act,
   waitFor,
@@ -106,6 +106,47 @@ describe("SidebarChatList", () => {
     expect(
       container.querySelector('[role="img"][aria-hidden="true"]')
     ).toBeInTheDocument()
+  })
+
+  /** One row on its own, so an assertion about "no image anywhere" means it. */
+  const renderOneChat = (chat: SidebarChatGroup["chats"][number]) =>
+    render(
+      <SidebarChatProvider
+        initialGroups={[{ id: "groups", title: "Groups", chats: [chat] }]}
+      >
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+
+  it("draws a group's emoji as a native glyph, not a downloaded image", () => {
+    // At 20px a twemoji sprite reads soft beside Inter, and it costs one
+    // network image per row of a list that can be fifty rows long.
+    const { container } = renderOneChat({
+      id: "emoji",
+      label: "Product",
+      avatar: { type: "emoji", emoji: "🧭" },
+    })
+
+    expect(container.querySelector("img")).toBeNull()
+    expect(screen.getByRole("img", { name: "🧭" })).toHaveTextContent("🧭")
+    expect(screen.getByRole("img", { name: "🧭" }).className).toMatch(
+      /font-emoji/
+    )
+  })
+
+  it("keeps the hash glyph OUT of the emoji font", () => {
+    // ＃ is typography, not an emoji: U+FF03 has no glyph in any font of the
+    // emoji stack, so it would fall through to the browser's generic
+    // `sans-serif` while the name beside it stays Inter.
+    const { container } = renderOneChat({
+      id: "plain",
+      label: "General",
+      avatar: { type: "company", name: "General" },
+    })
+
+    const fallback = screen.getByTestId("sidebar-group-avatar-fallback")
+    expect(fallback).toHaveTextContent("＃")
+    expect(container.querySelector(".font-emoji")).toBeNull()
   })
 
   it("shows a blank state when there are no chats", () => {
@@ -1189,5 +1230,49 @@ describe("SidebarChatList unread navigation", () => {
     })
 
     expect(search).toHaveFocus()
+  })
+})
+
+describe("SidebarChatList group actions", () => {
+  const withAction = (onClick: () => void): SidebarChatGroup[] => [
+    groups[0]!,
+    { ...groups[1]!, action: { label: "New channel", icon: Plus, onClick } },
+  ]
+
+  const renderWithAction = (onClick: () => void) =>
+    render(
+      <SidebarChatProvider initialGroups={withAction(onClick)}>
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+
+  it("puts the action on the group it belongs to, and nowhere else", () => {
+    renderWithAction(vi.fn())
+
+    // One button, not one per group: creating a channel belongs to Channels,
+    // not to the whole panel and not to Direct messages.
+    expect(screen.getAllByRole("button", { name: "New channel" })).toHaveLength(
+      1
+    )
+  })
+
+  it("runs the action without collapsing the group it sits on", async () => {
+    // The header IS the collapse toggle, so the click has to stop there.
+    const onClick = vi.fn()
+    renderWithAction(onClick)
+
+    const header = screen.getByRole("button", { name: /Groups/ })
+    expect(header).toHaveAttribute("aria-expanded", "true")
+
+    await userEvent.click(screen.getByRole("button", { name: "New channel" }))
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(header).toHaveAttribute("aria-expanded", "true")
+  })
+
+  it("draws no action on a group that was given none", () => {
+    renderList()
+
+    expect(screen.queryByRole("button", { name: "New channel" })).toBeNull()
   })
 })

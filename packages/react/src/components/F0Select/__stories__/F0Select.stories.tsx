@@ -27,6 +27,28 @@ const icons: Record<string, IconType> = {
   dark: Appearance,
   system: Desktop,
 }
+
+/**
+ * The value the grouping stories start out with.
+ *
+ * Grouping sorts the first page by the group field, so a record with a low id
+ * is not on it — the trigger has no label for the selection and falls back to
+ * "…". `defaultItem` is how a consumer names a pre-selected value the first
+ * page does not carry, so the stories that ship with one selected pass it.
+ */
+const GROUPED_PRESELECTED_VALUE = "42"
+
+const groupedPreselectedItem = () => {
+  const item = mockItems.find((i) => i.value === GROUPED_PRESELECTED_VALUE)
+  return item
+    ? {
+        value: item.value,
+        label: item.label,
+        avatar: item.avatar,
+        description: item.description,
+      }
+    : undefined
+}
 const items = [
   {
     id: "light",
@@ -814,7 +836,10 @@ export const WithDataSourceGrouping: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    // Without this the trigger reads "…": grouping sorts the first page by the
+    // group field, so this record is not in it and there is no label to show.
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -896,7 +921,8 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -1051,6 +1077,11 @@ export const WithMultiLevelGrouping: Story = {
  *    The hierarchy is what this select IS, so there is nothing here for the
  *    user to choose — and the picker offers one field, which would drop the
  *    `thenBy` chain and flatten the tree.
+ * 4. A real book of work is NOT uniform, and the list says so. A task with a
+ *    project but no subproject is a row of its project, above the subproject
+ *    headings; one with no project at all belongs to no group and leads the
+ *    list, with no heading over it. Neither is filed under the value it is
+ *    missing — a record with nothing at a level belongs to the level above.
  */
 const PROJECTS = [
   { id: "p1", name: "Apollo" },
@@ -1081,16 +1112,38 @@ const TASK_TITLES: Record<string, string[]> = {
 
 const ASSIGNEES = ["Ada", "Grace", "Hedy", "Katherine", "Radia"]
 
-const projectTasks: ProjectTask[] = SUBPROJECTS.flatMap((subproject, index) => {
-  const project = PROJECTS.find((p) => p.id === subproject.projectId)!
-  return TASK_TITLES[subproject.id].map((title, taskIndex) => ({
-    id: `${subproject.id}-${taskIndex}`,
-    title,
-    assignee: ASSIGNEES[(index + taskIndex) % ASSIGNEES.length],
-    project: { id: project.id, name: project.name },
-    subproject: { id: subproject.id, name: subproject.name },
-  }))
-})
+/** Nothing at this level — the record belongs to the level above. */
+const NONE = { id: "", name: "" }
+
+const projectTasks: ProjectTask[] = [
+  // Belongs to no project at all: it leads the list, under no heading.
+  {
+    id: "loose-1",
+    title: "Write the incident post-mortem",
+    assignee: "Radia",
+    project: NONE,
+    subproject: NONE,
+  },
+  ...SUBPROJECTS.flatMap((subproject, index) => {
+    const project = PROJECTS.find((p) => p.id === subproject.projectId)!
+    return TASK_TITLES[subproject.id].map((title, taskIndex) => ({
+      id: `${subproject.id}-${taskIndex}`,
+      title,
+      assignee: ASSIGNEES[(index + taskIndex) % ASSIGNEES.length],
+      project: { id: project.id, name: project.name },
+      subproject: { id: subproject.id, name: subproject.name },
+    }))
+  }),
+  // In a project but in none of its subprojects: a row of Apollo itself,
+  // sitting above the Backend and Web headings.
+  {
+    id: "p1-loose",
+    title: "Plan the Apollo roadmap",
+    assignee: "Ada",
+    project: { id: "p1", name: "Apollo" },
+    subproject: NONE,
+  },
+]
 
 const nameById = (entities: { id: string; name: string }[], groupId: unknown) =>
   entities.find((entity) => entity.id === groupId)?.name ?? `${groupId}`

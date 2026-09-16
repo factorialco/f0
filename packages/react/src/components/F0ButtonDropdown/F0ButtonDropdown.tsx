@@ -75,6 +75,7 @@ const SplitMode = ({
   disabled,
   loading,
   tooltip,
+  container,
 }: {
   onClick: (value: string, item: ButtonDropdownItem) => void
   value?: string
@@ -84,6 +85,7 @@ const SplitMode = ({
   disabled?: boolean
   loading?: boolean
   tooltip?: string
+  container?: HTMLElement | null
 }) => {
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
@@ -165,6 +167,7 @@ const SplitMode = ({
             <DropdownInternal
               items={dropdownItems}
               align="end"
+              container={container}
               open={isOpen && !disabled}
               onOpenChange={(open) => {
                 if (disabled) {
@@ -351,6 +354,7 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
       disabled={props.disabled}
       loading={props.loading}
       tooltip={props.tooltip}
+      container={props.container}
     />
   )
 }

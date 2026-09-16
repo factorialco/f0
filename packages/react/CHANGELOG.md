@@ -1,5 +1,86 @@
 # Changelog
 
+## [7.1.0](https://github.com/factorialco/f0/compare/f0-react-v7.0.0...f0-react-v7.1.0) (2026-09-16)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** compare a widget against a figure it is measured by ([#5522](https://github.com/factorialco/f0/issues/5522)) ([bcb189f](https://github.com/factorialco/f0/commit/bcb189ffd6bf51b4f095ac2423477ee539550b54))
+
+## [7.0.0](https://github.com/factorialco/f0/compare/f0-react-v6.106.2...f0-react-v7.0.0) (2026-09-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **F0Chat:** unship the community demo copy ([#5555](https://github.com/factorialco/f0/issues/5555))
+
+### Code Refactoring
+
+* **F0Chat:** unship the community demo copy ([#5555](https://github.com/factorialco/f0/issues/5555)) ([d209829](https://github.com/factorialco/f0/commit/d209829251965d8ade7270140d16823b582bf21d))
+
+## [6.106.2](https://github.com/factorialco/f0/compare/f0-react-v6.106.1...f0-react-v6.106.2) (2026-09-15)
+
+
+### Bug Fixes
+
+* **F0Select:** one trigger tooltip, and only when it adds something ([#5552](https://github.com/factorialco/f0/issues/5552)) ([7737a3c](https://github.com/factorialco/f0/commit/7737a3cbc1e8ddd02dac69bfc2589f35fe9903d1))
+
+## [6.106.1](https://github.com/factorialco/f0/compare/f0-react-v6.106.0...f0-react-v6.106.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** guard persisted state and the Save view chip ([#5291](https://github.com/factorialco/f0/issues/5291)) ([08e7e12](https://github.com/factorialco/f0/commit/08e7e12a4d2838c7e18f22801d5e21e248e3a1b2))
+
+## [6.106.0](https://github.com/factorialco/f0/compare/f0-react-v6.105.0...f0-react-v6.106.0) (2026-09-15)
+
+
+### Features
+
+* **F0Chat:** community channels — a feed of posts in the panel ([#5409](https://github.com/factorialco/f0/issues/5409)) ([1570cc7](https://github.com/factorialco/f0/commit/1570cc7fdc56cf2ae907f38431d24aba7e179880))
+
+## [6.105.0](https://github.com/factorialco/f0/compare/f0-react-v6.104.0...f0-react-v6.105.0) (2026-09-15)
+
+
+### Features
+
+* **Home:** add tooltipDescription to list rows ([#5547](https://github.com/factorialco/f0/issues/5547)) ([84950a3](https://github.com/factorialco/f0/commit/84950a38464ecb4698212e26fea8962204a8b103))
+
+## [6.104.0](https://github.com/factorialco/f0/compare/f0-react-v6.103.1...f0-react-v6.104.0) (2026-09-15)
+
+
+### Features
+
+* **datasource:** let a list be grouped without being uniformly grouped ([#5534](https://github.com/factorialco/f0/issues/5534)) ([217d6cf](https://github.com/factorialco/f0/commit/217d6cf6c8eb798daf7da9a0b35e32cb469615dd))
+
+## [6.103.1](https://github.com/factorialco/f0/compare/f0-react-v6.103.0...f0-react-v6.103.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **F0AiChatUsageLimitsButton:** match the usage ring proportions to Figma ([#5541](https://github.com/factorialco/f0/issues/5541)) ([84770b8](https://github.com/factorialco/f0/commit/84770b87f6c7ab8663bedefed107c95409860e1e))
+
+## [6.103.0](https://github.com/factorialco/f0/compare/f0-react-v6.102.0...f0-react-v6.103.0) (2026-09-15)
+
+
+### Features
+
+* **OneDataCollection:** let a visualization override its switcher icon ([#5523](https://github.com/factorialco/f0/issues/5523)) ([1d7633e](https://github.com/factorialco/f0/commit/1d7633ef8e1193c27c0e601ee5d8c8a2ec67bebf))
+
+## [6.102.0](https://github.com/factorialco/f0/compare/f0-react-v6.101.2...f0-react-v6.102.0) (2026-09-15)
+
+
+### Features
+
+* **F0LocationInput:** add F0LocationInput component ([#5408](https://github.com/factorialco/f0/issues/5408)) ([981bfb6](https://github.com/factorialco/f0/commit/981bfb636a3b240b74f94453bca89be29cd08ac3))
+
+## [6.101.2](https://github.com/factorialco/f0/compare/f0-react-v6.101.1...f0-react-v6.101.2) (2026-09-15)
+
+
+### Bug Fixes
+
+* **F0Chat:** keep attachment downloads in the app ([#5538](https://github.com/factorialco/f0/issues/5538)) ([a9a67d0](https://github.com/factorialco/f0/commit/a9a67d0e65c1b12d2498814fd4359cacd2a0856c))
+
 ## [6.101.1](https://github.com/factorialco/f0/compare/f0-react-v6.101.0...f0-react-v6.101.1) (2026-09-14)
 
 

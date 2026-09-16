@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
+import { Delete, InfoCircleLine, Pencil, Table } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -94,6 +94,43 @@ export const BasicEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-basic/v1"
+      />
+    )
+  },
+}
+
+/**
+ * The view-switcher chip is presented as a plain table: `label` replaces the
+ * built-in "Editable table" text and `icon` replaces the built-in pencil, so
+ * the editing affordance is not advertised in the switcher. Both overrides are
+ * independent — pass either one alone — and the view still behaves as an
+ * editable table.
+ */
+export const EditableTableWithCustomChip: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            label: "Table",
+            icon: Table,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+          mockVisualizations.list,
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-custom-chip/v1"
       />
     )
   },

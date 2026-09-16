@@ -4,7 +4,10 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useI18n } from "@/lib/providers/i18n"
-import { useF0ChatEmit } from "../providers/F0ChatProvider"
+import {
+  useF0ChatChannelType,
+  useF0ChatEmit,
+} from "../providers/F0ChatProvider"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { DateTimeSeparator } from "./DateTimeSeparator"
@@ -32,13 +35,21 @@ const ChatJumpToBottomButton = ({
 }) => {
   const i18n = useI18n()
   const emit = useF0ChatEmit()
+  const isCommunity = useF0ChatChannelType() === "community"
+
+  // A community counts POSTS, not messages — and this label is the control's
+  // accessible name, so it is where the count is actually read aloud.
+  const countKey = isCommunity
+    ? unreadCount === 1
+      ? "chat.newPostsCount.one"
+      : "chat.newPostsCount.other"
+    : unreadCount === 1
+      ? "chat.unreadCount.one"
+      : "chat.unreadCount.other"
 
   const label =
     unreadCount > 0
-      ? i18n.t(
-          unreadCount === 1 ? "chat.unreadCount.one" : "chat.unreadCount.other",
-          { count: unreadCount }
-        )
+      ? i18n.t(countKey, { count: unreadCount })
       : hasMoreNewer
         ? i18n.chat.backToLatest
         : i18n.chat.scrollToBottom
