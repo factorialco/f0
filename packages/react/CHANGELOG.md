@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.1](https://github.com/factorialco/f0/compare/f0-react-v7.1.0...f0-react-v7.1.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** allow hiding icon and clearing date cells ([#5521](https://github.com/factorialco/f0/issues/5521)) ([967961b](https://github.com/factorialco/f0/commit/967961b2c5300d3b6cfeae97bbedb07df30105ae))
+
 ## [7.1.0](https://github.com/factorialco/f0/compare/f0-react-v7.0.0...f0-react-v7.1.0) (2026-09-16)
 
 
