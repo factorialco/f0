@@ -19,15 +19,23 @@ import {
   useChatVirtuoso,
 } from "../hooks/useChatVirtuoso"
 import { useTranscriptReadiness } from "../hooks/useTranscriptReadiness"
+import { useVisiblePostReads } from "../hooks/useVisiblePostReads"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { isUserMessage, LATEST } from "../types"
+import { chatPermission } from "../utils/capabilities"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { deliveryState } from "../utils/delivery-status"
-import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
+import {
+  flattenChatRows,
+  freshTailIds,
+  rowItem,
+  type ChatRow,
+} from "../utils/grouping"
 import { chatHeightEstimates } from "../utils/virtuoso-chat"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
+import { ChatReadOnlyNotice } from "./ChatReadOnlyNotice"
 import { type TypingEntryState } from "./ChatTypingBubble"
 import { ChatViewportOverlays } from "./ChatViewportOverlays"
 
@@ -41,8 +49,11 @@ const TYPING_EXIT_MS = 250
 const dateForRow = (rows: ChatRow[], from: number): string | null => {
   for (let i = Math.max(0, from); i < rows.length; i++) {
     const row = rows[i]
-    if (row.type === "message" || row.type === "system") {
-      return row.message.createdAt
+    // `rowItem` rather than a two-branch check, so a feed of nothing but posts
+    // doesn't leave the sticky pill empty.
+    const item = rowItem(row)
+    if (item) {
+      return item.createdAt
     }
     if (row.type === "separator") {
       return row.at
@@ -163,13 +174,31 @@ const ChatVirtuosoItem = forwardRef<
 })
 
 /** Breathing room between the last row and the transcript's bottom edge —
- * rendered as Virtuoso's Footer so scrollHeight and end-alignment include it. */
-const ChatBottomGap = (): ReactNode => (
-  <div
-    data-testid="chat-bottom-gap"
-    style={{ height: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)` }}
-  />
-)
+ * rendered as Virtuoso's Footer so scrollHeight and end-alignment include it.
+ *
+ * On a read-only channel the notice that explains why there is no composer
+ * rides along here, as the last thing IN the scroll. It used to be a fixed
+ * flex child under the transcript, which spent a strip of every screen on a
+ * sentence that is worth reading once: as a footer it greets you at the bottom
+ * where you arrive, and scrolling up takes it away. */
+const ChatBottomGap = (): ReactNode => {
+  const { channel, capabilities } = useF0Chat()
+  const canSend = chatPermission("canSend", channel.type, capabilities)
+
+  return (
+    <>
+      {!canSend ? (
+        <div className="mt-auto">
+          <ChatReadOnlyNotice channel={channel} />
+        </div>
+      ) : null}
+      <div
+        data-testid="chat-bottom-gap"
+        style={{ height: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)` }}
+      />
+    </>
+  )
+}
 
 /** Breathing room above the first row, as a constant Header — the mirror of
  * ChatBottomGap. It used to be a smaller top padding on whatever row happened
@@ -222,9 +251,14 @@ export const ChatMessagesContainer = (): ReactNode => {
     unreadCount,
     firstUnreadId,
     markRead,
+    capabilities,
   } = useF0Chat()
   const { reducedMotion } = useChatRenderConfig()
   const isGroup = channel.type === "group"
+  // Declared with the rest of the channel reads, not further down where it is
+  // first needed: the row flattening below runs during THIS render.
+  const isCommunity = channel.type === "community"
+  const canSend = chatPermission("canSend", channel.type, capabilities)
 
   const { registerScrollToMessage } = useChatJump()
 
@@ -248,10 +282,12 @@ export const ChatMessagesContainer = (): ReactNode => {
     const flat = flattenChatRows(messages, {
       dividerId,
       previousRows: rowCacheRef.current,
+      // A feed has no days — see the option's own note.
+      daySeparators: !isCommunity,
     })
     rowCacheRef.current = flat.rowCache
     return flat
-  }, [messages, dividerId])
+  }, [messages, dividerId, isCommunity])
 
   // Fresh tail of this commit (transports coalesce bursts into ONE render):
   // every appended message animates in, staggered by its batch order — not
@@ -430,6 +466,18 @@ export const ChatMessagesContainer = (): ReactNode => {
   )
 
   const prefetchGateRef = useRef(false)
+  // Same value as `prefetchGateRef`, separate name: this one gates READING, and
+  // the two would drift the moment either gains a condition of its own.
+  const readyGateRef = useRef(false)
+
+  // A feed marks posts read as they're scrolled past; a chat keeps its
+  // all-or-nothing rule at the bottom (below).
+  const reportSeenRow = useVisiblePostReads({
+    enabled: isCommunity,
+    rows: displayRows,
+    readyRef: readyGateRef,
+    markRead,
+  })
 
   const {
     virtuosoRef,
@@ -466,9 +514,11 @@ export const ChatMessagesContainer = (): ReactNode => {
     conversationKey: channel.id,
     reducedMotion,
     canPrefetchRef: prefetchGateRef,
+    onSeenRowIndex: reportSeenRow,
   })
 
   const { ready, setViewport, setListVisible } = useTranscriptReadiness(listKey)
+  readyGateRef.current = ready
 
   // Readiness is keyed by `listKey`, which the hook above produces — so the
   // prefetch gate travels through a ref instead of a prop.
@@ -540,10 +590,17 @@ export const ChatMessagesContainer = (): ReactNode => {
   const seeingAll = atBottom && hovering
 
   useEffect(() => {
+    // A community reads post by post instead (`useVisiblePostReads`). Clearing
+    // the whole feed on arrival at the bottom would claim a dozen screenfuls
+    // were read because the reader flung past them — and `hovering` is a
+    // pointer-only signal, so it would never clear at all on a keyboard.
+    if (isCommunity) {
+      return
+    }
     if (seeingAll && unreadCount > 0) {
       markRead?.()
     }
-  }, [seeingAll, unreadCount, markRead])
+  }, [isCommunity, seeingAll, unreadCount, markRead])
 
   // Seed the "already shown" set on first render with messages — only genuinely
   // new arrivals (not in the set) animate in. Mutated by the row renderer at mount.
@@ -572,9 +629,13 @@ export const ChatMessagesContainer = (): ReactNode => {
     [animatedIds, effectiveTypingLeaving, isGroup, reducedMotion]
   )
 
-  // Sticky date pill: the date of the top-most visible row.
+  // Sticky date pill: the date of the top-most visible row. A feed has no day
+  // rows to stick, and a date hovering over posts that are days apart answers
+  // a question nobody asked of a feed.
   const stickyDate =
-    stickyIndex != null ? dateForRow(displayRows, stickyIndex) : null
+    stickyIndex != null && !isCommunity
+      ? dateForRow(displayRows, stickyIndex)
+      : null
 
   // Show the affordance when scrolled up, or whenever the live tail isn't loaded
   // (after a far-back jump) so there's always a way back to the latest messages.
@@ -629,6 +690,17 @@ export const ChatMessagesContainer = (): ReactNode => {
         components={CHAT_VIRTUOSO_COMPONENTS}
         className={cn(
           "size-full",
+          // Read-only only: stretch Virtuoso's inner viewport to the height of
+          // the scroller and lay it out as a column, so the footer can be
+          // pushed to the bottom (`mt-auto`, see ChatBottomGap) when the
+          // conversation is too short to fill the panel. The MESSAGES do not
+          // move — they stay at the top, where they were written; it is the
+          // notice under them that stops hanging in mid-air.
+          //
+          // Nothing happens once there is enough to scroll: there is no free
+          // space left for `auto` margins to take.
+          !canSend &&
+            "[&_[data-viewport-type]]:flex [&_[data-viewport-type]]:min-h-full [&_[data-viewport-type]]:flex-col",
           !reducedMotion && "transition-opacity duration-100",
           ready ? "visible opacity-100" : "invisible opacity-0"
         )}

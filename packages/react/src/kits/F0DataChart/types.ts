@@ -191,6 +191,35 @@ export interface F0DataChartLineSeries {
   showArea?: boolean
 }
 
+/**
+ * A constant drawn across the whole plot rather than per category.
+ *
+ * For a figure that does not vary with the categories — a peer median, a
+ * target, an average. Drawn as one dashed line with its label at the end, so it
+ * reads as a threshold the bars are measured against rather than as another
+ * series: a constant repeated once per category would claim to be a quantity
+ * each of them has.
+ */
+export interface F0DataChartReferenceLine {
+  /** Where on the value axis to draw it. */
+  value: number
+  /** Shown at the end of the line. Omit for an unlabelled rule. */
+  label?: string
+  /** Must be an F0 design token name. Falls back to a neutral line colour. */
+  color?: ChartColorToken
+  /** Solid instead of dashed. @default false */
+  solid?: boolean
+  /**
+   * Shown when the reader hovers the line, under its label and value.
+   *
+   * For saying what the figure actually is — which companies a peer median
+   * covers, which quarter a target belongs to, whether it is an estimate. A
+   * line with no description is not hoverable: there would be nothing to add
+   * beyond the label already printed beside it.
+   */
+  description?: string
+}
+
 // ---------------------------------------------------------------------------
 // Shared base props
 // ---------------------------------------------------------------------------
@@ -228,6 +257,8 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   type: "bar"
   /** One or more data series to render as bars */
   series: F0DataChartBarSeries[]
+  /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+  referenceLines?: F0DataChartReferenceLine[]
   /** Bar orientation. @default "vertical" */
   orientation?: "vertical" | "horizontal"
   /** Stack all series into a single bar per category. @default false */
@@ -351,6 +382,8 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
   type: "line"
   /** One or more data series to render as lines */
   series: F0DataChartLineSeries[]
+  /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+  referenceLines?: F0DataChartReferenceLine[]
   /** Line interpolation type. @default "linear" */
   lineType?: F0DataChartLineType
   /** Show gradient area fill below lines. @default true */

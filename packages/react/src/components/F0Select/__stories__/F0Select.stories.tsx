@@ -27,6 +27,28 @@ const icons: Record<string, IconType> = {
   dark: Appearance,
   system: Desktop,
 }
+
+/**
+ * The value the grouping stories start out with.
+ *
+ * Grouping sorts the first page by the group field, so a record with a low id
+ * is not on it — the trigger has no label for the selection and falls back to
+ * "…". `defaultItem` is how a consumer names a pre-selected value the first
+ * page does not carry, so the stories that ship with one selected pass it.
+ */
+const GROUPED_PRESELECTED_VALUE = "42"
+
+const groupedPreselectedItem = () => {
+  const item = mockItems.find((i) => i.value === GROUPED_PRESELECTED_VALUE)
+  return item
+    ? {
+        value: item.value,
+        label: item.label,
+        avatar: item.avatar,
+        description: item.description,
+      }
+    : undefined
+}
 const items = [
   {
     id: "light",
@@ -814,7 +836,10 @@ export const WithDataSourceGrouping: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    // Without this the trigger reads "…": grouping sorts the first page by the
+    // group field, so this record is not in it and there is no label to show.
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -896,7 +921,8 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -947,6 +973,341 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
   },
 }
 
+/**
+ * Grouping nested more than one level deep. The `grouping.groupBy` map is the
+ * same one a single-level select uses — the extra levels are chosen in the
+ * grouping STATE, where `thenBy` names further fields of that map in the order
+ * they nest. Each level reuses its field's own `name` and `label`.
+ *
+ * The records themselves are listed under the deepest level only, and a
+ * sub-group's counter is the number of records in THAT branch (five offices'
+ * worth of Engineers is not what "Barcelona" under "Engineer" means).
+ */
+export const WithMultiLevelGrouping: Story = {
+  args: {
+    label: "Multi-level grouping",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          legalEntity: {
+            name: "Legal entity",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.legalEntity === groupId).length,
+          },
+          workplace: {
+            name: "Workplace",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.workplace === groupId).length,
+          },
+          role: {
+            name: "Role",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+        },
+      },
+      // Legal entity → workplace → role.
+      defaultGrouping: {
+        field: "legalEntity",
+        thenBy: [{ field: "workplace" }, { field: "role" }],
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: item.description,
+    }),
+  },
+}
+
+/**
+ * The hierarchy shape: pick a TASK, with its project and subproject as the two
+ * levels of header above it.
+ *
+ * Three things this story exists to show, because each is easy to get wrong:
+ *
+ * 1. Group by ID, label by NAME. "Backend" is a subproject of both Apollo and
+ *    Zephyr — grouping by name would fuse them into one list. The `groupBy`
+ *    fields are dotted paths to the ids (`project.id`), and each level's
+ *    `label` resolves the id it is handed. `label` may return a promise, so a
+ *    name that has to be fetched is a valid answer here.
+ * 2. The row's own label is short ("Ship the public API") because the headers
+ *    above it supply the rest. The TRIGGER has no headers, so `getSelectedLabel`
+ *    puts the path back on — leaf first, ancestors in parentheses — otherwise a
+ *    chosen task reads as a bare verb once the dropdown closes. It builds that
+ *    from the RECORD, so it still reads correctly for a selection whose group
+ *    is not in the loaded page.
+ * 3. `hideSelector` takes the grouping picker and its direction toggle away.
+ *    The hierarchy is what this select IS, so there is nothing here for the
+ *    user to choose — and the picker offers one field, which would drop the
+ *    `thenBy` chain and flatten the tree.
+ * 4. A real book of work is NOT uniform, and the list says so. A task with a
+ *    project but no subproject is a row of its project, above the subproject
+ *    headings; one with no project at all belongs to no group and leads the
+ *    list, with no heading over it. Neither is filed under the value it is
+ *    missing — a record with nothing at a level belongs to the level above.
+ */
+const PROJECTS = [
+  { id: "p1", name: "Apollo" },
+  { id: "p2", name: "Zephyr" },
+]
+
+const SUBPROJECTS = [
+  { id: "s1", projectId: "p1", name: "Backend" },
+  { id: "s2", projectId: "p1", name: "Web" },
+  { id: "s3", projectId: "p2", name: "Backend" },
+  { id: "s4", projectId: "p2", name: "Mobile" },
+]
+
+type ProjectTask = {
+  id: string
+  title: string
+  assignee: string
+  project: { id: string; name: string }
+  subproject: { id: string; name: string }
+}
+
+const TASK_TITLES: Record<string, string[]> = {
+  s1: ["Ship the public API", "Add a response cache", "Retire the v1 routes"],
+  s2: ["Dark mode", "Empty states for the dashboard"],
+  s3: ["Rate limits per tenant", "Backfill the audit log"],
+  s4: ["Offline queue", "Push notification opt-in", "Biometric unlock"],
+}
+
+const ASSIGNEES = ["Ada", "Grace", "Hedy", "Katherine", "Radia"]
+
+/** Nothing at this level — the record belongs to the level above. */
+const NONE = { id: "", name: "" }
+
+const projectTasks: ProjectTask[] = [
+  // Belongs to no project at all: it leads the list, under no heading.
+  {
+    id: "loose-1",
+    title: "Write the incident post-mortem",
+    assignee: "Radia",
+    project: NONE,
+    subproject: NONE,
+  },
+  ...SUBPROJECTS.flatMap((subproject, index) => {
+    const project = PROJECTS.find((p) => p.id === subproject.projectId)!
+    return TASK_TITLES[subproject.id].map((title, taskIndex) => ({
+      id: `${subproject.id}-${taskIndex}`,
+      title,
+      assignee: ASSIGNEES[(index + taskIndex) % ASSIGNEES.length],
+      project: { id: project.id, name: project.name },
+      subproject: { id: subproject.id, name: subproject.name },
+    }))
+  }),
+  // In a project but in none of its subprojects: a row of Apollo itself,
+  // sitting above the Backend and Web headings.
+  {
+    id: "p1-loose",
+    title: "Plan the Apollo roadmap",
+    assignee: "Ada",
+    project: { id: "p1", name: "Apollo" },
+    subproject: NONE,
+  },
+]
+
+const nameById = (entities: { id: string; name: string }[], groupId: unknown) =>
+  entities.find((entity) => entity.id === groupId)?.name ?? `${groupId}`
+
+export const WithProjectHierarchyGrouping: Story = {
+  args: {
+    label: "Task",
+    placeholder: "Pick a task",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<ProjectTask>({
+      grouping: {
+        mandatory: true,
+        // The hierarchy is the point of this select, not a view the user picks.
+        // The selector could only take it apart: choosing a field there replaces
+        // the whole grouping, `thenBy` included, and there is no way back to
+        // project > subproject from it.
+        hideSelector: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          "project.id": {
+            name: "Project",
+            label: (groupId) => nameById(PROJECTS, groupId),
+            itemCount: (groupId) =>
+              projectTasks.filter((task) => task.project.id === groupId).length,
+          },
+          "subproject.id": {
+            name: "Subproject",
+            label: (groupId) => nameById(SUBPROJECTS, groupId),
+          },
+        },
+      },
+      // Project → subproject, with the tasks themselves as the rows.
+      defaultGrouping: {
+        field: "project.id",
+        thenBy: [{ field: "subproject.id" }],
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: ({ search, pagination }) =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = projectTasks.filter(
+                (task) =>
+                  !search ||
+                  task.title.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          }),
+      },
+    }),
+    getSelectedLabel: ({ item }: { item?: ProjectTask }) =>
+      item
+        ? `${item.title} (${item.subproject.name}, ${item.project.name})`
+        : "",
+    mapOptions: (task: ProjectTask) => ({
+      value: task.id,
+      label: task.title,
+      description: task.assignee,
+      item: task,
+    }),
+  },
+}
+
+/**
+ * A grouping and a sorting the PRODUCT decides, not the user.
+ *
+ * `hideSelector` on the grouping definition takes the picker away and leaves
+ * the grouping in force — pair it with `mandatory: true` and a
+ * `defaultGrouping`, or the state can still arrive as "no grouping" with no
+ * control left to leave it. Two `groupBy` fields are declared here precisely to
+ * show the picker is hidden because it was asked to be, not because there was
+ * nothing to choose between.
+ *
+ * The sorting is fixed by `defaultSortings` alone: F0Select has never rendered
+ * a sorting control, so a sorting set on the source is already one the user
+ * cannot reach. Grouping appends its own field to what the adapter is asked to
+ * sort by, so a group's records arrive together.
+ */
+export const WithFixedGroupingAndSorting: Story = {
+  args: {
+    label: "Employee",
+    placeholder: "Select an employee",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        hideSelector: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          workplace: {
+            name: "Workplace",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.workplace === groupId).length,
+          },
+          role: {
+            name: "Role",
+            label: (groupId) => groupId,
+          },
+        },
+      },
+      defaultGrouping: { field: "workplace" },
+      sortings: { label: { label: "Name" } },
+      defaultSortings: { field: "label", order: "asc" },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: ({ search, pagination, sortings }) =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = [...mockItems]
+                .filter(
+                  (item) =>
+                    !search ||
+                    item.label.toLowerCase().includes(search.toLowerCase())
+                )
+                .sort((a, b) => {
+                  for (const { field, order } of sortings ?? []) {
+                    const key = field as keyof MockItem
+                    const comparison = String(a[key]).localeCompare(
+                      String(b[key])
+                    )
+                    if (comparison !== 0) {
+                      return order === "desc" ? -comparison : comparison
+                    }
+                  }
+                  return 0
+                })
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          }),
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+  },
+}
 export const WithManyCollapsibleGroups: Story = {
   args: {
     label: "Many Collapsible Groups",

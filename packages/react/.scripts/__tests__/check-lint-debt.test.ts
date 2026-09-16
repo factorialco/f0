@@ -5,6 +5,7 @@ import {
   lintablePaths,
   reportResult,
   ruleIdFromCode,
+  selectPaths,
   type DebtFile,
   type Finding,
 } from "../check-lint-debt"
@@ -168,6 +169,24 @@ describe("lintablePaths", () => {
 
   it("returns nothing when no path is linted, so the hook stays quiet", () => {
     expect(lintablePaths(["package.json", ".oxlintrc.json"])).toEqual([])
+  })
+})
+
+describe("selectPaths", () => {
+  it("lints the files that are there", () => {
+    expect(selectPaths(["src/lib/utils.ts", "package.json"])).toEqual({
+      scope: ["src/lib/utils.ts"],
+      toLint: ["src/lib/utils.ts"],
+    })
+  })
+
+  it("judges a deleted file without linting it, so its baseline entry goes", () => {
+    const { scope, toLint } = selectPaths([
+      "src/lib/utils.ts",
+      "src/gone-in-this-branch.tsx",
+    ])
+    expect(scope).toContain("src/gone-in-this-branch.tsx")
+    expect(toLint).not.toContain("src/gone-in-this-branch.tsx")
   })
 })
 

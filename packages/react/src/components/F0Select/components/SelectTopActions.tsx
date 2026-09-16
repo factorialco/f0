@@ -9,7 +9,10 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
+import {
+  canSelectGrouping,
+  GroupingSelector,
+} from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 import { ActiveFiltersChips } from "./ActiveFiltersChips"
 
@@ -62,12 +65,9 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
     [onFiltersOpenChange]
   )
 
-  if (
-    !showSearchBox &&
-    !filters &&
-    (!grouping ||
-      (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2))
-  ) {
+  // Nothing to put in the bar — not even an empty one, which would read as a
+  // stray divider above the options.
+  if (!showSearchBox && !filters && !canSelectGrouping(grouping)) {
     return null
   }
 

@@ -187,6 +187,15 @@ const preview: Preview = {
       toc: {
         headingSelector: "h2, h3, h4",
       },
+      canvas: {
+        /*
+         * Show the canvas toolbar (zoom controls + "Open canvas in new tab") on
+         * every story preview, not just the primary one of an autodocs page.
+         * Storybook only turns it on for `<Primary>`, so `<Stories>` entries and
+         * `<Canvas of={...} />` blocks in handwritten MDX would otherwise miss it.
+         */
+        withToolbar: true,
+      },
     },
     controls: {
       expanded: true,
