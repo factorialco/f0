@@ -1,16 +1,13 @@
 import { ReactElement } from "react"
-
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
-
+import { CardSelectable } from "./CardSelectable"
 import type {
   CardSelectableContainerProps,
   CardSelectableMultipleProps,
   CardSelectableSingleProps,
   CardSelectableValue,
 } from "./types"
-
-import { CardSelectable } from "./CardSelectable"
 
 function _CardSelectableContainer<T extends CardSelectableValue>(
   props: CardSelectableContainerProps<T>
@@ -23,6 +20,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
     multiple,
     isToggle,
     grouped,
+    compact,
   } = props
 
   const isMultiple = multiple === true
@@ -53,10 +51,9 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
     if (isMultiple) {
       const multiProps = props as CardSelectableMultipleProps<T>
       return (multiProps.value ?? []).includes(itemValue)
-    } else {
-      const singleProps = props as CardSelectableSingleProps<T>
-      return singleProps.value === itemValue
     }
+    const singleProps = props as CardSelectableSingleProps<T>
+    return singleProps.value === itemValue
   }
 
   // Determine the appropriate group role
@@ -68,7 +65,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
       <div
         role={groupRole}
         aria-label={label}
-        className="rounded-xl border border-solid border-f1-border overflow-hidden"
+        className="overflow-hidden rounded-xl border border-solid border-f1-border"
       >
         {items.map((item, index) => (
           <div
@@ -86,6 +83,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
               onSelect={() => handleSelect(item.value)}
               isToggle={isToggle}
               grouped
+              compact={compact}
             />
           </div>
         ))}
@@ -112,6 +110,7 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
           multiple={isMultiple}
           onSelect={() => handleSelect(item.value)}
           isToggle={isToggle}
+          compact={compact}
         />
       ))}
     </div>

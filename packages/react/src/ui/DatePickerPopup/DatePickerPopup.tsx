@@ -1,9 +1,13 @@
-import { useEffect, useMemo, useState } from "react"
-
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
-import { GranularityDefinitionKey, OneCalendar } from "@/components/OneCalendar"
-import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
+import { OneCalendar } from "@/components/OneCalendar"
+import {
+  DatePeriodsDefinition,
+  getGranularityDefinitions,
+  GranularityDefinitionKey,
+  NavigationGranularityKey,
+} from "@/components/OneCalendar/granularities"
 import {
   DateRange,
   DateRangeComplete,
@@ -13,11 +17,12 @@ import {
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { getCompareToValue } from "./compareTo"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
+import { createCalendarDismissalHandlers } from "./dismissal"
 import { DatePickerValue, DatePreset } from "./types"
 import { isSameDatePickerValue } from "./utils"
 
@@ -30,7 +35,7 @@ export type CompareToDef = {
 }
 
 export type DatePickerCompareTo = Partial<
-  Record<GranularityDefinitionKey, CompareToDef[]>
+  Record<NavigationGranularityKey, CompareToDef[]>
 >
 
 export interface DatePickerPopupProps {
@@ -38,7 +43,7 @@ export interface DatePickerPopupProps {
   value?: DatePickerValue
   defaultValue?: DatePickerValue
   presets?: DatePreset[]
-  granularities?: GranularityDefinitionKey[]
+  granularities?: NavigationGranularityKey[]
   minDate?: Date
   maxDate?: Date
   disabled?: boolean
@@ -56,6 +61,11 @@ export interface DatePickerPopupProps {
   weekStartsOn?: WeekStartsOn
   /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
   selectOnCellOnly?: boolean
+  /**
+   * Consumer-defined ranges (payroll cycles, academic terms…) offered as an
+   * extra entry in the granularity selector. Its `label` names that entry.
+   */
+  periods?: DatePeriodsDefinition
 }
 
 const PRESET_CUSTOM = "__custom__"
@@ -74,6 +84,7 @@ export function DatePickerPopup({
   asChild,
   weekStartsOn,
   selectOnCellOnly = false,
+  periods,
   ...props
 }: DatePickerPopupProps) {
   const i18n = useI18n()
@@ -84,6 +95,25 @@ export function DatePickerPopup({
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
+
+  // The calendar's year/month dropdowns are selects that portal into the dialog's
+  // container — a stacking context. A calendar left in `document.body` would paint over
+  // that subtree and cover the dropdowns it owns, so share the container instead.
+  // Side panels (left/right) stay in body to prevent clipping.
+  const dialogContext = useContext(F0DialogContext)
+  const shouldUseDialogContainer =
+    dialogContext.portalContainer &&
+    (dialogContext.position === "center" ||
+      dialogContext.position === "fullscreen")
+  const portalContainer = shouldUseDialogContainer
+    ? dialogContext.portalContainer
+    : undefined
+
+  const contentRef = useRef<HTMLDivElement>(null)
+  const dismissalHandlers = useMemo(
+    () => createCalendarDismissalHandlers(() => contentRef.current),
+    []
+  )
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -97,10 +127,31 @@ export function DatePickerPopup({
     [localValue?.granularity]
   )
 
-  const granularityDefinition = useMemo(() => {
-    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
-    return definitions[localGranularity]
-  }, [localGranularity, effectiveWeekStartsOn])
+  const definitions = useMemo(
+    () =>
+      getGranularityDefinitions({
+        weekStartsOn: effectiveWeekStartsOn,
+        periods,
+      }),
+    [effectiveWeekStartsOn, periods]
+  )
+
+  const granularityDefinition = useMemo(
+    () => definitions[localGranularity],
+    [definitions, localGranularity]
+  )
+
+  // Supplying periods is what makes them selectable; listing the key in
+  // `granularities` only controls where the entry sits in the selector. Tying
+  // the entry to the data means the selector can never offer a periods entry
+  // with nothing behind it.
+  const granularityOptions = useMemo(
+    () =>
+      periods && !granularities.includes("periods")
+        ? [...granularities, "periods" as const]
+        : granularities,
+    [granularities, periods]
+  )
 
   const calendarMode = useMemo(() => {
     return granularityDefinition.calendarMode || "single"
@@ -126,11 +177,12 @@ export function DatePickerPopup({
     setCustomRangeMode(presetId === PRESET_CUSTOM)
 
     const selectedPreset = presetId ? presets[+presetId] : undefined
-    if (!selectedPreset) return
+    if (!selectedPreset) {
+      return
+    }
 
-    const presetDefinitions = getGranularityDefinitions(effectiveWeekStartsOn)
     handleSelect({
-      value: presetDefinitions[selectedPreset.granularity].toRange(
+      value: definitions[selectedPreset.granularity].toRange(
         typeof selectedPreset.value === "function"
           ? selectedPreset.value()
           : selectedPreset.value
@@ -144,7 +196,7 @@ export function DatePickerPopup({
 
   const [customRangeMode, setCustomRangeMode] = useState(false)
 
-  const handleSelectGranularity = (granularity: GranularityDefinitionKey) => {
+  const handleSelectGranularity = (granularity: NavigationGranularityKey) => {
     // View-only: switch granularity without emitting or closing.
     if (selectOnCellOnly) {
       setLocalValue((prev) =>
@@ -245,7 +297,13 @@ export function DatePickerPopup({
   return (
     <Popover open={props.open} onOpenChange={props.onOpenChange}>
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
-      <PopoverContent className="w-full overflow-auto" align="start">
+      <PopoverContent
+        ref={contentRef}
+        className="w-full overflow-auto"
+        align="start"
+        container={portalContainer}
+        {...dismissalHandlers}
+      >
         {showPresets ? (
           <PresetList
             presets={presets}
@@ -254,9 +312,9 @@ export function DatePickerPopup({
           />
         ) : (
           <div className="flex gap-4">
-            {(presets.length > 0 || granularities.length > 1) && (
+            {presets.length > 0 || granularityOptions.length > 1 ? (
               <div>
-                {presets.length > 0 && (
+                {presets.length > 0 ? (
                   <F0Button
                     icon={ChevronLeft}
                     variant="neutral"
@@ -265,16 +323,17 @@ export function DatePickerPopup({
                     label="Back"
                     onClick={handleBackToPresets}
                   />
-                )}
-                {granularities.length > 1 && (
+                ) : null}
+                {granularityOptions.length > 1 ? (
                   <GranularitySelector
-                    granularities={granularities}
+                    granularities={granularityOptions}
                     value={localGranularity}
                     onChange={handleSelectGranularity}
+                    definitions={definitions}
                   />
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
             <div className="min-w-[300px] flex-1">
               <OneCalendar
                 showInput={!hideCalendarInput}
@@ -286,8 +345,9 @@ export function DatePickerPopup({
                 maxDate={props.maxDate}
                 weekStartsOn={effectiveWeekStartsOn}
                 selectOnCellOnly={selectOnCellOnly}
+                periods={periods}
               />
-              {compareToOptions.length > 0 && (
+              {compareToOptions.length > 0 ? (
                 <div className="mt-4 flex flex-col gap-2">
                   <div className="text-gray-500 text-sm">
                     {i18n.date.compareTo}
@@ -305,7 +365,7 @@ export function DatePickerPopup({
                     value={selectedCompareTo}
                   />
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}

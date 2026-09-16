@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import type { Status } from "./ApprovalStep"
-
 import { OneApprovalHistory } from "."
 
 const meta = {
@@ -131,6 +129,7 @@ export const MultipleApprovals: Story = {
         approvalsRequired: 2,
         status: "approved",
         approvers: mockApprovers,
+        approvalDate: new Date("2026-01-15"),
       },
       {
         title: "HR Approval",
@@ -150,6 +149,7 @@ export const RejectedApproval: Story = {
         approvalsRequired: 1,
         status: "rejected",
         approvers: mockApprovers,
+        approvalDate: new Date("2026-01-15"),
       },
     ],
   },

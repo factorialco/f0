@@ -1,24 +1,23 @@
+import "./F0Graph.css"
 import { ReactFlowProvider } from "@xyflow/react"
 import { forwardRef, type ForwardedRef, type ReactNode, type Ref } from "react"
-
-import "./F0Graph.css"
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
   F0GraphNodeTagColumn,
   GraphNodeState,
   GraphNodeVariant,
 } from "./components/F0GraphNode"
+import { F0GraphView } from "./components/F0GraphView"
 import type {
   DeferredNodesPayload,
   GraphEdge,
   GraphNode,
   LayoutEngine,
+  ViewportInset,
   ZoomLevel,
   ZoomPreset,
   ZoomThresholds,
 } from "./types"
-
-import { F0GraphView } from "./components/F0GraphView"
 
 // ─── Props ─────────────────────────────────────────────────────
 export interface F0GraphProps<T = unknown> {
@@ -130,12 +129,61 @@ export interface F0GraphProps<T = unknown> {
    * still animate with the smooth pan.
    */
   initialFocusNodeId?: string
+  /**
+   * Whether clicking a node flies to it — centering and zooming in close on the
+   * clicked node. **Defaults to `true`**: every consumer gets the fly-to without
+   * wiring anything. Pass `false` to keep a static camera on click (selection
+   * still happens, the viewport just doesn't move). Keyboard navigation is never
+   * affected — it scrolls focus its own way and this only reacts to clicks.
+   *
+   * Re-fires on **every** click, including a click on the already-selected node,
+   * so a click after panning away always re-centers.
+   *
+   * The fly starts a beat after the click (the same settle delay the reveal path
+   * uses) so it can see a `viewportInset` the click itself brought in — the usual
+   * case, where clicking a node is what opens the side panel. A second click
+   * within that window supersedes the first.
+   */
+  centerOnNodeClick?: boolean
+  /**
+   * Zoom level a node click lands on. Defaults to `NODE_CLICK_ZOOM` (`1.5`),
+   * clamped to `maxZoom`. A click is a deliberate "take me here", so it zooms in
+   * closer than the initial-focus frame regardless of the current zoom (clicking
+   * from far out still lands close; clicking from deep in doesn't stay deeper).
+   * Lower it for a dense graph where `1.5` feels too tight. Ignored when
+   * `centerOnNodeClick` is `false`.
+   */
+  nodeClickZoom?: number
+  /**
+   * Region of the canvas (in screen px) covered by external chrome — typically a
+   * side panel / drawer the consumer opens over the graph. Every fly-to path
+   * (click, `focusedNode`, `focusNode(id)`, "Find me", initial focus, fit-view)
+   * shifts its target so the node lands centered in the *free* area beside the
+   * panel instead of behind it. The side is encoded by which key is set (a
+   * right-hand drawer sets `right`; a left-hand one or RTL sets `left`).
+   *
+   * The consumer supplies the value — F0Graph has no notion of the panel. For a
+   * fixed-width drawer, pass its width while it's open (e.g. `{ right: 480 }`)
+   * and `undefined` / `{}` while it's closed. All-zero behaves exactly as if
+   * there were no inset.
+   */
+  viewportInset?: ViewportInset
 
   // ---- Layout ----
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows). */
   nodeWidth?: number
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 56. Override for compact nodes (icons, file rows). */
   nodeHeight?: number
+  /**
+   * Height of one stacked node row (see `GraphNode.stackNodes`). A row
+   * inherits the card's width but not its height — it is a compact strip — so
+   * it sizes independently of `nodeHeight`. Defaults to 44. Keep it in step
+   * with whatever `renderNode` returns for a stacked node, or the rows will
+   * overlap or leave gaps.
+   */
+  stackedNodeHeight?: number
+  /** Vertical gap between two stacked node rows. Defaults to 16. */
+  stackedNodeGap?: number
   /** Optional custom layout engine. When provided, overrides the built-in tree layout. */
   layoutEngine?: LayoutEngine
 
@@ -194,18 +242,18 @@ export interface F0GraphProps<T = unknown> {
    *
    * Order is preserved in the popover.
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  nodeTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Controlled set of currently visible tag types. When omitted, falls
    * back to `defaultVisibleTagTypes` (or all of `nodeTagTypes`). The
    * visibility UI itself is owned by the consumer.
    */
-  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  visibleTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Initial visible tag types when `visibleTagTypes` is not controlled.
    * Defaults to all of `nodeTagTypes`.
    */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Whether the layout should reserve vertical room for one tag row beneath
    * each node so the source handle (and outgoing edges) anchors below the
@@ -314,6 +362,20 @@ export interface F0GraphNodeRenderContext {
   posInSet: number
   nodeId: string
   ariaOwns?: string
+  /**
+   * `true` when this node is one row of its parent's stacked column (the parent
+   * set `stackNodes` and the group qualified). `F0GraphNode` reads this off
+   * the spread context and renders a compact row instead of the full card, so a
+   * `renderNode` does not need to branch on it: the layout has already reserved
+   * only `stackedNodeHeight` for the node.
+   */
+  stacked: boolean
+  /**
+   * The row height the layout reserved for this node, when `stacked`. Undefined
+   * unless the graph was given a custom `stackedNodeHeight`; `F0GraphNode` falls
+   * back to the same default the layout engine uses.
+   */
+  stackedHeight?: number
   onExpandToggle: () => void
   onClick: () => void
   nodeRef: (el: HTMLDivElement | null) => void

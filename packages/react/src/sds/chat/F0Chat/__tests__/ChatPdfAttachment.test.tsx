@@ -1,16 +1,21 @@
 import { type ReactNode, useEffect, useRef } from "react"
-import { beforeAll, describe, expect, it, vi } from "vitest"
-
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import {
+  act,
   fireEvent,
   zeroRender as render,
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
+
+const pdfDocumentRender = vi.hoisted(() => vi.fn())
+const pdfPageRenderControl = vi.hoisted(() => ({
+  deferred: false,
+  callbacks: [] as (() => void)[],
+}))
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -42,14 +47,20 @@ vi.mock("@/ui/pdf", () => ({
     onLoadError?: (error: Error) => void
   }) => {
     const url = typeof file === "string" ? file : (file?.url ?? "")
+    pdfDocumentRender(url)
     useEffect(() => {
       const id = setTimeout(() => {
-        if (url.includes("broken")) onLoadError?.(new Error("broken"))
-        else onLoadSuccess?.({ numPages: 2 })
+        if (url.includes("broken")) {
+          onLoadError?.(new Error("broken"))
+        } else {
+          onLoadSuccess?.({ numPages: 2 })
+        }
       }, 0)
       return () => clearTimeout(id)
     }, [url, onLoadSuccess, onLoadError])
-    if (url.includes("broken")) return null
+    if (url.includes("broken")) {
+      return null
+    }
     return <div data-testid="pdf-document">{children}</div>
   },
   Page: ({
@@ -70,15 +81,18 @@ vi.mock("@/ui/pdf", () => ({
     useEffect(() => {
       inputRef?.(ref.current)
       onLoadSuccess?.({ originalWidth: 600, originalHeight: 800 })
-      onRenderSuccess?.()
+      if (pdfPageRenderControl.deferred && onRenderSuccess) {
+        pdfPageRenderControl.callbacks.push(onRenderSuccess)
+      } else {
+        onRenderSuccess?.()
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return <div ref={ref} data-testid={`pdf-page-${pageNumber}`} />
   },
 }))
 
-beforeAll(() => {
-  Element.prototype.scrollIntoView = vi.fn()
+const installVisibleIntersectionObserver = () => {
   // The card's render-on-view gate needs an observer that actually fires —
   // jsdom's setup mock never calls back, so every card reports "in view".
   vi.stubGlobal(
@@ -99,6 +113,17 @@ beforeAll(() => {
       takeRecords = () => []
     }
   )
+}
+
+beforeAll(() => {
+  Element.prototype.scrollIntoView = vi.fn()
+})
+
+beforeEach(() => {
+  pdfDocumentRender.mockClear()
+  pdfPageRenderControl.deferred = false
+  pdfPageRenderControl.callbacks = []
+  installVisibleIntersectionObserver()
 })
 
 const now = new Date().toISOString()
@@ -116,7 +141,11 @@ const makeRuntime = (attachments: F0ChatAttachment[]): F0ChatRuntime => ({
   messages: [
     {
       id: "m1",
-      author: { id: "other", name: "María José" },
+      author: {
+        id: "other",
+        name: "María José",
+        avatarColor: "orange",
+      },
       body: "Here's the report",
       createdAt: now,
       isMine: false,
@@ -160,8 +189,11 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
     const card = screen.getByTestId("chat-document-attachment")
     expect(card).toHaveTextContent("report.pdf")
     expect(
-      screen.getByRole("button", { name: "Open document" })
+      screen.getByRole("button", { name: "Open report.pdf" })
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Download report.pdf" })
+    ).not.toBeInTheDocument()
     // The snapshot renders the first page once the lazy chunk resolves, and
     // fades in over the card's skeleton once the page reports its paint.
     await waitFor(() =>
@@ -187,7 +219,7 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
 
   it("opens the fullscreen viewer on click and closes it", async () => {
     renderChat([pdfAttachment])
-    fireEvent.click(screen.getByRole("button", { name: "Open document" }))
+    fireEvent.click(screen.getByRole("button", { name: "Open report.pdf" }))
 
     // The dialog announces the file and the (lazy) F0PdfViewer toolbar appears
     // (generous timeout: the viewer chunk resolves through React.lazy).
@@ -196,9 +228,10 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
       await screen.findByRole(
         "button",
         { name: "Next page" },
-        { timeout: 5000 }
+        { timeout: 60_000 }
       )
     ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
 
     // Close via the top-band pill (the backdrop shares the same label).
     const closeButtons = screen.getAllByRole("button", { name: "Close" })
@@ -206,7 +239,7 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-  })
+  }, 60_000)
 
   it("falls back to the plain file chip when the document can't load", async () => {
     renderChat([
@@ -223,7 +256,42 @@ describe("ChatDocumentAttachmentCard (pdf)", () => {
         screen.queryByTestId("chat-document-attachment")
       ).not.toBeInTheDocument()
     )
-    expect(screen.getByText("broken.pdf")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument()
+    expect(screen.getByText("broken.pdf").parentElement).toHaveClass(
+      "bg-f1-background-tertiary"
+    )
+    expect(
+      screen.getByRole("button", { name: "Download broken.pdf" })
+    ).toBeInTheDocument()
+  })
+
+  // The card no longer waits to be seen — it mounts with its row, and the
+  // skeleton under the snapshot covers pdf.js, which mounts fast but PAINTS
+  // asynchronously. What must not change is the box: 160px whether or not the
+  // page has rendered, so the row is never measured twice.
+  it("reserves the snapshot box and renders without waiting to be seen", async () => {
+    pdfPageRenderControl.deferred = true
+
+    renderChat([pdfAttachment])
+
+    const openButton = screen.getByRole("button", {
+      name: "Open report.pdf",
+    })
+    expect(openButton).toHaveAttribute("aria-busy", "true")
+    expect(openButton).toHaveStyle({ height: "160px" })
+
+    await waitFor(() =>
+      expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument()
+    )
+    expect(openButton).toHaveAttribute("aria-busy", "true")
+    expect(openButton).toHaveStyle({ height: "160px" })
+    expect(pdfPageRenderControl.callbacks).not.toHaveLength(0)
+
+    act(() => {
+      pdfPageRenderControl.callbacks.splice(0).forEach((onRendered) => {
+        onRendered()
+      })
+    })
+    await waitFor(() => expect(openButton).not.toHaveAttribute("aria-busy"))
+    expect(openButton).toHaveStyle({ height: "160px" })
   })
 })

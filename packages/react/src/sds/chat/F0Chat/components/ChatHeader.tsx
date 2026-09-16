@@ -1,34 +1,38 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { type ReactNode } from "react"
-import { useMediaQuery } from "usehooks-ts"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
-import {
-  Cross,
-  Ellipsis,
-  Maximize,
-  MicrophoneNegative,
-  Minimize,
-  Search,
-} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { useSidePanel } from "@/patterns/ApplicationFrame/SidePanel/SidePanelProvider"
+import { Skeleton } from "@/ui/skeleton"
 import { useChatSearch } from "../providers/ChatUIProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
-const PresenceDot = ({ online }: { online: boolean }): ReactNode => {
-  if (!online) return null
+const PresenceDot = ({
+  online,
+  label,
+}: {
+  online: boolean
+  label: string
+}): ReactNode => {
+  if (!online) {
+    return null
+  }
 
   return (
-    <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
+    <span
+      role="img"
+      aria-label={label}
+      className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background"
+    >
       <span
+        aria-hidden="true"
         className={cn("h-2 w-2 rounded-full", "bg-f1-background-positive-bold")}
       />
     </span>
@@ -45,7 +49,7 @@ export type ChatHeaderProps = {
   actions?: F0ChatHeaderAction[]
 }
 
-/** Top bar of the chat: avatar + presence + name (+ muted) and panel actions. */
+/** Top bar of the chat: avatar + presence + name + statuses and panel actions. */
 export const ChatHeader = ({
   channel,
   isFullscreen,
@@ -55,13 +59,34 @@ export const ChatHeader = ({
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatSearch()
-  // On mobile the chat already fills the screen, so the fullscreen toggle is a
-  // no-op — hide it (matches F0AiChatHeader).
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
+  // When the panel is covering the frame the chat already fills the screen and
+  // the fullscreen toggle is a no-op, so hide it (matches F0AiChatHeader).
+  //
+  // Read from the panel rather than the viewport: a narrow window no longer
+  // implies a covering panel — a laptop at half the screen splits — and the
+  // old viewport rule was hiding the button on a chat that plainly had
+  // somewhere to expand into. `useSidePanel` answers `false` with no panel, so
+  // a standalone chat keeps its button.
+  //
+  // Asked of the PANEL, not of the AI chat: this is the communications chat,
+  // and it used to reach into the AI kit for this one value — which meant it
+  // only got a true answer on customers who happened to have an assistant.
+  const { panelOverlays } = useSidePanel()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
+  // No emoji and no picture ⇒ the ＃ glyph, the same rule the sidebar applies
+  // (see `SidebarChatItem`) and for the same reason: an initials avatar for a
+  // PLACE reads as a person who isn't there. Not restricted to groups — a
+  // community is a channel too, and used to arrive here as an empty avatar box.
+  const showGroupFallback =
+    (channel.avatar.type === "team" || channel.avatar.type === "company") &&
+    !channel.avatar.src
+  const identityEmoji =
+    channel.avatar.type === "emoji"
+      ? channel.avatar.emoji
+      : showGroupFallback
+        ? "＃"
+        : null
 
   // Search is the ONLY built-in action. Everything else — pin, mute, edit
   // group… — comes from the host through `actions`, so each channel offers
@@ -78,8 +103,13 @@ export const ChatHeader = ({
   const inlineActions = channelActions.filter(isInline)
   const menuActions = channelActions.filter((action) => !isInline(action))
 
+  // A noticeboard is a short, fixed transcript — there is nothing to search
+  // through, and without host actions the menu would hold a single useless item.
+  const canSearch = channel.type !== "announcement"
   const menuItems: DropdownItem[] = [
-    { label: i18n.actions.search, icon: Search, onClick: openSearch },
+    ...(canSearch
+      ? [{ label: i18n.actions.search, icon: Search, onClick: openSearch }]
+      : []),
     ...menuActions.map((action) => ({
       label: action.label,
       icon: action.icon,
@@ -89,28 +119,55 @@ export const ChatHeader = ({
 
   const identity = (
     <div className="flex min-w-0 items-center gap-2">
-      <div className="relative shrink-0 flex">
-        {channel.avatar.type === "emoji" ? (
+      <div className="relative flex shrink-0">
+        {identityEmoji ? (
           // Emoji groups show the glyph alone (no avatar chrome) so it reads at
           // full size instead of shrunk inside the bordered avatar box.
-          <span className="flex size-6 items-center justify-center">
-            <EmojiImage emoji={channel.avatar.emoji} size="sm" />
+          <span
+            aria-hidden={showGroupFallback || undefined}
+            className={cn(
+              "flex size-5 items-center justify-center text-lg font-medium",
+              // The ＃ is type and takes the muted colour; an emoji keeps its
+              // own. Same split as the sidebar row.
+              showGroupFallback && "text-f1-foreground-secondary"
+            )}
+            data-testid={
+              showGroupFallback ? "chat-group-avatar-fallback" : undefined
+            }
+          >
+            {/* Same split as the sidebar row one panel away, and for the same
+                reasons — see `SidebarChatItem`. The two must agree: they are
+                the same identity, an inch apart. */}
+            {showGroupFallback ? (
+              identityEmoji
+            ) : (
+              <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+            )}
           </span>
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />
         )}
-        {showPresence && <PresenceDot online={channel.presence === "online"} />}
+        {showPresence ? (
+          <PresenceDot
+            online={channel.presence === "online"}
+            label={i18n.chat.online}
+          />
+        ) : null}
       </div>
-      <span className="truncate text-base font-medium text-f1-foreground">
-        {channel.title}
-      </span>
-      {/* All states surface in the header the same way the mute icon does. */}
-      {channel.muted && (
-        <F0Icon
-          icon={MicrophoneNegative}
-          size="sm"
-          color="secondary"
-          aria-label={i18n.chat.muted}
+      {channel.title ? (
+        <span className="truncate text-base font-medium text-f1-foreground">
+          {channel.title}
+        </span>
+      ) : (
+        // A NAME THAT HAS NOT ARRIVED, not a channel without one. It often
+        // comes from its own request — a community's title is a second query,
+        // separate from its posts — so the header used to sit blank next to a
+        // transcript that was already drawing itself. An empty title is
+        // therefore read as "not known yet"; a host must never ship one
+        // permanently, or this pulses forever.
+        <Skeleton
+          data-testid="chat-header-title-skeleton"
+          className="h-3.5 w-32 rounded-2xs"
         />
       )}
       {channel.statuses?.map((status) => (
@@ -118,7 +175,7 @@ export const ChatHeader = ({
           key={status.label}
           icon={status.icon}
           size="sm"
-          color="secondary"
+          color="default"
           aria-label={status.label}
         />
       ))}
@@ -153,16 +210,19 @@ export const ChatHeader = ({
                 onClick={() => action.onClick(channel)}
               />
             ))}
-            {/* Search + the host's menu actions live behind the ellipsis menu. */}
-            <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
-              <ButtonInternal
-                variant="ghost"
-                hideLabel
-                label={i18n.chat.options}
-                icon={Ellipsis}
-              />
-            </Dropdown>
-            {onToggleFullscreen && !isSmallScreen && (
+            {/* Search + the host's menu actions live behind the ellipsis menu,
+                which only exists while it holds something. */}
+            {menuItems.length > 0 ? (
+              <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
+                <ButtonInternal
+                  variant="ghost"
+                  hideLabel
+                  label={i18n.chat.options}
+                  icon={Ellipsis}
+                />
+              </Dropdown>
+            ) : null}
+            {onToggleFullscreen && !panelOverlays ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -172,8 +232,8 @@ export const ChatHeader = ({
                 icon={isFullscreen ? Minimize : Maximize}
                 onClick={onToggleFullscreen}
               />
-            )}
-            {onClose && (
+            ) : null}
+            {onClose ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -181,7 +241,7 @@ export const ChatHeader = ({
                 icon={Cross}
                 onClick={onClose}
               />
-            )}
+            ) : null}
           </div>
         </>
       )}

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
@@ -95,13 +94,13 @@ export interface CustomFieldRenderProps<TValue = unknown, TConfig = undefined> {
 export type F0CustomConfigBase<TValue = unknown> =
   | {
       /** Render function for the custom component */
-      render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
+      render: (props: CustomFieldRenderProps<TValue>) => ReactNode
     }
   | {
       /** Name identifying this custom field type (resolved by renderCustomField on the form) */
       customFieldName: string
       /** Optional render function (overridden by form-level renderCustomField when customFieldName is set) */
-      render?: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
+      render?: (props: CustomFieldRenderProps<TValue>) => ReactNode
     }
 
 /**

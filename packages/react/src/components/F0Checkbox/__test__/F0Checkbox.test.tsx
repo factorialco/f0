@@ -1,9 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0Checkbox } from "../F0Checkbox"
 
 describe("F0Checkbox", () => {
@@ -11,7 +9,7 @@ describe("F0Checkbox", () => {
     render(<F0Checkbox id="custom-id" title="Custom checkbox" />)
 
     const checkbox = screen.getByRole("checkbox")
-    const label = screen.getByText("Custom checkbox")
+    const label = screen.getByText("Custom checkbox").closest("label")
 
     expect(checkbox).toHaveAttribute("id", "custom-id")
     expect(label).toHaveAttribute("for", "custom-id")
@@ -138,6 +136,94 @@ describe("F0Checkbox", () => {
     expect(checkbox).toHaveAttribute("id", "accessible-id")
     expect(checkbox).toBeChecked()
     expect(checkbox).not.toBeDisabled()
+  })
+
+  // Regression: hovering the checkbox darkened its border. The box is not an
+  // interactive-looking control on its own, so it must have no hover state:
+  // no `hover:` utility may reach it in any of its states.
+  it.each([
+    { name: "unchecked", props: {} },
+    { name: "checked", props: { checked: true } },
+    { name: "indeterminate", props: { indeterminate: true, checked: true } },
+    { name: "disabled", props: { disabled: true } },
+    { name: "checked and disabled", props: { checked: true, disabled: true } },
+  ])("has no hover styles when $name", ({ props }) => {
+    render(<F0Checkbox title="No hover" {...props} />)
+
+    const hoverClasses = Array.from(
+      screen.getByRole("checkbox").classList
+    ).filter((className) => className.includes("hover:"))
+
+    expect(hoverClasses).toEqual([])
+  })
+
+  describe("description", () => {
+    it("renders the description under the title", () => {
+      render(
+        <F0Checkbox title="Share usage data" description="Helps us improve." />
+      )
+
+      expect(screen.getByText("Share usage data")).toBeInTheDocument()
+      expect(screen.getByText("Helps us improve.")).toBeInTheDocument()
+    })
+
+    // The description must not leak into the accessible name — a screen reader
+    // should announce "Share usage data, checkbox" and only then the
+    // description, the same as a native `aria-describedby` pairing.
+    it("exposes the description through aria-describedby, not the name", () => {
+      render(
+        <F0Checkbox title="Share usage data" description="Helps us improve." />
+      )
+
+      const checkbox = screen.getByRole("checkbox")
+      const description = screen.getByText("Helps us improve.")
+
+      expect(checkbox).toHaveAttribute("aria-label", "Share usage data")
+      expect(checkbox).toHaveAttribute(
+        "aria-describedby",
+        description.getAttribute("id")
+      )
+    })
+
+    it("has no aria-describedby when there is no description", () => {
+      render(<F0Checkbox title="Share usage data" />)
+
+      expect(screen.getByRole("checkbox")).not.toHaveAttribute(
+        "aria-describedby"
+      )
+    })
+
+    it("hides the description along with the label when hideLabel is set", () => {
+      render(
+        <F0Checkbox
+          title="Share usage data"
+          description="Helps us improve."
+          hideLabel
+        />
+      )
+
+      expect(screen.queryByText("Helps us improve.")).not.toBeInTheDocument()
+      expect(screen.getByRole("checkbox")).not.toHaveAttribute(
+        "aria-describedby"
+      )
+    })
+
+    it("toggles when the description is clicked", async () => {
+      const user = userEvent.setup()
+      const onCheckedChange = vi.fn()
+
+      render(
+        <F0Checkbox
+          title="Share usage data"
+          description="Helps us improve."
+          onCheckedChange={onCheckedChange}
+        />
+      )
+
+      await user.click(screen.getByText("Helps us improve."))
+
+      expect(onCheckedChange).toHaveBeenCalledWith(true)
+    })
   })
 
   it("generates unique id when not provided", () => {

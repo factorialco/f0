@@ -1,9 +1,7 @@
 import { waitFor } from "@testing-library/react"
 import { describe, expect, expectTypeOf, it, vi } from "vitest"
-
 import { DataCollectionDataAdapter } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { zeroRenderHook } from "@/testing/test-utils"
-
 import {
   DataAdapter,
   ItemNeighborsFetchOptions,

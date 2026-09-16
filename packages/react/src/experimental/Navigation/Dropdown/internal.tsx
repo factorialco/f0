@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -8,6 +7,7 @@ import { DataAttributes } from "@/global.types"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
+import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { NavigationItem } from "../utils"
 import { DropdownItemContent } from "./DropdownItem"
 
@@ -36,6 +35,13 @@ export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   critical?: boolean
   avatar?: AvatarVariant
   disabled?: boolean
+  /**
+   * Tooltip shown on hover while the item is `disabled` — use it to explain why
+   * the action is unavailable. Ignored when the item is not disabled. The
+   * tooltip trigger re-enables pointer events, so it works despite the disabled
+   * item's `pointer-events: none`.
+   */
+  disabledTooltip?: string
 }
 
 export type DropdownInternalProps = {
@@ -62,6 +68,14 @@ export type DropdownInternalProps = {
    * default, so existing dropdowns keep their current sizing behavior.
    */
   contentClassName?: string
+  /**
+   * Where the menu is portalled. Defaults to the document body; pass the
+   * element of a surrounding modal layer — a dialog's own content node, which
+   * it publishes as `portalContainer` — so that layer's focus trap CONTAINS
+   * the menu instead of fighting it. Two traps over the same document push
+   * focus back and forth until the call stack gives out.
+   */
+  container?: HTMLElement | null
 } & DataAttributes
 
 const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
@@ -70,6 +84,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     icon: _icon,
     avatar: _avatar,
     description: _description,
+    disabledTooltip,
     href,
     critical,
     disabled,
@@ -81,7 +96,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     critical && "text-f1-foreground-critical"
   )
 
-  return (
+  const menuItem = (
     <DropdownMenuItem
       asChild
       className={cn(itemClass, "cursor-pointer")}
@@ -105,6 +120,20 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
       )}
     </DropdownMenuItem>
   )
+
+  // A disabled item sets `pointer-events: none`, so it emits NO hover events —
+  // the tooltip must hang off a wrapper span that keeps pointer events and that
+  // the hover passes THROUGH to (same approach as F0FormEditableTable). Only a
+  // disabled item with a tooltip gets the wrapper; every other item renders bare.
+  if (disabled && disabledTooltip) {
+    return (
+      <TooltipWrapper tooltip={disabledTooltip}>
+        <span className="block w-full cursor-not-allowed">{menuItem}</span>
+      </TooltipWrapper>
+    )
+  }
+
+  return menuItem
 }
 
 function renderDropdownItem(
@@ -153,6 +182,7 @@ export function DropdownInternal({
   label,
   disabled,
   contentClassName,
+  container,
   ...rest
 }: DropdownInternalProps) {
   const i18n = useI18n()
@@ -167,7 +197,9 @@ export function DropdownInternal({
   // `disabled` flips back to false. In controlled mode this fires the
   // consumer's `onOpenChange(false)` — a disabled menu must never stay open.
   useEffect(() => {
-    if (disabled && rawOpen) setOpen(false)
+    if (disabled && rawOpen) {
+      setOpen(false)
+    }
   }, [disabled, rawOpen, setOpen])
   // Mask the value passed to Radix during render so a disabled menu cannot
   // flash open before the effect above commits the state reset.
@@ -219,7 +251,11 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className={contentClassName}>
+      <DropdownMenuContent
+        align={align}
+        className={contentClassName}
+        container={container}
+      >
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>

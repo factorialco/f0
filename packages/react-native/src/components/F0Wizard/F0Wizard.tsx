@@ -95,13 +95,17 @@ const F0Wizard = React.memo(function F0Wizard({
   )
 
   const handleNext = useCallback(async () => {
-    if (!step || isAdvancing) return
+    if (!step || isAdvancing) {
+      return
+    }
 
     if (step.onNext) {
       setIsAdvancing(true)
       try {
         const result = await step.onNext()
-        if (!result.canAdvance) return
+        if (!result.canAdvance) {
+          return
+        }
       } finally {
         setIsAdvancing(false)
       }
@@ -130,7 +134,9 @@ const F0Wizard = React.memo(function F0Wizard({
     : (step?.nextLabel ?? globalNextLabel)
   const backButtonLabel = step?.previousLabel ?? globalPreviousLabel
 
-  if (steps.length === 0) return null
+  if (steps.length === 0) {
+    return null
+  }
 
   return (
     <View

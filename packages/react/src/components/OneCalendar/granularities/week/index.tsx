@@ -13,10 +13,10 @@ import {
   startOfWeek,
   startOfMonth,
 } from "date-fns"
-
 import {
   DateRange,
   DateRangeComplete,
+  OptionalCalendarSelection,
   WeekStartDay,
   WeekStartsOn,
 } from "../../types"
@@ -57,9 +57,7 @@ export const getIsSameWeek = (
     : isSameWeek(dateLeft, dateRight, { weekStartsOn })
 }
 
-export function toWeekGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(
+export function toWeekGranularityDateRange<T extends OptionalCalendarSelection>(
   date: T,
   weekStartsOn: WeekStartsOn = WeekStartDay.Monday
 ): T extends Date | DateRange ? DateRangeComplete : T {

@@ -1,9 +1,7 @@
 import { OverflowList } from "@/ui/OverflowList"
-
-import type { F0TagListProps, TagType } from "./types"
-
 import { Tag, TagVariant } from "../F0Tag/F0Tag"
 import { TagCounter } from "./components/TagCounter"
+import type { F0TagListProps, TagType } from "./types"
 
 export const F0TagList = <T extends TagType>({
   type,
@@ -21,6 +19,11 @@ export const F0TagList = <T extends TagType>({
       items={tagVariants}
       max={max}
       min={1}
+      // Tags render their label through OneEllipsis (BaseTag), so a visible tag
+      // that does not fit should truncate — surfacing OneEllipsis' hover tooltip
+      // with the full text — instead of overflowing and painting over the "+N"
+      // counter. `min={1}` can force such a tag, so opt into fluid shrinking.
+      fluidItems
       renderListItem={(tag) => <Tag tag={tag} />}
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}
@@ -35,7 +38,11 @@ export const F0TagList = <T extends TagType>({
         />
       )}
       overflowIndicatorWithPopover={false}
-      className="flex-1"
+      // `min-w-0` lets this flex-1 row shrink below its content's intrinsic width
+      // (the `flex-1` utility alone leaves `min-width: auto`, which pins it to the
+      // widest tag and, in an auto-layout table cell, expands the column instead of
+      // ellipsizing). Together with `fluidItems` the over-wide tag then truncates.
+      className="min-w-0 flex-1"
     />
   )
 }

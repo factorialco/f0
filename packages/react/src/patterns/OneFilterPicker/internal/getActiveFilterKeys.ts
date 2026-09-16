@@ -1,5 +1,4 @@
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { FilterTypeSchema, getFilterType } from "../filterTypes"
 import { FiltersDefinition, FiltersState } from "../types"
 
@@ -21,4 +20,4 @@ export const getActiveFilterKeys = <Filters extends FiltersDefinition>(
     })
 
     return !isEmpty
-  }) as Array<keyof Filters>
+  }) as (keyof Filters)[]

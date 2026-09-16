@@ -1,17 +1,16 @@
 import { ComponentProps, ReactNode, useState } from "react"
 import { expect, waitFor, within } from "storybook/test"
-
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import { Page } from "@/patterns/Navigation/Page"
-import * as PageStories from "@/patterns/Navigation/Page/index.stories"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
   MockConnectedChatInput,
   MockConnectedMessagesContainer,
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import { Page } from "@/patterns/Navigation/Page"
+import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 
 // AI chat locked open in fullscreen. In ApplicationFrame the fullscreen chat
 // paints at `z-20` inside a `relative isolate`, as a sibling of `#content`
@@ -36,8 +35,8 @@ const fullscreenChatAi: ComponentProps<typeof ApplicationFrame>["ai"] = {
 // override `defaultVisualizationMode: "fullscreen"`. Clearing the keys before
 // the Ai provider initializes lets the fullscreen default take effect — with
 // no flash, since this runs in the parent's render before the provider mounts.
-const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
-const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
+const CHAT_OPEN_STORAGE_KEY = "f0-side-panel-open"
+const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "f0-side-panel-layout"
 
 /**
  * Renders the app shell with the AI chat locked open in fullscreen, then drops

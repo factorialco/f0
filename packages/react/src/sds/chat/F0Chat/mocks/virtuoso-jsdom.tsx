@@ -1,4 +1,10 @@
-import { type ComponentProps, createElement, type ReactNode } from "react"
+import {
+  type ComponentProps,
+  createElement,
+  forwardRef,
+  type ReactNode,
+} from "react"
+import { type VirtuosoHandle } from "react-virtuoso"
 
 type VirtuosoModule = typeof import("react-virtuoso")
 
@@ -31,17 +37,24 @@ export function mockVirtuosoModule(actual: VirtuosoModule): VirtuosoModule {
   if (!Element.prototype.scrollBy) {
     Element.prototype.scrollBy = () => {}
   }
-  const MockedVirtuoso = ({
-    // Entry positioning defers rendering across animation frames — which never
-    // arrive inside a synchronous jsdom assertion, leaving the list empty.
-    // Tests assert CONTENT; positioning is validated in Storybook.
-    initialTopMostItemIndex: _initialTopMostItemIndex,
-    ...props
-  }: ComponentProps<typeof actual.Virtuoso>): ReactNode =>
-    createElement(
+  const MockedVirtuoso = forwardRef<
+    VirtuosoHandle,
+    ComponentProps<typeof actual.Virtuoso>
+  >(function MockedVirtuoso(
+    {
+      // Entry positioning defers rendering across animation frames — which never
+      // arrive inside a synchronous jsdom assertion, leaving the list empty.
+      // Tests assert CONTENT; positioning is validated in Storybook.
+      initialTopMostItemIndex: _initialTopMostItemIndex,
+      ...props
+    }: ComponentProps<typeof actual.Virtuoso>,
+    ref
+  ): ReactNode {
+    return createElement(
       actual.VirtuosoMockContext.Provider,
       { value: { viewportHeight: 100_000, itemHeight: 40 } },
-      createElement(actual.Virtuoso, props)
+      createElement(actual.Virtuoso, { ...props, ref })
     )
+  })
   return { ...actual, Virtuoso: MockedVirtuoso as typeof actual.Virtuoso }
 }

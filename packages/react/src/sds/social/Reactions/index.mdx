@@ -1,0 +1,197 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./index.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# Reactions
+
+Reactions displays emoji response totals and reveals the people behind each response. Use it for lightweight feedback attached to shared content.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>items</code>
+        </td>
+        <td>
+          <code>ReactionProps[]</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Emoji reactions, their counts, current-member state, and optional user
+          identities.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>items[].loadUsers</code>
+        </td>
+        <td>
+          <code>() =&gt; Promise&lt;User[]&gt;</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Loads the complete identity list when the reaction receives hover or
+          keyboard focus.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onInteraction</code>
+        </td>
+        <td>
+          <code>(emoji: string) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Handles adding or removing the current member's reaction.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>locale</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Locale used by the emoji picker.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>action</code>
+        </td>
+        <td>
+          <code>{"{ label, icon, onClick }"}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Optional action displayed beside the emoji picker.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use Reactions when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Shared content</td>
+        <td>
+          People need a lightweight response without starting another
+          conversation.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A response needs explanation</td>
+        <td>A comment or chat reply.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Provide complete reaction identities, eagerly or through loadUsers.",
+  }}
+  dont={{
+    description:
+      "Show a count that cannot be reconciled with the identity list.",
+  }}
+/>
+
+### Behavior
+
+- WHEN `users` already contains at least `initialCount` entries → THEN the tooltip uses those names without calling `loadUsers`.
+- WHEN the identity list is incomplete and the reaction receives hover or keyboard focus → THEN `loadUsers` runs once and replaces the fallback tooltip with the resolved names.
+- WHEN the emoji or count changes → THEN stale identity responses are ignored.
+
+### Usage examples
+
+**Load identities on demand**
+
+Use deferred loading when the host transport omits full reaction membership from the initial payload.
+
+<Canvas of={Stories.LazyUsers} />
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Moves focus to a reaction and reveals its identity tooltip.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Toggles the focused reaction.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+Each reaction is a pressed-state button whose accessible name includes the emoji label and current count.

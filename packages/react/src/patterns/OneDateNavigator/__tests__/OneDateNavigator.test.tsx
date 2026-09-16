@@ -1,8 +1,6 @@
 import { screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { OneDateNavigator } from "../OneDateNavigator"
 
 describe("OneDateNavigator", () => {
@@ -41,6 +39,22 @@ describe("OneDateNavigator", () => {
 
     const trigger = await screen.getByRole("button", { name: "January 2023" })
     expect(trigger).toBeDefined()
+  })
+
+  it("renders a periods value when no periods are supplied", () => {
+    render(
+      <OneDateNavigator
+        onSelect={vi.fn()}
+        granularities={["periods"]}
+        value={{
+          granularity: "periods",
+          value: { from: new Date(2026, 0, 25), to: new Date(2026, 1, 24) },
+        }}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Previous" })).toBeInTheDocument()
   })
 
   it("handles disabled state", () => {

@@ -1,9 +1,7 @@
 import { type ReactNode } from "react"
-
 import { F0Card } from "@/components/F0Card"
 import { useI18n } from "@/lib/providers/i18n"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-
 import { type F0ChatUser } from "../types"
 
 /**

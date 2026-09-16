@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-
+import type { IconType } from "@/components/F0Icon"
 import {
   readFromLocalStorage,
   writeToLocalStorage,
@@ -10,13 +10,20 @@ export type ChatThread = {
   title: string
   createdAt: string
   updatedAt: string
+  /** Rendered before the title (e.g. a chart icon for Analytics chats). */
+  icon?: IconType
+  /**
+   * Secondary label at the row's end, revealed on hover/focus like the date
+   * (e.g. "Analytics" for mode-bound chats).
+   */
+  trailingLabel?: string
 }
 
 type UseChatHistoryReturn = {
   threads: ChatThread[]
   isLoading: boolean
   error: string | null
-  refetch: () => void
+  refetch: () => Promise<void>
   pinnedIds: Set<string>
   /**
    * Ids of threads with an in-flight pin/unpin/delete request. Use it to show a
@@ -113,10 +120,15 @@ export function useChatHistory({
   // it to localStorage so the pin state survives reloads.
   const setPinnedLocal = useCallback((id: string, pinned: boolean) => {
     setPinnedIds((prev) => {
-      if (pinned === prev.has(id)) return prev
+      if (pinned === prev.has(id)) {
+        return prev
+      }
       const next = new Set(prev)
-      if (pinned) next.add(id)
-      else next.delete(id)
+      if (pinned) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
       writePinnedIds(next)
       return next
     })
@@ -124,10 +136,15 @@ export function useChatHistory({
 
   const markPending = useCallback((id: string, pending: boolean) => {
     setPendingIds((prev) => {
-      if (pending === prev.has(id)) return prev
+      if (pending === prev.has(id)) {
+        return prev
+      }
       const next = new Set(prev)
-      if (pending) next.add(id)
-      else next.delete(id)
+      if (pending) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
       return next
     })
   }, [])
@@ -139,7 +156,9 @@ export function useChatHistory({
       const persist = pinned ? pinThreadCb : unpinThreadCb
       setPinnedLocal(id, pinned)
 
-      if (!persist) return // localStorage-only mode: nothing async to await.
+      if (!persist) {
+        return
+      } // localStorage-only mode: nothing async to await.
 
       markPending(id, true)
       persist(id)
@@ -169,7 +188,9 @@ export function useChatHistory({
 
         // Clean up from pinned if it was pinned.
         setPinnedIds((prev) => {
-          if (!prev.has(id)) return prev
+          if (!prev.has(id)) {
+            return prev
+          }
           const next = new Set(prev)
           next.delete(id)
           writePinnedIds(next)

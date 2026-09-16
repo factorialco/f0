@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest"
-
 import { effectiveStatusOf as mjsEffectiveStatusOf } from "../../scripts/component-status-build.mjs"
-
 import {
   componentStatusData,
   evaluateComponentStatus,
@@ -21,6 +19,7 @@ function entry(overrides: Partial<ComponentEntry> = {}): ComponentEntry {
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: true,
     docQuality: "gold" as DocQuality,
     docSignals: {
@@ -262,6 +261,24 @@ describe("getComponentStatus (name matching)", () => {
     expect(getComponentStatus("Button", dataset)?.zone).toBe("components")
   })
 
+  test("prefers the spelling asked for over an F0-stripped twin", () => {
+    const twins: ComponentEntry[] = [
+      entry({ name: "AI/AICallout", zone: "kits", apiStatus: "deprecated" }),
+      entry({
+        name: "AI/F0AiCallout",
+        zone: "kits",
+        apiStatus: "experimental",
+      }),
+    ]
+
+    // `normalize` drops the F0 prefix, so both land in the same pool. Asking
+    // for the live one must not return the deprecated twin.
+    expect(getComponentStatus("F0AiCallout", twins)?.name).toBe(
+      "AI/F0AiCallout"
+    )
+    expect(getComponentStatus("AICallout", twins)?.name).toBe("AI/AICallout")
+  })
+
   test("resolves a fully-qualified Storybook title to its exact entry", () => {
     const withGrouped: ComponentEntry[] = [
       ...dataset,
@@ -325,16 +342,37 @@ describe("effectiveStatus parity (TS policy vs generator helper)", () => {
 })
 
 describe("STABLE_REQUIREMENTS", () => {
-  test("is the checklist of stories, tests, play, docs, doc quality, and a11y", () => {
+  test("is the checklist of naming, stories, tests, play, snapshot, docs, doc quality, and a11y", () => {
     expect(STABLE_REQUIREMENTS.map((r) => r.key)).toEqual([
+      "naming",
       "stories",
       "unitTests",
       "playFunction",
+      "snapshot",
       "mdxDocs",
       "docQuality",
       "a11y",
     ])
   })
+
+  test.each([
+    ["components/F0Widget/__stories__/F0Widget.stories.tsx", true],
+    ["components/F0Widget/F0Widget.stories.tsx", true],
+    ["components/Widget/__stories__/Widget.stories.tsx", false],
+    ["components/F0widget/__stories__/F0widget.stories.tsx", false],
+    ["experimental/Lists/DetailsItem.stories.tsx", false],
+  ])(
+    "naming judges the component folder of %s as F0-named=%s",
+    (storyFile, ok) => {
+      const status = evaluateComponentStatus(
+        entry({ apiStatus: "stable", tags: ["stable"], storyFile })
+      )
+      expect(status.meetsBar).toBe(ok)
+      if (!ok) {
+        expect(status.missing).toEqual(['Named with the "F0" prefix'])
+      }
+    }
+  )
 
   test.each(["skipped", "todo"] as const)(
     "a component clean on everything but a11y (%s) is not stable",

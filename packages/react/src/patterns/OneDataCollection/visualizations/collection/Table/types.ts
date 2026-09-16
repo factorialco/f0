@@ -1,5 +1,4 @@
-import { ComponentProps, ComponentType, ReactNode } from "react"
-
+import { ComponentProps, ComponentType, ReactNode, RefObject } from "react"
 import { TableHead } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
@@ -8,12 +7,12 @@ import {
   SortingKey,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { DefaultExpandedPolicy } from "./providers/NestedProvider"
 
 export type TableVisualizationSettings = {
   order?: ColId[]
@@ -88,6 +87,14 @@ export type TableColumnDefinition<
     noHiding?: boolean
 
     /**
+     * Visually highlights the column: its header and cells render with a
+     * subtle gray background, and the spanning header of its group (if any)
+     * is emphasized too. To highlight a whole header group at once, set
+     * `highlighted` on its {@link HeaderGroupDefinition} instead.
+     */
+    highlighted?: boolean
+
+    /**
      * Avoid removing the column by the user. Only relevant when the
      * visualization sets `onRemoveColumn`; the per-row trash affordance in the
      * settings popover is hidden for this column. Mirrors `noHiding`.
@@ -97,11 +104,50 @@ export type TableColumnDefinition<
     /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
-     * The label for each group is provided via `headerGroupLabels` in
-     * the visualization options.
+     * Each group is configured via `headerGroups` in the visualization
+     * options, which also controls whether the group can be collapsed.
      */
     headerGroupId?: string
   }
+
+/**
+ * Configuration for a single header group, keyed by `headerGroupId` in the
+ * `headerGroups` visualization option.
+ */
+export type HeaderGroupDefinition = {
+  /**
+   * The label rendered in the spanning header row.
+   */
+  label: string
+
+  /**
+   * Ids of the columns in this group that stay visible while the group is
+   * collapsed — the group's "summary" columns. Providing this key is what
+   * makes the group collapsible; omit it for a purely visual group.
+   *
+   * Ids are matched against each column's `id` (falling back to its `label`,
+   * mirroring how column ids are resolved elsewhere). Ids that don't belong to
+   * this group are ignored. A collapsed group always keeps at least one
+   * column, so passing `[]` — or only unknown ids — leaves the group's first
+   * column visible.
+   */
+  collapsedColumns?: ColId[]
+
+  /**
+   * Whether the group renders collapsed on first render. Only meaningful for
+   * collapsible groups. Read once on mount; afterwards the collapsed state is
+   * owned by the table.
+   * @default false
+   */
+  defaultCollapsed?: boolean
+
+  /**
+   * Visually highlights the whole group: its spanning header and every column
+   * in it render with the highlighted emphasis. Equivalent to setting
+   * `highlighted` on each of the group's columns.
+   */
+  highlighted?: boolean
+}
 
 export type ReferenceType = "none" | "striped" | "striked"
 
@@ -114,7 +160,7 @@ export type TableVisualizationOptions<
   /**
    * The columns to display
    */
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
 
   /**
    * Placeholder to display in summary-row cells when no summary value is
@@ -127,6 +173,29 @@ export type TableVisualizationOptions<
    * The number of columns to freeze on the left
    */
   frozenColumns?: 0 | 1 | 2
+
+  /**
+   * For nested tables, which rows start out expanded before the user touches
+   * anything. Pass `true` for the whole tree, a depth, or a predicate:
+   *
+   * ```ts
+   * defaultExpanded: true                            // everything
+   * defaultExpanded: 2                               // down to depth 2
+   * defaultExpanded: (node) => node.type !== "role"  // stop at roles
+   * ```
+   *
+   * Once the user expands or collapses a row their choice wins for that row and
+   * the policy no longer applies to it. Changing filters, sortings or
+   * navigation filters resets the tree, so the policy applies again and a
+   * filtered view comes back expanded.
+   *
+   * Expanding a row loads its children, so a policy that opens a large tree
+   * costs one `fetchChildren` per opened row on first paint.
+   *
+   * @default false
+   */
+  defaultExpanded?: DefaultExpandedPolicy<R>
+
   /**
    * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
    */
@@ -152,13 +221,62 @@ export type TableVisualizationOptions<
    */
   onRemoveColumn?: (columnId: ColId) => void
 
+  /**
+   * The user-managed frozen columns in the column-settings popover. Locked
+   * columns move into a sticky group on the left, stay visible, and cannot be
+   * reordered or removed. Their array order controls their order in that group.
+   * One visible managed column always remains unlocked as the table's
+   * scrollable region; an all-locked input is normalized accordingly.
+   *
+   * Unlocking a column returns it to its saved position. Columns covered by
+   * `frozenColumns` remain permanently locked before this managed group.
+   */
+  lockedColumnIds?: readonly ColId[]
+
+  /**
+   * Called with the complete set of user-managed locked column ids whenever a
+   * user locks or unlocks a column. Passing this callback enables the lock
+   * controls in the column-settings popover.
+   */
+  onLockedColumnIdsChange?: (columnIds: ColId[]) => void
+
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
+
   /**
-   * Labels for header groups. Keys are headerGroupId values used in column
-   * definitions, values are the display labels rendered in the spanning header row.
+   * In a table with nested rows, renders the cell text of the root rows
+   * (depth 0) in bold so aggregate rows stand out from their children.
+   * Cells that fix their own weight (tags, deltas) keep it.
+   * @default false
    */
-  headerGroupLabels?: Record<string, string>
+  boldRootRows?: boolean
+  /**
+   * Header group configuration. Keys are the `headerGroupId` values used in
+   * column definitions. Pass a string for a plain spanning label, or a
+   * {@link HeaderGroupDefinition} to also make the group collapsible:
+   *
+   * ```ts
+   * headerGroups: {
+   *   personal: "Personal information",
+   *   january: {
+   *     label: "January",
+   *     collapsedColumns: ["january-total"],
+   *     defaultCollapsed: true,
+   *   },
+   * }
+   * ```
+   *
+   * A collapsed group hides every column in it except the ones listed in
+   * `collapsedColumns`, and renders a toggle next to its label.
+   */
+  headerGroups?: Record<string, string | HeaderGroupDefinition>
+
+  /**
+   * Called when the user collapses or expands a header group. Fires after the
+   * table has applied the change; use it to persist the state, not to control
+   * it.
+   */
+  onHeaderGroupCollapsedChange?: (groupId: string, collapsed: boolean) => void
 
   /**
    * Wraps the table in a rounded border container.
@@ -232,3 +350,9 @@ export type TableCustomizationProps<
   /** Override the visualization settings key (column order/visibility). If not provided, uses the "table" key. */
   visualizationSettings?: TableVisualizationSettings
 }
+
+/** The `ref` a table row accepts, as callback or object. */
+export type TableRowRef =
+  | ((element: HTMLTableRowElement | null) => void)
+  | RefObject<HTMLTableRowElement>
+  | null

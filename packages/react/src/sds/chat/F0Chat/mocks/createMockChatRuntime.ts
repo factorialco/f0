@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
+import { BellOff } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-
 import {
   isUserMessage,
-  type F0ChatAttachment,
+  type F0ChatComposableAttachment,
   type F0ChatChannel,
   type F0ChatEditInput,
   type F0ChatItem,
@@ -14,6 +14,8 @@ import {
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
+import { uploadedAttachmentFromFile } from "./uploads"
 
 /** Seed describing a fake conversation the mock runtime should simulate. */
 export type MockChatSeed = {
@@ -198,7 +200,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
       count: number,
       opts: { withImage?: boolean } = {}
     ) => {
-      if (authors.length === 0 || count <= 0) return
+      if (authors.length === 0 || count <= 0) {
+        return
+      }
       setMessages((prev) => [
         ...prev,
         ...Array.from({ length: count }, (_, i): F0ChatMessage => {
@@ -235,21 +239,29 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const receiveReaction = useCallback(() => {
     const emojis = ["👍", "❤️", "😂", "🎉", "😮"]
     setMessages((prev) => {
-      if (prev.length === 0) return prev
+      if (prev.length === 0) {
+        return prev
+      }
       const recent = prev.slice(-10).filter(isUserMessage)
-      if (recent.length === 0) return prev
+      if (recent.length === 0) {
+        return prev
+      }
       const target = recent[Math.floor(Math.random() * recent.length)]
       const emoji = emojis[Math.floor(Math.random() * emojis.length)]
       return prev.map((m) => {
-        if (!isUserMessage(m) || m.id !== target.id) return m
+        if (!isUserMessage(m) || m.id !== target.id) {
+          return m
+        }
         const reactions = m.reactions ? [...m.reactions] : []
         const idx = reactions.findIndex((r) => r.emoji === emoji)
-        if (idx === -1) reactions.push({ emoji, count: 1, reactedByMe: false })
-        else
+        if (idx === -1) {
+          reactions.push({ emoji, count: 1, reactedByMe: false })
+        } else {
           reactions[idx] = {
             ...reactions[idx],
             count: reactions[idx].count + 1,
           }
+        }
         return { ...m, reactions }
       })
     })
@@ -262,7 +274,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   // the read divider are demonstrable without the user doing anything.
   useEffect(() => {
     const responder = seed.others[0]
-    if (!responder || ambientEveryMs <= 0) return
+    if (!responder || ambientEveryMs <= 0) {
+      return
+    }
     const interval = setInterval(() => receiveFrom(responder), ambientEveryMs)
     return () => clearInterval(interval)
   }, [ambientEveryMs, receiveFrom, seed.others])
@@ -384,7 +398,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const setFailSends = useCallback(
     (fail: boolean) => {
       failSendsRef.current = fail
-      if (fail) return
+      if (fail) {
+        return
+      }
       after(800, () => {
         const pending = messagesRef.current.filter(
           (m) =>
@@ -399,7 +415,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   )
 
   const loadOlder = useCallback(() => {
-    if (loadingOlder || olderPagesLeft.current <= 0) return
+    if (loadingOlder || olderPagesLeft.current <= 0) {
+      return
+    }
     setLoadingOlder(true)
     after(700, () => {
       setMessages((prev) => {
@@ -423,7 +441,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const toggleReaction = useCallback((messageId: string, emoji: string) => {
     setMessages((prev) =>
       prev.map((m) => {
-        if (!isUserMessage(m) || m.id !== messageId) return m
+        if (!isUserMessage(m) || m.id !== messageId) {
+          return m
+        }
         const reactions = m.reactions ? [...m.reactions] : []
         const idx = reactions.findIndex((r) => r.emoji === emoji)
         if (idx === -1) {
@@ -431,8 +451,11 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
         } else {
           const r = reactions[idx]
           const count = r.count + (r.reactedByMe ? -1 : 1)
-          if (count <= 0) reactions.splice(idx, 1)
-          else reactions[idx] = { ...r, count, reactedByMe: !r.reactedByMe }
+          if (count <= 0) {
+            reactions.splice(idx, 1)
+          } else {
+            reactions[idx] = { ...r, count, reactedByMe: !r.reactedByMe }
+          }
         }
         return { ...m, reactions }
       })
@@ -450,7 +473,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const deleteMessage = useCallback((id: string) => {
     setMessages((prev) => {
       const target = prev.filter(isUserMessage).find((m) => m.id === id)
-      if (!target) return prev
+      if (!target) {
+        return prev
+      }
       // A failed message never reached the "server" — discard the local echo
       // entirely (no tombstone), matching the runtime contract.
       if (target.status === "failed" || target.status === "sending") {
@@ -496,29 +521,20 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   }, [])
 
   const uploadFiles = useCallback(
-    (files: File[]): Promise<F0ChatAttachment[]> =>
-      Promise.resolve(
-        files.map((file): F0ChatAttachment => {
-          const url = URL.createObjectURL(file)
-          return file.type.startsWith("image/")
-            ? { kind: "image", url, name: file.name }
-            : {
-                kind: "file",
-                url,
-                name: file.name,
-                size: file.size,
-                mimeType: file.type,
-              }
-        })
-      ),
+    (files: File[]): Promise<F0ChatComposableAttachment[]> =>
+      Promise.all(files.map(uploadedAttachmentFromFile)),
     []
   )
+
+  const i18n = useI18n()
 
   // Pinned (favourite) / muted state — surfaced by the host as header actions
   // (F0ChatHeaderAction) wired to these transport methods.
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
-  const [muted, setMuted] = useState(seed.channel.muted ?? false)
+  const [muted, setMuted] = useState(
+    seed.channel.statuses?.some((status) => status.icon === BellOff) ?? false
+  )
   const toggleMute = useCallback(() => setMuted((value) => !value), [])
 
   // Membership events (groups): each appends a centered system row — one item
@@ -527,7 +543,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const [memberCount, setMemberCount] = useState(seed.channel.memberCount)
   const pushSystem = useCallback(
     (event: F0ChatSystemEvent, users: F0ChatUser[], delta: number) => {
-      if (users.length === 0) return
+      if (users.length === 0) {
+        return
+      }
       setMessages((prev) => [
         ...prev,
         {
@@ -582,7 +600,17 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
 
   return {
     currentUserId: seed.me.id,
-    channel: { ...seed.channel, pinned, muted, memberCount },
+    channel: {
+      ...seed.channel,
+      pinned,
+      statuses: [
+        ...(seed.channel.statuses?.filter(
+          (status) => status.icon !== BellOff
+        ) ?? []),
+        ...(muted ? [{ icon: BellOff, label: i18n.chat.muted }] : []),
+      ],
+      memberCount,
+    },
     status: "ready",
     messages,
     typingUsers,
@@ -603,7 +631,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
-    maxFiles: 5,
+    maxFiles: 8,
+    // F0Chat stories use the same 100 MB per-file limit as ApplicationFrame.
+    maxFileSizeBytes: MOCK_MAX_FILE_SIZE_BYTES,
     // Same streaming dictation mock the AI chat / RichText stories use.
     transcribe: mockTranscribe,
     markRead,

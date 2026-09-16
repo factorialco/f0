@@ -16,14 +16,12 @@ const SvgMaximize = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M13.5 10.5L19 5M19 5H15M19 5V9"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M10.5 13.5L5 19M5 19H9M5 19V15"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

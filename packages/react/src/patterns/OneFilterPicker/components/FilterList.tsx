@@ -1,22 +1,20 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useMemo } from "react"
-
+import { useId, useMemo } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronRight } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
-
+import { NonFocusableScrollArea, ScrollArea } from "@/ui/scrollarea"
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 import type {
   FilterTypeDefinition,
   FilterTypeSchema,
 } from "../filterTypes/types"
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
-
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
-import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 
 /**
  * Props for the FilterList component.
@@ -59,6 +57,9 @@ export function FilterList<Definition extends FiltersDefinition>({
   onClickApplyFilters,
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
+  const activeDescriptionId = useId()
+  const shouldReduceMotion = useReducedMotion()
+  const ListScrollArea = isCompactMode ? NonFocusableScrollArea : ScrollArea
 
   const nestedKeysMap = useMemo(() => {
     const map = new Map<string, string[]>()
@@ -66,7 +67,9 @@ export function FilterList<Definition extends FiltersDefinition>({
       if (filter.type === "in" && "options" in filter) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing nested options generically
         const nested = collectNestedFilterKeys((filter as any).options)
-        if (nested.length > 0) map.set(key, nested)
+        if (nested.length > 0) {
+          map.set(key, nested)
+        }
       }
     }
     return map
@@ -86,10 +89,10 @@ export function FilterList<Definition extends FiltersDefinition>({
           "flex flex-1 h-full w-full flex-col min-h-0 max-h-full gap-1 overflow-x-hidden p-2"
         )}
       >
-        {isCompactMode && (
+        {isCompactMode ? (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-        )}
-        <ScrollArea className="flex-1 min-h-0 max-h-full">
+        ) : null}
+        <ListScrollArea className="flex-1 min-h-0 max-h-full">
           <div className="flex flex-col gap-1">
             {Object.entries(definition).map(([key, filter]) => {
               const filterType = getFilterType(filter.type)
@@ -126,36 +129,58 @@ export function FilterList<Definition extends FiltersDefinition>({
                     focusRing()
                   )}
                   onClick={() => onFilterSelect(key as keyof Definition)}
+                  aria-label={filter.label}
+                  aria-describedby={
+                    isActive ? `${activeDescriptionId}-${key}` : undefined
+                  }
                 >
                   <div className="flex w-full items-center justify-start gap-2.5 overflow-hidden">
                     <OneEllipsis className="flex-1 text-left text-f1-foreground">
                       {filter.label}
                     </OneEllipsis>
                     <AnimatePresence>
-                      {isActive && (
-                        <motion.div
+                      {isActive ? (
+                        <motion.span
                           className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
-                          initial={{ opacity: 0, scale: 0.7 }}
+                          initial={
+                            shouldReduceMotion
+                              ? false
+                              : { opacity: 0, scale: 0.7 }
+                          }
                           animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.7 }}
+                          exit={
+                            shouldReduceMotion
+                              ? undefined
+                              : { opacity: 0, scale: 0.7 }
+                          }
                         />
-                      )}
+                      ) : null}
                     </AnimatePresence>
-                    {isCompactMode && <F0Icon icon={ChevronRight} />}
+                    {isCompactMode ? <F0Icon icon={ChevronRight} /> : null}
                   </div>
+                  {isActive ? (
+                    <span
+                      id={`${activeDescriptionId}-${key}`}
+                      className="sr-only"
+                    >
+                      {i18n.t("filters.activeFilters", {
+                        filters: filter.label,
+                      })}
+                    </span>
+                  ) : null}
                 </button>
               )
             })}
           </div>
-        </ScrollArea>
-        {isCompactMode && (
+        </ListScrollArea>
+        {isCompactMode ? (
           <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
             <F0Button
               onClick={onClickApplyFilters}
               label={i18n.filters.applyFilters}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

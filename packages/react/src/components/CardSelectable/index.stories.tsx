@@ -1,13 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { Add, Briefcase, People } from "@/icons/app"
-
 import type { CardSelectableItem, CardSelectableSingleProps } from "./types"
-
-import { CardSelectableContainer } from "./index"
+import { CardSelectableContainer } from "."
 
 // Use single selection props for the meta type - stories can override for multiple
 const meta: Meta<CardSelectableSingleProps<string>> = {
@@ -174,6 +170,49 @@ export const Horizontal: Story = {
         layout="horizontal"
         label="Payment type selection"
       />
+    )
+  },
+}
+
+const compactLinkItems: CardSelectableItem<string>[] = [
+  {
+    value: "workflows",
+    title: "Link this course with Workflows",
+    description:
+      "Automate actions such as generating certificates or sending questionnaires.",
+    moreInfoLink: {
+      href: "https://help.factorial.co/workflows",
+    },
+  },
+]
+
+/**
+ * `compact` drops standalone card padding from 16px to 12px. The horizontal row
+ * is the density the form designs specify; the card below it checks that the
+ * `moreInfoLink` row stays aligned with the tightened card.
+ */
+export const Compact: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>("new")
+    const [linked, setLinked] = useState<string | undefined>("workflows")
+    return (
+      <div className="flex flex-col gap-4">
+        <CardSelectableContainer
+          layout="horizontal"
+          items={defaultItems}
+          value={value}
+          onChange={setValue}
+          compact
+          label="Payment type selection"
+        />
+        <CardSelectableContainer
+          items={compactLinkItems}
+          value={linked}
+          onChange={setLinked}
+          compact
+          label="Course settings"
+        />
+      </div>
     )
   },
 }

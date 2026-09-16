@@ -60,7 +60,6 @@ const BookAnimated = React.forwardRef<SVGSVGElement, BookProps>(
           variants={pageLeftVariants}
           transition={pageTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M4 7.50006V16.9194C4 17.7579 4.99792 18.2442 5.77114 17.9199C7.7041 17.109 9.70585 17.4668 12 19V7.50006C9 5.49507 6.5 5.50004 4 7.50006Z"
@@ -68,7 +67,6 @@ const BookAnimated = React.forwardRef<SVGSVGElement, BookProps>(
           variants={pageRightVariants}
           transition={pageTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

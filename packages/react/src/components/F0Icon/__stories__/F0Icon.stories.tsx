@@ -1,17 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { useState } from "react"
-import { ComponentProps } from "react"
+import { useState, ComponentProps } from "react"
 import { expect, within } from "storybook/test"
-
 import * as AIIcons from "@/icons/ai"
 import * as AnimatedIcons from "@/icons/animated"
 import * as Icons from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
 import * as SpecialIcons from "@/icons/special"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-
-import { F0Icon } from "../index"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
+import { F0Icon } from ".."
 
 const meta = {
   title: "Icon",
@@ -32,8 +30,14 @@ const meta = {
   },
   parameters: {
     layout: "centered",
+    a11y: {
+      test: "error",
+    },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["!autodocs", "stable"],
+  args: {
+    "aria-hidden": true,
+  },
 } satisfies Meta<ComponentProps<typeof F0Icon>>
 
 export default meta
@@ -103,6 +107,7 @@ export const Animated: Story = {
           icon={icon}
           state={isHovered ? "animate" : "normal"}
           size={size}
+          aria-hidden="true"
         />
       </div>
     )
@@ -138,4 +143,25 @@ export const AI: Story = {
       mapping: AIIcons,
     },
   },
+}
+
+export const Snapshot: Story = {
+  ...snapshotMatrix(F0Icon, {
+    baseArgs: { icon: Icons.ChartLine, "aria-hidden": true },
+    rows: { arg: "size", values: ["xs", "sm", "md", "lg"] },
+    cols: {
+      arg: "color",
+      values: [
+        "default",
+        "bold",
+        "accent",
+        "info",
+        "warning",
+        "positive",
+        "critical",
+      ],
+    },
+  }),
+  args: { icon: Icons.ChartLine },
+  parameters: withSnapshot({}),
 }

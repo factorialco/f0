@@ -16,14 +16,12 @@ const SvgArrowUp = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M6 11L12 5.00002L18 11"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M12 19L12 5.50002"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

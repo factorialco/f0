@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import { Skeleton } from "@/ui/skeleton"
 
 function SkeletonQuestionCard({
@@ -15,12 +14,12 @@ function SkeletonQuestionCard({
     <div className="flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-4">
       <div className="flex flex-col gap-2">
         <Skeleton className="h-5 rounded-sm" style={{ width: titleWidth }} />
-        {descriptionWidth && (
+        {descriptionWidth ? (
           <Skeleton
             className="h-4 rounded-sm"
             style={{ width: descriptionWidth }}
           />
-        )}
+        ) : null}
       </div>
       {answer}
     </div>

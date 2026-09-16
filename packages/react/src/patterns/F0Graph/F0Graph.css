@@ -9,7 +9,6 @@
  * component reads semantic intent and dark mode flips automatically via
  * the underlying --neutral-* vars in base.css. */
 .f0-graph {
-  --f0-graph-spark: hsl(var(--neutral-solid-40)); /* f1-icon-secondary */
   --f0-graph-bg-dot: hsl(var(--neutral-10)); /* f1-background-secondary */
   /* Opaque pre-blended edge colors. Using alpha tokens here causes
    * overlapping edges to compound darker at intersections; opaque

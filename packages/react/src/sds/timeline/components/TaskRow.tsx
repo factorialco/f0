@@ -1,5 +1,4 @@
 import type { F0TimelineRowTaskProps } from "../types"
-
 import { TaskDetails } from "./TaskDetails"
 import { TaskHeader } from "./TaskHeader"
 import { TimelineRowLayout } from "./TimelineRowLayout"
@@ -12,7 +11,7 @@ export const TaskRow = ({ props }: { props: F0TimelineRowTaskProps }) => {
       <div className="flex min-h-8 items-center gap-2">
         <TaskHeader props={props} />
       </div>
-      {status !== "completed" && <TaskDetails props={props} />}
+      {status !== "completed" ? <TaskDetails props={props} /> : null}
     </TimelineRowLayout>
   )
 }

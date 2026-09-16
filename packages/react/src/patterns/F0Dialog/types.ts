@@ -16,7 +16,7 @@ export type F0DialogPrimaryAction = {
   label: string
   icon?: IconType
   iconPosition?: "left" | "right"
-  onClick: () => void
+  onClick: () => void | Promise<void>
   disabled?: boolean
   loading?: boolean
 }
@@ -25,7 +25,7 @@ export type F0DialogSecondaryAction = {
   label: string
   icon?: IconType
   iconPosition?: "left" | "right"
-  onClick: () => void
+  onClick: () => void | Promise<void>
   disabled?: boolean
   loading?: boolean
 }
@@ -66,5 +66,5 @@ export type DialogControls =
   | {
       kind: "back"
       label: string
-      onClick: () => void
+      onClick: () => void | Promise<void>
     }

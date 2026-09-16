@@ -6,7 +6,7 @@ import { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import { F0TagList, TagType } from "@/components/tags/F0TagList"
 
 interface TagListValue {
-  tags: Array<Omit<TagVariant, "type">>
+  tags: Omit<TagVariant, "type">[]
   max?: number
   type: TagType
 }

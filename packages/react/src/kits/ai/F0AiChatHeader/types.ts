@@ -1,5 +1,4 @@
 import type { IconType } from "@/components/F0Icon"
-
 import type { AiChatCredits, AiChatEmployeeCredits } from "../F0AiChat/types"
 
 export interface F0AiChatHeaderAction {

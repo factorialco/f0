@@ -1,10 +1,8 @@
 import React, { act } from "react"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
-import type { GraphNode } from "../types"
 import { F0Graph } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 // Spy the props React Flow is rendered with so we can assert whether F0 leaves
 // React Flow's OWN `onlyRenderVisibleElements` culling on. The real ReactFlow is

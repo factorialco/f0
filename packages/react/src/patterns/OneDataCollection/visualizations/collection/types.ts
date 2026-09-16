@@ -1,13 +1,15 @@
+import { IconType } from "@/components/F0Icon"
+import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import type {
   FiltersDefinition,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-
-import { IconType } from "@/components/F0Icon"
-import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
-import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-
 import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
+import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "../../item-actions"
+import { NavigationFiltersDefinition } from "../../navigationFilters/types"
+import { SummariesDefinition } from "../../summary"
 import type {
   GroupingDefinition,
   OnLoadDataCallback,
@@ -17,13 +19,8 @@ import type { CardVisualizationOptions } from "./Card"
 import type { EditableTableVisualizationOptions } from "./EditableTable"
 import type { GraphVisualizationOptions } from "./Graph/types"
 import type { KanbanVisualizationOptions } from "./Kanban"
-import type { TableVisualizationOptions } from "./Table"
-
-import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "../../item-actions"
-import { NavigationFiltersDefinition } from "../../navigationFilters/types"
-import { SummariesDefinition } from "../../summary"
 import { ListVisualizationOptions } from "./List/types"
+import type { TableVisualizationOptions } from "./Table"
 
 /**
  * Optional per-visualization filter and preset overrides.
@@ -50,18 +47,22 @@ export type VisualizationFilterOverrides<
 }
 
 /**
- * Optional per-visualization label override for built-in visualization types.
+ * Optional per-visualization overrides for built-in visualization types.
  * When omitted, the localized built-in label from
- * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
+ * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") and the icon
+ * from the built-in registry are used.
  *
- * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
- * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
- * comes from the built-in registry for the visualization type.
+ * Lets consumers tailor the view switcher chip per instance, e.g. show "Org chart"
+ * instead of "Graph" for employees, or give an editable table the table icon
+ * rather than the built-in pencil.
  */
 export type VisualizationLabelOverrides = {
   /** Custom label shown in the view switcher chip and Settings selector.
    *  Defaults to the localized built-in label for this visualization type. */
   label?: string
+  /** Custom icon shown in the view switcher chip and Settings selector.
+   *  Defaults to the built-in icon for this visualization type. */
+  icon?: IconType
 }
 
 /**
@@ -185,17 +186,15 @@ export type VisualizationProps<
   Grouping extends GroupingDefinition<Record>,
 > = {
   /** Array of available visualization configurations */
-  visualizations?: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations?: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
 }
 
 /**

@@ -1,9 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import image from "@storybook-static/avatars/person04.jpg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { F0Link } from "@/components/F0Link"
 import {
   Add,
@@ -26,7 +24,6 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
-
 import {
   cardAlertVariants,
   cardImageFits,
@@ -57,7 +54,15 @@ const InteractiveChildrenContent = () => {
         This card has a link, but the children are interactive.
       </p>
       <div className="flex items-center justify-between">
-        <F0Link href="https://google.com" target="_blank">
+        {/*
+         * `py-0.5` takes the link from its 20px line box to a 24px target so it
+         * satisfies WCAG 2.2 SC 2.5.8 (Target Size, Minimum) on its own. A bare
+         * text link would only pass via the spacing exception, and the switch
+         * sits 11px away — well inside the 24px that exception needs. The
+         * inline exception does not apply either: this is a standalone action,
+         * not a link inside a sentence.
+         */}
+        <F0Link href="https://google.com" target="_blank" className="py-0.5">
           Click me (goes to Google)
         </F0Link>
         <Switch
@@ -85,8 +90,12 @@ const meta = {
     docs: {
       story: { inline: false, height: "320px" },
     },
+    a11y: { test: "error" },
   },
-  tags: ["autodocs", "stable"],
+  // `!autodocs` because Card.mdx is the docs page — the same pairing every other
+  // MDX-documented stable component uses (F0Button, F0Avatar, F0AvatarList,
+  // F0Alert, F0Icon).
+  tags: ["stable", "!autodocs"],
   argTypes: {
     imageFit: {
       control: "select",
@@ -160,11 +169,11 @@ export const Default: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Daniel",
-      lastName: "Moreno",
+      firstName: "Jordan",
+      lastName: "Avery",
     },
     compact: false,
-    title: "Daniel Moreno",
+    title: "Daniel Avery",
     description: "This is a cool description",
     metadata: [
       {
@@ -774,14 +783,14 @@ export const WithDismissibleAlert: Story = {
             onDismiss: () => setVisible(false),
           }}
         />
-        {!visible && (
+        {!visible ? (
           <button
             className="self-start text-sm text-f1-foreground-secondary underline"
             onClick={() => setVisible(true)}
           >
             Restore alert
           </button>
-        )}
+        ) : null}
       </div>
     )
   },
@@ -807,7 +816,7 @@ export const WithAlertAction: Story = {
             },
           }}
         />
-        {actioned && (
+        {actioned ? (
           <button
             type="button"
             className="self-start text-sm text-f1-foreground-secondary underline"
@@ -815,7 +824,7 @@ export const WithAlertAction: Story = {
           >
             Reset action
           </button>
-        )}
+        ) : null}
       </div>
     )
   },

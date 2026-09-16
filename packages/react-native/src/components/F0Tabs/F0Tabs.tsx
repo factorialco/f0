@@ -75,10 +75,14 @@ const F0TabsBase = React.memo(function F0Tabs({
 
   const scrollToTab = useCallback(
     (id: string, animated = true) => {
-      if (fullWidth) return
+      if (fullWidth) {
+        return
+      }
 
       const layout = tabLayouts.current[id]
-      if (!layout || containerWidth <= 0) return
+      if (!layout || containerWidth <= 0) {
+        return
+      }
 
       const targetX = layout.x + layout.width / 2 - containerWidth / 2
       const maxOffset = Math.max(0, contentWidth - containerWidth)
@@ -91,7 +95,9 @@ const F0TabsBase = React.memo(function F0Tabs({
 
   // Sync controlled active tab id → internal state + indicator animation
   useEffect(() => {
-    if (controlledActiveTabId === undefined) return
+    if (controlledActiveTabId === undefined) {
+      return
+    }
 
     setActiveId(controlledActiveTabId)
 
@@ -215,7 +221,9 @@ const F0TabsBase = React.memo(function F0Tabs({
               onLayout={(e) => handleTabLayout(tab.id, e)}
               disabled={isDisabled}
               onPress={() => {
-                if (isDisabled) return
+                if (isDisabled) {
+                  return
+                }
                 tab.onPress?.()
                 handleTabPress(tab.id)
               }}

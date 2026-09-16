@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRenderHook } from "@/testing/test-utils"
-
-import type { GraphEdge, TreeNode } from "../types"
-
 import { useLayoutEngine } from "../hooks/useLayoutEngine"
+import type { GraphEdge, TreeNode } from "../types"
 
 // ─── Helpers ───────────────────────────────────────────────────
 
@@ -44,13 +41,13 @@ function flattenTree(root: TreeNode<string>): TreeNode<string>[] {
 /** Compute bounding box {minX, maxX, minY, maxY} for a set of node IDs. */
 function bbox(
   layout: {
-    nodes: Array<{
+    nodes: {
       id: string
       x: number
       y: number
       width: number
       height: number
-    }>
+    }[]
   },
   ids: string[]
 ) {
@@ -60,10 +57,18 @@ function bbox(
   let minY = Infinity
   let maxY = -Infinity
   for (const n of filtered) {
-    if (n.x < minX) minX = n.x
-    if (n.x + n.width > maxX) maxX = n.x + n.width
-    if (n.y < minY) minY = n.y
-    if (n.y + n.height > maxY) maxY = n.y + n.height
+    if (n.x < minX) {
+      minX = n.x
+    }
+    if (n.x + n.width > maxX) {
+      maxX = n.x + n.width
+    }
+    if (n.y < minY) {
+      minY = n.y
+    }
+    if (n.y + n.height > maxY) {
+      maxY = n.y + n.height
+    }
   }
   return { minX, maxX, minY, maxY }
 }

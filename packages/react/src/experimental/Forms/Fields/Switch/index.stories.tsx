@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, within } from "storybook/test"
-
-import { Switch } from "./index"
+import { Switch } from "."
 
 const meta = {
   component: Switch,
@@ -91,5 +89,44 @@ export const NoLabel: Story = {
   render: (args) => {
     const [checked, setChecked] = useState(false)
     return <Switch {...args} checked={checked} onCheckedChange={setChecked} />
+  },
+}
+
+/**
+ * Regression guard for WCAG 2.2 SC 2.5.8 (Target Size, Minimum).
+ *
+ * Two switches sit 8px apart, closer than the 24px of clear space the spec's
+ * spacing exception needs. That leaves the switch's own box as the only way to
+ * satisfy the criterion, which is exactly the situation a form row or a card
+ * footer creates. With the 20px (`h-5`) switch this story failed axe with
+ * `target-size` on both controls; with the 24px hit area it passes on size
+ * regardless of how close the neighbours are.
+ *
+ * `a11y: { test: "error" }` makes it blocking — the global default in
+ * `.storybook/preview.tsx` is `todo`, which reports without failing.
+ */
+export const AdjacentTargets: Story = {
+  parameters: {
+    a11y: { test: "error" },
+  },
+  render: () => {
+    const [first, setFirst] = useState(false)
+    const [second, setSecond] = useState(true)
+    return (
+      <div className="flex flex-row gap-2">
+        <Switch
+          title="Email alerts"
+          hideLabel
+          checked={first}
+          onCheckedChange={setFirst}
+        />
+        <Switch
+          title="Push alerts"
+          hideLabel
+          checked={second}
+          onCheckedChange={setSecond}
+        />
+      </div>
+    )
   },
 }

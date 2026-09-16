@@ -67,6 +67,8 @@ export interface ComponentEntry {
   hasStories: boolean
   hasUnitTests: boolean
   hasPlayFunction: boolean
+  /** Has a Chromatic visual-regression snapshot story (`withSnapshot(...)`). */
+  hasSnapshot: boolean
   hasMdxDocs: boolean
   docQuality: DocQuality
   docSignals: DocSignals
@@ -176,8 +178,12 @@ function effectiveStatusOf(
   meetsBar: boolean,
   taggedStable: boolean
 ): ApiStatus {
-  if (apiStatus === "deprecated") return "deprecated"
-  if (apiStatus === "internal") return "internal"
+  if (apiStatus === "deprecated") {
+    return "deprecated"
+  }
+  if (apiStatus === "internal") {
+    return "internal"
+  }
   return taggedStable && meetsBar ? "stable" : "experimental"
 }
 
@@ -214,6 +220,24 @@ function summarize(
   return "Experimental. Complete the checklist below to reach stable."
 }
 
+/** Component naming convention: "F0" followed by an uppercase letter. */
+export const F0_NAME_PATTERN = /^F0[A-Z]/
+
+/**
+ * The component's code name — the leaf of its folder, given its story file
+ * path (a story in `__stories__/` maps to the parent folder). Story titles
+ * legitimately drop the F0 prefix ("Checkbox" ↔ `F0Checkbox/`), so naming is
+ * checked against the folder, which matches the exported symbol.
+ */
+export function componentFolderName(storyFile: string): string {
+  const parts = storyFile.split("/")
+  parts.pop() // the story file itself
+  if (parts[parts.length - 1] === "__stories__") {
+    parts.pop()
+  }
+  return parts[parts.length - 1] ?? ""
+}
+
 const DOC_QUALITY_ORDER: DocQuality[] = [
   "none",
   "stub",
@@ -243,13 +267,21 @@ export function a11yTierAtLeast(actual: A11yTier, min: A11yTier): boolean {
  * changes for 60 days, and Foundations approval. Those remain manual promotion
  * gates (see Lifecycle/Definition of Done).
  */
-export const STABLE_REQUIREMENTS: ReadonlyArray<{
+export const STABLE_REQUIREMENTS: readonly {
   key: string
   label: string
   detail: string
-  criteria?: Array<{ label: string; isMet: (c: ComponentEntry) => boolean }>
+  criteria?: { label: string; isMet: (c: ComponentEntry) => boolean }[]
   isMet: (c: ComponentEntry) => boolean
-}> = [
+}[] = [
+  {
+    key: "naming",
+    label: 'Named with the "F0" prefix',
+    detail:
+      'The component folder and exported symbol are "F0" followed by an ' +
+      "uppercase letter (e.g. F0Button).",
+    isMet: (c) => F0_NAME_PATTERN.test(componentFolderName(c.storyFile)),
+  },
   {
     key: "stories",
     label: "Has Storybook stories",
@@ -269,6 +301,13 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
     detail:
       "A Storybook play function (interaction test) covering the primary user flow.",
     isMet: (c) => c.hasPlayFunction,
+  },
+  {
+    key: "snapshot",
+    label: "Has a visual snapshot story",
+    detail:
+      "A Chromatic visual-regression story (via withSnapshot) that renders the component's variants, so unintended visual changes are caught.",
+    isMet: (c) => c.hasSnapshot,
   },
   {
     key: "mdxDocs",
@@ -333,8 +372,11 @@ export function evaluateComponentStatus(
   const taggedStable = entry.apiStatus === "stable"
 
   let discrepancy: ComponentStatus["discrepancy"] = null
-  if (taggedStable && !meetsBar) discrepancy = "tagged-but-below-bar"
-  else if (!taggedStable && meetsBar) discrepancy = "meets-bar-not-tagged"
+  if (taggedStable && !meetsBar) {
+    discrepancy = "tagged-but-below-bar"
+  } else if (!taggedStable && meetsBar) {
+    discrepancy = "meets-bar-not-tagged"
+  }
 
   const effectiveStatus = effectiveStatusOf(
     entry.apiStatus,
@@ -386,13 +428,25 @@ export function getComponentStatus(
   name: string,
   components: ComponentEntry[] = componentStatusData.components
 ): ComponentStatus | null {
-  if (!name) return null
+  if (!name) {
+    return null
+  }
   const target = normalize(name)
   const targetLeaf = normalize(leaf(name))
 
-  // When several entries match, prefer the one in the "components" zone.
-  const pick = (pool: ComponentEntry[]) =>
-    pool.find((c) => c.zone === "components") ?? pool[0]
+  // When several entries match, prefer the one spelled exactly like the query.
+  // `normalize` drops an `F0` prefix so that "Button" finds "F0Button", which
+  // also means "F0AiCallout" and "AICallout" land in the same pool — and
+  // without this the deprecated twin could win and report a live component as
+  // scheduled for removal. Zone is the next tie-break, as before.
+  // It narrows the pool rather than replacing the zone rule: with two entries
+  // both named "Button", both are exact and the zone still decides.
+  const queryLeaf = leaf(name).toLowerCase()
+  const pick = (pool: ComponentEntry[]) => {
+    const exact = pool.filter((c) => leaf(c.name).toLowerCase() === queryLeaf)
+    const candidates = exact.length > 0 ? exact : pool
+    return candidates.find((c) => c.zone === "components") ?? candidates[0]
+  }
 
   // Tier 1 — exact full-name match. Handles fully-qualified Storybook titles
   // like "Data Collection/Visualizations/Card" resolving to that exact entry.

@@ -1,7 +1,7 @@
 export type * from "@/hooks/datasource/types/sortings.typings"
 export type * from "@/patterns/OneFilterPicker/exports"
 export type * from "./actions"
-export { OneDataCollection } from "./index"
+export { OneDataCollection } from "."
 export type * from "./item-actions"
 export type * from "./navigationFilters/types"
 export type * from "./summary"
@@ -24,3 +24,9 @@ export type {
   CustomVisualizationProps,
   VisualizationFilterOverrides,
 } from "./visualizations/collection/types"
+export type { GraphVisualizationOptions } from "./visualizations/collection/Graph/types"
+// The graph visualization's `viewportInset` field carries this type. It is
+// declared in the F0Graph pattern, which has no public barrel of its own, so
+// re-export it here (alongside the options that use it) to give consumers a
+// name to import instead of restructuring the shape by hand.
+export type { ViewportInset } from "@/patterns/F0Graph"

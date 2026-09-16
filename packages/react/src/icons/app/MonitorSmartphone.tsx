@@ -16,21 +16,18 @@ const SvgMonitorSmartphone = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M10 19v-3.96 3.15"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M7 19h5"
-      vectorEffect="non-scaling-stroke"
     />
     <rect
       width={6}
@@ -41,7 +38,6 @@ const SvgMonitorSmartphone = (
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

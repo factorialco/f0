@@ -1,6 +1,6 @@
 import { useState } from "react"
-
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import UpsellIcon from "@/icons/app/Upsell"
 import { withDataTestId } from "@/lib/data-testid"
 import {
   ErrorMessageProps,
@@ -8,7 +8,6 @@ import {
   SuccessMessageProps,
   UpsellRequestResponseDialog,
 } from "@/sds/UpsellingKit/UpsellRequestResponseDialog"
-import UpsellIcon from "@/icons/app/Upsell"
 
 export interface LoadingStateProps {
   label: string
@@ -119,7 +118,7 @@ function _UpsellingButton({
         loading={isLoading}
         {...props}
       />
-      {showConfirmation && responseStatus && (
+      {showConfirmation && responseStatus ? (
         <UpsellRequestResponseDialog
           open={true}
           onClose={handleModalClose}
@@ -130,7 +129,7 @@ function _UpsellingButton({
           closeLabel={closeLabel}
           portalContainer={portalContainer}
         />
-      )}
+      ) : null}
     </>
   )
 }

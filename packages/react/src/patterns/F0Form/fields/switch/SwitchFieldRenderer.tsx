@@ -1,15 +1,13 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 import { ZodTypeAny } from "zod"
-
 import { Switch } from "@/experimental/Forms/Fields/Switch"
-
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
-import type { F0SwitchField } from "./types"
 import type { ResolvedField } from "../types"
+import type { F0SwitchField } from "./types"
 
 interface SwitchFieldRendererProps {
   field: ResolvedField<F0SwitchField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
 }
 
 /**

@@ -1,12 +1,10 @@
-import { format, isValid } from "date-fns"
+import { format, isValid, type Locale } from "date-fns"
 import { type MouseEvent, useMemo } from "react"
-
 import type { IconType } from "@/components/F0Icon"
-
 import { ChevronRight, Delete, Pencil } from "@/icons/app"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-
 import type {
   EntitiesListItem,
   F0EntitiesListFieldTag,
@@ -59,12 +57,12 @@ function renderTag(tag: F0EntitiesListFieldTag) {
 
 interface EntitiesListViewProps {
   /** Rows to display, each carrying a stable `__key`. */
-  rows: ReadonlyArray<Row>
+  rows: readonly Row[]
   /**
    * Visible fields in display order. The first is used as the row title and
    * the rest as description lines, unless overridden by `listItem`.
    */
-  fields: ReadonlyArray<EntitiesListViewField>
+  fields: readonly EntitiesListViewField[]
   /** Optional overrides for the row title/description/avatar. */
   listItem?: F0EntitiesListItemDefinition
   /** Opens the edit dialog for a row key (omitted in navigable/disabled mode). */
@@ -85,18 +83,23 @@ interface EntitiesListViewProps {
   /** Per-row link — makes the row navigable with a trailing arrow (nav mode). */
   getRowHref?: (rowKey: string) => string | undefined
   /** Custom per-row actions (archive/unarchive, …), shown in the overflow menu. */
-  getRowActions?: (rowKey: string) => ReadonlyArray<EntitiesListViewAction>
+  getRowActions?: (rowKey: string) => readonly EntitiesListViewAction[]
   editLabel: string
   removeLabel: string
   viewLabel: string
 }
 
 /** Renders a value for a description line: dates format, arrays join. */
-function formatValue(value: unknown): string {
-  if (value === null || value === undefined) return ""
-  if (value instanceof Date)
-    return isValid(value) ? format(value, "dd MMM yyyy") : ""
-  if (Array.isArray(value)) return value.map((v) => String(v)).join(", ")
+function formatValue(value: unknown, locale: Locale): string {
+  if (value === null || value === undefined) {
+    return ""
+  }
+  if (value instanceof Date) {
+    return isValid(value) ? format(value, "dd MMM yyyy", { locale }) : ""
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v)).join(", ")
+  }
   return String(value)
 }
 
@@ -121,6 +124,7 @@ export function EntitiesListView({
   removeLabel,
   viewLabel,
 }: EntitiesListViewProps) {
+  const locale = useDateFnsLocale()
   const titleField = fields[0]
   // Fields after the title split into right-side tags and description lines.
   const restFields = fields.slice(1)
@@ -215,11 +219,11 @@ export function EntitiesListView({
           itemDefinition: (record: ListRecord) => ({
             title:
               listItem?.title?.(record) ??
-              (titleField ? formatValue(record[titleField.id]) : ""),
+              (titleField ? formatValue(record[titleField.id], locale) : ""),
             description:
               listItem?.description?.(record) ??
               descriptionFields
-                .map((field) => formatValue(record[field.id]))
+                .map((field) => formatValue(record[field.id], locale))
                 .filter(Boolean),
             avatar: listItem?.avatar?.(record),
           }),
@@ -255,6 +259,7 @@ export function EntitiesListView({
       },
     ],
     [
+      locale,
       listItem,
       titleField,
       descriptionFields,
@@ -276,7 +281,9 @@ export function EntitiesListView({
   // leaving row links and real `type="button"` controls untouched.
   const suppressImplicitSubmit = (e: MouseEvent) => {
     const button = (e.target as HTMLElement).closest("button")
-    if (button && button.type !== "button") e.preventDefault()
+    if (button && button.type !== "button") {
+      e.preventDefault()
+    }
   }
 
   return (

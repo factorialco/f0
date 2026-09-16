@@ -1,22 +1,18 @@
 import userEvent from "@testing-library/user-event"
 import React, { useRef } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-
 import {
   zeroRender as render,
   screen,
   waitFor,
+  within,
   act,
 } from "@/testing/test-utils"
-
-import type { F0FieldAlertProps } from "../f0Schema"
-import type { F0SectionConfig } from "../types"
-import type { F0FormRef } from "../useF0Form"
-
 import { createConditionalResolver } from "../conditionalResolver"
 import { generateAnchorId } from "../context"
 import { F0Form } from "../F0Form"
+import type { F0FieldAlertProps } from "../f0Schema"
 import {
   f0FormField,
   getF0Config,
@@ -25,6 +21,8 @@ import {
 } from "../f0Schema"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
+import type { F0SectionConfig } from "../types"
+import type { F0FormRef } from "../useF0Form"
 import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
@@ -407,23 +405,19 @@ describe("inferFieldType", () => {
     expect(inferFieldType(schema, config)).toBe("text")
   })
 
-  it("infers number type from ZodNumber", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "number" } as const
-    expect(inferFieldType(schema, config)).toBe("number")
-  })
-
-  it("infers duration type from explicit fieldType", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "duration" } as const
-    expect(inferFieldType(schema, config)).toBe("duration")
-  })
-
-  it("infers switch type from ZodBoolean", () => {
-    const schema = z.boolean()
-    const config = { label: "Test", fieldType: "switch" } as const
-    expect(inferFieldType(schema, config)).toBe("switch")
-  })
+  it.each([
+    { fieldType: "number", schema: z.number() },
+    { fieldType: "duration", schema: z.number() },
+    { fieldType: "switch", schema: z.boolean() },
+    { fieldType: "percentage", schema: z.number() },
+    { fieldType: "money", schema: z.number() },
+  ] as const)(
+    "infers $fieldType type from explicit fieldType",
+    ({ fieldType, schema }) => {
+      const config = { label: "Test", fieldType } as const
+      expect(inferFieldType(schema, config)).toBe(fieldType)
+    }
+  )
 
   it("infers textarea from rows config", () => {
     const schema = z.string()
@@ -451,18 +445,6 @@ describe("inferFieldType", () => {
       fieldType: "checkbox",
     } as const
     expect(inferFieldType(schema, config)).toBe("checkbox")
-  })
-
-  it("infers percentage type from explicit fieldType", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "percentage" } as const
-    expect(inferFieldType(schema, config)).toBe("percentage")
-  })
-
-  it("infers money type from explicit fieldType", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "money" } as const
-    expect(inferFieldType(schema, config)).toBe("money")
   })
 })
 
@@ -535,10 +517,10 @@ describe("getSchemaDefinition", () => {
 
     expect(definition).toHaveLength(3)
     // Fields should be in declaration order
-    const fieldItems = definition as Array<{
+    const fieldItems = definition as {
       type: "field"
       field: { id: string }
-    }>
+    }[]
     expect(fieldItems[0].field.id).toBe("first")
     expect(fieldItems[1].field.id).toBe("second")
     expect(fieldItems[2].field.id).toBe("third")
@@ -562,7 +544,7 @@ describe("getSchemaDefinition", () => {
     expect(definition[0].type).toBe("row")
     const rowDef = definition[0] as {
       type: "row"
-      fields: Array<{ id: string }>
+      fields: { id: string }[]
     }
     expect(rowDef.fields).toHaveLength(2)
   })
@@ -4023,6 +4005,287 @@ describe("F0Form sections sidepanel scroll", () => {
   })
 })
 
+describe("F0Form showOnlySelectedSection", () => {
+  const sections: Record<string, F0SectionConfig> = {
+    personal: { title: "Personal" },
+    contact: { title: "Contact" },
+  }
+
+  const buildPerSectionSchema = () => ({
+    personal: z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    }),
+    contact: z.object({
+      email: f0FormField(z.string(), { label: "Email" }),
+    }),
+  })
+
+  const getSidebar = (container: HTMLElement) => {
+    const sidebar = container.querySelector<HTMLElement>(".sticky")
+    expect(sidebar).toBeInTheDocument()
+    return sidebar!
+  }
+
+  it("renders only the active section and switches via the sidepanel", async () => {
+    const user = userEvent.setup()
+
+    const { container } = render(
+      <F0Form
+        name="only-selected-per-section"
+        schema={buildPerSectionSchema()}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+      />
+    )
+
+    // In per-section mode the anchor id is on the wrapper div itself
+    const personal = document.getElementById(
+      generateAnchorId("only-selected-per-section", "personal")
+    )
+    const contact = document.getElementById(
+      generateAnchorId("only-selected-per-section", "contact")
+    )
+
+    expect(personal).not.toHaveClass("hidden")
+    expect(contact).toHaveClass("hidden")
+
+    await user.click(within(getSidebar(container)).getByText("Contact"))
+
+    expect(personal).toHaveClass("hidden")
+    expect(contact).not.toHaveClass("hidden")
+  })
+
+  it("preserves field values when switching between sections", async () => {
+    const user = userEvent.setup()
+
+    const { container } = render(
+      <F0Form
+        name="only-selected-values"
+        schema={buildPerSectionSchema()}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+      />
+    )
+
+    await user.type(screen.getByLabelText("Name"), "Ada")
+
+    const sidebar = getSidebar(container)
+    await user.click(within(sidebar).getByText("Contact"))
+    await user.click(within(sidebar).getByText("Personal"))
+
+    expect(screen.getByLabelText("Name")).toHaveValue("Ada")
+  })
+
+  it("keeps all sections visible when showOnlySelectedSection is set without the sidepanel", () => {
+    render(
+      <F0Form
+        name="only-selected-no-sidepanel"
+        schema={buildPerSectionSchema()}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showOnlySelectedSection: true }}
+      />
+    )
+
+    expect(
+      document.getElementById(
+        generateAnchorId("only-selected-no-sidepanel", "personal")
+      )
+    ).not.toHaveClass("hidden")
+    expect(
+      document.getElementById(
+        generateAnchorId("only-selected-no-sidepanel", "contact")
+      )
+    ).not.toHaveClass("hidden")
+  })
+})
+
+describe("F0Form sidepanel renderIf filtering", () => {
+  const buildConditionalSchema = () =>
+    z.object({
+      showExtra: f0FormField(z.boolean(), {
+        label: "Show extra",
+        fieldType: "checkbox",
+        section: "personal",
+      }),
+      name: f0FormField(z.string(), {
+        label: "Name",
+        section: "personal",
+      }),
+      extra: f0FormField(z.string().optional(), {
+        label: "Extra field",
+        section: "extra",
+      }),
+    })
+
+  const conditionalSections: Record<string, F0SectionConfig> = {
+    personal: { title: "Personal" },
+    extra: {
+      title: "Extra",
+      renderIf: ({ values }) => values.showExtra === true,
+    },
+  }
+
+  const getSidebar = (container: HTMLElement) => {
+    const sidebar = container.querySelector<HTMLElement>(".sticky")
+    expect(sidebar).toBeInTheDocument()
+    return sidebar!
+  }
+
+  it("omits conditionally-hidden sections from the sidepanel and adds them when the condition becomes true", async () => {
+    const user = userEvent.setup()
+
+    const { container } = render(
+      <F0Form
+        name="toc-renderif"
+        schema={buildConditionalSchema()}
+        defaultValues={{ showExtra: false, name: "", extra: "" }}
+        onSubmit={async () => ({ success: true })}
+        sections={conditionalSections}
+        styling={{ showSectionsSidepanel: true }}
+      />
+    )
+
+    const sidebar = getSidebar(container)
+
+    // The "extra" section is hidden by renderIf, so it must not be listed
+    expect(within(sidebar).getByText("Personal")).toBeInTheDocument()
+    expect(within(sidebar).queryByText("Extra")).not.toBeInTheDocument()
+
+    await user.click(screen.getByLabelText("Show extra"))
+
+    expect(within(sidebar).getByText("Extra")).toBeInTheDocument()
+  })
+})
+
+describe("F0Form sidepanel on small screens", () => {
+  const originalMatchMedia = window.matchMedia
+
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia
+  })
+
+  // Make the small-screen media query match, mirroring the global stub shape
+  const stubSmallScreen = () => {
+    window.matchMedia = ((query: string) => ({
+      matches: query === "(max-width: 560px)",
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })) as unknown as typeof window.matchMedia
+  }
+
+  const sections: Record<string, F0SectionConfig> = {
+    personal: { title: "Personal" },
+    contact: { title: "Contact" },
+  }
+
+  it("hides the sidepanel and stacks all sections on small screens (single schema)", async () => {
+    stubSmallScreen()
+
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name", section: "personal" }),
+      email: f0FormField(z.string(), { label: "Email", section: "contact" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="mobile-sidepanel"
+        schema={formSchema}
+        defaultValues={{ name: "", email: "" }}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true }}
+      />
+    )
+
+    // The sidepanel layout (scroll container + sticky sidebar) is not used
+    await waitFor(() => {
+      expect(
+        container.querySelector(".overflow-scroll")
+      ).not.toBeInTheDocument()
+    })
+    expect(container.querySelector(".sticky")).not.toBeInTheDocument()
+
+    // All sections stack vertically
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("hides the sidepanel and stacks all sections on small screens (per-section schema)", async () => {
+    stubSmallScreen()
+
+    const schema = {
+      personal: z.object({
+        name: f0FormField(z.string(), { label: "Name" }),
+      }),
+      contact: z.object({
+        email: f0FormField(z.string(), { label: "Email" }),
+      }),
+    }
+
+    const { container } = render(
+      <F0Form
+        name="mobile-sidepanel-per-section"
+        schema={schema}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+      />
+    )
+
+    await waitFor(() => {
+      expect(container.querySelector(".sticky")).not.toBeInTheDocument()
+    })
+
+    expect(
+      document.getElementById(
+        generateAnchorId("mobile-sidepanel-per-section", "personal")
+      )
+    ).not.toHaveClass("hidden")
+    expect(
+      document.getElementById(
+        generateAnchorId("mobile-sidepanel-per-section", "contact")
+      )
+    ).not.toHaveClass("hidden")
+  })
+})
+
+describe("F0Form row layout", () => {
+  it("row fields stack and take the full width below the xs breakpoint", () => {
+    const formSchema = z.object({
+      from: f0FormField(z.string(), { label: "From", row: "dates" }),
+      to: f0FormField(z.string(), { label: "To", row: "dates" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="row-layout"
+        schema={formSchema}
+        defaultValues={{ from: "", to: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const rowEl = container.querySelector('[class*="@[480px]:flex-row"]')
+    expect(rowEl).toBeInTheDocument()
+    // The row responds to its container width (not the viewport): stacks
+    // vertically below 480px of available space, side by side above
+    expect(rowEl).toHaveClass("flex-col", "@[480px]:flex-row")
+    expect(rowEl!.parentElement).toHaveClass("@container")
+    // Each field spans the full width when stacked. In row mode the w-full
+    // is inert: flex-1 sets flex-basis 0, which takes precedence over width
+    // for main-axis sizing, so fields keep equal widths.
+    expect(rowEl).toHaveClass("[&>*]:w-full", "[&>*]:flex-1")
+  })
+})
+
 describe("F0Form renderIf hidden field layout", () => {
   it("wrapper div of a hidden field (renderIf=false) has the has-[>span.hidden]:hidden class so it does not impact layout", () => {
     const formSchema = z.object({
@@ -4102,7 +4365,7 @@ describe("F0Form clearing optional values", () => {
       }),
     })
 
-    const submissions: Array<number | undefined> = []
+    const submissions: (number | undefined)[] = []
 
     const Harness = () => {
       const [budget, setBudget] = React.useState<number | undefined>(50)

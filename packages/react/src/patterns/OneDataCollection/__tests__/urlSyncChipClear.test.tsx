@@ -1,12 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest"
-
 import {
   screen,
   userEvent,
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { ExampleComponent } from "../__stories__/mockData"
 
 afterEach(() => {

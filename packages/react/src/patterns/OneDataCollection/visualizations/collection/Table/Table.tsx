@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
-
+import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Icon } from "@/components/F0Icon"
 import {
   OneTable,
   TableBody,
@@ -26,19 +26,14 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { Add } from "@/icons/app"
+import { Add, MaximizeHorizontal, MinimizeHorizontal } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
-
-import type {
-  TableCustomizationProps,
-  TableVisualizationOptions,
-} from "./types"
-
+import { tableCellContentClassName } from "@/ui/value-display/const"
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -50,10 +45,15 @@ import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
-import { useColumns } from "./hooks/useColums"
+import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
+import { getColumnId, useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
+import type {
+  TableCustomizationProps,
+  TableVisualizationOptions,
+} from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -63,7 +63,9 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
+  if (!result) {
+    return []
+  }
   return (Array.isArray(result) ? result : [result]).filter(
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
@@ -102,13 +104,18 @@ export const TableCollection = <
   columns: originalColumns,
   source,
   frozenColumns = 0,
+  defaultExpanded,
   onSelectItems,
   onLoadData,
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  lockedColumnIds,
+  onLockedColumnIdsChange,
   referenceRowType,
-  headerGroupLabels,
+  boldRootRows,
+  headerGroups: headerGroupsOption,
+  onHeaderGroupCollapsedChange,
   bordered,
   rowWrapper: RowWrapper,
   cellRenderer,
@@ -129,30 +136,72 @@ export const TableCollection = <
   TableCustomizationProps<R, Sortings, Summaries>) => {
   const { t, ...i18n } = useI18n()
   const addRow = useAddRow()
-  // Created a motion component for the row
+  // Created a motion component for the row.
+  //
+  // Memoized on the OUTSIDE of `motion.create`, not on `Row`: rows carry framer's
+  // `layout` prop, so the wrapper measures each row's box on every commit. A memo
+  // inside would skip React's render of the row but still pay that measurement,
+  // which is a large part of what makes a full-table commit expensive.
+  //
+  // Default shallow comparison on purpose. A hand-written comparator is faster but
+  // fails unsafely — omit a prop and a row silently shows stale data. Shallow only
+  // skips when every prop is identical, so a prop we have not stabilized costs a
+  // render rather than correctness.
   const [MotionRow] = useState(() =>
-    motion.create(
-      Row<
-        R,
-        Filters,
-        Sortings,
-        Summaries,
-        ItemActions,
-        NavigationFilters,
-        Grouping
-      >
+    memo(
+      motion.create(
+        Row<
+          R,
+          Filters,
+          Sortings,
+          Summaries,
+          ItemActions,
+          NavigationFilters,
+          Grouping
+        >
+      )
     )
   )
 
   const { settings } = useDataCollectionSettings()
+  const usesExplicitColumnLocking =
+    lockedColumnIds !== undefined || !!onLockedColumnIdsChange
 
   // Sorted and hidden columns
-  const { columns } = useColumns(
+  const { columns: orderedColumns, stickyColumnIds } = useColumns({
     originalColumns,
     frozenColumns,
-    visualizationSettings ?? settings.visualization?.table,
-    allowColumnReordering,
-    allowColumnHiding
+    settings: visualizationSettings ?? settings.visualization?.table,
+    allowSorting: allowColumnReordering,
+    allowHiding: allowColumnHiding,
+    lockedColumnIds,
+    usesExplicitColumnLocking,
+  })
+  const stickyColumnIdSet = useMemo(
+    () => new Set(stickyColumnIds),
+    [stickyColumnIds]
+  )
+
+  // Header groups own the collapsed state and drop the columns hidden by a
+  // collapsed group, so everything downstream renders off `columns` unchanged.
+  const {
+    columns,
+    headerGroups,
+    toggleHeaderGroup,
+    collapsingCellClasses,
+    collapseTransitions,
+    settleHeaderGroup,
+  } = useHeaderGroups(orderedColumns, {
+    headerGroups: headerGroupsOption,
+    onCollapsedChange: onHeaderGroupCollapsedChange,
+    preservedColumnIds: stickyColumnIdSet,
+  })
+
+  const tableContainerRef = useRef<HTMLDivElement>(null)
+  useColumnCollapseAnimation(
+    tableContainerRef,
+    collapseTransitions,
+    settleHeaderGroup
   )
 
   const {
@@ -163,6 +212,7 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
+    committedQuery,
   } = useDataCollectionData<
     R,
     Filters,
@@ -197,6 +247,29 @@ export const TableCollection = <
     [source, showItemActionsProp]
   )
 
+  // Rows read the pinned definition, never the live source: its identity churns
+  // every consumer render, which no row memo can survive. A hand-built source
+  // has no `definition`, and falls back to re-rendering as it did before.
+  const rowDefinition = source.definition ?? source
+  const rowSource = useMemo(
+    () =>
+      showItemActionsProp === false
+        ? { ...rowDefinition, itemActions: undefined }
+        : rowDefinition,
+    [rowDefinition, showItemActionsProp]
+  )
+
+  // Children are fetched too late for this component to resolve anything for
+  // them, and resolving one reads the current filters and sortings. Flat rows
+  // get `undefined`, which is stable.
+  const liveSourceFor = (record: R) =>
+    effectiveSource.itemsWithChildren?.(record) ? effectiveSource : undefined
+
+  // Called with no arguments at every use site, so the result is always the same
+  // object by value. Building it once stops every row receiving a fresh
+  // `variants` prop on each render.
+  const rowAnimationVariants = useMemo(() => getAnimationVariants(), [])
+
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
     paginationInfo,
@@ -216,7 +289,7 @@ export const TableCollection = <
     // eslint-disable-next-line react-hooks/exhaustive-deps --  we don't want to re-run this effect when the filters change, just when the data changes
   }, [paginationInfo?.total, data.records])
 
-  const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
+  const frozenColumnsLeft = stickyColumnIds.length
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return `id:${String(item.id)}`
@@ -230,16 +303,10 @@ export const TableCollection = <
     data?.type === "flat"
       ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
       : []
-  // Identity of the current pagination position. When it changes the row set is
-  // swapped by navigation (paging / loading more), not by an insert, so the
-  // flash must be suppressed for that render.
-  const paginationResetKey =
-    paginationInfo?.type === "pages"
-      ? paginationInfo.currentPage
-      : paginationInfo?.type === "infinite-scroll"
-        ? paginationInfo.cursor
-        : undefined
-  const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
+  // Keyed on the query these records answer, not the one the user has
+  // selected: the latter changes a render before its data arrives, and reseeding
+  // the flash baseline there memorises the previous query's rows.
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, committedQuery)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
@@ -260,10 +327,36 @@ export const TableCollection = <
     getRenderedSelectableEntries: selectionRegistry.getEntries,
     renderedSelectableCount: selectionRegistry.ids.length,
   })
+
+  // `handleSelectItemChange` is rebuilt whenever the consumer's `selectable`
+  // changes identity, which for an inline definition is every render. Rows get a
+  // stable wrapper instead, so the latest handler still runs.
+  const latestSelectItemChangeRef = useRef(handleSelectItemChange)
+  latestSelectItemChangeRef.current = handleSelectItemChange
+  const stableSelectItemChange = useMemo(
+    () => (item: R, checked: boolean) =>
+      latestSelectItemChangeRef.current(item, checked),
+    []
+  )
+
+  // Selection is handed to each row as its own boolean. Passing the whole Map made
+  // every row's props differ on any selection change (measured: 25 mismatches for
+  // 25 rows), so one checkbox re-rendered the entire table.
+  const isItemSelected = (record: R): boolean => {
+    const id = effectiveSource.selectable?.(record)
+    return id !== undefined && selectedItems.has(id)
+  }
+
+  // Only rows that render nested children need the Map, to derive their own
+  // children's state. Flat rows get `undefined`, which is stable.
+  const nestedSelectedItems = (record: R): typeof selectedItems | undefined =>
+    effectiveSource.itemsWithChildren?.(record) ? selectedItems : undefined
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
-    if (!summariesData || !source.summaries) return null
+    if (!summariesData || !source.summaries) {
+      return null
+    }
 
     return {
       data: summariesData as R,
@@ -314,9 +407,8 @@ export const TableCollection = <
           field: columnSorting,
           order: "desc",
         }
-      } else {
-        return null
       }
+      return null
     })
   }
 
@@ -339,8 +431,6 @@ export const TableCollection = <
     columns,
     !!source.selectable
   )
-
-  const headerGroups = useHeaderGroups(columns, headerGroupLabels)
 
   const tableWithChildren = data?.records.some((item) =>
     source.itemsWithChildren?.(item)
@@ -376,8 +466,12 @@ export const TableCollection = <
     selectionRegistry.ids.length > 0
       ? selectionRegistry.ids
       : (data?.records ?? [])
+          // The registry is already free of them; this fallback is not.
+          .filter((record) => !source.selectionDisabled?.(record))
           .map((record) => source.selectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)
+
+  const selectAllDisabled = source.disableSelectAll ?? false
 
   const allPageRowsSelected =
     currentPageSelectableIds.length > 0 &&
@@ -397,6 +491,7 @@ export const TableCollection = <
     allPageRowsSelected
 
   const showSelectAllOption =
+    !selectAllDisabled &&
     !!source.allPagesSelection &&
     (!allSelectedStatus.checked || allSelectedStatus.indeterminate) &&
     paginationInfo?.total !== undefined &&
@@ -410,12 +505,21 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
-
+  // Mounted unconditionally rather than swapped for a `Fragment` on flat
+  // tables: it only holds nested state that flat tables never read, and
+  // choosing the wrapper by branch made it impossible to pass it props without
+  // rebuilding the component type — which would remount the whole table
+  // whenever a consumer passed an inline `defaultExpanded` predicate.
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <TableWrapper>
+      <NestedDataProvider
+        defaultExpanded={defaultExpanded}
+        currentFilters={source.currentFilters}
+        currentSortings={source.currentSortings}
+        currentNavigationFilters={source.currentNavigationFilters}
+      >
         <div
+          ref={tableContainerRef}
           className={cn(
             "min-h-0",
             bordered &&
@@ -426,7 +530,7 @@ export const TableCollection = <
             <TableHeader sticky={true}>
               {headerGroups ? (
                 <TableRow>
-                  {source.selectable && (
+                  {source.selectable ? (
                     <TableHead
                       align="left"
                       sticky={{ left: 0 }}
@@ -438,27 +542,99 @@ export const TableCollection = <
                     >
                       <div className="ml-3.5 flex w-full items-center justify-start" />
                     </TableHead>
-                  )}
+                  ) : null}
                   {headerGroups.map((entry, entryIndex) => {
+                    // A collapsible group is clickable, so it keeps the cell's
+                    // hover highlight — the same one a sortable column header
+                    // shows. Everything else in this row is inert and opts out.
+                    const isClickable =
+                      entry.type === "group" && entry.collapsible
                     const borderClass = cn(
                       groupBorderClass,
-                      "hover:after:bg-transparent"
+                      !isClickable && "hover:after:bg-transparent"
                     )
+                    // The spanning label takes the alignment of the columns
+                    // under it, so it sits on the same edge as their content
+                    // instead of floating over the middle of the span.
+                    const align = entry.columnIndices.every(
+                      (columnIndex) => columns[columnIndex].align === "right"
+                    )
+                      ? "right"
+                      : "left"
                     return entry.type === "group" ? (
                       <TableHead
-                        align="right"
+                        align={align}
                         colSpan={entry.colSpan}
                         className={borderClass}
+                        highlighted={entry.columnIndices.some(
+                          (columnIndex) => columns[columnIndex].highlighted
+                        )}
+                        // The toggle lives on the cell, not on the button, so
+                        // the whole header is the hit area. The button keeps
+                        // the focus ring and `aria-expanded` and lets its click
+                        // bubble up to here.
+                        onClick={
+                          entry.collapsible
+                            ? () => toggleHeaderGroup(entry.id)
+                            : undefined
+                        }
                         key={`header-group-${entry.id}-${entryIndex}`}
                       >
-                        {entry.label}
+                        {entry.collapsible ? (
+                          <button
+                            type="button"
+                            aria-expanded={!entry.collapsed}
+                            // Restates the header cell's own typography so the
+                            // label reads exactly like the non-collapsible
+                            // headers around it. The colour can't be left to
+                            // inherit: preflight is off and ress gives buttons
+                            // `font: inherit` but not `color`, so the label
+                            // would fall back to the UA buttontext and render
+                            // darker. `text-inherit` is no help either — the
+                            // theme replaces Tailwind's palette and has no
+                            // `inherit` key, so that utility doesn't exist.
+                            //
+                            // The colour holds on hover, label and icon alike:
+                            // the cell's own highlight is the affordance, and
+                            // darkening the text on top of it made a group
+                            // header look like a different kind of header from
+                            // the inert ones beside it.
+                            className={cn(
+                              "flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary",
+                              // The icon takes the side the label is not
+                              // aligned to, so the label keeps its column's
+                              // edge instead of being pushed off it.
+                              align === "right" && "flex-row-reverse",
+                              focusRing()
+                            )}
+                          >
+                            <span className="truncate">{entry.label}</span>
+                            {/* Hints at the action, not the state: arrows out
+                                to open the group, in to shut it. Hidden from
+                                AT — `aria-expanded` conveys the state. */}
+                            <F0Icon
+                              aria-hidden="true"
+                              size="sm"
+                              icon={
+                                entry.collapsed
+                                  ? MaximizeHorizontal
+                                  : MinimizeHorizontal
+                              }
+                            />
+                          </button>
+                        ) : (
+                          entry.label
+                        )}
                       </TableHead>
                     ) : (
                       <TableHead
-                        align="right"
+                        align={align}
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
                         minWidth={columns[entry.columnIndices[0]].minWidth}
+                        highlighted={
+                          !!columns[entry.columnIndices[0]].highlighted
+                        }
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
@@ -466,8 +642,8 @@ export const TableCollection = <
                       </TableHead>
                     )
                   })}
-                  {showItemActions &&
-                    (isEditableTable ? (
+                  {showItemActions ? (
+                    isEditableTable ? (
                       <TableHead
                         key="actions"
                         width="fit"
@@ -490,11 +666,12 @@ export const TableCollection = <
                           <span />
                         </TableHead>
                       </>
-                    ))}
+                    )
+                  ) : null}
                 </TableRow>
               ) : null}
               <TableRow>
-                {source.selectable && (
+                {source.selectable ? (
                   <TableHead
                     width={checkColumnWidth}
                     sticky={{ left: 0 }}
@@ -505,18 +682,20 @@ export const TableCollection = <
                         : undefined
                     }
                   >
-                    <div className="ml-3.5 flex w-full items-center justify-start">
-                      <F0Checkbox
-                        checked={isAllSelected}
-                        indeterminate={hasSelection && !isAllSelected}
-                        onCheckedChange={handleSelectAll}
-                        title={i18n.actions.selectAll}
-                        hideLabel
-                        disabled={data?.records.length === 0}
-                      />
-                    </div>
+                    {!selectAllDisabled ? (
+                      <div className="ml-3.5 flex w-full items-center justify-start">
+                        <F0Checkbox
+                          checked={isAllSelected}
+                          indeterminate={hasSelection && !isAllSelected}
+                          onCheckedChange={handleSelectAll}
+                          title={i18n.actions.selectAll}
+                          hideLabel
+                          disabled={data?.records.length === 0}
+                        />
+                      </div>
+                    ) : null}
                   </TableHead>
-                )}
+                ) : null}
                 {columns.map(({ sorting, label, ...column }, index) => {
                   const headerGroup = headerGroups?.find(
                     (group) =>
@@ -549,13 +728,18 @@ export const TableCollection = <
                           isLastInGroup && groupBorderClass,
                           fromVisualization === "editableTable" &&
                             (index !== columns.length - 1 || showItemActions) &&
-                            "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                            "border-0 border-r-[1px] border-solid border-f1-border-secondary",
+                          collapsingCellClasses.get(
+                            getColumnId({ id: column.id, label })
+                          )
                         ) || undefined
                       }
                       onSortClick={
                         sorting
                           ? () => {
-                              if (!sorting) return
+                              if (!sorting) {
+                                return
+                              }
                               handleSortClick(sorting)
                             }
                           : undefined
@@ -565,8 +749,8 @@ export const TableCollection = <
                     </TableHead>
                   )
                 })}
-                {showItemActions &&
-                  (isEditableTable ? (
+                {showItemActions ? (
+                  isEditableTable ? (
                     <TableHead key="actions" width="fit" sticky={{ right: 0 }}>
                       <span className="sr-only">
                         {i18n.collections.actions.actions}
@@ -587,251 +771,264 @@ export const TableCollection = <
                         {i18n.collections.actions.actions}
                       </TableHead>
                     </>
-                  ))}
+                  )
+                ) : null}
               </TableRow>
               {hasSelection &&
-                source.selectable &&
-                !!source.allPagesSelection && (
-                  <TableRow>
-                    <th
-                      colSpan={1 + selectionHeaderColSpan}
-                      className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
-                    >
-                      <div className="flex items-center gap-3">
-                        <HighlightedCount
-                          text={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? t("status.selected.allItemsSelected", {
-                                  total: selectableTotal,
+              source.selectable &&
+              !!source.allPagesSelection ? (
+                <TableRow>
+                  <th
+                    colSpan={1 + selectionHeaderColSpan}
+                    className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <HighlightedCount
+                        text={
+                          allSelectedStatus.checked &&
+                          !allSelectedStatus.indeterminate
+                            ? t("status.selected.allItemsSelected", {
+                                total: selectableTotal,
+                              })
+                            : allPageRowsSelected
+                              ? t("status.selected.allOnPage", {
+                                  count: allSelectedStatus.selectedCount,
                                 })
-                              : allPageRowsSelected
-                                ? t("status.selected.allOnPage", {
-                                    count: allSelectedStatus.selectedCount,
-                                  })
-                                : `${allSelectedStatus.selectedCount} ${selectedText}`
-                          }
-                          count={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? selectableTotal
-                              : allSelectedStatus.selectedCount
-                          }
+                              : `${allSelectedStatus.selectedCount} ${selectedText}`
+                        }
+                        count={
+                          allSelectedStatus.checked &&
+                          !allSelectedStatus.indeterminate
+                            ? selectableTotal
+                            : allSelectedStatus.selectedCount
+                        }
+                      />
+                      {showSelectAllOption ? (
+                        <F0Button
+                          variant="outline"
+                          label={t("status.selected.selectAllItems", {
+                            total: selectableTotal,
+                          })}
+                          onClick={() => handleSelectAllItems(true)}
+                          size="sm"
                         />
-                        {showSelectAllOption && (
-                          <F0Button
-                            variant="outline"
-                            label={t("status.selected.selectAllItems", {
-                              total: selectableTotal,
-                            })}
-                            onClick={() => handleSelectAllItems(true)}
-                            size="sm"
-                          />
-                        )}
-                      </div>
-                    </th>
-                  </TableRow>
-                )}
+                      ) : null}
+                    </div>
+                  </th>
+                </TableRow>
+              ) : null}
             </TableHeader>
             <TableBody>
-              {data?.type === "grouped" &&
-                data.groups.map((group, groupIndex) => {
-                  const itemCount = group.itemCount
-                  return (
-                    <Fragment key={`group-${group.key}`}>
-                      <TableRow key={`group-header-${group.key}`} sticky>
-                        {source.selectable && (
+              {data?.type === "grouped"
+                ? data.groups.map((group, groupIndex) => {
+                    const itemCount = group.itemCount
+                    return (
+                      <Fragment key={`group-${group.key}`}>
+                        <TableRow key={`group-header-${group.key}`} sticky>
+                          {source.selectable ? (
+                            <TableCell
+                              width={checkColumnWidth}
+                              sticky={{ left: 0 }}
+                            >
+                              <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
+                                {/* A group checkbox selects the whole group. */}
+                                {!selectAllDisabled ? (
+                                  <F0Checkbox
+                                    checked={
+                                      !!statusToChecked(
+                                        groupAllSelectedStatus[group.key]
+                                      )
+                                    }
+                                    indeterminate={
+                                      statusToChecked(
+                                        groupAllSelectedStatus[group.key]
+                                      ) === "indeterminate"
+                                    }
+                                    title={i18n.actions.selectAll}
+                                    hideLabel
+                                    onCheckedChange={(checked) =>
+                                      handleSelectGroupChange(group, checked)
+                                    }
+                                  />
+                                ) : null}
+                              </div>
+                            </TableCell>
+                          ) : null}
                           <TableCell
-                            width={checkColumnWidth}
-                            sticky={{ left: 0 }}
+                            sticky={{
+                              left: source.selectable ? checkColumnWidth : 0,
+                            }}
+                            colSpan={frozenColumnsLeft || 1}
                           >
-                            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
-                              <F0Checkbox
-                                checked={
-                                  !!statusToChecked(
-                                    groupAllSelectedStatus[group.key]
+                            <GroupHeader
+                              selectable={false}
+                              showOpenChange={collapsible}
+                              label={group.label}
+                              itemCount={itemCount}
+                              open={openGroups[group.key]}
+                              onOpenChange={(open) =>
+                                setGroupOpen(group.key, open)
+                              }
+                            />
+                          </TableCell>
+                          {columns.length - (frozenColumnsLeft || 1) > 0 ? (
+                            <TableCell
+                              colSpan={
+                                columns.length - (frozenColumnsLeft || 1)
+                              }
+                            >
+                              &nbsp;
+                            </TableCell>
+                          ) : null}
+                        </TableRow>
+
+                        <AnimatePresence key={`group-animate-${groupIndex}`}>
+                          {!collapsible || openGroups[group.key]
+                            ? group.records.map((item, index) => {
+                                const rowKey = `row-${groupIndex}-${getRowKey(item, index)}`
+                                const motionRow = (
+                                  <MotionRow
+                                    variants={rowAnimationVariants}
+                                    initial={collapsible ? "hidden" : "visible"}
+                                    animate="visible"
+                                    exit="hidden"
+                                    custom={index}
+                                    key={rowKey}
+                                    layout
+                                    source={rowSource}
+                                    liveSource={liveSourceFor(item)}
+                                    item={item}
+                                    index={index}
+                                    groupIndex={groupIndex}
+                                    onItemCheckedChange={stableSelectItemChange}
+                                    isSelected={isItemSelected(item)}
+                                    selectedItems={nestedSelectedItems(item)}
+                                    columns={columns}
+                                    frozenColumnsLeft={frozenColumnsLeft}
+                                    checkColumnWidth={checkColumnWidth}
+                                    referenceRowType={referenceRowType}
+                                    rowWrapper={RowWrapper}
+                                    cellRenderer={cellRenderer}
+                                    headerGroups={headerGroups}
+                                    collapsingCellClasses={
+                                      collapsingCellClasses
+                                    }
+                                    fromVisualization={fromVisualization}
+                                    registerSelectable={
+                                      selectionRegistry.register
+                                    }
+                                    unregisterSelectable={
+                                      selectionRegistry.unregister
+                                    }
+                                  />
+                                )
+                                if (RowWrapper) {
+                                  return (
+                                    <RowWrapper
+                                      key={rowKey}
+                                      item={item}
+                                      index={index}
+                                    >
+                                      {motionRow}
+                                    </RowWrapper>
                                   )
                                 }
-                                indeterminate={
-                                  statusToChecked(
-                                    groupAllSelectedStatus[group.key]
-                                  ) === "indeterminate"
-                                }
-                                title={i18n.actions.selectAll}
-                                hideLabel
-                                onCheckedChange={(checked) =>
-                                  handleSelectGroupChange(group, checked)
-                                }
-                              />
-                            </div>
-                          </TableCell>
-                        )}
-                        <TableCell
-                          sticky={{
-                            left: source.selectable ? checkColumnWidth : 0,
-                          }}
-                          colSpan={frozenColumnsLeft || 1}
-                        >
-                          <GroupHeader
-                            selectable={false}
-                            showOpenChange={collapsible}
-                            label={group.label}
-                            itemCount={itemCount}
-                            open={openGroups[group.key]}
-                            onOpenChange={(open) =>
-                              setGroupOpen(group.key, open)
-                            }
-                          />
-                        </TableCell>
-                        {columns.length - (frozenColumnsLeft || 1) > 0 && (
-                          <TableCell
-                            colSpan={columns.length - (frozenColumnsLeft || 1)}
-                          >
-                            &nbsp;
-                          </TableCell>
-                        )}
-                      </TableRow>
 
-                      <AnimatePresence key={`group-animate-${groupIndex}`}>
-                        {MotionRow &&
-                          (!collapsible || openGroups[group.key]) &&
-                          group.records.map((item, index) => {
-                            const rowKey = `row-${groupIndex}-${getRowKey(item, index)}`
-                            const motionRow = (
-                              <MotionRow
-                                variants={getAnimationVariants()}
-                                initial={collapsible ? "hidden" : "visible"}
-                                animate="visible"
-                                exit="hidden"
-                                custom={index}
-                                key={rowKey}
-                                layout
-                                source={effectiveSource}
-                                item={item}
-                                index={index}
-                                groupIndex={groupIndex}
-                                onItemCheckedChange={handleSelectItemChange}
-                                onCheckedChange={(checked) =>
-                                  handleSelectItemChange(item, checked)
-                                }
-                                selectedItems={selectedItems}
-                                columns={columns}
-                                frozenColumnsLeft={frozenColumnsLeft}
-                                checkColumnWidth={checkColumnWidth}
-                                referenceRowType={referenceRowType}
-                                rowWrapper={RowWrapper}
-                                cellRenderer={cellRenderer}
-                                headerGroups={headerGroups}
-                                fromVisualization={fromVisualization}
-                                registerSelectable={selectionRegistry.register}
-                                unregisterSelectable={
-                                  selectionRegistry.unregister
-                                }
-                              />
-                            )
-                            if (RowWrapper) {
-                              return (
-                                <RowWrapper
-                                  key={rowKey}
-                                  item={item}
-                                  index={index}
-                                >
-                                  {motionRow}
-                                </RowWrapper>
-                              )
-                            }
-
-                            return motionRow
-                          })}
-                      </AnimatePresence>
-                    </Fragment>
-                  )
-                })}
-              {data?.type === "flat" &&
-                // Deliberately not wrapped in `AnimatePresence`: a row that
-                // leaves the dataset (deleted, filtered out, re-sorted away)
-                // must unmount on the same render. An exit transition keeps it
-                // mounted — still in the DOM, still in the selection registry —
-                // for as long as it runs, so a removed row goes on answering
-                // queries and shifting row/checkbox positions. Enter and flash
-                // don't need presence tracking; `initial`/`animate` cover them.
-                data.records.map((item, index) => {
-                  const rowKey = `row-${getRowKey(item, index)}`
-                  const isNew = addedRowKeys.has(rowKey)
-                  const motionRow = (
-                    <MotionRow
-                      variants={getAnimationVariants()}
-                      // Only a genuinely-inserted row plays the enter
-                      // animation; rows arriving via pagination or the initial
-                      // load appear in place, without movement.
-                      initial={isNew ? "hidden" : false}
-                      animate="visible"
-                      custom={index}
-                      key={rowKey}
-                      layout
-                      isNew={isNew}
-                      groupIndex={0}
-                      source={effectiveSource}
-                      item={item}
-                      index={index}
-                      onItemCheckedChange={handleSelectItemChange}
-                      onCheckedChange={(checked) =>
-                        handleSelectItemChange(item, checked)
-                      }
-                      selectedItems={selectedItems}
-                      columns={columns}
-                      frozenColumnsLeft={frozenColumnsLeft}
-                      checkColumnWidth={checkColumnWidth}
-                      tableWithChildren={tableWithChildren}
-                      referenceRowType={referenceRowType}
-                      rowWrapper={RowWrapper}
-                      cellRenderer={cellRenderer}
-                      fromVisualization={fromVisualization}
-                      headerGroups={headerGroups}
-                      registerSelectable={selectionRegistry.register}
-                      unregisterSelectable={selectionRegistry.unregister}
-                    />
-                  )
-                  if (RowWrapper) {
-                    return (
-                      <RowWrapper key={rowKey} item={item} index={index}>
-                        {motionRow}
-                      </RowWrapper>
+                                return motionRow
+                              })
+                            : null}
+                        </AnimatePresence>
+                      </Fragment>
                     )
-                  }
-
-                  return motionRow
-                })}
-              {paginationInfo?.type === "infinite-scroll" &&
-                isLoadingMore &&
-                Array.from({ length: 5 }).map((_, rowIndex) => (
-                  <TableRow key={`skeleton-row-${rowIndex}`}>
-                    {Array.from({ length: skeletonColumns }).map(
-                      (_, colIndex) => (
-                        <TableCell
-                          key={`skeleton-cell-${rowIndex}-${colIndex}`}
-                        >
-                          <Skeleton className="h-4 w-full" />
-                        </TableCell>
+                  })
+                : null}
+              {/* Deliberately not wrapped in `AnimatePresence`: a row that
+                  leaves the dataset (deleted, filtered out, re-sorted away)
+                  must unmount on the same render. An exit transition keeps it
+                  mounted — still in the DOM, still in the selection registry —
+                  for as long as it runs, so a removed row goes on answering
+                  queries and shifting row/checkbox positions. Enter and flash
+                  don't need presence tracking; `initial`/`animate` cover them. */}
+              {data?.type === "flat"
+                ? data.records.map((item, index) => {
+                    const rowKey = `row-${getRowKey(item, index)}`
+                    const isNew = addedRowKeys.has(rowKey)
+                    const motionRow = (
+                      <MotionRow
+                        variants={rowAnimationVariants}
+                        // Only a genuinely-inserted row plays the enter
+                        // animation; rows arriving via pagination or the initial
+                        // load appear in place, without movement.
+                        initial={isNew ? "hidden" : false}
+                        animate="visible"
+                        custom={index}
+                        key={rowKey}
+                        layout
+                        isNew={isNew}
+                        groupIndex={0}
+                        source={rowSource}
+                        liveSource={liveSourceFor(item)}
+                        item={item}
+                        index={index}
+                        onItemCheckedChange={stableSelectItemChange}
+                        isSelected={isItemSelected(item)}
+                        selectedItems={nestedSelectedItems(item)}
+                        columns={columns}
+                        frozenColumnsLeft={frozenColumnsLeft}
+                        checkColumnWidth={checkColumnWidth}
+                        tableWithChildren={tableWithChildren}
+                        referenceRowType={referenceRowType}
+                        boldRootRows={boldRootRows}
+                        rowWrapper={RowWrapper}
+                        cellRenderer={cellRenderer}
+                        fromVisualization={fromVisualization}
+                        headerGroups={headerGroups}
+                        collapsingCellClasses={collapsingCellClasses}
+                        registerSelectable={selectionRegistry.register}
+                        unregisterSelectable={selectionRegistry.unregister}
+                      />
+                    )
+                    if (RowWrapper) {
+                      return (
+                        <RowWrapper key={rowKey} item={item} index={index}>
+                          {motionRow}
+                        </RowWrapper>
                       )
-                    )}
-                  </TableRow>
-                ))}
+                    }
+
+                    return motionRow
+                  })
+                : null}
+              {paginationInfo?.type === "infinite-scroll" && isLoadingMore
+                ? Array.from({ length: 5 }).map((_, rowIndex) => (
+                    <TableRow key={`skeleton-row-${rowIndex}`}>
+                      {Array.from({ length: skeletonColumns }).map(
+                        (_, colIndex) => (
+                          <TableCell
+                            key={`skeleton-cell-${rowIndex}-${colIndex}`}
+                          >
+                            <Skeleton className="h-4 w-full" />
+                          </TableCell>
+                        )
+                      )}
+                    </TableRow>
+                  ))
+                : null}
               {isInfiniteScrollPagination(paginationInfo) &&
-                paginationInfo.hasMore && (
-                  <tr>
-                    <td
-                      colSpan={
-                        columns.length +
-                        (source.selectable ? 1 : 0) +
-                        (showItemActions ? 1 : 0)
-                      }
-                      ref={loadingIndicatorRef}
-                      className="h-10"
-                      aria-hidden="true"
-                    ></td>
-                  </tr>
-                )}
+              paginationInfo.hasMore ? (
+                <tr>
+                  <td
+                    colSpan={
+                      columns.length +
+                      (source.selectable ? 1 : 0) +
+                      (showItemActions ? 1 : 0)
+                    }
+                    ref={loadingIndicatorRef}
+                    className="h-10"
+                    aria-hidden="true"
+                  ></td>
+                </tr>
+              ) : null}
             </TableBody>
             {(() => {
               const actions = normalizeAddRowActions(addRow?.addRowActions?.())
@@ -842,7 +1039,7 @@ export const TableCollection = <
 
               return (
                 <TableFooter>
-                  {summaryData && (
+                  {summaryData ? (
                     <TableRow
                       className={cn(
                         summaryData.sticky &&
@@ -850,29 +1047,31 @@ export const TableCollection = <
                         "font-medium"
                       )}
                     >
-                      {source.selectable && (
+                      {source.selectable ? (
                         <TableCell
                           width={checkColumnWidth}
                           sticky={{ left: 0 }}
                         >
-                          {summaryData.label && (
+                          {summaryData.label ? (
                             <div className="font-medium text-f1-foreground-secondary">
                               {summaryData.label}
                             </div>
-                          )}
+                          ) : null}
                         </TableCell>
-                      )}
+                      ) : null}
                       {columns.map((column, cellIndex) => (
                         <TableCell
                           key={`summary-${String(column.label)}`}
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          highlighted={!!column.highlighted}
                           className={cn(
                             isEditableTable &&
                               (cellIndex !== columns.length - 1 ||
                                 showItemActions) &&
-                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary",
+                            collapsingCellClasses.get(getColumnId(column))
                           )}
                         >
                           {cellIndex === 0 &&
@@ -885,7 +1084,8 @@ export const TableCollection = <
                             <div
                               className={cn(
                                 column.align === "right" ? "justify-end" : "",
-                                "flex"
+                                "flex",
+                                tableCellContentClassName
                               )}
                             >
                               {(() => {
@@ -930,8 +1130,8 @@ export const TableCollection = <
                           )}
                         </TableCell>
                       ))}
-                      {showItemActions &&
-                        (isEditableTable ? (
+                      {showItemActions ? (
+                        isEditableTable ? (
                           <TableCell
                             key="summary-actions"
                             sticky={{ right: 0 }}
@@ -952,10 +1152,11 @@ export const TableCollection = <
                               {""}
                             </TableCell>
                           </>
-                        ))}
+                        )
+                      ) : null}
                     </TableRow>
-                  )}
-                  {actions.length > 0 && (
+                  ) : null}
+                  {actions.length > 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={
@@ -1019,7 +1220,7 @@ export const TableCollection = <
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}
+                  ) : null}
                 </TableFooter>
               )
             })()}
@@ -1030,7 +1231,7 @@ export const TableCollection = <
           setPage={setPage}
           className="pb-4"
         />
-      </TableWrapper>
+      </NestedDataProvider>
     </div>
   )
 }

@@ -16,7 +16,6 @@ const SvgHub = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       stroke="currentColor"
       strokeLinejoin="round"
       rx={3}
-      vectorEffect="non-scaling-stroke"
     />
     <rect
       width={6}
@@ -26,7 +25,6 @@ const SvgHub = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       stroke="currentColor"
       strokeLinejoin="round"
       rx={1.5}
-      vectorEffect="non-scaling-stroke"
     />
     <rect
       width={6}
@@ -36,7 +34,6 @@ const SvgHub = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       stroke="currentColor"
       strokeLinejoin="round"
       rx={1.5}
-      vectorEffect="non-scaling-stroke"
     />
     <rect
       width={6}
@@ -46,7 +43,6 @@ const SvgHub = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       stroke="currentColor"
       strokeLinejoin="round"
       rx={1.5}
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

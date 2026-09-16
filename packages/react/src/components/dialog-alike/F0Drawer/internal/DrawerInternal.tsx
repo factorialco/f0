@@ -1,5 +1,4 @@
 import { FC, useEffect, useMemo, useState } from "react"
-
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"
@@ -25,6 +24,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
   setActiveTabId,
   disableContentPadding,
   container,
+  onWidthChange,
 }) => {
   const [localIsOpen, setLocalIsOpen] = useState(isOpen)
 
@@ -80,6 +80,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
       fullHeight
       onOpenChange={setLocalIsOpen}
       container={container}
+      onWidthChange={onWidthChange}
     >
       {_memoizedDialogLayout}
     </DialogWrapper>

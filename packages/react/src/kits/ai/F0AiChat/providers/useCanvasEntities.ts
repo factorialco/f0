@@ -1,8 +1,5 @@
+import type { CanvasEntityDefinition } from "../../canvas/types"
 import { useAiChat } from "./AiChatStateProvider"
-import type {
-  CanvasContentBase,
-  CanvasEntityDefinition,
-} from "../../canvas/types"
 
 /**
  * Narrow read of the AiChat context for the canvas registry. Reduces
@@ -10,10 +7,8 @@ import type {
  * on the entities map, not on the full provider surface.
  */
 export function useCanvasEntities():
-  | Record<string, CanvasEntityDefinition<CanvasContentBase>>
+  | Record<string, CanvasEntityDefinition>
   | undefined {
   const { canvasEntities } = useAiChat()
-  return canvasEntities as
-    | Record<string, CanvasEntityDefinition<CanvasContentBase>>
-    | undefined
+  return canvasEntities as Record<string, CanvasEntityDefinition> | undefined
 }

@@ -4,12 +4,40 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
 import * as React from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
-import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
-import { ArrowLeft, ArrowRight } from "@/icons/app"
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
+
+/**
+ * THE SHADOW BLEED, as classes.
+ *
+ * The viewport clips its slides, and a widget card's shadow is drawn OUTSIDE its
+ * box — so the box is grown by `SPACE_FOR_WIDGET_SHADOW` (28px) on every side and
+ * pulled back by the same amount, giving the shadow somewhere to land inside the
+ * clip. The mask then fades that borrowed margin out, so a slide's shadow
+ * disappears at the edge instead of being cut off square.
+ *
+ * ⚠️ THE NUMBERS ARE WRITTEN OUT, and that is forced rather than sloppy:
+ * Tailwind's scanner never sees a class built from a variable, so `m-[${N}px]`
+ * emits no CSS at all — the quiet kind of broken, since the markup still looks
+ * right. `SPACE_FOR_WIDGET_SHADOW` remains the single source of truth and
+ * `carousel.test.tsx` fails if these drift from it: 28px is `-m-7` / `p-7`, 56px
+ * is the pair, 14px is the half.
+ *
+ * The borrowed band paints nothing but still hit-tests, so it takes no pointer
+ * events; the track turns them back on for the slides in {@link CarouselContent}.
+ * Embla's drag survives it — its listeners are on the viewport, but a drag
+ * starts on a slide and the events reach it by bubbling.
+ *
+ * Exported for that test alone — nothing else should need it.
+ */
+export const CAROUSEL_SHADOW_BLEED = cn(
+  "-m-7 h-[calc(100%_+_56px)] w-[calc(100%_+_56px)] p-7",
+  "pointer-events-none",
+  "[mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]",
+  "[-webkit-mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]"
+)
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
@@ -21,6 +49,7 @@ type CarouselProps = {
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
+  paging?: CarouselPaging
 }
 
 type CarouselContextProps = {
@@ -30,7 +59,8 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-} & CarouselProps
+  pagingState: CarouselPagingState
+} & Omit<CarouselProps, "paging">
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
@@ -44,6 +74,242 @@ function useCarousel() {
   return context
 }
 
+/**
+ * A carousel whose slides are ONE PAGE of a longer list.
+ *
+ * A carousel can only reason about the slides it holds, so on its own it says
+ * "there is no next one" the moment it reaches the last one it was given — which
+ * is wrong when the list continues on the server. This is the missing half of
+ * that answer, and it is deliberately the shape `useData` already returns for an
+ * infinite-scroll source (`paginationInfo.hasMore`, `isLoadingMore`, `loadMore`),
+ * so wiring one to the other is passing three fields across.
+ */
+export type CarouselPaging = {
+  /** Whether the source has records past the slides currently mounted. */
+  hasMore: boolean
+  /** A fetch for the next page is in flight. */
+  isLoading?: boolean
+  /** Fetch the next page and APPEND it to the slides. */
+  onLoadMore: () => void
+  /**
+   * How many records the source holds ALTOGETHER, when it says — `useData`'s
+   * `totalItems`. For anything that reports a position out loud ("3 of 11"):
+   * without it the only number available is how many have been loaded, which
+   * moves every time another page arrives.
+   *
+   * The carousel itself ignores it. Its dots describe the slides that exist, and
+   * a dot for a page nobody has fetched would be a control that cannot be
+   * pressed.
+   */
+  total?: number
+}
+
+export type CarouselPagingState = {
+  canGoNext: boolean
+  goNext: () => void
+  isAwaitingPage: boolean
+  isPageInFlight: boolean
+}
+
+/**
+ * How many slides are IN THE DOM right now — React's view, not the carousel's
+ * cached one, which lags a re-measure behind.
+ */
+const countSlides = (api: CarouselApi) =>
+  api?.containerNode()?.childElementCount ?? 0
+
+const DRAG_PAST_END_PERCENT = 5
+
+/**
+ * Makes the Next arrow tell the truth when the slides are a page.
+ *
+ * THREE WAYS THE NEXT PAGE IS ASKED FOR, and they cover each other:
+ *
+ * - PRESSING NEXT at the end of what is mounted. `goNext` scrolls if there is
+ *   anywhere to scroll and fetches if there isn't, so the arrow always does
+ *   something as long as the feed continues.
+ * - DRAGGING past the end, which rubber-bands because the next slide does not
+ *   exist yet. A pull past `DRAG_PAST_END_PERCENT` of the view fetches too.
+ * - ARRIVING at the last snap, which fetches the page after it. So walking
+ *   through a carousel stays smooth: the page you are about to need is usually
+ *   already in flight by the time you ask for it.
+ *
+ * ARRIVAL, not render. The prefetch is bound to embla's `select` — a real
+ * navigation — rather than run whenever the paging props change. That is what
+ * makes it loop-proof without a bookkeeping ref: a source that answers
+ * `hasMore: true` with no new records leaves you on the same snap, no `select`
+ * fires, and nothing asks again. It also means a carousel nobody touched fetches
+ * exactly the page it was given, which is the point of paging.
+ */
+const usePagingState = (
+  api: CarouselApi,
+  canScrollNext: boolean,
+  scrollNext: () => void,
+  paging?: CarouselPaging
+): CarouselPagingState => {
+  const hasMore = paging?.hasMore ?? false
+  const isLoading = paging?.isLoading ?? false
+  const onLoadMore = paging?.onLoadMore
+
+  /**
+   * THE MOVE THE READER ASKED FOR, still owed — and the only reason to show that
+   * anything is loading at all.
+   *
+   * Pressing Next at the end of a page cannot scroll yet, because the slides do
+   * not exist. So the press is remembered and finished the moment there is
+   * somewhere to go: without it the carousel fetches, fills, and then just sits
+   * there, having moved nothing in answer to an arrow.
+   *
+   * It is STATE rather than a ref because it is also the answer to "is anybody
+   * waiting on this fetch". A page pulled in ahead of the reader — the prefetch
+   * on arriving at the last page — is work nobody asked about, and announcing it
+   * with a spinner invites them to wait for something that was never in their
+   * way. Only a fetch somebody is standing on says so.
+   */
+  const [owedNext, setOwedNext] = React.useState(false)
+  const [awaitedPage, setAwaitedPage] = React.useState(false)
+  // Whether the load in flight is the one that just finished, so an owed move
+  // that turned out to have nowhere to go stops waiting instead of hanging.
+  const wasLoading = React.useRef(isLoading)
+  /** How many slides there were when the move was asked for. */
+  const slidesAtAsk = React.useRef(0)
+
+  // The listeners are bound ONCE per carousel and read the paging state through
+  // a ref: subscribing on every change of `hasMore`/`isLoading` would tear the
+  // handlers down and rebuild them in the middle of the very fetch they started.
+  const latest = React.useRef({ hasMore, isLoading, onLoadMore, owedNext })
+  latest.current = { hasMore, isLoading, onLoadMore, owedNext }
+
+  const askForNextPage = React.useCallback(() => {
+    const { hasMore, isLoading, onLoadMore, owedNext } = latest.current
+    if (!hasMore || !onLoadMore) {
+      return
+    }
+    if (owedNext) {
+      return
+    }
+    slidesAtAsk.current = countSlides(api)
+    setOwedNext(true)
+    setAwaitedPage(true)
+    // Recorded whether or not we are the ones who ask: a press landing while a
+    // page is already in flight must still move the row when it lands, and
+    // asking twice for the same records is not the way to make that happen.
+    if (!isLoading) {
+      onLoadMore()
+    }
+  }, [api])
+
+  React.useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    const prefetchIfAtEnd = () => {
+      const { hasMore, isLoading, onLoadMore } = latest.current
+      if (!hasMore || isLoading || !onLoadMore) {
+        return
+      }
+      const snaps = api.scrollSnapList().length
+      if (api.selectedScrollSnap() < snaps - 1) {
+        return
+      }
+      setAwaitedPage(false)
+      onLoadMore()
+    }
+
+    let pulledPastEnd = false
+
+    const watchPull = () => {
+      const { dragHandler, limit, location, percentOfView } =
+        api.internalEngine()
+      if (!dragHandler.pointerDown()) {
+        return
+      }
+      const pull = limit.min - location.get()
+      if (pull < percentOfView.measure(DRAG_PAST_END_PERCENT)) {
+        return
+      }
+      pulledPastEnd = true
+    }
+
+    const askIfPulledPastEnd = () => {
+      if (!pulledPastEnd) {
+        return
+      }
+      pulledPastEnd = false
+      askForNextPage()
+    }
+
+    const forgetPull = () => {
+      pulledPastEnd = false
+    }
+
+    api.on("select", prefetchIfAtEnd)
+    api.on("scroll", watchPull)
+    api.on("pointerDown", forgetPull)
+    api.on("pointerUp", askIfPulledPastEnd)
+
+    return () => {
+      api.off("select", prefetchIfAtEnd)
+      api.off("scroll", watchPull)
+      api.off("pointerDown", forgetPull)
+      api.off("pointerUp", askIfPulledPastEnd)
+    }
+  }, [api, askForNextPage])
+
+  React.useEffect(() => {
+    const settled = wasLoading.current && !isLoading
+    wasLoading.current = isLoading
+    if (settled) {
+      setAwaitedPage(false)
+    }
+    if (!owedNext) {
+      return
+    }
+    if (canScrollNext) {
+      setOwedNext(false)
+      scrollNext()
+      return
+    }
+    /**
+     * THE FETCH IS DONE, AND THE CAROUSEL HAS NOT CAUGHT UP.
+     *
+     * `isLoading` going false and the new slides arriving happen in one React
+     * commit, but `canScrollNext` does not: it comes from the carousel
+     * re-measuring itself, which is asynchronous. Clearing the owed move on
+     * `settled` alone therefore cancelled it a beat before there was anywhere to
+     * go — the page loaded, the arrow stopped spinning, and the row sat still.
+     *
+     * So the slide count decides. More slides than when we asked means the move
+     * is still coming and this is just the gap before the measurement; the same
+     * number means the fetch brought nothing and nobody should keep waiting.
+     *
+     * Counted off the DOM rather than asked of the carousel: at this exact
+     * moment the carousel's own list is the stale thing being worked around, so
+     * consulting it answers "still two" and cancels the move all over again.
+     */
+    if (settled && countSlides(api) <= slidesAtAsk.current) {
+      setOwedNext(false)
+    }
+  }, [owedNext, canScrollNext, isLoading, scrollNext, api])
+
+  return {
+    canGoNext: canScrollNext || (hasMore && !isLoading),
+    /** A fetch the reader is actually standing on. */
+    isAwaitingPage: owedNext,
+    isPageInFlight: awaitedPage && isLoading,
+    goNext: () => {
+      if (canScrollNext) {
+        scrollNext()
+        return
+      }
+      askForNextPage()
+    },
+  }
+}
+
+const useCarouselPaging = (): CarouselPagingState => useCarousel().pagingState
+
 const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
@@ -54,6 +320,7 @@ const Carousel = React.forwardRef<
       opts,
       setApi,
       plugins,
+      paging,
       className,
       children,
       ...props
@@ -86,6 +353,8 @@ const Carousel = React.forwardRef<
     const scrollNext = React.useCallback(() => {
       api?.scrollNext()
     }, [api])
+
+    const pagingState = usePagingState(api, canScrollNext, scrollNext, paging)
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -134,6 +403,7 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
+          pagingState,
         }}
       >
         <div
@@ -156,29 +426,27 @@ const CarouselContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  const maskImageStyle = `linear-gradient(to right, transparent 0px, transparent ${SPACE_FOR_WIDGET_SHADOW / 2}px, black ${SPACE_FOR_WIDGET_SHADOW}px, black calc(100% - ${SPACE_FOR_WIDGET_SHADOW}px), transparent calc(100% - ${SPACE_FOR_WIDGET_SHADOW / 2}px), transparent 100%)`
-
   const { carouselRef, orientation } = useCarousel()
 
   return (
     <div
       ref={carouselRef}
-      className="overflow-hidden"
-      style={{
-        scrollbarWidth: "none", // For Firefox
-        msOverflowStyle: "none", // For IE and Edge
-        margin: `-${SPACE_FOR_WIDGET_SHADOW}px`,
-        padding: `${SPACE_FOR_WIDGET_SHADOW}px`,
-        height: `calc(100% + ${SPACE_FOR_WIDGET_SHADOW * 2}px)`,
-        width: `calc(100% + ${SPACE_FOR_WIDGET_SHADOW * 2}px)`,
-        maskImage: maskImageStyle,
-        WebkitMaskImage: maskImageStyle,
-      }}
+      className={cn(
+        "overflow-hidden",
+        CAROUSEL_SHADOW_BLEED,
+        // The viewport scrolls but never shows a bar: embla drives it, and a
+        // native one over the slides is chrome nobody asked for. Firefox reads
+        // the first, old Edge the second.
+        "[scrollbar-width:none] [-ms-overflow-style:none]"
+      )}
     >
       <div
         ref={ref}
         className={cn(
           "flex",
+          // The slides take the pointer; the bleed band around them does not
+          // (see `CAROUSEL_SHADOW_BLEED`).
+          "pointer-events-auto",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
         )}
@@ -306,7 +574,9 @@ const CarouselDots = React.forwardRef<
   const currentSlide = api?.selectedScrollSnap() || 0
 
   React.useEffect(() => {
-    if (!dotsContainerRef.current) return
+    if (!dotsContainerRef.current) {
+      return
+    }
 
     const container = dotsContainerRef.current
     const dotWidth = 16
@@ -323,7 +593,9 @@ const CarouselDots = React.forwardRef<
   // Prevent user scrolling
   React.useEffect(() => {
     const container = dotsContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const preventScroll = (e: Event) => {
       e.preventDefault()
@@ -348,21 +620,31 @@ const CarouselDots = React.forwardRef<
   const visibleDotsWidth = Math.min(maxDots, numberOfSlides) * 16
 
   const getScale = (index: number) => {
-    if (maxDots === numberOfSlides) return null // No scaling when showing all dots
+    if (maxDots === numberOfSlides) {
+      return null
+    } // No scaling when showing all dots
 
     const distance = Math.abs(index - currentSlide)
 
-    if (distance === 0) return "scale-100"
-    if (distance === 1) return "scale-100"
-    if (distance === 2)
+    if (distance === 0) {
+      return "scale-100"
+    }
+    if (distance === 1) {
+      return "scale-100"
+    }
+    if (distance === 2) {
       return currentSlide === 0 || currentSlide === numberOfSlides - 1
         ? "scale-100"
         : "scale-75"
-    if (distance === 3)
+    }
+    if (distance === 3) {
       return currentSlide === 0 || currentSlide === numberOfSlides - 1
         ? "scale-75"
         : "scale-50"
-    if (distance >= 4) return "scale-50"
+    }
+    if (distance >= 4) {
+      return "scale-50"
+    }
   }
 
   return (
@@ -373,11 +655,7 @@ const CarouselDots = React.forwardRef<
       >
         <div
           ref={dotsContainerRef}
-          className="flex w-full gap-0 overflow-x-scroll"
-          style={{
-            scrollbarWidth: "none",
-            overscrollBehavior: "none",
-          }}
+          className="flex w-full gap-0 overflow-x-scroll [overscroll-behavior:none] [scrollbar-width:none]"
           tabIndex={0}
           aria-label="Carousel pagination"
           onKeyDown={(e) => {
@@ -416,12 +694,89 @@ const CarouselDots = React.forwardRef<
 })
 CarouselDots.displayName = "CarouselDots"
 
+/**
+ * THE PAGING ROW: an arrow on each end, the dots between them, under the slides.
+ *
+ * The alternative to `CarouselPrevious`/`CarouselNext`, which are absolutely
+ * positioned overlays on the carousel's SIDES, revealed on hover. That is right
+ * for a full-bleed gallery and wrong everywhere a carousel sits inside something
+ * else — a widget, a card, a panel: a control that only exists while the pointer
+ * is over it is a control a touch user never finds, and one hanging off the left
+ * edge of a card hangs over whatever is beside it.
+ *
+ * IN THE FLOW instead, and always there. Both arrows keep their corners whether
+ * or not there is anywhere to go — disabled rather than removed, so the row
+ * doesn't change width under the pointer — and the dots take the middle, which
+ * is `CarouselDots` unchanged (it hides itself when there is only one page).
+ *
+ * The `pt-4` is the row's own: it belongs to the gap ABOVE the controls rather
+ * than to the slides' bottom margin, so a carousel that has no controls has no
+ * space under it either.
+ */
+const CarouselControls = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    /**
+     * The arrows' accessible names and tooltips. There is no visible text in
+     * this row, so these are the only words in it.
+     */
+    labels?: { previous?: string; next?: string }
+    /** Whether the dots sit between the arrows. Defaults to true. */
+    showDots?: boolean
+  }
+>(({ className, labels, showDots = true, ...props }, ref) => {
+  const { scrollPrev, canScrollPrev } = useCarousel()
+  const { canGoNext, goNext, isAwaitingPage } = useCarouselPaging()
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex flex-row items-center justify-between gap-2 pt-4",
+        className
+      )}
+      {...props}
+    >
+      <ButtonInternal
+        size="md"
+        variant="outline"
+        icon={ChevronLeft}
+        label={labels?.previous ?? "Previous"}
+        hideLabel
+        disabled={!canScrollPrev}
+        onClick={scrollPrev}
+      />
+      {/* `grow`, so the dots are centered on the ROW rather than on what is left
+          of it — the arrows are the same width, so today the two are the same
+          thing, and this survives one of them growing. */}
+      {showDots ? <CarouselDots className="grow" /> : null}
+      <ButtonInternal
+        size="md"
+        variant="outline"
+        icon={ChevronRight}
+        label={labels?.next ?? "Next"}
+        hideLabel
+        // The spinner sits on the control that caused the wait, rather than on
+        // the slides: the row you are looking at has not gone anywhere. And ONLY
+        // when somebody is waiting — a page pulled in ahead of the reader should
+        // pass unnoticed, not advertise itself.
+        loading={isAwaitingPage}
+        disabled={!canGoNext}
+        onClick={goNext}
+      />
+    </div>
+  )
+})
+CarouselControls.displayName = "CarouselControls"
+
 export {
   Carousel,
   CarouselContent,
+  CarouselControls,
   CarouselDots,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  useCarouselPaging,
   type CarouselApi,
 }

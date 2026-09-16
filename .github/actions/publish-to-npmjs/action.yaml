@@ -1,11 +1,13 @@
 name: "Publish to npmjs"
 
+# Authentication is done with npm Trusted Publishers (OIDC), not with a token.
+# The calling job MUST grant `id-token: write`, and the package must have a
+# Trusted Publisher configured on npmjs.com pointing at `npm-publish.yaml`.
+# See https://docs.npmjs.com/trusted-publishers
+
 inputs:
   workspace:
     description: "Workspace"
-    required: true
-  registry_token:
-    description: "Registry token"
     required: true
 
 outputs:
@@ -19,6 +21,23 @@ runs:
     - uses: ./.github/actions/setup-node-pnpm
       name: Setup Node and pnpm
 
+    # pnpm shells out to `npm publish`, and OIDC needs npm >= 11.5.1.
+    # ubuntu-latest still ships npm 10.x with Node 22.
+    - name: Upgrade npm for trusted publishing
+      shell: bash
+      run: npm install -g npm@^11.5.1
+
+    # setup-node writes `_authToken=${NODE_AUTH_TOKEN}` into the npmrc. With no
+    # token set, npm sends that placeholder verbatim and OIDC auth fails with a
+    # confusing E404, so drop the line.
+    - name: Remove placeholder auth from npmrc
+      shell: bash
+      run: |
+        npmrc="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+        if [ -f "$npmrc" ]; then
+          sed -i '/_authToken=\${NODE_AUTH_TOKEN}/d' "$npmrc"
+        fi
+
     - name: Build
       shell: bash
       run: |
@@ -29,8 +48,9 @@ runs:
       shell: bash
       id: publish
       run: |
-        result=$(pnpm --filter ${{ inputs.workspace }} publish --no-git-checks --access=public)
-        if [[ $result == "There are no new packages that should be published" ]]
+        result=$(pnpm --filter ${{ inputs.workspace }} publish --no-git-checks --access=public --provenance)
+        echo "$result"
+        if [[ $result == *"There are no new packages that should be published"* ]]
         then
           echo "No new packages to publish"
           echo "published=false" >> $GITHUB_OUTPUT
@@ -38,5 +58,3 @@ runs:
           echo "Packages published"
           echo "published=true" >> $GITHUB_OUTPUT
         fi
-      env:
-        NODE_AUTH_TOKEN: ${{ inputs.registry_token }}

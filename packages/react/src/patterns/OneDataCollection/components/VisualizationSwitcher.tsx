@@ -1,8 +1,7 @@
+import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
-
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { useVisualizationMeta } from "../Settings/components/useVisualizationMeta"
@@ -29,17 +28,15 @@ export const VisualizationSwitcher = <
   onVisualizationChange,
   hideLabels,
 }: {
-  visualizations: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   currentVisualization: number
   onVisualizationChange: (index: number) => void
   /** Show segments icon-only (e.g. when the header runs out of room). */

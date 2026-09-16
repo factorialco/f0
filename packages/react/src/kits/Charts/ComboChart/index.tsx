@@ -5,11 +5,12 @@ import {
   ComposedChart,
   LabelList,
   Line,
+  Rectangle,
+  RectangleProps,
   Scatter,
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartConfig,
   ChartContainer,
@@ -18,7 +19,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -28,7 +28,8 @@ import {
   yAxisProps,
 } from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
-import { prepareData } from "../utils/muncher"
+import { bridgeContinuedSeries, prepareData } from "../utils/muncher"
+import { ProjectedBar } from "../utils/ProjectedBar"
 import { ChartPropsBase } from "../utils/types"
 
 const createScatter = (categoryKey: string) => {
@@ -41,7 +42,9 @@ const createScatter = (categoryKey: string) => {
     }
 
     const getScatterValue = () => {
-      if (!payload) return "-"
+      if (!payload) {
+        return "-"
+      }
 
       if (payload[categoryKey] !== undefined) {
         return payload[categoryKey]
@@ -79,6 +82,53 @@ const createScatter = (categoryKey: string) => {
   return ScatterShape
 }
 
+type StackedBarShapeProps = RectangleProps & {
+  payload?: Record<string, unknown>
+}
+
+/**
+ * Rounds only the outer corners of a stacked bar: the top of the outermost
+ * positive segment and the bottom of the outermost negative one. Middle
+ * segments stay square so the stack reads as one continuous bar.
+ *
+ * Projected segments render through ProjectedBar and fade out, so the
+ * outermost solid segment keeps its rounded tip even when projected ones sit
+ * above it.
+ */
+const createStackedBarShape = (
+  category: string,
+  categories: string[],
+  projectedCategories: Set<string>
+) => {
+  const StackedBarShape = (props: unknown) => {
+    const { payload, ...rest } = props as StackedBarShapeProps
+    const valueOf = (key: string) => {
+      const value = payload?.[key]
+      return typeof value === "number" ? value : 0
+    }
+
+    const value = valueOf(category)
+    const outermostSolid = [...categories]
+      .reverse()
+      .find(
+        (key) =>
+          (value < 0 ? valueOf(key) < 0 : valueOf(key) > 0) &&
+          !projectedCategories.has(key)
+      )
+
+    // Segments below zero come in with a negative height and Rectangle mirrors
+    // the path for them, so the first two radius slots land on the bar tip on
+    // both sides of the axis.
+    const radius: [number, number, number, number] =
+      outermostSolid === category ? [4, 4, 0, 0] : [0, 0, 0, 0]
+
+    return <Rectangle {...rest} radius={radius} />
+  }
+
+  StackedBarShape.displayName = `StackedBar-${category}`
+  return StackedBarShape
+}
+
 type ChartDataPoint<K extends ChartConfig> = {
   label: string
   values: {
@@ -86,16 +136,26 @@ type ChartDataPoint<K extends ChartConfig> = {
   }
 }
 
-type ActivePayload<K> = Array<{
+type ActivePayload<K> = {
   name: keyof K
   value: number
-}>
+}[]
 
 type ChartTypeConfig<K extends ChartConfig> = {
   categories: keyof K | (keyof K)[]
   axisLabel?: string
   hideAxis?: boolean
   axisPosition?: "left" | "right"
+}
+
+type BarChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
+  /**
+   * How multiple bar categories are laid out: side by side ("simple", the
+   * default), stacked into a single bar ("stacked"), or stacked with negative
+   * values hanging below the zero line ("stacked-by-sign"). Mirrors BarChart's
+   * `type` prop.
+   */
+  type?: "simple" | "stacked" | "stacked-by-sign"
 }
 
 type LineChartTypeConfig<K extends ChartConfig> = ChartTypeConfig<K> & {
@@ -108,7 +168,7 @@ export type ComboChartProps<K extends ChartConfig = ChartConfig> =
     label?: boolean
     legend?: boolean
     showValueUnderLabel?: boolean
-    bar?: ChartTypeConfig<K>
+    bar?: BarChartTypeConfig<K>
     line?: LineChartTypeConfig<K>
     scatter?: ChartTypeConfig<K>
     onClick?: (data: ChartDataPoint<K>) => void
@@ -133,13 +193,22 @@ const _ComboChart = <K extends ChartConfig>(
   }: ComboChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
-  const preparedData = prepareData(data)
+  const preparedData = prepareData(bridgeContinuedSeries(data, dataConfig))
 
   const barCategories = bar?.categories
     ? Array.isArray(bar.categories)
       ? bar.categories
       : [bar.categories]
     : []
+  const isStackedBar =
+    bar?.type === "stacked" || bar?.type === "stacked-by-sign"
+  const projectedBarCategories = new Set(
+    barCategories.filter((key) => dataConfig[key].projected).map(String)
+  )
+  const barColor = (category: keyof K, index: number) =>
+    dataConfig[category].color
+      ? getColor(dataConfig[category].color)
+      : getCategoricalColor(index)
   const lineCategories = line?.categories
     ? Array.isArray(line.categories)
       ? line.categories
@@ -186,7 +255,7 @@ const _ComboChart = <K extends ChartConfig>(
           top: label ? 24 : 0,
           bottom: showValueUnderLabel ? 24 : 12,
         }}
-        stackOffset={undefined}
+        stackOffset={bar?.type === "stacked-by-sign" ? "sign" : undefined}
         onClick={(data) => {
           if (!onClick || !data.activeLabel || !data.activePayload) {
             return
@@ -204,17 +273,17 @@ const _ComboChart = <K extends ChartConfig>(
           onClick(chartData)
         }}
       >
-        {!hideTooltip && (
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
             }
           />
-        )}
-        {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
+        ) : null}
+        {!hideGrid ? <CartesianGrid {...cartesianGridProps()} /> : null}
 
-        {leftAxisCharts.length > 0 && (
+        {leftAxisCharts.length > 0 ? (
           <YAxis
             {...yAxisProps(yAxis)}
             tick
@@ -237,9 +306,9 @@ const _ComboChart = <K extends ChartConfig>(
                 : undefined
             }
           />
-        )}
+        ) : null}
 
-        {rightAxisCharts.length > 0 && (
+        {rightAxisCharts.length > 0 ? (
           <YAxis
             {...yAxisProps(yAxis)}
             yAxisId="right"
@@ -266,7 +335,7 @@ const _ComboChart = <K extends ChartConfig>(
                 : undefined
             }
           />
-        )}
+        ) : null}
         <XAxis
           {...xAxisProps(xAxis)}
           hide={xAxis?.hide}
@@ -298,7 +367,7 @@ const _ComboChart = <K extends ChartConfig>(
                       >
                         {payload.value}
                       </text>
-                      {!!value && (
+                      {value ? (
                         <text
                           x={0}
                           y={0}
@@ -308,7 +377,7 @@ const _ComboChart = <K extends ChartConfig>(
                         >
                           {normalizedValue}
                         </text>
-                      )}
+                      ) : null}
                     </g>
                   )
                 }
@@ -316,47 +385,73 @@ const _ComboChart = <K extends ChartConfig>(
           }
         />
 
-        {barCategories.map((category, index) => (
-          <Bar
-            key={`bar-${String(category)}`}
-            isAnimationActive={false}
-            dataKey={String(category)}
-            fill={
-              dataConfig[category].color
-                ? getColor(dataConfig[category].color)
-                : getCategoricalColor(index)
-            }
-            radius={4}
-            maxBarSize={32}
-          >
-            {label && (
-              <LabelList
-                key={`label-${String(category)}`}
-                position="top"
-                offset={10}
-                className="fill-f1-foreground"
-                fontSize={12}
-              />
-            )}
-          </Bar>
-        ))}
+        {barCategories.map((category, index) => {
+          const commonProps = {
+            isAnimationActive: false,
+            dataKey: String(category),
+            stackId: isStackedBar ? "stack" : undefined,
+            fill: barColor(category, index),
+            radius: 4,
+            maxBarSize: 32,
+          }
+          const labelList = label && (
+            <LabelList
+              key={`label-${String(category)}`}
+              position="top"
+              offset={10}
+              className="fill-f1-foreground"
+              fontSize={12}
+            />
+          )
 
-        {lineCategories.map((category, index) => (
-          <Line
-            key={`line-${String(category)}`}
-            type={line?.lineType ?? "natural"}
-            dataKey={String(category)}
-            stroke={
-              dataConfig[category].color
-                ? getColor(dataConfig[category].color)
-                : getCategoricalColor(barCategories.length + index)
-            }
-            strokeWidth={2}
-            dot={line?.dot ?? false}
-            isAnimationActive={false}
-            yAxisId={line?.axisPosition === "right" ? "right" : undefined}
-          />
-        ))}
+          return projectedBarCategories.has(String(category)) ? (
+            <ProjectedBar
+              key={`bar-${String(category)}`}
+              {...commonProps}
+              stackKeys={isStackedBar ? barCategories.map(String) : undefined}
+            >
+              {labelList}
+            </ProjectedBar>
+          ) : (
+            <Bar
+              key={`bar-${String(category)}`}
+              {...commonProps}
+              shape={
+                isStackedBar
+                  ? createStackedBarShape(
+                      String(category),
+                      barCategories.map(String),
+                      projectedBarCategories
+                    )
+                  : undefined
+              }
+            >
+              {labelList}
+            </Bar>
+          )
+        })}
+
+        {lineCategories.map((category, index) => {
+          const stroke = dataConfig[category].color
+            ? getColor(dataConfig[category].color)
+            : getCategoricalColor(barCategories.length + index)
+
+          return (
+            <Line
+              key={`line-${String(category)}`}
+              type={line?.lineType ?? "natural"}
+              dataKey={String(category)}
+              stroke={stroke}
+              strokeWidth={2}
+              strokeDasharray={dataConfig[category].dashed ? "4 4" : undefined}
+              // Solid dots in the series color; the default hollow white ones
+              // read as gaps over a dashed stroke.
+              dot={line?.dot ? { fill: stroke, stroke, r: 3 } : false}
+              isAnimationActive={false}
+              yAxisId={line?.axisPosition === "right" ? "right" : undefined}
+            />
+          )
+        })}
 
         {scatterCategories.map((category, index) => (
           <Scatter
@@ -375,7 +470,7 @@ const _ComboChart = <K extends ChartConfig>(
             shape={createScatter(String(category))}
           />
         ))}
-        {legend && (
+        {legend ? (
           <ChartLegend
             content={<ChartLegendContent nameKey="label" />}
             align={"center"}
@@ -383,7 +478,7 @@ const _ComboChart = <K extends ChartConfig>(
             layout="vertical"
             className={"flex-row items-start gap-4 pr-3 pt-2"}
           />
-        )}
+        ) : null}
       </ComposedChart>
     </ChartContainer>
   )

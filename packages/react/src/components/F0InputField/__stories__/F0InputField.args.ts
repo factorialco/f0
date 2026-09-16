@@ -1,5 +1,4 @@
 import { icons } from "lucide-react"
-
 import { inputFieldStatus } from "../types"
 
 const inputFieldArgs = {
@@ -111,7 +110,7 @@ const inputFieldArgs = {
 }
 
 export const getInputFieldArgs = (
-  keys?: ReadonlyArray<keyof typeof inputFieldArgs | string>
+  keys?: readonly (keyof typeof inputFieldArgs | (string & {}))[]
 ) => {
   if (!keys) {
     return inputFieldArgs

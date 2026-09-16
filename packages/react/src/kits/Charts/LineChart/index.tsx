@@ -6,14 +6,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   LineChartConfig,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -23,7 +21,7 @@ import {
   yAxisProps,
 } from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
-import { prepareData } from "../utils/muncher"
+import { bridgeContinuedSeries, prepareData } from "../utils/muncher"
 import { LineChartPropsBase } from "../utils/types"
 
 export type LineChartProps<K extends LineChartConfig = LineChartConfig> =
@@ -45,7 +43,7 @@ export const _LineChart = <K extends LineChartConfig>(
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const lines = Object.keys(dataConfig) as (keyof LineChartConfig)[]
-  const preparedData = prepareData(data)
+  const preparedData = prepareData(bridgeContinuedSeries(data, dataConfig))
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       lines.map((key) =>
@@ -65,22 +63,22 @@ export const _LineChart = <K extends LineChartConfig>(
         data={preparedData}
         margin={{ left: yAxis && !yAxis.hide ? 0 : 12, right: 12 }}
       >
-        {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
-        {!xAxis?.hide && <XAxis {...xAxisProps(xAxis)} />}
-        {!yAxis?.hide && (
+        {!hideGrid ? <CartesianGrid {...cartesianGridProps()} /> : null}
+        {!xAxis?.hide ? <XAxis {...xAxisProps(xAxis)} /> : null}
+        {!yAxis?.hide ? (
           <YAxis
             {...yAxisProps(yAxis)}
             width={yAxis.width ?? maxLabelWidth + 20}
           />
-        )}
-        {!hideTooltip && (
+        ) : null}
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }
           />
-        )}
+        ) : null}
         {lines.map((line, index) => (
           <Line
             key={line}

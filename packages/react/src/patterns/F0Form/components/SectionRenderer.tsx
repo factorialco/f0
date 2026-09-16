@@ -1,12 +1,8 @@
 import React from "react"
 import { useFormContext } from "react-hook-form"
-
 import { F0Button } from "@/components/F0Button"
-import { SectionHeader } from "@/patterns/SectionHeader"
 import { cn } from "@/lib/utils"
-
-import type { SectionDefinition } from "../types"
-
+import { SectionHeader } from "@/patterns/SectionHeader"
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
@@ -16,6 +12,7 @@ import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "../groupingUtils"
+import type { SectionDefinition } from "../types"
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
@@ -58,7 +55,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
         )}
       >
         <SectionHeader title={title} description={description ?? ""} />
-        {action && (
+        {action ? (
           <F0Button
             label={action.label}
             icon={action.icon}
@@ -67,7 +64,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
             variant="outline"
             size="md"
           />
-        )}
+        ) : null}
       </div>
       <div className={`flex flex-col ${FIELD_GAP}`}>
         {groupedItems.map((item, index) => {

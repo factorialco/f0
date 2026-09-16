@@ -1,6 +1,8 @@
 import { DatePickerValue } from "./types"
 
-const coerceToDate = (value: Date | string | number): Date =>
+type DateLike = Date | string | number
+
+const coerceToDate = (value: DateLike): Date =>
   value instanceof Date ? value : new Date(value)
 
 /**
@@ -25,8 +27,8 @@ export const reviveDatePickerValue = (
     return value
   }
   const { from, to } = value.value as {
-    from: Date | string | number
-    to: Date | string | number
+    from: DateLike
+    to: DateLike
   }
   if (from instanceof Date && to instanceof Date) {
     return value

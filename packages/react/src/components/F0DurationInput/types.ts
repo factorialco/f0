@@ -1,5 +1,5 @@
-import type { InputFieldStatus } from "@/components/F0InputField/types"
 import type { AriaAttributes } from "react"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 export const durationUnits = ["days", "hours", "minutes", "seconds"] as const
 export type DurationUnit = (typeof durationUnits)[number]
@@ -29,6 +29,13 @@ export interface F0DurationInputProps {
   hideLabel?: boolean
   value: number
   onChange: (seconds: number) => void
+  /**
+   * Allows entering negative durations (e.g. to adjust tracked time).
+   * A leading minus sign typed in the first visible segment applies to the
+   * whole duration, and `value`/`onChange` carry negative total seconds.
+   * Defaults to false.
+   */
+  allowNegative?: boolean
   onBlur?: () => void
   units?: DurationUnit[]
   fields?: Partial<Record<DurationUnit, DurationFieldConfig>>

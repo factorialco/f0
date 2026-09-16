@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import {
   F0Select,
@@ -13,7 +12,7 @@ import { ChevronDown } from "@/icons/app"
 export type BreadcrumbSelectProps<
   T extends string,
   R = unknown,
-> = F0SelectProps<T, R> & { multiple?: false }
+> = F0SelectProps<T, R> & { multiple?: false; variant?: "field" }
 
 export function BreadcrumbSelect<T extends string, R = unknown>({
   ...props

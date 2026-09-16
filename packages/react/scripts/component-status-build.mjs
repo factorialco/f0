@@ -13,7 +13,9 @@
  * - name (from the story `title` or the filename)
  * - zone (components, patterns, sds, kits, experimental, layouts, deprecated…)
  * - API status tag (stable / experimental / deprecated / internal — from tags)
- * - hasUnitTests  (a __tests__ folder or *.test.ts(x) near the story)
+ * - hasUnitTests  (a __tests__ folder, or a *.test.ts(x) / *.spec.ts(x) file,
+ *                  near the story)
+ * - hasSnapshot   (a Chromatic snapshot story — `withSnapshot(...)`)
  * - hasMdxDocs    (an *.mdx file alongside the story)
  * - docQuality    (heuristic tier from the MDX structure)
  *
@@ -42,11 +44,22 @@ const DOC_TIER_ORDER = ["none", "stub", "acceptable", "good", "gold"]
  * JS, no virtual module) so Node contexts like `.storybook/main.ts` can compute
  * the effective status for the sidebar.
  */
+/**
+ * Naming convention: the component folder (and exported symbol) is "F0"
+ * followed by an uppercase letter. Mirrors componentFolderName +
+ * F0_NAME_PATTERN in src/component-status/component-status.ts.
+ */
+export function isF0Named(storyFile) {
+  return /^F0[A-Z]/.test(basename(componentDirOf(storyFile)))
+}
+
 export function meetsStableBar(c) {
   return (
+    isF0Named(c.storyFile) &&
     c.hasStories &&
     c.hasUnitTests &&
     c.hasPlayFunction &&
+    c.hasSnapshot &&
     c.hasMdxDocs &&
     DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good") &&
     c.a11yTier === "enforced"
@@ -63,6 +76,18 @@ export function effectiveStatusOf(c) {
 }
 
 /** Normalize a component name for matching (drop F0 prefix + punctuation). */
+/**
+ * Key for the sidebar's status badge. Unlike `normalizeComponentName` this does
+ * *not* drop an `F0` prefix, because the two functions do opposite jobs: that
+ * one matches two spellings of the same component (the export `F0Callout`
+ * against the story `AICallout`), while this one has to tell two different
+ * components apart. Stripping here collapsed `F0AiCallout` and `AICallout` onto
+ * one key, so a deprecated component's ❌ landed on its replacement.
+ */
+export function sidebarStatusKey(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "")
+}
+
 export function normalizeComponentName(name) {
   return name
     .toLowerCase()
@@ -84,7 +109,7 @@ export function leafName(name) {
 export function effectiveStatusByLeaf(components) {
   const byLeaf = {}
   for (const c of components) {
-    const key = normalizeComponentName(leafName(c.name))
+    const key = sidebarStatusKey(leafName(c.name))
     const prev = byLeaf[key]
     if (!prev || (c.zone === "components" && prev.zone !== "components")) {
       byLeaf[key] = { zone: c.zone, status: effectiveStatusOf(c) }
@@ -254,9 +279,7 @@ export function a11yTierOf(content) {
 export function computeComponentStatusData(srcDir = SRC_DIR) {
   const allFiles = walk(srcDir)
   const storyFiles = allFiles.filter((f) => f.endsWith(".stories.tsx"))
-  const testFiles = allFiles.filter(
-    (f) => f.endsWith(".test.tsx") || f.endsWith(".test.ts")
-  )
+  const testFiles = allFiles.filter((f) => /\.(test|spec)\.(ts|tsx)$/.test(f))
   const mdxByDir = new Map()
   for (const f of allFiles) {
     if (!f.endsWith(".mdx")) continue
@@ -332,6 +355,10 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       // A Storybook play function (interaction test) — `play: async (…)` or
       // `play: (…)` in a story object.
       hasPlayFunction: /\bplay\s*:\s*(async\b|\()/.test(content),
+      // A Chromatic visual-regression snapshot story — enabled via the
+      // `withSnapshot(...)` parameters helper (the global default disables
+      // Chromatic; withSnapshot re-enables it for that story).
+      hasSnapshot: /\bwithSnapshot\s*\(/.test(content),
       hasMdxDocs: Boolean(mdxPath),
       docQuality: scoreDocQuality(mdxContent, docSignals),
       docSignals,

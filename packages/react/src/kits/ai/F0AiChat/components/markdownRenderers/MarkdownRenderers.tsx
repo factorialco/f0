@@ -1,5 +1,4 @@
 import type { ComponentType } from "react"
-
 import { Blockquote, Code, Hr, Pre } from "./components/Block"
 import { Image } from "./components/Image"
 import { A } from "./components/Link"

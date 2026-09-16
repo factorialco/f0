@@ -4,7 +4,7 @@ import {
   DataCollectionStorageFeaturesDefinition,
 } from "./types"
 
-const ALL_FEATURES_TOKENS = ["*", "all"]
+const ALL_FEATURES_TOKENS = new Set(["*", "all"])
 
 /**
  * Calculate the features to use for the data collection storage
@@ -14,18 +14,18 @@ const ALL_FEATURES_TOKENS = ["*", "all"]
 export const getFeatures = (
   features: DataCollectionStorageFeaturesDefinition | undefined
 ) => {
-  const res: Set<DataCollectionStorageFeature> = new Set()
+  const res = new Set<DataCollectionStorageFeature>()
   if (!features) {
     return []
   }
-  if (features.some((feature) => ALL_FEATURES_TOKENS.includes(feature))) {
+  if (features.some((feature) => ALL_FEATURES_TOKENS.has(feature))) {
     dataCollectionStorageFeatures.forEach((feature) => {
       res.add(feature)
     })
   }
 
   features
-    .filter((feature) => !ALL_FEATURES_TOKENS.includes(feature))
+    .filter((feature) => !ALL_FEATURES_TOKENS.has(feature))
     .forEach((feature) => {
       if (feature.startsWith("!")) {
         res.delete(feature.slice(1) as DataCollectionStorageFeature)

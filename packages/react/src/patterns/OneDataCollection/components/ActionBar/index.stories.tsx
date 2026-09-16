@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { fn } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import {
@@ -14,7 +12,6 @@ import {
   Share,
   Upload,
 } from "@/icons/app"
-
 import { ActionBar } from "."
 
 const meta: Meta<typeof ActionBar> = {
@@ -189,6 +186,15 @@ export const NoSelectedItems: Story = {
         <ActionBar {...args} isOpen={open} />
       </div>
     )
+  },
+}
+
+export const AllItemsSelected: Story = {
+  args: {
+    ...Default.args,
+    allPagesSelection: true,
+    isAllItemsSelected: true,
+    totalItems: 133,
   },
 }
 

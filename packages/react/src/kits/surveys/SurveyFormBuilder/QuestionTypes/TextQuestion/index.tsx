@@ -1,10 +1,7 @@
 import { useMemo } from "react"
-
-import type { F0Field } from "@/patterns/F0Form/fields/types"
-
-import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
-
+import type { F0Field } from "@/patterns/F0Form/fields/types"
+import { F0FormField } from "@/patterns/F0FormField"
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestionOnChangeParams } from "../../types"
 import {
@@ -27,13 +24,15 @@ export const TextQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: TextQuestionProps) => {
-  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering, placeholders } =
+    useSurveyFormBuilderContext()
 
   const disabled = useQuestionDisabled(baseQuestionComponentProps)
 
   const { t } = useI18n()
 
-  const placeholder = t("surveyFormBuilder.answer.textPlaceholder")
+  const placeholder =
+    placeholders?.answer ?? t("surveyFormBuilder.answer.textPlaceholder")
 
   const field: F0Field = useMemo(
     () =>

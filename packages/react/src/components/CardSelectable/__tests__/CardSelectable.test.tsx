@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
+import { CardSelectableContainer } from ".."
 import type { CardSelectableItem } from "../types"
-
-import { CardSelectableContainer } from "../index"
 
 const baseItems: CardSelectableItem<string>[] = [
   {
@@ -132,5 +129,165 @@ describe("CardSelectable selectedContent", () => {
     )
 
     expect(screen.getByTestId("content-a")).toBeInTheDocument()
+  })
+})
+
+const linkItems: CardSelectableItem<string>[] = [
+  {
+    value: "workflows",
+    title: "Link this course with Workflows",
+    description: "Automate certificates and questionnaires.",
+    moreInfoLink: {
+      href: "https://help.example.com/workflows",
+      label: "Learn more",
+    },
+  },
+]
+
+/**
+ * The card header carries `role="switch" | "checkbox" | "radio"` and is
+ * focusable. A link inside it makes an interactive control wrap another one,
+ * which axe flags as `nested-interactive` (WCAG 2.0 SC 4.1.2, "Element has
+ * focusable descendants"). The link is a sibling row below the header instead.
+ */
+describe("CardSelectable moreInfoLink", () => {
+  it.each(["switch", "checkbox", "radio"] as const)(
+    "renders the link outside the %s element",
+    (role) => {
+      render(
+        <CardSelectableContainer
+          {...(role === "switch"
+            ? { multiple: true as const, isToggle: true }
+            : role === "checkbox"
+              ? { multiple: true as const }
+              : { multiple: false as const })}
+          items={linkItems}
+          value={role === "radio" ? undefined : []}
+          onChange={vi.fn()}
+          label="test"
+        />
+      )
+
+      const control = screen.getByRole(role)
+      const link = screen.getByRole("link", { name: /Learn more/ })
+
+      expect(link).toBeInTheDocument()
+      expect(control.contains(link)).toBe(false)
+    }
+  )
+
+  it("leaves no focusable descendant inside the interactive header", () => {
+    render(
+      <CardSelectableContainer
+        multiple
+        isToggle
+        items={linkItems}
+        value={[]}
+        onChange={vi.fn()}
+        label="test"
+      />
+    )
+
+    const control = screen.getByRole("switch")
+    expect(
+      control.querySelectorAll(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).toHaveLength(0)
+  })
+
+  it("does not toggle the card when the link is activated", async () => {
+    const onChange = vi.fn()
+    render(
+      <CardSelectableContainer
+        multiple
+        isToggle
+        items={linkItems}
+        value={[]}
+        onChange={onChange}
+        label="test"
+      />
+    )
+
+    await userEvent.click(screen.getByRole("link", { name: /Learn more/ }))
+    expect(onChange).not.toHaveBeenCalled()
+  })
+})
+
+describe("CardSelectable compact", () => {
+  const items: CardSelectableItem<string>[] = [
+    { value: "a", title: "Option A" },
+  ]
+
+  const linkItems: CardSelectableItem<string>[] = [
+    {
+      value: "a",
+      title: "Option A",
+      moreInfoLink: { href: "https://example.test", label: "More" },
+    },
+  ]
+
+  it("keeps the default padding when compact is not set", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        label="test"
+      />
+    )
+
+    expect(screen.getByRole("radio")).toHaveClass("p-4")
+  })
+
+  it("tightens the padding when compact is set", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        compact
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("p-3")
+    expect(card).not.toHaveClass("p-4")
+  })
+
+  it("is a no-op in grouped layout, whose rows are already 12px tall", () => {
+    render(
+      <CardSelectableContainer
+        items={items}
+        value="a"
+        onChange={vi.fn()}
+        grouped
+        compact
+        label="test"
+      />
+    )
+
+    const card = screen.getByRole("radio")
+    expect(card).toHaveClass("px-4")
+    expect(card).toHaveClass("py-3")
+    expect(card).not.toHaveClass("p-3")
+  })
+
+  it("keeps the moreInfoLink row aligned with the tightened card", () => {
+    render(
+      <CardSelectableContainer
+        items={linkItems}
+        value="a"
+        onChange={vi.fn()}
+        compact
+        label="test"
+      />
+    )
+
+    const linkRow = screen.getByRole("link").parentElement
+    expect(linkRow).toHaveClass("px-3")
+    expect(linkRow).toHaveClass("pb-3")
+    expect(linkRow).not.toHaveClass("px-4")
   })
 })

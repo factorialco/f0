@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { zeroRenderHook } from "@/testing/test-utils"
-
 import type { FiltersDefinition, FiltersState } from "../types"
-
 import { getActiveFiltersValue } from "./getActiveFiltersValue"
 
 const filters = {

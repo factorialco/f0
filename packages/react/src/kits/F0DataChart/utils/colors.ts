@@ -1,5 +1,4 @@
 import { colord } from "colord"
-
 import { baseColors } from "../../../../../core/src/tokens/colors"
 
 // ---------------------------------------------------------------------------
@@ -118,6 +117,18 @@ export const echartsColorPalette = [
 /** Look up a palette color by index (wraps around) */
 export function paletteColor(index: number): string {
   return echartsColorPalette[index % echartsColorPalette.length] ?? "#999"
+}
+
+/**
+ * Amount a fill is darkened to read as "beyond the reference" — enough to
+ * separate the two stretches of one bar at a glance, little enough that they
+ * still read as the same series.
+ */
+const DARKEN_AMOUNT = 0.12
+
+/** Darker variant of a hex color, for the part of a mark that passed its target */
+export function darkenChartColor(color: string): string {
+  return colord(color).darken(DARKEN_AMOUNT).toHex()
 }
 
 /** Linearly interpolate between two hex colors */

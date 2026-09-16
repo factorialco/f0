@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useMemo, useState } from "react"
-
 import type { PaginationInfo } from "@/hooks/datasource/types"
 import {
   buildDataCollectionUrlParams,
@@ -11,7 +10,6 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import {
   paginationFilters,
   type PaginationFiltersType,
@@ -34,6 +32,10 @@ const STORAGE_ID = "examples/url-params/v1"
  * "Select all": over {@link MAX_URL_FILTER_VALUES} values it is dropped from the
  * URL (still applied). Storage is off here, so this also shows URL syncing needs
  * no storage.
+ *
+ * `dc_sort` is only written once the sorting differs from the collection's
+ * `defaultSortings`: a collection that starts already sorted does not stamp the
+ * param on first paint, and sorting back to the default drops it again.
  */
 const UrlParamsExample = () => {
   // Read everything synchronously from the URL so the first fetch/render already

@@ -56,14 +56,12 @@ const MessageHeartAnimated = React.forwardRef<SVGSVGElement, MessageHeartProps>(
           variants={messageVariants}
           transition={messageTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M13.4389 9C14.6716 9 15.5 10.1175 15.5 11.16C15.5 13.2713 12.0622 15 12 15C11.9378 15 8.5 13.2713 8.5 11.16C8.5 10.1175 9.32833 9 10.5611 9C11.2689 9 11.7317 9.34125 12 9.64125C12.2683 9.34125 12.7311 9 13.4389 9Z"
           variants={heartVariants}
           transition={heartTransition}
           animate={animate}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )

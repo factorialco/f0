@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import CrossIcon from "@/icons/app/Cross"
@@ -44,7 +43,7 @@ export function CustomModal({
       >
         <div className="flex flex-row items-center justify-between px-4 py-4">
           <DialogTitle className="flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground">
-            {module && <F0AvatarModule module={module} size="md" />}
+            {module ? <F0AvatarModule module={module} size="md" /> : null}
             {title}
           </DialogTitle>
           <ButtonInternal

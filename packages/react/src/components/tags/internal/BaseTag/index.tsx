@@ -1,9 +1,8 @@
 import { forwardRef, ReactNode } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircleLine } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 type BaseTagProps = {
@@ -80,7 +79,7 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
           )}
         >
           {left}
-          {!!text && !hideLabel && (
+          {!!text && !hideLabel ? (
             <OneEllipsis
               tag="span"
               lines={1}
@@ -90,22 +89,22 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
             >
               {text}
             </OneEllipsis>
-          )}
-          {additionalAccessibleText && (
+          ) : null}
+          {additionalAccessibleText ? (
             <span className="sr-only">{additionalAccessibleText}</span>
-          )}
+          ) : null}
           {right}
         </div>
-        {hint && (
+        {hint ? (
           <span className="text-base font-medium text-f1-foreground-secondary">
             {hint}
           </span>
-        )}
-        {info && (
+        ) : null}
+        {info ? (
           <Tooltip description={info}>
             <F0Icon icon={InfoCircleLine} size="md" />
           </Tooltip>
-        )}
+        ) : null}
       </div>
     )
   }

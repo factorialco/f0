@@ -1,15 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, waitFor, within } from "storybook/test"
-
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
-
-import type { KanbanProps } from "../types"
-
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
+import type { KanbanProps } from "../types"
 
 type Task = {
   id: string
@@ -166,13 +162,7 @@ export const ProjectStatuses: Story = {
               return lane?.items.findIndex((item) => item.id === id) ?? -1
             },
             onMove: async (fromLaneId, toLaneId, source, destiny) => {
-              await console.log(
-                "DND onMove",
-                fromLaneId,
-                toLaneId,
-                source,
-                destiny
-              )
+              console.log("DND onMove", fromLaneId, toLaneId, source, destiny)
               // Simulate optimistic lock conflict when moving to 'review'
               if (toLaneId === "review") {
                 await new Promise((r) => setTimeout(r, 50))
@@ -326,12 +316,12 @@ export const SimpleOnMoveTest: Story = {
   render: function Render() {
     const [instanceId] = useState(() => Symbol("kanban-instance"))
     const [callbackCalls, setCallbackCalls] = useState<
-      Array<{
+      {
         fromLaneId: string
         toLaneId: string
         sourceRecord: Task
         destinyRecord: { record: Task; position: "above" | "below" } | null
-      }>
+      }[]
     >([])
 
     // ✅ Estado mutable para las lanes para ver el movimiento visual
@@ -583,5 +573,50 @@ export const SimpleOnMoveTest: Story = {
       expect(secondCall).toHaveTextContent(/"title":"Design spec"/)
       expect(secondCall).toHaveTextContent(/"position":"above"/)
     })
+  },
+}
+
+export const ContentHeight: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  args: { lanes: [], renderCard: () => null, getKey: () => "" },
+  render: function Render() {
+    const [instanceId] = useState(() => Symbol("kanban-content-height"))
+    const many: Task[] = Array.from({ length: 14 }, (_, i) => ({
+      id: `m${i}`,
+      title: `Task ${i + 1}`,
+    }))
+    const lanes: KanbanProps<Task>["lanes"] = [
+      { id: "backlog", title: "Backlog", items: many, variant: "neutral" },
+      {
+        id: "in-progress",
+        title: "In Progress",
+        items: mockRight,
+        variant: "info",
+      },
+      { id: "done", title: "Done", items: mockLeft, variant: "positive" },
+    ]
+    return (
+      <DndProvider driver={createAtlaskitDriver(instanceId)}>
+        {/* Constrained, scrollable outer container: with heightMode="content" the
+          lanes should grow to the tallest (Backlog) and this box should scroll —
+          NOT each lane scrolling internally. */}
+        <div className="h-[480px] overflow-auto rounded-lg border border-f1-border-secondary">
+          <Kanban<Task>
+            heightMode="content"
+            lanes={lanes}
+            getKey={(item: Task) => item.id}
+            renderCard={(item: Task, index: number, total: number) => (
+              <KanbanCard<Task>
+                drag={{ id: item.id, type: "list-card", data: { ...item } }}
+                id={item.id}
+                index={index}
+                total={total}
+                title={item.title}
+              />
+            )}
+          />
+        </div>
+      </DndProvider>
+    )
   },
 }

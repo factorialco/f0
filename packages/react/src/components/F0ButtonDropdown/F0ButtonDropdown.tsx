@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import {
   DropdownInternal,
@@ -11,7 +10,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Action } from "@/ui/Action/index.tsx"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants.ts"
-
 import {
   ButtonDropdownGroup,
   ButtonDropdownItem,
@@ -20,12 +18,15 @@ import {
   F0ButtonDropdownProps,
 } from "./types.ts"
 
+type ButtonDropdownItems =
+  | ButtonDropdownItem[]
+  | ButtonDropdownGroup[]
+  | ButtonDropdownGroup
+
 /**
  * Normalize the items to an array of DropdownButtonGroup
  */
-const normalizeItems = (
-  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
-) => {
+const normalizeItems = (items: ButtonDropdownItems) => {
   if (Array.isArray(items)) {
     // ButtonDropdownItem[]
     if (items.every(isButtonDropdownItem)) {
@@ -34,14 +35,12 @@ const normalizeItems = (
           items: items,
         },
       ]
-    } else {
-      // ButtonDropdownGroup[]
-      return items
     }
-  } else {
-    // ButtonDropdownGroup
-    return [items]
+    // ButtonDropdownGroup[]
+    return items
   }
+  // ButtonDropdownGroup
+  return [items]
 }
 
 export type F0DropdownButtonProps<T = string> = {
@@ -76,23 +75,22 @@ const SplitMode = ({
   disabled,
   loading,
   tooltip,
+  container,
 }: {
-  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+  onClick: (value: string, item: ButtonDropdownItem) => void
   value?: string
-  items:
-    | ButtonDropdownItem<string>[]
-    | ButtonDropdownGroup<string>[]
-    | ButtonDropdownGroup<string>
+  items: ButtonDropdownItems
   size?: ButtonDropdownSize
   variant?: ButtonDropdownVariant
   disabled?: boolean
   loading?: boolean
   tooltip?: string
+  container?: HTMLElement | null
 }) => {
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
-  const items: ButtonDropdownGroup<string>[] = useMemo(
+  const items: ButtonDropdownGroup[] = useMemo(
     () => normalizeItems(rawItems),
     [rawItems]
   )
@@ -163,14 +161,18 @@ const SplitMode = ({
           aria-label={selectedItem.label}
           prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
           className="rounded-r-none after:rounded-r-none disabled:opacity-100"
-          tooltip={tooltip}
+          // Same as dropdown mode: what this control is, then what is chosen.
+          tooltip={{ label: tooltip, description: selectedItem.label }}
           appendOutside={
             <DropdownInternal
               items={dropdownItems}
               align="end"
+              container={container}
               open={isOpen && !disabled}
               onOpenChange={(open) => {
-                if (disabled) return
+                if (disabled) {
+                  return
+                }
                 setIsOpen(open)
               }}
             >
@@ -215,6 +217,7 @@ const SplitMode = ({
 const DropdownMode = ({
   onClick,
   trigger,
+  value,
   items: rawItems,
   size,
   variant,
@@ -223,12 +226,10 @@ const DropdownMode = ({
   tooltip,
   contentClassName,
 }: {
-  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+  onClick: (value: string, item: ButtonDropdownItem) => void
   trigger?: string
-  items:
-    | ButtonDropdownItem<string>[]
-    | ButtonDropdownGroup<string>[]
-    | ButtonDropdownGroup<string>
+  value?: string
+  items: ButtonDropdownItems
   size?: ButtonDropdownSize
   variant?: ButtonDropdownVariant
   disabled?: boolean
@@ -238,7 +239,7 @@ const DropdownMode = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const items: ButtonDropdownGroup<string>[] = useMemo(
+  const items: ButtonDropdownGroup[] = useMemo(
     () => normalizeItems(rawItems),
     [rawItems]
   )
@@ -247,7 +248,26 @@ const DropdownMode = ({
     return items.flatMap((item) => item.items)
   }, [items])
 
-  const triggerLabel = trigger || flattenedItems[0]?.label
+  // What `value` names, if anything — the trigger then shows that item, exactly
+  // as split mode's main button does.
+  const selectedItem = useMemo(
+    () => flattenedItems.find((item) => item.value === value),
+    [value, flattenedItems]
+  )
+
+  const triggerLabel =
+    trigger || selectedItem?.label || flattenedItems[0]?.label
+
+  /**
+   * On hover: which control this is, then what is chosen in it — the same
+   * two-line shape `F0Select`'s trigger tooltip has (`tooltip` bold on top, the
+   * selection under it). Either half alone is fine: with nothing selected the
+   * tooltip stays what the consumer passed, and without a `tooltip` the selection
+   * speaks for itself.
+   */
+  const triggerTooltip = selectedItem
+    ? { label: tooltip, description: selectedItem.label }
+    : tooltip
 
   const dropdownItems = useMemo(
     () =>
@@ -271,7 +291,9 @@ const DropdownMode = ({
     [items, onClick]
   )
 
-  if (!triggerLabel) return null
+  if (!triggerLabel) {
+    return null
+  }
 
   return (
     <DropdownInternal
@@ -279,7 +301,9 @@ const DropdownMode = ({
       align="end"
       open={isOpen && !disabled}
       onOpenChange={(open) => {
-        if (disabled) return
+        if (disabled) {
+          return
+        }
         setIsOpen(open)
       }}
       contentClassName={contentClassName}
@@ -291,11 +315,12 @@ const DropdownMode = ({
         loading={loading}
         data-testid="button-dropdown-trigger"
         aria-label={triggerLabel}
+        prepend={selectedItem?.icon && <F0Icon icon={selectedItem.icon} />}
         append={
           <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
         }
         pressed={isOpen && !disabled}
-        tooltip={tooltip}
+        tooltip={triggerTooltip}
       >
         {triggerLabel}
       </Action>
@@ -311,6 +336,7 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
       <DropdownMode
         onClick={props.onClick}
         trigger={"trigger" in props ? props.trigger : undefined}
+        value={"value" in props ? props.value : undefined}
         items={props.items}
         size={props.size}
         variant={props.variant}
@@ -334,6 +360,7 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
       disabled={props.disabled}
       loading={props.loading}
       tooltip={props.tooltip}
+      container={props.container}
     />
   )
 }

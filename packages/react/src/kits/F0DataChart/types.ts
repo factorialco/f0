@@ -1,6 +1,5 @@
 import type * as echarts from "echarts"
 import type { ReactNode } from "react"
-
 import type { ChartColorToken } from "./utils/colors"
 
 // ---------------------------------------------------------------------------
@@ -32,12 +31,99 @@ export interface F0DataChartEmptyStateProps {
   disabled?: boolean
 }
 
+/** One series' value at the category a click resolved to. */
+export interface F0DataChartPointClickSeries {
+  /** Configured series name. Empty when ECharts does not report one. */
+  name: string
+  /** Index of the series in the chart's own series list. */
+  seriesIndex: number
+  /** Raw, unformatted value at this category. */
+  value: number
+}
+
+/**
+ * What a click resolved to — one bar segment, one slice, one point, or (for a
+ * line, where the click can land anywhere in the plot area) a whole category.
+ *
+ * The top-level fields always name a single series, so a consumer that wants
+ * one number has one. {@link F0DataChartPointClick.series} carries everything
+ * the click resolved, which for a line is every series at that category — the
+ * same rows its tooltip shows.
+ */
+export interface F0DataChartPointClick {
+  /** Interaction surface that resolved the point. */
+  source: "pointer"
+  /** Configured series name for the mark. Empty when ECharts does not report one. */
+  seriesName: string
+  /**
+   * Mark name reported by ECharts: an axis category, pie slice, funnel stage,
+   * scatter label, or gauge/radar item name. Empty when the mark has no name.
+   */
+  category: string
+  /** Raw, unformatted value. Consumers apply their own formatting. */
+  value: number
+  /**
+   * Every number the mark carries, in series order: `[42]` for a bar or a
+   * slice, `[x, y]` for a scatter point, `[xIndex, yIndex, value]` for a
+   * heatmap cell.
+   *
+   * {@link value} is the last entry, which is the measure for every type
+   * except scatter — there both entries are measures, and quoting only the
+   * last one drops half the point. Read this when the chart type has more
+   * than one number to say.
+   */
+  values: number[]
+  /**
+   * Every series the click resolved, in the order they are configured.
+   *
+   * A line chart accepts a click anywhere in its plot area, so this is the
+   * whole category — one entry per series that has a value there and is
+   * switched on in the legend, exactly the rows its axis tooltip shows.
+   * Everywhere else a click identifies one mark and this holds that one entry,
+   * matching {@link seriesName} and {@link value}.
+   */
+  series: F0DataChartPointClickSeries[]
+  /** Index of the clicked mark within its series. */
+  dataIndex: number
+  /** Index of the series the mark belongs to. */
+  seriesIndex: number
+  /**
+   * Where a pointer click landed, in viewport coordinates — enough to anchor a
+   * floating element without the consumer having to reach for the chart's own
+   * geometry. Taken from the touch on a touch device, where the event itself
+   * carries no coordinates. Both are 0 if the pointer event carried no
+   * coordinates.
+   */
+  clientX: number
+  clientY: number
+}
+
 /**
  * Props shared by every `F0DataChart` variant.
  */
 interface F0DataChartCommonProps {
   /** Customize or opt out of the empty state shown when data is empty. */
   emptyState?: F0DataChartEmptyStateProps
+  /**
+   * Called when the user clicks a single mark (bar segment, slice, point).
+   * Omit to leave clicks inert, which is the default for every chart.
+   *
+   * Line charts accept a click anywhere in the plot area, since a line is too
+   * thin to hit — the same allowance their axis-triggered tooltip already
+   * makes — and answer with the whole category in
+   * {@link F0DataChartPointClick.series}, matching what the tooltip showed.
+   */
+  onPointClick?: (point: F0DataChartPointClick) => void
+}
+
+/** Props shared only by variants with an interactive legend. */
+interface F0DataChartLegendInteractionProps {
+  /**
+   * Reports the chart's live legend visibility after an interactive toggle.
+   * Primarily used by accessible companion surfaces that must expose the same
+   * data currently shown on the canvas.
+   */
+  onLegendSelectionChange?: (selected: Record<string, boolean>) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -105,11 +191,41 @@ export interface F0DataChartLineSeries {
   showArea?: boolean
 }
 
+/**
+ * A constant drawn across the whole plot rather than per category.
+ *
+ * For a figure that does not vary with the categories — a peer median, a
+ * target, an average. Drawn as one dashed line with its label at the end, so it
+ * reads as a threshold the bars are measured against rather than as another
+ * series: a constant repeated once per category would claim to be a quantity
+ * each of them has.
+ */
+export interface F0DataChartReferenceLine {
+  /** Where on the value axis to draw it. */
+  value: number
+  /** Shown at the end of the line. Omit for an unlabelled rule. */
+  label?: string
+  /** Must be an F0 design token name. Falls back to a neutral line colour. */
+  color?: ChartColorToken
+  /** Solid instead of dashed. @default false */
+  solid?: boolean
+  /**
+   * Shown when the reader hovers the line, under its label and value.
+   *
+   * For saying what the figure actually is — which companies a peer median
+   * covers, which quarter a target belongs to, whether it is an estimate. A
+   * line with no description is not hoverable: there would be nothing to add
+   * beyond the label already printed beside it.
+   */
+  description?: string
+}
+
 // ---------------------------------------------------------------------------
 // Shared base props
 // ---------------------------------------------------------------------------
 
-interface F0DataChartBaseProps extends F0DataChartCommonProps {
+interface F0DataChartBaseProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Labels for the category axis (one per data point) */
   categories: string[]
 
@@ -141,10 +257,117 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   type: "bar"
   /** One or more data series to render as bars */
   series: F0DataChartBarSeries[]
+  /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+  referenceLines?: F0DataChartReferenceLine[]
   /** Bar orientation. @default "vertical" */
   orientation?: "vertical" | "horizontal"
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
+  /**
+   * Draw the stretch of a bar that ran past its `target` in a darker shade of
+   * the bar's own colour, split at the target.
+   *
+   * Left off, a target only shows as the faded ghost the bar has yet to reach,
+   * so a bar that beat its target looks the same as one that landed exactly on
+   * it — the reader has to eye its height against the ghosts beside it. Turn it
+   * on wherever passing the target is itself the news: attainment against a
+   * quota, a goal, a budget.
+   *
+   * Ignored by points with no target, and by negative values — "past the
+   * target" has no single reading when the bar grows downwards.
+   * @default false
+   */
+  highlightOverachievement?: boolean
+  /**
+   * Add the share of the target the bar reached to its tooltip, under the
+   * target row (e.g. "108.1% of target").
+   *
+   * Opt-in: the percentage answers "how did this do against its target", which
+   * is the question on a quota or a goal, and noise on a chart where the target
+   * is a reference line the reader is not scoring against.
+   *
+   * The percentage is `value / target`, the same two numbers the bar draws.
+   * @default false
+   */
+  showTargetProgress?: boolean
+  /**
+   * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
+   * labels if the widest value in that category doesn't fit the bar. The whole
+   * category drops together (all-or-nothing), so a tight chart never shows a
+   * ragged, half-labelled set instead of overlapping numbers. @default true
+   */
+  hideOverflowingLabels?: boolean
+  /**
+   * Per-side clearance in pixels the widest value must have before
+   * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
+   * Overrides the default, which is placement-based: **6** for stacked (inside)
+   * labels, **0** for labels outside the bar.
+   */
+  labelFitPadding?: number
+  /**
+   * With {@link F0DataChartBarProps.hideOverflowingLabels} on, use the widest
+   * label as the fit reference for vertical columns and labels outside
+   * horizontal bars. If it exceeds the shared allowance, hide every label
+   * instead of leaving a ragged, partially labelled chart. Labels inside
+   * horizontal stacked segments always fit per segment because their available
+   * widths differ. Height overflow is also evaluated per bar. @default true
+   */
+  hideAllLabelsOnOverflow?: boolean
+  /**
+   * Draw only as many categories as fit at a readable bar thickness, instead of
+   * compressing every one of them into the available height.
+   *
+   * Opt-in, because it hides data: a windowed chart shows the first N rows in
+   * data order and nothing in the chart itself leads to the rest. Set it only
+   * where the surrounding UI offers the way back — subscribe to
+   * {@link F0DataChartBarProps.onHiddenCategoriesChange} and put a control next
+   * to the count, as `F0AnalyticsDashboard` does. Left off, a dense chart stays
+   * complete and its bars get thinner, which is the readable-but-honest end of
+   * the trade.
+   *
+   * Ignored by vertical charts, which lay categories out along the width.
+   * @default false
+   */
+  windowCategories?: boolean
+  /**
+   * Render every category at once, overriding
+   * {@link F0DataChartBarProps.windowCategories}.
+   *
+   * Set this when the reader has asked to see the whole distribution — an
+   * expanded or fullscreen view — and accepts thinner bars in exchange. Ignored
+   * by vertical charts, which lay categories out along the width.
+   * @default false
+   */
+  showAllCategories?: boolean
+  /**
+   * Reports how many categories the row window is hiding — `0` when every
+   * category is on screen. Fires whenever the count changes, which includes
+   * container resizes and {@link F0DataChartBarProps.showAllCategories} being
+   * switched on.
+   *
+   * The chart states the fact rather than rendering an affordance for it: only
+   * the surrounding UI knows where a "see everything" control belongs. The
+   * dashboard puts it in the widget's description, next to the count.
+   */
+  onHiddenCategoriesChange?: (hiddenCategoryCount: number) => void
+  /**
+   * Suggested number of segments on the value axis — lower values draw fewer
+   * grid lines. Applies to whichever axis is the value axis (Y for vertical
+   * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2
+   */
+  valueAxisSplitNumber?: number
+  /**
+   * Font size in pixels for the value labels. @default 11
+   */
+  labelFontSize?: number
+  /**
+   * Formatter for the values shown in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the
+   * axis reads the same on hover, then to a plain localized number. Set it when
+   * the axis has to stay compact ("107.5K") but the tooltip should be exact
+   * ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 // ---------------------------------------------------------------------------
@@ -159,12 +382,22 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
   type: "line"
   /** One or more data series to render as lines */
   series: F0DataChartLineSeries[]
+  /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+  referenceLines?: F0DataChartReferenceLine[]
   /** Line interpolation type. @default "linear" */
   lineType?: F0DataChartLineType
   /** Show gradient area fill below lines. @default true */
   showArea?: boolean
   /** Show data point dots on the lines. @default false */
   showDots?: boolean
+  /**
+   * Formatter for the values shown in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the
+   * axis reads the same on hover, then to a plain localized number. Set it when
+   * the axis has to stay compact ("107.5K") but the tooltip should be exact
+   * ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +439,8 @@ export interface F0DataChartFunnelSeries {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
+export interface F0DataChartFunnelProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "funnel"
   /** The funnel series to render */
@@ -230,6 +464,13 @@ export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
   showConversion?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
   /**
    * Map stage colors to their values using a gradient scale (light→dark).
    * When enabled, higher values get a more intense color. @default true
@@ -277,7 +518,8 @@ export interface F0DataChartPieSeries {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartPieProps extends F0DataChartCommonProps {
+export interface F0DataChartPieProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "pie"
   /** The pie series to render */
@@ -292,6 +534,13 @@ export interface F0DataChartPieProps extends F0DataChartCommonProps {
   showPercentage?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -331,7 +580,8 @@ export interface F0DataChartRadarSeries {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export interface F0DataChartRadarProps extends F0DataChartCommonProps {
+export interface F0DataChartRadarProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
   /** Chart type */
   type: "radar"
   /** Axes of the radar — defines the dimensions to compare */
@@ -346,6 +596,13 @@ export interface F0DataChartRadarProps extends F0DataChartCommonProps {
   showLabels?: boolean
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -376,6 +633,13 @@ export interface F0DataChartGaugeProps extends F0DataChartCommonProps {
   showValue?: boolean
   /** Format the value displayed */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -410,6 +674,107 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
   showVisualMap?: boolean
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Formatter for the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the labels reads the same
+   * on hover, then to a plain localized number. Set it when the labels have to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
+// Scatter data types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single point in a scatter series.
+ *
+ * The bare `[x, y]` tuple is the terse form. The object form additionally
+ * carries `label` — the point's identity (e.g. an employee or team name),
+ * shown as the tooltip header.
+ */
+export type F0DataChartScatterDataPoint =
+  | [number, number]
+  | {
+      /** Horizontal position, plotted on the value X axis */
+      x: number
+      /** Vertical position, plotted on the value Y axis */
+      y: number
+      /** Identity of this point, used as the tooltip header (e.g. "Ana Ruiz") */
+      label?: string
+      /** Override color for this individual point. Must be an F0 design token name. */
+      color?: ChartColorToken
+    }
+
+/**
+ * A group of points sharing a color and a legend entry. Use one series per
+ * group value to split a scatter by a dimension (e.g. one per department).
+ */
+export interface F0DataChartScatterSeries {
+  /** Display name used in legend and tooltip */
+  name: string
+  /** Points in this group */
+  data: F0DataChartScatterDataPoint[]
+  /** Override color for this series. Must be an F0 design token name. Falls back to the theme palette. */
+  color?: ChartColorToken
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: scatter variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Scatter chart variant props.
+ *
+ * Plots x/y pairs on two value axes to show the relationship between two
+ * measures. Unlike bar/line there is no category axis — both axes are
+ * continuous — so this interface is separate from `F0DataChartBaseProps`.
+ * Pass multiple `series` to color-split the points by a group dimension.
+ */
+export interface F0DataChartScatterProps
+  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
+  /** Chart type */
+  type: "scatter"
+  /** One or more point groups. Multiple series render as a color split. */
+  series: F0DataChartScatterSeries[]
+  /** Point diameter in pixels. @default 12 */
+  pointSize?: number
+  /**
+   * Fit each axis to its data range instead of anchoring it at zero. Turn off
+   * to force both axes through the origin. @default true
+   */
+  scaleAxes?: boolean
+  /** Show the legend below the chart. Only rendered with 2+ series. @default true */
+  showLegend?: boolean
+  /** Show the background grid lines on both axes. @default true */
+  showGrid?: boolean
+  /** Format the Y axis tick labels */
+  valueFormatter?: (value: number) => string
+  /** Format the X axis tick labels */
+  xValueFormatter?: (value: number) => string
+  /**
+   * Formatter for the y value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}, so a unit or a currency on the Y axis reads the same
+   * on hover, then to a plain localized number. Set it when the axis has to
+   * stay compact ("107.5K") but the tooltip should be exact ("107,505").
+   */
+  tooltipValueFormatter?: (value: number) => string
+  /**
+   * Formatter for the x value shown in the hover tooltip. Same contract as
+   * {@link tooltipValueFormatter}, against {@link xValueFormatter}.
+   */
+  xTooltipValueFormatter?: (value: number) => string
+  /**
+   * What the X measure is, e.g. "salary". Labels the x row in the tooltip —
+   * a scatter has no headline value, so both coordinates read as rows and
+   * need naming, the same way radar names its indicators.
+   */
+  xAxisName?: string
+  /** What the Y measure is, e.g. "tenure". Labels the y row in the tooltip. */
+  yAxisName?: string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
   echartsOptions?: Partial<echarts.EChartsOption>
 }
@@ -422,7 +787,7 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
  * Props for the F0DataChart component.
  *
  * A unified chart component that supports bar, line, funnel, pie, radar,
- * gauge, and heatmap chart types via a discriminated `type` prop.
+ * gauge, heatmap, and scatter chart types via a discriminated `type` prop.
  */
 export type F0DataChartProps =
   | F0DataChartBarProps
@@ -432,3 +797,4 @@ export type F0DataChartProps =
   | F0DataChartRadarProps
   | F0DataChartGaugeProps
   | F0DataChartHeatmapProps
+  | F0DataChartScatterProps

@@ -7,7 +7,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { UnreadBadge } from "./UnreadBadge"
@@ -30,13 +29,21 @@ const Dots = () => (
 const PresenceDot = ({
   presence,
   isActive,
+  label,
 }: {
   presence: SidebarChatPresence
   isActive: boolean
+  label: string
 }) => {
-  if (presence === "offline") return null
+  if (presence === "offline") {
+    return null
+  }
   return (
-    <div className="absolute -bottom-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
+    <div
+      role="img"
+      aria-label={label}
+      className="absolute -bottom-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background"
+    >
       <span
         aria-hidden="true"
         className={cn(
@@ -78,11 +85,20 @@ export const SidebarChatItem = ({
   const presence =
     chat.presence ?? (chat.avatar?.type === "person" ? "offline" : undefined)
 
-  // Status — people only; the consumer provides the emoji/icon + label.
-  const status = chat.avatar?.type === "person" ? chat.status : undefined
+  // The consumer owns the status icons and labels for every conversation type.
+  const statuses = chat.statuses ?? (chat.status ? [chat.status] : [])
+  const showGroupFallback =
+    (chat.avatar?.type === "team" || chat.avatar?.type === "company") &&
+    !chat.avatar.src
+  const identityEmoji =
+    chat.avatar?.type === "emoji"
+      ? chat.avatar.emoji
+      : showGroupFallback
+        ? "＃"
+        : null
 
   return (
-    <div className="group/row relative">
+    <div className="group/row relative" data-sidebar-chat-id={chat.id}>
       <button
         type="button"
         onClick={onClick}
@@ -99,18 +115,49 @@ export const SidebarChatItem = ({
           <Dots />
         ) : chat.avatar ? (
           <div className="relative flex flex-shrink-0 items-center">
-            {chat.avatar.type === "emoji" ? (
+            {identityEmoji ? (
               // Emoji groups show the glyph alone (no avatar chrome) so it isn't
               // shrunk inside the bordered avatar box.
-              <span className="flex size-5 items-center justify-center">
-                <EmojiImage emoji={chat.avatar.emoji} size="sm" />
+              <span
+                aria-hidden={showGroupFallback || undefined}
+                className={cn(
+                  "flex size-5 items-center justify-center text-lg font-medium",
+                  // The muted colour belongs to the ＃ ALONE — it is type, and
+                  // it sits at the same weight as the name beside it. An emoji
+                  // in here keeps its own (see `EmojiImage`).
+                  showGroupFallback && "text-f1-foreground-secondary"
+                )}
+                data-testid={
+                  showGroupFallback
+                    ? "sidebar-group-avatar-fallback"
+                    : undefined
+                }
+              >
+                {showGroupFallback ? (
+                  // ＃ IS NOT AN EMOJI — it is the typographic stand-in for a
+                  // community, which has no emoji to give (`PostsGroup` has no
+                  // field for one). So it must not go through the emoji font:
+                  // that stack ends in `sans-serif`, and U+FF03 has no glyph in
+                  // any of the emoji fonts before it, so the ＃ would fall
+                  // through to the browser's generic sans while the name beside
+                  // it stays Inter.
+                  identityEmoji
+                ) : (
+                  // NATIVE, not a twemoji image: at 20px the sprite reads soft
+                  // next to Inter, and it costs a network image per row.
+                  <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+                )}
               </span>
             ) : (
               <F0Avatar size="xs" avatar={chat.avatar} />
             )}
-            {presence && (
-              <PresenceDot presence={presence} isActive={isActive} />
-            )}
+            {presence ? (
+              <PresenceDot
+                presence={presence}
+                isActive={isActive}
+                label={i18n.chat.online}
+              />
+            ) : null}
           </div>
         ) : null}
 
@@ -130,7 +177,7 @@ export const SidebarChatItem = ({
         >
           {chat.label}
         </OneEllipsis>
-        {(status || chat.unreadCount) && (
+        {statuses.length > 0 || chat.unreadCount ? (
           <div
             className={cn(
               "gap-1 flex items-center justify-center transition-opacity",
@@ -140,8 +187,11 @@ export const SidebarChatItem = ({
               chat.pinPending && "opacity-0"
             )}
           >
-            {status && (
-              <div className="flex h-5 w-5 items-center justify-center">
+            {statuses.map((status, index) => (
+              <div
+                key={`${status.label}-${index}`}
+                className="flex h-5 w-5 items-center justify-center"
+              >
                 <F0Icon
                   icon={status.icon}
                   size="sm"
@@ -149,23 +199,24 @@ export const SidebarChatItem = ({
                   color="default"
                 />
               </div>
-            )}
+            ))}
             {/* A mention in the unread run just prefixes the count with `@`. */}
             {chat.unreadCount ? (
               <UnreadBadge
                 count={chat.unreadCount}
                 hasMention={!!chat.mentionCount}
+                kind={chat.kind}
               />
             ) : null}
           </div>
-        )}
+        ) : null}
       </button>
       {/* Hover (or focus) reveals a pin/unpin button, sitting where the unread
           badge / status is — a sibling of the row button so it isn't a nested
           <button>. While a pin/unpin is saving, a spinner takes its place and
           stays visible off-hover. */}
-      {chat.onTogglePin &&
-        (chat.pinPending ? (
+      {chat.onTogglePin ? (
+        chat.pinPending ? (
           <div
             className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center"
             aria-label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
@@ -191,7 +242,8 @@ export const SidebarChatItem = ({
               }}
             />
           </div>
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

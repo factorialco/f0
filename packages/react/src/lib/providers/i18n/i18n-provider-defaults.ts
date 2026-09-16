@@ -30,6 +30,10 @@ export const defaultTranslations = {
         placeholder: "Select a company",
       },
     },
+    sidePanel: {
+      resize: "Resize side panel",
+      width: "{{width}} pixels",
+    },
     previous: "Previous",
     next: "Next",
   },
@@ -63,8 +67,48 @@ export const defaultTranslations = {
     details: "Recording details",
     summary: "Summary",
     transcription: "Transcription",
+    jumpTo: "Jump to {{time}}",
+    transcriptHint: "Select a line to move the recording to that moment",
     language: "Language",
     audio: "Audio",
+  },
+  meetingCard: {
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    inProgress: "In progress",
+    inProgressTitle: "Call in progress",
+    summarizing: "Summarizing",
+    finished: "Finished",
+    cancelled: "Cancelled",
+    startingNow: "Starting now",
+    startsIn: {
+      one: "In {{count}} min",
+      other: "In {{count}} mins",
+    },
+    startedAgo: {
+      one: "{{count}} min ago",
+      other: "{{count}} mins ago",
+    },
+    invited: {
+      one: "{{count}} guest",
+      other: "{{count}} guests",
+    },
+    inside: {
+      one: "{{count}} inside",
+      other: "{{count}} inside",
+    },
+    duration: {
+      one: "{{count}} min",
+      other: "{{count}} mins",
+    },
+    attendees: "Attendees",
+    join: "Join",
+    summary: "Summary",
+  },
+  coachmark: {
+    next: "Next",
+    done: "Got it",
   },
   actions: {
     add: "Add",
@@ -77,6 +121,7 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -204,11 +249,14 @@ export const defaultTranslations = {
       viewSelectorLabel: "Select view",
     },
     table: {
+      seeMoreChildren: "See more",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
         addColumn: "Add column",
         removeColumn: "Remove column",
+        lockColumn: "Lock column: {{label}}",
+        unlockColumn: "Unlock column: {{label}}",
       },
     },
     editableTable: {
@@ -309,6 +357,11 @@ export const defaultTranslations = {
         currentDate: "Today",
         label: "Range",
       },
+      periods: {
+        currentDate: "Current period",
+        label: "Periods",
+        empty: "No periods available",
+      },
     },
     month: {
       january: "January",
@@ -347,6 +400,13 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
+    attribution: "Suggested by One",
+    evidence: {
+      show: "See {{name}}",
+      hide: "Hide {{name}}",
+    },
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -396,6 +456,13 @@ export const defaultTranslations = {
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?",
     },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage",
+    },
     reportCard: {
       tableLabel: "Table",
       openButton: "Open",
@@ -415,6 +482,7 @@ export const defaultTranslations = {
       exporting: "Exporting…",
     },
     dashboardItem: {
+      askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",
@@ -449,6 +517,7 @@ export const defaultTranslations = {
       "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    dropWidgetToDiscuss: "Drop here to discuss with One",
     reply: "Reply",
     removeQuote: "Remove quote",
     clarifyingQuestion: {
@@ -495,19 +564,39 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    readOnly: "You can't send messages in this conversation",
+    online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
+    emojiPicker: {
+      search: "Search emoji",
+      frequentlyUsed: "Frequently used",
+      noResults: "No emoji found",
+      grid: "Emoji",
+      categories: {
+        people: "Smileys & people",
+        nature: "Animals & nature",
+        foods: "Food & drink",
+        activity: "Activity",
+        places: "Travel & places",
+        objects: "Objects",
+        symbols: "Symbols",
+        flags: "Flags",
+      },
+    },
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
-    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    removeNamedFile: "Remove {{name}}",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
+    messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
     fileUploadError: "Upload failed",
     micPermissionDenied:
       "Microphone access is blocked. Allow it in your browser settings to dictate.",
@@ -515,8 +604,6 @@ export const defaultTranslations = {
     transcriptionError: "Couldn't transcribe the audio. Try again.",
     sent: "Sent",
     read: "Read",
-    // Plural shape (one/other) so other languages can diverge — selected by the
-    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
     readBy: {
       one: "Read by {{count}}",
       other: "Read by {{count}}",
@@ -528,51 +615,42 @@ export const defaultTranslations = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
-    // Shared-location attachments (map preview card + reply quote descriptor).
     location: "Location",
-    // Voice notes (mic in the composer records + sends audio, no transcript).
     voiceNote: "Voice note",
     sendVoiceNote: "Send voice note",
     sendingVoiceNote: "Sending voice note…",
-    // Delivery-state indicators beside your own bubble (icon labels + the
-    // failed message's reduced actions menu).
     sending: "Sending…",
     notSent: "Not sent",
     retry: "Retry",
     moreActions: "Message actions",
-    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
     pin: "Pin",
     unpin: "Unpin",
     info: "Info",
     viewProfile: "View profile",
-    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
-    // for a group-wide ping (localize the word, e.g. es "aquí").
     mentionEveryone: "here",
     mentionEveryoneDescription: "Notify everyone in this group",
     reply: "Reply",
     react: "Add reaction",
     download: "Download",
+    downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
-    // Editing your own message (within the edit window). `editing` heads the
-    // composer chip; `edited` is the muted marker after an edited message body.
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
-    // Shown as the quoted sender's name when the replied-to message is your own.
     you: "You",
-    // In-chat image lightbox.
     openImage: "Open image",
     imagePreview: "Image preview",
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
     openDocument: "Open document",
+    openNamedDocument: "Open {{name}}",
     documentPreview: "Document preview",
-    // Attachment previews in reply quotes + the composer chip (a lone file shows
-    // its real name instead of a count).
+    videoPlayerLabel: "Video player: {{name}}",
+    loadingVideo: "Loading video: {{name}}",
     photo: "Photo",
     photoCount: {
       one: "{{count}} photo",
@@ -588,12 +666,6 @@ export const defaultTranslations = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
-    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
-    // are replaced with React nodes (`@name` hover-card chips) by the component
-    // via token split — NOT through `t(key, args)`, whose interpolation is
-    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
-    // @Raúl" / "…and 5 more") so every language words the conjunction its own
-    // way. Plural shape mirrors `readBy`.
     system: {
       memberAdded: {
         one: "{{members}} was added to the group",
@@ -607,7 +679,6 @@ export const defaultTranslations = {
         one: "{{members}} left the group",
         other: "{{members}} left the group",
       },
-      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
       membersWithLast: "{{names}} and {{last}}",
       membersWithMore: "{{names}} and {{count}} more",
     },
@@ -615,10 +686,64 @@ export const defaultTranslations = {
       one: "{{count}} unread",
       other: "{{count}} unread",
     },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above",
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below",
+    },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
     loadingOlder: "Loading earlier messages…",
+    newPosts: "New posts",
+    newPostsCount: {
+      one: "{{count}} new post",
+      other: "{{count}} new posts",
+    },
+    unreadMentionCount: {
+      one: "{{count}} unread, mentions you",
+      other: "{{count}} unread, mentions you",
+    },
+    post: {
+      in: "in",
+      comment: "Comment",
+      views: {
+        one: "{{count}} view",
+        other: "{{count}} views",
+      },
+      comments: {
+        one: "{{count}} comment",
+        other: "{{count}} comments",
+      },
+    },
+    community: {
+      readOnly: "You can't post in this community",
+      writePost: "Write a post…",
+      newPost: "New post",
+      postTitle: "Title",
+      postTitlePlaceholder: "Add a title",
+      postBodyPlaceholder: "Share something with the community…",
+      publish: "Publish",
+      cancel: "Cancel",
+      discardTitle: "Discard this post?",
+      discardDescription: "What you've written won't be saved.",
+      discard: "Discard",
+      keepEditing: "Keep editing",
+      publishError: "Couldn't publish this post",
+      pinnedPost: "Pinned post",
+      pinnedPosts: "Pinned",
+      unpinPost: "Unpin post",
+      goToPost: "Go to post",
+      scheduledPosts: "Scheduled",
+      scheduledEvent: "Event",
+      draftPosts: "Drafts",
+      draftUntitled: "Untitled post",
+      draftSavedAt: "Saved {{when}}",
+      shelfLabel: "Pinned, scheduled and draft posts",
+    },
   },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
@@ -631,6 +756,16 @@ export const defaultTranslations = {
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters",
+    },
+    windowedCategories: "Showing {{count}} of {{total}} categories",
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofTarget: "of target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}",
     },
   },
   progressSeries: {
@@ -649,6 +784,37 @@ export const defaultTranslations = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
+  },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found",
+  },
+  locationInput: {
+    country: "Country",
+    addressLine1: "Address line 1",
+    addressLine2: "Address line 2",
+    city: "City",
+    state: "Region",
+    postalCode: "Postal code",
+    placeholder: "Enter an address",
+    selectCountry: "Select a country",
+    searchCountry: "Search country",
+    noCountryResults: "No country found",
+    noResults: "No addresses found",
+    searchHint: "Type an address to search",
+    noResultsHelp: "Can't find an address?",
+    enterManually: "Enter it manually",
+    addressLine1Placeholder: "Enter a street and number",
+    addressLine2Placeholder: "Enter a floor or unit",
+    postalCodePlaceholder: "e.g., 08001",
+    searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found",
+    },
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -869,6 +1035,9 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+      phone: {
+        invalid: "Enter a valid phone number",
+      },
     },
   },
   graph: {
@@ -882,11 +1051,41 @@ export const defaultTranslations = {
       navigation: "Graph navigation",
     },
   },
+  map: {
+    region: "Map",
+    navigation: "Map navigation",
+    listLabel: "Locations",
+    location: "location",
+    locations: "locations",
+    unnamedLocation: "Location",
+    cluster: "Cluster of {{count}} locations",
+    skipToList: "Skip to location list",
+    loadError: "Couldn't load the map.",
+    retry: "Retry",
+    currentLocation: "Your location",
+    controls: {
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fit: "Fit to markers",
+      locate: "My location",
+    },
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  widgets: {
+    whatThisMeans: "What this info means?",
+    gotIt: "Got it",
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    configureWidget: "Configure {{title}}",
+    recommended: "Recommended",
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {
     toolbar: "Document toolbar",

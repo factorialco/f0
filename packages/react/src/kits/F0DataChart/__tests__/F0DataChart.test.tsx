@@ -1,7 +1,6 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 
 // Mock ECharts — canvas rendering is not testable in jsdom
@@ -103,6 +102,21 @@ describe("F0DataChart", () => {
         data={[
           [0, 0, 5],
           [1, 1, 10],
+        ]}
+      />
+    )
+    expect(container.querySelector("div")).toBeInTheDocument()
+  })
+
+  it("renders a scatter chart without crashing", () => {
+    const { container } = render(
+      <F0DataChart
+        type="scatter"
+        series={[
+          {
+            name: "Engineering",
+            data: [[62000, 4.5], { x: 78000, y: 7.2, label: "Marc Vidal" }],
+          },
         ]}
       />
     )

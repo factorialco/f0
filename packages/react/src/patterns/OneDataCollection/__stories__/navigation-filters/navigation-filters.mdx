@@ -86,6 +86,10 @@ and ending on the last day of the month at 23:59:59), etc.
   It is used when the filter is created.
 - `min`: The minimum date of the date navigation filter.
 - `max`: The maximum date of the date navigation filter.
+- `periods`: Consumer-defined ranges (payroll cycles, academic terms, …). They
+  become an extra entry in the granularity list, named by the definition's
+  `label`, whose view lists every period instead of a calendar. See
+  [Consumer-defined periods](#consumer-defined-periods).
 
 ### Example
 
@@ -116,6 +120,59 @@ The DateNavigation pass to the `dataFetch` function the following values via
 - `valueString`: The string representation of the current value of the date
   navigation filter.
 - `granularity`: The granularity of the date navigation filter.
+
+### Consumer-defined periods
+
+Some collections navigate by ranges no calendar granularity can express —
+payroll cycles that run from the 25th to the 24th, academic terms, fiscal
+periods. Pass them as `periods` and they become an extra entry in the
+granularity list, named by the definition's `label`. Its view lists every
+period with its own label and date range, and the navigation arrows step from
+one period to the next rather than by a calendar unit.
+
+```tsx
+const dataSource = useDataCollectionSource({
+  navigationFilters: {
+    date: {
+      type: "date-navigator",
+      defaultValue: new Date(),
+      defaultGranularity: "periods",
+      granularity: ["day", "week", "month"],
+      periods: {
+        label: "Payroll",
+        header: "Spain — Iberia Workforce SL",
+        periods: [
+          {
+            label: "January 2026",
+            from: new Date(2025, 11, 25),
+            to: new Date(2026, 0, 24),
+          },
+          {
+            label: "February 2026",
+            from: new Date(2026, 0, 25),
+            to: new Date(2026, 1, 24),
+          },
+        ],
+      },
+    },
+  },
+})
+```
+
+Supplying `periods` is what makes the entry selectable — listing `"periods"` in
+`granularity` only controls where it sits in the list. Each period accepts an
+optional `description` to override the generated date range, and `header` is
+optional.
+
+A period stays reachable as long as it overlaps `min`/`max`, since
+consumer-defined periods rarely line up with those bounds. A value that falls
+outside every period keeps its own range, so a persisted or out-of-range value
+still renders.
+
+<Canvas
+  of={DataCollectionNavigationFiltersStories.WithPeriods}
+  meta={DataCollectionNavigationFiltersStories}
+/>
 
 ### Add a new granularity
 

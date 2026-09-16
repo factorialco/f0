@@ -1,9 +1,7 @@
 import type * as echarts from "echarts"
-
 import { type RefObject, useMemo } from "react"
-
+import { useI18n } from "@/lib/providers/i18n"
 import type { F0DataChartPieProps } from "../../types"
-
 import {
   resolveChartColorToken,
   resolveDataPointColor,
@@ -12,6 +10,8 @@ import {
   buildItemTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
+  renderValueTooltip,
+  tooltipValueFormat,
 } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
@@ -44,11 +44,13 @@ export function usePieChartOptions(
     showLabels = true,
     showPercentage = false,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartPieProps,
   size: PieChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth } = useContainerSize(containerRef)
 
   return useMemo(() => {
@@ -56,6 +58,11 @@ export function usePieChartOptions(
     const resolvedSeriesColor = series.color
       ? resolveChartColorToken(series.color)
       : undefined
+
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
 
     const responsive = resolveResponsiveDisplay(size)
     // The user prop can still force chrome OFF, but never ON at sm/md.
@@ -75,7 +82,9 @@ export function usePieChartOptions(
     const legendData = dataPoints.map((d) => d.name)
 
     const buildLabel = (): echarts.PieSeriesOption["label"] => {
-      if (!effectiveShowLabels) return { show: false }
+      if (!effectiveShowLabels) {
+        return { show: false }
+      }
 
       return {
         show: true,
@@ -165,11 +174,25 @@ export function usePieChartOptions(
             percent?: number
           }
           const val = Number(p.value ?? 0)
-          const formattedValue = valueFormatter
-            ? valueFormatter(val)
-            : String(val)
-          const pct = (p.percent ?? 0).toFixed(1)
-          return `<div>${String(p.marker ?? "")} <strong>${String(p.name ?? "")}</strong></div><div style="margin-top: 2px">${formattedValue} (${pct}%)</div>`
+          const total = dataPoints.reduce((sum, point) => sum + point.value, 0)
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: String(p.name ?? ""),
+              value: formatTooltipValue(val),
+              rows: [
+                {
+                  value: `${(p.percent ?? 0).toFixed(1)}%`,
+                  label: i18n.dataChart.tooltip.ofTotal,
+                },
+                {
+                  value: formatTooltipValue(total),
+                  label: i18n.dataChart.tooltip.total,
+                },
+              ],
+            },
+            theme
+          )
         },
       }),
       emphasis: DEFAULT_EMPHASIS,
@@ -187,8 +210,10 @@ export function usePieChartOptions(
     showLabels,
     showPercentage,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     size,
   ])

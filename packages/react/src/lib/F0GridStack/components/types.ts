@@ -1,4 +1,6 @@
-// Import gridstack to ensure original types are loaded before augmentation
+// The empty import makes this file a module, so the block below augments
+// gridstack's types instead of replacing them.
+// oxlint-disable-next-line import/no-empty-named-blocks
 import type {} from "gridstack"
 
 declare module "gridstack" {
@@ -6,12 +8,12 @@ declare module "gridstack" {
   // TypeScript will merge these with the original interface
   interface GridStackWidget {
     id?: string
-    allowedSizes?: Array<{ w: number; h: number }>
+    allowedSizes?: { w: number; h: number }[]
     meta?: Record<string, unknown>
   }
 
   // Augment GridStackNode interface - only add our custom property
   interface GridStackNode {
-    allowedSizes?: Array<{ w: number; h: number }>
+    allowedSizes?: { w: number; h: number }[]
   }
 }

@@ -1,8 +1,6 @@
 import { forwardRef, PropsWithChildren } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
 import { useTextFormatEnforcer } from "../../../lib/text"
 
 type Props = PropsWithChildren & {

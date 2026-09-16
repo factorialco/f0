@@ -8,21 +8,8 @@ const SvgSearch = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M16 16L19 19"
-      vectorEffect="non-scaling-stroke"
-    />
-    <rect
-      width={14}
-      height={14}
-      x={4}
-      y={4}
-      stroke="currentColor"
-      rx={7}
-      vectorEffect="non-scaling-stroke"
-    />
+    <path stroke="currentColor" strokeLinecap="round" d="M16 16L19 19" />
+    <rect width={14} height={14} x={4} y={4} stroke="currentColor" rx={7} />
   </svg>
 )
 const ForwardRef = forwardRef(SvgSearch)

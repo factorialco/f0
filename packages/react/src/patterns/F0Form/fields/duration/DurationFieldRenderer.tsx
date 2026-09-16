@@ -1,15 +1,13 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import type { AriaAttributes } from "react"
-
+import { ControllerRenderProps } from "react-hook-form"
 import { F0DurationInput } from "@/components/F0DurationInput"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
-import type { F0DurationField } from "./types"
 import type { ResolvedField } from "../types"
+import type { F0DurationField } from "./types"
 
 interface DurationFieldRendererProps {
   field: ResolvedField<F0DurationField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   status?: InputFieldStatus
   id?: string
@@ -46,6 +44,7 @@ export function DurationFieldRenderer({
       onBlur={formField.onBlur}
       units={field.units}
       fields={field.fields}
+      allowNegative={field.allowNegative}
       status={resolvedStatus}
       disabled={field.disabled}
       readonly={field.readonly}

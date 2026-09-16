@@ -1,8 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { DataCollectionSettingsProvider } from "../../../../../Settings/SettingsProvider"
 import type { GraphVisualizationOptions } from "../../types"
 import { SettingsRenderer } from "../SettingsRenderer"
@@ -70,6 +68,28 @@ describe("Graph SettingsRenderer", () => {
     renderSettings(baseOptions)
     const switches = screen.getAllByRole("switch")
     const disabled = switches.filter((s) => s.hasAttribute("disabled"))
-    expect(disabled.length).toBe(1)
+    expect(disabled).toHaveLength(1)
+  })
+
+  it("renders a locked tag as OFF + disabled, and locked wins over pinned", () => {
+    renderSettings({
+      ...baseOptions,
+      // 'status' is pinned in baseOptions; locking it too must win (OFF, not the
+      // pinned ON). 'company' is locked but not pinned.
+      lockedTagTypes: {
+        company: "No permission",
+        status: "No permission",
+      },
+    } as unknown as Options)
+
+    const switchFor = (label: string) => {
+      const row = screen.getByText(label).closest("li") as HTMLElement
+      return within(row).getByRole("switch")
+    }
+
+    expect(switchFor("Legal entity")).toBeDisabled()
+    expect(switchFor("Legal entity")).toHaveAttribute("aria-checked", "false")
+    expect(switchFor("Reports")).toBeDisabled()
+    expect(switchFor("Reports")).toHaveAttribute("aria-checked", "false")
   })
 })

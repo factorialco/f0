@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -7,7 +6,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import {
@@ -15,6 +13,7 @@ import {
   type F0ChatMessageStatus,
   type F0ChatRuntime,
 } from "../types"
+import { formatClock } from "../utils/natural-time"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -150,33 +149,34 @@ describe("connection states", () => {
 })
 
 describe("delivery states", () => {
-  // Optimistic footer (WhatsApp): sending/sent/delivered all show the bare
-  // time — the label never changes when the ack lands (zero flicker). A slow
-  // send is the SendingClock's job; only read/failed speak up.
+  // The footer reports delivery only — the time lives in the bubble. Sent and
+  // delivered share "Sent"; read advances to "Read".
+
+  // Through the shared formatter, not a copy of it: the clock is written in the
+  // reader's own locale, so a hand-rolled 24-hour expectation would only hold
+  // on a 24-hour machine.
   const bareTimeOf = (message: F0ChatMessage) =>
-    new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(message.createdAt))
+    formatClock(new Date(message.createdAt))
 
   it("shows the bare time while sending, from the very first frame", () => {
     const message = mine("sending")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
+    // The bubble carries its own clock now, so the footer's bare time is no
+    // longer the only match — both must read the same.
+    expect(screen.getAllByText(bareTimeOf(message)).length).toBeGreaterThan(0)
     expect(screen.queryByText("Sending…")).not.toBeInTheDocument()
   })
 
-  it("does not announce success — sent keeps the bare time", () => {
+  it("shows sent once the message is acknowledged", () => {
     const message = mine("sent")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
-    expect(screen.queryByText(/^Sent/)).not.toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
   })
 
-  it("keeps delivered silent too (the Info panel carries that detail)", () => {
+  it("keeps delivered under the sent footer label", () => {
     const message = mine("delivered")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
     expect(screen.queryByText(/^Delivered/)).not.toBeInTheDocument()
   })
 

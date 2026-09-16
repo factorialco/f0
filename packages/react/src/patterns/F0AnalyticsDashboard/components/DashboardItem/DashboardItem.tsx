@@ -1,5 +1,4 @@
-import { useState, type ReactNode } from "react"
-
+import { useRef, useState, type ReactNode } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -9,6 +8,7 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
+import { One as OneIcon } from "@/icons/ai"
 import {
   Delete,
   Download,
@@ -17,6 +17,8 @@ import {
   Minimize,
   InfoCircleLine,
 } from "@/icons/app"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -31,10 +33,22 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
+import type {
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+  DashboardItemFiltersConfig,
+} from "../../types"
+import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {
   title: string
   description?: string
+  /**
+   * Help copy for what this widget measures, revealed by an ⓘ icon beside the
+   * title. See `DashboardItemBase.info` for how it differs from `description`
+   * and `explanation`.
+   */
+  info?: string | InfoHintContent
   isLoading: boolean
   error?: Error
   onRetry?: () => void
@@ -43,10 +57,24 @@ interface DashboardItemProps {
   children: ReactNode
   /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
+  /**
+   * Per-widget filter configuration. When set, a filter icon appears with the
+   * other header actions on hover or keyboard focus (and remains available on
+   * touch-only devices) and opens a compact anchored filter popover.
+   */
+  itemFilters?: DashboardItemFiltersConfig
   /** When true, adds a "Delete" option to the dropdown menu */
   editMode?: boolean
   /** Called when the user clicks the delete action */
   handleDelete?: (itemId: string) => void
+  /**
+   * Overrides the built-in "Ask One" action. Given it, this component stops
+   * touching the chat and the host answers instead — and the entry no longer
+   * needs a chat to be mounted at all.
+   */
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  /** Observes the built-in chat action without replacing it. */
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
   /** Chart type transform options — rendered as a toggle group in the dropdown */
@@ -66,6 +94,20 @@ interface DashboardItemProps {
   explanation?: string
   /** Whether this item is currently expanded to fill the grid */
   isFullscreen?: boolean
+  /**
+   * A link rendered inline after the description, for something the description
+   * implies but can't do — a chart showing "13 of 29 categories" offers the way
+   * to see the rest. Kept out of the description string so the text stays
+   * translatable and truncatable on its own.
+   */
+  descriptionAction?: { label: string; onClick: () => void }
+  /**
+   * Take the height from the content instead of the available space. Set by an
+   * expanded item whose content has an intrinsic height it must not compress
+   * below — a horizontal bar chart drawing every category at a fixed row
+   * height. The widget then grows past the viewport and the page scrolls.
+   */
+  fitContent?: boolean
   /** Called when the user toggles fullscreen from the dropdown */
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -81,21 +123,29 @@ interface DashboardItemProps {
 export function DashboardItem({
   title,
   description,
+  info,
   isLoading,
   error,
   onRetry,
   skeleton,
   children,
   actions = [],
+  itemFilters,
   editMode,
   handleDelete,
+  onAskAi,
+  onAskAiTarget,
   itemId,
   chartTypeOptions,
   explanation,
   isFullscreen = false,
+  descriptionAction,
+  fitContent = false,
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const shouldFocusChatAfterMenuRef = useRef(false)
   /**
    * When true, the dropdown menu's content is swapped from the action list
    * to a markdown rendering of `explanation`. The dropdown trigger stays
@@ -106,10 +156,18 @@ export function DashboardItem({
    */
   const [isExplanationView, setIsExplanationView] = useState(false)
   const translations = useI18n()
+  const {
+    enabled: aiEnabled,
+    setPendingQuote,
+    setOpen: setAiChatOpen,
+    focusChatInput,
+  } = useAiChat()
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
-    if (!open) setIsExplanationView(false)
+    if (!open) {
+      setIsExplanationView(false)
+    }
   }
 
   // Filter to only actionable items (not separators/labels)
@@ -122,18 +180,134 @@ export function DashboardItem({
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
   const hasFullscreen = !!onFullscreenChange
-  const showMenu = hasDownloads || hasDelete || hasChartTypes || hasExplanation
+  // Keyboard-reachable twin of dragging the widget onto the chat. Gated on
+  // something being able to answer it: a host handler, or failing that a
+  // mounted chat — with no provider `useAiChat()` returns an inert context
+  // whose setters are no-ops, so offering the action would do nothing.
+  const hasAskOne = title.trim().length > 0 && (onAskAi ? !!itemId : aiEnabled)
+  const showMenu =
+    hasAskOne || hasDownloads || hasDelete || hasChartTypes || hasExplanation
+  const actionsClassName = cn(
+    "flex flex-shrink-0 gap-0.5",
+    !isFullscreen &&
+      "opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:[@media(hover:hover)]:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100",
+    !isFullscreen && (isDropdownOpen || isFiltersOpen) && "delay-0 !opacity-100"
+  )
+
+  const handleAskOne = () => {
+    if (onAskAi) {
+      // The host answers this one. Nothing else here applies: it may not open
+      // the chat at all, so leaving fullscreen would be a guess. `hasAskOne`
+      // guarantees the public payload has a real widget ID.
+      if (!itemId) {
+        return
+      }
+      onAskAi({ id: itemId, title })
+      return
+    }
+
+    // Fullscreen covers the chat, so step out of it before handing the widget
+    // over — same reason the delete action does.
+    if (isFullscreen) {
+      onFullscreenChange?.(false)
+    }
+    shouldFocusChatAfterMenuRef.current = true
+    const quote = { text: title }
+    if (itemId) {
+      onAskAiTarget?.({ id: itemId, title, quote })
+    }
+    setPendingQuote(quote)
+    setAiChatOpen(true)
+  }
+
+  const handleAskOneMenuCloseAutoFocus = (event: Event) => {
+    if (!shouldFocusChatAfterMenuRef.current) {
+      return
+    }
+    shouldFocusChatAfterMenuRef.current = false
+
+    // Keep Radix's normal trigger restoration while the composer is still
+    // mounting. The buffered request moves focus once registration completes.
+    if (focusChatInput()) {
+      event.preventDefault()
+    }
+  }
+
+  const askOneMenuItem = hasAskOne ? (
+    <DropdownMenuGroup>
+      <DropdownMenuItem onClick={handleAskOne}>
+        <div className="flex w-full flex-row items-center gap-2">
+          <F0Icon icon={OneIcon} />
+          <span className="flex-1">{translations.ai.dashboardItem.askOne}</span>
+        </div>
+      </DropdownMenuItem>
+    </DropdownMenuGroup>
+  ) : null
 
   if (error) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
-        <div className="flex shrink-0 flex-col p-4">
-          <h3 className="text-base font-medium text-f1-foreground">{title}</h3>
-          {description && (
-            <p className="text-base text-f1-foreground-secondary">
-              {description}
-            </p>
-          )}
+      <div className="group/dashitem flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
+        <div className="flex shrink-0 items-start gap-2 p-4">
+          {/* The help copy survives the failure: a reader looking at an error
+              is exactly the one asking what the widget was meant to show.
+              `items-start`, not `items-center`: this heading doesn't truncate,
+              so a long title wraps and centring would float the ⓘ against the
+              middle of the block instead of its first line. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex min-w-0 items-start gap-1">
+              <h3 className="text-base font-medium text-f1-foreground">
+                {title}
+              </h3>
+              {info ? (
+                <div className="flex shrink-0 items-center text-f1-foreground-secondary">
+                  <InfoHint info={info} />
+                </div>
+              ) : null}
+            </div>
+            {description ? (
+              <p className="text-base text-f1-foreground-secondary">
+                {description}
+              </p>
+            ) : null}
+          </div>
+          {itemFilters || hasAskOne ? (
+            <div className={actionsClassName}>
+              {itemFilters ? (
+                <DashboardItemFilters
+                  {...itemFilters}
+                  onOpenChange={setIsFiltersOpen}
+                />
+              ) : null}
+              {hasAskOne ? (
+                <DropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={handleDropdownOpenChange}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <ButtonInternal
+                      label={translations.actions.other}
+                      icon={Ellipsis}
+                      variant="ghost"
+                      size="md"
+                      hideLabel
+                      pressed={isDropdownOpen}
+                      compact
+                      onClick={(event: React.MouseEvent) =>
+                        event.stopPropagation()
+                      }
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="py-1"
+                    onCloseAutoFocus={handleAskOneMenuCloseAutoFocus}
+                  >
+                    {askOneMenuItem}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           <OneEmptyState
@@ -159,32 +333,79 @@ export function DashboardItem({
 
   return (
     <div
-      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
+      className={cn(
+        "group/dashitem flex flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background",
+        // `min-h-full` still fills the space when the content is shorter, but
+        // lets a taller intrinsic height win instead of being clipped to it.
+        // `shrink-0` is what makes that stick: as a flex item this card would
+        // otherwise be shrunk back down to the space available, and the
+        // percentage `min-height` can't stop it — a definite value replaces the
+        // content-based automatic minimum that normally does. Without it the
+        // border stops at the fold while the chart keeps drawing below it.
+        fitContent ? "min-h-full shrink-0" : "h-full"
+      )}
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
       <div className="flex items-start px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-col">
-          <OneEllipsis
-            tag="h3"
-            className="text-base font-semibold text-f1-foreground"
-          >
-            {title}
-          </OneEllipsis>
-          {description && (
-            <OneEllipsis className="text-base text-f1-foreground-secondary">
-              {description}
+          {/* The icon never shrinks, so a long title truncates around it rather
+              than squeezing it out of the row. */}
+          <div className="flex min-w-0 items-center gap-1">
+            <OneEllipsis
+              tag="h3"
+              className="text-base font-semibold text-f1-foreground"
+            >
+              {title}
             </OneEllipsis>
-          )}
+            {info ? (
+              <div className="flex shrink-0 items-center text-f1-foreground-secondary">
+                <InfoHint info={info} />
+              </div>
+            ) : null}
+          </div>
+          {description || descriptionAction ? (
+            // Baseline-aligned row so the link sits on the description's own
+            // line; the text keeps its own truncation, the link never shrinks.
+            <div className="flex items-baseline gap-1">
+              {description ? (
+                <OneEllipsis className="text-base text-f1-foreground-secondary">
+                  {description}
+                </OneEllipsis>
+              ) : null}
+              {descriptionAction ? (
+                <>
+                  {description ? (
+                    // Separator, not content: hidden from the accessibility tree
+                    // so the description and the action read as two things rather
+                    // than one sentence with a stray character in it.
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 text-base text-f1-foreground-tertiary"
+                    >
+                      ·
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={descriptionAction.onClick}
+                    className="shrink-0 cursor-pointer whitespace-nowrap border-0 bg-transparent p-0 text-base font-medium text-f1-foreground-secondary underline hover:text-f1-foreground"
+                  >
+                    {descriptionAction.label}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          ) : null}
         </div>
-        <div
-          className={cn(
-            "flex flex-shrink-0 gap-0.5",
-            !isFullscreen &&
-              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`
-          )}
-        >
-          {hasFullscreen && (
+        <div className={actionsClassName}>
+          {itemFilters ? (
+            <DashboardItemFilters
+              {...itemFilters}
+              onOpenChange={setIsFiltersOpen}
+            />
+          ) : null}
+          {hasFullscreen ? (
             <ButtonInternal
               label={
                 isFullscreen
@@ -198,8 +419,8 @@ export function DashboardItem({
               compact
               onClick={() => onFullscreenChange?.(!isFullscreen)}
             />
-          )}
-          {showMenu && (
+          ) : null}
+          {showMenu ? (
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={handleDropdownOpenChange}
@@ -219,6 +440,7 @@ export function DashboardItem({
               <DropdownMenuContent
                 align="end"
                 className={cn("py-1", isExplanationView && "w-96 max-w-[90vw]")}
+                onCloseAutoFocus={handleAskOneMenuCloseAutoFocus}
               >
                 {isExplanationView && hasExplanation ? (
                   <div className="px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2">
@@ -229,7 +451,7 @@ export function DashboardItem({
                   </div>
                 ) : (
                   <>
-                    {hasChartTypes && (
+                    {hasChartTypes ? (
                       <div className="mb-1 flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
                         <OneEllipsis className="text-base font-medium text-f1-foreground-tertiary">
                           {translations.ai.dashboardItem.chartType}
@@ -254,8 +476,8 @@ export function DashboardItem({
                           fullWidth
                         />
                       </div>
-                    )}
-                    {hasExplanation && (
+                    ) : null}
+                    {hasExplanation ? (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onSelect={(e) => {
@@ -271,9 +493,11 @@ export function DashboardItem({
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                    )}
+                    ) : null}
 
-                    {hasDownloads && (
+                    {askOneMenuItem}
+
+                    {hasDownloads ? (
                       <DropdownMenuGroup>
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
@@ -292,9 +516,9 @@ export function DashboardItem({
                                   onClick={action.onClick}
                                 >
                                   <div className="flex w-full flex-row items-center gap-2">
-                                    {action.icon && (
+                                    {action.icon ? (
                                       <F0Icon icon={action.icon} />
-                                    )}
+                                    ) : null}
                                     <span className="flex-1">
                                       {action.label}
                                     </span>
@@ -305,12 +529,14 @@ export function DashboardItem({
                           </DropdownMenuPortal>
                         </DropdownMenuSub>
                       </DropdownMenuGroup>
-                    )}
-                    {hasDelete && (
+                    ) : null}
+                    {hasDelete ? (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => {
-                            if (isFullscreen) onFullscreenChange?.(false)
+                            if (isFullscreen) {
+                              onFullscreenChange?.(false)
+                            }
                             handleDelete(itemId)
                           }}
                           className={cn("text-f1-foreground-critical")}
@@ -323,15 +549,17 @@ export function DashboardItem({
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                    )}
+                    ) : null}
                   </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          ) : null}
         </div>
       </div>
-      <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>
+      <div className={cn("flex-1", !fitContent && "min-h-0")}>
+        {isLoading ? skeleton : children}
+      </div>
     </div>
   )
 }

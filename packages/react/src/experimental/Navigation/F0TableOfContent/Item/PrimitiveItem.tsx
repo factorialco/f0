@@ -1,14 +1,12 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { Counter } from "@/ui/Counter"
 import { ChevronDown, Handle } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
+import { Counter } from "@/ui/Counter"
 import { TOCItem } from "../types"
 import { ItemDropDown } from "./ItemDropDown"
 
@@ -55,7 +53,7 @@ export function PrimitiveItem({
 
   return (
     <div className="flex w-full min-w-0 items-center">
-      {collapsible && (
+      {collapsible ? (
         <ButtonInternal
           compact
           size="sm"
@@ -72,7 +70,7 @@ export function PrimitiveItem({
           )}
           icon={ChevronDown}
         ></ButtonInternal>
-      )}
+      ) : null}
       <div
         className={cn(
           focusRing("focus:border-f1-border-focus"),
@@ -86,7 +84,7 @@ export function PrimitiveItem({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {(sortable || icon) && (
+        {sortable || icon ? (
           <div className="absolute left-1.5 top-1/2 -translate-y-1/2">
             <AnimatePresence mode="wait">
               {showHandleIcon ? (
@@ -127,7 +125,7 @@ export function PrimitiveItem({
               )}
             </AnimatePresence>
           </div>
-        )}
+        ) : null}
         <OneEllipsis
           lines={1}
           className={cn(
@@ -139,7 +137,7 @@ export function PrimitiveItem({
         </OneEllipsis>
 
         <AnimatePresence>
-          {(shouldShowCounter || shouldShowDropdown) && (
+          {shouldShowCounter || shouldShowDropdown ? (
             <motion.div
               key="actions-container"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -180,20 +178,20 @@ export function PrimitiveItem({
                       }}
                       className="flex items-center justify-center"
                     >
-                      {otherActions && (
+                      {otherActions ? (
                         <ItemDropDown
                           otherActions={otherActions}
                           open={open}
                           setOpen={setOpen}
                           disabled={disabled}
                         />
-                      )}
+                      ) : null}
                     </motion.div>
                   )
                 )}
               </AnimatePresence>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
       {children}

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
-
 import { getLabels, normalizeData } from "./helpers"
-import { CLOCK_IN_COLORS, ClockInStatus } from "./index"
+import { CLOCK_IN_COLORS, ClockInStatus } from "."
 
 describe("ClockInGraph helpers", () => {
   describe("normalizeData", () => {
@@ -59,8 +58,14 @@ describe("ClockInGraph helpers", () => {
         {
           value: 0.75, // 90 minutes difference
           color: CLOCK_IN_COLORS["clocked-in"],
+          // A segment also carries WHEN its entry ran, which is what the
+          // horizontal bar answers a hover with.
+          from: new Date("2024-03-20T09:00:00"),
+          to: new Date("2024-03-20T10:30:00"),
+          label: undefined,
         },
         {
+          // The remainder is the rest of the day, not a stretch of it: no range.
           value: 0.25,
           color: CLOCK_IN_COLORS.empty,
         },

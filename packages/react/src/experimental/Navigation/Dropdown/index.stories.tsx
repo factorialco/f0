@@ -1,12 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, userEvent, within } from "storybook/test"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
+import { Dropdown, MobileDropdown as MobileDropdownComponent } from "."
 
 const meta = {
   title: "Dropdown",
@@ -131,8 +128,8 @@ export const WithCustomTrigger: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -286,8 +283,8 @@ export const DisabledWithCustomTrigger: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -307,6 +304,34 @@ export const DisabledWithCustomTrigger: Story = {
     await expect(trigger).toBeDisabled()
     await userEvent.click(trigger)
     await expect(page.queryByText("Upload new avatar")).not.toBeInTheDocument()
+  },
+}
+
+/**
+ * A single item can be disabled with `disabled: true` — it stays VISIBLE but
+ * greyed-out and non-interactive (unlike `enabled: false`, which removes it).
+ * Pair it with `disabledTooltip` to explain on hover why the action is
+ * unavailable; the tooltip works despite the disabled item's `pointer-events:
+ * none`. Open the menu and hover "Delete" to see it.
+ */
+export const DisabledItemWithTooltip: Story = {
+  args: {
+    items: [
+      {
+        label: "Edit",
+        onClick: () => console.log("Edit clicked"),
+        icon: Icons.Pencil,
+      },
+      {
+        label: "Delete",
+        onClick: () => console.log("Delete clicked"),
+        icon: Icons.Delete,
+        critical: true,
+        disabled: true,
+        disabledTooltip:
+          "You can't delete this while people with active contracts are assigned to it",
+      },
+    ],
   },
 }
 
@@ -354,8 +379,8 @@ export const WithDataTestId: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -383,8 +408,8 @@ export const Snapshot: Story = {
         <button aria-label="Open user menu">
           <F0AvatarPerson
             src="/avatars/person04.jpg"
-            firstName="Dani"
-            lastName="Moreno"
+            firstName="Jordan"
+            lastName="Avery"
             size="lg"
           />
         </button>

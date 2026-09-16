@@ -7,7 +7,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartConfig,
   ChartContainer,
@@ -16,7 +15,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -36,10 +34,10 @@ type ChartDataPoint<K extends ChartConfig> = {
   }
 }
 
-type ActivePayload<K> = Array<{
+type ActivePayload<K> = {
   name: keyof K
   value: number
-}>
+}[]
 
 export type BarChartProps<K extends ChartConfig = ChartConfig> =
   ChartPropsBase<K> & {
@@ -124,15 +122,15 @@ const _BarChart = <K extends ChartConfig>(
           onClick(chartData)
         }}
       >
-        {!hideTooltip && (
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps()}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis.tickFormatter} />
             }
           />
-        )}
-        {!hideGrid && <CartesianGrid {...cartesianGridProps()} />}
+        ) : null}
+        {!hideGrid ? <CartesianGrid {...cartesianGridProps()} /> : null}
         <YAxis
           {...yAxisProps(yAxis)}
           tick
@@ -170,7 +168,7 @@ const _BarChart = <K extends ChartConfig>(
                       >
                         {payload.value}
                       </text>
-                      {!!value && (
+                      {value ? (
                         <text
                           x={0}
                           y={0}
@@ -180,7 +178,7 @@ const _BarChart = <K extends ChartConfig>(
                         >
                           {normalizedValue}
                         </text>
-                      )}
+                      ) : null}
                     </g>
                   )
                 }
@@ -208,7 +206,7 @@ const _BarChart = <K extends ChartConfig>(
             radius={type === "stacked-by-sign" ? [4, 4, 0, 0] : 4}
             maxBarSize={32}
           >
-            {label && (
+            {label ? (
               <LabelList
                 key={`label-${key}`}
                 position="top"
@@ -216,10 +214,10 @@ const _BarChart = <K extends ChartConfig>(
                 className="fill-f1-foreground"
                 fontSize={12}
               />
-            )}
+            ) : null}
           </Bar>
         ))}
-        {legend && (
+        {legend ? (
           <ChartLegend
             content={<ChartLegendContent nameKey="label" />}
             align={"center"}
@@ -227,7 +225,7 @@ const _BarChart = <K extends ChartConfig>(
             layout="vertical"
             className={"flex-row items-start gap-4 pr-3 pt-2"}
           />
-        )}
+        ) : null}
       </BarChartPrimitive>
     </ChartContainer>
   )

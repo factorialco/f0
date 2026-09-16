@@ -1,5 +1,4 @@
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
-
 import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import {
@@ -24,11 +23,20 @@ export const tags = [
 ] as const
 export type Tag = (typeof tags)[number]
 
+/**
+ * Radix's own default open delay. Named here so a caller passing `delay` is
+ * changing a value this component owns rather than silently diverging from an
+ * upstream default.
+ */
+const DEFAULT_TOOLTIP_DELAY_MS = 700
+
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
-  if (!element) return false
+  if (!element) {
+    return false
+  }
   if (lines > 1) {
     // For multi-line, check if content height exceeds line-clamp height
-    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight)
+    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight, 10)
     return element.scrollHeight > lineHeight * lines
   }
   // For single line, check if content width exceeds container width
@@ -72,10 +80,14 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
     const [hasEllipsis, setHasEllipsis] = useState(false)
 
     useEffect(() => {
-      if (!ref || typeof ref !== "object" || disabled) return
+      if (!ref || typeof ref !== "object" || disabled) {
+        return
+      }
 
       const element = ref.current
-      if (!element) return
+      if (!element) {
+        return
+      }
 
       /**
        * Finds the ellipsis state of the element and sets the state and emits the change
@@ -91,6 +103,15 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       // Initial check
       findAndSetEllipsisState()
 
+      // Re-check after the next layout. When this text lives in a flex row that
+      // an ancestor width-constrains only on a later pass (e.g. an OverflowList
+      // inside a table cell), the element can mount at its natural width and
+      // shrink afterwards — a transition the ResizeObserver below sometimes
+      // misses, leaving `hasEllipsis` (and thus the tooltip) stale-false while
+      // the text is visibly clipped. A post-layout re-measure catches it.
+      const raf = requestAnimationFrame(() => findAndSetEllipsisState())
+      const timeout = setTimeout(() => findAndSetEllipsisState(), 100)
+
       // Set up resize observer
       const resizeObserver = new ResizeObserver(() => {
         findAndSetEllipsisState()
@@ -99,6 +120,8 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
       resizeObserver.observe(element)
 
       return () => {
+        cancelAnimationFrame(raf)
+        clearTimeout(timeout)
         resizeObserver.disconnect()
       }
     }, [ref, onHasEllipsisChange, lines, disabled])
@@ -165,6 +188,13 @@ type OneEllipsisProps = {
    * @default false
    */
   markdown?: boolean
+  /**
+   * How long the pointer has to rest on the clipped text before the tooltip
+   * opens, in milliseconds. Lower it where the tooltip is the only way to read
+   * text the layout has cut off, so recovering it does not feel like a wait.
+   * @default 700
+   */
+  delay?: number
 }
 
 const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
@@ -177,6 +207,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
       disabled = false,
       markdown = false,
       tag = "span",
+      delay = DEFAULT_TOOLTIP_DELAY_MS,
       ...props
     },
     forwardedRef
@@ -211,9 +242,19 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
     }, [children, markdown])
 
     return hasEllipsis && !noTooltip ? (
-      <TooltipProvider>
+      <TooltipProvider delayDuration={delay}>
         <Tooltip>
-          <TooltipTrigger asChild>{Text}</TooltipTrigger>
+          {/*
+           * `pointer-events-auto` on the trigger, not just via the wrapper's own
+           * ellipsis state: wrapping in the tooltip remounts the text, resetting
+           * that internal state, so inside a `pointer-events-none` container (e.g.
+           * a table cell) the trigger could end up unhoverable and the tooltip
+           * unreachable. Driving it from the rendered-tooltip branch keeps it
+           * reliably interactive whenever a tooltip exists.
+           */}
+          <TooltipTrigger asChild className="pointer-events-auto">
+            {Text}
+          </TooltipTrigger>
           <TooltipContent className="max-w-xl">{plainText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>

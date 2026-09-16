@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
-
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   GroupingDefinition,
   RecordType,
@@ -13,7 +12,6 @@ import {
   tagColumn,
 } from "@/patterns/F0Graph"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
@@ -62,14 +60,18 @@ export const GraphCollection = <
   nodeTagTypes,
   defaultVisibleTagTypes,
   pinnedTagTypes,
+  lockedTagTypes,
   currentUserNodeId,
   getNodeId,
   getChildrenCount,
+  stackNodes,
+  stackedTrailing,
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
   searchSelectionNonce,
   focusOnEntry,
+  initialSelectedNodeId,
   loadNodePath,
   getParentId,
   loadNodeData,
@@ -77,6 +79,9 @@ export const GraphCollection = <
   zoomPreset,
   minZoom,
   maxZoom,
+  centerOnNodeClick,
+  nodeClickZoom,
+  viewportInset,
   showControls,
   canvasFooterActions,
   enableNodeWindowing,
@@ -120,6 +125,7 @@ export const GraphCollection = <
       tags,
       getNodeId,
       getChildrenCount,
+      stackNodes,
       childrenFilters,
       defaultExpandDepth,
       loadNodePath,
@@ -138,6 +144,18 @@ export const GraphCollection = <
   // `focusedNode` prop only reacts to value changes), and dropping the click
   // selection when a reveal marks a node via `highlightedNodes` instead.
   const graphRef = useRef<F0GraphHandle>(null)
+
+  // Entry selection. When `initialSelectedNodeId` is set we run F0Graph's
+  // selection in CONTROLLED mode, seeded with that node so a deep link arrives
+  // already marked (the click-selection ring), and mirror every later change
+  // back into this state so clicks/keyboard keep moving the selection normally.
+  // The control mode is decided ONCE at mount (a stable boolean) so we never
+  // flip controlled/uncontrolled; consumers that omit the option keep the
+  // previous uncontrolled behavior (`selectedNodes` stays `undefined`).
+  const [controlSelection] = useState(() => initialSelectedNodeId !== undefined)
+  const [selectedNodes, setSelectedNodes] = useState<Set<string>>(() =>
+    initialSelectedNodeId ? new Set([initialSelectedNodeId]) : new Set()
+  )
 
   // Reveal + focus a node: load/expand it (declarative `focusedNode` handles
   // the first fly, with the right async + settle timing), then imperatively
@@ -165,7 +183,9 @@ export const GraphCollection = <
   const lastNonceRef = useRef<number | undefined>(undefined)
   const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
-    if (isInitialLoading) return
+    if (isInitialLoading) {
+      return
+    }
     const decision = resolveGraphReveal({
       isInitialLoading,
       initialConsumed: initialRevealConsumedRef.current,
@@ -174,10 +194,14 @@ export const GraphCollection = <
       revealNonce: searchSelectionNonce,
       lastNonce: lastNonceRef.current,
     })
-    if (decision.consumeInitial) initialRevealConsumedRef.current = true
+    if (decision.consumeInitial) {
+      initialRevealConsumedRef.current = true
+    }
     lastRevealedRef.current = decision.lastRevealed
     lastNonceRef.current = decision.lastNonce
-    if (decision.revealId) void revealAndFocus(decision.revealId)
+    if (decision.revealId) {
+      void revealAndFocus(decision.revealId)
+    }
   }, [revealNodeId, searchSelectionNonce, revealAndFocus, isInitialLoading])
 
   // Clear the shared header search when ENTERING and LEAVING the graph view, so
@@ -197,6 +221,9 @@ export const GraphCollection = <
   const allTagTypes = nodeTagTypes ? [...nodeTagTypes] : []
   const defaultVisibleSet = new Set(defaultVisibleTagTypes ?? allTagTypes)
   const pinnedSet = new Set<string>(pinnedTagTypes ?? [])
+  // Columns the actor can't see: never rendered on a node, whatever the saved
+  // visibility says (their settings toggle is locked OFF + disabled too).
+  const lockedSet = new Set<string>(Object.keys(lockedTagTypes ?? {}))
   const hiddenSet = new Set(
     graphSettings?.hidden ??
       allTagTypes.filter((type) => !defaultVisibleSet.has(type))
@@ -204,11 +231,12 @@ export const GraphCollection = <
   const order = graphSettings?.order ?? allTagTypes
   const orderedTagTypes = allTagTypes.sort(
     (a, b) =>
-      (order.indexOf(a) === -1 ? Infinity : order.indexOf(a)) -
-      (order.indexOf(b) === -1 ? Infinity : order.indexOf(b))
+      (!order.includes(a) ? Infinity : order.indexOf(a)) -
+      (!order.includes(b) ? Infinity : order.indexOf(b))
   )
   const visibleTagTypes = orderedTagTypes.filter(
-    (type) => pinnedSet.has(type) || !hiddenSet.has(type)
+    (type) =>
+      !lockedSet.has(type) && (pinnedSet.has(type) || !hiddenSet.has(type))
   )
 
   // Reorder each node's tags to match the configured metadata order.
@@ -241,21 +269,36 @@ export const GraphCollection = <
           initialFocusNodeId={focusOnEntry}
           highlightedNodes={highlightedNodes}
           selectionMode="single"
-          // Selecting a node marks it via the internal selection ring; drop the
-          // reveal highlight (search / "Find me") so only one node stays marked.
-          // Fires with the new set — a non-empty set means a real selection (an
-          // empty set is a pane click or our own `clearSelection()` on reveal,
-          // which must NOT wipe the highlight we just set). Centering lives on
-          // the node's own click (below) so a click on the empty canvas never
-          // re-centers.
+          // Controlled only when an entry selection was requested (see
+          // `controlSelection`); otherwise `undefined` keeps F0Graph's own
+          // uncontrolled selection, unchanged for existing consumers.
+          selectedNodes={controlSelection ? selectedNodes : undefined}
+          // Selecting a node marks it via the selection ring; drop the reveal
+          // highlight (search / "Find me") so only one node stays marked. Fires
+          // with the new set — a non-empty set means a real selection (an empty
+          // set is a pane click or our own `clearSelection()` on reveal, which
+          // must NOT wipe the highlight we just set). Centering lives on the
+          // node's own click (below) so a click on the empty canvas never
+          // re-centers. When controlled we also mirror the set so clicks keep
+          // moving the ring past the seeded entry selection.
           onSelectedNodesChange={(next) => {
-            if (next.size > 0) clearFocus()
+            if (controlSelection) {
+              setSelectedNodes(next)
+            }
+            if (next.size > 0) {
+              clearFocus()
+            }
           }}
           showControls={showControls ?? true}
           canvasFooterActions={canvasFooterActions}
           zoomPreset={zoomPreset}
           minZoom={minZoom}
           maxZoom={maxZoom}
+          // Fly-to on click is F0Graph's default; centers + zooms in close on the
+          // clicked node and offsets for the side panel via `viewportInset`.
+          centerOnNodeClick={centerOnNodeClick}
+          nodeClickZoom={nodeClickZoom}
+          viewportInset={viewportInset}
           enableNodeWindowing={enableNodeWindowing}
           nodeWindowPadding={nodeWindowPadding}
           // The hook's own hydration loader (two-phase mode) wins; otherwise
@@ -278,6 +321,12 @@ export const GraphCollection = <
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
+            // One call for both shapes. When the graph sets `ctx.stacked` this
+            // renders as a row, which mirrors the card's anatomy (same box, same
+            // leading avatar, same title) so a column reads as a continuation of
+            // its parent. The card-only extras below — subtitle, tags, the
+            // selection toolbar, the hover card — are ignored for a row, where
+            // `trailing` takes their place.
             return (
               <F0GraphNode
                 {...ctx}
@@ -286,15 +335,18 @@ export const GraphCollection = <
                 loading={ctx.dataLoading}
                 avatar={avatar?.(node.data)}
                 title={title(node.data)}
+                trailing={stackedTrailing?.(node.data)}
                 subtitle={subtitle?.(node.data)}
                 tags={orderedTags?.(node.data)}
                 actions={nodeActions?.(node.data)}
                 hoverCard
                 onClick={() => {
+                  // Select + fly-to is handled by F0Graph's default
+                  // `centerOnNodeClick` (closer zoom, panel-aware offset), so we
+                  // no longer center imperatively here. `ctx.onClick()` keeps
+                  // keyboard (Enter) selection working, where there's no pointer
+                  // click for F0Graph's own click path to catch.
                   ctx.onClick()
-                  // Center on the node the user actually clicked (never fires on
-                  // an empty-canvas click); re-centers even on a repeat click.
-                  graphRef.current?.focusNode(ctx.nodeId)
                   itemOnClick?.()
                 }}
               />

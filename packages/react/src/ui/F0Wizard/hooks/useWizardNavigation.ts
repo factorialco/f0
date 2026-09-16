@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from "react"
-
 import type { F0WizardStep } from "../types"
 
 interface UseWizardNavigationOptions {
@@ -42,33 +41,58 @@ export function useWizardNavigation({
     [onStepChanged]
   )
 
-  const goToStep = useCallback(
-    async (index: number) => {
-      if (index < 0 || index >= stepsRef.current.length) return
+  /**
+   * Whether a jump to `index` is on offer at all: the index exists, the current
+   * step has no errors, skipping is allowed (or the step is the next one), no
+   * step being jumped over has errors, and every step before it is complete.
+   */
+  const canGoToStep = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= stepsRef.current.length) {
+        return false
+      }
 
-      if (stepsRef.current[currentStep]?.hasErrors?.() === true) return
+      if (stepsRef.current[currentStep]?.hasErrors?.() === true) {
+        return false
+      }
 
-      if (!allowStepSkipping && index > currentStep + 1) return
+      if (!allowStepSkipping && index > currentStep + 1) {
+        return false
+      }
 
       if (index > currentStep) {
         const intermediateHasErrors = stepsRef.current
           .slice(currentStep, index)
           .some((step) => step.hasErrors?.() === true)
-        if (intermediateHasErrors) return
+        if (intermediateHasErrors) {
+          return false
+        }
       }
 
-      const canJump = stepsRef.current
+      return stepsRef.current
         .slice(0, index)
         .every((step) => step.isCompleted?.() !== false)
+    },
+    [currentStep, allowStepSkipping]
+  )
 
-      if (!canJump) return
+  const goToStep = useCallback(
+    async (index: number) => {
+      if (!canGoToStep(index)) {
+        return
+      }
 
+      // The loop stays here rather than in a helper: with no step carrying an
+      // `onNext` it runs without awaiting anything, so `changeStep` lands in
+      // the same tick as the call — which is what callers (and the tests) get
+      // today for a plain jump.
       if (index > currentStep) {
         setLoading(true)
         try {
           for (let i = currentStep; i < index; i++) {
             const step = stepsRef.current[i]
             if (step?.onNext) {
+              // oxlint-disable-next-line no-await-in-loop -- steps run onNext in order and a rejection stops the jump
               await step.onNext()
             }
           }
@@ -83,12 +107,14 @@ export function useWizardNavigation({
 
       changeStep(index)
     },
-    [changeStep, currentStep, allowStepSkipping]
+    [changeStep, currentStep, canGoToStep]
   )
 
   const goNext = useCallback(async () => {
     const step = stepsRef.current[currentStep]
-    if (!step) return
+    if (!step) {
+      return
+    }
 
     setLoading(true)
     try {

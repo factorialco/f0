@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   Default as DefaultWidgetSimpleListItemStory,
   WithLongTitle as WithLongTitleWidgetSimpleListItemStory,
 } from "../../ListItems/WidgetSimpleListItem/index.stories"
-import { WidgetSimpleList, WidgetSimpleListProps } from "./index"
+import { WidgetSimpleList, WidgetSimpleListProps } from "."
 
 const meta: Meta<WidgetSimpleListProps> = {
   title: "Widgets/WidgetSimpleList",
@@ -27,7 +26,7 @@ type Story = StoryObj<WidgetSimpleListProps>
 
 export const Default: Story = {
   args: {
-    items: new Array(10).fill(null).map((_, i) => ({
+    items: Array.from({ length: 10 }, (_, i) => ({
       id: i,
       ...DefaultWidgetSimpleListItemStory.args,
       title: DefaultWidgetSimpleListItemStory.args?.title ?? "Example title",
@@ -39,7 +38,7 @@ export const Default: Story = {
 export const WithLongTitles: Story = {
   args: {
     ...Default.args,
-    items: new Array(10).fill(null).map((_, i) => ({
+    items: Array.from({ length: 10 }, (_, i) => ({
       id: i,
       ...WithLongTitleWidgetSimpleListItemStory.args,
       title:

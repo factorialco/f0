@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0DataChart as _F0DataChart } from "./F0DataChart"
 
 export type {
@@ -19,10 +18,16 @@ export type {
   F0DataChartPieDataPoint,
   F0DataChartPieProps,
   F0DataChartPieSeries,
+  F0DataChartPointClick,
+  F0DataChartPointClickSeries,
   F0DataChartProps,
   F0DataChartRadarIndicator,
+  F0DataChartReferenceLine,
   F0DataChartRadarProps,
   F0DataChartRadarSeries,
+  F0DataChartScatterDataPoint,
+  F0DataChartScatterProps,
+  F0DataChartScatterSeries,
 } from "./types"
 
 export { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"
@@ -36,6 +41,7 @@ export {
   LineChartSkeleton,
   PieChartSkeleton,
   RadarChartSkeleton,
+  ScatterChartSkeleton,
 } from "./skeletons"
 
 /**

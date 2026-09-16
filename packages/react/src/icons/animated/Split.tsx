@@ -49,7 +49,6 @@ const SplitAnimated = React.forwardRef<SVGSVGElement, SplitProps>(
           animate={animate}
           initial="normal"
           transition={lineTransition}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M5 12H9L10.6187 14.59C11.167 15.4671 12.1284 16 13.1627 16H19"
@@ -57,7 +56,6 @@ const SplitAnimated = React.forwardRef<SVGSVGElement, SplitProps>(
           animate={animate}
           initial="normal"
           transition={lineTransition}
-          vectorEffect="non-scaling-stroke"
         />
         <motion.path
           d="M17 14L19 16L17 18"

@@ -1,183 +1,297 @@
 "use client"
 
-import {
-  lazy,
-  type ReactNode,
-  type RefObject,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-
+import { lazy, type ReactNode, Suspense, useState } from "react"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
+import { type IconType } from "@/components/F0Icon"
 import { Download } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
 import { useChatDocumentPreview } from "../providers/ChatUIProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
-import { type ChatDocumentKind } from "../utils/attachments"
+import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
+import { ClampText } from "./ClampText"
 
 // Every snapshot renderer is heavy in its own way (pdf.js, SheetJS,
-// docx-preview) — each lives in its own chunk, fetched the first time a card
-// of that kind scrolls into view.
-const ChatPdfThumbnail = lazy(() => import("./ChatPdfThumbnail"))
-const ChatSheetThumbnail = lazy(() => import("./ChatSheetThumbnail"))
-const ChatDocxThumbnail = lazy(() => import("./ChatDocxThumbnail"))
-const ChatTextThumbnail = lazy(() => import("./ChatTextThumbnail"))
+// docx-preview) — each stays in its own chunk. The card itself mounts with its
+// row: Suspense covers the chunk, and the skeleton under the snapshot covers
+// the renderers, which mount fast but PAINT asynchronously.
+const loadPdfThumbnail = () => import("./ChatPdfThumbnail")
+const loadSheetThumbnail = () => import("./ChatSheetThumbnail")
+const loadDocxThumbnail = () => import("./ChatDocxThumbnail")
+const loadTextThumbnail = () => import("./ChatTextThumbnail")
+const ChatPdfThumbnail = lazy(loadPdfThumbnail)
+const ChatSheetThumbnail = lazy(loadSheetThumbnail)
+const ChatDocxThumbnail = lazy(loadDocxThumbnail)
+const ChatTextThumbnail = lazy(loadTextThumbnail)
 
-const CARD_WIDTH = 288
+/** Matches the transcript's shared media width at its cap (see media-layout). */
+const CARD_WIDTH = 384
 const THUMB_HEIGHT = 160
 
-/** Render-on-view gate: a long transcript can hold many documents, so the
- * parser chunk + snapshot render only happen once a card nears the viewport. */
-const useInViewport = (ref: RefObject<HTMLElement | null>): boolean => {
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const element = ref.current
-    if (!element || inView) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) setInView(true)
-      },
-      { rootMargin: "200px" }
+/** The snapshot renderer for this document kind. */
+const DocumentThumbnail = ({
+  kind,
+  url,
+  width,
+  onError,
+  onRendered,
+}: {
+  kind: ChatDocumentKind
+  url: string
+  /** Kinds that lay out to a fixed width need it up front. */
+  width: number
+  onError: () => void
+  onRendered: () => void
+}) => {
+  if (kind === "pdf") {
+    return (
+      <ChatPdfThumbnail
+        url={url}
+        width={width}
+        onError={onError}
+        onRendered={onRendered}
+      />
     )
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [ref, inView])
-  return inView
+  }
+
+  if (kind === "sheet") {
+    return (
+      <ChatSheetThumbnail url={url} onError={onError} onRendered={onRendered} />
+    )
+  }
+
+  if (kind === "docx") {
+    return (
+      <ChatDocxThumbnail
+        url={url}
+        width={width}
+        onError={onError}
+        onRendered={onRendered}
+      />
+    )
+  }
+
+  if (kind === "text") {
+    return (
+      <ChatTextThumbnail url={url} onError={onError} onRendered={onRendered} />
+    )
+  }
+
+  return null
+}
+/**
+ * What the card falls back to once the snapshot fails to render: the plain
+ * downloadable file chip, or a square tile in the compact surfaces.
+ */
+const FailedDocumentCard = ({
+  file,
+  action,
+  compact,
+  cornerClass,
+  surfaceClassName,
+}: {
+  file: F0ChatFileAttachment
+  /** The download action, or whatever the host put in its place. */
+  action: { label: string; icon: IconType; onClick: () => void }
+  compact: boolean
+  cornerClass: string
+  surfaceClassName: string | undefined
+}) => {
+  const fileDescriptor = { name: file.name, type: file.mimeType ?? "" }
+
+  if (!compact) {
+    return <F0FileItem size="md" file={fileDescriptor} actions={[action]} />
+  }
+
+  return (
+    <div
+      className={cn(
+        "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
+        cornerClass,
+        surfaceClassName
+      )}
+      data-testid="chat-document-attachment"
+    >
+      <F0AvatarFile file={fileDescriptor} size="md" />
+      <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+        <ButtonInternal
+          variant="outline"
+          size="sm"
+          hideLabel
+          icon={action.icon}
+          label={action.label}
+          onClick={action.onClick}
+        />
+      </div>
+      <span className="sr-only">{file.name}</span>
+    </div>
+  )
 }
 
 /**
- * Slack-style document card: a header (type badge + name + download) over a
- * cropped snapshot of the content — the first PDF page, the first sheet's
- * cells, the first Word page, or the first lines of text. Clicking the
- * snapshot opens the fullscreen viewer ({@link ChatDocumentPreview}); a
- * document that can't load falls back to the plain file chip so download
- * always stays available.
+ * Document card with a type badge and name over a cropped snapshot of the
+ * content — the first PDF page, the first sheet's cells, the first Word page,
+ * or the first lines of text. Clicking the snapshot opens the fullscreen
+ * viewer ({@link ChatDocumentPreview}), which owns its download action. A
+ * document that can't load falls back to the plain downloadable file chip.
  */
 export const ChatDocumentAttachmentCard = ({
   file,
   kind,
   cornerClass = "rounded-xl",
+  action,
+  previewDisabled = false,
+  compact = false,
+  surfaceClassName,
 }: {
   file: F0ChatFileAttachment
   kind: ChatDocumentKind
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
+  /** Optional card action, e.g. Remove inside the composer. */
+  action?: {
+    label: string
+    icon: IconType
+    onClick: () => void
+  }
+  /** Prevent opening a transient local URL before its upload completes. */
+  previewDisabled?: boolean
+  /** Render as a square thumbnail in compact surfaces such as the composer. */
+  compact?: boolean
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   const { openDocumentPreview } = useChatDocumentPreview()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const inView = useInViewport(containerRef)
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
   const [failed, setFailed] = useState(false)
   const [rendered, setRendered] = useState(false)
+  const fallbackAction = action ?? {
+    label: i18n.t("chat.downloadNamedFile", { name: file.name }),
+    icon: Download,
+    onClick: () => {
+      triggerDownload(file.url, file.name)
+      emit.onAttachmentDownloaded({ kind: attachedKindOf(file) })
+    },
+  }
+  const cardWidth = compact ? 64 : CARD_WIDTH
+  const thumbHeight = compact ? "100%" : THUMB_HEIGHT
 
   if (failed) {
     return (
-      <F0FileItem
-        size="md"
-        file={{ name: file.name, type: file.mimeType ?? "" }}
-        actions={[
-          {
-            label: i18n.chat.download,
-            icon: Download,
-            onClick: () => triggerDownload(file.url, file.name),
-          },
-        ]}
+      <FailedDocumentCard
+        file={file}
+        action={fallbackAction}
+        compact={compact}
+        cornerClass={cornerClass}
+        surfaceClassName={surfaceClassName}
       />
     )
   }
 
   return (
     <div
-      ref={containerRef}
       className={cn(
-        "flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
-        cornerClass
+        "group/attachment relative flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
+        compact && "box-border h-16 w-16",
+        cornerClass,
+        surfaceClassName
       )}
-      style={{ width: CARD_WIDTH }}
+      style={{ width: cardWidth }}
       data-testid="chat-document-attachment"
     >
-      <div className="flex items-center gap-2 py-2 px-2">
-        <F0AvatarFile
-          file={{ name: file.name, type: file.mimeType ?? "" }}
-          size="md"
-        />
-        <OneEllipsis className="grow text-sm font-medium text-f1-foreground">
-          {file.name}
-        </OneEllipsis>
-        <ButtonInternal
-          variant="ghost"
-          size="sm"
-          hideLabel
-          icon={Download}
-          label={i18n.chat.download}
-          onClick={() => triggerDownload(file.url, file.name)}
-        />
-      </div>
+      {!compact ? (
+        <div className="flex items-center gap-2 px-2 py-2">
+          <F0AvatarFile
+            file={{ name: file.name, type: file.mimeType ?? "" }}
+            size="md"
+          />
+          <ClampText className="grow text-sm font-medium text-f1-foreground">
+            {file.name}
+          </ClampText>
+          {action ? (
+            <ButtonInternal
+              variant="ghost"
+              size="sm"
+              hideLabel
+              icon={action.icon}
+              label={action.label}
+              onClick={action.onClick}
+            />
+          ) : null}
+        </div>
+      ) : null}
       <button
         type="button"
-        onClick={() => openDocumentPreview(file)}
-        aria-label={i18n.chat.openDocument}
-        className="relative block w-full overflow-hidden border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity hover:opacity-90"
-        style={{ height: THUMB_HEIGHT }}
+        onClick={() => {
+          openDocumentPreview(file)
+          // Opening your own not-yet-sent draft is not consuming shared content.
+          if (surface === "transcript") {
+            emit.onDocumentOpened({ kind })
+          }
+        }}
+        disabled={previewDisabled}
+        aria-busy={!rendered ? true : undefined}
+        aria-label={i18n.t("chat.openNamedDocument", { name: file.name })}
+        className={cn(
+          "relative block w-full overflow-hidden border-0 border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity enabled:hover:opacity-90",
+          !compact && "border-t",
+          focusRing("focus-visible:ring-inset"),
+          surfaceClassName
+        )}
+        style={{ height: thumbHeight }}
       >
         {/* Skeleton lives UNDER the snapshot; the rendered content fades in
             over it (no hard swap) once the renderer paints. */}
-        <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
-        {inView && (
-          <div
-            className={cn(
-              "relative",
-              !reducedMotion && "transition-opacity duration-200",
-              rendered ? "opacity-100" : "opacity-0"
-            )}
-            data-testid="chat-document-snapshot"
-          >
-            <Suspense fallback={null}>
-              {kind === "pdf" && (
-                <ChatPdfThumbnail
-                  url={file.url}
-                  width={CARD_WIDTH - 2}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-              {kind === "sheet" && (
-                <ChatSheetThumbnail
-                  url={file.url}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-              {kind === "docx" && (
-                <ChatDocxThumbnail
-                  url={file.url}
-                  width={CARD_WIDTH - 2}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-              {kind === "text" && (
-                <ChatTextThumbnail
-                  url={file.url}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-            </Suspense>
-          </div>
-        )}
+        <Skeleton
+          className={cn(
+            "absolute inset-0 h-full w-full rounded-none motion-reduce:animate-none",
+            surfaceClassName
+          )}
+        />
+        <div
+          className={cn(
+            "relative",
+            !reducedMotion && "transition-opacity duration-200",
+            rendered ? "opacity-100" : "opacity-0"
+          )}
+          data-testid="chat-document-snapshot"
+        >
+          <Suspense fallback={null}>
+            <DocumentThumbnail
+              kind={kind}
+              url={file.url}
+              width={cardWidth - 2}
+              onError={() => setFailed(true)}
+              onRendered={() => setRendered(true)}
+            />
+          </Suspense>
+        </div>
       </button>
+      {compact && action ? (
+        <>
+          <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+            <ButtonInternal
+              variant="outline"
+              size="sm"
+              hideLabel
+              icon={action.icon}
+              label={action.label}
+              onClick={action.onClick}
+            />
+          </div>
+          <span className="sr-only">{file.name}</span>
+        </>
+      ) : null}
     </div>
   )
 }

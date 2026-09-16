@@ -1,18 +1,16 @@
 import { useEffect, useRef } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { Action } from "@/ui/Action"
-
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { Action } from "@/ui/Action"
 
 export type SidebarIconProps = {
   isExpanded: boolean
   onClick?: () => void
 }
 
-function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
+export function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
   return (
     <svg
       width="20"

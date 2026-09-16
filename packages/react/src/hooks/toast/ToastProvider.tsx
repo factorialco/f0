@@ -10,15 +10,13 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
-
-import { F0Toast } from "@/ui/Toast/F0Toast"
 import { useIsMobile } from "@/lib/useIsDesktop"
 import { cn } from "@/lib/utils"
-
+import { F0Toast } from "@/ui/Toast/F0Toast"
 import { toastStore } from "./store"
 import { ToastId, ToastProviderItem } from "./types"
 
-const toastContainerPositions = ["bottom-left"] as const
+const toastContainerPositions = ["bottom-center"] as const
 type ToastContainerPosition = (typeof toastContainerPositions)[number]
 
 type ToastProviderProps = {
@@ -27,14 +25,14 @@ type ToastProviderProps = {
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
-  "bottom-left": "items-end justify-start",
+  "bottom-center": "items-end justify-center",
 } as const
 
 // The toast layer paints from `#f0-overlay-root` (above the fullscreen AI chat
 // and any dialog), but is positioned to overlay this element's box — the main
-// content region — so it sits in the content's bottom-left corner and never
-// covers the sidebar. Falls back to the full viewport when the element is
-// absent (e.g. outside ApplicationFrame).
+// content region — so it sits centred at the bottom of the content area (the
+// same column as the action bar) and never covers the sidebar. Falls back to the
+// full viewport when the element is absent (e.g. outside ApplicationFrame).
 const toastAnchorSelector = "#content"
 
 // How many toasts are shown fully expanded (not stacked)
@@ -93,21 +91,27 @@ const StackedToasts = ({
   }, [isTransitioning])
 
   const handleMouseEnter = () => {
-    if (!lockRef.current) setIsHovered(true)
+    if (!lockRef.current) {
+      setIsHovered(true)
+    }
   }
 
   useEffect(() => {
     onHoverChange?.(isHovered)
   }, [isHovered])
 
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    return null
+  }
 
   // Count of actual visible (non-promoted) items for z-index and order calculations
   const visibleCount = items.filter(
     (item) => !promotedEverRef.current.has(item.id)
   ).length
 
-  if (visibleCount === 0) return null
+  if (visibleCount === 0) {
+    return null
+  }
 
   return (
     <div
@@ -213,7 +217,7 @@ const StackedToasts = ({
 
 const ToastsContainer = ({
   items,
-  position = "bottom-left",
+  position = "bottom-center",
 }: {
   items: ToastProviderItem[]
   position?: ToastContainerPosition
@@ -326,7 +330,9 @@ const ToastsContainer = ({
   // (kept in sync on resize/scroll). Falls back to the full viewport when the
   // anchor element isn't present.
   useIsomorphicLayoutEffect(() => {
-    if (typeof document === "undefined" || !hasItems) return
+    if (typeof document === "undefined" || !hasItems) {
+      return
+    }
 
     const anchor = document.querySelector<HTMLElement>(toastAnchorSelector)
     if (!anchor) {
@@ -365,11 +371,8 @@ const ToastsContainer = ({
       style={anchorStyle}
     >
       <AnimatePresence>
-        {hasItems && (
-          <div
-            key="toast-panel"
-            className="flex w-full flex-col p-6 sm:w-[350px]"
-          >
+        {hasItems ? (
+          <div key="toast-panel" className="flex w-full flex-col p-6 sm:w-96">
             {/* Stacked Toasts at the Top */}
             <div ref={stackedContainerRef}>
               <StackedToasts
@@ -392,7 +395,11 @@ const ToastsContainer = ({
                   return (
                     <motion.div
                       key={item.id}
-                      layout
+                      // `layout="position"` (not full `layout`): glide when
+                      // stacking neighbours move, but DON'T scale-animate size
+                      // changes — a scale FLIP distorts the text when a toast
+                      // updates in place (e.g. error → loading).
+                      layout="position"
                       // Promoted: start from stacked position (negative Y) and slide down
                       // New: slide in from the left
                       initial={
@@ -419,7 +426,7 @@ const ToastsContainer = ({
               </AnimatePresence>
             </div>
           </div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   )
@@ -470,7 +477,9 @@ export const ToastProvider = ({
   const prevPortalTargetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    if (typeof document === "undefined") return
+    if (typeof document === "undefined") {
+      return
+    }
     const selector = isMobile
       ? portalTargets?.mobile || "body"
       : portalTargets?.desktop || "body"
@@ -486,15 +495,16 @@ export const ToastProvider = ({
   return (
     <>
       {isRenderer &&
-        isMounted &&
-        typeof document !== "undefined" &&
-        portalTarget != null &&
-        createPortal(
-          <Fragment key={portalKey}>
-            <ToastsContainer items={items} />
-          </Fragment>,
-          portalTarget
-        )}
+      isMounted &&
+      typeof document !== "undefined" &&
+      portalTarget != null
+        ? createPortal(
+            <Fragment key={portalKey}>
+              <ToastsContainer items={items} />
+            </Fragment>,
+            portalTarget
+          )
+        : null}
       {children}
     </>
   )

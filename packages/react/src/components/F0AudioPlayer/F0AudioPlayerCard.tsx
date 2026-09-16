@@ -1,7 +1,14 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { motion } from "motion/react"
-import { forwardRef, useMemo, useState, type CSSProperties } from "react"
-
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import { useReducedMotion } from "@/lib/a11y"
@@ -13,17 +20,31 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { AudioScrubber } from "./components/AudioScrubber"
 import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackMenu } from "./components/PlaybackMenu"
 import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
+import { TranscriptCueList } from "./components/TranscriptCueList"
 import type { AudioPlayerDetailTab, F0AudioPlayerCardProps } from "./types"
 import { preserveAudioPosition, useAudioLanguage } from "./useAudioLanguage"
 import { useDerivedTranscription } from "./useDerivedTranscription"
 import { usePlayerController } from "./usePlayerController"
-import { getDataAttributes } from "./utils"
+import {
+  buildCueTimeline,
+  findActiveCueIndex,
+  getDataAttributes,
+} from "./utils"
+
+const SCROLL_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+])
 
 const F0AudioPlayerCardBase = forwardRef<
   HTMLDivElement,
@@ -98,9 +119,71 @@ const F0AudioPlayerCardBase = forwardRef<
   )
   const transcription = passedTranscription ?? derivedTranscription
 
+  const cues = Array.isArray(transcription) ? transcription : undefined
+  const transcriptionText =
+    typeof transcription === "string" ? transcription : undefined
+  const hasTranscription = Boolean(transcriptionText || cues?.length)
+
+  const timeline = useMemo(() => (cues ? buildCueTimeline(cues) : []), [cues])
+  const isTimed = timeline.length > 0
+  const syncTime = controller.pendingTime ?? controller.currentTime
+  const activeCueIndex = useMemo(
+    () => (isTimed ? findActiveCueIndex(timeline, syncTime) : -1),
+    [isTimed, timeline, syncTime]
+  )
+
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const cueRefs = useRef<(HTMLLIElement | null)[]>([])
+  const readerTookOverRef = useRef(false)
+
+  const handleSeek = useCallback(
+    (seconds: number) => {
+      readerTookOverRef.current = false
+      controller.seek(seconds)
+    },
+    [controller.seek]
+  )
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) {
+      return
+    }
+
+    const takeOver = () => {
+      readerTookOverRef.current = true
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (SCROLL_KEYS.has(event.key)) {
+        takeOver()
+      }
+    }
+    // Dragging the scrollbar assigns `scrollTop` directly, firing none of the
+    // above; anything pressed outside the viewport is its scrollbar or corner.
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!viewport.contains(event.target as Node)) {
+        takeOver()
+      }
+    }
+
+    const root = viewport.parentElement
+    viewport.addEventListener("wheel", takeOver, { passive: true })
+    viewport.addEventListener("touchmove", takeOver, { passive: true })
+    viewport.addEventListener("keydown", handleKeyDown)
+    root?.addEventListener("pointerdown", handlePointerDown)
+    return () => {
+      viewport.removeEventListener("wheel", takeOver)
+      viewport.removeEventListener("touchmove", takeOver)
+      viewport.removeEventListener("keydown", handleKeyDown)
+      root?.removeEventListener("pointerdown", handlePointerDown)
+    }
+  }, [hasTranscription])
+
   // Normalise whichever input was given into the tab list the panel renders.
   const tabs: AudioPlayerDetailTab[] = useMemo(() => {
-    if (usesLegacyDetails) return details ?? []
+    if (usesLegacyDetails) {
+      return details ?? []
+    }
     const built: AudioPlayerDetailTab[] = []
     if (summary) {
       built.push({
@@ -109,11 +192,20 @@ const F0AudioPlayerCardBase = forwardRef<
         content: <p className="whitespace-pre-line">{summary}</p>,
       })
     }
-    if (transcription) {
+    if (hasTranscription) {
       built.push({
         value: "transcription",
         label: i18n.audioPlayer.transcription,
-        content: <p className="whitespace-pre-line">{transcription}</p>,
+        content: cues ? (
+          <TranscriptCueList
+            cues={cues}
+            activeIndex={activeCueIndex}
+            onSeek={isTimed ? handleSeek : undefined}
+            cueRefs={cueRefs}
+          />
+        ) : (
+          <p className="whitespace-pre-line">{transcriptionText}</p>
+        ),
       })
     }
     return built
@@ -121,7 +213,12 @@ const F0AudioPlayerCardBase = forwardRef<
     usesLegacyDetails,
     details,
     summary,
-    transcription,
+    hasTranscription,
+    cues,
+    transcriptionText,
+    activeCueIndex,
+    isTimed,
+    handleSeek,
     i18n.audioPlayer.summary,
     i18n.audioPlayer.transcription,
   ])
@@ -131,7 +228,7 @@ const F0AudioPlayerCardBase = forwardRef<
   // derived transcription is "available"; anything else is "missing" — including
   // the deprecated `details` array, whose opaque content we can't confirm as a
   // transcript (migrate to `content.transcription` to be counted as available).
-  const transcriptionState = transcription ? "available" : "missing"
+  const transcriptionState = hasTranscription ? "available" : "missing"
 
   const hasDetails = tabs.length > 0
   // With a single tab there's nothing to switch between, so the segmented
@@ -156,6 +253,31 @@ const F0AudioPlayerCardBase = forwardRef<
     defaultProp: defaultExpanded,
     onChange: onExpandedChange,
   })
+  useEffect(() => {
+    if (!isExpanded || activeCueIndex < 0 || readerTookOverRef.current) {
+      return
+    }
+
+    const viewport = viewportRef.current
+    const cue = cueRefs.current[activeCueIndex]
+    if (!viewport || !cue) {
+      return
+    }
+
+    const viewportBox = viewport.getBoundingClientRect()
+    const cueBox = cue.getBoundingClientRect()
+    const above = cueBox.top - viewportBox.top
+    const below = cueBox.bottom - viewportBox.bottom
+    if (above >= 0 && below <= 0) {
+      return
+    }
+
+    viewport.scrollTo({
+      top: viewport.scrollTop + (above < 0 ? above : below),
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+    })
+  }, [activeCueIndex, isExpanded, shouldReduceMotion])
+
   const [selectedTab, setSelectedTab] = useState(tabs[0]?.value)
   // Guard against a stale selection if the tabs change (e.g. a recycled card in
   // a list, or a transcription resolving asynchronously): fall back to the
@@ -199,19 +321,19 @@ const F0AudioPlayerCardBase = forwardRef<
             <span className="truncate text-base font-medium text-f1-foreground">
               {title}
             </span>
-            {subtitle && (
+            {subtitle ? (
               <span className="truncate text-base text-f1-foreground-secondary">
                 {subtitle}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
-        {(hasDetails ||
-          controller.playbackRates.length > 0 ||
-          audioLang.languages.length > 1 ||
-          actions) && (
+        {hasDetails ||
+        controller.playbackRates.length > 0 ||
+        audioLang.languages.length > 1 ||
+        actions ? (
           <div className="flex shrink-0 items-center gap-2">
-            {hasDetails && (
+            {hasDetails ? (
               <F0Button
                 variant="outline"
                 size="sm"
@@ -219,10 +341,10 @@ const F0AudioPlayerCardBase = forwardRef<
                 onClick={() => setExpanded(!isExpanded)}
                 aria-expanded={isExpanded}
               />
-            )}
-            {(controller.playbackRates.length > 0 ||
-              audioLang.languages.length > 1 ||
-              actions) && (
+            ) : null}
+            {controller.playbackRates.length > 0 ||
+            audioLang.languages.length > 1 ||
+            actions ? (
               <PlaybackMenu
                 playbackRate={controller.playbackRate}
                 playbackRates={controller.playbackRates}
@@ -233,9 +355,9 @@ const F0AudioPlayerCardBase = forwardRef<
                 audioLanguage={audioLang.activeLocale}
                 onAudioLanguageChange={changeAudioLanguage}
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="flex w-full items-center gap-2">
@@ -244,7 +366,7 @@ const F0AudioPlayerCardBase = forwardRef<
           duration={controller.duration}
           buffered={controller.buffered}
           disabled={disabled}
-          onSeek={controller.seek}
+          onSeek={handleSeek}
         />
 
         <PlaybackTime
@@ -254,7 +376,7 @@ const F0AudioPlayerCardBase = forwardRef<
         />
       </div>
 
-      {hasDetails && (
+      {hasDetails ? (
         <motion.div
           role="region"
           aria-label={singleTab ? singleTab.label : i18n.audioPlayer.details}
@@ -273,7 +395,7 @@ const F0AudioPlayerCardBase = forwardRef<
         >
           {/* Language picker when the content is provided in several languages;
               a single selection drives both tabs. */}
-          {languages.length > 1 && activeLocale && (
+          {languages.length > 1 && activeLocale ? (
             <div className="flex justify-end pb-2.5">
               <LanguageSelect
                 value={activeLocale}
@@ -282,9 +404,9 @@ const F0AudioPlayerCardBase = forwardRef<
                 kind={i18n.audioPlayer.language}
               />
             </div>
-          )}
+          ) : null}
           {/* One tab has nothing to switch between — show the content alone. */}
-          {!singleTab && (
+          {!singleTab ? (
             <F0SegmentedControl
               fullWidth
               ariaLabel={i18n.audioPlayer.details}
@@ -295,9 +417,10 @@ const F0AudioPlayerCardBase = forwardRef<
                 label: tab.label,
               }))}
             />
-          )}
+          ) : null}
           <div className={singleTab ? undefined : "pt-2.5"}>
             <ScrollArea
+              viewportRef={viewportRef}
               style={
                 {
                   "--audio-details-max-h": `${detailsMaxHeight}px`,
@@ -311,7 +434,7 @@ const F0AudioPlayerCardBase = forwardRef<
             </ScrollArea>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </div>
   )
 })

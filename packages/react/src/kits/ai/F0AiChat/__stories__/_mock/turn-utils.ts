@@ -1,6 +1,6 @@
 import { type F0Message } from "../../types"
 
-export type Turn = Array<F0Message | Array<F0Message>>
+export type Turn = (F0Message | Array<F0Message>)[]
 
 type MaybeAgentName = { agentName?: string }
 type MaybeCoagentName = { name?: string }
@@ -59,7 +59,9 @@ export function analyzeTurn(
 }
 
 export function convertMessagesToTurns(messages: F0Message[]): Turn[] {
-  if (messages.length === 0) return []
+  if (messages.length === 0) {
+    return []
+  }
 
   const turns: Turn[] = []
   let thinkingGroup: F0Message[] | null = null
@@ -81,7 +83,9 @@ export function convertMessagesToTurns(messages: F0Message[]): Turn[] {
     if (isAgentStateMessage(message) && thinkingGroup) {
       if (i !== messages.length - 1) {
         const idx = currentTurn.indexOf(thinkingGroup)
-        if (idx !== -1) currentTurn.splice(idx, 1)
+        if (idx !== -1) {
+          currentTurn.splice(idx, 1)
+        }
         currentTurn.push(message, thinkingGroup)
       }
       continue
@@ -112,7 +116,7 @@ export function convertMessagesToTurns(messages: F0Message[]): Turn[] {
 
 export function extractThinkingGroup(turnMessages: Turn): {
   thinkingGroup: F0Message[] | null
-  restMessages: Array<F0Message | Array<F0Message>>
+  restMessages: (F0Message | Array<F0Message>)[]
 } {
   const thinkingGroup = turnMessages.find((m) => Array.isArray(m)) as
     | F0Message[]

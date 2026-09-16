@@ -1,7 +1,5 @@
 import { ButtonHTMLAttributes } from "react"
-
 import { Shortcut } from "@/ui/Shortcut"
-
 import { F0Icon } from "../../../../components/F0Icon"
 import { Search } from "../../../../icons/app"
 import { cn, focusRing } from "../../../../lib/utils"

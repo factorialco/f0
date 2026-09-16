@@ -1,5 +1,5 @@
-import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 import { getFilterType } from "../filterTypes"
+import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 import type { FiltersDefinition, FiltersState } from "../types"
 
 export function getClearedFiltersValue<Filters extends FiltersDefinition>(

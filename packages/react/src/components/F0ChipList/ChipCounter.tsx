@@ -1,10 +1,8 @@
 import { useState } from "react"
-
+import { Chip, type ChipProps } from "@/components/OneChip"
 import { focusRing } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-
-import { Chip, type ChipProps } from "@/components/OneChip"
 
 type Props = {
   count: number
@@ -16,7 +14,9 @@ export const ChipCounter = ({ count, list }: Props) => {
 
   const counter = <Chip label={`+${count}`} />
 
-  if (!list?.length) return counter
+  if (!list?.length) {
+    return counter
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

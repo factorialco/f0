@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { F0DataChart } from ".."
 import type { F0DataChartProps } from "../types"
-
-import { F0DataChart } from "../index"
 import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
@@ -137,8 +136,31 @@ export const StackedNegativeValues: Story = {
 }
 
 /**
+ * All values are positive, but not every series has data in every category —
+ * e.g. "Involuntary exits" is 0 for most offices. The outer-most non-zero
+ * segment of each bar is rounded, whichever series that happens to be for
+ * that category, instead of always the last series in the array.
+ */
+export const StackedWithMissingCategories: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    stacked: true,
+    categories: ["Barcelona", "Paris", "Berlin", "London", "Remote"],
+    series: [
+      { name: "Working from home", data: [14, 13, 0, 0, 0] },
+      { name: "Paid — Vacation", data: [12, 10, 25, 28, 26] },
+      { name: "Paid — Compensation", data: [0, 2, 0, 0, 0] },
+      { name: "Involuntary exits", data: [0, 2, 2, 0, 0] },
+    ],
+  },
+}
+
+/**
  * Each bar has a `target` value — the gap between the actual value and the
- * target is rendered as a faded "ghost" bar above the solid one.
+ * target is rendered as a faded "ghost" bar above the solid one. A month with
+ * nothing attained yet is that gradient and nothing else, and hovering it
+ * reports the month's target all the same.
  */
 export const WithTargets: Story = {
   render: (args) => <F0DataChart {...args} />,
@@ -148,13 +170,44 @@ export const WithTargets: Story = {
     series: [
       {
         name: "Revenue",
-        data: [
-          9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 2_400_000,
-        ].map((value) => ({ value, target: 12_000_000 })),
+        data: [9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 0].map(
+          (value) => ({ value, target: 12_000_000 })
+        ),
       },
     ],
     showLegend: false,
     valueFormatter: (v) => `${v / 1_000_000}M`,
+  },
+}
+
+/**
+ * A year in progress, with every state a target can be in. `highlightOverachievement`
+ * splits a bar that ran past its target at the target itself, drawing the stretch
+ * beyond it in a darker shade — without it, Q2 and Q3 would read the same as a
+ * quarter that landed exactly on its number. `showTargetProgress` adds what that
+ * comes to (`value / target`) to the tooltip, under the target row. Q4 has not
+ * started, and hovering its gradient still reports the target it is measured against.
+ */
+export const WithOverachievement: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["Q1", "Q2", "Q3", "Q4"],
+    series: [
+      {
+        name: "Attainment",
+        data: [
+          { value: 125_000, target: 185_000 },
+          { value: 200_000, target: 185_000 },
+          { value: 268_000, target: 185_000 },
+          { value: 0, target: 185_000 },
+        ],
+      },
+    ],
+    highlightOverachievement: true,
+    showTargetProgress: true,
+    showLegend: false,
+    valueFormatter: (v) => `${v / 1000}k €`,
   },
 }
 
@@ -273,6 +326,131 @@ export const Minimal: Story = {
   },
 }
 
+const BAR_POLISH_SNAPSHOT_VARIANTS: {
+  label: string
+  props: F0DataChartProps
+}[] = [
+  {
+    label: "Grouped labels and sparse grid",
+    props: {
+      type: "bar",
+      categories: ["Engineering", "Design", "Product", "Sales"],
+      series: [
+        { name: "Headcount", data: [145, 89, 67, 90] },
+        { name: "Open roles", data: [12, 8, 40, 30] },
+      ],
+      showLabels: true,
+      labelFontSize: 11,
+      valueAxisSplitNumber: 2,
+      valueFormatter: (value) => `${value}`,
+    },
+  },
+  {
+    label: "Stacked labels",
+    props: {
+      type: "bar",
+      categories: ["Q1", "Q2", "Q3", "Q4"],
+      stacked: true,
+      series: [
+        { name: "Fixed", data: [120, 125, 130, 128] },
+        { name: "Variable", data: [18, 22, 15, 30] },
+        { name: "Benefits", data: [8, 9, 9, 10] },
+      ],
+      showLabels: true,
+      valueFormatter: (value) => `${value}K`,
+    },
+  },
+  {
+    label: "Horizontal categories",
+    props: {
+      type: "bar",
+      orientation: "horizontal",
+      categories: [
+        "Engineering",
+        "Design",
+        "Product",
+        "Sales",
+        "Customer support",
+      ],
+      series: [{ name: "Headcount", data: [145, 89, 67, 90, 58] }],
+      showLabels: true,
+      showLegend: false,
+    },
+  },
+  {
+    label: "Narrow stacked labels",
+    props: {
+      type: "bar",
+      orientation: "horizontal",
+      categories: ["Engineering", "Design", "Product"],
+      stacked: true,
+      series: [
+        { name: "Completed", data: [92, 45, 74] },
+        { name: "Blocked", data: [3, 2, 4] },
+        { name: "Pending review", data: [5, 53, 22] },
+      ],
+      showLabels: true,
+      valueFormatter: (value) => `${value}%`,
+    },
+  },
+]
+
+/** Consolidated Chromatic coverage for the polished bar variants. */
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="grid w-fit grid-cols-1 gap-6 p-6">
+      {BAR_POLISH_SNAPSHOT_VARIANTS.map(({ label, props }) => (
+        <div key={label} className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {label}
+          </span>
+          <div className="h-[300px] w-[720px] rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+            <F0DataChart {...props} />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+}
+
+/** Compact axis/labels with precise values preserved in the hover tooltip. */
+export const PreciseTooltip: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["January", "February", "March", "April"],
+    series: [
+      {
+        name: "Revenue",
+        data: [107_505, 93_240, 128_910, 115_780],
+      },
+    ],
+    showLabels: true,
+    valueFormatter: (value) => `${(value / 1000).toFixed(1)}K`,
+    tooltipValueFormatter: (value) => value.toLocaleString("en-US"),
+  },
+}
+
+/** Narrow stacked segments demonstrate labels disappearing before overlap. */
+export const OverflowingLabels: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    orientation: "horizontal",
+    categories: ["Engineering", "Design", "Product"],
+    stacked: true,
+    series: [
+      { name: "Completed", data: [92, 45, 74] },
+      { name: "Blocked", data: [3, 2, 4] },
+      { name: "Pending review", data: [5, 53, 22] },
+    ],
+    showLabels: true,
+    valueFormatter: (value) => `${value}%`,
+  },
+}
+
 // ---------------------------------------------------------------------------
 // Responsive snapshot
 //
@@ -306,9 +484,10 @@ export const ResponsiveSnapshotMatrix: Story = {
 
 /**
  * Same matrix as `ResponsiveSnapshotMatrix` but rendered with
- * `orientation: "horizontal"`. The category axis lives on Y instead of X, so
- * at the medium breakpoint it's the Y axis (categories) that gets hidden and
- * the X axis (values) that stays visible — the inverse of the vertical case.
+ * `orientation: "horizontal"`. The category axis lives on Y instead of X; as in
+ * the vertical case it survives the medium breakpoint, since the categories are
+ * the subjects being compared. Both axes are visible from `md` up; `sm` still
+ * drops all chrome.
  */
 const responsivePropsHorizontal = (
   column: "low" | "normal" | "large"
@@ -320,6 +499,78 @@ const responsivePropsHorizontal = (
 export const ResponsiveSnapshotMatrixHorizontal: Story = {
   decorators: [(Story) => <Story />],
   render: () => <ResponsiveSnapshot getProps={responsivePropsHorizontal} />,
+}
+
+// ---------------------------------------------------------------------------
+// Category-axis boundary widths
+//
+// Bar charts keep their category axis at `md` in both orientations, where every
+// other chart family hides it (see `resolveResponsiveDisplay`). The deviation is
+// deliberate — the categories are the subjects being compared — but it costs
+// plot area: horizontal labels take `min(80, width * 0.2)` of the width,
+// vertical ones a row of height. This story renders one pixel either side of
+// both band edges so Chromatic diffs that trade-off instead of leaving it to
+// prose, and shows what the smart axis layout does with the space it gets.
+// ---------------------------------------------------------------------------
+
+const CATEGORY_AXIS_BOUNDARY_WIDTHS = [
+  { label: "219px — last sm", widthClass: "w-[219px]" },
+  { label: "220px — first md", widthClass: "w-[220px]" },
+  { label: "519px — last md", widthClass: "w-[519px]" },
+  { label: "520px — first lg", widthClass: "w-[520px]" },
+] as const
+
+const boundaryProps = (
+  orientation: "vertical" | "horizontal"
+): F0DataChartProps => ({
+  type: "bar",
+  orientation,
+  categories: ["Engineering", "Design", "Product", "Sales"],
+  series: [{ name: "Headcount", data: [145, 89, 67, 90] }],
+  showLegend: false,
+})
+
+/**
+ * The exact widths at which the category axis appears. Both orientations gain
+ * it at 220px (`sm` → `md`) and keep it across 519/520px, so the only visible
+ * step is between the first two columns. Paired with the boundary assertions in
+ * `BarChart.test.tsx`.
+ */
+export const CategoryAxisBoundaries: Story = {
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="flex w-fit flex-col gap-8 p-6">
+      {(["horizontal", "vertical"] as const).map((orientation) => (
+        <div key={orientation} className="flex flex-col gap-3">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {orientation}
+          </span>
+          <div className="flex flex-row items-start gap-4">
+            {CATEGORY_AXIS_BOUNDARY_WIDTHS.map(({ label, widthClass }) => (
+              <div key={label} className="flex flex-col gap-2">
+                <span className="text-xs text-f1-foreground-secondary">
+                  {label}
+                </span>
+                {/*
+                 * The sized box carries no border or padding of its own. The
+                 * chart measures its container, and `box-sizing: border-box`
+                 * means any inset would shift the effective width off the
+                 * boundary being demonstrated — a padded 220px box measures as
+                 * `sm`. The frame lives on the wrapper instead.
+                 */}
+                <div className="w-fit rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+                  <div className={`${widthClass} h-[240px]`}>
+                    <F0DataChart {...boundaryProps(orientation)} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
 }
 
 /**

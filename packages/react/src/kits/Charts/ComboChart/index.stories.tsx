@@ -1,6 +1,5 @@
 import { Meta } from "@storybook/react-vite"
-
-import { ComboChart } from "./index"
+import { ComboChart } from "."
 
 const meta: Meta = {
   title: "Charts/ComboChart",
@@ -173,7 +172,291 @@ export const Biaxial: Meta<typeof ComboChart<typeof departmentConfig>> = {
     },
     yAxis: {
       hide: false,
-      tickFormatter: (value: string) => `${value}`,
+      tickFormatter: (value: string) => value,
+    },
+    legend: true,
+  },
+}
+
+const headcountConfig = {
+  actuals: {
+    label: "Actuals",
+    color: "categorical-1",
+  },
+  incoming: {
+    label: "Incoming",
+    color: "categorical-4",
+  },
+  terminations: {
+    label: "Terminations",
+    color: "categorical-3",
+  },
+  planned: {
+    label: "Planned",
+    color: "categorical-2",
+    dashed: true,
+  },
+}
+
+const forecastConfig = {
+  actuals: {
+    label: "Actuals",
+    color: "categorical-1",
+  },
+  incoming: {
+    label: "Incoming",
+    color: "categorical-4",
+  },
+  terminations: {
+    label: "Terminations",
+    color: "categorical-3",
+  },
+  forecastGrowth: {
+    label: "Forecast growth",
+    color: "categorical-6",
+    projected: true,
+  },
+  forecastAttrition: {
+    label: "Forecast attrition",
+    color: "categorical-3",
+    projected: true,
+  },
+  planned: {
+    label: "Planned",
+    color: "categorical-2",
+    dashed: true,
+  },
+}
+
+export const ProjectedBars: Meta<typeof ComboChart<typeof forecastConfig>> = {
+  args: {
+    dataConfig: forecastConfig,
+    data: [
+      {
+        label: "January",
+        values: {
+          actuals: 78,
+          incoming: 10,
+          terminations: 0,
+          forecastGrowth: 24,
+          forecastAttrition: 0,
+          planned: 86,
+        },
+      },
+      {
+        label: "February",
+        values: {
+          actuals: 80,
+          incoming: 0,
+          terminations: -8,
+          forecastGrowth: 33,
+          forecastAttrition: 0,
+          planned: 84,
+        },
+      },
+      {
+        label: "March",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 73,
+          forecastAttrition: 0,
+          planned: 100,
+        },
+      },
+      {
+        label: "April",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 98,
+          forecastAttrition: 0,
+          planned: 122,
+        },
+      },
+      {
+        label: "May",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 87,
+          forecastAttrition: -55,
+          planned: 128,
+        },
+      },
+      {
+        label: "June",
+        values: {
+          actuals: 64,
+          incoming: 0,
+          terminations: 0,
+          forecastGrowth: 34,
+          forecastAttrition: -60,
+          planned: 76,
+        },
+      },
+    ],
+    bar: {
+      type: "stacked-by-sign",
+      categories: [
+        "actuals",
+        "incoming",
+        "terminations",
+        "forecastGrowth",
+        "forecastAttrition",
+      ],
+    },
+    line: {
+      categories: ["planned"],
+      dot: true,
+      lineType: "linear",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    legend: true,
+  },
+}
+
+export const StackedBySignWithLine: Meta<
+  typeof ComboChart<typeof headcountConfig>
+> = {
+  args: {
+    dataConfig: headcountConfig,
+    data: [
+      {
+        label: "January",
+        values: { actuals: 60, incoming: 12, terminations: 0, planned: 80 },
+      },
+      {
+        label: "February",
+        values: { actuals: 70, incoming: 0, terminations: -8, planned: 78 },
+      },
+      {
+        label: "March",
+        values: { actuals: 66, incoming: 24, terminations: 0, planned: 95 },
+      },
+      {
+        label: "April",
+        values: { actuals: 90, incoming: 0, terminations: -20, planned: 110 },
+      },
+    ],
+    bar: {
+      type: "stacked-by-sign",
+      categories: ["actuals", "incoming", "terminations"],
+    },
+    line: {
+      categories: ["planned"],
+      dot: true,
+      lineType: "linear",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    legend: true,
+  },
+}
+
+const continuationConfig = {
+  actuals: {
+    label: "Actuals",
+    color: "categorical-1",
+    legendIndicator: "line" as const,
+  },
+  forecast: {
+    label: "Forecast",
+    color: "categorical-1",
+    dashed: true,
+    continues: "actuals",
+    legendIndicator: "line" as const,
+  },
+  planned: {
+    label: "Planned",
+    color: "categorical-2",
+    dashed: true,
+    legendIndicator: "line" as const,
+  },
+}
+
+export const LineContinuation: Meta<
+  typeof ComboChart<typeof continuationConfig>
+> = {
+  args: {
+    dataConfig: continuationConfig,
+    data: [
+      {
+        label: "January",
+        values: { actuals: 27000, forecast: null, planned: 27000 },
+      },
+      {
+        label: "February",
+        values: { actuals: 22000, forecast: null, planned: 27000 },
+      },
+      {
+        label: "March",
+        values: { actuals: 25500, forecast: null, planned: 31500 },
+      },
+      {
+        label: "April",
+        values: { actuals: 31000, forecast: null, planned: 35500 },
+      },
+      {
+        label: "May",
+        values: { actuals: 35500, forecast: null, planned: 35500 },
+      },
+      {
+        label: "June",
+        values: { actuals: 49000, forecast: null, planned: 52500 },
+      },
+      {
+        label: "July",
+        values: { actuals: 51000, forecast: null, planned: 56000 },
+      },
+      {
+        label: "August",
+        values: { actuals: null, forecast: 60000, planned: 56000 },
+      },
+      {
+        label: "September",
+        values: { actuals: null, forecast: 42500, planned: 49000 },
+      },
+      {
+        label: "October",
+        values: { actuals: null, forecast: 27000, planned: 30000 },
+      },
+      {
+        label: "November",
+        values: { actuals: null, forecast: 11000, planned: 16500 },
+      },
+      {
+        label: "December",
+        values: { actuals: null, forecast: 11000, planned: 16500 },
+      },
+    ],
+    line: {
+      categories: ["actuals", "forecast", "planned"],
+      lineType: "linear",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${Number(value) / 1000}k`,
     },
     legend: true,
   },

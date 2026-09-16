@@ -61,6 +61,7 @@ export function Example() {
 | `Controlled`         | Controlled expansion and selection state                    |
 | `StagedLoading`      | Progressive deferred node loading after initial paint       |
 | `StagedLoadingError` | Deferred loading error path and fallback behavior           |
+| `StackedNodes`       | Leaf children rendered as a column under their parent       |
 
 ---
 
@@ -125,6 +126,52 @@ Reach this variant by continuing to zoom out from compact.
 The thresholds between variants are configurable via
 `zoomThresholds` and a preset can be selected via
 `zoomPreset`.
+
+### Stacked nodes
+
+A parent that sets `stackNodes` renders its children as a tight
+vertical column of compact rows directly beneath it, instead of the
+default horizontal fan-out. Use it when the children read as a **list
+belonging to the parent** rather than as branches in their own right —
+job levels under a role, plan tiers under a product.
+
+The column reserves no horizontal space, so the parent's siblings sit as
+close together as if it had no children at all, and a single trunk edge
+connects the parent to the top of the column.
+
+```tsx
+const nodes = [
+  { id: "role", parentId: "root", data: role, childrenCount: 3, stackNodes: true },
+  { id: "l1", parentId: "role", data: junior, childrenCount: 0 },
+  { id: "l2", parentId: "role", data: mid, childrenCount: 0 },
+  { id: "l3", parentId: "role", data: senior, childrenCount: 0 },
+]
+
+// No branch needed: the graph decides the shape and passes it through `ctx`.
+renderNode={(node, ctx) => (
+  <F0GraphNode {...ctx} avatar={…} title={node.data.name} />
+)}
+```
+
+`F0GraphNode` renders a row instead of a card when the graph sets
+`ctx.stacked`. A row keeps the card's semantics (selection, focus, ARIA,
+keyboard) and its title type scale per zoom level, but drops `subtitle`,
+`tags`, `actions` and `hoverCard`, which have nowhere to go in a strip.
+Use `trailing` for a count or a small action pinned to the row's end.
+
+**Only leaf children stack.** A group with an expandable child falls back
+to the normal fan-out — a stacked row is a strip with no lane under it,
+so there is nowhere to hang a subtree.
+
+**The reserved band does not change with zoom.** The layout reserves
+`stackedNodeHeight` (default `44`) plus `stackedNodeGap` (default `8`)
+per row, and a row must render at exactly that height. Only the row's
+contents answer to zoom: the title steps up to the card's compact type
+scale, then drops out entirely at dot, leaving an avatar-only strip. The
+band itself has to stay fixed because layout runs before the zoom level
+is known (see the zoomLevel⇄bounds cycle in `F0GraphView`).
+
+<Canvas of={F0GraphStories.StackedNodes} />
 
 ---
 
@@ -234,11 +281,13 @@ All public props on `<F0Graph>`, grouped by behavior.
 
 ### Layout & Display
 
-| Prop           | Type           | Default              | Description                                                        |
-| -------------- | -------------- | -------------------- | ------------------------------------------------------------------ |
-| `nodeWidth`    | `number`       | `256`                | Layout sizing hint passed to the built-in layout engine.           |
-| `nodeHeight`   | `number`       | `56`                 | Layout sizing hint passed to the built-in layout engine.           |
-| `layoutEngine` | `LayoutEngine` | built-in tree engine | Custom layout engine. Overrides the built-in layout when provided. |
+| Prop                | Type           | Default              | Description                                                        |
+| ------------------- | -------------- | -------------------- | ------------------------------------------------------------------ |
+| `nodeWidth`         | `number`       | `256`                | Layout sizing hint passed to the built-in layout engine.           |
+| `nodeHeight`        | `number`       | `56`                 | Layout sizing hint passed to the built-in layout engine.           |
+| `stackedNodeHeight` | `number`       | `44`                 | Height of one stacked node row (see `GraphNode.stackNodes`).       |
+| `stackedNodeGap`    | `number`       | `16`                 | Vertical gap between two stacked node rows.                        |
+| `layoutEngine`      | `LayoutEngine` | built-in tree engine | Custom layout engine. Overrides the built-in layout when provided. |
 
 ### Zoom
 

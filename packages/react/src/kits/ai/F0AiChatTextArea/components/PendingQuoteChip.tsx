@@ -4,7 +4,6 @@ import { Cross, Reply } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { type PendingQuote } from "../../F0AiChat/types"
 
 type PendingQuoteChipProps = {
@@ -25,7 +24,7 @@ export const PendingQuoteChip = ({
   const translation = useI18n()
 
   return (
-    <div className="p-1">
+    <div aria-atomic="true" aria-live="polite" className="p-1" role="status">
       <div
         className={cn(
           "flex items-start gap-2 justify-center",

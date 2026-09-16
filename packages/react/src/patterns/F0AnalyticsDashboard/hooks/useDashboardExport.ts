@@ -1,17 +1,15 @@
 import { useCallback, useRef, useState } from "react"
-
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import type {
   DashboardChartData,
   DashboardItem,
   DashboardMetricData,
   DashboardMetricItem,
 } from "../types"
-
+import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"
 import { extractColumns } from "../utils/extractColumns"
@@ -20,6 +18,8 @@ type SheetData = {
   name: string
   columns: string[]
   rows: Record<string, unknown>[]
+  /** Row-lookup keys parallel to `columns`, when headers may collide. */
+  keys?: string[]
 }
 
 interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
@@ -46,34 +46,51 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
   metricItems: DashboardMetricItem<Filters>[],
   filters: FiltersState<Filters>
 ): Promise<SheetData | null> {
-  if (metricItems.length === 0) return null
+  if (metricItems.length === 0) {
+    return null
+  }
+
+  // Metrics are independent, so they are fetched in parallel. Rows keep the
+  // item order.
+  const results = await Promise.all(
+    metricItems.map(async (item) => {
+      try {
+        const data: DashboardMetricData = await item.fetchData(
+          getItemFilters(item, filters)
+        )
+        return { item, data }
+      } catch (err) {
+        console.warn(
+          `[useDashboardExport] Failed to export metric "${item.title}":`,
+          err
+        )
+        return null
+      }
+    })
+  )
 
   const rows: Record<string, unknown>[] = []
   let hasPrevious = false
 
-  for (const item of metricItems) {
-    try {
-      const data: DashboardMetricData = await item.fetchData(
-        getItemFilters(item, filters)
-      )
-      const row: Record<string, unknown> = {
-        Metric: item.title,
-        Value: data.value,
-      }
-      if (data.previousValue !== undefined) {
-        row["Previous Value"] = data.previousValue
-        hasPrevious = true
-      }
-      rows.push(row)
-    } catch (err) {
-      console.warn(
-        `[useDashboardExport] Failed to export metric "${item.title}":`,
-        err
-      )
+  for (const result of results) {
+    if (!result) {
+      continue
     }
+    const { item, data } = result
+    const row: Record<string, unknown> = {
+      Metric: item.title,
+      Value: data.value,
+    }
+    if (data.previousValue !== undefined) {
+      row["Previous Value"] = data.previousValue
+      hasPrevious = true
+    }
+    rows.push(row)
   }
 
-  if (rows.length === 0) return null
+  if (rows.length === 0) {
+    return null
+  }
 
   const columns = hasPrevious
     ? ["Metric", "Value", "Previous Value"]
@@ -93,7 +110,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
     (item): item is DashboardMetricItem<Filters> => item.type === "metric"
   )
   const metricsSheet = await buildMetricsSheet(metricItems, filters)
-  if (metricsSheet) sheets.push(metricsSheet)
+  if (metricsSheet) {
+    sheets.push(metricsSheet)
+  }
 
   // Build sheets for charts and collections in parallel
   const nonMetricItems = items.filter((item) => item.type !== "metric")
@@ -104,11 +123,22 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
           const data: DashboardChartData = await item.fetchData(
             getItemFilters(item, filters)
           )
+          // Same guard `ChartItem` applies when rendering: without it an
+          // unrenderable config throws inside the converter and the sheet is
+          // dropped by the catch below, which reads as a silent omission
+          // rather than a stated one.
+          if (!isRenderableChart(item.chart)) {
+            console.warn(
+              `[useDashboardExport] Skipped chart "${item.title}": unsupported chart type`
+            )
+            return null
+          }
           const tabular = chartDataToTabular(item.chart, data)
           return {
             name: item.title,
             columns: tabular.columns,
             rows: tabular.rows,
+            keys: tabular.keys,
           }
         } catch (err) {
           console.warn(
@@ -131,7 +161,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
             "records" in result
               ? result.records
               : (result as Record<string, unknown>[])
-          if (records.length === 0) return null
+          if (records.length === 0) {
+            return null
+          }
           const columns = extractColumns(records)
           return { name: item.title, columns, rows: records }
         } catch (err) {
@@ -149,7 +181,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
 
   const results = await Promise.all(sheetPromises)
   for (const result of results) {
-    if (result) sheets.push(result)
+    if (result) {
+      sheets.push(result)
+    }
   }
 
   return sheets

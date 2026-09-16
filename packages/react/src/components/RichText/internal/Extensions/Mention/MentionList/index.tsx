@@ -5,7 +5,6 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react"
-
 import { MentionItem } from "../MentionItem"
 import {
   MentionedUser,

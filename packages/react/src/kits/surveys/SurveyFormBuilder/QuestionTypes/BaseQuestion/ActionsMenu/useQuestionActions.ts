@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from "react"
-
 import { useQuestionTypes } from "../../../constants"
 import { useSurveyFormBuilderContext } from "../../../Context"
 import {
@@ -13,6 +12,7 @@ import { SurveyFormBuilderCallbacks, QuestionType } from "../../../types"
 export const RATING_OPTIONS: { label: string; value: RatingOptionType }[] = [
   { label: "1 - 5", value: "1-5" },
   { label: "1 - 10", value: "1-10" },
+  { label: "0 - 10", value: "0-10" },
   { label: "Emojis", value: "emojis" },
 ]
 
@@ -47,7 +47,9 @@ export function shouldResetParamsOnTypeChange(
   currentType: QuestionType,
   question: { options?: unknown } | undefined
 ): boolean {
-  if (newType === currentType) return false
+  if (newType === currentType) {
+    return false
+  }
 
   // Keep existing options when switching between select and multi-select
   // if the question already has options
@@ -175,7 +177,9 @@ export function useQuestionActionsFactory() {
         onQuestionChange?.({
           id: questionId,
           type: "rating",
-          value: 0,
+          // Clear the selection rather than resetting it to 0, which is a real
+          // option on the 0-10 scale.
+          value: undefined,
           options: getRatingOptions(ratingType),
         } as Parameters<
           NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
@@ -186,7 +190,9 @@ export function useQuestionActionsFactory() {
         questionType === "dropdown-multi" && !!currentDatasetKey
 
       const handleToggleMultiSelect = (enabled: boolean) => {
-        if (!currentDatasetKey) return
+        if (!currentDatasetKey) {
+          return
+        }
         const newType = enabled ? "dropdown-multi" : "dropdown-single"
         onQuestionChange?.({
           id: questionId,
@@ -209,7 +215,9 @@ export function useQuestionActionsFactory() {
       )
 
       const handleToggleAllowCreate = (enabled: boolean) => {
-        if (!currentDatasetKey) return
+        if (!currentDatasetKey) {
+          return
+        }
         onQuestionChange?.({
           id: questionId,
           type: questionType,

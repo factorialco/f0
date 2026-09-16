@@ -13,14 +13,12 @@ const SvgSleep = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M10.5 20.5H3.5L10.5 13.5H3.5"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M20.5 10.5H13.5L20.5 3.5H13.5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

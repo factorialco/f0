@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "cva"
 import { useId } from "react"
-
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 import { ModuleId, modules } from "./modules"
 
@@ -85,9 +84,9 @@ export function F0AvatarModule({
         </defs>
         <path d={squirclePath} fill={`url(#${gradientId})`} />
       </svg>
-      {IconComponent && (
+      {IconComponent ? (
         <IconComponent className={iconSizeVariants({ size })} />
-      )}
+      ) : null}
     </div>
   )
 }

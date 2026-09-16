@@ -24,6 +24,7 @@ export type {
   PositionedEdge,
   DeferredNodesPayload,
   DeferredStatus,
+  ViewportInset,
 } from "./types"
 
 // Sub-components

@@ -1,14 +1,13 @@
 import { cva } from "cva"
 import { FC, useCallback, useMemo, useState } from "react"
-
+import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-
 import { F0DialogContent } from "./components/F0DialogContent"
 import { F0DialogFooter } from "./components/F0DialogFooter"
 import { F0DialogHeader } from "./components/F0DialogHeader"
 import { F0DialogProvider } from "./components/F0DialogProvider"
-import { F0DialogInternalProps } from "./internal-types"
+import { F0DialogInternalProps, F0DialogSideControls } from "./internal-types"
 import { useIsSmallScreen } from "./utils"
 
 const dialogWrapperClassName = cva({
@@ -23,7 +22,11 @@ const dialogWrapperClassName = cva({
       right: "left-auto right-0 items-end p-3",
       left: "left-0 items-start p-3",
       center: "",
-      fullscreen: "inset-6",
+      // NO INSET ON A PHONE. A fullscreen dialog inset by 24px is a card with
+      // the page showing round it; at 560px wide that gutter is most of what is
+      // left of the margins. `560px` is `useIsSmallScreen`'s own breakpoint, so
+      // the frame and the components inside it change over together.
+      fullscreen: "inset-6 max-[560px]:inset-0",
     },
   },
   defaultVariants: {
@@ -38,7 +41,8 @@ const dialogContentClassName = cva({
       sidePosition:
         "flex h-full w-full flex-col rounded-md border border-solid border-f1-border-secondary",
       center: "flex max-h-[95vh] flex-1 flex-col rounded-xl",
-      fullscreen: "h-full w-full rounded-xl",
+      // ...and no rounded corners with nothing to round them against.
+      fullscreen: "h-full w-full rounded-xl max-[560px]:rounded-none",
     },
     position: {
       left: "",
@@ -65,7 +69,59 @@ const dialogContentClassName = cva({
   },
 })
 
+/** Where the previous/next controls sit when they are not in a bar. */
+const SIDE_CONTROLS_SEAT = "absolute top-1/2 z-10 -translate-y-1/2"
+
+/**
+ * The dialog's previous/next controls. On a phone they become a bar along the
+ * bottom of the content, in the flow (`sticky`, so it holds the bottom of a
+ * panel that scrolls); anywhere else they hang off either side of the dialog.
+ */
+const DialogSideControls = ({
+  controls,
+  inBar,
+}: {
+  controls: F0DialogSideControls | undefined
+  inBar: boolean
+}) => {
+  if (!controls) {
+    return null
+  }
+
+  if (inBar) {
+    return (
+      <div
+        className={cn(
+          "sticky bottom-0 z-10 flex shrink-0 flex-row items-center justify-between gap-2",
+          "border border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
+          "bg-f1-background px-4 py-3"
+        )}
+      >
+        {controls.previous}
+        {controls.next}
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {controls.previous ? (
+        <div className={cn(SIDE_CONTROLS_SEAT, "-left-14")}>
+          {controls.previous}
+        </div>
+      ) : null}
+      {controls.next ? (
+        <div className={cn(SIDE_CONTROLS_SEAT, "-right-14")}>
+          {controls.next}
+        </div>
+      ) : null}
+    </>
+  )
+}
+
 export const F0DialogInternal: FC<F0DialogInternalProps> = ({
+  dismissable = true,
+  dismissOnInteractOutside = true,
   asBottomSheetInMobile = true,
   position = "center",
   onClose,
@@ -81,6 +137,8 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   navigation,
   resourceHeader,
   controls,
+  headerStatus,
+  sideControls,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -99,8 +157,10 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     setContainerElement(node)
   }, [])
 
+  // Radix routes BOTH Escape and a click outside through here, so a single gate
+  // covers the two ways out that aren't the dialog's own actions.
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && dismissable) {
       onClose()
     }
   }
@@ -161,10 +221,48 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     navigation,
     resourceHeader,
     controls,
+    headerStatus,
+    dismissable,
     tabs,
     activeTabId,
     setActiveTabId,
   }
+
+  /**
+   * The flanking controls. They are children of the PANEL — which is already
+   * `relative` and `pointer-events-auto` — and merely positioned outside its
+   * box, so they sit inside Radix's focus trap and are reachable by keyboard.
+   * Rendered next to the dialog instead they would be `aria-hidden` and inert.
+   *
+   * `-left-14`/`-right-14` clears the panel by 56px on a screen with room for
+   * it. A BOTTOM SHEET has no such room — it is the width of the phone — so
+   * there they come back onto the panel's own edges and float over the content,
+   * which is where a gallery has always put them.
+   */
+  // AN ELEMENT, NOT A COMPONENT. Declared as a local function component and
+  // rendered as a tag, it would be a brand-new component TYPE on every render,
+  // so React would tear the arrows down and rebuild them each time — losing
+  // focus mid-interaction, and dropping a click between its own pointerdown and
+  // mouseup because the node the press started on no longer exists.
+  /**
+   * ON A PHONE THE CONTROLS COME DOWN, into a bar across the bottom of the
+   * panel, rather than flanking it.
+   *
+   * There is nothing to flank: the dialog is the width of the screen, so
+   * "outside the panel" is off it. Floating them over the content instead —
+   * where a gallery puts them — costs the content two thumb-sized holes and puts
+   * the controls exactly where a thumb rests by accident. A bar is the phone
+   * idiom: fixed, reachable, and out of the reading.
+   *
+   * `sticky` rather than `absolute`, so it sits under the content in the flow
+   * and holds the bottom of a panel that scrolls.
+   */
+  const controlsInBar = isSmallScreen
+  const isFullscreenOnPhone = isSmallScreen && position === "fullscreen"
+
+  const renderedSideControls = (
+    <DialogSideControls controls={sideControls} inBar={controlsInBar} />
+  )
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
@@ -182,6 +280,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}
             </F0DialogContent>
+            {renderedSideControls}
             <F0DialogFooter
               primaryAction={primaryAction}
               secondaryAction={secondaryAction}
@@ -207,19 +306,39 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         <DialogContent
           ref={setContentRef}
           withTranslateAnimation={!isSidePosition}
+          // A PLAIN FADE once the dialog is the whole screen. The default entry
+          // zooms from 95% and slides down — motion that reads as a card
+          // arriving over a page, which is what it is on a desktop. On a phone
+          // the "card" is the screen, so the zoom is the screen itself lurching,
+          // and the bigger the surface the more that costs.
+          animation={isFullscreenOnPhone ? "fade" : "scale"}
+          // NOTHING LEFT TO DIM. The panel already covers the screen, so the
+          // only moment the overlay is ever visible is the fade itself — showing
+          // through a panel that is briefly semi-transparent, as a grey flash on
+          // the way in and again on the way out. It still mounts, because Radix
+          // hangs dismissal and the scroll lock off it; it just stops painting.
+          overlayClassName={isFullscreenOnPhone ? "bg-transparent" : undefined}
           wrapperClassName={dialogWrapperClassName({
             variant,
             position,
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          // A press outside stops meaning "dismiss" — see
+          // `dismissOnInteractOutside`. Escape and the close button still work,
+          // so the panel is never a dead end.
+          onInteractOutside={
+            dismissOnInteractOutside ? undefined : (e) => e.preventDefault()
+          }
           container={containerProp}
           defaultContainerId={defaultContainerId}
         >
+          {controlsInBar ? null : renderedSideControls}
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>
             {children}
           </F0DialogContent>
+          {controlsInBar ? renderedSideControls : null}
           <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}

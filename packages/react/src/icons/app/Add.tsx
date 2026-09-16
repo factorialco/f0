@@ -13,14 +13,12 @@ const SvgAdd = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M12 5V12V19"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M12 12H5H19"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

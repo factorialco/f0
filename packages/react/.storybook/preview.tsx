@@ -1,29 +1,25 @@
+import "../src/styles.css"
 import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite"
-
 import { DARK_MODE_EVENT_NAME } from "@vueless/storybook-dark-mode"
 import isChromatic from "chromatic/isChromatic"
 import { MotionGlobalConfig } from "motion/react"
 // organize-imports-ignore
 import React, { useEffect, useState } from "react"
 import { action } from "storybook/actions"
-import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import { addons } from "storybook/preview-api"
-
-import "../src/styles.css"
-import { aiTranslations } from "@/kits/ai/F0AiChat/types"
-import { WeekStartDay } from "@/components/OneCalendar/types"
-import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
-import { F0Provider } from "@/lib/providers/f0"
-import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
-import { ThemeProvider } from "@/lib/providers/theme"
-import { A11Y_RUN_ONLY } from "@/lib/storybook-utils/a11yAxeConfig"
-
+import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import {
   getAllComponentStatuses,
   getComponentStatus,
   getStatusGeneratedAt,
 } from "@/component-status"
-
+import { WeekStartDay } from "@/components/OneCalendar/types"
+import { aiTranslations } from "@/kits/ai/F0AiChat/types"
+import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
+import { F0Provider } from "@/lib/providers/f0"
+import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
+import { ThemeProvider } from "@/lib/providers/theme"
+import { A11Y_RUN_ONLY } from "@/lib/storybook-utils/a11yAxeConfig"
 import { DocsContainer } from "./DocsContainer.tsx"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
@@ -59,8 +55,15 @@ export const withTheme = () => {
   }
 }
 
-export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
+export const F0 = (Story: StoryFn, { parameters, viewMode }: StoryContext) => {
   const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
+
+  // Docs pages are capped to a readable measure (see preview-head.html). Page
+  // shells — the Home layouts, ApplicationFrame — are about the whole canvas
+  // and have nothing to do with reading, so they opt out with
+  // `parameters: { docsFullWidth: true }` and the measure steps aside there.
+  const optOutOfDocsMeasure =
+    viewMode === "docs" && parameters.docsFullWidth === true
 
   return (
     <F0Provider
@@ -117,6 +120,13 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
       renderDataTestIdAttribute={true}
     >
+      {optOutOfDocsMeasure && (
+        <span
+          data-docs-full-width
+          aria-hidden="true"
+          style={{ display: "none" }}
+        />
+      )}
       <Story />
     </F0Provider>
   )
@@ -172,6 +182,15 @@ const preview: Preview = {
       container: DocsContainer,
       toc: {
         headingSelector: "h2, h3, h4",
+      },
+      canvas: {
+        /*
+         * Show the canvas toolbar (zoom controls + "Open canvas in new tab") on
+         * every story preview, not just the primary one of an autodocs page.
+         * Storybook only turns it on for `<Primary>`, so `<Stories>` entries and
+         * `<Canvas of={...} />` blocks in handwritten MDX would otherwise miss it.
+         */
+        withToolbar: true,
       },
     },
     controls: {

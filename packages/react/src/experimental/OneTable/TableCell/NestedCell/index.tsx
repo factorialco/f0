@@ -1,11 +1,10 @@
 import { ChevronDown, ChevronRight } from "lucide-react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Add, ArrowDown } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
-
 import {
   CHEVRON_PARENT_SIZE,
   CHEVRON_SIZE,
@@ -38,6 +37,7 @@ export const NestedCell = ({
   children,
   onClick,
 }: NestedCellProps) => {
+  const { collections } = useI18n()
   const firstCellWithChildren = isFirstCellWithChildren(
     firstCell,
     !!nestedRowProps?.rowWithChildren
@@ -147,24 +147,22 @@ export const NestedCell = ({
           )}
         </div>
       ) : onLoadMoreChildren ? (
-        <>
-          <div
-            className={cn(
-              "pointer-events-auto cursor-pointer flex items-center w-full h-full border-0 border-r-[1px] border-solid border-f1-border-secondary"
-            )}
-          >
-            <F0Button
-              variant="ghost"
-              size="md"
-              icon={ArrowDown}
-              label="See more"
-              onClick={(e) => {
-                e.stopPropagation()
-                onLoadMoreChildren?.()
-              }}
-            />
-          </div>
-        </>
+        <div
+          className={cn(
+            "pointer-events-auto cursor-pointer flex items-center w-full h-full border-0 border-r-[1px] border-solid border-f1-border-secondary"
+          )}
+        >
+          <F0Button
+            variant="ghost"
+            size="md"
+            icon={ArrowDown}
+            label={collections.table.seeMoreChildren}
+            onClick={(e) => {
+              e.stopPropagation()
+              onLoadMoreChildren?.()
+            }}
+          />
+        </div>
       ) : (
         <>
           <div
@@ -175,11 +173,9 @@ export const NestedCell = ({
             )}
             style={
               {
-                ...{
-                  "--chevron-parent-size": `${CHEVRON_PARENT_SIZE}px`,
-                  "--chevron-size": `${CHEVRON_SIZE}px`,
-                  "--spacing-factor": `${SPACING_FACTOR}px`,
-                },
+                "--chevron-parent-size": `${CHEVRON_PARENT_SIZE}px`,
+                "--chevron-size": `${CHEVRON_SIZE}px`,
+                "--spacing-factor": `${SPACING_FACTOR}px`,
               } as React.CSSProperties
             }
             onClick={(e) => {
@@ -189,8 +185,8 @@ export const NestedCell = ({
               }
             }}
           >
-            {firstCellWithChildren &&
-              (nestedRowProps?.expanded ? (
+            {firstCellWithChildren ? (
+              nestedRowProps?.expanded ? (
                 <ChevronDown
                   className="pointer-events-none shrink-0"
                   size={CHEVRON_SIZE}
@@ -200,7 +196,8 @@ export const NestedCell = ({
                   className="pointer-events-none shrink-0"
                   size={CHEVRON_SIZE}
                 />
-              ))}
+              )
+            ) : null}
           </div>
           <div
             className={cn(

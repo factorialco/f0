@@ -1,14 +1,10 @@
 import { forwardRef, useMemo } from "react"
-
 import type { F0CardProps } from "@/components/F0Card"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
-import type { PersonProfile } from "./types"
-
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
 import { EntityRefHoverCard } from "../../components/EntityRefHoverCard"
+import type { PersonProfile } from "./types"
 
 const PersonTrigger = forwardRef<HTMLButtonElement, { label: string }>(
   ({ label, ...props }, ref) => (

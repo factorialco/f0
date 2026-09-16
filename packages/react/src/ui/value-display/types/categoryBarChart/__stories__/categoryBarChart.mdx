@@ -7,6 +7,8 @@ import * as CategoryBarChartStories from "./categoryBarChart.stories"
 
 Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with tooltip on hover. Mirrors the standalone `CategoryBarChart` kit but sized for table cells (no legend).
 
+Hovering anywhere in the cell — the bar, the gaps between segments, or the empty space above and below it — opens a single tooltip listing **every** segment, so the reader gets the whole legend at once instead of hovering each segment in turn. Hovering a specific segment drills down to it: that row is highlighted and the rest are dimmed.
+
 #### Value type
 
 ```
@@ -16,7 +18,7 @@ type value = {
     value: number         // absolute count
     color?: CategoryBarColor // optional: a 15-palette base-color token (e.g. "viridian", "yellow", "barbie") OR a legacy token ("categorical-1"…"categorical-8", "feedback-*"); falls back to the categorical palette by index
   }>
-  hideTooltip?: boolean   // when true, suppresses hover tooltips
+  hideTooltip?: boolean   // when true, suppresses the hover tooltip
   loading?: boolean       // when true, renders a skeleton (same size as the bar) until data arrives
 }
 ```
@@ -31,7 +33,7 @@ type value = {
 
 #### InsideClickableTableCell
 
-Replicates OneTable's cell mechanics (a `pointer-events-none` content wrapper plus a stretched navigation link). The chart segments re-enable pointer events so the tooltip opens on hover/focus while a click still navigates the row.
+Replicates OneTable's cell mechanics (a `pointer-events-none` content wrapper plus a stretched navigation link). The bar re-enables pointer events so the tooltip opens on hover/focus while a click still navigates the row.
 
 <Canvas of={CategoryBarChartStories.InsideClickableTableCell} />
 
@@ -51,7 +53,7 @@ The cell inside a OneDataCollection-like table with clickable rows: tooltips ope
 
 #### HiddenTooltip
 
-Set `hideTooltip: true` on the value to suppress the per-segment tooltip. Segments still render and stay focusable.
+Set `hideTooltip: true` on the value to suppress the tooltip. The bar still renders and stays focusable.
 
 <Canvas of={CategoryBarChartStories.HiddenTooltip} />
 

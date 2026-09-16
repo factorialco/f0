@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { COMPLETION_TAIL_RATIO, COMPLETION_TAIL_SECONDS } from "../utils"
 
 export interface UseVideoCompletionOptions {
@@ -40,10 +39,14 @@ export function useVideoCompletion({
   }, [resetKey])
 
   useEffect(() => {
-    if (!video || !enabled) return
+    if (!video || !enabled) {
+      return
+    }
 
     const handleTimeUpdate = () => {
-      if (firedRef.current || !video.duration) return
+      if (firedRef.current || !video.duration) {
+        return
+      }
       if (video.currentTime >= completionThreshold(video.duration)) {
         firedRef.current = true
         onCompleteRef.current?.(video)

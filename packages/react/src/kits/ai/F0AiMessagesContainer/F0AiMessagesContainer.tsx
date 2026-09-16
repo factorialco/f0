@@ -1,12 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ComponentType, type ReactNode, useMemo, useRef } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { F0ActionItem } from "../F0ActionItem"
 import { ActiveFormCard } from "./components/ActiveFormCard"
 import {
@@ -22,11 +20,16 @@ import {
 import { TurnFeedback } from "./components/feedback/TurnFeedback"
 import { ScrollShadow } from "./components/ScrollShadow"
 import { Thinking } from "./components/Thinking"
+import { ThinkingElapsed } from "./components/ThinkingElapsed"
 import {
   UserMessage as F0UserMessage,
   type F0UserMessageExtraProps,
 } from "./components/UserMessage"
-import { WelcomeScreen } from "./components/WelcomeScreen"
+import {
+  WelcomeScreen,
+  type WelcomeScreenCta,
+} from "./components/WelcomeScreen"
+import { useThinkingClock } from "./hooks/useThinkingClock"
 import { type Message, type RenderableTurn } from "./types"
 import { useMessageScroll } from "./useMessageScroll"
 
@@ -53,6 +56,14 @@ export type F0AiMessagesContainerProps = {
   /** Welcome phrase shown centered when the chat is empty. Falls back to
    *  `translations.ai.defaultInitialMessage` if omitted. */
   initialMessage?: string | string[]
+  /** Static line above the welcome phrase, same size but secondary color
+   *  (e.g. "Analytics mode:"). */
+  initialMessageCaption?: string
+  /** Smaller secondary line below the welcome phrase. */
+  initialMessageSubtitle?: string
+  /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+   *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+  initialMessageCta?: WelcomeScreenCta
   /** Called when the user clicks the welcome phrase (used by F0AiChat to open
    *  the pong easter egg). When omitted the phrase is non-interactive. */
   onWelcomeClick?: () => void
@@ -107,6 +118,9 @@ const Messages = ({
   isLoadingThread = false,
   interrupt,
   initialMessage,
+  initialMessageCaption,
+  initialMessageSubtitle,
+  initialMessageCta,
   onWelcomeClick,
   renderToolCall,
   onReplyQuote,
@@ -158,6 +172,21 @@ const Messages = ({
     turnsCount: turns.length,
     freezeTurnMinHeight: freezeLayout,
   })
+
+  // One clock for the whole container. Only the last turn can be running —
+  // both `endIndicator` and `thinking.inProgress` are derived upstream from
+  // `inProgress && isLastTurn` — so there is no per-turn identity to track.
+  // Sealing it here, above every indicator, is what makes the number carry
+  // over as the active step moves instead of restarting on each hand-off.
+  const activeTurn = turns[turns.length - 1]
+  const isThinking = Boolean(
+    activeTurn &&
+    (activeTurn.endIndicator === "thinking" || activeTurn.thinking?.inProgress)
+  )
+  const thinkingStartedAt = useThinkingClock(
+    isThinking,
+    activeTurn?.thinking?.startedAt
+  )
 
   const renderTurn = (turn: RenderableTurn, turnIndex: number) => {
     const isLastTurn = turnIndex === turns.length - 1
@@ -236,29 +265,36 @@ const Messages = ({
         {turn.userMessages.map((message, index) =>
           renderUserMessage(message, index)
         )}
-        {turn.thinking && turn.thinking.titles.length > 0 && (
+        {turn.thinking && turn.thinking.titles.length > 0 ? (
           <Thinking
             titles={turn.thinking.titles}
             title={translations.ai.thoughtsGroupTitle}
             inProgress={turn.thinking.inProgress}
             isWriting={turn.thinking.isWriting}
+            startedAt={isLastTurn ? thinkingStartedAt : null}
           />
-        )}
+        ) : null}
         {turn.assistantMessages.map((message, index) =>
           renderAssistantMessage(message, index)
         )}
-        {turn.endIndicator === "thinking" && (
-          <F0ActionItem title={translations.ai.thinking} status="executing" />
-        )}
-        {turn.endIndicator === "activity" && <F0ActionItem status="writing" />}
-        {turn.feedback && (
+        {turn.endIndicator === "thinking" ? (
+          <F0ActionItem
+            title={translations.ai.thinking}
+            status="executing"
+            suffix={<ThinkingElapsed startedAt={thinkingStartedAt} />}
+          />
+        ) : null}
+        {turn.endIndicator === "activity" ? (
+          <F0ActionItem status="writing" />
+        ) : null}
+        {turn.feedback ? (
           <TurnFeedback
             content={turn.feedback.content}
             targetMessage={turn.feedback.targetMessage}
             onCopy={onCopy}
           />
-        )}
-        {isLastTurn && <ActiveFormCard />}
+        ) : null}
+        {isLastTurn ? <ActiveFormCard /> : null}
       </div>
     )
   }
@@ -287,16 +323,20 @@ const Messages = ({
                 "w-full max-w-content"
               )}
             >
-              {isLoadingThread && <MessagesSkeleton />}
-              {showWelcomeBlock && (
+              {isLoadingThread ? <MessagesSkeleton /> : null}
+              {showWelcomeBlock ? (
                 <WelcomeScreen
                   messages={welcomeMessages}
+                  caption={initialMessageCaption}
+                  subtitle={initialMessageSubtitle}
+                  cta={initialMessageCta}
                   onClick={onWelcomeClick}
                   fullscreen={fullscreen}
                 />
-              )}
-              {!isLoadingThread &&
-                turns.map((turn, turnIndex) => renderTurn(turn, turnIndex))}
+              ) : null}
+              {!isLoadingThread
+                ? turns.map((turn, turnIndex) => renderTurn(turn, turnIndex))
+                : null}
               {interrupt}
             </div>
 
@@ -307,7 +347,7 @@ const Messages = ({
             </footer>
 
             <AnimatePresence>
-              {showScrollBtn && (
+              {showScrollBtn ? (
                 <motion.div
                   className="sticky bottom-2 z-10 flex justify-center"
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -325,27 +365,27 @@ const Messages = ({
                     />
                   </div>
                 </motion.div>
-              )}
+              ) : null}
             </AnimatePresence>
           </div>
         </div>
 
-        {!noShadows && !showWelcomeBlock && (
+        {!noShadows && !showWelcomeBlock ? (
           <>
             <ScrollShadow position="top" key="shadow-top" />
             <ScrollShadow position="bottom" key="shadow-bottom" />
           </>
-        )}
+        ) : null}
       </div>
 
-      {modal.isOpen && (
+      {modal.isOpen ? (
         <FeedbackModal
           onSubmit={handleSubmit}
           onClose={handleClose}
           reactionType={modal.currentReaction}
           message={modal.currentMessage}
         />
-      )}
+      ) : null}
     </>
   )
 }

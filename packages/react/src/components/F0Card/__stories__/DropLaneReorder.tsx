@@ -2,7 +2,6 @@ import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/clo
 import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef } from "react"
-
 import { useDroppableList } from "@/lib/dnd/hooks"
 
 export function DropLaneReorder({
@@ -30,12 +29,16 @@ export function DropLaneReorder({
     return monitorForElements({
       canMonitor: ({ source }) => source.data.instanceId === instanceId,
       onDrop: ({ location, source }) => {
-        if (!location.current.dropTargets.length) return
+        if (!location.current.dropTargets.length) {
+          return
+        }
         // ensure we are dropping inside this lane
         const inThisLane = location.current.dropTargets.some(
           (t) => t.data.type === "list-droppable" && t.data.id === id
         )
-        if (!inThisLane) return
+        if (!inThisLane) {
+          return
+        }
         const sourceId = String(source.data.id)
         const cardTarget = location.current.dropTargets.find(
           (t) => t.data.type === "list-card-target"
@@ -48,7 +51,9 @@ export function DropLaneReorder({
           ? extractClosestEdge(cardTarget.data)
           : null
         const startIndex = getIndexById(sourceId)
-        if (startIndex === -1) return
+        if (startIndex === -1) {
+          return
+        }
         const finishIndex = getReorderDestinationIndex({
           startIndex,
           indexOfTarget,

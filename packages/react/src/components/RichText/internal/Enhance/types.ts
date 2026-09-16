@@ -1,5 +1,4 @@
 import type { JSONContent } from "@tiptap/react"
-
 import { IconType } from "@/components/F0Icon"
 
 type enhanceTextParams = {

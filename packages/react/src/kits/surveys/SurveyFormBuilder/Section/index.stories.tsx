@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { Section } from "."
 import { SurveyFormBuilderProvider } from "../Context"
+import { Section } from "."
 
 const meta: Meta = {
   title: "Surveys/SurveyFormBuilder/Section",

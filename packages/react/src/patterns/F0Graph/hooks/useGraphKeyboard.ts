@@ -6,7 +6,6 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { FIT_VIEW_PADDING_LOOSE, FIT_VIEW_PADDING_TIGHT } from "../constants"
 import type { TreeNode } from "../types"
 
@@ -83,11 +82,15 @@ export function useGraphKeyboard<T>({
       }
 
       const currentId = focusedNodeIdRef.current
-      if (!currentId) return
+      if (!currentId) {
+        return
+      }
 
       const order = flatVisibleOrderRef.current
       const currentIndex = order.indexOf(currentId)
-      if (currentIndex === -1) return
+      if (currentIndex === -1) {
+        return
+      }
 
       let targetId: string | null = null
 
@@ -201,7 +204,9 @@ export function useGraphKeyboard<T>({
   const handleCanvasKeyDown = useCallback(
     (e: KeyboardEvent) => {
       // Only handle when the canvas wrapper itself has focus
-      if (e.target !== e.currentTarget) return
+      if (e.target !== e.currentTarget) {
+        return
+      }
 
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"

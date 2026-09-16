@@ -1,12 +1,17 @@
 import { createContext, useContext, type ReactNode } from "react"
-
 import type { LayoutDirection, ZoomLevel } from "./types"
 
 // ─── Zoom ──────────────────────────────────────────────────────
 
+/**
+ * Every node wrapper subscribes to this context, so it must only carry values
+ * that change at DISCRETE steps. The live (continuous) zoom factor is
+ * deliberately absent: publishing it here re-created the context value on every
+ * zoom frame and re-rendered every node in the graph — `memo` on the wrappers
+ * cannot stop a context change. Only the derived `zoomLevel` belongs here.
+ */
 export interface F0GraphZoomContextValue {
   zoomLevel: ZoomLevel
-  currentZoom: number
   direction: LayoutDirection
 }
 
@@ -163,11 +168,23 @@ export interface F0GraphRenderConfigContextValue {
   /**
    * Height of the tag row reserved in the node rect by the layout engine.
    * `0` when tags don't affect layout (overflow mode) or when no tag types
-   * are configured. Used by the node wrapper to top-align the pill and
-   * offset the source Handle upward in compact/dot mode (where tags are
-   * hidden but the rect is still oversized).
+   * are configured. Used by the node wrapper to decide whether a node's box is
+   * taller than the node itself (see `paintedHandleStyle`).
    */
   tagRowHeight?: number
+  /**
+   * How tall a node card paints, reservation excluded — the resolved
+   * `nodeHeight`, so the wrapper can put a connector's endpoint on the pill's
+   * own edge rather than on the box's.
+   */
+  nodeHeight?: number
+  /**
+   * Height of one stacked row as reserved by the layout engine. Used by the node
+   * wrapper to set `stackedHeight` on the render context, so a row always fills
+   * exactly its band — otherwise a custom `stackedNodeHeight` would move the
+   * layout while the row kept the default height, and the column would drift.
+   */
+  stackedNodeHeight?: number
   /**
    * `true` when the graph has more rendered nodes than the snap threshold.
    * F0GraphNode uses this to disable variant transitions (chrome opacity,
@@ -185,6 +202,32 @@ F0GraphRenderConfigContext.displayName = "F0GraphRenderConfigContext"
 /** Non-throwing variant for internal edge wrapper */
 export function useF0GraphRenderConfigInternal(): F0GraphRenderConfigContextValue | null {
   return useContext(F0GraphRenderConfigContext)
+}
+
+// ─── Stacked-column hover ──────────────────────────────────────
+
+/**
+ * Which stacked parent the pointer is currently inside, so that parent's collapse
+ * affordance can reveal itself from anywhere in its column rather than only from
+ * the narrow band under the card.
+ *
+ * This value changes as the pointer moves, so it is read by
+ * `F0GraphCollapserWrapper` **only**. Reading it from `F0GraphNodeWrapper` would
+ * re-render every node in the graph on pointer movement, and `memo` cannot stop a
+ * context change (see the warning at the top of this file). There is no throwing
+ * variant because nothing public needs it.
+ */
+export interface F0GraphStackHoverContextValue {
+  hoveredStackParentId: string | null
+}
+
+export const F0GraphStackHoverContext =
+  createContext<F0GraphStackHoverContextValue | null>(null)
+
+F0GraphStackHoverContext.displayName = "F0GraphStackHoverContext"
+
+export function useF0GraphStackHoverInternal(): F0GraphStackHoverContextValue | null {
+  return useContext(F0GraphStackHoverContext)
 }
 
 // ─── Focus (roving tabindex) ───────────────────────────────────

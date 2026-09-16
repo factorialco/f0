@@ -1,16 +1,16 @@
+import { cn } from "@/lib/utils"
 /**
  * Hour distribution cell type for displaying worked hours per day as a compact bar chart.
  * Thin preset over barSeries: maps date + value (+ optional plannedValue) to bar-series
  * with date/hours formatters and current colors (underworked = orange, planned/overtime = teal).
  */
 import { tableDisplayClassNames } from "../../const"
+import { ValueDisplayRendererContext } from "../../renderers"
 import {
   BarSeriesCell,
   BarSeriesCellValue,
   BarSeriesDataPoint,
 } from "../barSeries"
-import { ValueDisplayRendererContext } from "../../renderers"
-import { cn } from "@/lib/utils"
 
 export interface HourDistributionDataPoint {
   date: string
@@ -38,7 +38,9 @@ const MAX_MINUTES_FOR_SCALE = 8 * 60 // 8 hours
 function formatDateForTooltip(dateStr: string): string {
   try {
     const date = new Date(dateStr)
-    if (Number.isNaN(date.getTime())) return dateStr
+    if (Number.isNaN(date.getTime())) {
+      return dateStr
+    }
     return date.toLocaleDateString(undefined, {
       day: "numeric",
       month: "long",
@@ -51,7 +53,9 @@ function formatDateForTooltip(dateStr: string): string {
 function formatHours(minutes: number): string {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
-  if (m === 0) return `${h}h`
+  if (m === 0) {
+    return `${h}h`
+  }
   return `${h}h ${m}m`
 }
 

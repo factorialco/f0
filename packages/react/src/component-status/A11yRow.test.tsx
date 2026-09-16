@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-
 import { A11yRow, A11yTooltipRow } from "./A11yRow"
 
 // axe-core is dynamically imported inside the audit; hoist a mock so both rows

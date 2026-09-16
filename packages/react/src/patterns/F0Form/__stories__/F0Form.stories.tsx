@@ -1,13 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { useState, useCallback, useMemo, useRef } from "react"
+import { useState, useCallback, useId, useMemo, useRef } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
-
+import { forms } from "@/patterns/forms"
+import {
+  f0FormField,
+  F0Form,
+  F0SectionConfig,
+  RenderCustomFieldProps,
+  F0FormRef,
+} from ".."
 import type {
   FileUploadHookReturn,
   FileUploadResult,
@@ -15,15 +22,7 @@ import type {
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
 
-import { forms } from "@/patterns/forms"
-
-import {
-  f0FormField,
-  F0Form,
-  F0SectionConfig,
-  RenderCustomFieldProps,
-  F0FormRef,
-} from "../index"
+const DISABLED_STORY_SAMPLE_VALUE = "sample-value"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -31,7 +30,7 @@ const meta: Meta = {
   title: "Forms/F0Form",
   component: F0Form,
   tags: ["stable", "!autodocs"],
-  parameters: { a11y: { skipCi: true } },
+  parameters: { a11y: { test: "error" } },
 }
 
 export default meta
@@ -153,6 +152,28 @@ export const CriticalAlertBlocksSubmit: Story = {
     })
 
     return <F0Form formDefinition={formDefinition} />
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const quantity = () => canvas.getByRole("textbox", { name: "Quantity" })
+    const submit = () => canvas.getByRole("button", { name: "Submit" })
+
+    // `errorTriggerMode` defaults to "on-submit" and the critical alert only
+    // becomes a form error inside the resolver, so the gate is closed by
+    // submitting — not on first render. The alert itself is visible immediately.
+    await expect(canvas.getByText("Not enough stock")).toBeVisible()
+    await expect(submit()).toBeEnabled()
+
+    await userEvent.click(submit())
+    await waitFor(() => expect(submit()).toBeDisabled())
+
+    await userEvent.clear(quantity())
+    await userEvent.type(quantity(), "5")
+
+    await waitFor(() =>
+      expect(canvas.queryByText("Not enough stock")).not.toBeInTheDocument()
+    )
+    await waitFor(() => expect(submit()).toBeEnabled())
   },
 }
 
@@ -564,6 +585,95 @@ export const WithSectionsSidepanel: Story = {
 }
 
 /**
+ * Large form where only the section selected in the sidepanel is shown.
+ * Use `styling.showOnlySelectedSection` (together with `showSectionsSidepanel`)
+ * to avoid overwhelming the user with every section at once. Hidden sections
+ * stay mounted, so values, dirty state, and validation are preserved when
+ * switching — and submitting still validates the whole form, revealing the
+ * section that contains an error.
+ */
+export const WithOnlySelectedSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField.text({
+          label: "First name",
+          row: "name",
+        }),
+        lastName: f0FormField.text({
+          label: "Last name",
+          row: "name",
+        }),
+        birthdate: f0FormField.date({
+          label: "Birthdate",
+          optional: true,
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField.email({ label: "Email" }),
+        phone: f0FormField.text({ label: "Phone", optional: true }),
+      }),
+      address: z.object({
+        street: f0FormField.text({ label: "Street" }),
+        city: f0FormField.text({ label: "City", row: "city-zip" }),
+        postalCode: f0FormField.text({
+          label: "Postal code",
+          row: "city-zip",
+        }),
+      }),
+      preferences: z.object({
+        newsletter: f0FormField.boolean({
+          label: "Subscribe to the newsletter",
+          optional: true,
+        }),
+        language: f0FormField.select({
+          label: "Language",
+          options: [
+            { value: "en", label: "English" },
+            { value: "es", label: "Spanish" },
+          ],
+        }),
+      }),
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "employee-profile",
+      schema,
+      sections: {
+        personal: { title: "Personal information" },
+        contact: { title: "Contact" },
+        address: { title: "Address" },
+        preferences: { title: "Preferences" },
+      },
+      defaultValues: {
+        personal: { firstName: "", lastName: "", birthdate: undefined },
+        contact: { email: "", phone: "" },
+        address: { street: "", city: "", postalCode: "" },
+        preferences: { newsletter: false, language: "en" },
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return (
+      <F0Form
+        formDefinition={formDefinition}
+        styling={{
+          showSectionsSidepanel: true,
+          showOnlySelectedSection: true,
+        }}
+      />
+    )
+  },
+}
+
+/**
  * Form with conditional field rendering based on other field values.
  * Fields can use `renderIf` to conditionally show/hide based on other field values.
  * Supports both condition objects and functions.
@@ -968,6 +1078,11 @@ export const AllFieldTypes: Story = {
       emailField: f0FormField.email({
         label: "Email Field",
       }),
+      phoneField: f0FormField.phone({
+        label: "Phone Field",
+        defaultCountry: "es",
+        optional: true,
+      }),
       passwordField: f0FormField.text({
         label: "Password Field",
         placeholder: "Enter password",
@@ -1092,14 +1207,18 @@ export const AllFieldTypes: Story = {
       defaultValues: {
         textField: "",
         emailField: "",
+        phoneField: undefined,
         passwordField: "",
         numberField: 0,
         durationField: 0,
         textareaField: "",
         selectField: "option1",
         multiSelectField: [],
+        urlField: "",
         checkboxField: false,
+        requiredCheckboxField: true,
         switchField: false,
+        requiredSwitchField: true,
         dateField: undefined,
         timeField: undefined,
         datetimeField: undefined,
@@ -1291,7 +1410,7 @@ export const AllFieldTypesDisabled: Story = {
       defaultValues: {
         textField: "Sample text value",
         emailField: "user@example.com",
-        passwordField: "secretpassword",
+        passwordField: DISABLED_STORY_SAMPLE_VALUE,
         numberField: 42,
         durationField: 3661,
         textareaField:
@@ -1335,11 +1454,15 @@ function useMockUpload(): FileUploadHookReturn {
     setStatus("processing")
     setProgress(0)
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
     setStatus("uploading")
     for (let i = 1; i <= 10; i++) {
       await sleep(200)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
     setStatus("success")
@@ -2353,31 +2476,41 @@ export const CustomField: Story = {
       disabled?: boolean
       options: { id: string; name: string }[]
       placeholder?: string
-    }) => (
-      <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-f1-foreground-secondary">
-          {label}
-        </label>
-        <select
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value || undefined)}
-          disabled={disabled}
-          className={`rounded-lg border px-3 py-2 text-sm ${
-            error ? "border-f1-border-critical" : "border-f1-border-secondary"
-          } ${disabled ? "opacity-50" : ""}`}
-        >
-          <option value="">{placeholder ?? "Select an option..."}</option>
-          {options.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name}
-            </option>
-          ))}
-        </select>
-        {error && (
-          <span className="text-sm text-f1-foreground-critical">{error}</span>
-        )}
-      </div>
-    )
+    }) => {
+      // The label must be wired to the control, or the select has no accessible
+      // name (axe `select-name`, WCAG 2.0 SC 4.1.2). A docs example is the last
+      // place to leave that broken.
+      const selectId = useId()
+      return (
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor={selectId}
+            className="text-sm font-medium text-f1-foreground-secondary"
+          >
+            {label}
+          </label>
+          <select
+            id={selectId}
+            value={value ?? ""}
+            onChange={(e) => onChange(e.target.value || undefined)}
+            disabled={disabled}
+            className={`rounded-lg border px-3 py-2 text-sm ${
+              error ? "border-f1-border-critical" : "border-f1-border-secondary"
+            } ${disabled ? "opacity-50" : ""}`}
+          >
+            <option value="">{placeholder ?? "Select an option..."}</option>
+            {options.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.name}
+              </option>
+            ))}
+          </select>
+          {error ? (
+            <span className="text-sm text-f1-foreground-critical">{error}</span>
+          ) : null}
+        </div>
+      )
+    }
 
     const PriorityPicker = ({
       label,
@@ -2423,9 +2556,9 @@ export const CustomField: Story = {
               </button>
             ))}
           </div>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -3406,9 +3539,9 @@ export const FormInDialog: Story = {
     return (
       <div className="flex flex-col items-start gap-3">
         <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
-        {lastResult && (
-          <p className="text-f1-foreground-secondary text-sm">{lastResult}</p>
-        )}
+        {lastResult ? (
+          <p className="text-sm text-f1-foreground-secondary">{lastResult}</p>
+        ) : null}
       </div>
     )
   },
@@ -4181,4 +4314,17 @@ export const ActionBarWiggle: Story = {
       </div>
     )
   },
+}
+
+/**
+ * Visual-regression snapshot. Reuses the `AllFieldTypes` render so the snapshot
+ * exercises every field type the form supports.
+ */
+export const Snapshot: Story = {
+  ...AllFieldTypes,
+  // Inherits the meta-level `a11y: { test: "error" }` — do not opt this story
+  // out of axe. Note `a11yTierOf` in scripts/component-status-build.mjs regexes
+  // the raw file text, so even naming the opt-out parameter in a comment drops
+  // this file's a11y tier back to "skipped" and the stable-DoD gate with it.
+  parameters: withSnapshot({}),
 }

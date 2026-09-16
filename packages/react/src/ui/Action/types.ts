@@ -28,9 +28,11 @@ export type FontSize = (typeof fontSizes)[number]
 
 export interface ActionCommonProps {
   /**
-   * Tooltip
+   * Tooltip. A string is the description on its own; the object form adds a
+   * bold first line above it — for "which control this is" over "what it holds",
+   * the same two-line shape `F0Select`'s trigger tooltip uses.
    */
-  tooltip?: string | false
+  tooltip?: string | false | { label?: string; description: string }
   /**
    * The variant of the action.
    */

@@ -1,11 +1,9 @@
 import { CSSProperties } from "react"
-
 import {
   F0ProgressSeries,
   F0ProgressSeriesProps,
 } from "@/experimental/F0ProgressSeries"
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 

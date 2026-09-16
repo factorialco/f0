@@ -183,6 +183,19 @@ See `f0-component-patterns` skill for code examples.
 - Export component prop interfaces
 - No circular imports
 
+## Injecting HTML
+
+- `dangerouslySetInnerHTML` needs a sanitizer — `parseMarkdown()` /
+  `parseMarkdownDocument()` from `@/lib/markdown`, or `DOMPurify.sanitize()`
+- Put the props spread **before** `dangerouslySetInnerHTML`, never after: it is a
+  legal DOM prop, so spreading after it lets a caller replace the sanitized HTML
+- A component that sanitizes should `Omit<..., "dangerouslySetInnerHTML">` from
+  its props type, so the mistake is a type error rather than a silent bypass
+- Inline `<style>` needs a `nonce` or a strict CSP drops it silently
+
+Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
+`pnpm lint`, but oxc does not surface JS plugins in editors yet).
+
 ## Testing
 
 - Test files: `.test.tsx` / `.test.ts` — never `.spec.ts`
@@ -226,8 +239,31 @@ renderers) imports the same constant.
 - `useI18n()` from `@/lib/providers/i18n` — returns direct property access and `t()` for dot-notation keys with `{{placeholder}}` interpolation
 - Translation keys: camelCase, domain-namespaced (`actions.save`), `one`/`other` sub-keys for plurals
 - Missing keys: log `console.warn` and return the key string
+- **Never hardcode user-visible copy.** A string literal is untranslatable by construction — no consumer dictionary can reach it, so every locale renders English. This includes defaults: `label = "Actions"` and `{ label: "Today" }` in a lookup table are the same bug as `<span>Save</span>`.
+- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). The check names the existing key when it finds one.
+- `pnpm check:untranslated-copy` enforces this, and blocks CI on copy a PR **adds**. Existing debt is baselined in `.scripts/untranslated-copy-debt.json`; the list may only shrink.
+  - `--report` — the full inventory across `src/`
+  - `--update` — rewrite the baseline (after translating something, to lock the win in)
+  - `--comment` — the PR-comment markdown CI posts
+  - Genuinely untranslatable literal (brand name, keyboard key)? Put `i18n-exempt` in a comment on that line.
+- On a failing PR the offending lines are annotated **inline on the Files tab** (`::error file=,line=`) and summarised in a PR comment that separates "already has a key, swap it" from "needs a new key" — no digging through CI logs.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
+
+## Lint debt (ratchet)
+
+Rules with more violations than one PR can fix run as `"warn"` in the RATCHET
+group of `.oxlintrc.json`. `pnpm lint` shows only errors; `pnpm check:lint-debt`
+compares the warnings per file against `.scripts/lint-debt.json`, a baseline
+that may only shrink. It runs on staged files in the pre-commit hook and over
+the whole tree in CI.
+
+- A file that gains a warning fails the check. Fix the warning.
+- A file that loses one also fails: run `pnpm check:lint-debt --update` and
+  commit the baseline. That is what locks the win in.
+- `sonarjs/cognitive-complexity` (threshold 15) is in the group. Reduce it by
+  extracting the nested branches into named functions, not by raising the
+  threshold.
 
 ## Accessibility
 
@@ -256,8 +292,9 @@ pnpm build          # build library and generate types
 pnpm vitest         # unit tests (watch)
 pnpm vitest:ci      # unit tests (CI, run once)
 pnpm test-storybook # Storybook interaction + a11y tests
-pnpm lint           # lint check
+pnpm lint           # lint check (errors only; warnings belong to the ratchet)
 pnpm lint-fix       # auto-fix lint issues
+pnpm check:lint-debt # ratchet rules: no file may gain a warning
 pnpm tsc            # type-check
 pnpm format         # auto-fix formatting (oxfmt) — run before every commit
 pnpm format:check   # check formatting without modifying files (same as CI)

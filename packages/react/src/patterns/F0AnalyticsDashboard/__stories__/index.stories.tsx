@@ -1,21 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useId, useState } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
-
-import type { FiltersState } from "@/patterns/OneFilterPicker/types"
-
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import type { DashboardItem } from "../types"
-
-import { F0AnalyticsDashboard } from "../index"
+import type { FiltersState } from "@/patterns/OneFilterPicker/types"
+import { F0AnalyticsDashboard } from ".."
+import type {
+  DashboardItem,
+  DashboardItemFiltersConfig,
+  DashboardItemFiltersState,
+} from "../types"
 import {
   dashboardFilters,
   dashboardPresets,
   type DashboardFiltersType,
   mixedItems,
 } from "./mockDataMixed"
+import {
+  salaryDynamicsDescription,
+  salaryDynamicsFilters,
+  salaryDynamicsItems,
+  salaryDynamicsTitle,
+} from "./mockDataSalaryDynamics"
 
 const meta = {
   component: F0AnalyticsDashboard,
@@ -140,7 +145,9 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
       onTransformChart={(itemId, newType, orientation) => {
         setItems((prev) =>
           prev.map((item) => {
-            if (item.id !== itemId || item.type !== "chart") return item
+            if (item.id !== itemId || item.type !== "chart") {
+              return item
+            }
             return {
               ...item,
               chart: {
@@ -444,12 +451,341 @@ export const ReportFilterCommitLifecycle: Story = {
   },
 }
 
+/** Explains the reference figure; revealed by the ⓘ after "Peer median". */
+const PEER_MEDIAN_INFO =
+  "The median of this measure across all companies on Factorial."
+
+/**
+ * Three KPIs at the default compact height, two of them stating a peer median
+ * under the value with an ⓘ that says where the figure comes from, and one
+ * without a comparison beside them.
+ */
+const compactPeerMedianItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "compact-attrition",
+    title: "Attrition Rate",
+    type: "metric",
+    x: 0,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 16.4,
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "compact-absenteeism",
+    title: "Absenteeism Rate",
+    type: "metric",
+    x: 4,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 3.2,
+      comparison: {
+        value: 2.8,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "compact-punctuality",
+    title: "Punctuality Rate",
+    type: "metric",
+    x: 8,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    // No benchmark for this measure: shows a bare KPI next to two that have one.
+    fetchData: async () => ({ value: 94.1 }),
+  },
+]
+
+const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "compact-metric",
+    title: "Compact KPI — 144px",
+    description: "The value stays aligned to the bottom-left.",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: async () => ({ value: 1_234_567 }),
+  },
+  {
+    id: "tall-metric",
+    title: "Tall KPI — 336px",
+    description: "A positive trend centers once the body exceeds 220px.",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 3,
+    itemHeight: 336,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: async () => ({ value: 1_234_567, previousValue: 1_000_000 }),
+  },
+  {
+    id: "tall-decrease",
+    title: "Tall KPI with decrease",
+    description: "Direction remains explicit beyond its icon and color.",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 3,
+    itemHeight: 336,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({ value: 76.5, previousValue: 100 }),
+  },
+  {
+    id: "peer-reference-line",
+    title: "Gender salary gap by team",
+    description: "A constant is drawn once across the plot, not once per bar.",
+    type: "chart",
+    chart: { type: "bar", orientation: "horizontal" },
+    colSpan: 8,
+    x: 0,
+    y: 9,
+    itemHeight: 336,
+    fetchData: async () => ({
+      categories: ["People", "Customer Support", "Sales", "Operations"],
+      series: [{ name: "Salary gap", data: [24.98, 15.17, 12.17, 9.4] }],
+      referenceLines: [
+        {
+          value: 11,
+          label: "Peer median",
+          description:
+            "Median of companies in Spain with 51–200 employees (210 companies). Illustrative distribution — not computed from real companies.",
+        },
+      ],
+    }),
+  },
+  {
+    id: "peer-comparison",
+    title: "KPI with a peer comparison",
+    description: "A reference figure is stated, not turned into a trend.",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 6,
+    itemHeight: 144,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 16.4,
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "peer-comparison-with-trend",
+    title: "KPI with both",
+    description:
+      "The arrow reports the movement; the line under it reports a different quantity.",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 6,
+    itemHeight: 336,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({
+      value: 16.4,
+      previousValue: 11.1,
+      comparison: {
+        value: 13.5,
+        label: "Peer median",
+        info: PEER_MEDIAN_INFO,
+      },
+    }),
+  },
+  {
+    id: "tall-long-value",
+    title: "Tall KPI with a long value",
+    description: "Overflow starts at the left edge and remains scrollable.",
+    type: "metric",
+    colSpan: 4,
+    x: 8,
+    y: 3,
+    itemHeight: 336,
+    valueFormatter: () => "€123,456,789,012,345,678,901,234,567,890",
+    fetchData: async () => ({ value: 123_456_789 }),
+  },
+]
+
+/** KPI height, trend-direction, and long-value overflow variants. */
+export const MetricHeightVariants: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      items={metricHeightItems}
+    />
+  ),
+}
+
+/**
+ * Compact KPIs with a peer median. The ⓘ after the figure opens a tooltip that
+ * says where it comes from; the third KPI has no comparison, so the row shows
+ * how the two states sit side by side.
+ */
+export const CompactKpisWithPeerMedian: Story = {
+  render: () => <F0AnalyticsDashboard items={compactPeerMedianItems} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(
+      await canvas.findByText("Peer median 13.5%")
+    ).toBeInTheDocument()
+    await expect(
+      await canvas.findByText("Peer median 2.8%")
+    ).toBeInTheDocument()
+    await expect(canvas.queryByText(/^Peer median 9/)).toBeNull()
+
+    const card = canvasElement.querySelector<HTMLElement>(
+      '[data-card-id="compact-attrition"]'
+    )
+    await expect(card?.parentElement?.style.height).toBe("144px")
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: () => (
-    <ControlledDashboard initialValue={supportedReportFilterValues} />
+    <div className="flex flex-col gap-8">
+      <ControlledDashboard initialValue={supportedReportFilterValues} />
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        items={metricHeightItems}
+      />
+      <F0AnalyticsDashboard items={compactPeerMedianItems} />
+      <ItemFiltersDemo
+        items={mixedItems}
+        initialValues={{
+          headcount: { country: ["ES"] },
+          "employee-table": { country: ["ES", "FR"] },
+        }}
+      />
+    </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const title = canvas.getAllByText("Headcount by Department").at(-1)
+    const filteredWidget = title?.closest("[class*='dashitem']")
+    if (!filteredWidget) {
+      throw new Error("The filtered widget did not render")
+    }
+    await userEvent.hover(filteredWidget)
+  },
+}
+// ---------------------------------------------------------------------------
+// A real One-authored report
+// ---------------------------------------------------------------------------
+
+/**
+ * The report in edit mode, with its layout owned by the story the way the
+ * canvas owns it in production: `onLayoutChange` writes every drag and resize
+ * back onto the items, so a widget keeps its new height and slot instead of
+ * snapping back on the next render.
+ */
+const ResizableSalaryDynamicsReport = () => {
+  const [items, setItems] = useState<DashboardItem[]>(salaryDynamicsItems)
+
+  return (
+    // Bounded height, scrolled here rather than by the page — the same shape as
+    // the canvas panel that hosts this report in production. Fullscreen depends
+    // on it: the dashboard root switches to `h-full` and can only fill a parent
+    // whose height is known, so an auto-height wrapper collapses the expanded
+    // item to its header.
+    <div className="flex h-screen flex-col gap-4 px-4 py-1">
+      <header>
+        <h2 className="m-0 text-2xl font-semibold text-f1-foreground">
+          {salaryDynamicsTitle}
+        </h2>
+        <p className="m-0 mt-1 text-base text-f1-foreground-secondary">
+          {salaryDynamicsDescription}
+        </p>
+      </header>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <F0AnalyticsDashboard
+          filters={salaryDynamicsFilters}
+          navigationFilters={{
+            date: {
+              type: "date-navigator",
+              defaultValue: new Date("2026-08-03T12:00:00.000Z"),
+              granularity: ["year"],
+            },
+          }}
+          items={items}
+          editMode
+          onLayoutChange={(layout) => {
+            const byId = new Map(layout.map((entry) => [entry.id, entry]))
+            setItems((prev) =>
+              prev.map((item) => {
+                const next = byId.get(item.id)
+                return next
+                  ? {
+                      ...item,
+                      x: next.x,
+                      y: next.y,
+                      colSpan: next.colSpan,
+                      itemHeight: next.itemHeight,
+                    }
+                  : item
+              })
+            )
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * "Average salary dynamics (12 months)" exactly as the One agent authored it in
+ * Analytics mode — item ids, titles, descriptions, chart types, orientation and
+ * heights come from the `authorSemanticDashboardPreview` call in the trace; the
+ * numbers are synthetic but keep the real cardinality (29 workplaces × 3 gender
+ * series).
+ *
+ * The middle chart is the one worth looking at: 87 bars across 29 categories,
+ * far more than a 655px widget can render at a readable thickness.
+ *
+ * `editMode` is on, so each widget can be resized and moved: drag the handle
+ * under a row to change its height, and drag a widget's header onto another row
+ * to make them share it — width comes from how many widgets a row holds.
+ */
+export const OneSalaryDynamicsReport: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    // The wrapper below is `h-screen`, which only lines up with the preview if
+    // the preview has no padding of its own — otherwise the story hangs 1rem
+    // past the window and an expanded widget's bottom edge can never be
+    // scrolled into view.
+    layout: "fullscreen",
+    docs: {
+      description: {
+        story:
+          "A verbatim reproduction of a One Analytics report, in edit mode, for iterating on how a dense horizontal bar chart renders and reflows as the canvas is resized.",
+      },
+    },
+  },
+  render: () => <ResizableSalaryDynamicsReport />,
 }
 
 // ---------------------------------------------------------------------------
@@ -528,5 +864,374 @@ export const EmptyDashboard: Story = {
     await expect(await canvas.findAllByText("No data available")).toHaveLength(
       emptyItems.length
     )
+  },
+}
+// ─── Item filters ────────────────────────────────────────────────
+
+const itemFilterIds = [
+  "total-headcount",
+  "headcount",
+  "employee-table",
+  "attrition-rate",
+]
+
+const itemFilterItems = itemFilterIds.flatMap((id, index) => {
+  const item = mixedItems.find((candidate) => candidate.id === id)
+  if (!item) {
+    return []
+  }
+
+  return [
+    {
+      ...item,
+      x: index < 3 ? index * 4 : 0,
+      y: index < 3 ? 0 : 7,
+      colSpan: 4,
+      rowSpan: index < 3 ? 7 : 3,
+      ...(id === "attrition-rate"
+        ? { title: "No filters (undefined)", explanation: undefined }
+        : {}),
+    },
+  ]
+})
+
+/** Report-style definitions using values supplied by a semantic catalog. */
+const itemFilterDefinitions = {
+  country: {
+    type: "in" as const,
+    label: "Country",
+    options: {
+      options: [
+        { value: "ES", label: "Spain" },
+        { value: "FR", label: "France" },
+        { value: "DE", label: "Germany" },
+      ],
+    },
+  },
+  agreementType: {
+    type: "in" as const,
+    label: "Agreement type",
+    options: {
+      options: [
+        { value: "indefinite", label: "Indefinite" },
+        { value: "temporary", label: "Temporary" },
+      ],
+    },
+  },
+  startDate: {
+    type: "date" as const,
+    label: "Start date",
+    options: { mode: "range" as const },
+  },
+}
+
+const onItemFiltersChange = fn()
+
+type ItemFilterDefinitions = typeof itemFilterDefinitions
+type ItemFilterState = DashboardItemFiltersState<ItemFilterDefinitions>
+type ItemFilterStatesByItem = Record<string, ItemFilterState>
+
+const ItemFiltersDemo = ({
+  initialValues = {},
+  items = itemFilterItems,
+}: {
+  initialValues?: ItemFilterStatesByItem
+  items?: DashboardItem<typeof dashboardFilters>[]
+}) => {
+  const [valuesByItem, setValuesByItem] =
+    useState<ItemFilterStatesByItem>(initialValues)
+
+  return (
+    <F0AnalyticsDashboard
+      items={items}
+      itemFilters={(item) => {
+        if (item.id === "attrition-rate") {
+          return undefined
+        }
+        const config: DashboardItemFiltersConfig<ItemFilterDefinitions> = {
+          filters: itemFilterDefinitions,
+          value: valuesByItem[item.id] ?? {},
+          onChange: (value) => {
+            onItemFiltersChange(item.id, value)
+            setValuesByItem((prev) => ({
+              ...prev,
+              [item.id]: value,
+            }))
+          },
+        }
+        return config
+      }}
+    />
+  )
+}
+
+/**
+ * Per-widget filters, rendered consistently in every widget header:
+ *
+ * - **Metric, chart, and collection** widgets get a filter icon opening a
+ *   compact anchored popover:
+ *   a list of this widget's fields, then the same catalog-backed enum and date
+ *   controls used by report-level filters.
+ * - Applied filters produce only a count on the icon; selected values stay in
+ *   the picker instead of consuming widget-header space.
+ * - The filter icon follows the other widget actions: visible on hover or
+ *   keyboard focus, and while its popover is open.
+ *
+ * Applying emits `onChange` for that widget only. The last metric's resolver
+ * returns `undefined`, so it has no filter control at all.
+ */
+export const WithItemFilters: Story = {
+  render: () => <ItemFiltersDemo />,
+  play: async ({ canvasElement }) => {
+    onItemFiltersChange.mockClear()
+    const page = within(canvasElement.closest("body")!)
+
+    const widgetOf = (title: string) =>
+      page.getByText(title).closest("[class*='dashitem']") as HTMLElement
+
+    // Header icons appear on the metric, chart, and collection. The fourth
+    // widget's resolver returns undefined so it gets no control at all.
+    const metricTrigger = within(widgetOf("Total Headcount")).getByLabelText(
+      "Filters"
+    )
+    const chartTrigger = within(
+      widgetOf("Headcount by Department")
+    ).getByLabelText("Filters")
+    const tableTrigger = within(widgetOf("Employee Directory")).getByRole(
+      "button",
+      { name: "Filters" }
+    )
+    const openFilterDialog = async (trigger: HTMLElement) => {
+      await userEvent.click(trigger)
+      await waitFor(() => expect(trigger).toHaveAttribute("aria-controls"))
+      const dialogId = trigger.getAttribute("aria-controls")
+      const dialog = dialogId
+        ? canvasElement.ownerDocument.getElementById(dialogId)
+        : null
+      if (!dialog) {
+        throw new Error("The item filter dialog did not open")
+      }
+      return within(dialog)
+    }
+    await expect(
+      within(widgetOf("No filters (undefined)")).queryByLabelText("Filters")
+    ).toBeNull()
+
+    // — Metric: header icon → compact popover → drill in → apply —
+    const metricDialog = await openFilterDialog(metricTrigger)
+    await userEvent.click(metricDialog.getByRole("button", { name: "Country" }))
+
+    await userEvent.click(
+      await metricDialog.findByRole("checkbox", { name: "Spain" })
+    )
+    await userEvent.click(
+      metricDialog.getByRole("button", { name: "Apply selection" })
+    )
+    await userEvent.click(
+      metricDialog.getByRole("button", { name: "Apply filters" })
+    )
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("total-headcount", {
+        country: ["ES"],
+      })
+    )
+    await expect(onItemFiltersChange).toHaveBeenCalledOnce()
+
+    // The applied filter surfaces as a counter on this widget's trigger only.
+    await waitFor(() => expect(metricTrigger).toHaveTextContent("1"))
+    await expect(chartTrigger).not.toHaveTextContent("1")
+
+    // — Chart: the same header flow remains isolated to the chart widget —
+    onItemFiltersChange.mockClear()
+    const chartDialog = await openFilterDialog(chartTrigger)
+    await userEvent.click(chartDialog.getByRole("button", { name: "Country" }))
+    await userEvent.click(
+      await chartDialog.findByRole("checkbox", { name: "France" })
+    )
+    await userEvent.click(
+      chartDialog.getByRole("button", { name: "Apply selection" })
+    )
+    await userEvent.click(
+      chartDialog.getByRole("button", { name: "Apply filters" })
+    )
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("headcount", {
+        country: ["FR"],
+      })
+    )
+    await expect(onItemFiltersChange).toHaveBeenCalledOnce()
+    await waitFor(() => expect(chartTrigger).toHaveTextContent("1"))
+    await expect(metricTrigger).toHaveTextContent("1")
+
+    // — Collection: the same header picker contract —
+    onItemFiltersChange.mockClear()
+    const tableDialog = await openFilterDialog(tableTrigger)
+    await userEvent.click(tableDialog.getByRole("button", { name: "Country" }))
+    await userEvent.click(
+      await tableDialog.findByRole("checkbox", { name: "Germany" })
+    )
+    await userEvent.click(
+      tableDialog.getByRole("button", { name: "Apply selection" })
+    )
+    await userEvent.click(
+      tableDialog.getByRole("button", { name: "Apply filters" })
+    )
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("employee-table", {
+        country: ["DE"],
+      })
+    )
+
+    await expect(tableTrigger).toHaveTextContent("1")
+    await expect(
+      within(widgetOf("Employee Directory")).queryByText("Country: Germany")
+    ).toBeNull()
+  },
+}
+
+/**
+ * Widgets with filters already applied: every filter icon shows only the
+ * applied count. Dismissing the popover without applying keeps the value
+ * intact.
+ */
+export const ItemFiltersApplied: Story = {
+  render: () => (
+    <ItemFiltersDemo
+      initialValues={{
+        headcount: { country: ["ES"] },
+        "employee-table": { country: ["ES", "FR"] },
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    onItemFiltersChange.mockClear()
+    const page = within(canvasElement.closest("body")!)
+    const chart = page
+      .getByText("Headcount by Department")
+      .closest("[class*='dashitem']") as HTMLElement
+    const filtered = within(chart).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country (1)",
+    })
+    await expect(filtered).toHaveTextContent("1")
+
+    const table = page
+      .getByText("Employee Directory")
+      .closest("[class*='dashitem']") as HTMLElement
+    const tableFilter = within(table).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country (1)",
+    })
+    await expect(tableFilter).toHaveTextContent("1")
+    await expect(within(table).queryByText(/Spain \+1/)).toBeNull()
+
+    // Open and dismiss without applying — the counter must not change.
+    await userEvent.click(filtered)
+    await waitFor(() => expect(filtered).toHaveAttribute("aria-controls"))
+    const dialogId = filtered.getAttribute("aria-controls")
+    const popover = dialogId
+      ? canvasElement.ownerDocument.getElementById(dialogId)
+      : null
+    if (!popover) {
+      throw new Error("The item filter dialog did not open")
+    }
+    const dialog = within(popover)
+    await userEvent.click(dialog.getByRole("button", { name: "Country" }))
+    await expect(dialog.getByRole("checkbox", { name: "Spain" })).toBeChecked()
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(filtered).toHaveTextContent("1"))
+    await expect(onItemFiltersChange).not.toHaveBeenCalled()
+
+    await userEvent.click(filtered)
+    const reopenedId = filtered.getAttribute("aria-controls")
+    const reopened = reopenedId
+      ? canvasElement.ownerDocument.getElementById(reopenedId)
+      : null
+    if (!reopened) {
+      throw new Error("The item filter dialog did not reopen")
+    }
+    const reopenedDialog = within(reopened)
+    await userEvent.click(
+      reopenedDialog.getByRole("button", { name: "Country" })
+    )
+    await expect(
+      reopenedDialog.getByRole("checkbox", { name: "Spain" })
+    ).toBeChecked()
+    await userEvent.keyboard("{Escape}")
+  },
+}
+
+const hoverItem = (id: string, title: string): DashboardItem => ({
+  id,
+  title,
+  type: "metric",
+  fetchData: async () => ({ value: 145 }),
+})
+
+const hoverFilterValues: ItemFilterStatesByItem = {
+  hover: {
+    country: ["ES"],
+    agreementType: ["indefinite"],
+    startDate: { from: new Date(2026, 0, 1), to: new Date(2026, 0, 31) },
+  },
+}
+
+/**
+ * On hover-capable devices, the filter action stays out of the way until the
+ * widget is hovered or the control receives keyboard focus. Touch-only devices
+ * keep it available. Applied values remain represented only by the icon
+ * counter.
+ */
+export const HoverItemFilterSignal: Story = {
+  tags: ["no-sidebar", "widget-filters"],
+  render: () => (
+    <div className="w-[760px] p-4">
+      <ItemFiltersDemo
+        items={[
+          hoverItem("hover", "Hover widget") as never,
+          hoverItem("attrition-rate", "Unfiltered companion") as never,
+        ]}
+        initialValues={hoverFilterValues}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const widget = canvas
+      .getByText("Hover widget")
+      .closest("[class*='dashitem']") as HTMLElement
+    const trigger = within(widget).getByRole("button", {
+      name: "Filters",
+      description: "Active filters: Country, Agreement type, Start date (3)",
+    })
+    const supportsHover =
+      canvasElement.ownerDocument.defaultView?.matchMedia("(hover: hover)")
+        .matches ?? true
+
+    await step("Only the counter represents applied filters", async () => {
+      await expect(trigger).toHaveTextContent("3")
+      await expect(within(widget).queryByText("Country: Spain")).toBeNull()
+      if (supportsHover) {
+        await expect(trigger).not.toBeVisible()
+      } else {
+        await expect(trigger).toBeVisible()
+      }
+    })
+
+    await step("Hover reveals the filter action", async () => {
+      await userEvent.hover(widget)
+      await expect(trigger.parentElement).toHaveClass(
+        "group-hover/dashitem:sm:opacity-100"
+      )
+    })
+
+    await step("Keyboard focus keeps the filter action visible", async () => {
+      await userEvent.unhover(widget)
+      await userEvent.tab()
+      await expect(trigger).toHaveFocus()
+      await waitFor(() => expect(trigger).toBeVisible())
+    })
   },
 }

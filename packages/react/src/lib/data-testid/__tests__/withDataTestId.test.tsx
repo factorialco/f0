@@ -1,11 +1,9 @@
 import { render, screen } from "@testing-library/react"
 import React, { forwardRef, memo } from "react"
-import { describe, expect, it } from "vitest"
-
+import { describe, expect, expectTypeOf, it } from "vitest"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 import { zeroRender } from "@/testing/test-utils"
-
-import { WithDataTestIdPropsOf, withDataTestId } from "../index"
+import { WithDataTestIdPropsOf, withDataTestId } from ".."
 
 const renderWithProviders = zeroRender
 
@@ -44,6 +42,7 @@ describe("withDataTestId", () => {
         Test Content
       </div>
     ))
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent dataTestId="test-id" />)
@@ -62,6 +61,7 @@ describe("withDataTestId", () => {
         <div {...props}>Test Content</div>
       )
     )
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     render(<WrappedComponent dataTestId="test-id" />)
@@ -127,6 +127,7 @@ describe("withDataTestId", () => {
         Test Content
       </div>
     ))
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent ref={ref} dataTestId="test-id" />)
@@ -226,10 +227,10 @@ describe("withDataTestId", () => {
       type WrappedProps = WithDataTestIdPropsOf<typeof Wrapped>
 
       const _goodProps: WrappedProps = {
-        onChange: (value: DateValue | undefined, label: string | undefined) => {
-          void value
-          void label
-        },
+        onChange: (
+          _value: DateValue | undefined,
+          _label: string | undefined
+        ) => {},
         dataTestId: "test",
       }
       expect(_goodProps).toBeDefined()
@@ -305,8 +306,7 @@ describe("withDataTestId", () => {
       //
       // NOTE: The assertion below verifies CheckedIsAny is false (checked is NOT any).
       // If this test fails with "unused @ts-expect-error", the fix is working!
-      const _checkedIsNotAny: CheckedIsAny = false
-      expect(_checkedIsNotAny).toBe(false)
+      expectTypeOf<CheckedIsAny>().toEqualTypeOf<false>()
     })
   })
 })

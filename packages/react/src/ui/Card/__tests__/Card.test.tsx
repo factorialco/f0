@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import * as React from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import ChevronRight from "../../../icons/app/ChevronRight"
 import { I18nProvider } from "../../../lib/providers/i18n"
 import { defaultTranslations } from "../../../lib/providers/i18n/i18n-provider-defaults"
@@ -161,6 +160,14 @@ describe("Card Components", () => {
       )
       const el = screen.getByLabelText("Navigate")
       expect(el.tagName).not.toBe("BUTTON")
+    })
+
+    it("uses a ghost appearance by default (transparent, no border, fills on hover)", () => {
+      renderWithWrapper(<CardLink title="Ghost" icon={ChevronRight} />)
+      const el = screen.getByLabelText("Ghost")
+      expect(el).toHaveClass("bg-transparent", "border-transparent")
+      expect(el).toHaveClass("hover:bg-f1-background-secondary-hover")
+      expect(el).not.toHaveClass("bg-f1-background-inverse-secondary")
     })
   })
 

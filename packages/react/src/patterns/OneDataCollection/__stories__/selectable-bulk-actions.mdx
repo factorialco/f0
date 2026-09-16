@@ -169,6 +169,89 @@ once every loaded row is checked.
   meta={DataCollectionStories}
 />
 
+### Blocking a row (`selectionDisabled`)
+
+`selectable` can only render a checkbox or hide it, and hiding is the wrong
+answer when a row is selectable _in principle_ but blocked _right now_ — by a
+mutually-exclusive rule, a permission, a pending state. Making a checkbox
+disappear as the user ticks the first row reads as the table breaking.
+
+`selectionDisabled` renders that checkbox **disabled** instead, so the row keeps
+its place:
+
+```tsx
+const { source } = useDataCollectionSource({
+  ...
+  selectable: (item) => item.id,
+  // Once a kind is picked, the other kinds are out of reach — visibly so
+  selectionDisabled: (item) => lockedKind !== null && item.kind !== lockedKind,
+  ...
+})
+```
+
+- Rows `selectable` already skipped (it returned `undefined`) never reach the
+  predicate.
+- A disabled row is **excluded from "select all" and from the selection
+  counts**, so the header checkbox still reaches a fully-checked state instead
+  of hanging in the indeterminate state forever.
+- The exclusion is enforced in the selection layer, not in the markup: a
+  disabled item cannot enter the selection through any visualization, nor
+  through a programmatic `handleSelectItemChange`.
+- The predicate is read on every render, so it can close over your own state
+  (as above) — no need to rebuild the source.
+- The **disabled affordance** renders in the **table** and **list**
+  visualizations. Card and Kanban enforce the exclusion but do not grey the
+  control.
+
+### Selected through something else (`selectionInherited`)
+
+In a tree, picking a node usually takes everything under it. Those descendants
+are _included_ but they are not the user's own picks, and they must not enter the
+selection — an API that moves or deletes subtrees expects to be told only the
+node the user chose.
+
+`selectionInherited` renders exactly that: the row's checkbox shows the
+indeterminate mark, disabled, so it reads as "included, but not something you
+ticked" and cannot be unticked on its own. It implies `selectionDisabled`, and
+the row never joins the selection, so the payload keeps naming only real picks.
+
+```tsx
+const { source } = useDataCollectionSource({
+  ...
+  selectable: (item) => item.id,
+  // Anything below a picked node travels with it
+  selectionInherited: (item) => hasSelectedAncestor(item),
+  ...
+})
+```
+
+### Removing "select all" (`disableSelectAll`)
+
+The header checkbox starts from an empty selection, so a rule that only locks
+in _after_ the first pick cannot constrain it — it selects every row on the
+page and produces exactly the invalid set the rule exists to prevent. Set
+`disableSelectAll` on the source to drop it:
+
+```tsx
+const { source } = useDataCollectionSource({
+  ...
+  selectable: (item) => item.id,
+  disableSelectAll: true,
+  ...
+})
+```
+
+It removes the header select-all checkbox, the per-group select-all checkbox,
+and the cross-page "Select all N items" CTA, forcing row-by-row selection. The
+checkbox column keeps its width, so the columns stay aligned. Mirrors
+[`F0Select`](?path=/docs/components-select--documentation)'s prop of the same
+name.
+
+<Canvas
+  of={DataCollectionStories.WithDisabledSelection}
+  meta={DataCollectionStories}
+/>
+
 #### Examples
 
 **Default selected items**
@@ -224,6 +307,30 @@ This works in the same way for the groups.
   of={DataCollectionStories.WithPagesPagination}
   meta={DataCollectionStories}
 />
+
+### Explaining an unavailable action (`disabledTooltip`)
+
+A `disabled` bulk action says nothing about _why_, and a native disabled button
+emits no pointer events, so a plain `title` never appears either. Give the action
+`disabledTooltip` and the bar hangs the reason off a wrapper that does receive
+hover:
+
+```tsx
+bulkActions: (selectedItems) => ({
+  primary: [
+    {
+      id: "move",
+      label: "Move to",
+      disabled: mixesKinds(selectedItems),
+      disabledTooltip: "You can't bulk move two nodes of different types",
+    },
+  ],
+})
+```
+
+It is only rendered while the action is disabled — an action the user can click
+explains itself by doing the thing. Prefer this over `warningMessage` when only
+_one_ action is unavailable: the warning form replaces the whole action set.
 
 ## Bulk actions
 

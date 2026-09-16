@@ -1,8 +1,7 @@
-import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { IconType } from "@/components/F0Icon/F0Icon"
 import type { F0SelectItemObject } from "@/components/F0Select/types"
 import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
-
+import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
 import type { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import type { DropdownMultiQuestionProps } from "./QuestionTypes/DropdownMultiQuestion/types"
@@ -48,7 +47,14 @@ export type HiddenAction =
   | "duplicate"
   | "delete"
 
-export type HiddenActions = ReadonlyArray<HiddenAction>
+export type HiddenActions = readonly HiddenAction[]
+
+/**
+ * The parts of a question that `lockedFields` can freeze on their own, without
+ * locking the question outright. Both are the question's wording — what it asks
+ * — as opposed to the answer it collects.
+ */
+export type LockedFields = readonly ("title" | "description")[]
 
 /**
  * Explanation surfaced in a locked item's lock tooltip (authoring view only —
@@ -144,7 +150,9 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
       }
     | {
         type: "rating"
-        value: number
+        // Optional so an unanswered question can be reported as having no
+        // selection. 0 cannot stand in for that on the 0-10 scale.
+        value?: number
         options?: { value: number; label: string }[]
       }
     | {
@@ -219,6 +227,22 @@ export type SurveyFormBuilderCallbacks = {
   onDuplicateElement?: (params: OnDuplicateElementParams) => void
 }
 
+export type SurveyFormBuilderPlaceholders = {
+  /** Overrides the default "Question title" placeholder shown on empty questions. */
+  questionTitle?: string
+  /** Overrides the default "Section title" placeholder shown on empty sections. */
+  sectionTitle?: string
+  /** Overrides the default question description placeholder (pass "" to hide the hint). */
+  questionDescription?: string
+  /** Overrides the default text-answer preview placeholder (pass "" to hide the hint). */
+  answer?: string
+}
+
+export type SurveyFormBuilderLabels = {
+  /** Overrides the label/tooltip of the "add" buttons (default: "Add question"). */
+  addQuestion?: string
+}
+
 export type SurveyFormBuilderProps = {
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
@@ -228,4 +252,14 @@ export type SurveyFormBuilderProps = {
   applyingChanges?: boolean
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  /** Per-instance overrides for the builder's title placeholders. Falls back to i18n defaults. */
+  placeholders?: SurveyFormBuilderPlaceholders
+  /** Per-instance overrides for the builder's action labels. Falls back to i18n defaults. */
+  labels?: SurveyFormBuilderLabels
+  /**
+   * When true, an empty builder does NOT auto-insert a default section on mount,
+   * letting the consumer start from a blank form. Defaults to the legacy behaviour
+   * (a section is created).
+   */
+  skipDefaultSection?: boolean
 }

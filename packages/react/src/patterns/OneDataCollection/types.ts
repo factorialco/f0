@@ -1,8 +1,3 @@
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-
 import { IconType } from "@/components/F0Icon"
 import {
   DataError,
@@ -11,7 +6,10 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
@@ -36,6 +34,11 @@ export type BulkActionDefinition = {
   critical?: boolean
   description?: string
   disabled?: boolean
+  /**
+   * Why the action is disabled, shown on hover. Only rendered while `disabled`
+   * — an action the user can click explains itself by doing the thing.
+   */
+  disabledTooltip?: string
 }
 
 /**

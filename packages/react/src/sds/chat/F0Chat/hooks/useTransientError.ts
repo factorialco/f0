@@ -4,21 +4,36 @@ import { useCallback, useEffect, useRef, useState } from "react"
 const TRANSIENT_ERROR_MS = 4000
 
 /**
- * A short-lived error message: `show(msg)` flashes it, and it auto-clears after
- * `timeoutMs`. Used by the composer for "too many files" / upload / voice
- * failures (same pattern as the AI chat).
+ * Composer error state. `show(msg)` clears after `timeoutMs` by default;
+ * validation errors can opt into persistence until the next corrective action
+ * calls `clear()`.
  */
 export function useTransientError(timeoutMs: number = TRANSIENT_ERROR_MS): {
   error: string | null
-  show: (message: string) => void
+  show: (message: string, options?: { persistent?: boolean }) => void
+  clear: () => void
 } {
   const [error, setError] = useState<string | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const clear = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    timeoutRef.current = null
+    setError(null)
+  }, [])
+
   const show = useCallback(
-    (message: string) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    (message: string, options?: { persistent?: boolean }) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
       setError(message)
+      if (options?.persistent) {
+        timeoutRef.current = null
+        return
+      }
       timeoutRef.current = setTimeout(() => {
         setError(null)
         timeoutRef.current = null
@@ -29,10 +44,12 @@ export function useTransientError(timeoutMs: number = TRANSIENT_ERROR_MS): {
 
   useEffect(
     () => () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
     },
     []
   )
 
-  return { error, show }
+  return { error, show, clear }
 }

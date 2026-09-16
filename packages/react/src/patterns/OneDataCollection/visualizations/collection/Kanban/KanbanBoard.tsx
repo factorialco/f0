@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react"
-
-import type { KanbanOnMove, KanbanProps } from "@/ui/Kanban/types"
-
 import { type RecordType } from "@/hooks/datasource"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { Kanban } from "@/ui/Kanban"
+import type { KanbanOnMove, KanbanProps } from "@/ui/Kanban/types"
 
 type KanbanBoardProps<R extends RecordType> = {
   lanes: KanbanProps<R>["lanes"]
@@ -16,6 +14,7 @@ type KanbanBoardProps<R extends RecordType> = {
   idProvider?: (item: R, index?: number) => string | number | symbol
   allowReorder: boolean
   loading: boolean
+  heightMode?: KanbanProps<R>["heightMode"]
 }
 
 /**
@@ -34,6 +33,7 @@ export const KanbanBoard = <R extends RecordType>({
   idProvider,
   allowReorder,
   loading,
+  heightMode,
 }: KanbanBoardProps<R>) => {
   const [instanceId] = useState(() => Symbol("kanban-visualization"))
 
@@ -73,8 +73,9 @@ export const KanbanBoard = <R extends RecordType>({
       renderCard,
       onCreate,
       dnd,
+      heightMode,
     }),
-    [lanes, loading, getKey, renderCard, onCreate, dnd]
+    [lanes, loading, getKey, renderCard, onCreate, dnd, heightMode]
   )
 
   return !onMove ? (

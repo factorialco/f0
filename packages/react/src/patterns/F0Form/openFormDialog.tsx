@@ -1,19 +1,17 @@
 import { nanoid } from "nanoid"
 import { useMemo, useRef } from "react"
 import { z } from "zod"
-
 import { F0Dialog, F0DialogSize } from "@/components/dialog-alike/F0Dialog"
-import { useI18n } from "@/lib/providers/i18n"
+import type { DialogId, DialogModule } from "@/lib/providers/dialogs-alike"
 import {
   mountFormOverlay,
   unmountFormOverlay,
 } from "@/lib/providers/form-overlays"
-import type { DialogId, DialogModule } from "@/lib/providers/dialogs-alike"
+import { useI18n } from "@/lib/providers/i18n"
 import type {
   F0FormDefinitionSingleSchema,
   F0FormSchema,
 } from "@/patterns/F0WizardForm/types"
-
 import { F0Form } from "./F0Form"
 import type { F0FormPropsWithSingleSchemaDefinition } from "./types"
 import { useF0Form } from "./useF0Form"
@@ -94,7 +92,9 @@ function FormDialogContent<TSchema extends F0FormSchema>({
       submitConfig: { ...formDefinition.submitConfig, hideSubmitButton: true },
       onSubmit: async (arg) => {
         const result = await formDefinition.onSubmit(arg)
-        if (result.success) submittedDataRef.current = arg.data
+        if (result.success) {
+          submittedDataRef.current = arg.data
+        }
         return result
       },
     }),
@@ -165,7 +165,9 @@ export function openFormDialog<TSchema extends F0FormSchema>(
     const id = options.id ?? nanoid()
     let settled = false
     const finish = (result: OpenFormDialogResult<TSchema>) => {
-      if (settled) return
+      if (settled) {
+        return
+      }
       settled = true
       resolve(result)
       unmountFormOverlay(id)

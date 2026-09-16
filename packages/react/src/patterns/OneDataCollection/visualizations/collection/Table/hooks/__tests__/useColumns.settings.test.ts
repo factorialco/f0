@@ -1,6 +1,5 @@
-import { renderHook } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
+import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 import { TableColumnDefinition, TableVisualizationSettings } from "../../types"
 import { useColumns } from "../useColums"
 
@@ -19,13 +18,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        mockColumns,
+      useColumns({
+        originalColumns: mockColumns,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // column2 and column3 should be hidden as per developer defaults
@@ -46,13 +45,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        mockColumns,
+      useColumns({
+        originalColumns: mockColumns,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // All columns should be visible because user explicitly set hidden to []
@@ -75,13 +74,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        mockColumns,
+      useColumns({
+        originalColumns: mockColumns,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // column3 and column4 should be hidden per user preferences (overriding developer defaults)
@@ -103,13 +102,13 @@ describe("useColumns with settings", () => {
     const allowHiding = false
 
     const { result } = renderHook(() =>
-      useColumns(
-        mockColumns,
+      useColumns({
+        originalColumns: mockColumns,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // Should use developer defaults even when settings exist
@@ -129,13 +128,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        columnsWithOrder,
+      useColumns({
+        originalColumns: columnsWithOrder,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // Should respect developer-defined order
@@ -156,13 +155,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        columnsWithOrder,
+      useColumns({
+        originalColumns: columnsWithOrder,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // Should respect user-defined order
@@ -183,13 +182,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        columnsWithOrder,
+      useColumns({
+        originalColumns: columnsWithOrder,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // Empty array means no columns in saved order, so all maintain definition order
@@ -223,13 +222,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        columnsWithNewHidden,
+      useColumns({
+        originalColumns: columnsWithNewHidden,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // column4 should be hidden because it's NEW (not in saved settings) and has hidden: true
@@ -258,13 +257,13 @@ describe("useColumns with settings", () => {
     const allowHiding = true
 
     const { result } = renderHook(() =>
-      useColumns(
-        columnsWithNewVisible,
+      useColumns({
+        originalColumns: columnsWithNewVisible,
         frozenColumns,
         settings,
         allowSorting,
-        allowHiding
-      )
+        allowHiding,
+      })
     )
 
     // column4 should be visible (no hidden: true)
@@ -283,13 +282,13 @@ describe("useColumns with settings", () => {
 
     const { result, rerender } = renderHook(
       ({ settings }) =>
-        useColumns(
-          mockColumns,
+        useColumns({
+          originalColumns: mockColumns,
           frozenColumns,
           settings,
           allowSorting,
-          allowHiding
-        ),
+          allowHiding,
+        }),
       { initialProps: { settings } }
     )
 
@@ -318,13 +317,13 @@ describe("useColumns with settings", () => {
 
     const { result, rerender } = renderHook(
       ({ settings }) =>
-        useColumns(
-          columnsWithOrder,
+        useColumns({
+          originalColumns: columnsWithOrder,
           frozenColumns,
           settings,
           allowSorting,
-          allowHiding
-        ),
+          allowHiding,
+        }),
       { initialProps: { settings } }
     )
 
@@ -336,5 +335,231 @@ describe("useColumns with settings", () => {
 
     // Should restore developer-defined order
     expect(result.current.colsOrder).toEqual(["column2", "column3", "column1"])
+  })
+
+  it("uses controlled locks instead of implicitly locking the first column", () => {
+    const { result } = renderHook(() =>
+      useColumns({
+        originalColumns: mockColumns,
+        frozenColumns: 0,
+        settings: { hidden: ["column2"] },
+        allowSorting: true,
+        allowHiding: true,
+        lockedColumnIds: ["column2", "column3"],
+        usesExplicitColumnLocking: true,
+      })
+    )
+
+    const first = result.current.columnsWithStatus.find(
+      ({ column }) => column.id === "column1"
+    )
+    const firstLocked = result.current.columnsWithStatus.find(
+      ({ column }) => column.id === "column2"
+    )
+    const secondLocked = result.current.columnsWithStatus.find(
+      ({ column }) => column.id === "column3"
+    )
+
+    expect(first).toMatchObject({
+      canHide: true,
+      frozen: false,
+      locked: false,
+      sortable: true,
+    })
+    expect(firstLocked).toMatchObject({
+      canHide: false,
+      frozen: false,
+      locked: true,
+      sortable: false,
+      visible: true,
+    })
+    expect(secondLocked).toMatchObject({
+      canHide: false,
+      frozen: false,
+      locked: true,
+      sortable: false,
+      visible: true,
+    })
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column2",
+      "column3",
+      "column1",
+      "column4",
+    ])
+  })
+
+  it("returns an unlocked column to its saved position", () => {
+    const settings: TableVisualizationSettings = {
+      hidden: [],
+      order: ["column2", "column1", "column3", "column4"],
+    }
+    const { result, rerender } = renderHook(
+      ({ lockedColumnIds }) =>
+        useColumns({
+          originalColumns: mockColumns,
+          frozenColumns: 0,
+          settings,
+          allowSorting: true,
+          allowHiding: true,
+          lockedColumnIds,
+          usesExplicitColumnLocking: true,
+        }),
+      { initialProps: { lockedColumnIds: ["column3"] } }
+    )
+
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column3",
+      "column2",
+      "column1",
+      "column4",
+    ])
+
+    rerender({ lockedColumnIds: [] })
+
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column2",
+      "column1",
+      "column3",
+      "column4",
+    ])
+  })
+
+  it("allows every non-frozen column to be editable when controlled locks are empty", () => {
+    const { result } = renderHook(() =>
+      useColumns({
+        originalColumns: mockColumns,
+        frozenColumns: 0,
+        settings: {},
+        allowSorting: true,
+        allowHiding: true,
+        lockedColumnIds: [],
+        usesExplicitColumnLocking: true,
+      })
+    )
+
+    expect(result.current.columnsWithStatus).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          column: expect.objectContaining({ id: "column1" }),
+          canHide: true,
+          locked: false,
+          sortable: true,
+        }),
+      ])
+    )
+  })
+
+  it("keeps frozen columns permanently locked alongside controlled locks", () => {
+    const { result } = renderHook(() =>
+      useColumns({
+        originalColumns: mockColumns,
+        frozenColumns: 1,
+        settings: {},
+        allowSorting: true,
+        allowHiding: true,
+        lockedColumnIds: ["column2", "column3"],
+        usesExplicitColumnLocking: true,
+      })
+    )
+
+    expect(result.current.columnsWithStatus.slice(0, 3)).toEqual([
+      expect.objectContaining({
+        column: expect.objectContaining({ id: "column1" }),
+        frozen: true,
+        locked: true,
+      }),
+      expect.objectContaining({
+        column: expect.objectContaining({ id: "column2" }),
+        frozen: false,
+        locked: true,
+      }),
+      expect.objectContaining({
+        column: expect.objectContaining({ id: "column3" }),
+        frozen: false,
+        locked: true,
+      }),
+    ])
+    expect(result.current.stickyColumnIds).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+  })
+
+  it("leaves the final ordered column visible and unlocked when every managed column is requested", () => {
+    const { result } = renderHook(() =>
+      useColumns({
+        originalColumns: mockColumns,
+        frozenColumns: 0,
+        settings: { hidden: ["column4"] },
+        allowSorting: true,
+        allowHiding: true,
+        lockedColumnIds: ["column1", "column2", "column3", "column4"],
+        usesExplicitColumnLocking: true,
+      })
+    )
+
+    expect(result.current.managedLockedColumnIds).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+    expect(result.current.stickyColumnIds).toEqual([
+      "column1",
+      "column2",
+      "column3",
+    ])
+    expect(
+      result.current.columnsWithStatus.find(
+        ({ column }) => column.id === "column4"
+      )
+    ).toMatchObject({
+      canHide: false,
+      locked: false,
+      visible: true,
+    })
+  })
+
+  it("restores a hidden unlocked column when every scrollable column is hidden", () => {
+    const { result } = renderHook(() =>
+      useColumns({
+        originalColumns: mockColumns,
+        frozenColumns: 0,
+        settings: { hidden: ["column3", "column4"] },
+        allowSorting: true,
+        allowHiding: true,
+        lockedColumnIds: ["column1", "column2"],
+        usesExplicitColumnLocking: true,
+      })
+    )
+
+    expect(result.current.columns.map((column) => column.id)).toEqual([
+      "column1",
+      "column2",
+      "column4",
+    ])
+    expect(
+      result.current.columnsWithStatus.find(
+        ({ column }) => column.id === "column4"
+      )
+    ).toMatchObject({
+      canHide: false,
+      locked: false,
+      visible: true,
+    })
+  })
+
+  it("does not turn the legacy non-editable first column into a sticky column", () => {
+    const { result } = renderHook(() =>
+      useColumns({
+        originalColumns: mockColumns,
+        frozenColumns: 0,
+        settings: {},
+        allowSorting: true,
+        allowHiding: true,
+      })
+    )
+
+    expect(result.current.stickyColumnIds).toEqual([])
   })
 })

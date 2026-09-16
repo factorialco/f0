@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0Form as F0FormComponent } from "./F0Form"
 
 // Export main types
@@ -52,6 +51,7 @@ export type {
   F0DateTimeFieldConfig,
   F0DateRangeFieldConfig,
   F0PeriodFieldConfig,
+  F0PhoneFieldConfig,
   F0ArrayConfig,
   F0CustomFieldConfig,
   F0RichTextFieldConfig,
@@ -88,6 +88,7 @@ export type {
   F0DateTimeField,
   F0DateRangeConfig,
   F0PeriodConfig,
+  F0PhoneConfig,
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
@@ -101,6 +102,7 @@ export type {
   F0DateField,
   F0DateRangeField,
   F0PeriodField,
+  F0PhoneField,
   F0RichTextField,
   F0FileField,
   F0CustomField,

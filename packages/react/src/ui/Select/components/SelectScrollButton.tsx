@@ -1,9 +1,7 @@
 import { forwardRef } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 import { cn } from "@/lib/utils.ts"
-
 import * as SelectPrimitive from "./radix-ui"
 
 type Props = {

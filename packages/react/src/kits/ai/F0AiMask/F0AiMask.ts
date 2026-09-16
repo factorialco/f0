@@ -100,7 +100,7 @@ function parseColor(colorStr: string): [number, number, number] {
     throw new Error(`Invalid color format: ${colorStr}`)
   }
   const [, r, g, b] = match
-  return [parseInt(r) / 255, parseInt(g) / 255, parseInt(b) / 255]
+  return [parseInt(r, 10) / 255, parseInt(g, 10) / 255, parseInt(b, 10) / 255]
 }
 
 export class F0AiMask {
@@ -148,8 +148,12 @@ export class F0AiMask {
   }
 
   start(): void {
-    if (this.disposed) throw new Error("Mask instance has been disposed.")
-    if (this.running) return
+    if (this.disposed) {
+      throw new Error("Mask instance has been disposed.")
+    }
+    if (this.running) {
+      return
+    }
     if (!this.glr) {
       console.error("WebGL resources are not initialized.")
       return
@@ -175,14 +179,18 @@ export class F0AiMask {
     this.checkGLError(this.glr.gl, "start: after initial setup")
 
     const loop = () => {
-      if (!this.running || !this.glr) return
+      if (!this.running || !this.glr) {
+        return
+      }
       this.rafId = requestAnimationFrame(loop)
 
       const now = performance.now()
       const delta = now - this.lastTime
 
       // This kind of animation will not benefit from high frame rates
-      if (delta < 1000 / 32) return
+      if (delta < 1000 / 32) {
+        return
+      }
 
       this.lastTime = now
       const t = (now - this.startTime) * 0.001
@@ -192,36 +200,58 @@ export class F0AiMask {
   }
 
   pause() {
-    if (this.disposed) throw new Error("Mask instance has been disposed.")
+    if (this.disposed) {
+      throw new Error("Mask instance has been disposed.")
+    }
     this.running = false
-    if (this.rafId !== null) cancelAnimationFrame(this.rafId)
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId)
+    }
   }
 
   dispose(): void {
-    if (this.disposed) return
+    if (this.disposed) {
+      return
+    }
     this.disposed = true
     this.running = false
-    if (this.rafId !== null) cancelAnimationFrame(this.rafId)
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId)
+    }
 
     const { gl, vao, positionBuffer, uvBuffer, program } = this.glr
-    if (vao) gl.deleteVertexArray(vao)
-    if (positionBuffer) gl.deleteBuffer(positionBuffer)
-    if (uvBuffer) gl.deleteBuffer(uvBuffer)
+    if (vao) {
+      gl.deleteVertexArray(vao)
+    }
+    if (positionBuffer) {
+      gl.deleteBuffer(positionBuffer)
+    }
+    if (uvBuffer) {
+      gl.deleteBuffer(uvBuffer)
+    }
     gl.deleteProgram(program)
 
-    if (this.observer) this.observer.disconnect()
+    if (this.observer) {
+      this.observer.disconnect()
+    }
 
     this.canvas.remove()
   }
 
   resize(width: number, height: number, ratio?: number): void {
-    if (this.disposed) throw new Error("Mask instance has been disposed.")
+    if (this.disposed) {
+      throw new Error("Mask instance has been disposed.")
+    }
 
     this.options.width = width
     this.options.height = height
-    if (ratio) this.options.ratio = ratio
+    if (ratio) {
+      this.options.ratio = ratio
+    }
 
-    if (!this.running) return
+    if (!this.running) {
+      return
+    }
 
     const { gl, program, vao, positionBuffer, uvBuffer, uResolution } = this.glr
 
@@ -298,7 +328,9 @@ export class F0AiMask {
   }
 
   fadeIn(): Promise<void> {
-    if (this.disposed) throw new Error("Mask instance has been disposed.")
+    if (this.disposed) {
+      throw new Error("Mask instance has been disposed.")
+    }
 
     return new Promise<void>((resolve, reject) => {
       const animation = this.canvas.animate(
@@ -310,12 +342,14 @@ export class F0AiMask {
       )
 
       animation.onfinish = () => resolve()
-      animation.oncancel = () => reject("canceled")
+      animation.oncancel = () => reject(new Error("canceled"))
     })
   }
 
   fadeOut(): Promise<void> {
-    if (this.disposed) throw new Error("Mask instance has been disposed.")
+    if (this.disposed) {
+      throw new Error("Mask instance has been disposed.")
+    }
 
     return new Promise<void>((resolve, reject) => {
       const animation = this.canvas.animate(
@@ -327,7 +361,7 @@ export class F0AiMask {
       )
 
       animation.onfinish = () => resolve()
-      animation.oncancel = () => reject("canceled")
+      animation.oncancel = () => reject(new Error("canceled"))
     })
   }
 
@@ -456,7 +490,9 @@ export class F0AiMask {
   }
 
   private render(t: number): void {
-    if (!this.glr) return
+    if (!this.glr) {
+      return
+    }
     const { gl, program, vao, uTime } = this.glr
 
     gl.useProgram(program)

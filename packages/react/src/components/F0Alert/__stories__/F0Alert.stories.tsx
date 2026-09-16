@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, fn, within } from "storybook/test"
-
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0Alert } from "../F0Alert"
 import { alertVariantOptions } from "../types"
 
@@ -14,6 +11,7 @@ const meta: Meta<typeof F0Alert> = {
   tags: ["stable", "!autodocs"],
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
   argTypes: {
     title: {

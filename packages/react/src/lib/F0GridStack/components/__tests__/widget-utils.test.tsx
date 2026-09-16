@@ -1,9 +1,6 @@
 import type { GridStackWidget } from "gridstack"
-
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import type { GridStackReactWidget } from "../../F0GridStack"
-
 import {
   convertWidgetForGridStack,
   convertWidgetRecursive,
@@ -338,13 +335,13 @@ describe("widget-utils", () => {
 
       expect(middle1.id).toBe("middle-1")
       expect(middle1.subGridOpts?.children).toHaveLength(1)
-      expect((middle1.subGridOpts?.children?.[0] as GridStackWidget).id).toBe(
+      expect((middle1.subGridOpts!.children![0] as GridStackWidget).id).toBe(
         "leaf-1"
       )
 
       expect(middle2.id).toBe("middle-2")
       expect(middle2.subGridOpts?.children).toHaveLength(1)
-      expect((middle2.subGridOpts?.children?.[0] as GridStackWidget).id).toBe(
+      expect((middle2.subGridOpts!.children![0] as GridStackWidget).id).toBe(
         "leaf-2"
       )
     })

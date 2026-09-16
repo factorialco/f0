@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest"
-
 import { toArray } from "./toArray"
 
 describe("toArray", () => {

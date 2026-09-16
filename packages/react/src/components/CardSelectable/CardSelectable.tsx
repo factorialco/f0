@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { ReactElement } from "react"
-
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
@@ -12,7 +11,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import type {
   CardSelectableAvatarVariant,
   CardSelectableItem,
@@ -42,7 +40,9 @@ function RadioIndicator({ checked }: { checked: boolean }) {
           : "border-2 border-solid border-f1-border bg-f1-background"
       )}
     >
-      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+      {checked ? (
+        <div className="h-2 w-2 rounded-full bg-f1-background" />
+      ) : null}
     </div>
   )
 }
@@ -59,7 +59,7 @@ function CheckboxIndicator({ checked }: { checked: boolean }) {
           : "border border-solid border-f1-border bg-f1-background"
       )}
     >
-      {checked && <F0Icon icon={Check} size="sm" />}
+      {checked ? <F0Icon icon={Check} size="sm" /> : null}
     </div>
   )
 }
@@ -94,6 +94,8 @@ interface CardSelectableProps<T extends CardSelectableValue> {
   isToggle?: boolean
   /** When true, renders without individual card borders (for grouped layout) */
   grouped?: boolean
+  /** When true, uses 12px padding instead of 16px (standalone cards only) */
+  compact?: boolean
 }
 
 function _CardSelectable<T extends CardSelectableValue>({
@@ -104,6 +106,7 @@ function _CardSelectable<T extends CardSelectableValue>({
   onSelect,
   isToggle,
   grouped,
+  compact,
 }: CardSelectableProps<T>) {
   const { forms } = useI18n()
   const shouldReduceMotion = useReducedMotion()
@@ -129,6 +132,11 @@ function _CardSelectable<T extends CardSelectableValue>({
   }
 
   const hasSelectedContent = !!item.selectedContent
+  // The link must not live inside the element carrying `role`, or axe's
+  // `nested-interactive` fires (WCAG 2.1 SC 4.1.2: "Element has focusable
+  // descendants") and the card becomes an interactive control wrapping another
+  // one. It is rendered as a sibling row below the header instead.
+  const moreInfoLink = item.moreInfoLink
 
   return (
     <div
@@ -153,11 +161,6 @@ function _CardSelectable<T extends CardSelectableValue>({
         tabIndex={isDisabled ? -1 : 0}
         onClick={handleClick}
         onKeyDown={(e) => {
-          // Ignore key events from interactive descendants (e.g. links, buttons)
-          // to prevent toggling selection when activating nested controls
-          const target = e.target as HTMLElement
-          if (target.closest("a, button") && target !== e.currentTarget) return
-
           if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
             e.preventDefault()
             handleClick()
@@ -166,10 +169,13 @@ function _CardSelectable<T extends CardSelectableValue>({
         className={cn(
           "flex cursor-pointer items-center gap-3",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-f1-special-ring",
-          grouped ? "px-4 py-3" : "p-4"
+          grouped ? "px-4 py-3" : compact ? "p-3" : "p-4",
+          // The link row below supplies the bottom padding so the gap between
+          // description and link matches the old in-column `gap-2`.
+          moreInfoLink && "pb-0"
         )}
       >
-        {item.avatar && <AvatarRender avatar={item.avatar} />}
+        {item.avatar ? <AvatarRender avatar={item.avatar} /> : null}
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-col gap-0.5">
             <span
@@ -179,33 +185,50 @@ function _CardSelectable<T extends CardSelectableValue>({
               )}
             >
               {item.title}
-              {item.required && (
+              {item.required ? (
                 <span className="ml-0.5 text-f1-foreground-critical">*</span>
-              )}
+              ) : null}
             </span>
-            {item.description && (
+            {item.description ? (
               <span className="text-base text-f1-foreground-secondary">
                 {item.description}
               </span>
-            )}
+            ) : null}
           </div>
-          {item.moreInfoLink && (
-            <F0Link
-              href={item.moreInfoLink.href}
-              target="_blank"
-              variant="link"
-              className="self-start"
-              stopPropagation
-            >
-              {item.moreInfoLink.label ?? forms.moreInformation}
-            </F0Link>
-          )}
         </div>
         {renderIndicator()}
       </div>
 
+      {/* Outside the interactive header — see the `moreInfoLink` note above. */}
+      {moreInfoLink ? (
+        <div
+          className={cn(
+            "flex flex-row items-start gap-3 pt-2",
+            grouped ? "px-4 pb-3" : compact ? "px-3 pb-3" : "px-4 pb-4"
+          )}
+        >
+          {item.avatar ? (
+            /* Invisible copy of the avatar keeps the link aligned with the
+               title column without hardcoding the avatar's width. */
+            <div aria-hidden="true" className="invisible">
+              <AvatarRender avatar={item.avatar} />
+            </div>
+          ) : null}
+          <F0Link
+            href={moreInfoLink.href}
+            target="_blank"
+            variant="link"
+            /* min-h-6 keeps the touch target at 24px (WCAG 2.2 SC 2.5.8);
+               the link's own text box is only 20px tall. */
+            className="min-h-6 items-center self-start"
+          >
+            {moreInfoLink.label ?? forms.moreInformation}
+          </F0Link>
+        </div>
+      ) : null}
+
       {/* Expandable content — outside the interactive area, attached below */}
-      {hasSelectedContent && (
+      {hasSelectedContent ? (
         <motion.div
           initial={false}
           animate={{
@@ -229,7 +252,7 @@ function _CardSelectable<T extends CardSelectableValue>({
             </div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </div>
   )
 }

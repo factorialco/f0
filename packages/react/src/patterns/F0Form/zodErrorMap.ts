@@ -1,5 +1,4 @@
 import { ZodIssueCode, ZodErrorMap } from "zod"
-
 import { TranslationsType } from "@/lib/providers/i18n/i18n-provider"
 
 /**
@@ -119,6 +118,12 @@ export function createZodErrorMap(i18n: TranslationsType): ZodErrorMap {
         // Handle z.literal(true) for checkboxes/switches that must be checked
         if (issue.expected === true) {
           return { message: validation.checkbox.mustBeChecked }
+        }
+        break
+
+      case ZodIssueCode.custom:
+        if (issue.params?.type === "phone") {
+          return { message: validation.phone.invalid }
         }
         break
     }

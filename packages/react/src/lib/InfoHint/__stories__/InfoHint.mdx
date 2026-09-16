@@ -1,0 +1,222 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./InfoHint.stories"
+
+<Meta of={Stories} />
+
+# Info hint
+
+Reveals concise help for the label it follows, so the same measure can explain
+itself in a table column, chart, metric, or collection header. This is internal
+shared chrome; consumers configure it through the public surface that owns the
+label, such as `DashboardItemBase.info`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>info</code>
+        </td>
+        <td>
+          <code>string | InfoHintContent</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          A string opens a tooltip. Structured content opens a hover card with a
+          title, description, and optional link action.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>icon</code>
+        </td>
+        <td>
+          <code>IconType</code>
+        </td>
+        <td>
+          <code>InfoCircleLine</code>
+        </td>
+        <td>—</td>
+        <td>Overrides the information icon for an owning surface.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>“More information”</td>
+        <td>—</td>
+        <td>
+          Accessible name for the trigger when structured content does not
+          provide its own label.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Content forms
+
+**Structured content with a link**
+
+Use a link only when the short explanation leads to a useful source, such as a
+catalog entry. Focus or hover the icon to inspect the complete state.
+
+<Canvas of={Stories.Default} />
+
+**Structured content without a link**
+
+Use the same card when a title helps organize the explanation but there is no
+destination to offer.
+
+<Canvas of={Stories.DescriptionOnly} />
+
+**Plain text**
+
+Use a string for one short, non-interactive sentence.
+
+<Canvas of={Stories.PlainText} />
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use an info hint when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A measure needs a concise definition</td>
+        <td>The label alone cannot explain what is counted or calculated.</td>
+      </tr>
+      <tr>
+        <td>The same measure appears on multiple data surfaces</td>
+        <td>
+          Tables, charts, and metrics should reveal the same definition without
+          lengthening every label.
+        </td>
+      </tr>
+      <tr>
+        <td>A definition has a canonical source</td>
+        <td>The structured form can link to that source.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The text states what the whole widget shows</td>
+        <td>
+          The widget <code>description</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>The reader needs the calculation method or data provenance</td>
+        <td>
+          The widget <code>explanation</code> action.
+        </td>
+      </tr>
+      <tr>
+        <td>The message is an error or status update</td>
+        <td>An alert, field error, or toast appropriate to its lifetime.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+<DoDonts
+  do={{
+    description: "Define the measure directly.",
+    guidelines: [
+      "Name the measure in the title",
+      "Explain what is included or excluded",
+      "Link only to a useful source",
+    ],
+  }}
+  dont={{
+    description:
+      "Do not repeat the surrounding label or hide essential status copy.",
+    guidelines: [
+      "Don't restate the widget title",
+      "Don't put errors behind the icon",
+      "Don't use the link as the only explanation",
+    ],
+  }}
+/>
+
+### Behavior
+
+- WHEN `info` is a string → THEN a focusable icon reveals a non-interactive tooltip.
+- WHEN `info` is structured content → THEN focus or hover opens a card with its title and description.
+- WHEN structured content includes `link` → THEN the card renders the link action and closes after it is activated.
+- WHEN `info.label` is present → THEN it overrides the host label and generic accessible-name fallback.
+- WHEN no custom accessible name is present → THEN the structured trigger is named “More information”.
+
+## Accessibility
+
+The trigger is keyboard reachable. Give custom labels an action-oriented name,
+such as “About active headcount”, rather than repeating the visible heading.
+
+<Canvas of={Stories.NamedTrigger} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Moves focus to the information trigger and reveals its content.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Activates the optional link after it receives focus.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>

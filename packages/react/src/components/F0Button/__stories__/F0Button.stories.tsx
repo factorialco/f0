@@ -1,13 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import React from "react"
 import { expect, within } from "storybook/test"
-
 import { Add, Archive, Delete, Save } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { navTargets } from "@/ui/Action"
-
 import { F0Button } from "../F0Button"
 
 const meta = {
@@ -15,6 +12,7 @@ const meta = {
   component: F0Button,
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Web-components?node-id=41-1256&t=99GWQFvFLZtKW49N-4",
@@ -555,4 +553,29 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("my-test-button")).toBeInTheDocument()
   },
+}
+
+export const Counter: Story = {
+  tags: ["no-sidebar"],
+  render: (args) => (
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      <F0Button {...args} variant="default" label="Default" counterValue={3} />
+      <F0Button {...args} variant="outline" label="Outline" counterValue={3} />
+      <F0Button {...args} variant="neutral" label="Neutral" counterValue={3} />
+      <F0Button {...args} variant="ghost" label="Ghost" counterValue={3} />
+      <F0Button
+        {...args}
+        variant="critical"
+        label="Critical"
+        counterValue={3}
+      />
+      <F0Button {...args} variant="promote" label="Promote" counterValue={3} />
+      <F0Button
+        {...args}
+        variant="outlinePromote"
+        label="Outline promote"
+        counterValue={3}
+      />
+    </div>
+  ),
 }

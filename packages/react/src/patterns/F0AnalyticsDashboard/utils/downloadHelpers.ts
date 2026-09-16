@@ -8,10 +8,18 @@ import * as XLSX from "xlsx"
  * - objects/arrays → JSON string
  */
 function serializeValue(value: unknown): string {
-  if (value == null) return ""
-  if (typeof value === "boolean") return String(value)
-  if (value instanceof Date) return value.toISOString()
-  if (typeof value === "object") return JSON.stringify(value)
+  if (value == null) {
+    return ""
+  }
+  if (typeof value === "boolean") {
+    return String(value)
+  }
+  if (value instanceof Date) {
+    return value.toISOString()
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(value)
+  }
   return String(value)
 }
 
@@ -107,16 +115,19 @@ export function downloadMultiSheetExcel(
     name: string
     columns: string[]
     rows: Record<string, unknown>[]
+    /** Row-lookup keys parallel to `columns`; see {@link downloadAsExcel}. */
+    keys?: string[]
   }[],
   filename: string
 ): void {
   const workbook = XLSX.utils.book_new()
 
   for (const sheet of sheets) {
+    const rowKeys = sheet.keys ?? sheet.columns
     const wsData = [
       sheet.columns,
       ...sheet.rows.map((row) =>
-        sheet.columns.map((col) => serializeValue(row[col]))
+        rowKeys.map((key) => serializeValue(row[key]))
       ),
     ]
     const worksheet = XLSX.utils.aoa_to_sheet(wsData)

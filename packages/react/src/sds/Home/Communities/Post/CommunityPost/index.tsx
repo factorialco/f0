@@ -1,22 +1,23 @@
+import { useEffect, useId, useRef, useState } from "react"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { IconType } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
-import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Comment as CommentIcon,
   EllipsisHorizontal,
   Person as PersonIcon,
+  PushPinSolid,
 } from "@/icons/app"
-import { getDisplayDateBasedOnDuration } from "@/lib/date"
+import { getAgo, getDisplayDateBasedOnDuration } from "@/lib/date"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
+import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useId, useRef, useState } from "react"
-
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
@@ -96,13 +97,78 @@ export type CommunityPostProps = {
 
   noVideoPreload?: boolean
 
-  onClick: (id: string) => void
+  /**
+   * WHAT CLICKING THE POST DOES — and whether it does anything.
+   *
+   * OMIT IT once the post is the destination. In a feed the card is a way in, so
+   * it takes a pointer cursor, a hover tint and a focus ring. Opened in a dialog
+   * it is already what you came for, and every one of those says there is
+   * somewhere further to go when there isn't: the tint follows the mouse across
+   * a page you are reading, and clicking does nothing.
+   */
+  onClick?: (id: string) => void
 
   noReactionsButton?: boolean
 
   dropdownItems?: DropdownItem[]
 
   descriptionExpandable?: boolean
+
+  /**
+   * THE WHOLE BODY, unclamped and with no "See more" — for a container that IS
+   * the post rather than a way to it: a dialog, a page. There the body is what
+   * the reader came for, and a clamp with nothing behind it hides the end of
+   * what they opened.
+   *
+   * In a FEED, leave it off. Posts a page long each are what makes a feed
+   * unskimmable, which is what the clamp is for.
+   */
+  noDescriptionClamp?: boolean
+
+  /**
+   * Drops "in <community>" from the header — for a container that already names
+   * the community, like a single community's feed, whose channel header carries
+   * that name an inch above every card. Without this the link repeats what you
+   * are already reading and leads nowhere you aren't.
+   *
+   * `group` stays required: it is still the post's community, and a caller that
+   * hides the line today may show it tomorrow without changing what it passes.
+   */
+  hideGroup?: boolean
+
+  /**
+   * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
+   * for a container that already shows it, like a dialog carrying the post's
+   * title in its own header. Without this the same words appear twice, an inch
+   * apart.
+   *
+   * The title element stays in the DOM, `sr-only`: it is what the expanded
+   * description points at (`aria-describedby`), so removing it would quietly
+   * break that as well as the post's name.
+   */
+  hideTitle?: boolean
+
+  /**
+   * Marks the post as pinned in its community: a pin beside the date.
+   *
+   * A BADGE, not a control — pinning and unpinning are decisions the container
+   * owns (they need to know who may), and this only says what is already true.
+   */
+  pinned?: boolean
+
+  /** Accessible name for the pin badge, e.g. "Pinned post". Required with
+   * `pinned`, since the icon alone says nothing to a screen reader. */
+  pinnedLabel?: string
+
+  /**
+   * "2 days ago" instead of "August 25th, 2026 at 3:00 PM".
+   *
+   * For a FEED, where the question a date answers is "how fresh is this" and
+   * the posts scroll past in one column — a full timestamp on every row is
+   * four lines of clerical detail nobody reads. A page or a dialog showing one
+   * post keeps the exact date, which is the default.
+   */
+  relativeDate?: boolean
 }
 
 export const BaseCommunityPost = ({
@@ -123,9 +189,16 @@ export const BaseCommunityPost = ({
   dropdownItems,
   noReactionsButton = false,
   descriptionExpandable = false,
+  noDescriptionClamp = false,
+  hideTitle = false,
+  hideGroup = false,
+  pinned = false,
+  pinnedLabel,
+  relativeDate = false,
 }: CommunityPostProps) => {
   const titleId = useId()
   const descriptionId = useId()
+  const locale = useDateFnsLocale()
   const descriptionRef = useRef<HTMLDivElement>(null)
   const [expandedDescription, setExpandedDescription] = useState<{
     id: string
@@ -141,12 +214,13 @@ export const BaseCommunityPost = ({
     descriptionExpandable &&
     expandedDescription?.id === id &&
     expandedDescription.description === description
-  const descriptionCollapsed = !descriptionExpanded
-  const date = getDisplayDateBasedOnDuration(createdAt)
+  const descriptionCollapsed = !descriptionExpanded && !noDescriptionClamp
+  const date = relativeDate
+    ? getAgo(createdAt, locale)
+    : getDisplayDateBasedOnDuration(createdAt, { locale })
 
-  const handleClick = () => {
-    onClick(id)
-  }
+  const isClickable = Boolean(onClick)
+  const handleClick = onClick ? () => onClick(id) : undefined
 
   const handleVideoClick = (event: React.MouseEvent<HTMLVideoElement>) => {
     event.stopPropagation()
@@ -160,7 +234,9 @@ export const BaseCommunityPost = ({
     event.preventDefault()
     event.stopPropagation()
 
-    if (!description) return
+    if (!description) {
+      return
+    }
 
     setExpandedDescription({ id, description })
   }
@@ -172,7 +248,9 @@ export const BaseCommunityPost = ({
   }, [descriptionExpanded])
 
   useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescription(null)
+    if (!descriptionExpandable) {
+      setExpandedDescription(null)
+    }
   }, [descriptionExpandable])
 
   useEffect(() => {
@@ -191,7 +269,9 @@ export const BaseCommunityPost = ({
 
     updateDescriptionOverflow()
 
-    if (typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
     resizeObserver.observe(descriptionElement)
@@ -201,15 +281,38 @@ export const BaseCommunityPost = ({
 
   return (
     <div
-      className="flex w-full cursor-pointer flex-row gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
+      className={cn(
+        "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-4",
+        // The affordances belong to the click, so they come and go with it.
+        isClickable &&
+          "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"
+      )}
       onClick={handleClick}
       id={`community-post-${id}`}
     >
-      <div className="hidden md:block">
+      {/* THE HEADER, and the avatar belongs to IT. It used to be a column of
+          its own with everything else beside it, which indented the post's whole
+          body — title, text, media — past a 40px gutter that only these two
+          lines ever needed.
+
+          One avatar at one size for every screen, too: the old markup carried a
+          `md`-and-up one in that gutter and a separate `xs` one inline for
+          phones, which is two things to keep in step for one picture. */}
+      <div className="flex min-w-0 flex-row items-center gap-3">
         {author ? (
+          // `flex` AND `leading-none`, so the link is exactly the avatar.
+          //
+          // The row was centring this link correctly all along — the link was
+          // just taller than the picture in it. An avatar sits in a text line
+          // box, so a 32px picture came in a 37px box with the extra 5px as
+          // descender space BELOW it, which put the picture 2.5px above the
+          // centre of everything beside it. `leading-[0]` — not `leading-none`,
+          // which still leaves a 1em strut and 2px of it showing — collapses the
+          // line box to the picture, and `flex` keeps the box the child's size.
           <F0Link
             href={author.url || "#"}
             title={authorFullName}
+            className="flex items-center leading-[0]"
             stopPropagation
           >
             <F0AvatarPerson
@@ -221,176 +324,200 @@ export const BaseCommunityPost = ({
         ) : (
           <F0AvatarIcon icon={PersonIcon} />
         )}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-row justify-between">
-            <div className="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
-              {author ? (
-                <>
-                  <F0Link
-                    href={author.url}
-                    className="block md:hidden"
-                    title={authorFullName}
-                    stopPropagation
-                  >
-                    <span className="flex items-center">
-                      <F0AvatarPerson
-                        firstName={author.firstName}
-                        lastName={author.lastName}
-                        src={author.avatarUrl}
-                        size="xs"
-                      />
-                    </span>
-                  </F0Link>
-                  <F0Link
-                    href={author.url}
-                    title={authorFullName}
-                    className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
-                    stopPropagation
-                  >
-                    {authorFullName}
-                  </F0Link>
-                </>
-              ) : (
-                <div className="block md:hidden">
-                  <F0AvatarIcon icon={PersonIcon} size="sm" />
-                </div>
-              )}
-              <span
-                className={cn(
-                  "text-f1-foreground-secondary",
-                  !author && "capitalize"
-                )}
-              >
-                {inLabel}
-              </span>
+        {/* No gap: the name and the date are one two-line block, and the
+            avatar beside them is centred on the pair (`items-center` above). */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
+            {author ? (
               <F0Link
-                onClick={group.onClick}
-                title={group.title}
+                href={author.url}
+                title={authorFullName}
                 className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
                 stopPropagation
-                href="#"
               >
-                {group.title}
+                {authorFullName}
               </F0Link>
-            </div>
-
-            <div className="flex flex-row gap-2">
-              <div className="hidden flex-row gap-2 md:flex">
-                {actions?.map((act) => (
-                  <F0Button
-                    hideLabel={!act.label}
-                    key={act.label}
-                    {...(act.icon && { icon: act.icon })}
-                    variant="outline"
-                    size="md"
-                    onClick={act.onClick}
-                    label={act.label ?? ""}
-                    title={act.label ?? ""}
-                  />
-                ))}
-                {dropdownItems?.length && (
-                  <Dropdown
-                    items={dropdownItems}
-                    icon={EllipsisHorizontal}
-                    size="sm"
-                  />
-                )}
-              </div>
-              <div className="md:hidden">
-                <Dropdown
-                  items={[
-                    {
-                      label: comment.label,
-                      onClick: comment.onClick,
-                    },
-                    ...(dropdownItems ?? []),
-                  ]}
-                  icon={EllipsisHorizontal}
-                  size="sm"
-                />
-              </div>
-            </div>
-          </div>
-          <span className="-mt-3 text-sm text-f1-foreground-secondary">
-            {date}
-          </span>
-          <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
-            <p
-              id={titleId}
-              className={cn(
-                "text-xl font-semibold",
-                "line-clamp-2 break-words"
-              )}
-            >
-              {title}
-            </p>
-            {description && (
+            ) : null}
+            {/* `inLabel` goes with the group link, not the author: on its own
+                it is a dangling "in" (or, with no author at all, a capitalised
+                "In" followed by nothing). */}
+            {!hideGroup ? (
               <>
-                <PostDescription
-                  ref={descriptionRef}
-                  id={descriptionId}
-                  content={description}
-                  collapsed={descriptionCollapsed}
-                  tabIndex={descriptionExpanded ? -1 : undefined}
-                  className={cn(descriptionExpanded && focusRing())}
-                />
-                {descriptionExpandable &&
-                  isDescriptionOverflowing &&
-                  !descriptionExpanded && (
-                    <ExpandDescriptionButton
-                      describedBy={titleId}
-                      controls={descriptionId}
-                      expanded={descriptionExpanded}
-                      onClick={handleExpandDescription}
-                    />
+                <span
+                  className={cn(
+                    "text-f1-foreground-secondary",
+                    !author && "capitalize"
                   )}
+                >
+                  {inLabel}
+                </span>
+                <F0Link
+                  onClick={group.onClick}
+                  title={group.title}
+                  className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
+                  stopPropagation
+                  href="#"
+                >
+                  {group.title}
+                </F0Link>
               </>
-            )}
+            ) : null}
+          </div>
+
+          {/* `text-base`, like the author line above it: the two are one
+              header, and a smaller size made the date read as a footnote to the
+              line it sits under. */}
+          <span className="flex flex-row items-center gap-1.5 text-base text-f1-foreground-secondary">
+            {date}
+            {/* Beside the date rather than by the title: it is a fact about the
+                post's standing, not part of what it says. */}
+            {pinned ? (
+              <F0Icon
+                icon={PushPinSolid}
+                size="xs"
+                aria-label={pinnedLabel}
+                role={pinnedLabel ? "img" : undefined}
+              />
+            ) : null}
+          </span>
+        </div>
+        {/* THE ACTIONS SIT ON THE AVATAR'S ROW, not on the first line of the
+            heading. Inside that line they were a 32px control on a 21px line,
+            so the whole two-line block grew to fit them and the header carried
+            height nothing was using. Out here they are centred on the header as
+            a whole (`items-center` on the row), beside the name rather than
+            above the date. */}
+        <div className="flex flex-row gap-2">
+          <div className="hidden flex-row gap-2 md:flex">
+            {actions?.map((act) => (
+              <F0Button
+                hideLabel={!act.label}
+                key={act.label}
+                {...(act.icon && { icon: act.icon })}
+                variant="outline"
+                size="md"
+                onClick={act.onClick}
+                label={act.label ?? ""}
+                title={act.label ?? ""}
+              />
+            ))}
+            {dropdownItems?.length ? (
+              <Dropdown
+                items={dropdownItems}
+                icon={EllipsisHorizontal}
+                size="sm"
+              />
+            ) : null}
+          </div>
+          <div className="md:hidden">
+            <Dropdown
+              items={[
+                {
+                  label: comment.label,
+                  onClick: comment.onClick,
+                },
+                ...(dropdownItems ?? []),
+              ]}
+              icon={EllipsisHorizontal}
+              size="sm"
+            />
           </div>
         </div>
-        {mediaUrl && !event && (
-          <div className="relative aspect-video overflow-hidden rounded-xl md:max-w-[480px]">
-            {isVideo(mediaUrl) ? (
-              <video
-                controls
-                className="aspect-video h-full w-full bg-f1-background-secondary object-cover"
-                onClick={handleVideoClick}
-              >
-                <source src={mediaUrl} />
-              </video>
-            ) : (
-              <>
-                <img
-                  src={mediaUrl}
-                  role="presentation"
-                  loading="lazy"
-                  className="aspect-video h-full w-full object-cover"
-                />
-                <Skeleton className="absolute inset-0 -z-10 h-full w-full" />
-              </>
-            )}
-          </div>
-        )}
-        {event && (
-          <div className="w-full md:max-w-[480px]">
-            <PostEvent {...event} />
-          </div>
-        )}
-        <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-        {!noReactionsButton && (
-          <Reactions
-            items={reactions?.items ?? []}
-            onInteraction={reactions?.onInteraction}
-            action={{
-              label: comment.label,
-              onClick: comment.onClick,
-              icon: CommentIcon,
-            }}
-          />
-        )}
       </div>
+      <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
+        <p
+          id={titleId}
+          className={cn(
+            hideTitle
+              ? "sr-only"
+              : cn("text-xl font-semibold", "line-clamp-2 break-words")
+          )}
+        >
+          {title}
+        </p>
+        {description ? (
+          <>
+            <PostDescription
+              ref={descriptionRef}
+              id={descriptionId}
+              content={description}
+              collapsed={descriptionCollapsed}
+              tabIndex={descriptionExpanded ? -1 : undefined}
+              className={cn(descriptionExpanded && focusRing())}
+            />
+            {descriptionExpandable &&
+            !noDescriptionClamp &&
+            isDescriptionOverflowing &&
+            !descriptionExpanded ? (
+              <ExpandDescriptionButton
+                describedBy={titleId}
+                controls={descriptionId}
+                expanded={descriptionExpanded}
+                onClick={handleExpandDescription}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </div>
+      {mediaUrl && !event ? (
+        // FILLS THE POST, UP TO THE READING COLUMN. The old 480px cap dated
+        // from when the avatar's gutter took a chunk of the card and the media
+        // sat in what was left; with the body starting at the card's own edge it
+        // left a third of a wide post empty while the text beside it ran full
+        // width. But uncapped is the other mistake — `aspect-video` means every
+        // pixel of extra width buys 9/16 of a pixel of height, so on a wide
+        // surface the picture simply swallows the post.
+        //
+        // `max-w-content` (712px) is f0's reading column — the measure the Home
+        // layout gives its main column and the chat gives its messages — so the
+        // media stops where the text would.
+        //
+        // The cap only applies once there is enough room for it to READ as a
+        // cap. Between 712 and 744px it would leave a sliver of empty card
+        // beside the picture, which looks like a bug rather than a decision, so
+        // below 744 (the column plus 32px) the media simply fills the width.
+        // A CONTAINER query, not a viewport one: what the media has to fit is
+        // the post's own box — a card in a rail, a dialog, a feed — and the
+        // window's width says nothing about it.
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl @[744px]:max-w-content">
+          {isVideo(mediaUrl) ? (
+            <video
+              controls
+              className="aspect-video h-full w-full bg-f1-background-secondary object-cover"
+              onClick={handleVideoClick}
+            >
+              <source src={mediaUrl} />
+            </video>
+          ) : (
+            <>
+              <img
+                src={mediaUrl}
+                role="presentation"
+                loading="lazy"
+                className="aspect-video h-full w-full object-cover"
+              />
+              <Skeleton className="absolute inset-0 -z-10 h-full w-full" />
+            </>
+          )}
+        </div>
+      ) : null}
+      {event ? (
+        <div className="w-full @[744px]:max-w-content">
+          <PostEvent {...event} />
+        </div>
+      ) : null}
+      <p className="text-f1-foreground-secondary">{countersDisplay}</p>
+      {!noReactionsButton ? (
+        <Reactions
+          items={reactions?.items ?? []}
+          onInteraction={reactions?.onInteraction}
+          action={{
+            label: comment.label,
+            onClick: comment.onClick,
+            icon: CommentIcon,
+          }}
+        />
+      ) : null}
     </div>
   )
 }
@@ -420,16 +547,16 @@ export const CommunityPostSkeleton = ({
       <div className="mt-3">
         <PostDescription.Skeleton />
       </div>
-      {withImage && !withEvent && (
+      {withImage && !withEvent ? (
         <div className="mt-3 aspect-video w-full overflow-hidden rounded-xl md:w-2/3">
           <Skeleton className="h-full w-full rounded-2xs" />
         </div>
-      )}
-      {withEvent && (
+      ) : null}
+      {withEvent ? (
         <div className="mt-3 w-full md:w-2/3">
           <PostEvent.Skeleton />
         </div>
-      )}
+      ) : null}
       <div className="mt-3 flex flex-row items-center gap-1 py-1">
         <Skeleton className="h-2.5 w-14 rounded-2xs" />
         <Skeleton className="h-2.5 w-14 rounded-2xs" />

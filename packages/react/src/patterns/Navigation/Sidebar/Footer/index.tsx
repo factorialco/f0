@@ -1,13 +1,12 @@
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { Badge } from "@/ui/IconBadge"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Badge } from "@/ui/IconBadge"
 
 interface SidebarFooterProps {
   user: {
@@ -55,7 +54,7 @@ export function SidebarFooter({
           </button>
         </Dropdown>
       </div>
-      {showActivityButton && (
+      {showActivityButton ? (
         <Tooltip label={i18n.notifications} shortcut={activityButtonShortcut}>
           <div className="relative">
             <F0Button
@@ -65,14 +64,14 @@ export function SidebarFooter({
               variant="ghost"
               hideLabel
             />
-            {hasActivityUpdates && (
+            {hasActivityUpdates ? (
               <div className="absolute -right-1 -top-1 rounded-full bg-f1-background">
                 <Badge type="highlight" size="sm" icon={CircleIcon} />
               </div>
-            )}
+            ) : null}
           </div>
         </Tooltip>
-      )}
+      ) : null}
     </div>
   )
 }

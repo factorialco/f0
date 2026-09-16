@@ -2,15 +2,19 @@ import {
   endOfYear,
   isAfter,
   isBefore,
-  isSameYear,
   isWithinInterval,
   startOfYear,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
-
 import { cn, focusRing } from "@/lib/utils"
-
 import { CalendarMode, DateRange } from "../../types"
+import { isDateRange, rangeAfterPeriodClick } from "../periodClick"
+
+/** The whole year a date falls in. */
+const yearRange = (date: Date): DateRange => ({
+  from: startOfYear(date),
+  to: endOfYear(date),
+})
 
 interface YearViewProps {
   mode: CalendarMode
@@ -33,13 +37,6 @@ export function YearView({
 }: YearViewProps) {
   const today = new Date()
 
-  // Check if a value is a DateRange
-  const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
-  }
-
   // Generate years for a decade
   const decadeStart = Math.floor(decade / 10) * 10
   const years = [
@@ -50,71 +47,40 @@ export function YearView({
 
   // Handle year click
   const handleYearClick = (year: number) => {
-    const selectedDate = new Date(year, 0, 1)
+    const clicked = yearRange(new Date(year, 0, 1))
 
     if (mode === "single") {
       // Return the full year range
-      onSelect?.({
-        from: startOfYear(selectedDate),
-        to: endOfYear(selectedDate),
-      })
-    } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
-        // Complete the range
-        if (isSameYear(selected.from, selectedDate)) {
-          // If clicking the same year, select just that year
-          onSelect?.({
-            from: startOfYear(selected.from),
-            to: endOfYear(selected.from),
-          })
-        } else {
-          // Create a range between the two years
-          const start = isBefore(selected.from, selectedDate)
-            ? selected.from
-            : selectedDate
-          const end = isBefore(selected.from, selectedDate)
-            ? selectedDate
-            : selected.from
+      onSelect?.(clicked)
+      return
+    }
 
-          onSelect?.({
-            from: startOfYear(start),
-            to: endOfYear(end),
-          })
-        }
-      } else {
-        // Start a new range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      }
+    if (mode === "range") {
+      onSelect?.(
+        rangeAfterPeriodClick({ selected, clicked, periodRangeOf: yearRange })
+      )
     }
   }
 
   // Check if a year is selected
   const isYearSelected = (year: number) => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     if (!isDateRange(selected)) {
       // Single date selection
       return selected.getFullYear() === year
-    } else {
-      // Range selection
-      if (selected.from && selected.to) {
-        const current = new Date(year, 6, 1)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return selected.from.getFullYear() === year
-      }
+    }
+    // Range selection
+    if (selected.from && selected.to) {
+      const current = new Date(year, 6, 1)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return selected.from.getFullYear() === year
     }
 
     return false
@@ -127,13 +93,17 @@ export function YearView({
 
   // Check if a year is the start of the range
   const isRangeStart = (year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
     return selected.from.getFullYear() === year
   }
 
   // Check if a year is the end of the range
   const isRangeEnd = (year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
     return selected.to.getFullYear() === year
   }
 
@@ -205,7 +175,7 @@ export function YearView({
               )}
             >
               <span>{year}</span>
-              {isCurrent && (
+              {isCurrent ? (
                 <div
                   className={cn(
                     "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -218,7 +188,7 @@ export function YearView({
                       "bg-f1-background-selected-bold"
                   )}
                 />
-              )}
+              ) : null}
             </button>
           )
         })}

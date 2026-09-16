@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { expect, waitFor, within } from "storybook/test"
+import { AlertCircleLine } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
 import { type AIMessage, type Message, type RenderableTurn } from "../types"
 
@@ -151,6 +153,54 @@ export const EmptyWelcome: Story = {
   args: {
     turns: [],
     initialMessage: "Ask anything about your company",
+  },
+}
+
+export const EmptyWelcomeWithCaptionAndSubtitle: Story = {
+  args: {
+    turns: [],
+    initialMessage: [
+      "Ask a data question.",
+      "Get an instant answer.",
+      "Turn it into a report.",
+    ],
+    initialMessageCaption: "Analytics mode:",
+    initialMessageSubtitle:
+      "Ask about employees, contracts, absences, and presence. More data soon.",
+  },
+}
+
+export const EmptyWelcomeWithCta: Story = {
+  args: {
+    turns: [],
+    initialMessage: "Skip the boring part of your job",
+    initialMessageCta: {
+      label: "How to use One",
+      icon: AlertCircleLine,
+      onClick: () => console.log("welcome CTA clicked"),
+    },
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    turns: [],
+    initialMessage: "Ask a data question.",
+    initialMessageCaption: "Analytics mode:",
+    initialMessageSubtitle:
+      "Ask about employees, contracts, absences, and presence. More data soon.",
+  },
+  // A single message types once and then holds. The sr-only span carries the
+  // full phrase from the first frame, so the settled state is reached when
+  // the visible (typed) span matches it too — two text hits pin Chromatic's
+  // capture to that state.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await waitFor(
+      () => expect(canvas.getAllByText("Ask a data question.")).toHaveLength(2),
+      { timeout: 5000 }
+    )
   },
 }
 

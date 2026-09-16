@@ -1,18 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useCallback, useState } from "react"
 import { F0Button } from "@/components/F0Button"
+import { Laptop, Money, People, Star } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import type { DeferredNodesPayload, GraphNode } from "../types"
-
+import { F0GraphNode, type F0GraphNodeTag } from "../components/F0GraphNode"
 import {
   F0Graph,
   type F0GraphNodeRenderContext,
   type F0GraphProps,
 } from "../F0Graph"
-import { F0GraphNode } from "../components/F0GraphNode"
+import type { DeferredNodesPayload, GraphNode } from "../types"
 
 const meta = {
   title: "Graph/F0Graph",
@@ -43,6 +41,10 @@ const meta = {
     maxZoom: {
       control: { type: "number", min: 1, max: 4, step: 0.1 },
     },
+    centerOnNodeClick: { control: "boolean" },
+    nodeClickZoom: {
+      control: { type: "number", min: 0.1, max: 2, step: 0.1 },
+    },
 
     // ---- Hidden from controls ----
     nodes: { table: { disable: true } },
@@ -60,6 +62,7 @@ const meta = {
     onNodeSelect: { table: { disable: true } },
     focusedNode: { table: { disable: true } },
     highlightedNodes: { table: { disable: true } },
+    viewportInset: { table: { disable: true } },
     layoutEngine: { table: { disable: true } },
     controlLabels: { table: { disable: true } },
     onZoomLevelChange: { table: { disable: true } },
@@ -92,8 +95,8 @@ interface Employee {
   phone?: string
   workEmail?: string
   workplace?: string
-  workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
-  teams?: ReadonlyArray<Team>
+  workableDays?: readonly ("M" | "T" | "W" | "R" | "F" | "S" | "U")[]
+  teams?: readonly Team[]
 }
 
 function profileDefaults(
@@ -353,11 +356,11 @@ export const Lazy: Story = {
     loadChildren: async (nodeId: string) => {
       const lazyChildren: Record<
         string,
-        Array<{
+        {
           id: string
           data: { name: string; title: string }
           childrenCount: number
-        }>
+        }[]
       > = {
         "vp-eng": [
           {
@@ -740,6 +743,77 @@ export const InitialFocus: Story = {
     defaultExpandDepth: 2,
     initialFocusNodeId: "dept-4-member-100",
   },
+}
+
+// ─── Click-to-focus + side-panel inset ─────────────────────────────
+
+/**
+ * Clicking a node flies to it (F0Graph's default `centerOnNodeClick`), zooming
+ * in close and centering it. This demo opens a fixed-width (480px) side panel on
+ * selection and passes `viewportInset={{ right: 480 }}` while it's open, so the
+ * clicked node lands centered in the free area beside the panel instead of behind
+ * it. Click nodes with the panel open vs. closed to see the offset; click the
+ * empty canvas to dismiss the panel.
+ */
+function ClickToFocusWithSidePanelDemo() {
+  const nodes = makeLargeTree(600)
+  const [selected, setSelected] = useState<GraphNode<Employee> | null>(null)
+  const PANEL_WIDTH = 480
+  const byId = useCallback(
+    (id: string) => nodes.find((n) => n.id === id) ?? null,
+    [nodes]
+  )
+
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <F0Graph<Employee>
+        nodes={nodes}
+        renderNode={renderEmployee}
+        showControls
+        defaultExpandDepth={2}
+        selectionMode="single"
+        // The side panel is a fixed-width drawer; feed its width as the inset
+        // while it's open so every fly-to clears it. `0` while closed behaves
+        // exactly as if there were no inset.
+        viewportInset={{ right: selected ? PANEL_WIDTH : 0 }}
+        onSelectedNodesChange={(next) => {
+          const id = [...next][0]
+          setSelected(id ? byId(id) : null)
+        }}
+        onPaneClick={() => setSelected(null)}
+      />
+      {selected ? (
+        <div
+          className="absolute right-0 top-0 z-20 flex h-full flex-col gap-2 border-l border-f1-border bg-f1-background p-6 shadow-lg"
+          style={{ width: PANEL_WIDTH }}
+        >
+          <div className="text-lg font-semibold text-f1-foreground">
+            {selected.data.name}
+          </div>
+          <div className="text-f1-foreground-secondary">
+            {selected.data.title}
+          </div>
+          <F0Button
+            variant="neutral"
+            label="Close"
+            onClick={() => setSelected(null)}
+          />
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export const ClickToFocusWithSidePanel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click a node to fly to it (default `centerOnNodeClick`). A fixed-width side panel opens on selection and `viewportInset={{ right: 480 }}` keeps the centered node in the visible area beside it. Click the canvas to dismiss.",
+      },
+    },
+  },
+  render: () => <ClickToFocusWithSidePanelDemo />,
 }
 
 // ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
@@ -1141,8 +1215,11 @@ export const Controlled: Story = {
             onExpandToggle={(nodeId, expanded) => {
               setExpandedNodes((prev) => {
                 const next = new Set(prev)
-                if (expanded) next.add(nodeId)
-                else next.delete(nodeId)
+                if (expanded) {
+                  next.add(nodeId)
+                } else {
+                  next.delete(nodeId)
+                }
                 return next
               })
             }}
@@ -1151,8 +1228,11 @@ export const Controlled: Story = {
             onNodeSelect={(nodeId, selected) => {
               setSelectedNodes((prev) => {
                 const next = new Set(prev)
-                if (selected) next.add(nodeId)
-                else next.delete(nodeId)
+                if (selected) {
+                  next.add(nodeId)
+                } else {
+                  next.delete(nodeId)
+                }
                 return next
               })
             }}
@@ -1244,6 +1324,313 @@ export const StagedLoadingError: Story = {
     onDeferredLoadError: (error: Error) => {
       // eslint-disable-next-line no-console
       console.error("[StagedLoadingError] Deferred load failed:", error.message)
+    },
+  },
+}
+
+// ─── Stacked nodes ──────────────────────────────────────────
+
+/**
+ * Roles whose children are job levels. Each role sets `stackNodes`, so its
+ * levels render as a tight column of compact rows under it instead of fanning
+ * out — and the column costs no horizontal space, so the roles sit as close
+ * together as they would with no children at all.
+ */
+interface CatalogNode {
+  name: string
+  kind: "root" | "role" | "level"
+  headcount?: number
+  /** Bottom of the level's salary band, in thousands. */
+  salaryFrom?: number
+  /** How many competencies the level expects. */
+  competencies?: number
+  /** How many devices the level's standard kit includes. */
+  devices?: number
+}
+
+const CATALOG_NODES: GraphNode<CatalogNode>[] = [
+  {
+    id: "catalog",
+    parentId: null,
+    data: { name: "Job catalog", kind: "root" },
+    childrenCount: 3,
+  },
+  ...["Engineering", "Design", "Sales"].flatMap((role, roleIndex) => {
+    const roleId = `role-${roleIndex}`
+    const levels = ["Junior", "Mid", "Senior", "Staff"].slice(0, 2 + roleIndex)
+    return [
+      {
+        id: roleId,
+        parentId: "catalog",
+        data: { name: role, kind: "role" as const },
+        childrenCount: levels.length,
+        // The opt-in: this role's children render as a stacked column.
+        stackNodes: true,
+      },
+      ...levels.map((level, levelIndex) => ({
+        id: `${roleId}-level-${levelIndex}`,
+        parentId: roleId,
+        data: {
+          name: `${level} ${role}`,
+          kind: "level" as const,
+          headcount: 2 + levelIndex * 3,
+          salaryFrom: 30 + levelIndex * 12,
+          competencies: 4 + levelIndex * 2,
+          devices: levelIndex < 2 ? 1 : 2,
+        },
+        childrenCount: 0,
+      })),
+    ]
+  }),
+]
+
+/**
+ * What a catalog owner reads off a job level: its salary band, how many people
+ * sit in it, how many competencies it expects, and how many devices its kit
+ * includes. All four are `raw` pills, so each declares its own `column` to get
+ * an independent toggle, label and reservation slot.
+ */
+const LEVEL_TAG_COLUMNS = [
+  "salary",
+  "headcount",
+  "competencies",
+  "devices",
+] as const
+
+const LEVEL_TAG_LABELS = {
+  salary: "Salary band",
+  headcount: "People",
+  competencies: "Competencies",
+  devices: "Devices",
+}
+
+/**
+ * The copy is deliberately terse. A row's tag area is the row width minus its
+ * indent (~227px) and the layout reserves `ceil(columns / 2)` rows of height,
+ * so the four pills have to pack into two lines: any wider and they wrap past
+ * the room reserved for them, and the next row lands on top. The icon carries
+ * what the shortened text drops, and `tagLabels` spells it out again in the
+ * hover card.
+ */
+function catalogLevelTags(node: CatalogNode): F0GraphNodeTag[] {
+  const { headcount, salaryFrom, competencies, devices } = node
+  if (salaryFrom === undefined) {
+    return []
+  }
+  return [
+    {
+      type: "raw",
+      icon: Money,
+      text: `€${salaryFrom}k - ${salaryFrom + 10}k`,
+      column: "salary",
+    },
+    {
+      type: "raw",
+      icon: People,
+      text: `${headcount} people`,
+      column: "headcount",
+    },
+    {
+      type: "raw",
+      icon: Star,
+      text: `${competencies} competencies`,
+      column: "competencies",
+    },
+    {
+      type: "raw",
+      icon: Laptop,
+      text: `${devices}`,
+      additionalAccessibleText: `${devices} devices`,
+      column: "devices",
+    },
+  ]
+}
+
+const StackedNodesDemo = () => {
+  return (
+    <F0Graph<CatalogNode>
+      nodes={CATALOG_NODES}
+      defaultExpandDepth={2}
+      showControls
+      // No branch on `ctx.stacked`: the graph has already decided this node is
+      // a row, and F0GraphNode reads that off the spread context.
+      renderNode={(node, ctx) => (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "team", name: node.data.name }}
+          title={node.data.name}
+          subtitle={node.data.kind === "role" ? "Role" : undefined}
+        />
+      )}
+    />
+  )
+}
+
+/**
+ * A role card carries the same four columns as the levels under it, rolled up:
+ * the band runs from the bottom of its lowest level to the top of its highest,
+ * the people add up, and competencies and devices take the top level's figure
+ * (a senior level's framework and kit contain the ones below it).
+ */
+function catalogRoleTags(
+  role: string,
+  levels: CatalogNode[]
+): F0GraphNodeTag[] {
+  if (levels.length === 0) {
+    return []
+  }
+  const from = Math.min(...levels.map((l) => l.salaryFrom ?? 0))
+  const to = Math.max(...levels.map((l) => (l.salaryFrom ?? 0) + 10))
+  return [
+    {
+      type: "raw",
+      icon: Money,
+      text: `€${from}k - ${to}k`,
+      column: "salary",
+    },
+    {
+      type: "raw",
+      icon: People,
+      text: `${levels.reduce((sum, l) => sum + (l.headcount ?? 0), 0)} people`,
+      column: "headcount",
+    },
+    {
+      type: "raw",
+      icon: Star,
+      text: `${Math.max(...levels.map((l) => l.competencies ?? 0))} competencies`,
+      column: "competencies",
+    },
+    {
+      type: "raw",
+      icon: Laptop,
+      text: `${Math.max(...levels.map((l) => l.devices ?? 0))}`,
+      additionalAccessibleText: `devices for the ${role} role`,
+      column: "devices",
+    },
+  ]
+}
+
+/** The levels under each role, so a role card can roll their metadata up. */
+const LEVELS_BY_ROLE = CATALOG_NODES.reduce<Record<string, CatalogNode[]>>(
+  (acc, node) => {
+    if (node.data.kind !== "level") {
+      return acc
+    }
+    const role = node.data.name.split(" ").slice(1).join(" ")
+    acc[role] = [...(acc[role] ?? []), node.data]
+    return acc
+  },
+  {}
+)
+
+const StackedNodesWithTagsDemo = () => {
+  return (
+    <F0Graph<CatalogNode>
+      nodes={CATALOG_NODES}
+      defaultExpandDepth={2}
+      showControls
+      // Declaring the columns is what makes the reservation scale: the layout
+      // sizes the tag area from how many tag types are visible. Passing only
+      // `reserveTagRow` would reserve a single row no matter how many tags
+      // render, and the wrapped rows would collide with the row below.
+      nodeTagTypes={LEVEL_TAG_COLUMNS}
+      renderNode={(node, ctx) => (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "team", name: node.data.name }}
+          title={node.data.name}
+          subtitle={node.data.kind === "role" ? "Role" : undefined}
+          tags={
+            node.data.kind === "role"
+              ? catalogRoleTags(
+                  node.data.name,
+                  LEVELS_BY_ROLE[node.data.name] ?? []
+                )
+              : catalogLevelTags(node.data)
+          }
+          tagLabels={LEVEL_TAG_LABELS}
+        />
+      )}
+    />
+  )
+}
+
+export const StackedNodes: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A parent that sets `stackNodes` renders its (leaf) children as a vertical column of compact `F0GraphNode` rows sharing its x, connected by a single trunk edge. Groups with an expandable child fall back to the normal fan-out.",
+      },
+    },
+  },
+  render: () => <StackedNodesDemo />,
+}
+
+export const StackedNodesWithTags: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Tags on stacked rows. The strip keeps its fixed height and the tags sit under it, in room the layout reserves per row (`reserveTagRow`) exactly as it does for a card. Detail zoom only — the tags leave with the title in compact and dot.",
+      },
+    },
+  },
+  render: () => <StackedNodesWithTagsDemo />,
+}
+
+// ─── Cards with tags ───────────────────────────────────────────
+
+const CARD_TAG_COLUMNS = ["team", "level", "devices"] as const
+
+const CARD_TAG_LABELS = {
+  team: "Team",
+  level: "Level",
+  devices: "Devices",
+}
+
+/** Deliberately uneven — the reservation is the same for all five, the pills are not. */
+const CARD_TAGS: Record<string, F0GraphNodeTag[]> = {
+  "1": [{ type: "raw", icon: People, text: "Board", column: "team" }],
+  "2": [
+    { type: "raw", icon: People, text: "Platform", column: "team" },
+    { type: "raw", icon: Laptop, text: "3", column: "devices" },
+  ],
+  "3": [],
+  "4": [
+    { type: "raw", icon: People, text: "Core Engineering", column: "team" },
+    { type: "raw", icon: Star, text: "Senior", column: "level" },
+    { type: "raw", icon: Laptop, text: "2", column: "devices" },
+  ],
+  "5": [{ type: "raw", icon: People, text: "Quality", column: "team" }],
+}
+
+export const CardsWithTags: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Tags under a node card, with a different number of pills per node. A connector runs the whole way from the pill it leaves to the node it points at; the tag block crops the part that would otherwise cross it, so the metadata reads as sitting on the line rather than being pierced by it. Use the controls popover to toggle a column and watch the connectors stay put.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    defaultExpandDepth: 2,
+    showControls: true,
+    nodeTagTypes: CARD_TAG_COLUMNS,
+    renderNode: (node, ctx) => {
+      const [firstName = "", lastName = ""] = node.data.name.split(" ")
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={node.data.name}
+          subtitle={node.data.title}
+          tags={CARD_TAGS[node.id]}
+          tagLabels={CARD_TAG_LABELS}
+        />
+      )
     },
   },
 }

@@ -2,7 +2,6 @@ import { IconType } from "@/components/F0Icon"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SortingsDefinition, SummariesDefinition } from "../../types"
@@ -42,7 +41,8 @@ export const useVisualizationMeta = () => {
     }
 
     return {
-      icon: collectionVisualizations[visualization.type].icon,
+      icon:
+        visualization.icon ?? collectionVisualizations[visualization.type].icon,
       label:
         visualization.label ??
         i18n.collections.visualizations[visualization.type],

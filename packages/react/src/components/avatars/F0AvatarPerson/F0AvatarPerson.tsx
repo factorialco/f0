@@ -1,5 +1,4 @@
-import { PersonNegative } from "@/icons/app"
-
+import { PersonNegative, SearchPerson } from "@/icons/app"
 import { BaseAvatar } from "../internal/BaseAvatar"
 import { F0AvatarPersonProps } from "./types"
 
@@ -12,7 +11,14 @@ export const F0AvatarPerson = ({
   "aria-labelledby": ariaLabelledby,
   badge,
   deactivated,
+  pending,
 }: F0AvatarPersonProps) => {
+  const stateIcon = deactivated
+    ? PersonNegative
+    : pending
+      ? SearchPerson
+      : undefined
+
   return (
     <BaseAvatar
       type="rounded"
@@ -23,9 +29,7 @@ export const F0AvatarPerson = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
-      icon={
-        deactivated ? { icon: PersonNegative, color: "secondary" } : undefined
-      }
+      icon={stateIcon ? { icon: stateIcon, color: "secondary" } : undefined}
     />
   )
 }

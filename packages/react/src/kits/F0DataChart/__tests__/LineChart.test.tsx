@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 
 // ---------------------------------------------------------------------------
@@ -13,6 +12,9 @@ import { F0DataChart } from "../F0DataChart"
 // ---------------------------------------------------------------------------
 
 const setOptionMock = vi.fn()
+const onMock = vi.fn()
+const zrOnMock = vi.fn()
+const zrSetCursorStyleMock = vi.fn()
 
 vi.mock("echarts", () => ({
   init: vi.fn(() => ({
@@ -20,13 +22,22 @@ vi.mock("echarts", () => ({
     resize: vi.fn(),
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
-    on: vi.fn(),
+    getOption: getLatestOption,
+    containPixel: vi.fn(() => false),
+    on: onMock,
     off: vi.fn(),
+    getZr: vi.fn(() => ({
+      on: zrOnMock,
+      off: vi.fn(),
+      setCursorStyle: zrSetCursorStyleMock,
+    })),
+    isDisposed: vi.fn(() => false),
   })),
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
   graphic: {
     LinearGradient: vi.fn(function LinearGradient(this: object) {
+      // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
       return this
     }),
   },
@@ -49,19 +60,86 @@ vi.mock("../utils/useContainerSize", () => ({
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
-    series: Array<{ areaStyle?: unknown }>
+    series: { areaStyle?: unknown }[]
     legend?: { show?: boolean }
     xAxis: { axisLabel: { show: boolean } }
     yAxis: { axisLabel: { show: boolean } }
+    tooltip?: {
+      formatter?: (params: unknown) => string
+    }
   }
 }
 
 beforeEach(() => {
   setOptionMock.mockClear()
+  onMock.mockClear()
+  zrOnMock.mockClear()
+  zrSetCursorStyleMock.mockClear()
   containerSize.width = 800
   containerSize.height = 320
+})
+
+describe("LineChart — click hit area", () => {
+  /**
+   * Pins the wiring, not the resolution (which `usePointClick`'s own tests
+   * cover): a line is too thin to require a hit on it, so this chart has to
+   * listen at the canvas level and must NOT take the mark-only path.
+   */
+  it("listens for clicks across the plot area, not on the marks", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb", "Mar"]}
+        series={[{ name: "Revenue", data: [1, 2, 3] }]}
+        onPointClick={vi.fn()}
+      />
+    )
+
+    expect(zrOnMock).toHaveBeenCalledWith("click", expect.any(Function))
+    expect(zrOnMock).toHaveBeenCalledWith("mousemove", expect.any(Function))
+    expect(zrOnMock).toHaveBeenCalledWith("globalout", expect.any(Function))
+    expect(onMock).not.toHaveBeenCalledWith("click", expect.any(Function))
+  })
+
+  it("keeps axis labels distinct from the clickable plot", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb", "Mar"]}
+        series={[{ name: "Revenue", data: [1, 2, 3] }]}
+        onPointClick={vi.fn()}
+      />
+    )
+
+    const axisMouseOver = onMock.mock.calls.find(
+      ([event]) => event === "mouseover"
+    )?.[1] as ((params: Record<string, unknown>) => void) | undefined
+
+    axisMouseOver?.({
+      componentType: "xAxis",
+      componentIndex: 0,
+      value: "Jan",
+      event: { offsetX: 40, offsetY: 240 },
+    })
+
+    expect(zrSetCursorStyleMock).toHaveBeenCalledWith("default")
+
+    zrSetCursorStyleMock.mockClear()
+    zrOnMock.mock.calls
+      .filter(([event]) => event === "mousemove")
+      .forEach(([, handler]) =>
+        (handler as (params: Record<string, unknown>) => void)({
+          offsetX: 40,
+          offsetY: 240,
+        })
+      )
+
+    expect(zrSetCursorStyleMock).toHaveBeenCalledWith("default")
+  })
 })
 
 describe("LineChart — area mode", () => {
@@ -155,5 +233,51 @@ describe("LineChart — responsive breakpoints", () => {
     expect(option.legend?.show).toBe(true)
     expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(true)
+  })
+})
+
+describe("LineChart — tooltip value formatting", () => {
+  const hoverFirstPoint = () =>
+    getLatestOption().tooltip?.formatter?.([
+      { axisValue: "A", seriesName: "S", value: 107505, dataIndex: 0 },
+    ])
+
+  it("falls back to the axis formatter when no tooltipValueFormatter is given", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K €`}
+      />
+    )
+
+    expect(hoverFirstPoint()).toContain("108K €")
+  })
+
+  it("uses a plain localized number when neither formatter is given", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+      />
+    )
+
+    expect(hoverFirstPoint()).toContain((107505).toLocaleString())
+  })
+
+  it("lets tooltipValueFormatter keep a unit the axis formatter would drop", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        tooltipValueFormatter={(v) => `${v.toLocaleString("en-US")} €`}
+      />
+    )
+
+    expect(hoverFirstPoint()).toContain("107,505 €")
   })
 })

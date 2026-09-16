@@ -1,15 +1,23 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
-
+import { useI18n } from "@/lib/providers/i18n"
 import type {
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
   F0DataChartLineSeries,
   F0DataChartLineType,
 } from "../../types"
-
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions } from "../../utils/options"
+import {
+  buildBaseChartOptions,
+  deltaRow,
+  renderValueTooltip,
+  tooltipValueFormat,
+} from "../../utils/options"
+import {
+  referenceLineRows,
+  referenceLineSeries,
+} from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -65,15 +73,25 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
 /**
  * Build a single ECharts line series entry from an F0DataChartLineSeries.
  */
-function buildSeriesEntry(
-  series: F0DataChartLineSeries,
-  index: number,
-  globalLineType: F0DataChartLineType,
-  globalShowArea: boolean,
-  showDots: boolean,
-  showLabels: boolean,
+type BuildSeriesEntryOptions = {
+  series: F0DataChartLineSeries
+  index: number
+  globalLineType: F0DataChartLineType
+  globalShowArea: boolean
+  showDots: boolean
+  showLabels: boolean
   labelColor: string
-): echarts.LineSeriesOption {
+}
+
+function buildSeriesEntry({
+  series,
+  index,
+  globalLineType,
+  globalShowArea,
+  showDots,
+  showLabels,
+  labelColor,
+}: BuildSeriesEntryOptions): echarts.LineSeriesOption {
   const color = resolveColor(series, index)
   const lineType = series.lineType ?? globalLineType
   const showArea = series.showArea ?? globalShowArea
@@ -146,12 +164,15 @@ export function useLineChartOptions(
     showGrid = true,
     showLabels = false,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
+    referenceLines,
     echartsOptions,
   }: F0DataChartLineProps,
   size: LineChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const i18n = useI18n()
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
 
@@ -171,25 +192,99 @@ export function useLineChartOptions(
     const { showCategoryAxis, showValueAxis } = responsive
 
     const echartsSeries = series.map((s, i) =>
-      buildSeriesEntry(
+      buildSeriesEntry({
         // When forced off, also strip the per-series override so it doesn't
-        // accidentally re-enable area on a single series in `buildSeriesEntry`.
-        isMultiSeries ? { ...s, showArea: false } : s,
-        i,
-        lineType,
-        effectiveShowArea,
+        series:
+          // accidentally re-enable area on a single series in `buildSeriesEntry`.
+          isMultiSeries ? { ...s, showArea: false } : s,
+        index: i,
+        globalLineType: lineType,
+        globalShowArea: effectiveShowArea,
         showDots,
         showLabels,
-        theme.colors.foregroundSecondary
-      )
+        labelColor: theme.colors.foregroundSecondary,
+      })
     )
 
     const legendData = series.map((s) => s.name)
 
-    return buildBaseChartOptions({
+    const formatTooltipValue = tooltipValueFormat(
+      tooltipValueFormatter,
+      valueFormatter
+    )
+
+    // Lines keep the axis trigger — a line is too thin to hover reliably —
+    // but render the shared tooltip card. With one series that is the same
+    // card every other chart type shows; with several, the category heads
+    // the card and each series becomes a row.
+    const tooltipFormatter = (params: unknown) => {
+      if (!Array.isArray(params) || params.length === 0) {
+        return ""
+      }
+      const points = params as {
+        seriesName?: string
+        axisValueLabel?: string
+        name?: string
+        value?: number
+        dataIndex?: number
+        marker?: string
+      }[]
+      const first = points[0]
+      const category = String(first?.axisValueLabel ?? first?.name ?? "")
+
+      if (points.length === 1 && first) {
+        const value = Number(first.value)
+        const dataIndex = first.dataIndex ?? 0
+        const hovered = series.find((s) => s.name === first.seriesName)
+        const previous =
+          dataIndex > 0 && hovered
+            ? getValue(hovered.data[dataIndex - 1])
+            : undefined
+        return renderValueTooltip(
+          {
+            marker: first.marker,
+            title: String(first.seriesName ?? ""),
+            subtitle: category,
+            value: formatTooltipValue(value),
+            rows: [
+              deltaRow(
+                value,
+                previous,
+                i18n.dataChart.tooltip.fromPrevious,
+                theme
+              ),
+              // A line's tooltip fires on the axis, which owns the whole plot,
+              // so its marks never receive the pointer and must ride along here.
+              ...referenceLineRows(referenceLines, formatTooltipValue),
+            ],
+          },
+          theme
+        )
+      }
+
+      return renderValueTooltip(
+        {
+          title: category,
+          rows: [
+            ...points.map((point) => ({
+              marker: point.marker,
+              value: formatTooltipValue(Number(point.value)),
+              label: String(point.seriesName ?? ""),
+            })),
+            ...referenceLineRows(referenceLines, formatTooltipValue),
+          ],
+        },
+        theme
+      )
+    }
+
+    const lineOptions = buildBaseChartOptions({
       categories,
       theme,
-      series: echartsSeries,
+      series: [
+        ...echartsSeries,
+        ...referenceLineSeries(referenceLines, theme, "y"),
+      ],
       legendData,
       isVertical: true,
       showGrid,
@@ -197,12 +292,15 @@ export function useLineChartOptions(
       showCategoryAxis,
       showValueAxis,
       valueFormatter,
+      tooltipFormatter,
       categoryFormatter,
       echartsOptions,
       containerWidth,
       containerHeight,
       boundaryGap: false,
     })
+
+    return lineOptions
   }, [
     categories,
     series,
@@ -213,9 +311,12 @@ export function useLineChartOptions(
     showGrid,
     showLabels,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
+    referenceLines,
     echartsOptions,
     theme,
+    i18n,
     containerWidth,
     containerHeight,
     size,

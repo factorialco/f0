@@ -11,36 +11,12 @@ const SvgCalculator = (
     ref={ref}
     {...props}
   >
-    <rect
-      width={12}
-      height={16}
-      x={6}
-      y={4}
-      stroke="currentColor"
-      rx={3}
-      vectorEffect="non-scaling-stroke"
-    />
-    <path stroke="currentColor" d="M18 8H6" vectorEffect="non-scaling-stroke" />
-    <path
-      stroke="currentColor"
-      d="M14 8V20"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      d="M10 8V20"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      d="M18 12H6"
-      vectorEffect="non-scaling-stroke"
-    />
-    <path
-      stroke="currentColor"
-      d="M14 16H6"
-      vectorEffect="non-scaling-stroke"
-    />
+    <rect width={12} height={16} x={6} y={4} stroke="currentColor" rx={3} />
+    <path stroke="currentColor" d="M18 8H6" />
+    <path stroke="currentColor" d="M14 8V20" />
+    <path stroke="currentColor" d="M10 8V20" />
+    <path stroke="currentColor" d="M18 12H6" />
+    <path stroke="currentColor" d="M14 16H6" />
   </svg>
 )
 const ForwardRef = forwardRef(SvgCalculator)

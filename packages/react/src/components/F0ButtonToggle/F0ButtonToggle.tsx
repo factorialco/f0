@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
-
 import { F0ButtonToggleInternal } from "./internal/F0ButtonToggle.internal"
 import { F0ButtonToggleInternalProps } from "./internal/types.internal"
 

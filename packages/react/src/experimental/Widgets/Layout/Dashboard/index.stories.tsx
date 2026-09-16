@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { AreaChartWidget } from "../../Charts/AreaChartWidget"
 import AreaChartWidgetStoriesMeta from "../../Charts/AreaChartWidget/index.stories"
@@ -15,7 +14,7 @@ import RadialProgressWidgetStoriesMeta from "../../Charts/RadialProgressWidget/i
 import { VerticalBarChartWidget } from "../../Charts/VerticalBarChartWidget"
 import VerticalBarChartWidgetStoriesMeta from "../../Charts/VerticalBarChartWidget/index.stories"
 import { Widget } from "../../Widget"
-import { Dashboard } from "./index"
+import { Dashboard } from "."
 
 /* eslint-disable react/jsx-key */
 const widgets = [
@@ -50,13 +49,7 @@ const meta = {
     widgetWidth: "sm",
     children: Array.from({ length: 20 }, (_, i) => widgets[i % widgets.length]),
   },
-  parameters: {
-    a11y: {
-      config: {
-        rules: [{ id: "svg-img-alt", enabled: false }],
-      },
-    },
-  },
+  parameters: {},
 } satisfies Meta<typeof Dashboard>
 
 export default meta

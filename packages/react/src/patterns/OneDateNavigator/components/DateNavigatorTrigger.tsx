@@ -1,21 +1,20 @@
 import { forwardRef, useEffect, useMemo, useState } from "react"
-
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import type {
   DateRange,
   DateRangeComplete,
   GranularityDefinition,
 } from "@/components/OneCalendar"
-
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { granularityDefinitions } from "@/components/OneCalendar/granularities"
+import {
+  NavigationGranularityKey,
+  resolveGranularityDefinition,
+} from "@/components/OneCalendar/granularities"
 import { isAfterOrEqual, isBeforeOrEqual } from "@/components/OneCalendar/utils"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
-
-import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { DatePickerValue } from "../types"
 
 type DateNavigatorTriggerProps = {
@@ -65,7 +64,7 @@ const DateNavigatorTrigger = forwardRef<
 
       // Use the granularity prop if provided, otherwise fall back to static definitions
       const granularityToUse =
-        granularity || granularityDefinitions[value.granularity]
+        granularity || resolveGranularityDefinition(value.granularity)
 
       const values = [
         value.value,
@@ -145,7 +144,7 @@ const DateNavigatorTrigger = forwardRef<
     }
 
     type GranularityTranslations = {
-      [key in GranularityDefinitionKey]: {
+      [key in NavigationGranularityKey]: {
         currentDate: string
       }
     }
@@ -170,7 +169,7 @@ const DateNavigatorTrigger = forwardRef<
             navigation ? "justify-between" : "justify-center"
           )}
         >
-          {navigation && (
+          {navigation ? (
             <F0Button
               size="sm"
               variant="ghost"
@@ -180,7 +179,7 @@ const DateNavigatorTrigger = forwardRef<
               disabled={!nextPrev?.prev}
               onClick={() => handleNavigation(nextPrev?.prev ?? false)}
             />
-          )}
+          ) : null}
           <ButtonInternal
             fontSize="md"
             size="sm"
@@ -191,7 +190,7 @@ const DateNavigatorTrigger = forwardRef<
             style={{ minWidth: granularity?.toStringMaxWidth() }}
             className={cn(highlighted && "bg-f1-background-secondary-hover")}
           />
-          {navigation && (
+          {navigation ? (
             <F0Button
               variant="ghost"
               icon={ChevronRight}
@@ -202,9 +201,9 @@ const DateNavigatorTrigger = forwardRef<
               disabled={!nextPrev?.next}
               onClick={() => handleNavigation(nextPrev?.next ?? false)}
             />
-          )}
+          ) : null}
         </div>
-        {!hideGoToCurrent && currentDate && (
+        {!hideGoToCurrent && currentDate ? (
           <div className="border-l-solid flex-shrink-0 border-[#f00]">
             <F0Button
               fontSize="md"
@@ -218,7 +217,7 @@ const DateNavigatorTrigger = forwardRef<
               onClick={handleClickCurrentDate}
             />
           </div>
-        )}
+        ) : null}
       </div>
     )
   }

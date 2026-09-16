@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const meta = {
@@ -31,7 +30,22 @@ export const TagType: Story = {
         type: "tag",
         value: {
           label: item.status,
-          color: item.status === "active" ? "green" : "red",
+        },
+      }),
+    },
+  },
+}
+
+export const NeutralTagType: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Tag",
+      render: (item) => ({
+        type: "tag",
+        value: {
+          label: item.status,
+          variant: "neutral",
         },
       }),
     },

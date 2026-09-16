@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest"
-
 import type {
   FiltersDefinition,
   FiltersState,
   PresetDefinition,
 } from "../types"
-
 import { isPresetSelected } from "./isPresetSelected"
 
 type TestFilters = FiltersDefinition

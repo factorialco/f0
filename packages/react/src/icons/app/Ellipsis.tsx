@@ -17,7 +17,6 @@ const SvgEllipsis = (
       r={1.5}
       fill="currentColor"
       transform="rotate(90 12 12)"
-      vectorEffect="non-scaling-stroke"
     />
     <circle
       cx={12}
@@ -25,7 +24,6 @@ const SvgEllipsis = (
       r={1.5}
       fill="currentColor"
       transform="rotate(90 12 6.5)"
-      vectorEffect="non-scaling-stroke"
     />
     <circle
       cx={12}
@@ -33,7 +31,6 @@ const SvgEllipsis = (
       r={1.5}
       fill="currentColor"
       transform="rotate(90 12 17.5)"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

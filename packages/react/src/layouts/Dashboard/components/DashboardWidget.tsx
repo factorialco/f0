@@ -1,5 +1,5 @@
-import { F0Widget } from "@/components/F0Widget"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Widget } from "@/experimental/Widgets/Widget"
 
 export interface DashboardWidgetProps {
   children: React.ReactNode
@@ -19,13 +19,14 @@ export const DashboardWidget = ({
   aiButton,
 }: DashboardWidgetProps) => {
   return (
-    <F0Widget
-      title={title}
+    <Widget
+      header={{ title }}
       draggable={draggable}
       actions={actions}
       AIButton={aiButton}
+      fullHeight
     >
       {children}
-    </F0Widget>
+    </Widget>
   )
 }

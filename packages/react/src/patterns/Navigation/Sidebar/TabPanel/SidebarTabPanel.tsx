@@ -1,12 +1,10 @@
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { Fragment, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Search } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { fuzzyMatch } from "@/lib/fuzzyMatch"
 import { cn, focusRing } from "@/lib/utils"
-
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { SidebarTabPanelAction, SidebarTabPanelProps } from "./types"
 
@@ -60,9 +58,9 @@ const SidebarTabPanelActionButton = ({
       focusRing("focus-visible:ring-inset")
     )}
   >
-    {action.icon && (
+    {action.icon ? (
       <F0Icon icon={action.icon} size="md" className="text-f1-icon" />
-    )}
+    ) : null}
     <span className="line-clamp-1">{action.label}</span>
   </button>
 )
@@ -108,16 +106,19 @@ export const SidebarTabPanel = ({
   const noResults = isSearching && hasAnyItems && filteredGroups.length === 0
 
   return (
-    <div className={cn("flex w-full flex-col gap-4 px-3", className)}>
+    <div
+      className={cn("flex w-full flex-col gap-4 px-3", className)}
+      data-sidebar-tab-panel-searching={isSearching}
+    >
       {/* Search always sits at the very top of the panel. */}
-      {searchPlaceholder !== undefined && (
+      {searchPlaceholder !== undefined ? (
         <SidebarTabPanelSearch
           value={query}
           onChange={setQuery}
           placeholder={searchPlaceholder}
         />
-      )}
-      {actions && actions.length > 0 && (
+      ) : null}
+      {actions && actions.length > 0 ? (
         <div className="flex flex-col gap-0.5">
           {actions.map((action) => {
             const button = <SidebarTabPanelActionButton action={action} />
@@ -128,16 +129,16 @@ export const SidebarTabPanel = ({
             )
           })}
         </div>
-      )}
-      {showSkeleton && skeleton}
-      {!showSkeleton && !hasAnyItems && emptyState}
-      {noResults && (
+      ) : null}
+      {showSkeleton ? skeleton : null}
+      {!showSkeleton && !hasAnyItems ? emptyState : null}
+      {noResults ? (
         <p className="px-1.5 py-2 text-base text-f1-foreground-secondary">
           {noResultsLabel}
         </p>
-      )}
-      {!showSkeleton &&
-        (animateItems ? (
+      ) : null}
+      {!showSkeleton ? (
+        animateItems ? (
           // Layout-animated lists. A `LayoutGroup` lets the collapsible groups
           // remeasure together, so a row leaving one group and joining another
           // (pin/unpin) stays in sync as positions shift.
@@ -148,6 +149,7 @@ export const SidebarTabPanel = ({
                   // Remount only when search toggles on/off (not per keystroke)
                   // so a collapsed group opens to reveal its matches.
                   key={`${group.id}-${isSearching}`}
+                  data-sidebar-panel-group-id={group.id}
                   layout="position"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -171,6 +173,7 @@ export const SidebarTabPanel = ({
                     isOpen={isSearching ? true : group.isOpen}
                     highlightWhenCollapsed={group.highlightWhenCollapsed}
                     collapsedBadge={group.collapsedBadge}
+                    action={group.action}
                   >
                     {/* `popLayout` pulls an exiting row out of flow at once, so
                         the rows that stay slide up immediately instead of
@@ -214,22 +217,28 @@ export const SidebarTabPanel = ({
           </LayoutGroup>
         ) : (
           filteredGroups.map((group) => (
-            <SidebarCollapsibleSection
+            <div
               // Remount only when search toggles on/off (not per keystroke) so a
               // collapsed group opens to reveal its matches while searching.
               key={`${group.id}-${isSearching}`}
-              title={group.title ?? ""}
-              isRoot={group.title === undefined}
-              isOpen={isSearching ? true : group.isOpen}
-              highlightWhenCollapsed={group.highlightWhenCollapsed}
-              collapsedBadge={group.collapsedBadge}
+              data-sidebar-panel-group-id={group.id}
             >
-              {group.items.map((item) => (
-                <Fragment key={item.id}>{item.content}</Fragment>
-              ))}
-            </SidebarCollapsibleSection>
+              <SidebarCollapsibleSection
+                title={group.title ?? ""}
+                isRoot={group.title === undefined}
+                isOpen={isSearching ? true : group.isOpen}
+                highlightWhenCollapsed={group.highlightWhenCollapsed}
+                collapsedBadge={group.collapsedBadge}
+                action={group.action}
+              >
+                {group.items.map((item) => (
+                  <Fragment key={item.id}>{item.content}</Fragment>
+                ))}
+              </SidebarCollapsibleSection>
+            </div>
           ))
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

@@ -1,5 +1,4 @@
 import { VerticalOverflowList } from "@/ui/VerticalOverflowList"
-
 import {
   WidgetSimpleListItem,
   WidgetSimpleListItemProps,

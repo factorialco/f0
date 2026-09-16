@@ -1,4 +1,3 @@
-import flatten from "lodash/flatten"
 import React, {
   createContext,
   useCallback,
@@ -7,9 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from "react"
-
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
-
 import {
   getDefaultParamsForQuestionType,
   getDefaultQuestionTypeToAdd,
@@ -22,6 +19,8 @@ import {
   QuestionType,
   SectionElement,
   SurveyDatasets,
+  SurveyFormBuilderPlaceholders,
+  SurveyFormBuilderLabels,
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
@@ -40,6 +39,8 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  placeholders?: SurveyFormBuilderPlaceholders
+  labels?: SurveyFormBuilderLabels
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -58,6 +59,9 @@ type SurveyFormBuilderProviderProps = {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  placeholders?: SurveyFormBuilderPlaceholders
+  labels?: SurveyFormBuilderLabels
+  skipDefaultSection?: boolean
 }
 
 export function SurveyFormBuilderProvider({
@@ -72,6 +76,9 @@ export function SurveyFormBuilderProvider({
   onFieldBlur,
   useUpload,
   datasets,
+  placeholders,
+  labels,
+  skipDefaultSection,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -81,7 +88,9 @@ export function SurveyFormBuilderProvider({
 
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
-    if (!lastElement) return undefined
+    if (!lastElement) {
+      return undefined
+    }
 
     return lastElement.type === "section"
       ? lastElement.section.id
@@ -285,12 +294,10 @@ export function SurveyFormBuilderProvider({
     SurveyFormBuilderCallbacks["onDuplicateElement"]
   > = useCallback(
     ({ elementId }) => {
-      const flattenedElements = flatten(
-        elementsRef.current.map((element) =>
-          element.type === "section"
-            ? [element, ...(element.section.questions ?? [])]
-            : [element.question]
-        )
+      const flattenedElements = elementsRef.current.flatMap((element) =>
+        element.type === "section"
+          ? [element, ...(element.section.questions ?? [])]
+          : [element.question]
       )
 
       const element = flattenedElements.find((element) =>
@@ -326,12 +333,10 @@ export function SurveyFormBuilderProvider({
   )
 
   const getQuestionById = useCallback((questionId: string) => {
-    const questions = flatten(
-      elementsRef.current.map((element) =>
-        element.type === "question"
-          ? [element.question]
-          : element.section.questions
-      )
+    const questions = elementsRef.current.flatMap((element) =>
+      element.type === "question"
+        ? [element.question]
+        : (element.section.questions ?? [])
     )
     return questions.find((question) => question?.id === questionId)
   }, [])
@@ -402,14 +407,13 @@ export function SurveyFormBuilderProvider({
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      if (isEmpty && !disabled && !answering) {
+      if (isEmpty && !disabled && !answering && !skipDefaultSection) {
         handleAddNewElement({
           type: "section",
         })
       }
-      return
     }
-  }, [isEmpty, handleAddNewElement, disabled])
+  }, [isEmpty, handleAddNewElement, disabled, answering, skipDefaultSection])
 
   const isQuestionTypeAllowed = useCallback(
     (questionType: QuestionType) => {
@@ -442,6 +446,8 @@ export function SurveyFormBuilderProvider({
       onFieldBlur,
       useUpload,
       datasets,
+      placeholders,
+      labels,
     }),
     [
       handleQuestionChange,
@@ -461,6 +467,8 @@ export function SurveyFormBuilderProvider({
       onFieldBlur,
       useUpload,
       datasets,
+      placeholders,
+      labels,
     ]
   )
 

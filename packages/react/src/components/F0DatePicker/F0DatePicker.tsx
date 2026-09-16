@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import {
-  GranularityDefinitionKey,
-  granularityDefinitions,
+  NavigationGranularityKey,
+  resolveGranularityDefinition,
 } from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
-
 import { DateInput } from "./components/DateInput"
 import { DatePickerValue, F0DatePickerProps } from "./types"
 
@@ -37,13 +35,10 @@ export function F0DatePicker({
   }, [granularities])
 
   const getGranularity = useCallback(
-    (granularityKey: GranularityDefinitionKey | undefined) => {
+    (granularityKey: NavigationGranularityKey | undefined) => {
       const key = granularityKey || defaultGranularity
-      if (!granularityDefinitions[key]) {
-        throw new Error(`Invalid granularity ${key}`)
-      }
       return {
-        ...granularityDefinitions[key],
+        ...resolveGranularityDefinition(key),
         key,
       }
     },
@@ -55,7 +50,9 @@ export function F0DatePicker({
    */
   const toSafeRange = useCallback(
     (value: DatePickerValue | undefined) => {
-      if (!value) return undefined
+      if (!value) {
+        return undefined
+      }
 
       const granularity = getGranularity(value.granularity)
       const range = granularity.toRange(
@@ -66,7 +63,9 @@ export function F0DatePicker({
 
       // Normalize { value: undefined } to undefined so isSameDatePickerValue
       // correctly detects "no change" on subsequent blur events after a clear.
-      if (!range) return undefined
+      if (!range) {
+        return undefined
+      }
 
       return { value: range, granularity: value.granularity }
     },

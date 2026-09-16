@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
-
 import * as Icons from "../../icons/app"
 import { withSnapshot } from "../../lib/storybook-utils/parameters"
-import { Chip } from "./index"
+import { Chip } from "."
 
 const meta = {
   component: Chip,
@@ -107,12 +105,12 @@ export const ClickableAndRemovable: Story = {
 
 export const WithAvatar: Story = {
   args: {
-    label: "Dani Moreno",
+    label: "Jordan Avery",
     variant: "default",
     avatar: {
       type: "person",
-      firstName: "Dani",
-      lastName: "Moreno",
+      firstName: "Jordan",
+      lastName: "Avery",
       src: "/avatars/person01.jpg",
     },
   },
@@ -226,8 +224,8 @@ export const Snapshot: Story = {
         label="With avatar"
         avatar={{
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: "Jordan",
+          lastName: "Avery",
           src: "/avatars/person01.jpg",
         }}
       />

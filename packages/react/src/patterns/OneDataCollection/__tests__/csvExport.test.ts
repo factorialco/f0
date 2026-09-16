@@ -1,15 +1,12 @@
 import { describe, expect, test } from "vitest"
-
 import type { RecordType } from "@/hooks/datasource"
-
-import type { Visualization } from "../visualizations/collection"
-
 import {
   escapeCSVCell,
   extractDisplayValue,
   extractTypedCellValue,
   extractColumns,
 } from "../utils/csvExport"
+import type { Visualization } from "../visualizations/collection"
 
 type AnyVisualization = Visualization<
   RecordType,

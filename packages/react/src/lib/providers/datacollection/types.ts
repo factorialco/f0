@@ -1,9 +1,9 @@
+import { DataCollectionStatus } from "@/patterns/OneDataCollection/hooks/useDataColectionStorage/types"
+import { DataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import { DataCollectionStatus } from "@/patterns/OneDataCollection/hooks/useDataColectionStorage/types"
-import { DataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 
 export type DataCollectionStorage<
   CurrentFiltersState extends FiltersState<FiltersDefinition> =

@@ -9,6 +9,10 @@
  * - `sm` (< 220px)  → narrow chat card: minimal chrome.
  * - `md` (220–519px) → wide chat card: legend + value-side axes.
  * - `lg` (≥ 520px)  → dashboard cell: full chrome (legend + both axes).
+ *
+ * Each chart hook owns what it does with the size, so a family may deviate
+ * where the layout demands it — bar charts keep their category axis at `md` in
+ * both orientations, since those labels are the subjects being compared.
  */
 export type ChartResponsiveSize = "sm" | "md" | "lg"
 
@@ -23,8 +27,14 @@ export const MD_MAX_WIDTH = 520
  * charts that will end up large once measured.
  */
 export function resolveChartSize(width: number): ChartResponsiveSize {
-  if (width === 0) return "lg"
-  if (width < SM_MAX_WIDTH) return "sm"
-  if (width < MD_MAX_WIDTH) return "md"
+  if (width === 0) {
+    return "lg"
+  }
+  if (width < SM_MAX_WIDTH) {
+    return "sm"
+  }
+  if (width < MD_MAX_WIDTH) {
+    return "md"
+  }
   return "lg"
 }

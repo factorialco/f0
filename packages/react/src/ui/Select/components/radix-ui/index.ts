@@ -8,6 +8,7 @@ export {
   ItemIndicator,
   ItemText,
   Label,
+  Listbox,
   Portal,
   //
   Root,
@@ -23,6 +24,7 @@ export {
   SelectItemIndicator,
   SelectItemText,
   SelectLabel,
+  SelectListbox,
   SelectPortal,
   SelectScrollDownButton,
   SelectScrollUpButton,
@@ -45,6 +47,7 @@ export type {
   SelectItemProps,
   SelectItemTextProps,
   SelectLabelProps,
+  SelectListboxProps,
   SelectPortalProps,
   SelectProps,
   SelectScrollDownButtonProps,

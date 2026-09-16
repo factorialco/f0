@@ -1,5 +1,4 @@
 import { Editor } from "@tiptap/react"
-
 import { IconType } from "@/components/F0Icon"
 import {
   CheckDouble,
@@ -16,7 +15,6 @@ import {
   Video,
 } from "@/icons/app"
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { AIBlockConfig } from "../AIBlock"
 import {
   DEFAULT_ACCEPTED_TYPES,
@@ -54,19 +52,17 @@ const getGroupedCommands = ({
       ? [
           {
             title: aiBlockConfig.title,
-            commands: [
-              ...aiBlockConfig.buttons.map((button) => ({
-                title: button.label,
-                command: (editor: Editor) => {
-                  editor
-                    .chain()
-                    .focus()
-                    .executeAIAction(button.type, aiBlockConfig)
-                    .run()
-                },
-                icon: button.icon,
-              })),
-            ],
+            commands: aiBlockConfig.buttons.map((button) => ({
+              title: button.label,
+              command: (editor: Editor) => {
+                editor
+                  .chain()
+                  .focus()
+                  .executeAIAction(button.type, aiBlockConfig)
+                  .run()
+              },
+              icon: button.icon,
+            })),
           },
         ]
       : []),

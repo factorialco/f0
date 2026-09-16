@@ -1,6 +1,5 @@
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0AudioPlayerBase } from "./F0AudioPlayer"
 import { F0AudioPlayerCardBase } from "./F0AudioPlayerCard"
 
@@ -8,6 +7,7 @@ export type {
   AudioPlayerMenuAction,
   AudioPlayerDetailTab,
   AudioPlayerContent,
+  TranscriptCue,
   F0AudioPlayerProps,
   F0AudioPlayerCardProps,
   F0AudioPlayerSize,

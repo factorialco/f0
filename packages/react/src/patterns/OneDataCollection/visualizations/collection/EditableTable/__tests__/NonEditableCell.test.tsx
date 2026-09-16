@@ -2,9 +2,7 @@ import "@testing-library/jest-dom/vitest"
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import InfoCircleLine from "@/icons/app/InfoCircleLine"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { NonEditableCell } from "../components/cells/status/NonEditableCell"
@@ -54,6 +52,27 @@ describe("NonEditableCell", () => {
     const content = screen.getByText("John Doe")
     expect(
       content.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("renders the hint icon before the cell content when hint.hintPosition is left", () => {
+    render(
+      <NonEditableCell
+        {...defaultProps}
+        hint={{
+          icon: InfoCircleLine,
+          message: "Backfilling Jane's position",
+          hintPosition: "left",
+        }}
+      />
+    )
+
+    const button = screen.getByRole("button", {
+      name: "Backfilling Jane's position",
+    })
+    const content = screen.getByText("John Doe")
+    expect(
+      button.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 

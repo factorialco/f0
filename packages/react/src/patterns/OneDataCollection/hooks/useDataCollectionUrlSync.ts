@@ -1,7 +1,6 @@
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useCallback, useEffect, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
-
 import {
   FiltersDefinition,
   FiltersState,
@@ -38,6 +37,13 @@ type UseDataCollectionUrlSyncOptions = {
   filters: FiltersState<FiltersDefinition>
   search: string | undefined
   sortings: SortingsState<SortingsDefinition>
+  /**
+   * The collection's default sortings. While the current sorting still equals
+   * it, `dc_sort` is left out of the URL, so a collection that starts already
+   * sorted (a `defaultSortings` was configured) does not stamp the param on the
+   * first paint with no user interaction.
+   */
+  defaultSortings?: SortingsState<SortingsDefinition>
   /** Index of the active visualization. */
   visualization: number
   /**
@@ -78,6 +84,7 @@ export const useDataCollectionUrlSync = ({
   filters,
   search,
   sortings,
+  defaultSortings = null,
   visualization,
   visualizationKeys,
   selectedPresetId,
@@ -94,7 +101,9 @@ export const useDataCollectionUrlSync = ({
 
   // URL → collection (run once, after hydration so the URL wins over storage).
   useEffect(() => {
-    if (!active || !storageReady || urlApplied) return
+    if (!active || !storageReady || urlApplied) {
+      return
+    }
 
     const state = parseDataCollectionUrlParams(
       typeof window !== "undefined" ? window.location.search : "",
@@ -104,16 +113,24 @@ export const useDataCollectionUrlSync = ({
     if ("filters" in state) {
       setFilters((state.filters ?? {}) as FiltersState<FiltersDefinition>)
     }
-    if ("search" in state) setSearch(state.search)
-    if ("sortings" in state) setSortings(state.sortings ?? null)
+    if ("search" in state) {
+      setSearch(state.search)
+    }
+    if ("sortings" in state) {
+      setSortings(state.sortings ?? null)
+    }
     // Map the readable view key back to its index; ignore unknown keys.
     if (syncVisualization && state.visualization !== undefined) {
       const index = visualizationKeys.indexOf(state.visualization)
-      if (index >= 0) setVisualization(index)
+      if (index >= 0) {
+        setVisualization(index)
+      }
     }
     // Restore the selected preset marker; its captured filters/sorting/view are
     // carried by the other params, so we only mark the selection here.
-    if (state.preset !== undefined) setSelectedPresetId(state.preset)
+    if (state.preset !== undefined) {
+      setSelectedPresetId(state.preset)
+    }
 
     // Enable writing in the same render as the applied state, so the first
     // write reflects the URL we just read rather than the prior snapshot.
@@ -132,18 +149,26 @@ export const useDataCollectionUrlSync = ({
   // never let it fire. `syncDataCollectionUrlParams` reads `window.location`
   // itself and takes the full state as its argument, so it needs no deps.
   const syncToUrl = useCallback(
-    (state: DataCollectionUrlState<FiltersState<FiltersDefinition>>) =>
-      syncDataCollectionUrlParams(state),
+    (state: DataCollectionUrlState) => syncDataCollectionUrlParams(state),
     []
   )
   const debouncedSync = useDebounceCallback(syncToUrl, URL_SYNC_DEBOUNCE_MS)
 
   useDeepCompareEffect(() => {
-    if (!active || !urlApplied) return
+    if (!active || !urlApplied) {
+      return
+    }
     debouncedSync({
       filters,
       search,
-      sortings,
+      // Leave `dc_sort` out while the sorting still equals the default: a
+      // collection with `defaultSortings` would otherwise stamp it on first
+      // paint with nothing clicked (and, re-read next entry, reset the nested
+      // tree). A real change away from the default writes it as before.
+      sortings:
+        JSON.stringify(sortings) === JSON.stringify(defaultSortings)
+          ? null
+          : sortings,
       // Omit the default (first) view; reflect others by their type/key.
       visualization:
         syncVisualization && visualization > 0
@@ -162,6 +187,7 @@ export const useDataCollectionUrlSync = ({
     filters,
     search,
     sortings,
+    defaultSortings,
     visualization,
     visualizationKeys,
     syncVisualization,

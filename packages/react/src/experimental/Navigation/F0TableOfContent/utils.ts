@@ -6,7 +6,9 @@ export function findExpandedPath(
 ): Set<string> {
   const expandedIds = new Set<string>()
 
-  if (!activeItemId) return expandedIds
+  if (!activeItemId) {
+    return expandedIds
+  }
 
   function findPath(
     items: TOCItem[],
@@ -92,7 +94,9 @@ export function findItemInTree(
 
       if (item.children) {
         const result = search(item.children, targetId, [...parentPath, item.id])
-        if (result) return result
+        if (result) {
+          return result
+        }
       }
     }
     return null
@@ -184,26 +188,28 @@ export function wouldCreateCycle(
   targetParentId: string | null
 ): boolean {
   // If target is root level, no cycle possible
-  if (targetParentId === null) return false
+  if (targetParentId === null) {
+    return false
+  }
 
   // If target is the item itself, cycle
-  if (targetParentId === itemId) return true
+  if (targetParentId === itemId) {
+    return true
+  }
 
   // Check if targetParentId is a descendant of itemId
   const itemData = findItemInTree(items, itemId)
-  if (!itemData) return false
+  if (!itemData) {
+    return false
+  }
 
-  function isDescendant(
-    items: TOCItem[],
-    ancestorId: string,
-    descendantId: string
-  ): boolean {
+  function isDescendant(items: TOCItem[], descendantId: string): boolean {
     for (const item of items) {
       if (item.id === descendantId) {
         return true
       }
       if (item.children) {
-        if (isDescendant(item.children, ancestorId, descendantId)) {
+        if (isDescendant(item.children, descendantId)) {
           return true
         }
       }
@@ -214,7 +220,7 @@ export function wouldCreateCycle(
   // Check if targetParentId is a descendant of itemId
   const itemWithChildren = findItemInTree(items, itemId)
   if (itemWithChildren?.item.children) {
-    return isDescendant(itemWithChildren.item.children, itemId, targetParentId)
+    return isDescendant(itemWithChildren.item.children, targetParentId)
   }
 
   return false
@@ -263,7 +269,9 @@ export function calculateAdjustedIndex(
   targetIndex: number
 ): number {
   const itemData = findItemInTree(items, itemId)
-  if (!itemData) return targetIndex
+  if (!itemData) {
+    return targetIndex
+  }
 
   let adjustedIndex = targetIndex
 

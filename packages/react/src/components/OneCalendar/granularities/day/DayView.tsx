@@ -4,17 +4,15 @@ import {
   SelectRangeEventHandler,
   SelectSingleEventHandler,
 } from "react-day-picker"
-
-import { useL10n } from "@/lib/providers/l10n"
+import { useDateFnsLocale, useL10n } from "@/lib/providers/l10n"
 import { Calendar } from "@/ui/calendar"
-
 import {
   CalendarMode,
   DateRange,
   WeekStartDay,
   WeekStartsOn,
 } from "../../types"
-import { getLocale, toCalendarPickerMatcher } from "../../utils"
+import { toCalendarPickerMatcher } from "../../utils"
 
 interface DayViewProps {
   mode: CalendarMode
@@ -35,7 +33,9 @@ interface DayViewProps {
  * because the user is still selecting the end date.
  */
 const isMultiDayRange = (range: DateRange | null | undefined): boolean => {
-  if (!range?.from || !range?.to) return false
+  if (!range?.from || !range?.to) {
+    return false
+  }
   // Check if from and to are on different days
   return range.from.toDateString() !== range.to.toDateString()
 }
@@ -52,7 +52,8 @@ export function DayView({
   compact = false,
   weekStartsOn,
 }: DayViewProps) {
-  const { locale, date } = useL10n()
+  const { date } = useL10n()
+  const locale = useDateFnsLocale()
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? date?.weekStartsOn ?? WeekStartDay.Monday
@@ -66,7 +67,9 @@ export function DayView({
    */
   const handleRangeSelect: SelectRangeEventHandler = useCallback(
     (range) => {
-      if (!onSelect) return
+      if (!onSelect) {
+        return
+      }
 
       const previousRange = selected as DateRange | undefined
       const hadMultiDayRange = isMultiDayRange(previousRange)
@@ -130,7 +133,7 @@ export function DayView({
             selected={selected as Date}
             onSelect={onSelect as SelectSingleEventHandler}
             month={month}
-            locale={getLocale(locale)}
+            locale={locale}
             weekStartsOn={effectiveWeekStartsOn}
             compact={compact}
           />
@@ -158,7 +161,7 @@ export function DayView({
           onSelect={handleRangeSelect}
           month={month}
           onMonthChange={onMonthChange}
-          locale={getLocale(locale)}
+          locale={locale}
           weekStartsOn={effectiveWeekStartsOn}
           compact={compact}
         />

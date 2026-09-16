@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-
 import type { CanvasContent, CanvasEntityDefinition } from "../canvas/types"
 
 export type F0CanvasPanelProps = {
@@ -40,6 +38,10 @@ export function F0CanvasPanel({
   side = "right",
 }: F0CanvasPanelProps): ReactNode {
   const isLeft = side === "left"
+  // `coversChat` content spans the frame instead of docking beside the chat, so
+  // there is no seam to face: both edges meet the frame and are finished the
+  // same way (rounded, bordered, inset) rather than one being left open.
+  const coversChat = content?.coversChat === true
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -59,7 +61,9 @@ export function F0CanvasPanel({
   const entity = content && entities ? entities[content.type] : undefined
 
   const renderInner = (): ReactNode => {
-    if (!content || !entity) return null
+    if (!content || !entity) {
+      return null
+    }
 
     const header = entity.renderHeader({
       content,
@@ -93,7 +97,7 @@ export function F0CanvasPanel({
 
   return (
     <AnimatePresence>
-      {content && (
+      {content ? (
         <motion.div
           className={cn(
             // No overflow on the outer wrappers so the inner card's
@@ -115,10 +119,13 @@ export function F0CanvasPanel({
             className={cn(
               "flex h-full flex-col bg-f1-special-page p-0 md:py-1 border border-solid border-f1-border-secondary",
               // Seam faces the chat: chat-right -> canvas opens on its right;
-              // chat-left -> canvas opens on its left (mirrored).
-              isLeft
-                ? "md:rounded-r-lg md:pr-1 border-l-0"
-                : "md:rounded-l-lg md:pl-1 border-r-0"
+              // chat-left -> canvas opens on its left (mirrored). A covering
+              // canvas has no chat beside it, so neither edge is a seam.
+              coversChat
+                ? "md:rounded-lg md:px-1"
+                : isLeft
+                  ? "md:rounded-r-lg md:pr-1 border-l-0"
+                  : "md:rounded-l-lg md:pl-1 border-r-0"
             )}
           >
             <motion.div
@@ -144,7 +151,7 @@ export function F0CanvasPanel({
             </motion.div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

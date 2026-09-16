@@ -13,14 +13,12 @@ const SvgCode = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M9 17L4 12L9 7"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M15 17L20 12L15 7"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

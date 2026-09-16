@@ -1,11 +1,11 @@
 import type { ReactNode } from "react"
-
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { RecordType } from "@/hooks/datasource"
 import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import type {
   F0GraphNodeTag,
   F0GraphNodeTagColumn,
+  ViewportInset,
   ZoomPreset,
 } from "@/patterns/F0Graph"
 import type {
@@ -47,13 +47,22 @@ export type GraphVisualizationOptions<
    * toggle to show/hide each metadata column (like configuring table columns).
    * Values are tag `column` keys (or `type` when a tag has no `column`).
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  nodeTagTypes?: readonly F0GraphNodeTagColumn[]
   /** Friendly labels per tag column, shown in the metadata visibility toggle. */
   nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>
   /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[]
   /** Tag columns that are always visible and cannot be hidden in the settings. */
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  pinnedTagTypes?: readonly F0GraphNodeTagColumn[]
+  /**
+   * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+   * still listed in the settings but with its toggle forced OFF and disabled,
+   * and the given (already-translated) text shown in a tooltip. Unlike
+   * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+   * icon — the disabled switch + tooltip is the affordance. The caller should
+   * also omit these columns' tags from `tags(record)`.
+   */
+  lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>
   /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -63,6 +72,29 @@ export type GraphVisualizationOptions<
   getNodeId?: (record: R) => string
   /** Number of children a node has. A node is expandable when this is `> 0`. */
   getChildrenCount: (record: R) => number
+  /**
+   * Whether this record's children render as a vertical stack of compact rows
+   * directly under it, instead of the default horizontal fan-out. Use it for
+   * children that read as a list belonging to the record rather than as
+   * branches in their own right — job levels under a role, plan tiers under a
+   * product. A stacked group reserves no horizontal space, so the record's
+   * siblings close in around it.
+   *
+   * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+   * all of them); a group with an expandable child keeps the normal fan-out.
+   * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+   * `avatar` / `subtitle` / `tags` do not apply to them.
+   */
+  stackNodes?: (record: R) => boolean
+  /**
+   * Trailing content for a stacked row — a count or a small icon button.
+   * Rendered at the row's trailing edge; clicks inside it do not select the
+   * node. Ignored for records that are not rendered as stacked rows.
+   *
+   * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+   * would promise a behaviour the graph does not have.
+   */
+  stackedTrailing?: (record: R) => ReactNode
   /**
    * Returns the filters that, applied to the source `dataAdapter`, fetch the
    * direct children of `parentId`. `parentId === null` must return the roots.
@@ -91,6 +123,18 @@ export type GraphVisualizationOptions<
    * the default entry view (roots expanded to `defaultExpandDepth`).
    */
   focusOnEntry?: string
+  /**
+   * Id of a node to mark as **selected on entry** — the click-selection ring, so
+   * a deep link lands on the graph looking the way a user's own click leaves it,
+   * not just framed. Seeded on the first render; the selection then follows
+   * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+   * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+   * branch is expanded and framed — otherwise the ring isn't visible until its
+   * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+   * the reveal highlight. Providing it puts the graph's selection in controlled
+   * mode; omitting it leaves selection uncontrolled (the default).
+   */
+  initialSelectedNodeId?: string
   /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for
@@ -155,6 +199,27 @@ export type GraphVisualizationOptions<
   minZoom?: number
   /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
   maxZoom?: number
+  /**
+   * Whether clicking a node flies to it (centers + zooms in close), passed
+   * through to F0Graph. Defaults to `true` — pass `false` for a static camera on
+   * click (selection still happens). Re-centers on every click, even a repeat.
+   * The fly starts a beat after the click so it picks up a `viewportInset` set in
+   * response to that same click (a side panel opening).
+   */
+  centerOnNodeClick?: boolean
+  /**
+   * Zoom a node click lands on (pass-through). Defaults to F0Graph's
+   * `NODE_CLICK_ZOOM` (`1.5`), clamped to `maxZoom`. Lower it for a dense tree.
+   */
+  nodeClickZoom?: number
+  /**
+   * Region of the canvas (screen px) covered by a side panel / drawer the
+   * consumer opens over the graph (pass-through to F0Graph). Every fly-to path
+   * shifts its target so the clicked / revealed node lands centered in the free
+   * area beside the panel instead of behind it. For a fixed-width drawer, pass
+   * its width while open (e.g. `{ right: 480 }`) and omit it while closed.
+   */
+  viewportInset?: ViewportInset
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
   /**

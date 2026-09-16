@@ -5,13 +5,11 @@ import {
   SelectRangeEventHandler,
   DateRange as DayPickerDateRange,
 } from "react-day-picker"
-
 import { Calendar } from "@/ui/calendar"
-
-import { useL10n } from "../../../../lib/providers/l10n"
+import { useDateFnsLocale, useL10n } from "../../../../lib/providers/l10n"
 import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
-import { getLocale, toCalendarPickerMatcher } from "../../utils"
-import { getEndOfWeek, getStartOfWeek } from "./index"
+import { toCalendarPickerMatcher } from "../../utils"
+import { getEndOfWeek, getStartOfWeek } from "."
 
 interface WeekViewProps {
   selected?: Date | DateRange | null
@@ -36,7 +34,8 @@ export function WeekView({
   compact = false,
   weekStartsOn,
 }: WeekViewProps) {
-  const { locale, date } = useL10n()
+  const { date } = useL10n()
+  const locale = useDateFnsLocale()
 
   const effectiveWeekStartsOn =
     weekStartsOn ?? date?.weekStartsOn ?? WeekStartDay.Monday
@@ -81,7 +80,9 @@ export function WeekView({
   }
 
   const selectedValue: DayPickerDateRange | undefined = useMemo(() => {
-    if (!selected) return undefined
+    if (!selected) {
+      return undefined
+    }
 
     const dateToUse = selected instanceof Date ? selected : selected.from
     return getWeekRangeFromDate(dateToUse)
@@ -112,7 +113,7 @@ export function WeekView({
           onSelect={handleSelect}
           month={month}
           onMonthChange={onMonthChange}
-          locale={getLocale(locale)}
+          locale={locale}
           weekStartsOn={effectiveWeekStartsOn}
           showOutsideDays={true}
           showWeekNumber

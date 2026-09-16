@@ -1,5 +1,4 @@
 import { RecordType } from "@/hooks/datasource/types/records.typings"
-
 import { EditableCellProps } from ".."
 import { BaseCell } from "../BaseCell"
 import { ReadOnlyCellContent } from "../ReadOnlyCellContent"
@@ -15,7 +14,7 @@ export function NonEditableCell<R extends RecordType>({
       showRightBorder={!isLastColumn}
       borderOnHover={false}
       hint={hint}
-      hintPosition="right"
+      hintPosition={hint?.hintPosition ?? "right"}
       cursor="default"
     >
       <ReadOnlyCellContent

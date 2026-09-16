@@ -14,8 +14,12 @@ export function shouldAutoSizePerPage(
   dataAdapter: { paginationType?: string; perPage?: number | "auto" },
   fullHeight: boolean | undefined
 ): boolean {
-  if (!fullHeight) return false
-  if (dataAdapter.paginationType !== "pages") return false
+  if (!fullHeight) {
+    return false
+  }
+  if (dataAdapter.paginationType !== "pages") {
+    return false
+  }
   const perPage = dataAdapter.perPage
   return perPage === "auto" || perPage === undefined
 }
@@ -90,7 +94,9 @@ function findScrollContainer(container: HTMLElement): HTMLElement | null {
     const overflowY = getComputedStyle(el).overflowY
     return overflowY === "auto" || overflowY === "scroll"
   })
-  if (candidates.length === 0) return null
+  if (candidates.length === 0) {
+    return null
+  }
   return candidates.reduce((tallest, el) =>
     el.scrollHeight > tallest.scrollHeight ? el : tallest
   )
@@ -161,7 +167,9 @@ export function useAutoPerPage(
       return
     }
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const available = container.clientHeight - RESERVED_CHROME_HEIGHT
     const seed = clampPerPage(Math.floor(available / rowHeight))
@@ -176,21 +184,26 @@ export function useAutoPerPage(
   //    body) so the measurement survives mount churn: the ref is reliably
   //    attached and laid out by the time it runs.
   useEffect(() => {
-    if (!enabled || !ready || measuredRef.current) return
+    if (!enabled || !ready || measuredRef.current) {
+      return
+    }
 
     // A timeout (not requestAnimationFrame, which is paused in background
     // tabs) lets layout settle after the first page renders, then measures.
     const timer = setTimeout(() => {
       const container = containerRef.current
       const seed = seedRef.current
-      if (!container || seed === undefined || measuredRef.current) return
+      if (!container || seed === undefined || measuredRef.current) {
+        return
+      }
       const scroller = findScrollContainer(container)
       if (
         !scroller ||
         scroller.clientHeight === 0 ||
         scroller.scrollHeight === 0
-      )
+      ) {
         return
+      }
       measuredRef.current = true
       const fit = clampPerPage(
         Math.floor((seed * scroller.clientHeight) / scroller.scrollHeight)

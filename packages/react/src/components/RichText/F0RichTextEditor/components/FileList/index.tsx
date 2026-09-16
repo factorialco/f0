@@ -1,7 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { F0FileItem } from "@/components/F0FileItem"
-
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import {
   getAcceptFileTypeString,
@@ -25,7 +23,9 @@ const FileList = ({
   disabled,
   fileInputRef,
 }: FileListProps) => {
-  if (!filesConfig) return null
+  if (!filesConfig) {
+    return null
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files
@@ -56,7 +56,7 @@ const FileList = ({
         aria-label="Upload file"
       />
       <AnimatePresence>
-        {files.length > 0 && (
+        {files.length > 0 ? (
           <motion.div
             key="filelist-accordion"
             initial={{ height: 0, opacity: 0, y: -20 }}
@@ -81,7 +81,7 @@ const FileList = ({
               ))}
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )

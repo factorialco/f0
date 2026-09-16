@@ -1,9 +1,7 @@
-import type { Dispatch, SetStateAction } from "react"
-
 import { useDeepCompareEffect } from "@reactuses/core"
+import type { Dispatch, SetStateAction } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { useDebouncedState } from "../useDebouncedState"
-
 import {
   DataSource,
   DataSourceDefinition,
@@ -25,7 +23,7 @@ import { SearchOptions } from "./types/search.typings"
  */
 
 export const getDataSourcePaginationType = <
-  D extends { paginationType?: PaginationType | undefined | never },
+  D extends { paginationType?: PaginationType },
 >(
   dataAdapter: D
 ): PaginationType => {
@@ -105,7 +103,7 @@ export function useDataSource<
     grouping,
     ...rest
   }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>,
-  deps: ReadonlyArray<unknown> = []
+  deps: readonly unknown[] = []
 ): DataSource<R, FiltersSchema, Sortings, Grouping> {
   /******************* FILTERS STATE***************************************************/
   const [currentFilters, _setCurrentFilters] = useState<
@@ -133,18 +131,46 @@ export function useDataSource<
   }
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentFilters) return
+    if (!externalCurrentFilters) {
+      return
+    }
     setCurrentFilters(externalCurrentFilters)
   }, [externalCurrentFilters])
 
   /******************* SORTINGS ***************************************************/
-  const [currentSortings, setCurrentSortings] =
+  const [currentSortings, _setCurrentSortings] =
     useState<SortingsState<Sortings> | null>(
       externalCurrentSortings ?? defaultSortings ?? null
     )
 
+  // Mirrors `setCurrentFilters`: a value-equal update is dropped so it keeps the
+  // same object identity. The URL sync re-applies `dc_sort` as a fresh object
+  // carrying the default value on every entry; without this guard that identity
+  // change alone resets the nested tree and triggers a needless refetch.
+  const setCurrentSortings: Dispatch<
+    SetStateAction<SortingsState<Sortings> | null>
+  > = (value) => {
+    if (typeof value === "function") {
+      _setCurrentSortings((prev) => {
+        const next = (
+          value as (
+            prevState: SortingsState<Sortings> | null
+          ) => SortingsState<Sortings> | null
+        )(prev)
+        return JSON.stringify(next) === JSON.stringify(prev) ? prev : next
+      })
+    } else {
+      if (JSON.stringify(currentSortings) === JSON.stringify(value)) {
+        return
+      }
+      _setCurrentSortings(value)
+    }
+  }
+
   useDeepCompareEffect(() => {
-    if (!externalCurrentSortings) return
+    if (!externalCurrentSortings) {
+      return
+    }
     setCurrentSortings(externalCurrentSortings)
   }, [externalCurrentSortings])
   /******************* SEARCH ***************************************************/
@@ -163,7 +189,9 @@ export function useDataSource<
   >(currentSearch, 200)
 
   useEffect(() => {
-    if (searchOptions.sync) return
+    if (searchOptions.sync) {
+      return
+    }
     setDebouncedCurrentSearch(currentSearch)
   }, [currentSearch, searchOptions.sync, setDebouncedCurrentSearch])
 

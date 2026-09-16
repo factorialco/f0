@@ -14,7 +14,6 @@ import {
 } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListExtras } from "@/components/avatars/F0AvatarList/types"
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 
@@ -25,10 +24,11 @@ type AvatarListValue = {
    */
   max?: number
   /**
-   * Controls the scroll behavior of the `+N` overflow popover.
-   * - `"vertical"` (default): caps the popover height and scrolls vertically.
-   * - `"none"`: lets the popover grow to fit all entries.
-   * @default "vertical"
+   * @deprecated No longer has any effect; the `+N` popover always caps at the
+   * available viewport height and scrolls. See
+   * `F0AvatarListProps["tooltipScroll"]`.
+   * @removeIn 5.0
+   * @migration Remove the prop.
    */
   tooltipScroll?: "vertical" | "none"
 } & (
@@ -66,7 +66,6 @@ export const AvatarListCell = (
           avatars: args.avatarList,
           size: "xs" as const,
           max: args.max,
-          tooltipScroll: args.tooltipScroll,
         } as F0AvatarListProps)}
       />
     </div>

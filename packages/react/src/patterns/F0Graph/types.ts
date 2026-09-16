@@ -22,6 +22,21 @@ export interface GraphNode<T = unknown> {
    * Leave undefined when not using on-demand data loading.
    */
   dataLoaded?: boolean
+  /**
+   * Render this node's children as a vertical stack directly under it — a tight
+   * column of compact rows sharing the parent's x — instead of the default
+   * horizontal fan-out. Use it for children that read as a list belonging to the
+   * parent rather than as branches in their own right (job levels under a role,
+   * plan tiers under a product).
+   *
+   * A stacked group reserves no horizontal space, so the parent's siblings sit
+   * as close together as if it had no children at all.
+   *
+   * **Only applies when every child is a leaf** (`childrenCount === 0`). A group
+   * with an expandable child falls back to the normal fan-out, because a stacked
+   * row has nowhere to hang a subtree.
+   */
+  stackNodes?: boolean
 }
 
 // Edge between nodes
@@ -60,6 +75,13 @@ export interface TreeNode<T = unknown> {
   /** Mirrors `GraphNode.dataLoaded` for viewport-driven data loading. */
   dataLoaded?: boolean
   /**
+   * Mirrors `GraphNode.stackNodes`. The layout engine reads it to lay this
+   * node's children out as a vertical stack instead of a horizontal fan-out.
+   * `useGraphRenderModel` normalizes it first — see `resolveStackedParents` —
+   * so by the time the engine sees it, the leaf-children precondition holds.
+   */
+  stackNodes?: boolean
+  /**
    * Present when a node has multiple parents in a DAG. Lists all logical
    * parent IDs. The canonical layout parent (`parentId`) is the first entry.
    * Only set when `parentIds` was provided on the input `GraphNode`.
@@ -88,6 +110,24 @@ export interface ZoomThresholds {
 
 // Layout direction
 export type LayoutDirection = "TB" | "LR" | "BT" | "RL"
+
+/**
+ * Region of the canvas (in screen px) covered by external chrome — typically a
+ * side panel / drawer opened over the graph. All fly-to paths shift their target
+ * so the node lands centered in the *free* area instead of behind the panel.
+ *
+ * The consumer measures / knows this (e.g. a fixed-width drawer) and passes it;
+ * F0Graph has no notion of the panel itself. The side is encoded by which key is
+ * set — a right-hand drawer sets `right`, a left-hand one (or RTL layout) sets
+ * `left` — so no separate direction handling is needed. Omitted / `0` on every
+ * side behaves exactly as if there were no inset.
+ */
+export interface ViewportInset {
+  top?: number
+  right?: number
+  bottom?: number
+  left?: number
+}
 
 /**
  * Layout engine interface (abstract — implementations can be swapped).
@@ -125,7 +165,7 @@ export interface PositionedEdge {
   id: string
   source: string
   target: string
-  points: Array<{ x: number; y: number }>
+  points: { x: number; y: number }[]
 }
 
 // ─── Deferred payload ──────────────────────────────────────────

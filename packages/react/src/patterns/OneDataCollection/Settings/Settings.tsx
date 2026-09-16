@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
@@ -13,7 +12,7 @@ import { Reset, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
+import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
@@ -21,8 +20,10 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
-import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
-import { GroupingSelector } from "./components/GroupingSelector"
+import {
+  canSelectGrouping,
+  GroupingSelector,
+} from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { useDataCollectionSettings } from "./SettingsProvider"
 import {
@@ -39,17 +40,15 @@ type SettingsProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  visualizations: ReadonlyArray<
-    Visualization<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   currentVisualization: number
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
@@ -135,7 +134,9 @@ export const Settings = <
   const settingsTitle = useMemo(
     () => {
       const visualizationType = visualizations[currentVisualization]?.type
-      if (!visualizationType) return "-"
+      if (!visualizationType) {
+        return "-"
+      }
 
       const visualizationName =
         i18n.collections.visualizations[
@@ -154,8 +155,9 @@ export const Settings = <
   const settingsContext = useDataCollectionSettings()
 
   const hasModifiedSettings = useMemo(() => {
-    if (JSON.stringify(currentSortings) !== JSON.stringify(defaultSortings))
+    if (JSON.stringify(currentSortings) !== JSON.stringify(defaultSortings)) {
       return true
+    }
 
     const visualizationType = visualizations[currentVisualization]?.type
 
@@ -200,25 +202,18 @@ export const Settings = <
           sideOffset={8}
         >
           {[
-            hasGrouping &&
-              !grouping?.hideSelector &&
-              !(
-                !!grouping.mandatory &&
-                Object.entries(grouping.groupBy).length < 2
-              ) && (
-                <div className="p-3">
-                  <GroupingSelector
-                    key="grouping"
-                    grouping={grouping}
-                    currentGrouping={currentGrouping}
-                    onGroupingChange={handleGroupingChange}
-                  />
-                </div>
-              ),
+            hasGrouping && canSelectGrouping(grouping) && (
+              <div key="grouping" className="p-3">
+                <GroupingSelector
+                  grouping={grouping}
+                  currentGrouping={currentGrouping}
+                  onGroupingChange={handleGroupingChange}
+                />
+              </div>
+            ),
             hasSortings && (
-              <div className="p-3">
+              <div key="sorting" className="p-3">
                 <SortingSelector
-                  key="sorting"
                   currentSortings={currentSortings}
                   onChange={onSortingsChange}
                   sortings={effectiveSortings}

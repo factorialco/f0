@@ -8,19 +8,12 @@ const SvgPerson = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
     ref={ref}
     {...props}
   >
-    <circle
-      cx={12}
-      cy={9}
-      r={4}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={9} r={4} stroke="currentColor" />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M7 18C7 18 8.5 16 12 16C15.5 16 17 18 17 18"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

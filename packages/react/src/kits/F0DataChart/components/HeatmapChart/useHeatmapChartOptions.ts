@@ -1,11 +1,13 @@
 import type * as echarts from "echarts"
-
 import { type RefObject, useMemo } from "react"
-
 import type { F0DataChartHeatmapProps } from "../../types"
-
 import { lerpColor, paletteColor } from "../../utils/colors"
-import { buildCategoryAxis, buildItemTooltip } from "../../utils/options"
+import {
+  buildCategoryAxis,
+  buildItemTooltip,
+  renderValueTooltip,
+  tooltipValueFormat,
+} from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -55,6 +57,7 @@ export function useHeatmapChartOptions(
     showLabels = false,
     showVisualMap = false,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
   }: F0DataChartHeatmapProps,
   size: HeatmapChartSize
@@ -198,12 +201,18 @@ export function useHeatmapChartOptions(
             value?: [number, number, number]
           }
           const [xIdx, yIdx, val] = p.value ?? [0, 0, 0]
-          const xLabel = xCategories[xIdx] ?? ""
-          const yLabel = yCategories[yIdx] ?? ""
-          const formattedValue = valueFormatter
-            ? valueFormatter(val)
-            : String(val)
-          return `<div style="margin-bottom: 4px; font-weight: 500">${yLabel} · ${xLabel}</div><div>${String(p.marker ?? "")} <strong>${formattedValue}</strong></div>`
+          return renderValueTooltip(
+            {
+              marker: p.marker,
+              title: yCategories[yIdx] ?? "",
+              subtitle: xCategories[xIdx] ?? "",
+              value: tooltipValueFormat(
+                tooltipValueFormatter,
+                valueFormatter
+              )(val),
+            },
+            theme
+          )
         },
       }),
     }
@@ -222,6 +231,7 @@ export function useHeatmapChartOptions(
     showLabels,
     showVisualMap,
     valueFormatter,
+    tooltipValueFormatter,
     echartsOptions,
     theme,
     width,

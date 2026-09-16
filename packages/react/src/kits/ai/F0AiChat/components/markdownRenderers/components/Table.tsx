@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react"
-
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Download } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -28,7 +27,9 @@ export function Table({
 
   const handleDownload = useCallback(
     (format: DownloadFormat) => {
-      if (!ref.current) return
+      if (!ref.current) {
+        return
+      }
       const filename = title?.replace(/\s+/g, "_").toLowerCase() || "table"
       downloadTable(ref.current, format, filename)
     },

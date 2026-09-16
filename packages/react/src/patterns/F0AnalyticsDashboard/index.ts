@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0AnalyticsDashboard as _F0AnalyticsDashboard } from "./F0AnalyticsDashboard"
 
 export type {
@@ -10,16 +9,24 @@ export type {
   DashboardCollectionItem,
   DashboardItem,
   DashboardItemBase,
+  DashboardItemFiltersConfig,
+  DashboardItemFiltersDefinition,
+  DashboardItemFiltersState,
   DashboardMetricData,
   DashboardMetricItem,
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+  F0AnalyticsDashboardPointClick,
   F0AnalyticsDashboardProps,
   FunnelChartConfig,
   GaugeChartConfig,
   HeatmapChartConfig,
+  InfoHintContent,
   LineChartConfig,
   MetricFormat,
   PieChartConfig,
   RadarChartConfig,
+  ScatterChartConfig,
 } from "./types"
 
 /**

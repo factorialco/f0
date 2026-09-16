@@ -1,4 +1,5 @@
 import { DataAttributes } from "@/global.types"
+import type { TranscriptCue } from "./types"
 
 export const getDataAttributes = <T extends object>(props: T): DataAttributes =>
   Object.fromEntries(
@@ -22,4 +23,43 @@ export const formatPlaybackTime = (seconds: number): string => {
   }
 
   return `${minutes}:${pad(secs)}`
+}
+
+export interface CueTimelineEntry {
+  start: number
+  cueIndex: number
+}
+
+export const buildCueTimeline = (cues: TranscriptCue[]): CueTimelineEntry[] =>
+  cues
+    .map((cue, cueIndex) => ({ start: cue.startTime, cueIndex }))
+    .filter(
+      (entry): entry is CueTimelineEntry =>
+        typeof entry.start === "number" && Number.isFinite(entry.start)
+    )
+    .sort((a, b) => a.start - b.start)
+
+export const findActiveCueIndex = (
+  timeline: CueTimelineEntry[],
+  time: number
+): number => {
+  let low = 0
+  let high = timeline.length - 1
+  let active = -1
+
+  while (low <= high) {
+    const mid = (low + high) >> 1
+    const entry = timeline[mid]
+    if (entry === undefined) {
+      break
+    }
+    if (entry.start <= time) {
+      active = entry.cueIndex
+      low = mid + 1
+    } else {
+      high = mid - 1
+    }
+  }
+
+  return active
 }

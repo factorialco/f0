@@ -16,10 +16,7 @@
  *
  */
 
-import { forwardRef, useCallback, useRef } from "react"
-
-import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
+import { forwardRef, useCallback, useEffect, useRef } from "react"
 import {
   GroupingDefinition,
   RecordType,
@@ -30,14 +27,8 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
-import type {
-  CellRendererProps,
-  RowWrapperProps,
-  TableColumnDefinition,
-} from "../types"
-
 import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
@@ -45,6 +36,13 @@ import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { useNestedDataContext } from "../providers/NestedProvider"
+import type {
+  CellRendererProps,
+  ColId,
+  RowWrapperProps,
+  TableColumnDefinition,
+  TableRowRef,
+} from "../types"
 import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
@@ -56,7 +54,9 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
+  if (!result) {
+    return []
+  }
   return (Array.isArray(result) ? result : [result]).filter(
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
@@ -83,22 +83,28 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
   onItemCheckedChange?: (item: R, checked: boolean) => void
-  selectedItems: Map<string | number, R>
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  /** This row's own selected state, so a selection change only alters the prop
+   * of the row that changed. */
+  isSelected?: boolean
+  selectedItems?: Map<string | number, R>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
   frozenColumnsLeft: number
   checkColumnWidth: number
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => "none" | "striped" | "striked"
+  /** In a table with nested rows, renders root rows (depth 0) in bold. */
+  boldRootRows?: boolean
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  /** Marker classes the collapse animation looks the cells up by. */
+  collapsingCellClasses?: ReadonlyMap<ColId, string>
   registerSelectable?: (id: SelectionId, item: R) => void
   unregisterSelectable?: (id: SelectionId) => void
 }
@@ -121,19 +127,36 @@ const NestedRowContent = <
     NavigationFilters,
     Grouping
   >,
-  externalRef:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  externalRef: TableRowRef
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+
+  // Each child gets its own boolean, for the same reason the parent does:
+  // handing down the Map made every sibling's props differ whenever any one of
+  // them changed, so selecting one row re-rendered them all.
+  const isChildSelected = (record: R): boolean => {
+    const childId = props.source.selectable?.(record)
+    return childId !== undefined && !!props.selectedItems?.has(childId)
+  }
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+  const itemKey =
+    "id" in props.item ? `${String(props.item.id)}-${props.index}` : props.index
+  const rowId = `${props.nestedRowProps?.depth ?? 0}-${itemKey}`
 
-  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
-  const open = expandedRowIds[rowId] ?? false
+  const {
+    expandedRowIds,
+    setRowExpanded,
+    isExpandedByDefault,
+    resetGeneration,
+  } = useNestedDataContext()
+  // An absent entry means the user has not decided for this row, and only then
+  // does the default policy apply. `??` is deliberate over `||`: a recorded
+  // `false` is a deliberate collapse and must win over an opening policy.
+  const open =
+    expandedRowIds[rowId] ??
+    isExpandedByDefault(props.item, props.nestedRowProps?.depth ?? 0)
 
   /**
    * useLoadChildren hook manages:
@@ -147,7 +170,6 @@ const NestedRowContent = <
       rowId: rowId,
       item: props.item,
       source: props.source,
-      onClearFetchedData: () => setRowExpanded(rowId, false),
     })
 
   const shouldShowLoading = open && isLoading
@@ -210,6 +232,24 @@ const NestedRowContent = <
     }
   }
 
+  // A row the default policy opens never went through `handleExpand`, so it has
+  // to ask for its children itself. The flag is keyed on `resetGeneration`
+  // rather than a plain boolean: a tree reset wipes the children and bumps the
+  // generation, so the guard re-arms and the still-open row re-fetches instead
+  // of staying empty. Keying it (over `children.length`, which stays 0 for a
+  // parent whose fetch comes back empty) also avoids re-requesting every render.
+  const requestedDefaultChildrenGenerationRef = useRef<number | null>(null)
+  useEffect(() => {
+    if (!open || children.length) {
+      return
+    }
+    if (requestedDefaultChildrenGenerationRef.current === resetGeneration) {
+      return
+    }
+    requestedDefaultChildrenGenerationRef.current = resetGeneration
+    loadChildren()
+  }, [open, children.length, loadChildren, resetGeneration])
+
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,
     expanded: open,
@@ -251,94 +291,92 @@ const NestedRowContent = <
         fromVisualization={props.fromVisualization}
       />
 
-      {shouldShowChildren &&
-        children.map((child, childIndex) => {
-          const childItem = child as R
-          const childHasChildren = props.source.itemsWithChildren?.(childItem)
-          const isFirstChild = childIndex === 0
-          const isLastChildInLevel = childIndex === children.length - 1
+      {shouldShowChildren
+        ? children.map((child, childIndex) => {
+            const childItem = child as R
+            const childHasChildren = props.source.itemsWithChildren?.(childItem)
+            const isFirstChild = childIndex === 0
+            const isLastChildInLevel = childIndex === children.length - 1
 
-          const depth = (props.nestedRowProps?.depth ?? 0) + 1
+            const depth = (props.nestedRowProps?.depth ?? 0) + 1
 
-          /**
-           * Get the appropriate ref for connector height calculations
-           *
-           * We only need refs for the first and last children to calculate
-           * the connector line height. Other children don't need refs.
-           *
-           * Special case: If there's a "Load More" button, the last child
-           * doesn't get the ref because the LoadMore component will be the
-           * actual last element.
-           */
-          const getChildRef = () => {
-            if (isFirstChild) {
-              return (el: HTMLTableRowElement | null) => {
-                setFirstChildRef(el)
+            /**
+             * Get the appropriate ref for connector height calculations
+             *
+             * We only need refs for the first and last children to calculate
+             * the connector line height. Other children don't need refs.
+             *
+             * Special case: If there's a "Load More" button, the last child
+             * doesn't get the ref because the LoadMore component will be the
+             * actual last element.
+             */
+            const getChildRef = () => {
+              if (isFirstChild) {
+                return (el: HTMLTableRowElement | null) => {
+                  setFirstChildRef(el)
+                }
+              } else if (
+                isLastChildInLevel &&
+                !shouldShowLoadMore &&
+                !hasAddRowActions
+              ) {
+                return (el: HTMLTableRowElement | null) => {
+                  setLastChildRef(el)
+                }
               }
-            } else if (
-              isLastChildInLevel &&
-              !shouldShowLoadMore &&
-              !hasAddRowActions
-            ) {
-              return (el: HTMLTableRowElement | null) => {
-                setLastChildRef(el)
-              }
+              return undefined
             }
-            return undefined
-          }
 
-          /**
-           * Determine if this child is the last visible element in the tree
-           *
-           * A child is the "last in tree" only if:
-           * 1. It's the last child in its current level
-           * 2. Its parent is also the last in the tree (isLastChild from props)
-           * 3. There's no LoadMore button (which would add more elements)
-           *
-           * This ensures the border "bubbles down" to the deepest last visible element
-           */
-          const childIsLastInTree =
-            isLastChildInLevel && isLastChild && !shouldShowLoadMore
+            /**
+             * Determine if this child is the last visible element in the tree
+             *
+             * A child is the "last in tree" only if:
+             * 1. It's the last child in its current level
+             * 2. Its parent is also the last in the tree (isLastChild from props)
+             * 3. There's no LoadMore button (which would add more elements)
+             *
+             * This ensures the border "bubbles down" to the deepest last visible element
+             */
+            const childIsLastInTree =
+              isLastChildInLevel && isLastChild && !shouldShowLoadMore
 
-          const RowWrapper = props.rowWrapper
+            const RowWrapper = props.rowWrapper
 
-          // Recursive case: Child has its own children
-          if (childHasChildren) {
-            const nestedChild = (
-              <NestedRow
-                {...props}
-                key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
-                index={childIndex}
-                item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
-                tableWithChildren={props.tableWithChildren}
-                ref={getChildRef()}
-                nestedRowProps={{
-                  ...props.nestedRowProps,
-                  parentHasChildren: true,
-                  depth: depth,
-                  isLastChild: childIsLastInTree,
-                }}
-                fromVisualization={props.fromVisualization}
-              />
-            )
-
-            if (RowWrapper) {
-              return (
-                <RowWrapper
+            // Recursive case: Child has its own children
+            if (childHasChildren) {
+              const nestedChild = (
+                <NestedRow
+                  {...props}
                   key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
-                  item={childItem}
                   index={childIndex}
-                >
-                  {nestedChild}
-                </RowWrapper>
+                  item={childItem}
+                  isSelected={isChildSelected(childItem)}
+                  tableWithChildren={props.tableWithChildren}
+                  ref={getChildRef()}
+                  nestedRowProps={{
+                    ...props.nestedRowProps,
+                    parentHasChildren: true,
+                    depth: depth,
+                    isLastChild: childIsLastInTree,
+                  }}
+                  fromVisualization={props.fromVisualization}
+                />
               )
-            }
 
-            return nestedChild
-          } else {
+              if (RowWrapper) {
+                return (
+                  <RowWrapper
+                    key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
+                    item={childItem}
+                    index={childIndex}
+                  >
+                    {nestedChild}
+                  </RowWrapper>
+                )
+              }
+
+              return nestedChild
+            }
             // Base case: Leaf node with no children
             // For leaf nodes, border is shown only if it's the last visible element in the tree
             const leafShouldHideBorder =
@@ -350,9 +388,7 @@ const NestedRowContent = <
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
+                isSelected={isChildSelected(childItem)}
                 noBorder={leafShouldHideBorder}
                 ref={getChildRef()}
                 nestedRowProps={{
@@ -381,10 +417,10 @@ const NestedRowContent = <
             }
 
             return leafChild
-          }
-        })}
+          })
+        : null}
 
-      {shouldShowLoading && (
+      {shouldShowLoading ? (
         <RowLoading
           {...props}
           rowRef={internalRowRef}
@@ -396,9 +432,9 @@ const NestedRowContent = <
           ref={setLastChildRef}
           shouldHideBorder={!isLastChild}
         />
-      )}
+      ) : null}
 
-      {shouldShowLoadMore && !isLoading && (
+      {shouldShowLoadMore && !isLoading ? (
         <LoadMoreRow
           {...props}
           disableHover={true}
@@ -412,9 +448,9 @@ const NestedRowContent = <
             isLastChild,
           }}
         />
-      )}
+      ) : null}
 
-      {hasAddRowActions && (
+      {hasAddRowActions ? (
         <AddRowRow
           {...props}
           disableHover={true}
@@ -422,7 +458,9 @@ const NestedRowContent = <
           addRowActions={addRowActions}
           addRowLabel={addRow?.addNestedRowActionsLabel}
           ref={(el: HTMLTableRowElement | null) => {
-            if (children.length === 0) setFirstChildRef(el)
+            if (children.length === 0) {
+              setFirstChildRef(el)
+            }
             setLastChildRef(el)
           }}
           nestedRowProps={{
@@ -431,11 +469,11 @@ const NestedRowContent = <
             nestedVariant: childrenType,
           }}
         />
-      )}
+      ) : null}
 
       {/* Invisible sentinel row used by useStickyParentRow to detect when
           all children have been scrolled past and the parent should unstick. */}
-      {open && (
+      {open ? (
         <tr aria-hidden="true" className="h-0 border-none p-0">
           <td
             ref={sentinelRef}
@@ -447,7 +485,7 @@ const NestedRowContent = <
             className="h-0 border-none p-0"
           />
         </tr>
-      )}
+      ) : null}
     </>
   )
 }
@@ -470,10 +508,7 @@ const NestedRowComponentInner = <
     NavigationFilters,
     Grouping
   >,
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: TableRowRef
 ) => {
   // Provider is mounted at Table level when tableWithChildren is true, so we
   // never wrap here. This keeps expansion state and fetched data in a single
@@ -499,10 +534,7 @@ const NestedRowContentWithRef = forwardRef(NestedRowContent) as <
     NavigationFilters,
     Grouping
   > & {
-    ref?:
-      | ((element: HTMLTableRowElement | null) => void)
-      | React.RefObject<HTMLTableRowElement>
-      | null
+    ref?: TableRowRef
   }
 ) => ReturnType<typeof NestedRowContent>
 

@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   zeroRender as render,
@@ -8,7 +7,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 // Drives the panel the way the real hosts do: the sidebar mounts a
@@ -70,6 +68,33 @@ describe("ApplicationFrame split panel (conversations left, AI chat right)", () 
     expect(screen.queryByText("AI CHAT")).not.toBeInTheDocument()
   })
 
+  it("gives the hosted window its final width before the entrance animation", async () => {
+    renderFrame()
+    await userEvent.click(screen.getByText("open-conv"))
+
+    let element: HTMLElement | null = screen.getByText("CONVERSATION")
+    while (element && element.style.width !== "100%") {
+      element = element.parentElement
+    }
+
+    expect(element).not.toBeNull()
+    expect(element).toHaveStyle({ width: "100%" })
+    expect(element?.style.width).not.toBe("0px")
+  })
+
+  it("contains horizontal overscroll inside the application shell", () => {
+    renderFrame()
+
+    const main = document.getElementById("content")
+    const root = main?.closest(".grid")
+    expect(root).toHaveClass("w-full", "max-w-full", "overflow-hidden")
+    expect(main).toHaveClass("overflow-x-hidden", "overflow-y-auto")
+    expect(main?.firstElementChild).toHaveClass(
+      "overflow-x-hidden",
+      "overflow-y-auto"
+    )
+  })
+
   it("the One switch swaps the conversation for the right-docked AI chat", async () => {
     renderFrame()
     await userEvent.click(screen.getByText("open-conv"))
@@ -103,8 +128,8 @@ describe("ApplicationFrame split panel (conversations left, AI chat right)", () 
 
   it("restores the last conversation on reload without flashing the AI chat", async () => {
     // The previous session had the conversation showing when it unloaded.
-    localStorage.setItem("ONE-ai-chat-open", "true")
-    localStorage.setItem("ONE-ai-chat-panel-content-id", '"conv"')
+    localStorage.setItem("f0-side-panel-open", "true")
+    localStorage.setItem("f0-side-panel-view-id", '"conv"')
 
     // Restore-aware host: re-mounts the persisted conversation (the way the
     // sidebar does in the stories / CommunicationsPanelBridge in factorial).

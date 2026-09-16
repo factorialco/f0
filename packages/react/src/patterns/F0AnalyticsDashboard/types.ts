@@ -1,18 +1,28 @@
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
   F0DataChartFunnelSeries,
   F0DataChartLineSeries,
   F0DataChartPieSeries,
+  F0DataChartPointClick,
   F0DataChartRadarIndicator,
+  F0DataChartReferenceLine,
   F0DataChartRadarSeries,
+  F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
+import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
+
+// Re-exported under its own name: the same shape types a table column header
+// and a widget header, and a host typing a widget's `info` shouldn't have to
+// reach for the table's `TableHeaderInfo` alias to do it.
+export type { InfoHintContent }
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -23,10 +33,19 @@ interface ChartConfigBase {
   showLegend?: boolean
   /** Show background grid lines. @default true */
   showGrid?: boolean
-  /** Show value labels on each data point. @default false */
+  /**
+   * Show value labels on each data point.
+   * @default true for bar charts, false otherwise
+   */
   showLabels?: boolean
   /** Format the value axis tick labels */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
   /** Format category axis tick labels */
   categoryFormatter?: (value: string) => string
 }
@@ -69,6 +88,12 @@ export interface FunnelChartConfig {
   colorScale?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface PieChartConfig {
@@ -83,6 +108,12 @@ export interface PieChartConfig {
   showPercentage?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface RadarChartConfig {
@@ -95,6 +126,12 @@ export interface RadarChartConfig {
   showLabels?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface GaugeChartConfig {
@@ -109,6 +146,12 @@ export interface GaugeChartConfig {
   showValue?: boolean
   /** Format the value displayed inside the gauge */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 export interface HeatmapChartConfig {
@@ -123,6 +166,36 @@ export interface HeatmapChartConfig {
   showVisualMap?: boolean
   /** Format the value displayed in cells and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Format the value shown in the hover tooltip. Defaults to
+   * {@link valueFormatter}; set it when the axis and labels must stay compact
+   * while the tooltip carries the exact figure.
+   */
+  tooltipValueFormatter?: (value: number) => string
+}
+
+export interface ScatterChartConfig {
+  type: "scatter"
+  /** Point diameter in pixels. @default 12 */
+  pointSize?: number
+  /** Fit each axis to its data range instead of anchoring it at zero. @default true */
+  scaleAxes?: boolean
+  /** Show the legend below the chart. Only rendered with 2+ series. @default true */
+  showLegend?: boolean
+  /** Show the background grid lines. @default true */
+  showGrid?: boolean
+  /** Format the Y axis tick labels */
+  valueFormatter?: (value: number) => string
+  /** Format the X axis tick labels */
+  xValueFormatter?: (value: number) => string
+  /** Format the y value in the tooltip, which shows full numbers */
+  tooltipValueFormatter?: (value: number) => string
+  /** Format the x value in the tooltip, which shows full numbers */
+  xTooltipValueFormatter?: (value: number) => string
+  /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
+  xAxisName?: string
+  /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */
+  yAxisName?: string
 }
 
 /**
@@ -137,6 +210,7 @@ export type DashboardChartConfig =
   | RadarChartConfig
   | GaugeChartConfig
   | HeatmapChartConfig
+  | ScatterChartConfig
 
 // ---------------------------------------------------------------------------
 // Chart data — the shape returned by a chart item's fetchData
@@ -145,6 +219,14 @@ export type DashboardChartConfig =
 export interface DashboardChartData {
   /** Category axis labels. Required for bar/line charts. */
   categories?: string[]
+  /**
+   * Constants to draw across the plot — a peer median, a target, an average.
+   *
+   * Part of the DATA, not the config: a figure like this arrives with the
+   * values it is compared against, and changes when they do. Bar and line
+   * charts render them; every other type ignores them.
+   */
+  referenceLines?: F0DataChartReferenceLine[]
   /** X-axis category labels for heatmap charts. */
   xCategories?: string[]
   /** Y-axis category labels for heatmap charts. */
@@ -161,6 +243,12 @@ export interface DashboardChartData {
     | { value: number; name?: string }
   /** Heatmap data points as [xIndex, yIndex, value] tuples. */
   data?: [number, number, number][]
+  /**
+   * Scatter series — x/y pairs, optionally split into color groups. Kept on
+   * its own field rather than reusing `series` or `data` so shape detection
+   * can never confuse it with a bar/line series array or the heatmap grid.
+   */
+  scatterSeries?: F0DataChartScatterSeries[]
 }
 
 // ---------------------------------------------------------------------------
@@ -174,6 +262,17 @@ export interface DashboardItemBase {
   title: string
   /** Optional description below the title */
   description?: string
+  /**
+   * Optional help copy for what the widget measures, revealed by an ⓘ icon
+   * beside the title. A string renders a plain tooltip; the structured form
+   * renders a hoverable card that can carry a link — the same affordance a
+   * table column header offers, so a figure explains itself the same way
+   * wherever it is read.
+   *
+   * Distinct from `description` (which states what this widget shows) and from
+   * `explanation` (how it is computed, behind the menu).
+   */
+  info?: string | InfoHintContent
   /**
    * Optional markdown explanation of how this item's data is calculated.
    * When set, the per-item dropdown menu shows a "Where does this data come
@@ -252,6 +351,30 @@ export interface DashboardMetricData {
   value: number
   /** Optional previous value — used to compute a trend indicator */
   previousValue?: number
+  /**
+   * A reference figure to show the value against, under the number.
+   *
+   * Distinct from {@link DashboardMetricData.previousValue}, which is this
+   * metric at an earlier time and renders as a rise or a fall. A comparison is
+   * a different quantity entirely — a peer median, a target, a company-wide
+   * average — so it is stated rather than turned into a trend: an arrow next to
+   * it would read as "it moved", which it did not.
+   *
+   * `value` is in the metric's own units and is formatted exactly like the
+   * headline number, so the two can be read against each other. `label` says
+   * what the figure is, in the consumer's own words and language.
+   */
+  comparison?: {
+    value: number
+    label: string
+    /**
+     * Where the figure comes from, revealed by an ⓘ icon after it — "the
+     * median across all companies on Factorial", say. A string renders a
+     * plain tooltip; the structured form renders a hoverable card that can
+     * carry a link, the same affordance as `DashboardItemBase.info`.
+     */
+    info?: string | InfoHintContent
+  }
 }
 
 /**
@@ -308,7 +431,7 @@ export interface DashboardCollectionItem<
    * Same shape as OneDataCollection's `visualizations` prop.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  visualizations: ReadonlyArray<any>
+  visualizations: readonly any[]
 }
 
 // ---------------------------------------------------------------------------
@@ -327,6 +450,41 @@ export type DashboardItem<
   | DashboardChartItem<Filters>
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
+
+/** Report-style definitions accepted by a dashboard item's filter control. */
+export type DashboardItemFiltersDefinition<Keys extends string = string> =
+  FiltersDefinition<Keys>
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export type DashboardItemFiltersState<
+  Definitions extends DashboardItemFiltersDefinition,
+> = FiltersState<Definitions>
+
+/**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * Every item type shows the same filter control in its header on hover or
+ * keyboard focus, while touch-only devices keep it available without hover.
+ * Applied filters are signalled by the trigger counter without exposing their
+ * selected values in the widget header.
+ *
+ * The picker holds a draft state; `onChange` fires only when the user applies,
+ * with cleared or incomplete entries stripped from the emitted state.
+ *
+ * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
+ * definition — so dashboard configs remain JSON-compatible.
+ */
+export interface DashboardItemFiltersConfig<
+  ItemFilters extends DashboardItemFiltersDefinition =
+    DashboardItemFiltersDefinition,
+> {
+  /** Filter definitions available for this widget. */
+  filters: ItemFilters
+  /** Currently applied filter state for this widget. */
+  value: DashboardItemFiltersState<ItemFilters>
+  /** Called with the new state when the user applies changes. */
+  onChange: (value: DashboardItemFiltersState<ItemFilters>) => void
+}
 
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks
@@ -353,6 +511,39 @@ export type DashboardItemLayout = {
 // ---------------------------------------------------------------------------
 // Root component props
 // ---------------------------------------------------------------------------
+
+/** A point selected from either the chart canvas or its keyboard companion. */
+export type F0AnalyticsDashboardPointClick = Omit<
+  F0DataChartPointClick,
+  "source"
+> & {
+  source: "pointer" | "keyboard"
+}
+
+/**
+ * What the user asked about: a whole widget, or one mark inside it.
+ *
+ * `point` is absent when the ask came from the widget's ⋯ menu and present
+ * when it came from clicking a mark, which is the only thing that tells the
+ * two apart.
+ */
+export interface F0AnalyticsDashboardAskAiTarget {
+  id: string
+  title: string
+  point?: F0AnalyticsDashboardPointClick
+}
+
+/**
+ * A built-in Ask One interaction together with the exact quote F0 staged.
+ *
+ * The quote object is kept by the chat composer until it is submitted or
+ * dismissed. Hosts can therefore associate hidden analytical context with
+ * this exact interaction without replacing F0's quote/open/focus behavior.
+ */
+export type F0AnalyticsDashboardAskAiTargetWithQuote =
+  F0AnalyticsDashboardAskAiTarget & {
+    quote: PendingQuote
+  }
 
 /**
  * Props for the F0AnalyticsDashboard component.
@@ -406,6 +597,16 @@ export interface F0AnalyticsDashboardProps<
    */
   items: DashboardItem<Filters>[]
   /**
+   * Resolve the per-widget filter configuration for each dashboard item.
+   *
+   * Return a config to show a filter icon in that widget's header (next to
+   * the fullscreen and menu buttons) opening a compact filter popover; return
+   * `undefined` to hide the control for that item.
+   */
+  itemFilters?: (
+    item: DashboardItem<Filters>
+  ) => DashboardItemFiltersConfig | undefined
+  /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */
   editMode?: boolean
@@ -439,6 +640,37 @@ export interface F0AnalyticsDashboardProps<
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  /**
+   * Called when the user picks "Ask One" on a widget, replacing what the entry
+   * does by default (quote the widget in the mounted AI chat, then open it).
+   *
+   * Pass this to own the action — send the widget somewhere else, add
+   * tracking, ask for confirmation first. The entry then appears whether or
+   * not an AI chat is mounted, since the host is answering it. Its label stays
+   * `ai.dashboardItem.askOne`, which hosts already override, so the copy is
+   * yours either way.
+   *
+   * Without it the entry appears only where an AI chat is mounted and enabled,
+   * and drives that chat directly.
+   *
+   * `point` is set when the ask came from a clicked mark rather than the
+   * widget menu, so one handler answers both without the host having to tell
+   * them apart by anything other than its presence.
+   */
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  /**
+   * Observes built-in Ask One interactions without replacing them.
+   *
+   * Called immediately before F0 stages the quoted widget or point in the
+   * mounted chat. `quote` is the same object the composer later submits or
+   * dismisses, so a host can bind structured analytical context to the exact
+   * pending interaction and clean it up by quote identity.
+   *
+   * This observer does not make Ask One available by itself. A mounted,
+   * enabled AI chat still owns the built-in behavior; use `onAskAi` instead
+   * when the host must replace that behavior entirely.
+   */
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   /**
    * Navigation filter definitions (e.g. date-navigator).
    * Rendered above the grid alongside the regular filter bar.

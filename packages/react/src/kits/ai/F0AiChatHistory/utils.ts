@@ -1,23 +1,27 @@
-import { format, isSameMonth, isSameYear, isToday, isYesterday } from "date-fns"
-
-import { getLocale } from "@/components/OneCalendar/utils"
-
-import type { ChatThread } from "./useChatHistory"
+import {
+  format,
+  isSameMonth,
+  isSameYear,
+  isToday,
+  isYesterday,
+  type Locale,
+} from "date-fns"
 import type { DateGroup, ThreadGroup } from "./types"
-
-/** Resolve the browser's `date-fns` locale, falling back to the default. */
-function resolveLocale() {
-  if (typeof navigator === "undefined") return undefined
-  return getLocale(navigator.language)
-}
+import type { ChatThread } from "./useChatHistory"
 
 export function getDateGroup(dateString: string): DateGroup {
   const date = new Date(dateString)
   const now = new Date()
 
-  if (isToday(date)) return "today"
-  if (isYesterday(date)) return "yesterday"
-  if (isSameMonth(date, now)) return "thisMonth"
+  if (isToday(date)) {
+    return "today"
+  }
+  if (isYesterday(date)) {
+    return "yesterday"
+  }
+  if (isSameMonth(date, now)) {
+    return "thisMonth"
+  }
   return "older"
 }
 
@@ -36,23 +40,27 @@ export function getDateGroup(dateString: string): DateGroup {
  * punctuation separator keeps the format consistent and safe to use in any
  * locale without per-language overrides.
  *
- * The month/day and time segments are produced by `date-fns` in the
- * browser's locale (so "Apr" becomes "abr" in Spanish, time switches to
- * 24h when the locale uses it, etc.). The calendar-day label ("Today",
- * "Yesterday") still comes from the app's i18n so it matches whatever
- * language the chat is currently running in.
+ * The month/day and time segments are produced by `date-fns` in the app's
+ * locale (so "Apr" becomes "abr" in Spanish, time switches to 24h when the
+ * locale uses it, etc.). The calendar-day label ("Today", "Yesterday") still
+ * comes from the app's i18n so it matches whatever language the chat is
+ * currently running in.
  */
 export function formatThreadDate(
   dateString: string,
-  labels: { today: string; yesterday: string }
+  labels: { today: string; yesterday: string },
+  locale: Locale
 ): string {
   const date = new Date(dateString)
-  const locale = resolveLocale()
   // `p` = locale-aware short time (e.g. "7:59 AM" in en-US, "7:59" in es-ES).
   const time = format(date, "p", { locale })
 
-  if (isToday(date)) return `${labels.today}, ${time}`
-  if (isYesterday(date)) return `${labels.yesterday}, ${time}`
+  if (isToday(date)) {
+    return `${labels.today}, ${time}`
+  }
+  if (isYesterday(date)) {
+    return `${labels.yesterday}, ${time}`
+  }
 
   const includeYear = !isSameYear(date, new Date())
   // `MMM d` = short month + day (e.g. "Apr 23"). Add the year when the

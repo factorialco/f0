@@ -1,8 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-
-import { ComponentMaturityTag, ComponentStability } from "./ComponentStability"
 import { type ComponentEntry } from "./component-status"
+import { ComponentMaturityTag, ComponentStability } from "./ComponentStability"
 
 // axe-core is dynamically imported by the a11y audit; hoist a mock so opening
 // the maturity tooltip exercises the real audit wiring without the heavy lib.
@@ -30,6 +29,7 @@ const DATASET: ComponentEntry[] = [
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: false,
     docQuality: "none",
     docSignals: {
@@ -52,6 +52,7 @@ const DATASET: ComponentEntry[] = [
     hasStories: true,
     hasUnitTests: true,
     hasPlayFunction: true,
+    hasSnapshot: true,
     hasMdxDocs: true,
     docQuality: "gold",
     docSignals: {

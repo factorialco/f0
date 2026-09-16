@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import type { GraphNode, TreeNode } from "../types"
 
 interface TreeBuilderResult<T> {
@@ -53,6 +52,7 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
       childrenCount: node.childrenCount ?? 0,
       childrenLoaded: node.childrenLoaded ?? false,
       dataLoaded: node.dataLoaded,
+      stackNodes: node.stackNodes,
     }
     if (dagParentIds) {
       treeNode.dagParentIds = dagParentIds
@@ -111,7 +111,9 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
       cycleSet.add(node.id)
       return
     }
-    if (visited.has(node.id)) return
+    if (visited.has(node.id)) {
+      return
+    }
 
     visited.add(node.id)
     inStack.add(node.id)
@@ -136,6 +138,8 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
     inStack.delete(node.id)
   }
 
+  // detectCycles promotes cyclic children to roots while this runs, so iterate a copy.
+  // oxlint-disable-next-line unicorn/no-useless-spread
   for (const root of [...roots]) {
     detectCycles(root)
   }

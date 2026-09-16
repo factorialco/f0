@@ -1,12 +1,10 @@
 import { useCallback, useRef } from "react"
-
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Download } from "@/icons/app"
 import { F0Box } from "@/lib/F0Box"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { DataDownloadDataset } from "../canvas/types"
 
 type DownloadFormat = "xlsx" | "csv"
@@ -58,7 +56,9 @@ export function F0AiTableCard({
 
   const handleDownload = useCallback(
     (format: DownloadFormat) => {
-      if (!tableRef.current) return
+      if (!tableRef.current) {
+        return
+      }
       const resolved =
         filename ?? (title.replace(/\s+/g, "_").toLowerCase() || "table")
       void downloadTable(tableRef.current, format, resolved)
@@ -66,7 +66,9 @@ export function F0AiTableCard({
     [title, filename]
   )
 
-  if (!dataset.columns?.length) return null
+  if (!dataset.columns?.length) {
+    return null
+  }
 
   return (
     <F0Box

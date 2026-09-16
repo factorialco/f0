@@ -1,11 +1,11 @@
 import { IconType } from "@/components/F0Icon"
+import { type EmojiRenderMode } from "@/lib/emojis"
 import {
   ActionButtonVariant,
   ActionProps,
   ButtonType,
   NavTarget,
 } from "@/ui/Action"
-
 import { ButtonSize } from "./types"
 
 export type { ButtonType }
@@ -21,6 +21,8 @@ export type ButtonInternalProps = Pick<
   | "fontSize"
 > &
   DataAttributes & {
+    /** Native button behavior. */
+    type?: ButtonType
     /**
      * The aria-label of the button if not provided title or label will be used.
      */
@@ -48,15 +50,13 @@ export type ButtonInternalProps = Pick<
      */
     variant?: ActionButtonVariant
     /**
-     * The filters'counter value to display.
+     * A count shown in a neutral counter to the right of the label.
      */
     counterValue?: number
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (
-      event: React.MouseEvent<HTMLElement, MouseEvent>
-    ) => void | Promise<unknown>
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>
     /**
      * The title of the button.
      */
@@ -81,6 +81,11 @@ export type ButtonInternalProps = Pick<
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string
+    /**
+     * How that emoji is drawn — a twemoji image by default, or the system glyph
+     * with `"native"`. See {@link EmojiRenderMode}.
+     */
+    emojiMode?: EmojiRenderMode
     /**
      * Hides the label visually (for icon-only or emoji-only buttons), but keeps it accessible for screen readers.
      */
@@ -110,7 +115,9 @@ export type ButtonInternalProps = Pick<
     pressed?: boolean
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean
     /**

@@ -1,19 +1,18 @@
-// This file has been automatically migrated to valid ESM format by Storybook.
-import type { StorybookConfig } from "@storybook/react-vite"
-
 import { writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import { fileURLToPath } from "node:url"
+// This file has been automatically migrated to valid ESM format by Storybook.
+import type { StorybookConfig } from "@storybook/react-vite"
 import remarkGfm from "remark-gfm"
 import { Preset } from "storybook/internal/types"
-
 import {
   componentStatusVitePlugin,
   computeComponentStatusData,
   effectiveStatusByLeaf,
 } from "../scripts/component-status-build.mjs"
+import { productUsageVitePlugin } from "../scripts/product-usage-scan.mjs"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -68,6 +67,10 @@ const config: StorybookConfig = {
       titlePrefix: "Components",
     },
     {
+      directory: "../src/experimental/F0MeetingCard",
+      titlePrefix: "Components",
+    },
+    {
       directory: "../src/experimental/F0ProgressSeries",
       titlePrefix: "Components",
     },
@@ -116,6 +119,10 @@ const config: StorybookConfig = {
 
     // ── Resources · hooks, utilities, examples ───────────────────
     { directory: "../src/lib/F0Box", titlePrefix: "Components" }, // layout primitive → Components
+    {
+      directory: "../src/lib/InfoHint",
+      titlePrefix: "Components/Primitives",
+    }, // shared ⓘ chrome behind table headers and widget titles → Primitives
     { directory: "../src/lib/Await", titlePrefix: "Resources" },
     { directory: "../src/lib/F0GridStack", titlePrefix: "Resources" },
     { directory: "../src/lib/OneEllipsis", titlePrefix: "Resources" },
@@ -174,7 +181,10 @@ const config: StorybookConfig = {
     { directory: "../src/ui/Lane", titlePrefix: "Patterns" },
     // Resources
     { directory: "../src/ui/OneRestrictComponent", titlePrefix: "Resources" },
-    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
+    // ── Local-only pages ────────────────────────────────────────
+    // "Unused components" reports internal product and prototype usage, so it
+    // is kept out of the public Storybook the same way the usage tag is.
+    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : ["./local-docs/*.mdx"]),
   ],
   staticDirs: ["../public", "./static"],
   addons: [
@@ -197,6 +207,17 @@ const config: StorybookConfig = {
     },
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-vitest"),
+    // Performance panel: frame timing, input latency, layout shift and React
+    // render profiling. Collectors only run while the panel is open (the preview
+    // core starts them on PANEL_VISIBILITY), so it is inert for Chromatic,
+    // addon-vitest and the test-runner. Opt a story out with
+    // `parameters: { performancePanel: { disable: true } }`.
+    // Registered by bare specifier, NOT getAbsolutePath(): the decorator ships as
+    // the package's `./preview` export, and Storybook only auto-discovers it when
+    // the addon is named by package specifier so the exports map is consulted. An
+    // absolute path resolves the manager panel but silently drops the decorator,
+    // leaving the panel stuck on "Performance monitoring not active for this story".
+    "@github-ui/storybook-addon-performance-panel",
     // MCP server: exposes component docs/stories to AI agents via the MCP protocol.
     // In public (static) builds only the docs toolset is useful; dev and test require
     // a running Storybook server.
@@ -244,6 +265,15 @@ const config: StorybookConfig = {
     )
     if (!hasComponentStatus) {
       config.plugins.push(componentStatusVitePlugin())
+    }
+
+    // Serve usage data (scanned from local factorialco/factorial and
+    // factorial-composer checkouts) to the docs "Where is this used in the
+    // product?" tag. It only ever registers a dev-server route, and the tag
+    // itself is compiled out of production bundles — this data is internal and
+    // must not reach the public Storybook at f0.factorial.dev.
+    if (!process.env.STORYBOOK_PUBLIC_BUILD) {
+      config.plugins.push(productUsageVitePlugin())
     }
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served

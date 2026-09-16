@@ -13,7 +13,6 @@ const SvgMinus = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M19 12H5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

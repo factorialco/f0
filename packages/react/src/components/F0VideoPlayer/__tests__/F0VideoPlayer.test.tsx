@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { VolumeHigh, VolumeMid, VolumeMuted } from "@/icons/app"
 import {
   fireEvent,
@@ -7,15 +6,16 @@ import {
   userEvent,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import { F0VideoPlayer } from "../F0VideoPlayer"
 import { volumeIcon } from "../components/VolumeControl"
+import { F0VideoPlayer } from "../F0VideoPlayer"
 
 const VIDEO_SRC = "https://example.com/video.mp4"
 
 function getVideo(): HTMLVideoElement {
   const video = document.querySelector("video")
-  if (!video) throw new Error("Video element not found")
+  if (!video) {
+    throw new Error("Video element not found")
+  }
   return video
 }
 
@@ -37,7 +37,9 @@ function timeUpdate(
   duration = 0
 ) {
   setVideoProp(video, "currentTime", currentTime)
-  if (duration) setVideoProp(video, "duration", duration)
+  if (duration) {
+    setVideoProp(video, "duration", duration)
+  }
   fireEvent.timeUpdate(video)
 }
 
@@ -70,6 +72,15 @@ describe("F0VideoPlayer", () => {
       expect(getVideo()).toHaveAttribute("poster", "poster.webp")
     })
 
+    it("accepts a contextual accessible name", () => {
+      render(
+        <F0VideoPlayer src={VIDEO_SRC} ariaLabel="Video player: demo.mp4" />
+      )
+      expect(
+        screen.getByRole("region", { name: "Video player: demo.mp4" })
+      ).toBeInTheDocument()
+    })
+
     it("shows a center play overlay while paused and hides it during playback", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} />)
       expect(
@@ -80,6 +91,22 @@ describe("F0VideoPlayer", () => {
       expect(
         document.querySelector("[data-video-play-overlay]")
       ).not.toBeInTheDocument()
+    })
+
+    it("keeps the player surface and center play control dark in both themes", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+
+      const region = screen.getByRole("region", { name: "Video player" })
+      expect(region).toHaveClass("bg-f1-foreground", "dark:bg-f1-background")
+
+      const playButton = document.querySelector(
+        "[data-video-play-overlay] button"
+      )
+      expect(playButton).toHaveClass(
+        "bg-f1-foreground/70",
+        "dark:bg-f1-background/70"
+      )
+      expect(playButton).not.toHaveClass("opacity-70")
     })
 
     it("enables autoplay when autoPlay is true", () => {
@@ -107,6 +134,31 @@ describe("F0VideoPlayer", () => {
 
       fireEvent.loadedData(getVideo())
       expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument()
+    })
+
+    it("renders an optional download inside the loaded player controls", async () => {
+      const onDownload = vi.fn()
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          download={{ label: "Download demo.mp4", onClick: onDownload }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Download demo.mp4" })
+      ).not.toBeInTheDocument()
+
+      fireEvent.loadedData(getVideo())
+      const downloadButton = screen.getByRole("button", {
+        name: "Download demo.mp4",
+      })
+      downloadButton.focus()
+      await user.keyboard(" ")
+
+      expect(onDownload).toHaveBeenCalledOnce()
+      expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
     })
   })
 
@@ -535,8 +587,51 @@ describe("F0VideoPlayer", () => {
   })
 
   describe("audio description", () => {
+    const CAPS_URL = "https://example.com/captions.vtt"
     const DESC_URL = "https://example.com/descriptions.vtt"
     const DESCRIBED_SRC = "https://example.com/video.described.mp4"
+
+    it("renders an active description cue on a contrasting dark surface", async () => {
+      const captionTrack = Object.assign(new EventTarget(), {
+        kind: "captions" as TextTrackKind,
+        mode: "disabled" as TextTrackMode,
+        cues: { length: 1 } as TextTrackCueList,
+        activeCues: null,
+      })
+      const descriptionTrack = Object.assign(new EventTarget(), {
+        kind: "descriptions" as TextTrackKind,
+        mode: "disabled" as TextTrackMode,
+        cues: { length: 1 } as TextTrackCueList,
+        activeCues: {
+          0: { text: "A butterfly crosses the meadow." },
+          length: 1,
+        } as unknown as TextTrackCueList,
+      })
+      const textTracks = Object.assign(new EventTarget(), {
+        0: captionTrack,
+        1: descriptionTrack,
+        length: 2,
+      })
+      vi.spyOn(HTMLMediaElement.prototype, "textTracks", "get").mockReturnValue(
+        textTracks as unknown as TextTrackList
+      )
+
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ captions: CAPS_URL, descriptions: DESC_URL }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      await user.click(screen.getByRole("button", { name: "Captions" }))
+      fireEvent(descriptionTrack, new Event("cuechange"))
+
+      expect(screen.getByText("A butterfly crosses the meadow.")).toHaveClass(
+        "bg-f1-background/70",
+        "text-f1-foreground"
+      )
+    })
 
     it("offers an AD toggle and renders a descriptions track for a VTT script", async () => {
       const user = userEvent.setup()

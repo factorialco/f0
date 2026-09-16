@@ -59,11 +59,8 @@ const SearchPersonAnimated = React.forwardRef<SVGSVGElement, SearchPersonProps>(
           transition={personTransition}
           animate={animate}
         >
-          <path
-            d="M6.5 16V16C8.60581 12.7243 13.3942 12.7243 15.5 16V16"
-            vectorEffect="non-scaling-stroke"
-          />
-          <circle cx="11" cy="10.5" r="2.5" vectorEffect="non-scaling-stroke" />
+          <path d="M6.5 16V16C8.60581 12.7243 13.3942 12.7243 15.5 16V16" />
+          <circle cx="11" cy="10.5" r="2.5" />
         </motion.g>
         <motion.g
           initial="normal"
@@ -71,15 +68,8 @@ const SearchPersonAnimated = React.forwardRef<SVGSVGElement, SearchPersonProps>(
           transition={magnifierTransition}
           animate={animate}
         >
-          <rect
-            x="4"
-            y="4"
-            width="14"
-            height="14"
-            rx="7"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path d="M16 16L19 19" vectorEffect="non-scaling-stroke" />
+          <rect x="4" y="4" width="14" height="14" rx="7" />
+          <path d="M16 16L19 19" />
         </motion.g>
       </svg>
     )

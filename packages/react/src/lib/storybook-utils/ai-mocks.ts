@@ -16,7 +16,7 @@ const MOCK_TRANSCRIPTS = [
  * Builds a streaming STT mock from a pool of transcripts: picks a random one and
  * emits it word by word so the surface fills live (Wispr Flow feel) without any
  * backend. Use this to make voice dictation contextual to a given flow (e.g.
- * survey-refinement phrasing in the co-creation story) instead of the generic
+ * survey-refinement phrasing in the AI Cocreation story) instead of the generic
  * pool below.
  */
 export const makeMockTranscribe =
@@ -26,7 +26,10 @@ export const makeMockTranscribe =
     const words = transcript.split(" ")
     let acc = ""
     for (const word of words) {
-      if (signal?.aborted) break
+      if (signal?.aborted) {
+        break
+      }
+      // oxlint-disable-next-line no-await-in-loop -- words stream out one at a time with a delay between them
       await new Promise((r) => setTimeout(r, 60 + Math.random() * 100))
       acc = acc ? `${acc} ${word}` : word
       onPartial(acc)
@@ -73,7 +76,7 @@ export const mockEnhanceText = (
     setTimeout(
       () => {
         resolve({
-          success: !(params.selectedIntent === "error"),
+          success: params.selectedIntent !== "error",
           error: "Error from AI",
           text: pickRandom(MOCK_ENHANCED_TEXTS),
         })

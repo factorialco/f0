@@ -44,9 +44,8 @@ const FlagAnimated = React.forwardRef<SVGSVGElement, FlagProps>(
           variants={flagVariants}
           animate={animate}
           transition={flagTransition}
-          vectorEffect="non-scaling-stroke"
         />
-        <path d="M6 4V20" vectorEffect="non-scaling-stroke" />
+        <path d="M6 4V20" />
       </svg>
     )
   }

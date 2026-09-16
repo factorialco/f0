@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ReactNode, useEffect, useRef } from "react"
-
+import { fn } from "storybook/test"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0VideoPlayer } from "../F0VideoPlayer"
 import { bigBuckBunnyCaptions } from "./bigBuckBunnyCaptions"
 
@@ -20,7 +21,7 @@ function Frame({ children }: { children: ReactNode }) {
 }
 
 const meta = {
-  title: "Components/F0VideoPlayer",
+  title: "VideoPlayer",
   component: F0VideoPlayer,
   tags: ["experimental", "!autodocs"],
   parameters: {
@@ -76,6 +77,50 @@ export const Playground: Story = {
   },
   // No captions — flagged by the video-captions a11y rule.
   parameters: { a11y: { test: "todo" } },
+}
+
+export const Downloadable: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    content: { captions: bigBuckBunnyCaptions },
+    download: {
+      label: "Download sample video",
+      onClick: fn(),
+    },
+  },
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  parameters: withSnapshot({}),
+  render: (args) => (
+    <div className="flex flex-col gap-8">
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-medium">Standard controls</h2>
+        <Frame>
+          <F0VideoPlayer
+            {...args}
+            content={{ captions: bigBuckBunnyCaptions }}
+            persistControls
+          />
+        </Frame>
+      </section>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-medium">With download</h2>
+        <Frame>
+          <F0VideoPlayer
+            {...args}
+            content={{ captions: bigBuckBunnyCaptions }}
+            download={{
+              label: "Download sample video",
+              onClick: fn(),
+            }}
+            persistControls
+          />
+        </Frame>
+      </section>
+    </div>
+  ),
 }
 
 /**
@@ -212,9 +257,11 @@ function EmbeddedCaptionsDemo(
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const video = ref.current?.querySelector("video")
-    if (!video || typeof video.addTextTrack !== "function") return
+    if (!video || typeof video.addTextTrack !== "function") {
+      return
+    }
     const track = video.addTextTrack("captions", "English", "en")
-    const cues: Array<[number, number, string]> = [
+    const cues: [number, number, string][] = [
       [2.5, 6.4, "[SERENE MUSIC]"],
       [11.8, 14, "[BROOK BABBLES] [FLY BUZZES]"],
       [16.1, 17.7, "[BIRD TWEETS]"],

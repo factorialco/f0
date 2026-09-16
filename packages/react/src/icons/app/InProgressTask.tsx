@@ -11,17 +11,10 @@ const SvgInProgressTask = (
     ref={ref}
     {...props}
   >
-    <circle
-      cx={12}
-      cy={12}
-      r={8}
-      stroke="currentColor"
-      vectorEffect="non-scaling-stroke"
-    />
+    <circle cx={12} cy={12} r={8} stroke="currentColor" />
     <path
       fill="currentColor"
       d="M11.9999 18C15.3136 18 17.9999 15.3137 17.9999 12C17.9999 8.68629 15.3136 6 11.9999 6V18Z"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

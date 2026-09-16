@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0SelectItemProps } from "@/components/F0Select/types"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import {
   PageBasedPaginatedResponse,
   PaginatedFetchOptions,
@@ -17,8 +14,8 @@ import {
   MOCK_ICONS,
   SURNAMES_MOCK,
 } from "@/mocks"
-
-import { Breadcrumbs, BreadcrumbsProps } from "./index"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import { Breadcrumbs, BreadcrumbsProps } from "."
 
 const meta: Meta<typeof Breadcrumbs> = {
   title: "Navigation/Breadcrumbs",
@@ -44,7 +41,7 @@ export const Default: Story = {
         label: "Candidates",
         href: "/recruitment/candidates",
       },
-      { id: "dani-moreno", label: "Dani Moreno" },
+      { id: "dani-avery", label: "Jordan Avery" },
     ],
   },
 }
@@ -352,9 +349,9 @@ export const LongBreadcrumbs: Story = {
         href: "/documents/hr/recruitment/candidates",
       },
       {
-        id: "dani-moreno",
-        label: "Dani Moreno",
-        href: "/dani-moreno",
+        id: "dani-avery",
+        label: "Jordan Avery",
+        href: "/dani-avery",
       },
       {
         id: "applications",
@@ -385,9 +382,9 @@ export const Interactive: Story = {
         href: "/recruitment/candidates",
       },
       {
-        id: "dani-moreno",
-        label: "Dani Moreno",
-        href: "/recruitment/candidates/dani-moreno",
+        id: "dani-avery",
+        label: "Jordan Avery",
+        href: "/recruitment/candidates/dani-avery",
       },
       {
         id: "applications",

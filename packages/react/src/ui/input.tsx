@@ -1,7 +1,5 @@
 import * as React from "react"
-
 import { F0InputField, InputFieldProps } from "@/components/F0InputField"
-
 import { cn } from "../lib/utils"
 
 export type InputProps = Omit<
@@ -78,6 +76,19 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       readonly,
       buttonToggle,
       transparent,
+      // Renamed rather than left in the spread: the prop is the HTML attribute
+      // name, and React only recognises the camelCase spelling. Spread as-is it
+      // still reaches the DOM, but as an unknown attribute React warns about.
+      autocomplete,
+      // Forwarded by NAME rather than left in the spread: F0InputField clones
+      // the inner input with its own aria props, and an explicit `undefined`
+      // there overwrites whatever the spread had already set. `aria-controls`
+      // and `aria-expanded` were reaching F0InputField from nowhere for exactly
+      // that reason, so a combobox built on Input announced nothing.
+      "aria-controls": ariaControls,
+      "aria-expanded": ariaExpanded,
+      "aria-activedescendant": ariaActiveDescendant,
+      "aria-autocomplete": ariaAutocomplete,
       ...props
     },
     ref
@@ -100,6 +111,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         placeholder={placeholder || ""}
         size={size}
         role={role}
+        aria-controls={ariaControls}
+        aria-expanded={ariaExpanded}
+        aria-activedescendant={ariaActiveDescendant}
+        aria-autocomplete={ariaAutocomplete}
         isEmpty={isEmpty}
         emptyValue={emptyValue as string}
         maxLength={maxLength}
@@ -121,6 +136,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       >
         <input
           type={type}
+          autoComplete={autocomplete}
+          // After the rename, so `type="private"` keeps winning with its own
+          // `autoComplete: "off"`: hiding a sensitive field from password
+          // managers outranks any autofill hint the caller asked for
           {...props}
           onKeyDown={onKeyDown}
           className={cn(

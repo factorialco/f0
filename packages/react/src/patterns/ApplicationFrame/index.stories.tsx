@@ -1,9 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { ComponentProps, useCallback, useEffect, useRef, useState } from "react"
-
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react"
+import { expect, waitFor, within } from "storybook/test"
 import { F0Button } from "@/components/F0Button"
-import { F0Icon, IconType } from "@/components/F0Icon"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -17,35 +23,8 @@ import {
   Comment,
 } from "@/icons/app"
 import * as Icons from "@/icons/app"
-import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
-import { HomeLayout } from "@/layouts/HomeLayout"
-import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
-import { F0Box } from "@/lib/F0Box"
-import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-import { Page } from "@/patterns/Navigation/Page"
-import * as PageStories from "@/patterns/Navigation/Page/index.stories"
-import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
-import { SidebarChatBlankState } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatBlankState"
-import { SidebarChatList } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatList"
-import {
-  SidebarChatProvider,
-  useSidebarChatActions,
-  useSidebarChats,
-} from "@/patterns/Navigation/Sidebar/Chats/SidebarChatProvider"
-import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
-import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
-import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
-import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
-import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
-import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
-import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
-import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
-import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { useAiChat } from "@/kits/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
@@ -64,24 +43,55 @@ import {
   type UploadedFile,
   type VacancyProfile,
 } from "@/kits/ai/F0AiChat/types"
-import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { F0AiChatCreditsButton } from "@/kits/ai/F0AiChatHeader"
 import {
   ThreadItem,
   ThreadListSkeleton,
   useChatHistory,
 } from "@/kits/ai/F0AiChatHistory"
-import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
+import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
+import { HomeLayout } from "@/layouts/HomeLayout"
+import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
+import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { Page } from "@/patterns/Navigation/Page"
+import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
+import { SidebarChatBlankState } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatBlankState"
+import { SidebarChatList } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatList"
+import {
+  SidebarChatProvider,
+  useSidebarChatActions,
+  useSidebarChats,
+} from "@/patterns/Navigation/Sidebar/Chats/SidebarChatProvider"
+import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
+import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
+import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
+import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
+import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
+import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
+import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
+import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
+import {
+  F0Chat,
+  F0ChatProvider,
+  isUserMessage,
+  type F0ChatRuntime,
+} from "@/sds/chat/F0Chat"
+import { MessageStatus } from "@/sds/chat/F0Chat/components/MessageStatus"
 import {
   MockChatAppProvider,
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { MockCommunitySurface } from "@/sds/chat/F0Chat/mocks/MockCommunitySurface"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
-import { Action } from "@/ui/Action"
-
-import { ApplicationFrame } from "./index"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
+import { DaytimePage } from "@/sds/Home/DaytimePage"
+import { ApplicationFrame } from "."
 
 /**
  * Mock people database for @mention search and entity resolution in Storybook.
@@ -398,73 +408,6 @@ const mockUploadFiles = (files: File[]): Promise<UploadedFile[]> =>
     }, 1000)
   })
 
-const QuickActions = () => {
-  const { sendMessage } = useMockAiChatRuntime()
-
-  const buttonWithMessage = (action: {
-    label: string
-    message: string
-    icon: IconType
-  }) => {
-    return (
-      <F0Button
-        variant="outline"
-        label={action.label}
-        onClick={() => {
-          sendMessage(action.message)
-        }}
-        icon={action.icon}
-      />
-    )
-  }
-
-  const actions = [
-    {
-      label: "All templates",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Empty survey",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Q4 Employee Satisfaction",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Team Effectiveness",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4 rounded-md border-2 border-dotted border-f1-border p-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="whitespace-nowrap text-sm text-f1-foreground-secondary">
-          Or start from
-        </p>
-        <div className="flex items-center gap-2">
-          <Action
-            variant="ghost"
-            prepend={<F0Icon icon={Marketplace} size="sm" />}
-            append={<ArrowRight className="h-3.5 w-3.5" />}
-            onClick={() => {}}
-          >
-            All templates
-          </Action>
-        </div>
-      </div>
-      <F0Box display="grid" columns="4" gap="sm">
-        {actions.map((action) => buttonWithMessage(action))}
-      </F0Box>
-    </div>
-  )
-}
-
 const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
   {
     id: "empty-survey",
@@ -516,12 +459,13 @@ const WelcomeCards = () => {
   return <WelcomeScreenCardsRow cards={cards} />
 }
 
-const meta: Meta<typeof ApplicationFrame> = {
+const meta = {
   title: "App shell/ApplicationFrame",
   component: ApplicationFrame,
   tags: ["autodocs", "experimental"],
   parameters: {
     layout: "fullscreen",
+    docsFullWidth: true,
   },
   args: {
     ai: {
@@ -761,11 +705,11 @@ const meta: Meta<typeof ApplicationFrame> = {
     sidebar: <TabbedSidebar />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
-}
+} satisfies Meta<typeof ApplicationFrame>
 
 export default meta
 
-type Story = StoryObj<typeof ApplicationFrame>
+type Story = StoryObj<typeof meta>
 
 const mockChatSlots = {
   chatHeader: <MockConnectedChatHeader />,
@@ -777,6 +721,71 @@ const withMockChatSlots = (
   ai: ComponentProps<typeof ApplicationFrame>["ai"]
 ): ComponentProps<typeof ApplicationFrame>["ai"] =>
   ai ? { ...ai, ...mockChatSlots } : ai
+
+/**
+ * Manual-QA controls for the frame's motion. Storybook only — nothing here
+ * ships.
+ *
+ * Opening straight into fullscreen is the one entry the product's own chrome
+ * cannot give you: the header's expand button only exists once the panel is
+ * already docked. And fullscreen is where the two hardest transitions start —
+ * leaving it for the sidepanel, and closing outright, which is a different
+ * movement (`open` goes false first, and the mode resets a commit later).
+ *
+ * `clearPanelContent` first because these stories dock conversations on the
+ * opposite edge: without it the fullscreen would be the hosted window, not
+ * the AI chat.
+ */
+const MotionQaControls = () => {
+  const {
+    setOpen,
+    setVisualizationMode,
+    clearPanelContent,
+    open,
+    visualizationMode,
+  } = useAiChat()
+
+  const openAiChat = (mode: "sidepanel" | "fullscreen") => {
+    clearPanelContent()
+    // `setVisualizationMode("fullscreen")` opens the panel by itself; the
+    // docked case has to say so.
+    if (mode === "fullscreen") {
+      setVisualizationMode("fullscreen")
+    } else {
+      setVisualizationMode("sidepanel")
+      setOpen(true)
+    }
+  }
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-f1-border-secondary p-3">
+      <span className="text-sm font-medium text-f1-foreground-secondary">
+        Motion QA
+      </span>
+      <F0Button
+        label="AI chat · fullscreen"
+        variant="outline"
+        size="sm"
+        onClick={() => openAiChat("fullscreen")}
+      />
+      <F0Button
+        label="AI chat · docked"
+        variant="outline"
+        size="sm"
+        onClick={() => openAiChat("sidepanel")}
+      />
+      <F0Button
+        label="Close panel"
+        variant="neutral"
+        size="sm"
+        onClick={() => setOpen(false)}
+      />
+      <span className="text-sm text-f1-foreground-secondary">
+        open: {String(open)} · {visualizationMode}
+      </span>
+    </div>
+  )
+}
 
 // Communications mode hides the per-page One switch (One is reached from the
 // sidebar tab), so the page header opts out via `hideOneSwitch`.
@@ -791,9 +800,43 @@ const communicationsPageHeader = (
   />
 )
 
+/** The home page every communications story falls back to. */
+const HomePage = (): ReactNode => (
+  <DaytimePage
+    period="morning"
+    header={{
+      employeeFirstName: "Jordan",
+      employeeLastName: "Avery",
+      title: "Good morning, Jordan!",
+      employeeAvatar: "/avatars/person05.jpg",
+    }}
+  >
+    <MotionQaControls />
+    <HomeLayout {...HomeLayoutStories.Default.args} />
+  </DaytimePage>
+)
+
+/**
+ * The main content of EVERY story with a conversations sidebar: the open post
+ * or composer when there is one, the ordinary page when there isn't. Clicking
+ * a post in the feed REPLACES the page, exactly as navigating to it would —
+ * the chat stays on its edge throughout.
+ *
+ * It wraps every one of them because a community is reachable from the sidebar
+ * of every one of them. A story that renders its page bare instead gets a feed
+ * whose cards swallow each press in silence: the store records the open post
+ * and nothing is mounted to show it.
+ */
+const CommunityMain = ({
+  children,
+}: {
+  /** The page when no post is open. Defaults to the home page. */
+  children?: ReactNode
+}): ReactNode => <MockCommunitySurface fallback={children ?? <HomePage />} />
+
 export const Default: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           // Transitional communications layout: conversations dock LEFT
@@ -817,17 +860,7 @@ export const Default: Story = {
           {/* Real-world main content: the home "daytime" page. The One switch
               stays visible — it's how the AI chat opens (the sidebar only has
               Home + Chat tabs here). */}
-          <DaytimePage
-            period="morning"
-            header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
-            }}
-          >
-            <HomeLayout {...HomeLayoutStories.Default.args} />
-          </DaytimePage>
+          <CommunityMain />
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
@@ -835,38 +868,133 @@ export const Default: Story = {
 }
 
 /**
- * The previous communications layout, kept as the configurable alternative:
- * ONE panel docked left shared by conversations and the AI chat (`side:
- * "left"`, no `panelContentSide`), a third "One" sidebar tab instead of the
- * page-header switch, and the compact in-panel chat header.
+ * Everything at once, in one channel, inside the real resizable side panel.
+ *
+ * This is the manual-QA surface for the transcript work: it opens
+ * `grp-everything-stress` — a year of history, ten extra pages, every message
+ * shape (albums of 1/2/3/4/7, a 1:10 tower, a dimensionless photo, video,
+ * voice, location, pdf/sheet/docx/text cards, file chips, link previews,
+ * replies, mentions, reactions, edits, deletions, failures, system rows) and a
+ * live typing indicator.
+ *
+ * What to exercise here:
+ * - drag the panel's resize handle across its whole range while reading history
+ *   with albums and video above the fold — the message under the cursor must
+ *   stay put, and the sticky date pill must keep showing the right day;
+ * - toggle fullscreen (150ms in, 400ms out) and cross the `md` breakpoint;
+ * - close the panel, pick a different conversation, reopen — no jump on entry;
+ * - scroll up fast through the reaction-heavy stretch — no pill may drift;
+ * - check the in-bubble time against every shape, and its legibility over the
+ *   brightest and darkest photos in light and dark.
  */
-export const CommunicationsPanelLeft: Story = {
-  name: "Communications — everything left",
+export const EverythingChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider pace={5}>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="grp-everything-stress"
+              tabsPersistKey="communications-everything"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The announcement channel — Factorial's own noticeboard, and the welcome
+ * screen a new employee lands on. A `type: "announcement"` channel, so every
+ * capability defaults to off with no configuration at all.
+ *
+ * What it demonstrates, top to bottom:
+ * - a header with just the identity and the close button: no ellipsis, because
+ *   a fixed two-message transcript has nothing to search;
+ * - the day separator carrying the time ("Yesterday 22:14") while the messages
+ *   themselves carry none — their timestamp is seeded, not sent;
+ * - a card attachment (`kind: "card"`) rendered as an `F0Card`, the one thing
+ *   in here that IS interactive;
+ * - no hover ellipsis on either message: no reply, no reaction, no copy;
+ * - the read-only notice where the composer would be.
+ *
+ * What to exercise: hover both messages, drag a file over the panel (no drop
+ * affordance), and check the sidebar — badge of 2, no pin on hover, and no
+ * unread divider inside once opened.
+ */
+export const AnnouncementChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider pace={5}>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="dm-factorial"
+              tabsPersistKey="communications-announcement"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * A COMMUNITY — a channel whose contents are posts, not messages.
+ *
+ * What it demonstrates, top to bottom:
+ * - the "Communities" group LAST in the sidebar, under Direct messages and
+ *   Groups: a community is not a conversation of yours, it is a place you go to
+ *   read;
+ * - rows with no presence dot, no pin on hover and no "Writing…" — none of
+ *   which mean anything for a place rather than a person;
+ * - a badge that reads "3 new posts", not "3 unread";
+ * - full-width post cards inside: title, formatted body, cover, counters and
+ *   reactions, with no bubble and no avatar gutter;
+ * - the "New posts" divider, frozen for the whole visit;
+ * - the read-only notice naming who *can* post, where the composer would be.
+ *
+ * What to exercise: collapse the group (its total appears in the header),
+ * scroll slowly and watch the badge come down POST BY POST rather than all at
+ * once at the bottom, and leave and re-enter to confirm the divider doesn't
+ * move.
+ */
+export const CommunityChannel: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
             ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
+            panelContentSide: "left",
           }}
           aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar />}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="com-company-news"
+              tabsPersistKey="communications-communities"
+            />
+          }
         >
-          <DaytimePage
-            period="morning"
-            hideOneSwitch
-            header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
-            }}
-          >
-            <HomeLayout {...HomeLayoutStories.Default.args} />
-          </DaytimePage>
+          <CommunityMain />
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
@@ -874,88 +1002,86 @@ export const CommunicationsPanelLeft: Story = {
 }
 
 /**
- * The standalone AI assistant: no communications sidebar, the chat docked on the
- * right as a resizable side panel, with the full feature set (credits, file
- * attachments, dictation, entity refs, disclaimer + quick actions footer).
+ * The same panel for someone who may publish: the message composer is replaced
+ * by a bar that opens a post composer (title + rich text + an explicit
+ * Publish). Enter never publishes, and dismissing a written draft asks first.
+ *
+ * What to exercise: publish a post and watch it land at the foot of the feed
+ * already read — your own post never adds to your own badge.
  */
-export const WithAiAssistant: Story = {
+export const CommunityPosting: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
-      <ApplicationFrame
-        ai={withMockChatSlots(args.ai)}
-        aiPromotion={args.aiPromotion}
-        sidebar={<Sidebar {...SidebarStories.default.args} />}
-      >
-        <Page {...PageStories.Default.args} />
-      </ApplicationFrame>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="com-barcelona-office"
+              tabsPersistKey="communications-posting"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
-  args: {
-    ai: {
-      enabled: true,
-      resizable: true,
-      onThumbsUp: (message, { threadId, feedback }) => {
-        console.log("thumbs up", { message, threadId, feedback })
-      },
-      onThumbsDown: (message, { threadId, feedback }) => {
-        console.log("thumbs down", { message, threadId, feedback })
-      },
-      initialMessage: [
-        "Operational work, automated by One",
-        "Ask anything about your company",
-        "Skip the boring part of your job",
-        "Ask anything about your people, policies, or payroll",
-        "Turn months of data into a one-line answer",
-      ],
-      footer: <QuickActions />,
-      entityRefs: {
-        resolvers: {
-          person: mockPersonResolver,
-          candidate: mockCandidateResolver,
-          expense: mockExpenseResolver,
-          jobPosting: mockJobPostingResolver,
-          vacancy: mockVacancyResolver,
-          requisition: mockRequisitionResolver,
-          searchPersons: mockSearchPersons,
-        },
-        urls: {
-          person: (id) => `/employees/${id}`,
-          candidate: (id) => `/recruitment/candidates/${id}/applications`,
-          expense: (id) => `/expenses/${id}`,
-          jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
-          vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
-          requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
-        },
-      },
-      credits: {
-        fetchUsage: mockFetchCreditsUsage,
-        upgradePlanUrl: "https://example.com/upgrade",
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
-      },
-      // When both are set the employee-only popover wins (see
-      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
-      // stays as a documented fallback for hosts that haven't opted into
-      // per-employee allocations.
-      employeeCredits: {
-        fetchUsage: mockFetchEmployeeCreditsUsage,
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
-      },
-      fileAttachments: {
-        onUploadFiles: mockUploadFiles,
-        maxFiles: 5,
-      },
-      onTranscribe: mockTranscribe,
-      disclaimer: {
-        text: "One works within your permissions.",
-        link: "/permissions",
-        linkText: "See more",
-      },
-    },
-  },
+}
+
+/**
+ * THE AGGREGATED FEED — "All posts", every community you belong to in one
+ * channel. The first row of the Communities group, and the one a reader who
+ * follows six communities actually opens.
+ *
+ * What only this story demonstrates:
+ * - every card names WHERE it came from — "Marcus in Company news", "Nadia in
+ *   People Ops" — as a link to that community. It is the one place F0 is told
+ *   the community name instead of deriving it from the channel title, because
+ *   here the channel title cannot answer the question;
+ * - a pinned shelf that spans communities, which is how you find the post you
+ *   half-remember without remembering where it was published;
+ * - a composer that publishes into a community you pick, rather than the one
+ *   you happen to be reading;
+ * - no unread badge and no "New posts" divider. Deliberate: there is no
+ *   per-post read state to derive them from, so a count here would be a number
+ *   nobody could explain — and a feed is exactly where a reader expects one.
+ *
+ * What to exercise: click a community name and land in that community's own
+ * channel (the origin label is the shortest path from "this is interesting" to
+ * "show me more of it"); open a post and confirm the card stays selected while
+ * its page is open beside the feed; then compare against `CommunityChannel` —
+ * a single community must NOT repeat its name on every card, because its
+ * header already said it an inch above.
+ */
+export const GeneralFeed: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="feed"
+              tabsPersistKey="communications-feed"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
 }
 
 /**
@@ -963,8 +1089,43 @@ export const WithAiAssistant: Story = {
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
  * fullscreen/close to the panel via `useAiChat()`.
  */
-const MockChatPanel = ({ convId }: { convId: string }) => {
+const MockChatPanel = ({
+  convId,
+  receiptPreview,
+}: {
+  convId: string
+  receiptPreview?: "partial"
+}) => {
+  // The community post surfaces are wired inside `useConversationRuntime`
+  // itself, against the shared mock store — nothing to pass in here.
   const runtime = useConversationRuntime(convId)
+  const previewMessageId = useRef<string | null>(null)
+  if (receiptPreview === "partial" && previewMessageId.current == null) {
+    const lastOwnMessage = [...runtime.messages]
+      .reverse()
+      .find((item) => isUserMessage(item) && item.isMine)
+    previewMessageId.current = lastOwnMessage?.id ?? null
+  }
+
+  const previewRuntime = useMemo<F0ChatRuntime>(() => {
+    if (receiptPreview !== "partial" || previewMessageId.current == null) {
+      return runtime
+    }
+
+    return {
+      ...runtime,
+      messages: runtime.messages.map((item) =>
+        isUserMessage(item) && item.id === previewMessageId.current
+          ? {
+              ...item,
+              status: "read",
+              readBy: item.readBy?.slice(0, 2),
+              readByCount: undefined,
+            }
+          : item
+      ),
+    }
+  }, [receiptPreview, runtime])
   // Header actions are PER CHANNEL, derived from my role there (what a real
   // host derives from its permission system): admin channels get Edit group
   // (an F0Dialog owned by the host, prefilled with the group name + member
@@ -984,7 +1145,7 @@ const MockChatPanel = ({ convId }: { convId: string }) => {
   const isFullscreen = visualizationMode === "fullscreen"
 
   return (
-    <F0ChatProvider runtime={runtime}>
+    <F0ChatProvider runtime={previewRuntime}>
       <F0Chat
         isFullscreen={isFullscreen}
         onToggleFullscreen={() =>
@@ -1304,6 +1465,7 @@ const OneHistoryTab = ({
 const ConversationsSidebarInner = ({
   initialTab = "home",
   autoOpenConvId,
+  receiptPreview,
   forceEmpty = false,
   withOneTab = true,
   tabsPersistKey,
@@ -1311,6 +1473,8 @@ const ConversationsSidebarInner = ({
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
   autoOpenConvId?: string
+  /** Override the opened conversation to preview an incomplete receipt. */
+  receiptPreview?: "partial"
   /** Demo-only: render both lists (Messages + One) empty to show the blank states. */
   forceEmpty?: boolean
   /** Show the "One" tab. Off when the AI chat is reached from the page
@@ -1336,11 +1500,21 @@ const ConversationsSidebarInner = ({
     (convId: string) => {
       setPanelContent({
         id: convId,
-        content: <MockChatPanel convId={convId} />,
+        content: (
+          <MockChatPanel convId={convId} receiptPreview={receiptPreview} />
+        ),
       })
     },
-    [setPanelContent]
+    [receiptPreview, setPanelContent]
   )
+
+  // The aggregated feed's cards link to the community each post came from, and
+  // following one means switching CHANNEL — which only this component can do,
+  // since `setPanelContent` lives here. The store just forwards the request.
+  const { setConversationOpener } = useMockChatApp()
+  useEffect(() => {
+    setConversationOpener(onSelect)
+  }, [setConversationOpener, onSelect])
 
   // Demo convenience: open a conversation straight away (e.g. the mentions story
   // lands inside the group so the chat + composer are visible without a click).
@@ -1358,14 +1532,27 @@ const ConversationsSidebarInner = ({
   // up so the panel falls back to the AI chat.
   const restored = useRef(false)
   useEffect(() => {
-    if (!restoringPanelContentId || restored.current) return
+    if (!restoringPanelContentId || restored.current) {
+      return
+    }
     restored.current = true
+    // An explicit story target is deterministic fixture setup, so it must win
+    // over panel content persisted by a previously visited story.
+    if (autoOpenConvId) {
+      cancelPanelContentRestore()
+      return
+    }
     if (SEED_BY_ID.has(restoringPanelContentId)) {
       onSelect(restoringPanelContentId)
     } else {
       cancelPanelContentRestore()
     }
-  }, [restoringPanelContentId, onSelect, cancelPanelContentRestore])
+  }, [
+    autoOpenConvId,
+    restoringPanelContentId,
+    onSelect,
+    cancelPanelContentRestore,
+  ])
 
   // Groups come from the shared mock store, so unread badges / presence / mute
   // are live and clear as conversations are read.
@@ -1416,9 +1603,9 @@ const ConversationsSidebarInner = ({
           />
           {/* Search lives with the tabs in the (fixed) header so it stays put
               while the body scrolls. Only the Home tab uses it. */}
-          {tab === "home" && (
+          {tab === "home" ? (
             <SearchBar placeholder="Search..." onClick={() => {}} />
-          )}
+          ) : null}
         </>
       }
       body={
@@ -1451,12 +1638,14 @@ const ConversationsSidebarInner = ({
 const ConversationsSidebar = ({
   initialTab,
   autoOpenConvId,
+  receiptPreview,
   forceEmpty,
   withOneTab,
   tabsPersistKey,
 }: {
   initialTab?: string
   autoOpenConvId?: string
+  receiptPreview?: "partial"
   forceEmpty?: boolean
   withOneTab?: boolean
   tabsPersistKey?: string
@@ -1466,6 +1655,7 @@ const ConversationsSidebar = ({
       <ConversationsSidebarInner
         initialTab={initialTab}
         autoOpenConvId={autoOpenConvId}
+        receiptPreview={receiptPreview}
         forceEmpty={forceEmpty}
         withOneTab={withOneTab}
         tabsPersistKey={tabsPersistKey}
@@ -1474,16 +1664,59 @@ const ConversationsSidebar = ({
   )
 }
 
-/**
- * Both conversation lists **empty**, side by side in the frame. The Messages tab
- * and the One tab share the same compact blank state (`SidebarChatBlankState`):
- * title + description + a CTA button, no emoji. The host (factorial) supplies the
- * copy and the action per surface; F0 owns the layout so the two read
- * identically. Lands on Messages; the play function also opens One to reveal the
- * AI blank state.
- */
-export const CommunicationsBlankStates: Story = {
-  name: "Communications — blank states",
+const ReceiptStatusComparison = () => {
+  const runtime = useConversationRuntime("grp-reporting")
+  const message = [...runtime.messages]
+    .reverse()
+    .find((item) => isUserMessage(item) && item.isMine)
+  if (!message || !isUserMessage(message)) {
+    return null
+  }
+
+  const partialMessage = {
+    ...message,
+    status: "read" as const,
+    readBy: message.readBy?.slice(0, 2),
+    readByCount: undefined,
+  }
+
+  return (
+    <F0ChatProvider runtime={runtime}>
+      <div className="mx-auto grid w-full max-w-xl gap-4 p-8">
+        <h2 className="text-xl font-semibold text-f1-foreground">
+          Group receipt footer states
+        </h2>
+        <section
+          aria-labelledby="partial-receipts-title"
+          className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4"
+        >
+          <h3
+            id="partial-receipts-title"
+            className="font-medium text-f1-foreground"
+          >
+            Partial group receipts
+          </h3>
+          <MessageStatus message={partialMessage} isGroup />
+        </section>
+        <section
+          aria-labelledby="completed-receipts-title"
+          className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4"
+        >
+          <h3
+            id="completed-receipts-title"
+            className="font-medium text-f1-foreground"
+          >
+            Completed group receipts
+          </h3>
+          <MessageStatus message={message} isGroup />
+        </section>
+      </div>
+    </F0ChatProvider>
+  )
+}
+
+export const Snapshot: Story = {
+  name: "Snapshot",
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
@@ -1495,14 +1728,117 @@ export const CommunicationsBlankStates: Story = {
             chatHeader: <MockConnectedChatHeader compact />,
           }}
           aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar initialTab="messages" forceEmpty />}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-leadership"
+            />
+          }
         >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
+          <CommunityMain>
+            <Page
+              {...PageStories.Default.args}
+              header={communicationsPageHeader}
+            >
+              <ReceiptStatusComparison />
+            </Page>
+          </CommunityMain>
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvas, step }) => {
+    await step("Show the group avatar fallback", async () => {
+      const leadership = await canvas.findByRole("button", {
+        name: "Leadership",
+      })
+      const sidebarFallback = within(leadership).getByTestId(
+        "sidebar-group-avatar-fallback"
+      )
+      const headerFallback = await canvas.findByTestId(
+        "chat-group-avatar-fallback"
+      )
+
+      await expect(
+        sidebarFallback.getBoundingClientRect().width
+      ).toBeGreaterThan(0)
+      await expect(
+        headerFallback.getBoundingClientRect().width
+      ).toBeGreaterThan(0)
+    })
+
+    await step("Show partial and completed group receipt footers", async () => {
+      const partial = within(
+        await canvas.findByRole("region", { name: "Partial group receipts" })
+      )
+      const completed = within(
+        await canvas.findByRole("region", { name: "Completed group receipts" })
+      )
+
+      // Delivery only: the clock moved onto the bubble itself, so the footer no
+      // longer repeats it.
+      await waitFor(() =>
+        expect(partial.getByRole("status")).toHaveTextContent(/^Sent$/i)
+      )
+      await waitFor(() =>
+        expect(completed.getByRole("status")).toHaveTextContent(/^Read$/i)
+      )
+    })
+  },
+  parameters: withSnapshot({}),
+}
+
+/**
+ * Communications with no assistant — the case the panel could not serve.
+ *
+ * `ai` is absent entirely. The panel is declared on its own through
+ * `sidePanel.views`, so clicking a conversation opens it, resizes it and takes
+ * it fullscreen exactly as it does beside an AI chat. There is no One switch,
+ * because there is no One.
+ */
+export const SidePanelWithoutAi: Story = {
+  render: () => (
+    <MockChatAppProvider>
+      <ApplicationFrame
+        sidePanel={{
+          views: [{ id: "communications", side: "left" }],
+          resizable: true,
+        }}
+        sidebar={
+          <ConversationsSidebar
+            withOneTab={false}
+            tabsPersistKey="communications-without-ai"
+          />
+        }
+      >
+        <CommunityMain />
+      </ApplicationFrame>
+    </MockChatAppProvider>
+  ),
+}
+
+/**
+ * Nothing can occupy the panel, so there is no panel.
+ *
+ * Not an empty column — no container, no reserved width, no chrome. This is
+ * what a customer with neither an assistant nor communications sees.
+ */
+export const EmptySidePanel: Story = {
+  render: () => (
+    // The sidebar and the page still read from the mock chat app; only the
+    // PANEL is gone, which is the whole point of the story.
+    <MockChatAppProvider>
+      <ApplicationFrame
+        sidePanel={{ views: [{ id: "communications", available: false }] }}
+        sidebar={
+          <ConversationsSidebar
+            withOneTab={false}
+            tabsPersistKey="empty-side-panel"
+          />
+        }
+      >
+        <CommunityMain />
+      </ApplicationFrame>
+    </MockChatAppProvider>
   ),
 }

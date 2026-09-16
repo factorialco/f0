@@ -1,17 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useState } from "react"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
-import { f0FormField } from "@/patterns/F0Form/f0Schema"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { forms } from "@/patterns/forms"
-
-import { F0WizardForm, useF0FormDefinition } from "../index"
+import { F0WizardForm, useF0FormDefinition } from ".."
 
 const meta: Meta<typeof F0WizardForm> = {
   title: "Forms/F0WizardForm",
@@ -222,9 +218,9 @@ function OpenFormWizardStory() {
     >
       <div className="flex flex-1 flex-col items-center justify-center gap-3">
         <F0Button label="Open wizard" onClick={handleOpen} />
-        {lastResult && (
+        {lastResult ? (
           <p className="text-f1-foreground-secondary">{lastResult}</p>
-        )}
+        ) : null}
       </div>
     </ApplicationFrame>
   )
@@ -737,7 +733,7 @@ const manyFieldsSchema = z.object({
     fieldType: "select",
     options: [
       { value: "saul", label: "Saul Dominguez" },
-      { value: "dani", label: "Dani Moreno" },
+      { value: "jordan", label: "Jordan Avery" },
       { value: "jj", label: "Josep Jaume Rey" },
     ],
   }),

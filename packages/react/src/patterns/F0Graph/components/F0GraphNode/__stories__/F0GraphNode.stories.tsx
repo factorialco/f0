@@ -1,16 +1,14 @@
+import "@xyflow/react/dist/style.css"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   ReactFlow,
   ReactFlowProvider,
   type Node,
   type NodeTypes,
 } from "@xyflow/react"
-import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { Building, Delete, Files, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0GraphNode } from ".."
 import { graphNodeStates, graphNodeVariants } from "../types"
 
@@ -22,9 +20,20 @@ const meta = {
     layout: "centered",
   },
   decorators: [
+    // A bare `role="treeitem"` (what F0GraphNode renders) needs a `tree`/`group`
+    // owner or axe fails `aria-required-parent`. In the real graph the
+    // `role="tree"` container provides it; here a `role="group"` wrapper does —
+    // a valid treeitem parent (axe requiredContext is `group`/`tree`) that, being
+    // `group`, has no required children of its own, so a story that can't reach
+    // its node through the DOM (the node sits behind a nested `<ReactFlow>`'s
+    // `role="application"`) doesn't make this wrapper fail `aria-required-children`.
+    // Those stories provide their own `role="tree"` with `aria-owns` instead —
+    // see WithToolbar / ToolbarDemo.
     (Story) => (
       <ReactFlowProvider>
-        <Story />
+        <div role="group" aria-label="Graph node preview">
+          <Story />
+        </div>
       </ReactFlowProvider>
     ),
   ],
@@ -49,12 +58,12 @@ type Story = StoryObj<typeof meta>
 const personAvatar = {
   type: "person",
   firstName: "Alice",
-  lastName: "Moreno",
+  lastName: "Avery",
 } as const
 
 const baseProps = {
   avatar: personAvatar,
-  title: "Alice Moreno",
+  title: "Alice Avery",
   subtitle: "Staff Designer",
 } as const
 
@@ -114,7 +123,7 @@ export const ZoomLevels: Story = {
         <div key={variant} className="flex flex-col items-center gap-2">
           <F0GraphNode
             avatar={personAvatar}
-            title="Alice Moreno"
+            title="Alice Avery"
             subtitle="Staff Designer"
             variant={variant}
           />
@@ -137,8 +146,8 @@ export const Avatars: Story = {
       {
         key: "person",
         label: "person",
-        avatar: { type: "person", firstName: "Alice", lastName: "Moreno" },
-        title: "Alice Moreno",
+        avatar: { type: "person", firstName: "Alice", lastName: "Avery" },
+        title: "Alice Avery",
         subtitle: "Staff Designer",
       },
       {
@@ -348,7 +357,17 @@ const toolbarDemoNodes: Node[] = [
 
 function ToolbarDemo() {
   return (
-    <div style={{ width: 480, height: 240 }}>
+    // The node renders inside React Flow's hardcoded `role="application"` div,
+    // which severs the DOM tree→treeitem relationship. Mirror F0GraphView: a
+    // `role="tree"` directly wrapping React Flow re-owns the node via `aria-owns`
+    // (`ToolbarDemoNode` sets nodeId="toolbar-demo" → DOM id below), so the lone
+    // treeitem has a valid, owning parent.
+    <div
+      role="tree"
+      aria-label="Graph node preview"
+      aria-owns="f0-graph-node-toolbar-demo"
+      style={{ width: 480, height: 240 }}
+    >
       <ReactFlow
         nodes={toolbarDemoNodes}
         nodeTypes={toolbarNodeTypes}

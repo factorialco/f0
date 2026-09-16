@@ -79,6 +79,15 @@ return <F0Form formDefinition={formDefinition} />
         <td>✓</td>
       </tr>
       <tr>
+        <td>`f0FormField.phone(config)`</td>
+        <td>
+          `z.object({ prefix, number })` validated with libphonenumber
+          (`validate: "valid" | "possible" | false`, default `"valid"`)
+        </td>
+        <td>phone input (`F0PhoneInput`)</td>
+        <td>✓</td>
+      </tr>
+      <tr>
         <td>`f0FormField.url(config)`</td>
         <td>`z.string().url()`</td>
         <td>text input (url)</td>
@@ -661,8 +670,19 @@ links: f0FormField.entitiesList({
 ## Accessibility
 
 - All fields rendered by F0Form include ARIA labels derived from the `label` config.
-- Error messages are linked to their field via `aria-describedby`.
+  That `aria-label` is what names the control for assistive technology.
+- **Known limitation:** the visible label is _not_ programmatically associated with
+  its control, so clicking it does not move focus to the input. The label carries no
+  `for` attribute — the input's `id` is generated inside `F0InputField` and the field
+  renderers do not thread one through, so any `for` we could write today would point
+  at a nonexistent element. Screen-reader users are unaffected (the `aria-label`
+  above names the control); pointer users lose the click-to-focus affordance.
+- Help text and error messages are linked to their field via `aria-describedby`,
+  and the attribute is only emitted for the ones actually rendered — a field with
+  no `helpText` and no error carries no `aria-describedby`.
 - The form's submit button manages `aria-busy` during async submission.
+- Every story in this section runs axe in CI at blocking severity
+  (`a11y: { test: "error" }`), covering WCAG 2.0/2.1/2.2 at levels A and AA.
 
 ---
 
@@ -694,6 +714,29 @@ Use `sections` to split a long form into named groups with independent submit bu
 ## Sections in sidepanel
 
 <Canvas of={Stories.WithSectionsSidepanel} />
+
+## Only selected section
+
+For large forms, set `showOnlySelectedSection: true` on the `styling` prop to render only the currently selected section instead of stacking all sections at once. Navigation items in the sidepanel remain the same; only the visible content changes.
+
+<Canvas of={Stories.WithOnlySelectedSection} />
+
+**Behaviour details:**
+
+- **Value preservation** — hidden sections remain mounted (via `display: none`), so field values, dirty state, and validation are preserved across section switches.
+- **Error navigation** — if submission triggers validation errors in a hidden section, F0Form automatically reveals that section before focusing the offending field.
+- **Conditional sections** — sections whose `renderIf` evaluates to false are excluded from the sidepanel and skipped during section switching.
+- **Small screens** — the sidepanel (and therefore `showOnlySelectedSection`) is automatically disabled on viewports ≤ 560 px, where all sections stack vertically instead.
+- **Row layout** — fields grouped with the same `row` key switch to a stacked vertical layout when their container is narrower than 480 px (container query), so rows stay readable next to the sidepanel at medium viewport widths.
+
+```tsx
+const formDefinition = useF0FormDefinition({ ... })
+
+<F0Form
+  formDefinition={formDefinition}
+  styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+/>
+```
 
 ## Styling
 

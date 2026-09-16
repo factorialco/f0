@@ -1,18 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { buttonToggleVariants } from "@/components/F0ButtonToggle"
 import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
+import { buttonToggleGroupSizes, F0ButtonToggleGroup } from ".."
 import type {
   F0ButtonToggleGroupItem,
   F0ButtonToggleGroupProps,
 } from "../types"
-
-import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
 
 const meta = {
   title: "Button/ButtonToggleGroup",
@@ -142,6 +138,30 @@ const defaultArgs: Partial<StoryArgs> = {
 
 export const Default: Story = {
   args: defaultArgs,
+}
+
+export const WithTooltips: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "An item's `tooltip` names it on hover and on keyboard focus — worth " +
+          "setting on a compact group, where every item is a glyph on its own.",
+      },
+    },
+  },
+  args: {
+    ...defaultArgs,
+    items: [
+      { label: "Archive", icon: Archive, value: "archive", tooltip: "Archive" },
+      {
+        label: "Delete",
+        icon: Delete,
+        value: "delete",
+        tooltip: { label: "Delete", description: "This can't be undone" },
+      },
+    ],
+  },
 }
 
 export const Single: Story = {

@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, FC, useState } from "react"
 import { F0Button } from "@/components/F0Button"
-import { ResourceHeader } from "@/patterns/ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/patterns/ResourceHeader/index.stories"
 import {
   OnePersonListItem,
   OnePersonListItemProps,
@@ -13,10 +10,11 @@ import { Placeholder } from "@/icons/app"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
+import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/index.stories"
+import { F0Drawer } from ".."
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
-import { F0Drawer } from "../index"
 import { drawerSizes } from "../types"
 
 const meta: Meta<typeof F0Drawer> = {
@@ -233,9 +231,9 @@ export const WithResourceHeader: Story = {
       href: "/timeoff",
     },
     children: (
-      <ResourceHeader
+      <F0ResourceHeader
         {...(ResourceHeaderDefault.args as ComponentProps<
-          typeof ResourceHeader
+          typeof F0ResourceHeader
         >)}
         primaryAction={undefined}
         secondaryActions={undefined}

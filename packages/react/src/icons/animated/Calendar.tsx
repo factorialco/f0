@@ -43,23 +43,14 @@ const CalendarAnimated = React.forwardRef<SVGSVGElement, CalendarProps>(
           transition={pageTransition}
         >
           <g>
-            <path d="M5 10H19" vectorEffect="non-scaling-stroke" />
-            <path
-              d="M5 8C5 6.34315 6.34315 5 8 5H16C17.6569 5 19 6.34315 19 8V10H5V8Z"
-              vectorEffect="non-scaling-stroke"
-            />
+            <path d="M5 10H19" />
+            <path d="M5 8C5 6.34315 6.34315 5 8 5H16C17.6569 5 19 6.34315 19 8V10H5V8Z" />
 
-            <path d="M9 3V7" vectorEffect="non-scaling-stroke" />
-            <path d="M15 3V7" vectorEffect="non-scaling-stroke" />
+            <path d="M9 3V7" />
+            <path d="M15 3V7" />
           </g>
-          <path
-            d="M5 10H19V16C19 17.6569 17.6569 19 16 19H8C6.34315 19 5 17.6569 5 16V10Z"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d="M5 10H19V16C19 17.6569 17.6569 19 16 19H8C6.34315 19 5 17.6569 5 16V10Z"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d="M5 10H19V16C19 17.6569 17.6569 19 16 19H8C6.34315 19 5 17.6569 5 16V10Z" />
+          <path d="M5 10H19V16C19 17.6569 17.6569 19 16 19H8C6.34315 19 5 17.6569 5 16V10Z" />
         </motion.g>
       </svg>
     )

@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { GraphNode } from "../types"
 
 interface UseLazyTreeOptions<T> {
@@ -87,7 +86,9 @@ export function useLazyTree<T>(
 
       // Clear any previous error for this node
       setErrorNodes((prev) => {
-        if (!prev.has(nodeId)) return prev
+        if (!prev.has(nodeId)) {
+          return prev
+        }
         const next = new Map(prev)
         next.delete(nodeId)
         return next
@@ -137,7 +138,7 @@ export function useLazyTree<T>(
 
   const expandNode = useCallback(
     async (nodeId: string): Promise<GraphNode<T>[]> => {
-      return await fetchChildren(nodeId)
+      return fetchChildren(nodeId)
     },
     [fetchChildren]
   )
@@ -151,17 +152,26 @@ export function useLazyTree<T>(
     async (nodeId: string): Promise<GraphNode<T>[]> => {
       // Allow re-fetch by clearing the loaded flag
       loadedParents.current.delete(nodeId)
-      return await fetchChildren(nodeId)
+      return fetchChildren(nodeId)
     },
     [fetchChildren]
   )
 
-  return {
-    nodes: allNodes,
-    loadingNodes,
-    errorNodes,
-    expandNode,
-    collapseNode,
-    retryNode,
-  }
+  // Memoized: consumers keep this object in dependency arrays (the expand
+  // callbacks, and through them the actions context every node wrapper
+  // consumes). Returning a fresh literal gave it a new identity on every render
+  // of the host, which invalidated those callbacks — and re-rendered every
+  // on-screen node — even when no tree data had changed. Every member is either
+  // state or a `useCallback`, so this is stable exactly when the tree is.
+  return useMemo(
+    () => ({
+      nodes: allNodes,
+      loadingNodes,
+      errorNodes,
+      expandNode,
+      collapseNode,
+      retryNode,
+    }),
+    [allNodes, loadingNodes, errorNodes, expandNode, collapseNode, retryNode]
+  )
 }

@@ -4,7 +4,6 @@
  */
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
@@ -57,7 +56,7 @@ export const LongTextCell = (
       className={cn(
         "whitespace-pre-wrap break-words text-f1-foreground",
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary",
-        meta.visualization === "table" && tableDisplayClassNames.text
+        meta.visualization === "table" && tableDisplayClassNames.multiline
       )}
       lines={lines}
       disabled={fullText}

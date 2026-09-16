@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, within } from "storybook/test"
-
-import type { TagListProps } from "@/components/tags/F0TagList"
 import type { TagDotProps } from "@/components/tags/F0TagDot"
-
-import { DetailsItemsList } from "./index"
+import type { TagListProps } from "@/components/tags/F0TagList"
+import { DetailsItemsList } from "."
 
 const meta: Meta = {
   title: "List/DetailsItemsList",
@@ -181,8 +178,8 @@ export const TableViewWithPersonList: Story = {
         title: "Tech Lead",
         content: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: "Jordan",
+          lastName: "Avery",
           avatarUrl: "/avatars/person05.jpg",
         },
       },
@@ -235,8 +232,8 @@ export const WithAvatarList: Story = {
                 src: "/avatars/person01.jpg",
               },
               {
-                firstName: "Dani",
-                lastName: "Moreno",
+                firstName: "Jordan",
+                lastName: "Avery",
                 src: "/avatars/person05.jpg",
               },
               {
@@ -285,8 +282,8 @@ export const TableViewWithAvatarList: Story = {
                 src: "/avatars/person01.jpg",
               },
               {
-                firstName: "Dani",
-                lastName: "Moreno",
+                firstName: "Jordan",
+                lastName: "Avery",
                 src: "/avatars/person05.jpg",
               },
               {

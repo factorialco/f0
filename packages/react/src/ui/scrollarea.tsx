@@ -8,22 +8,25 @@ import {
   type ComponentPropsWithoutRef,
   type ElementRef,
 } from "react"
-
 import { cn } from "../lib/utils"
 
-const ScrollArea = forwardRef<
+type ScrollAreaProps = ComponentPropsWithoutRef<
+  typeof ScrollAreaPrimitive.Root
+> & {
+  showBar?: boolean
+  viewportRef?: React.RefObject<HTMLDivElement>
+  onScrollTop?: () => void
+  onScrollBottom?: () => void
+  /**
+   * The margin to add to the scroll area when the user is at the top or bottom of the scroll area.
+   * @default 0
+   */
+  scrollMargin?: number
+}
+
+const ScrollAreaImpl = forwardRef<
   ElementRef<typeof ScrollAreaPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
-    showBar?: boolean
-    viewportRef?: React.RefObject<HTMLDivElement>
-    onScrollTop?: () => void
-    onScrollBottom?: () => void
-    /**
-     * The margin to add to the scroll area when the user is at the top or bottom of the scroll area.
-     * @default 0
-     */
-    scrollMargin?: number
-  }
+  ScrollAreaProps & { focusableViewport: boolean }
 >(
   (
     {
@@ -33,6 +36,7 @@ const ScrollArea = forwardRef<
       viewportRef,
       onScrollTop,
       onScrollBottom,
+      focusableViewport = true,
       scrollMargin = 0,
       ...props
     },
@@ -77,7 +81,7 @@ const ScrollArea = forwardRef<
         <ScrollAreaPrimitive.Viewport
           ref={localViewportRef}
           className="size-full snap-none rounded-[inherit] [&>div]:!block"
-          tabIndex={0}
+          tabIndex={focusableViewport ? 0 : undefined}
           data-scroll-container
         >
           {children}
@@ -89,7 +93,22 @@ const ScrollArea = forwardRef<
     )
   }
 )
+ScrollAreaImpl.displayName = "ScrollAreaImpl"
+
+const ScrollArea = forwardRef<
+  ElementRef<typeof ScrollAreaPrimitive.Root>,
+  ScrollAreaProps
+>((props, ref) => <ScrollAreaImpl ref={ref} {...props} focusableViewport />)
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
+
+/** Internal static-enum variant: listbox options own focus, not the viewport. */
+const NonFocusableScrollArea = forwardRef<
+  ElementRef<typeof ScrollAreaPrimitive.Root>,
+  ScrollAreaProps
+>((props, ref) => (
+  <ScrollAreaImpl ref={ref} {...props} focusableViewport={false} />
+))
+NonFocusableScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
 const ScrollBar = forwardRef<
   ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
@@ -109,11 +128,11 @@ const ScrollBar = forwardRef<
     )}
     {...props}
   >
-    {showBar && (
+    {showBar ? (
       <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-f1-background-inverse opacity-30 transition-opacity group-hover/scrollbar:opacity-50" />
-    )}
+    ) : null}
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 
-export { ScrollArea, ScrollBar }
+export { NonFocusableScrollArea, ScrollArea, ScrollBar }

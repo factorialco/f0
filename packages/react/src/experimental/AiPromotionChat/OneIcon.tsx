@@ -1,9 +1,7 @@
-import type { SVGProps } from "react"
-
 import { cva } from "cva"
 import { motion } from "motion/react"
+import type { SVGProps } from "react"
 import { Ref, forwardRef, useId } from "react"
-
 import { cn } from "@/lib/utils"
 
 interface OneIconProps extends SVGProps<SVGSVGElement> {
@@ -85,32 +83,13 @@ const OneIcon = (
         transformStyle: spin ? "preserve-3d" : undefined,
       }}
     >
-      <motion.svg
+      <svg
         width="100%"
         height="100%"
         viewBox="0 0 32 32"
         xmlns="http://www.w3.org/2000/svg"
         ref={ref}
-        animate={{
-          "--gradient-angle": ["0deg", "360deg"],
-        }}
-        transition={
-          !background
-            ? {
-                "--gradient-angle": {
-                  duration: 6,
-                  ease: "linear",
-                  repeat: Infinity,
-                },
-              }
-            : undefined
-        }
-        style={
-          {
-            "--gradient-angle": "0deg",
-            ...safeSvgProps.style,
-          } as React.CSSProperties
-        }
+        style={safeSvgProps.style}
         {...(({ style: _style, ...rest }) => rest)(safeSvgProps)}
       >
         <defs>
@@ -133,6 +112,10 @@ const OneIcon = (
               width="32"
               height="32"
               clipPath={`url(#${clipPathId}-${piece.id})`}
+              // f0-allow-animated-css-var: written and read by this same
+              // element (its own `transform`), and the value depends on hover
+              // and the per-piece spin sequence, which a static keyframe cannot
+              // express.
               animate={{
                 "--rotate3d-angle": ["0deg", "180deg", "180deg", "360deg"],
                 "--scale": hover ? 8 : 1,
@@ -142,6 +125,7 @@ const OneIcon = (
                   ? ["blur(0px)", "blur(8px)", "blur(0px)"]
                   : undefined,
               }}
+              // f0-allow-animated-css-var: see above.
               transition={{
                 "--rotate3d-angle": {
                   delay: spin ? piece.delay : 0,
@@ -182,6 +166,10 @@ const OneIcon = (
               }
             >
               <div
+                className={cn(
+                  !background &&
+                    "[animation:rotate-gradient_6s_linear_infinite] motion-reduce:[animation:none]"
+                )}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -193,7 +181,7 @@ const OneIcon = (
             </motion.foreignObject>
           ))}
         </g>
-      </motion.svg>
+      </svg>
     </div>
   )
 }

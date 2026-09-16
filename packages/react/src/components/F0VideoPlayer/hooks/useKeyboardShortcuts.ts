@@ -1,5 +1,4 @@
 import { useCallback } from "react"
-
 import { SEEK_STEP_SECONDS, VOLUME_STEP } from "../utils"
 
 export interface UseKeyboardShortcutsOptions {
@@ -13,8 +12,8 @@ export interface UseKeyboardShortcutsOptions {
 }
 
 /**
- * Player keyboard shortcuts (active while the wrapper or a non-input descendant
- * holds focus):
+ * Player keyboard shortcuts (active while the wrapper or a non-interactive
+ * descendant holds focus):
  *
  *   Space    → play/pause
  *   ← / →    → seek ±SEEK_STEP_SECONDS (forward seek runs through `seek`'s clamp)
@@ -34,17 +33,30 @@ export function useKeyboardShortcuts({
     (event: React.KeyboardEvent<HTMLElement>) => {
       const target = event.target
       if (target instanceof HTMLElement) {
-        const tag = target.tagName
-        if (tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable)
+        // Native/custom controls own their activation keys. In particular,
+        // intercepting Space from a button would cancel its native click and
+        // toggle playback instead.
+        if (
+          target.closest(
+            'button, a, input, textarea, select, [role="button"], [contenteditable="true"]'
+          )
+        ) {
           return
+        }
         // Inside a menu, let the menu own its keys (Arrow/Space/Enter).
-        if (target.closest('[role="menu"], [role^="menuitem"]')) return
+        if (target.closest('[role="menu"], [role^="menuitem"]')) {
+          return
+        }
         // Custom sliders (seekbar, volume) own their own keyboard handling.
-        if (target.getAttribute("role") === "slider") return
+        if (target.getAttribute("role") === "slider") {
+          return
+        }
       }
 
       const video = videoRef.current
-      if (!video) return
+      if (!video) {
+        return
+      }
 
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key
 

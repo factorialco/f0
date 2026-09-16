@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { NewColor } from "@/components/tags/F0TagDot"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
@@ -31,7 +30,7 @@ export interface KanbanProps<TRecord extends RecordType> {
    * Lanes configuration. While the data source adapter is not ready, each lane
    * carries its concrete items so we can iterate visually.
    */
-  lanes: ReadonlyArray<KanbanLaneAttributes<TRecord>>
+  lanes: readonly KanbanLaneAttributes<TRecord>[]
 
   /** Whether the kanban is in loading state */
   loading?: boolean
@@ -52,6 +51,13 @@ export interface KanbanProps<TRecord extends RecordType> {
 
   /** Optional callback triggered when requesting a new record in a lane */
   onCreate?: KanbanOnCreate
+
+  /** Vertical sizing of the board.
+   * - `"fill"` (default): lanes fill the available height and scroll internally.
+   * - `"content"`: lanes grow to fit their cards (no inner scroll) and every lane
+   *   matches the tallest, so an outer container owns the single vertical scroll.
+   *   Used by the grouped board, where each group hugs its content. */
+  heightMode?: "fill" | "content"
 
   /** Optional DnD configuration to enable droppable lanes */
   dnd?: {

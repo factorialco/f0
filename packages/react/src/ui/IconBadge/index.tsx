@@ -1,9 +1,7 @@
 import { cva, type VariantProps } from "cva"
-
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
-import { F0Icon, IconType } from "@/components/F0Icon"
 
 const badgeVariants = cva({
   base: "flex shrink-0 items-center justify-center rounded-full",

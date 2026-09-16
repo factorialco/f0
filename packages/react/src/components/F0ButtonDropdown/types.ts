@@ -76,6 +76,13 @@ type F0ButtonDropdownBaseProps<T = string> = {
    * @default undefined
    */
   tooltip?: string
+  /**
+   * Where the menu is portalled. Defaults to the document body; inside a modal
+   * layer pass that layer's own element (an `F0Dialog` publishes it as
+   * `portalContainer`) so its focus trap contains the menu rather than fighting
+   * it.
+   */
+  container?: HTMLElement | null
 }
 
 /**
@@ -113,9 +120,15 @@ type F0ButtonDropdownDropdownProps<T = string> =
      */
     mode: "dropdown"
     /**
+     * The currently selected value. When it names an item, the trigger becomes
+     * that item — its label and its icon — the same way split mode's main button
+     * shows what is selected. Without it the trigger is just an opener.
+     */
+    value?: T
+    /**
      * Optional trigger button label. Customize the label shown on the
      * trigger button independently from the dropdown items.
-     * Falls back to the first item's label if not provided.
+     * Falls back to the selected item's label, then to the first item's.
      */
     trigger?: string
     /**

@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useContext } from "react"
-
 import type { F0WizardContextValue } from "../internal-types"
 
 export const F0WizardContext = createContext<F0WizardContextValue | null>(null)

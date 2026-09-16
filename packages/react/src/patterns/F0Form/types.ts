@@ -1,8 +1,6 @@
 import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { IconType } from "@/components/F0Icon"
-
 import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
 import type { UseFileUpload } from "./fields/file/types"
 import type {
@@ -255,7 +253,9 @@ export type F0FormSubmitConfig =
  */
 export interface F0FormStylingConfig {
   /**
-   * Shows a sidebar with section navigation (Table of Contents)
+   * Shows a sidebar with section navigation (Table of Contents).
+   * Automatically hidden on small viewports (max-width 560px), where
+   * sections stack as in the regular layout.
    * @default false
    */
   showSectionsSidepanel?: boolean
@@ -264,6 +264,23 @@ export interface F0FormStylingConfig {
    * @default false
    */
   noPadding?: boolean
+}
+
+/**
+ * Styling configuration for per-section schema forms.
+ * Extends the base config with options that only apply when each section
+ * has its own independent schema and submit button.
+ */
+export interface F0FormPerSectionStylingConfig extends F0FormStylingConfig {
+  /**
+   * Renders only the section selected in the sidepanel instead of stacking
+   * all sections. Useful for large forms where showing every section at once
+   * is overwhelming. Hidden sections stay mounted so their values, dirty
+   * state, and validation are preserved.
+   * Has no effect unless `showSectionsSidepanel` is true.
+   * @default false
+   */
+  showOnlySelectedSection?: boolean
 }
 
 /**
@@ -515,7 +532,7 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   /**
    * Styling configuration for form layout and appearance.
    */
-  styling?: F0FormStylingConfig
+  styling?: F0FormPerSectionStylingConfig
   /**
    * Ref to control the form programmatically from outside.
    */
@@ -580,7 +597,7 @@ export interface F0FormPropsWithPerSectionDefinition<
 > {
   formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<T>
   className?: string
-  styling?: F0FormStylingConfig
+  styling?: F0FormPerSectionStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
   /** Upload hook shared by all file fields in the form. */

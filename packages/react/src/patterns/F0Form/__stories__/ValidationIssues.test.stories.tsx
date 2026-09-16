@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
-
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
-
-import { f0FormField, F0Form } from "../index"
+import { f0FormField, F0Form } from ".."
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -11,7 +9,7 @@ const meta: Meta = {
   title: "Forms/ValidationIssues",
   component: F0Form,
   tags: ["autodocs", "experimental"],
-  parameters: { a11y: { skipCi: true } },
+  parameters: { a11y: { test: "error" } },
 }
 
 export default meta

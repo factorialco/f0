@@ -1,8 +1,6 @@
 import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group"
 import { useEffect, useMemo, useState } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { F0ButtonToggleInternal } from "../F0ButtonToggle/internal/F0ButtonToggle.internal"
 import { F0ButtonToggleGroupProps } from "./types"
 
@@ -88,7 +86,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
             size={size}
             withBorder={withBorder}
             variant={variant}
-            className={cn(fullWidth && "w-full")}
+            className={cn(fullWidth && "w-full", item.className)}
             selected={!!selectedValues?.includes(item.value)}
             // Intentionally pass a no-op function to satisfy type requirements.
             // The group manages selection state in a controlled manner.

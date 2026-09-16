@@ -52,7 +52,7 @@ export const LinkExtension = Link.configure({
 })
 
 export const StarterKitExtension = StarterKit.configure({
-  heading: { levels: [1, 2, 3] },
+  heading: { levels: [1, 2, 3, 4, 5, 6] },
   bulletList: {
     HTMLAttributes: {
       class: "f1-bullet-list",

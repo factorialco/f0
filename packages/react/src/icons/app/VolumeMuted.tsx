@@ -16,14 +16,12 @@ const SvgVolumeMuted = (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M11 5L6 9H3V15H6L11 19V5Z"
-      vectorEffect="non-scaling-stroke"
     />
     <path
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M15.5 9.5L20.5 14.5M20.5 9.5L15.5 14.5"
-      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )

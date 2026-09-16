@@ -20,19 +20,25 @@ const isTranscriptKind = (kind: TextTrackKind): boolean =>
 const isInBand = (audio: HTMLAudioElement, track: TextTrack): boolean => {
   const trackEls = audio.querySelectorAll("track")
   for (const el of Array.from(trackEls)) {
-    if ((el as HTMLTrackElement).track === track) return false
+    if ((el as HTMLTrackElement).track === track) {
+      return false
+    }
   }
   return true
 }
 
 const readCueText = (track: TextTrack): string => {
   const cues = track.cues
-  if (!cues || cues.length === 0) return ""
+  if (!cues || cues.length === 0) {
+    return ""
+  }
   const lines: string[] = []
-  for (let i = 0; i < cues.length; i++) {
+  for (const cue of Array.from(cues)) {
     // `VTTCue` exposes `text`; a generic `TextTrackCue` may not.
-    const text = (cues[i] as VTTCue).text
-    if (typeof text === "string" && text.trim()) lines.push(text.trim())
+    const text = (cue as VTTCue).text
+    if (typeof text === "string" && text.trim()) {
+      lines.push(text.trim())
+    }
   }
   return lines.join("\n")
 }
@@ -68,7 +74,9 @@ export const useDerivedTranscription = (
       return
     }
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio) {
+      return
+    }
 
     const tracks = audio.textTracks
 
@@ -82,7 +90,9 @@ export const useDerivedTranscription = (
       )
       for (const track of candidates) {
         // Force the browser to parse cues without displaying them.
-        if (track.mode === "disabled") track.mode = "hidden"
+        if (track.mode === "disabled") {
+          track.mode = "hidden"
+        }
         const text = readCueText(track)
         if (text) {
           setTranscription(text)
@@ -93,9 +103,11 @@ export const useDerivedTranscription = (
 
     pick()
 
-    const trackCleanups: Array<() => void> = []
+    const trackCleanups: (() => void)[] = []
     const watch = (track: TextTrack) => {
-      if (typeof track.addEventListener !== "function") return
+      if (typeof track.addEventListener !== "function") {
+        return
+      }
       const onCueChange = () => pick()
       track.addEventListener("cuechange", onCueChange)
       trackCleanups.push(() =>
@@ -107,14 +119,20 @@ export const useDerivedTranscription = (
     // `TextTrackList` exposes `addtrack` in the browser, but not in every test
     // environment (jsdom) or older engine — guard before subscribing.
     const onAddTrack = (event: TrackEvent) => {
-      if (event.track) watch(event.track)
+      if (event.track) {
+        watch(event.track)
+      }
       pick()
     }
     const canWatchList = typeof tracks.addEventListener === "function"
-    if (canWatchList) tracks.addEventListener("addtrack", onAddTrack)
+    if (canWatchList) {
+      tracks.addEventListener("addtrack", onAddTrack)
+    }
 
     return () => {
-      if (canWatchList) tracks.removeEventListener("addtrack", onAddTrack)
+      if (canWatchList) {
+        tracks.removeEventListener("addtrack", onAddTrack)
+      }
       trackCleanups.forEach((cleanup) => cleanup())
     }
   }, [audioRef, enabled, currentSrc])

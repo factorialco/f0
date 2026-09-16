@@ -1,13 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
-
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
 import { ReferenceType } from "@/patterns/OneDataCollection/visualizations/collection/Table"
 import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
-
 import { Link } from "../../../lib/linkHandler"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
@@ -88,6 +85,13 @@ interface TableCellProps {
   fromVisualization?: TableVisualizationType
 
   referenceRowType?: ReferenceType
+
+  /**
+   * Emphasizes the cell with a subtle gray background, drawing attention to a
+   * highlighted column.
+   * @default false
+   */
+  highlighted?: boolean
 }
 
 const stripedLines =
@@ -116,6 +120,7 @@ export function TableCell({
   nestedRowProps,
   fromVisualization,
   referenceRowType = "none",
+  highlighted = false,
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -149,6 +154,15 @@ export function TableCell({
         isSticky && isScrolled && stickyScrollClasses[referenceRowType],
         isSticky && "sticky z-10",
         isStickyRight && stickyScrollClasses[referenceRowType],
+        // The row hover keeps reading through the highlighted cell, so a hovered
+        // row stays one uniform surface.
+        highlighted &&
+          "bg-[hsl(var(--neutral-2))] group-hover:bg-f1-background-hover",
+        // Sticky cells paint their opaque background on the `before` layer;
+        // the highlighted tint has to land there too or it stays hidden under it.
+        highlighted &&
+          isSticky &&
+          "before:bg-[hsl(var(--neutral-2))] group-hover:before:bg-f1-background-hover",
         href && "cursor-pointer",
         className
       )}
@@ -162,8 +176,7 @@ export function TableCell({
       }}
     >
       <AnimatePresence>
-        {((isStickyLeft && isScrolled) ||
-          (isStickyRight && isScrolledRight)) && (
+        {(isStickyLeft && isScrolled) || (isStickyRight && isScrolledRight) ? (
           <motion.div
             key="cell-shadow-gradient"
             className={cn(
@@ -175,18 +188,18 @@ export function TableCell({
             animate={{ opacity: 0.1 }}
             exit={{ opacity: 0 }}
           />
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {firstCell && nestedRowProps?.tableWithChildren && (
+      {firstCell && nestedRowProps?.tableWithChildren ? (
         <TreeConnector
           firstCell={firstCell}
           nestedRowProps={nestedRowProps}
           fromVisualization={fromVisualization}
         />
-      )}
+      ) : null}
 
-      {loading && (
+      {loading ? (
         <div
           style={{ ...firstCellMarginLeft }}
           className={cn(
@@ -198,9 +211,9 @@ export function TableCell({
         >
           <Skeleton className="h-4 w-full" />
         </div>
-      )}
+      ) : null}
 
-      {!loading && (
+      {!loading ? (
         <>
           <div
             className={cn(
@@ -240,7 +253,7 @@ export function TableCell({
               </div>
             )}
           </div>
-          {href && (
+          {href ? (
             <Link
               ref={linkRef}
               href={href}
@@ -249,8 +262,8 @@ export function TableCell({
             >
               <span className="sr-only">{actions.view}</span>
             </Link>
-          )}
-          {onClick && (
+          ) : null}
+          {onClick ? (
             <button
               type="button"
               onClick={(e) => {
@@ -269,9 +282,9 @@ export function TableCell({
             >
               <span className="sr-only">{actions.view}</span>
             </button>
-          )}
+          ) : null}
         </>
-      )}
+      ) : null}
     </TableCellRoot>
   )
 }

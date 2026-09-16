@@ -1,0 +1,20 @@
+<!--
+  THE ONE OVERLAY ROOT.
+
+  `F0Provider` renders `#f0-overlay-root` itself, which is right in an app — there
+  is exactly one provider there. Storybook applies that provider as a PER-STORY
+  decorator, so a docs page ends up with one root per story (four on the dialog
+  docs page, sixteen on toast) all carrying the same id. `getElementById` returns
+  the first, so every overlay on the page was portaled into whichever story
+  happened to render first.
+
+  Injected at the top of `<body>`, this one comes first in document order and
+  wins that lookup — so overlays land here, outside every story's subtree, for
+  the whole preview. F0's tokens are defined on `:root` and the dark class is put
+  on the document by `storybook-dark-mode` (`stylePreview: true`), so a portal at
+  body level is styled exactly as one inside a story would be.
+
+  `display: contents` keeps it out of layout; what portals in positions itself.
+  Storybook-only: nothing about the shipped provider changes.
+-->
+<div id="f0-overlay-root" style="display: contents"></div>

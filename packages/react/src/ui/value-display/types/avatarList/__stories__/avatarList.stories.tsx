@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const meta = {
@@ -63,31 +62,6 @@ export const WithTooltipDescriptions: Story = {
               index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
           })),
           max: 1,
-        },
-      }),
-    },
-  },
-}
-
-/**
- * `tooltipScroll="none"` disables the popover's vertical scroll cap, letting
- * the overflow popover grow with its content.
- */
-export const OverflowPopoverNoScroll: Story = {
-  args: {
-    item: { ...mockItem, avatarList: avatarListWithDescriptions },
-    property: {
-      label: "Avatar List",
-      render: (item) => ({
-        type: "avatarList",
-        value: {
-          avatarList: item.avatarList.map((avatar, index) => ({
-            ...avatar,
-            tooltipDescription:
-              index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
-          })),
-          max: 1,
-          tooltipScroll: "none",
         },
       }),
     },

@@ -102,6 +102,14 @@ If it is mandatory, the data must be grouped by one of the grouping fields. If
 it is not mandatory, the user can choose not grouping the data and still
 choosing group by one of the available fields.
 
+### Hide selector
+
+The `hideSelector` property takes the grouping picker away and leaves the
+grouping itself in force — for a grouping the product decides and the user does
+not. The headers render; the control to change them never does. Pair it with
+`mandatory: true` and a `defaultGrouping`, or the state can still arrive as "no
+grouping" with no control left to leave it.
+
 ### Collapsible
 
 The `collapsible` property is used to define if the grouping is collapsible or
@@ -209,3 +217,21 @@ useful when "select a whole group" isn't a meaningful action for the consumer.
 selection (and bulk actions) while hiding the per-group "Select all" checkbox.
 
 <Canvas of={KanbanStories.KanbanWithGroupingHiddenGroupSelect} />
+
+### Kanban height and scrolling
+
+The Kanban visualization controls its vertical behaviour with the `heightMode`
+prop (defined on the underlying `Kanban` component):
+
+- **`"fill"` (default)** — lanes stretch to fill the available height and each
+  lane scrolls its own cards. This suits a standalone Kanban that owns the
+  viewport, and it stays the default.
+- **`"content"`** — lanes hug their cards (no per-lane scroll) and every lane
+  matches the tallest, so a single outer container owns the vertical scroll.
+
+Grouped Kanban uses `"content"`. A grouped collection stacks one board per
+group inside a single scrollable list — the same container the grouped List and
+Card visualizations already scroll in. With per-lane scroll there you would get
+nested scrolling and could never see a whole group at once, so the grouped
+Kanban lets the group list own the single scroll, keeping it consistent with
+List and Card.

@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type MouseEvent, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Pencil } from "@/icons/app"
 import { Await } from "@/lib/Await"
@@ -54,7 +53,10 @@ const _Preset = ({
       onMouseEnter={hasActions ? () => setShowActions(true) : undefined}
       onMouseLeave={hasActions ? () => setShowActions(false) : undefined}
       className={cn(
-        "group flex cursor-default appearance-none items-center gap-2 rounded px-2.5 py-1.5 font-medium text-f1-foreground outline outline-1 outline-f1-border transition-all",
+        // `min-w-0` lets the pill shrink below its label when the row that
+        // holds it runs out of space, so the label ellipsizes instead of
+        // spilling out of the pill's box.
+        "group flex min-w-0 cursor-default appearance-none items-center gap-2 rounded px-2.5 py-1.5 font-medium text-f1-foreground outline outline-1 outline-f1-border transition-all",
         onClick &&
           "focus-within:ring-2 focus-within:ring-f1-border-selected focus-within:ring-offset-2",
         number && "pr-1.5",
@@ -69,8 +71,8 @@ const _Preset = ({
         checked={selected}
         onChange={() => onClick?.()}
       />
-      <span className="whitespace-nowrap">{label}</span>
-      {number !== undefined && (
+      <span className="min-w-0 truncate">{label}</span>
+      {number !== undefined ? (
         <Await resolve={number} fallback={<Skeleton className="h-4 w-4" />}>
           {(number) =>
             number !== undefined && (
@@ -81,10 +83,10 @@ const _Preset = ({
             )
           }
         </Await>
-      )}
-      {hasActions && (
+      ) : null}
+      {hasActions ? (
         <AnimatePresence initial={false}>
-          {showActions && (
+          {showActions ? (
             <motion.span
               key="preset-actions"
               className="-my-0.5 -ml-1.5 -mr-1 flex items-center gap-0.5 overflow-hidden"
@@ -93,7 +95,7 @@ const _Preset = ({
               exit={{ opacity: 0, width: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              {onEdit && (
+              {onEdit ? (
                 <F0Button
                   variant="ghost"
                   size="sm"
@@ -102,11 +104,11 @@ const _Preset = ({
                   icon={Pencil}
                   onClick={actionHandler(onEdit)}
                 />
-              )}
+              ) : null}
             </motion.span>
-          )}
+          ) : null}
         </AnimatePresence>
-      )}
+      ) : null}
     </motion.label>
   )
 

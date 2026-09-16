@@ -1,5 +1,44 @@
 # Changelog
 
+## [2.3.0](https://github.com/factorialco/f0/compare/f0-core-v2.2.1...f0-core-v2.3.0) (2026-09-10)
+
+
+### Features
+
+* **icons:** add PinOff app icon ([#5463](https://github.com/factorialco/f0/issues/5463)) ([9d83c43](https://github.com/factorialco/f0/commit/9d83c43798aa1a8cd4c664ad204a0b01ea215370))
+
+## [2.2.1](https://github.com/factorialco/f0/compare/f0-core-v2.2.0...f0-core-v2.2.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **ApplicationFrame:** serve the main content before the side panel ([#5328](https://github.com/factorialco/f0/issues/5328)) ([ef98943](https://github.com/factorialco/f0/commit/ef9894375fe5f1e0614a2c9064e9cb1da3837ac4))
+
+## [2.2.0](https://github.com/factorialco/f0/compare/f0-core-v2.1.0...f0-core-v2.2.0) (2026-08-29)
+
+
+### Features
+
+* **F0Chat:** native emoji picker, transcript media and colour polish ([#5299](https://github.com/factorialco/f0/issues/5299)) ([e40311d](https://github.com/factorialco/f0/commit/e40311dc0af01beec8e6eccdb89c943f65367017))
+
+## [2.1.0](https://github.com/factorialco/f0/compare/f0-core-v2.0.0...f0-core-v2.1.0) (2026-08-11)
+
+
+### Features
+
+* **chat:** improve identity, navigation and scroll ([#4985](https://github.com/factorialco/f0/issues/4985)) ([bbe7b9f](https://github.com/factorialco/f0/commit/bbe7b9f9c8fb44a9df403282bc8adaabbf9928ac))
+
+## [2.0.0](https://github.com/factorialco/f0/compare/f0-core-v1.56.0...f0-core-v2.0.0) (2026-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884))
+
+### Features
+
+* **OneDataCollection:** collapsible header groups, replacing headerGroupLabels ([#4884](https://github.com/factorialco/f0/issues/4884)) ([c0c0c57](https://github.com/factorialco/f0/commit/c0c0c5780cf2b295849dda8db3b69734f6f9a91d))
+
 ## [1.56.0](https://github.com/factorialco/f0/compare/f0-core-v1.55.0...f0-core-v1.56.0) (2026-07-24)
 
 

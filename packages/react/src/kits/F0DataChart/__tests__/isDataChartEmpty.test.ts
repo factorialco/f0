@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type { F0DataChartProps } from "../types"
 import { isDataChartEmpty } from "../utils/isDataChartEmpty"
 
@@ -191,6 +190,45 @@ describe("isDataChartEmpty", () => {
           data: [
             [0, 0, 0],
             [1, 1, 5],
+          ],
+        })
+      ).toBe(false)
+    })
+  })
+
+  describe("scatter", () => {
+    it("no series at all", () => {
+      expect(isDataChartEmpty({ type: "scatter", series: [] })).toBe(true)
+    })
+
+    it("every series without points", () => {
+      expect(
+        isDataChartEmpty({
+          type: "scatter",
+          series: [
+            { name: "Engineering", data: [] },
+            { name: "Sales", data: [] },
+          ],
+        })
+      ).toBe(true)
+    })
+
+    it("a point at the origin is NOT empty", () => {
+      expect(
+        isDataChartEmpty({
+          type: "scatter",
+          series: [{ name: "Zero", data: [[0, 0]] }],
+        })
+      ).toBe(false)
+    })
+
+    it("one populated series among empty ones is not empty", () => {
+      expect(
+        isDataChartEmpty({
+          type: "scatter",
+          series: [
+            { name: "Engineering", data: [] },
+            { name: "Sales", data: [{ x: 1, y: 2 }] },
           ],
         })
       ).toBe(false)

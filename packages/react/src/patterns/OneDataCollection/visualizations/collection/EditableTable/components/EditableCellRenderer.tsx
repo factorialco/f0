@@ -1,11 +1,9 @@
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
-
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
-import type { EditableTableColumnDefinition } from "../types"
-
 import { editableCellMap, typingEditTypes } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
+import type { EditableTableColumnDefinition } from "../types"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**
@@ -24,8 +22,12 @@ function getCellValue<R extends RecordType>(
     return v === null || v === undefined ? "" : String(v)
   }
   const rendered = column.render(item)
-  if (typeof rendered === "string") return rendered
-  if (typeof rendered === "number") return String(rendered)
+  if (typeof rendered === "string") {
+    return rendered
+  }
+  if (typeof rendered === "number") {
+    return String(rendered)
+  }
 
   return ""
 }

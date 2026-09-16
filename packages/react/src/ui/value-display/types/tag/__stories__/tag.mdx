@@ -11,7 +11,7 @@ Renders a tag
 
 ```
 
-type value = { label: string icon?: IconType }
+type value = { label: string icon?: IconType variant?: "default" | "neutral" }
 
 ```
 
@@ -24,6 +24,27 @@ render: (item) => ({
     value: {
         label: 'Factorial'
         icon: Placeholder
+    }
+})
+`,
+  }}
+/>
+
+#### Neutral variant
+
+Renders a grey filled tag with secondary foreground text instead of the
+default outlined style. Useful for de-emphasized values such as variances or
+computed deltas.
+
+<Canvas
+  of={TagStories.NeutralTagType}
+  source={{
+    code: `
+render: (item) => ({
+    type: 'tag'
+    value: {
+        label: '+2.0%'
+        variant: 'neutral'
     }
 })
 `,

@@ -1,9 +1,7 @@
 import { useCallback } from "react"
-
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-
 import { TableColumnDefinition } from "./types"
 
 export const useSticky = <
@@ -12,7 +10,7 @@ export const useSticky = <
   Summaries extends SummariesDefinition,
 >(
   frozenColumnsLeft: number,
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>,
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[],
   hasCheckColumn: boolean
 ) => {
   const checkColumnWidth = hasCheckColumn ? 56 : 0

@@ -1,5 +1,4 @@
 import { BookOpen, File, Placeholder, Question, Video } from "@/icons/app"
-
 import {
   TOCItem,
   TOCItemAction,

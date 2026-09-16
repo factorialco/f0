@@ -2,7 +2,6 @@ import "@testing-library/jest-dom/vitest"
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { TextCell } from "../components/cells/TextCell"

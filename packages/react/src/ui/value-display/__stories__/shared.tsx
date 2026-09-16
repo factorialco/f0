@@ -1,9 +1,9 @@
 import { NewColor } from "@/components/tags/F0TagDot"
+import { useI18n } from "@/lib/providers/i18n"
 import {
   PropertyDefinition,
   renderProperty,
 } from "@/patterns/OneDataCollection/property-render"
-import { useI18n } from "@/lib/providers/i18n"
 
 export const mockItem = {
   id: "1",
@@ -83,5 +83,5 @@ export function Cell({
   property: PropertyDefinition<typeof mockItem>
 }) {
   const i18n = useI18n()
-  return renderProperty(item, property, "table", i18n)
+  return renderProperty({ item, property, visualization: "table", i18n })
 }

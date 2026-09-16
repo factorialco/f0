@@ -12,6 +12,15 @@
   --ds-sidebar-width: 240px;
 }
 
+/* Chat-scoped font stack: inserts the metric-adjusted "Inter Fallback" (see
+   assets/fonts/style.css) between Inter and the generic fallback, so transcript
+   rows measured before the webfont swap wrap identically after it. Scoped to
+   the chat shell on purpose — the global `font-sans` token in f0-core stays
+   untouched. */
+[data-f0-chat-shell] {
+  font-family: "Inter", "Inter Fallback", sans-serif;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     interpolate-size: allow-keywords;

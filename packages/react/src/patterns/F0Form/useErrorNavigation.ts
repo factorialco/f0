@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { FieldErrors } from "react-hook-form"
-
 import { generateAnchorId } from "./context"
 
 const errorNavigateClassName = "f0-form-error-navigate"
@@ -19,12 +18,16 @@ function findFieldAnchorElement(
   formName: string,
   fieldId: string
 ): HTMLElement | null {
-  if (typeof document === "undefined") return null
+  if (typeof document === "undefined") {
+    return null
+  }
 
   // Try without section ID first (non-sectioned form)
   const directId = generateAnchorId(formName, undefined, fieldId)
   const direct = document.getElementById(directId)
-  if (direct) return direct
+  if (direct) {
+    return direct
+  }
 
   // Fallback: search for sectioned anchor (forms.formName.*.fieldId)
   const prefix = `forms.${formName}.`
@@ -42,7 +45,7 @@ const applyErrorNavigationHighlight = (element: HTMLElement) => {
 
   // Remove and re-add class to restart animation
   element.classList.remove(errorNavigateClassName)
-  void element.offsetWidth // Force reflow
+  element.getBoundingClientRect() // Force reflow
   element.classList.add(errorNavigateClassName)
 
   const timeout = setTimeout(() => {
@@ -137,6 +140,13 @@ export function useErrorNavigation({
   formName,
   errors,
 }: UseErrorNavigationOptions): UseErrorNavigationReturn {
+  const focusField = useCallback(
+    (fieldId: string) => {
+      focusFieldByLookup(formName, fieldId, { highlight: true })
+    },
+    [formName]
+  )
+
   // Extract field error keys (excluding root error).
   // Object.keys(errors) order is unstable — RHF may reorder keys when it
   // re-validates a single field on blur (e.g. focusing a text input blurs the
@@ -153,10 +163,16 @@ export function useErrorNavigation({
       : [...fieldErrorKeys].sort((a, b) => {
           const anchorA = findFieldAnchorElement(formName, a)
           const anchorB = findFieldAnchorElement(formName, b)
-          if (!anchorA || !anchorB) return 0
+          if (!anchorA || !anchorB) {
+            return 0
+          }
           const position = anchorA.compareDocumentPosition(anchorB)
-          if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1
-          if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1
+          if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+            return -1
+          }
+          if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+            return 1
+          }
           return 0
         })
   const hasErrors = fieldErrors.length > 0
@@ -182,7 +198,9 @@ export function useErrorNavigation({
   // Resolve the current index from the tracked field ID and the latest error list
   const resolveCurrentIndex = useCallback(() => {
     const id = currentFieldIdRef.current
-    if (!id) return 0
+    if (!id) {
+      return 0
+    }
     const idx = fieldErrorsRef.current.indexOf(id)
     return idx === -1 ? 0 : idx
   }, [])
@@ -202,20 +220,22 @@ export function useErrorNavigation({
 
     if (newErrorKey) {
       // Focus the field with the new error and trigger animation
-      focusFieldByLookup(formName, newErrorKey, { highlight: true })
+      focusField(newErrorKey)
 
       // Track the newly focused field
       setCurrentFieldId(newErrorKey)
     }
 
     prevErrorKeysRef.current = currentErrorKeys
-  }, [fieldErrors, formName])
+  }, [fieldErrors, formName, focusField])
 
   // Navigate to a specific error by index (with wrap-around)
   const navigateToError = useCallback(
     (index: number) => {
       const errors = fieldErrorsRef.current
-      if (errors.length === 0) return
+      if (errors.length === 0) {
+        return
+      }
 
       // Wrap around
       const wrappedIndex =
@@ -224,9 +244,9 @@ export function useErrorNavigation({
       const fieldId = errors[wrappedIndex]
       setCurrentFieldId(fieldId)
 
-      focusFieldByLookup(formName, fieldId, { highlight: true })
+      focusField(fieldId)
     },
-    [formName]
+    [focusField]
   )
 
   const goToPreviousError = useCallback(() => {

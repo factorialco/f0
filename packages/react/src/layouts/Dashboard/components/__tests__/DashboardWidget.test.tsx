@@ -1,19 +1,11 @@
-import React from "react"
 import "@testing-library/jest-dom/vitest"
+import React from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import { DashboardWidget } from "../DashboardWidget"
 
 const _ = React
 // Mock components
-vi.mock("@/components/F0Text", () => ({
-  F0Text: ({ content }: { content: string }) => (
-    <p data-testid="one-ellipsis">{content}</p>
-  ),
-}))
-
 vi.mock("@/components/F0Icon", () => ({
   F0Icon: ({
     icon: _Icon,
@@ -63,9 +55,7 @@ describe("DashboardWidget", () => {
         </DashboardWidget>
       )
 
-      expect(screen.getByTestId("one-ellipsis")).toHaveTextContent(
-        "My Widget Title"
-      )
+      expect(screen.getByText("My Widget Title")).toBeInTheDocument()
     })
 
     it("should render children content", () => {
@@ -139,9 +129,7 @@ describe("DashboardWidget", () => {
         </DashboardWidget>
       )
 
-      expect(screen.getByTestId("one-ellipsis")).toHaveTextContent(
-        "Widget Title"
-      )
+      expect(screen.getByText("Widget Title")).toBeInTheDocument()
       const handle = document.querySelector('[data-gs-handle="true"]')
       expect(handle).toBeInTheDocument()
     })
@@ -179,7 +167,7 @@ describe("DashboardWidget", () => {
   })
 
   describe("Styling", () => {
-    it("should apply default classes", () => {
+    it("should draw the Widget card frame, filling its cell", () => {
       const { container } = zeroRender(
         <DashboardWidget title="Widget">
           <div>Content</div>
@@ -189,12 +177,9 @@ describe("DashboardWidget", () => {
       const widget = container.querySelector("div.relative")
       expect(widget).toHaveClass("relative")
       expect(widget).toHaveClass("h-full")
-      expect(widget).toHaveClass("w-full")
       expect(widget).toHaveClass("rounded-xl")
       expect(widget).toHaveClass("border")
       expect(widget).toHaveClass("border-solid")
-      expect(widget).toHaveClass("border-f1-border")
-      expect(widget).toHaveClass("bg-f1-background")
     })
   })
 })

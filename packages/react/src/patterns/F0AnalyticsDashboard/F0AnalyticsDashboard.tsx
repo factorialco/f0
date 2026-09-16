@@ -1,6 +1,9 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { useEffect, useMemo, useState } from "react"
-
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
+import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
 import type {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -9,19 +12,12 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
-import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
-import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
-
-import type { F0AnalyticsDashboardProps } from "./types"
-
 import { DashboardGrid } from "./components/DashboardGrid/DashboardGrid"
 import { ExportDropdown } from "./components/ExportDropdown/ExportDropdown"
 import { FilterBar } from "./components/FilterBar/FilterBar"
 import { FilterBarSkeleton } from "./components/FilterBar/FilterBarSkeleton"
 import { useDashboardExport } from "./hooks/useDashboardExport"
+import type { F0AnalyticsDashboardProps } from "./types"
 
 /**
  * F0AnalyticsDashboard — a declarative, config-driven analytics dashboard.
@@ -42,6 +38,7 @@ export const F0AnalyticsDashboard = <
   filtersValue,
   onFiltersChange,
   items,
+  itemFilters,
   editMode,
   onLayoutChange,
   enableExport,
@@ -49,6 +46,8 @@ export const F0AnalyticsDashboard = <
   onExportReady,
   resetKey,
   onTransformChart,
+  onAskAi,
+  onAskAiTarget,
   navigationFilters,
   filtersLoading,
 }: F0AnalyticsDashboardProps<Filters>) => {
@@ -63,8 +62,9 @@ export const F0AnalyticsDashboard = <
   })
 
   const initialNavState = useMemo(() => {
-    if (!navigationFilters)
+    if (!navigationFilters) {
       return {} as NavigationFiltersState<NavigationFiltersDefinition>
+    }
     const state: Record<string, unknown> = {}
     for (const [key, filter] of Object.entries(navigationFilters)) {
       const filterType = navigationFilterTypes[filter.type]
@@ -124,7 +124,7 @@ export const F0AnalyticsDashboard = <
     <div
       className={cn("flex flex-col gap-5 pb-10", fillHeight && "h-full pb-0")}
     >
-      {(filters || filtersLoading || enableExport || navigationFilters) && (
+      {filters || filtersLoading || enableExport || navigationFilters ? (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">
             {filters ? (
@@ -139,22 +139,22 @@ export const F0AnalyticsDashboard = <
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {navigationFilters && (
+            {navigationFilters ? (
               <NavigationFilters
                 navigationFilters={navigationFilters}
                 currentNavigationFilters={currentNavigationFilters}
                 onChangeNavigationFilters={setCurrentNavigationFilters}
               />
-            )}
-            {enableExport && (
+            ) : null}
+            {enableExport ? (
               <ExportDropdown
                 onExportExcel={exportAsExcel}
                 isExporting={isExporting}
               />
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
       <div
         className={cn(
           "px-5",
@@ -163,6 +163,7 @@ export const F0AnalyticsDashboard = <
       >
         <DashboardGrid
           items={items}
+          itemFilters={itemFilters}
           filters={
             {
               ...currentFilters,
@@ -172,6 +173,8 @@ export const F0AnalyticsDashboard = <
           editMode={editMode}
           onLayoutChange={onLayoutChange}
           onTransformChart={onTransformChart}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           resetKey={resetKey}
           onFullscreenChange={setIsItemFullscreen}
         />

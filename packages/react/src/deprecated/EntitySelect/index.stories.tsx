@@ -1,24 +1,21 @@
 import type { Meta } from "@storybook/react-vite"
-
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { ComponentProps, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
-
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Placeholder, Plus } from "@/icons/app"
-
 import { famousEmployees } from "./entity-select-name.factory"
 import {
   teamsWithEmployees,
   workplaceWithEmployees,
 } from "./groups-avatar-name.factory"
-import { EntitySelect } from "./index"
 import {
   EntityId,
   EntitySelectEntity,
   EntitySelectNamedGroup,
   EntitySelectProps,
 } from "./types"
+import { EntitySelect } from "."
 
 const GROUP_DATA = {
   all: famousEmployees,
@@ -310,7 +307,7 @@ export const SingleSelector = {
         }
         selectedEntities={!selected ? [] : [selected]}
         onSelect={(selection) => {
-          if (selectedGroup != "all") {
+          if (selectedGroup !== "all") {
             const found = GROUP_DATA["all"].find(
               (el) => el.id === selection?.subItems?.[0]?.subId
             )
@@ -491,14 +488,17 @@ export const WithCustomTrigger = {
             setSelectedGroup(value ?? "all")
           }}
           onOpenChange={(open) => {
-            if (open) setTimeout(() => setLoading(false), 500)
-            else setLoading(true)
+            if (open) {
+              setTimeout(() => setLoading(false), 500)
+            } else {
+              setLoading(true)
+            }
             setOpen(open)
           }}
           selectedEntities={selected}
           onSelect={(selection: EntitySelectEntity[]) => {
             setSelected(selection)
-            if (selectedGroup != "all") {
+            if (selectedGroup !== "all") {
               let total = 0
               selection.forEach((el) => (total += el.subItems?.length ?? 0))
               setNumSelected(total)
@@ -763,7 +763,7 @@ export const WithDeactivatedEntities = {
   },
 }
 
-export const Error = {
+const ErrorState = {
   args: {
     ...defaultArgs,
     error: "This is an error",
@@ -785,3 +785,6 @@ export const Disabled = {
     disabled: true,
   },
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

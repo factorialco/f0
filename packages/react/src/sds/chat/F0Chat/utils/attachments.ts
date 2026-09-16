@@ -1,6 +1,45 @@
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
+import {
+  type F0ChatAttachedKind,
+  type F0ChatAttachment,
+  type F0ChatCardAttachment,
+  type F0ChatFileAttachment,
+  type F0ChatImageAttachment,
+  type F0ChatLocationAttachment,
+  type F0ChatVoiceAttachment,
+} from "../types"
 
-import { type F0ChatFileAttachment } from "../types"
+const VIDEO_EXTENSIONS = new Set(["m4v", "mov", "mp4", "ogv", "webm"])
+
+/** Compact binary size used in composer validation messages. */
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) {
+    return `${bytes} B`
+  }
+  if (bytes < 1024 * 1024) {
+    const kilobytes = bytes / 1024
+    return `${Number.isInteger(kilobytes) ? kilobytes : kilobytes.toFixed(1)} KB`
+  }
+  if (bytes < 1024 * 1024 * 1024) {
+    const megabytes = bytes / (1024 * 1024)
+    return `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)} MB`
+  }
+  const gigabytes = bytes / (1024 * 1024 * 1024)
+  return `${Number.isInteger(gigabytes) ? gigabytes : gigabytes.toFixed(1)} GB`
+}
+
+/** Whether a generic file attachment can render in the native F0 video player. */
+export const isVideoFileAttachment = (file: F0ChatFileAttachment): boolean => {
+  if (file.mimeType?.toLowerCase().startsWith("video/")) {
+    return true
+  }
+
+  return [file.name, file.url].some((candidate) => {
+    const cleanCandidate = candidate.split(/[?#]/, 1)[0] ?? ""
+    const extension = cleanCandidate.split(".").at(-1)?.toLowerCase()
+    return extension !== undefined && VIDEO_EXTENSIONS.has(extension)
+  })
+}
 
 /**
  * Document families with an in-chat preview (Slack-style snapshot card + the
@@ -46,11 +85,15 @@ export const documentPreviewKind = (
 ): ChatDocumentKind | null => {
   const mime = file.mimeType?.toLowerCase() ?? ""
   for (const [fragment, kind] of MIME_KINDS) {
-    if (mime.includes(fragment)) return kind
+    if (mime.includes(fragment)) {
+      return kind
+    }
   }
   const name = file.name.toLowerCase()
   const dot = name.lastIndexOf(".")
-  if (dot <= 0) return null
+  if (dot <= 0) {
+    return null
+  }
   return EXTENSION_KINDS[name.slice(dot + 1)] ?? null
 }
 
@@ -68,3 +111,120 @@ export const withinPreviewSizeLimit = (
   file: F0ChatFileAttachment,
   kind: ChatDocumentKind
 ): boolean => (file.size ?? 0) <= PREVIEW_MAX_BYTES[kind]
+
+/**
+ * Attachment family for reporting, mirroring how the transcript renders it.
+ *
+ * Deliberately unlike {@link partitionChatAttachments} in one way: a document
+ * too large to preview is still a document here. Previewability is a rendering
+ * concern; "what kinds of files do people share" is not.
+ */
+export const attachedKindOf = (
+  attachment: F0ChatImageAttachment | F0ChatFileAttachment
+): F0ChatAttachedKind => {
+  if (attachment.kind === "image") {
+    return "image"
+  }
+  if (isVideoFileAttachment(attachment)) {
+    return "video"
+  }
+  return documentPreviewKind(attachment) ? "document" : "file"
+}
+
+/**
+ * The one photo in a message, or nothing when it has none or several.
+ *
+ * A lone photo is sized from its own proportions while an album is a mosaic, so
+ * the renderer has to know which it is before it can measure anything — and it
+ * has to know it above its early return, where hooks live.
+ */
+export const soleImageOf = (
+  attachments?: readonly F0ChatAttachment[]
+): F0ChatImageAttachment | undefined => {
+  const images = (attachments ?? []).filter(
+    (attachment): attachment is F0ChatImageAttachment =>
+      attachment.kind === "image"
+  )
+  return images.length === 1 ? images[0] : undefined
+}
+
+export type PartitionedChatAttachments = {
+  images: F0ChatImageAttachment[]
+  videos: F0ChatFileAttachment[]
+  documents: { file: F0ChatFileAttachment; kind: ChatDocumentKind }[]
+  files: F0ChatFileAttachment[]
+  locations: F0ChatLocationAttachment[]
+  voices: F0ChatVoiceAttachment[]
+  cards: F0ChatCardAttachment[]
+}
+
+/**
+ * Which bucket a file attachment lands in. An upload still in flight (it has a
+ * `progress`) is always a plain file: its URL is transient, so neither the
+ * video player nor the document preview can open it yet.
+ */
+const classifyFileAttachment = (
+  attachment: F0ChatFileAttachment
+):
+  | { bucket: "videos" }
+  | { bucket: "documents"; kind: ChatDocumentKind }
+  | { bucket: "files" } => {
+  if (attachment.progress !== undefined) {
+    return { bucket: "files" }
+  }
+
+  if (isVideoFileAttachment(attachment)) {
+    return { bucket: "videos" }
+  }
+
+  const kind = documentPreviewKind(attachment)
+  if (kind && withinPreviewSizeLimit(attachment, kind)) {
+    return { bucket: "documents", kind }
+  }
+
+  return { bucket: "files" }
+}
+
+/** Classifies each attachment exactly once for the transcript renderer. */
+export const partitionChatAttachments = (
+  attachments: F0ChatAttachment[]
+): PartitionedChatAttachments => {
+  const result: PartitionedChatAttachments = {
+    images: [],
+    videos: [],
+    documents: [],
+    files: [],
+    locations: [],
+    voices: [],
+    cards: [],
+  }
+
+  for (const attachment of attachments) {
+    switch (attachment.kind) {
+      case "image":
+        result.images.push(attachment)
+        break
+      case "card":
+        result.cards.push(attachment)
+        break
+      case "location":
+        result.locations.push(attachment)
+        break
+      case "voice":
+        result.voices.push(attachment)
+        break
+      default: {
+        const classified = classifyFileAttachment(attachment)
+        if (classified.bucket === "videos") {
+          result.videos.push(attachment)
+        } else if (classified.bucket === "documents") {
+          result.documents.push({ file: attachment, kind: classified.kind })
+        } else {
+          result.files.push(attachment)
+        }
+      }
+    }
+  }
+
+  return result
+}

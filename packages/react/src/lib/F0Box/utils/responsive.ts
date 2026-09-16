@@ -24,7 +24,6 @@ import type {
   SpacingToken,
   ZIndexToken,
 } from "../types"
-
 import { backgroundVariants } from "./background"
 import { borderVariants } from "./border"
 import { dimensionVariants } from "./dimensions"
@@ -160,13 +159,19 @@ export function resolveResponsiveClasses(
   const classes: string[] = []
 
   for (const [prop, value] of Object.entries(props)) {
-    if (value === undefined || value === null) continue
+    if (value === undefined || value === null) {
+      continue
+    }
 
     const map = variantMap[prop]
-    if (!map) continue
+    if (!map) {
+      continue
+    }
 
     const baseClass = map[String(value)]
-    if (!baseClass) continue
+    if (!baseClass) {
+      continue
+    }
 
     classes.push(prefixClasses(breakpoint, baseClass))
   }

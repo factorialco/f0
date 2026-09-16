@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { forwardRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -8,11 +7,16 @@ import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Counter } from "@/ui/Counter"
-
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
 
 const IconMotion = motion.create(F0Icon)
+
+/**
+ * Open delay for the tooltip that reveals a label too long to fit. Short on
+ * purpose — see where it is passed below.
+ */
+const CLIPPED_LABEL_TOOLTIP_DELAY_MS = 300
 
 /**
  * A button component internal that includes the private slots and props
@@ -31,6 +35,7 @@ const ButtonInternal = forwardRef<
     icon,
     iconPosition = "left",
     emoji,
+    emojiMode,
     variant = "default",
     size = "md",
     fontSize,
@@ -57,7 +62,7 @@ const ButtonInternal = forwardRef<
   const [isHovered, setIsHovered] = useState(false)
 
   const handleClick = async (
-    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => {
     const result = onClick?.(event)
 
@@ -76,6 +81,15 @@ const ButtonInternal = forwardRef<
   const shouldHideLabel = hideLabel || emoji
 
   const buttonLabel = (label ?? "").toString()
+  // A count of 0 (or no value) shows nothing: no pill, no padding change.
+  const hasCounter = counterValue !== undefined && counterValue > 0
+  // The counter matches the button height — 20px on md/lg, 16px on sm.
+  const counterSize = size === "sm" ? "sm" : "md"
+  // A dark counter pill: always on the primary (default) solid field, and on
+  // critical only while hovered, where the field darkens enough to wash out the
+  // light pill. Other variants (including promote) keep the neutral counter.
+  const counterIsDark =
+    variant === "default" || (variant === "critical" && isHovered)
   const buttonFontSize = fontSize ?? size
 
   const iconNode = icon ? (
@@ -123,6 +137,17 @@ const ButtonInternal = forwardRef<
       className={cn(
         "max-w-full",
         block && "w-full",
+        // A trailing counter has its own bordered edge, so the button's right
+        // padding tightens 4px (Figma "ButtonCounter"); the left is unchanged.
+        // Important because the override and the size variant's `px` both target
+        // `.main` as arbitrary variants, which tailwind-merge leaves unmerged —
+        // so the cascade, not class order, has to decide, and `!` guarantees it.
+        hasCounter &&
+          {
+            sm: "[&_.main]:!pr-1",
+            md: "[&_.main]:!pr-2",
+            lg: "[&_.main]:!pr-3",
+          }[size],
         withoutDisabledAppearance &&
           disabled &&
           "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default [&[aria-disabled=true]]:opacity-100 [&[aria-disabled=true]]:cursor-default",
@@ -148,14 +173,15 @@ const ButtonInternal = forwardRef<
             (iconPosition === "right" ? "-mr-[3px]" : "-ml-[3px]")
         )}
       >
-        {iconPosition === "left" && iconNode}
-        {emoji && (
+        {iconPosition === "left" ? iconNode : null}
+        {emoji ? (
           <EmojiImage
             emoji={emoji}
+            mode={emojiMode}
             size={size === "sm" ? "sm" : "md"}
             alt={""}
           />
-        )}
+        ) : null}
         {!shouldHideLabel ? (
           <OneEllipsis
             className={cn(
@@ -163,17 +189,38 @@ const ButtonInternal = forwardRef<
               fontSizeVariants({ fontSize: buttonFontSize })
             )}
             tag="span"
+            // A clipped label's own ellipsis tooltip is the only way a sighted
+            // mouse user recovers the hidden text, so it stays on by default.
+            // It has to stand down in two cases: `noAutoTooltip` opts out of
+            // every automatic tooltip, and an explicit `tooltip` already wraps
+            // the whole button — two Radix tooltips over one pointer open
+            // together and then close each other for good, leaving the hover
+            // showing nothing at all.
+            noTooltip={noAutoTooltip || !!tooltip}
+            // Faster than the 700ms default: this tooltip is not a hint layered
+            // on top of a readable control, it is the only way to read a label
+            // the layout has cut off, so waiting on it reads as unresponsive.
+            delay={CLIPPED_LABEL_TOOLTIP_DELAY_MS}
           >
             {buttonLabel}
           </OneEllipsis>
         ) : (
           <span className="sr-only">{buttonLabel}</span>
         )}
-        {iconPosition === "right" && iconNode}
+        {iconPosition === "right" ? iconNode : null}
         {append}{" "}
-        {counterValue && (
-          <Counter value={counterValue} size="sm" type="selected" />
-        )}
+        {hasCounter ? (
+          <span
+            className={cn(
+              "ml-1 inline-flex items-center",
+              // Scoping the dark theme to just the counter gives it a dark
+              // pill regardless of the app theme.
+              counterIsDark && "dark"
+            )}
+          >
+            <Counter value={counterValue} size={counterSize} type="default" />
+          </span>
+        ) : null}
       </div>
     </Action>
   )

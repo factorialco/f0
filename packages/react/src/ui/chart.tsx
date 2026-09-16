@@ -3,7 +3,6 @@ import DOMPurify from "dompurify"
 import * as React from "react"
 import { useLayoutEffect, useMemo, useState } from "react"
 import * as RechartsPrimitive from "recharts"
-
 import { cn } from "../lib/utils"
 
 const variants = cva({
@@ -23,6 +22,29 @@ export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
     icon?: React.ComponentType
+    /**
+     * Render this series dashed where the chart draws it as a line, e.g. for
+     * projected or planned series. Ignored by bar-only series.
+     */
+    dashed?: boolean
+    /**
+     * Mark this series as projected (provisional, not yet actual) data. Where
+     * the chart draws it as bars they fade toward the zero line with a
+     * gradient instead of using a solid fill.
+     */
+    projected?: boolean
+    /**
+     * Key of the series this one continues, e.g. a forecast extending the
+     * actuals. The chart bridges the gap by giving this series the last value
+     * of the continued one, so both lines connect. Consumed by the chart
+     * kits via `bridgeContinuedSeries` before rendering.
+     */
+    continues?: string
+    /**
+     * Swatch drawn for this series in the legend: a round dot (the default)
+     * or a line stroke (dashed when the series is dashed).
+     */
+    legendIndicator?: "dot" | "line"
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -33,6 +55,7 @@ type ChartConfigValue = {
   label?: React.ReactNode
   icon?: React.ComponentType
   dashed?: boolean
+  continues?: string
 } & (
   | { color?: string; theme?: never }
   | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -165,6 +188,49 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+/** The colour key beside a tooltip item: the series' own icon, or the swatch. */
+const TooltipItemIndicator = ({
+  icon: Icon,
+  hidden,
+  indicator,
+  nested,
+  color,
+}: {
+  icon: React.ComponentType | undefined
+  hidden: boolean
+  indicator: "line" | "dot" | "dashed"
+  /** A single-item tooltip nests its label, which shifts the swatch down. */
+  nested: boolean
+  color: string | undefined
+}) => {
+  if (Icon) {
+    return <Icon />
+  }
+  if (hidden) {
+    return null
+  }
+  return (
+    <div
+      className={cn(
+        "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
+        {
+          "h-2.5 w-2.5": indicator === "dot",
+          "w-1": indicator === "line",
+          "w-0 border-[1.5px] border-dashed bg-transparent":
+            indicator === "dashed",
+          "my-0.5": nested && indicator === "dashed",
+        }
+      )}
+      style={
+        {
+          "--color-bg": color,
+          "--color-border": color,
+        } as React.CSSProperties
+      }
+    />
+  )
+}
+
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
@@ -267,30 +333,13 @@ const ChartTooltipContent = React.forwardRef<
                   formatter(item.value, item.name, item, index, item.payload)
                 ) : (
                   <>
-                    {itemConfig?.icon ? (
-                      <itemConfig.icon />
-                    ) : (
-                      !hideIndicator && (
-                        <div
-                          className={cn(
-                            "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
-                            {
-                              "h-2.5 w-2.5": indicator === "dot",
-                              "w-1": indicator === "line",
-                              "w-0 border-[1.5px] border-dashed bg-transparent":
-                                indicator === "dashed",
-                              "my-0.5": nestLabel && indicator === "dashed",
-                            }
-                          )}
-                          style={
-                            {
-                              "--color-bg": indicatorColor,
-                              "--color-border": indicatorColor,
-                            } as React.CSSProperties
-                          }
-                        />
-                      )
-                    )}
+                    <TooltipItemIndicator
+                      icon={itemConfig?.icon}
+                      hidden={hideIndicator}
+                      indicator={indicator}
+                      nested={nestLabel}
+                      color={indicatorColor}
+                    />
                     <div
                       className={cn(
                         "flex flex-1 justify-between text-sm leading-none",
@@ -303,13 +352,13 @@ const ChartTooltipContent = React.forwardRef<
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
-                      {item.value && (
+                      {item.value ? (
                         <span className="font-mono font-medium tabular-nums text-f1-foreground">
                           {yAxisFormatter
                             ? yAxisFormatter(String(item.value))
                             : item.value.toLocaleString()}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </>
                 )}
@@ -323,6 +372,13 @@ const ChartTooltipContent = React.forwardRef<
 )
 
 ChartTooltipContent.displayName = "ChartTooltip"
+
+/**
+ * Opacity ramp shared by everything that renders a projected series: bars
+ * fade from `strong` at the tip to `faint` at the zero line, and the legend
+ * swatch mirrors the same gradient.
+ */
+const projectedFade = { strong: 0.4, faint: 0.05 } as const
 
 const ChartLegend = RechartsPrimitive.Legend
 
@@ -372,6 +428,7 @@ const ChartLegendContent = React.forwardRef<
             key,
             hiddenKey
           )
+          const indicator = itemConfig?.legendIndicator ?? "dot"
 
           return (
             <div
@@ -382,13 +439,25 @@ const ChartLegendContent = React.forwardRef<
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
+              ) : itemConfig && indicator === "line" ? (
+                <div
+                  className="w-4 shrink-0 border-t-2"
+                  style={{
+                    borderColor: item.color,
+                    borderTopStyle: itemConfig.dashed ? "dashed" : "solid",
+                  }}
+                />
               ) : (
                 itemConfig && (
                   <div
                     className="h-2 w-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: item.color,
-                    }}
+                    style={
+                      itemConfig.projected
+                        ? {
+                            background: `linear-gradient(to bottom, color-mix(in srgb, ${item.color} ${projectedFade.strong * 100}%, transparent), color-mix(in srgb, ${item.color} ${projectedFade.faint * 100}%, transparent))`,
+                          }
+                        : { backgroundColor: item.color }
+                    }
                   />
                 )
               )}
@@ -453,4 +522,5 @@ export {
   ChartStyle,
   ChartTooltip,
   ChartTooltipContent,
+  projectedFade,
 }

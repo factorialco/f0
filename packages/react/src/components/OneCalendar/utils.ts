@@ -1,10 +1,13 @@
-import { format, isAfter, isBefore, isEqual } from "date-fns"
-import * as locales from "date-fns/locale"
+import { format, isAfter, isBefore, isEqual, max, min } from "date-fns"
 import { Matcher } from "react-day-picker"
-
 import { GranularityDefinition } from "./granularities"
 import { rangeSeparator } from "./granularities/consts"
-import { DateRange, DateRangeComplete, DateRangeString } from "./types"
+import {
+  DateRange,
+  DateRangeComplete,
+  DateRangeString,
+  OptionalCalendarSelection,
+} from "./types"
 
 /**
  * Converts a date-fns format string to a human-readable placeholder pattern.
@@ -20,15 +23,18 @@ export const formatToPlaceholder = (formatStr: string): string => {
     .replace(/Q/g, "n") // Quarter number → n
 }
 
-// Get the locale object from date-fns/locale
+/**
+ * The tighter of two optional bounds: the later of two lower bounds, the
+ * earlier of two upper ones. An absent bound constrains nothing.
+ */
+export const latestDate = (a?: Date, b?: Date): Date | undefined =>
+  a && b ? max([a, b]) : (a ?? b)
 
-export const getLocale = (localeKey: string) => {
-  const key = localeKey.split("-")[0] // Handle both 'es' and 'es-ES' formats
-  return locales[key as keyof typeof locales]
-}
+export const earliestDate = (a?: Date, b?: Date): Date | undefined =>
+  a && b ? min([a, b]) : (a ?? b)
 
 export const toDateRange = (
-  value: Date | DateRange | undefined | null
+  value: OptionalCalendarSelection
 ): DateRange | undefined => {
   if (value instanceof Date) {
     return { from: value }
@@ -98,7 +104,7 @@ export const formatDate = (date: Date, formatStr: string): string => {
  * @returns
  */
 export const formatDateRange = (
-  date: Date | DateRange | undefined | null,
+  date: OptionalCalendarSelection,
   formatStr: string
 ): DateRangeString => {
   const dateRange = toDateRange(date)
@@ -119,7 +125,7 @@ export const formatDateRange = (
 }
 
 export const formatDateToString = (
-  date: Date | DateRange | undefined | null,
+  date: OptionalCalendarSelection,
   formatStr: string
 ): string => {
   const dateRange = formatDateRange(date, formatStr)
@@ -128,13 +134,12 @@ export const formatDateToString = (
   }
   const { from, to } = dateRange
 
-  return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
+  const toPart = to && from !== to ? ` ${rangeSeparator} ${to}` : ""
+  return `${from}${toPart}`
 }
 
-export function toGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(
-  date: Date | DateRange | undefined | null,
+export function toGranularityDateRange<T extends OptionalCalendarSelection>(
+  date: OptionalCalendarSelection,
   fromFn: (date: Date) => Date,
   toFn: (date: Date) => Date
 ): T extends Date | DateRange ? DateRangeComplete : T {

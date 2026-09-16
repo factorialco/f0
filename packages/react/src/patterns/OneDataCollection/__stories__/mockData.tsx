@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
-
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { cn } from "@/lib/utils"
@@ -11,6 +10,7 @@ import {
   MOCK_ICONS,
   MockUser,
   TEAMS_MOCK,
+  DEPARTMENTS_MOCK,
 } from "@/mocks"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 export { generateMockUsers, type MockUser }
@@ -46,7 +46,6 @@ import {
   Star,
   Upload,
 } from "@/icons/app"
-import { DEPARTMENTS_MOCK } from "@/mocks"
 import {
   BulkActionsDefinition,
   DataCollectionBaseFetchOptions,
@@ -59,7 +58,6 @@ import {
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker"
 import { mockImage } from "@/testing/mocks/images"
-
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
@@ -77,6 +75,11 @@ import {
 } from "../navigationFilters/types"
 import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
+
+type FrozenColumns = 0 | 1 | 2
+type NestedRecordsType = "basic" | "detailed" | "mixed"
+
+const CHILDREN_PER_PAGE = 2
 
 // Mock data for nested subfilters (office → space → desk)
 const OFFICES = [
@@ -297,7 +300,7 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
 export class MockDataCache<T extends MockUser> {
   // Map of id -> object for efficient updates
   private dataMap: Map<string, T>
-  private subscribers: Set<() => void> = new Set()
+  private subscribers = new Set<() => void>()
 
   constructor(initialData: T[]) {
     // Initialize cache with data
@@ -329,7 +332,9 @@ export class MockDataCache<T extends MockUser> {
 
   updateItemDepartment(itemId: string, newDepartment: string): T | null {
     const item = this.dataMap.get(itemId)
-    if (!item) return null
+    if (!item) {
+      return null
+    }
 
     // Update the cached object
     item.department = newDepartment as (typeof DEPARTMENTS_MOCK)[number]
@@ -344,7 +349,9 @@ export class MockDataCache<T extends MockUser> {
    * Replace an item in the cache with a new version.
    */
   updateItem(updatedItem: T): T | null {
-    if (!this.dataMap.has(updatedItem.id)) return null
+    if (!this.dataMap.has(updatedItem.id)) {
+      return null
+    }
     this.dataMap.set(updatedItem.id, updatedItem)
     this.notify()
     return updatedItem
@@ -361,9 +368,9 @@ export const mockUsers = generateMockUsers(10)
 
 export const getMockVisualizations = (options?: {
   // @deprecated
-  frozenColumns?: 0 | 1 | 2
+  frozenColumns?: FrozenColumns
   table?: {
-    frozenColumns?: 0 | 1 | 2
+    frozenColumns?: FrozenColumns
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
     noSorting?: boolean
@@ -731,8 +738,8 @@ export const getMockVisualizations = (options?: {
                   },
                   {
                     type: "person",
-                    firstName: "Dani",
-                    lastName: "Moreno",
+                    firstName: "Jordan",
+                    lastName: "Avery",
                     src: "/avatars/person04.jpg",
                   },
                   {
@@ -827,8 +834,8 @@ export const getMockVisualizations = (options?: {
                   },
                   {
                     type: "person",
-                    firstName: "Dani",
-                    lastName: "Moreno",
+                    firstName: "Jordan",
+                    lastName: "Avery",
                     src: "/avatars/person04.jpg",
                   },
                   {
@@ -1032,13 +1039,21 @@ export const sortings = {
 } as const
 
 // Helper function to filter users based on filters
-export const filterUsers = (
-  users: MockUser[],
-  filterValues: FiltersState<typeof filters>,
-  sortingState: SortingsStateMultiple,
-  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>,
+type FilterUsersOptions = {
+  users: MockUser[]
+  filterValues: FiltersState<typeof filters>
+  sortingState: SortingsStateMultiple
+  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   search?: string
-) => {
+}
+
+export const filterUsers = ({
+  users,
+  filterValues,
+  sortingState,
+  navigationFilters,
+  search,
+}: FilterUsersOptions) => {
   let filteredUsers = [...users]
 
   const searchValue = filterValues.search
@@ -1160,12 +1175,12 @@ export const createObservableDataFetch = (delay = 0) => {
       })
 
       const timeoutId = setTimeout(() => {
-        const filteredData = filterUsers(
-          mockUsers,
-          filters,
-          sortingsState,
-          navigationFilters
-        )
+        const filteredData = filterUsers({
+          users: mockUsers,
+          filterValues: filters,
+          sortingState: sortingsState,
+          navigationFilters,
+        })
 
         // Calculate summaries like in createPromiseDataFetch
         const summaries = {
@@ -1255,7 +1270,7 @@ const createdDetailedNestedRecords = (filteredData: MockUser[]) => {
 
 const createdNestedRecords = (
   filteredData: MockUser[],
-  nestedRecordsType?: "basic" | "detailed" | "mixed"
+  nestedRecordsType?: NestedRecordsType
 ) => {
   if (nestedRecordsType === "mixed") {
     return createdMixedNestedRecords(filteredData)
@@ -1272,7 +1287,7 @@ export const createPromiseDataFetch = (
   delay = 500,
   cache?: MockDataCache<MockUser>,
   nestedRecords = false,
-  nestedRecordsType?: "basic" | "detailed" | "mixed"
+  nestedRecordsType?: NestedRecordsType
 ) => {
   return (
     options: DataCollectionBaseFetchOptions<
@@ -1293,13 +1308,13 @@ export const createPromiseDataFetch = (
       setTimeout(() => {
         // Use cache if provided, otherwise use static mockUsers
         const sourceData = cache ? cache.getData() : mockUsers
-        const filteredData = filterUsers(
-          sourceData,
-          filters,
-          sortingsState,
+        const filteredData = filterUsers({
+          users: sourceData,
+          filterValues: filters,
+          sortingState: sortingsState,
           navigationFilters,
-          search
-        )
+          search,
+        })
 
         const summaries = {
           salary: filteredData.reduce((total, user) => {
@@ -1380,30 +1395,24 @@ export const ExampleComponent = ({
   usePresets?: boolean
   /** Override the developer-provided presets used when `usePresets` is true. */
   presets?: PresetsDefinition<typeof filters>
-  frozenColumns?: 0 | 1 | 2
+  frozenColumns?: FrozenColumns
   fullHeight?: boolean
-  visualizations?: ReadonlyArray<
-    Visualization<
-      MockUser,
-      FiltersType,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<MockUser>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >
-  >
+  visualizations?: readonly Visualization<
+    MockUser,
+    FiltersType,
+    typeof sortings,
+    SummariesDefinition,
+    ItemActionsDefinition<MockUser>,
+    NavigationFiltersDefinition,
+    GroupingDefinition<MockUser>
+  >[]
   id?: string
   storage?:
     | false
     | {
         features?: DataCollectionStorageFeaturesDefinition
       }
-  dataAdapter?: DataCollectionDataAdapter<
-    MockUser,
-    FiltersType,
-    NavigationFiltersDefinition
-  >
+  dataAdapter?: DataCollectionDataAdapter<MockUser, FiltersType>
   defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
   allPagesSelection?: boolean
@@ -1412,7 +1421,7 @@ export const ExampleComponent = ({
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
   totalItemSummary?: true | ((totalItems: number) => string)
-  grouping?: GroupingDefinition<MockUser> | undefined
+  grouping?: GroupingDefinition<MockUser>
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
   noSorting?: boolean
   paginationType?: PaginationType
@@ -1431,7 +1440,7 @@ export const ExampleComponent = ({
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   tmpFullWidth?: boolean
   nestedRecords?: boolean
-  nestedRecordsType?: "basic" | "detailed" | "mixed"
+  nestedRecordsType?: NestedRecordsType
   csvExport?: boolean | { filename?: string }
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
@@ -1451,7 +1460,9 @@ export const ExampleComponent = ({
   const [cacheVersion, setCacheVersion] = useState(0)
 
   useEffect(() => {
-    if (!cache) return
+    if (!cache) {
+      return
+    }
 
     const unsubscribe = cache.subscribe(() => {
       setCacheVersion((v) => v + 1)
@@ -1473,7 +1484,9 @@ export const ExampleComponent = ({
   // By including cacheVersion in the useMemo deps and in the returned object,
   // we ensure that useData detects the change and triggers a refetch
   const dataAdapterMemoized = useMemo(() => {
-    if (dataAdapter) return dataAdapter
+    if (dataAdapter) {
+      return dataAdapter
+    }
 
     return {
       fetchData: useObservable
@@ -1549,23 +1562,32 @@ export const ExampleComponent = ({
       dataAdapter: dataAdapterMemoized,
       itemsWithChildren: (item) => !!item?.children?.length,
       childrenCount: ({ item }) => item?.children?.length,
-      fetchChildren: async ({ item }) => {
+      fetchChildren: async ({ item, pagination }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        return item.children
-          ? {
-              records: item.children,
-              type: item.detailed ? "detailed" : "basic",
-              paginationInfo: {
-                cursor: "aaa",
-                total: item.children.length,
-                perPage: 2,
-                currentPage: 1,
-                pagesCount: 1,
-                hasMore: true,
-              },
-            }
-          : { records: [] }
+        if (!item.children) {
+          return { records: [] }
+        }
+
+        // A real page, not the whole list echoed back with a pinned `hasMore`:
+        // that shape made "See more" append the same records forever, so it
+        // never exercised the pagination it was meant to demo.
+        const perPage = pagination?.perPage ?? CHILDREN_PER_PAGE
+        const currentPage = (pagination?.currentPage ?? 0) + 1
+        const start = (currentPage - 1) * perPage
+        const total = item.children.length
+
+        return {
+          records: item.children.slice(start, start + perPage),
+          type: item.detailed ? "detailed" : "basic",
+          paginationInfo: {
+            total,
+            perPage,
+            currentPage,
+            pagesCount: Math.max(1, Math.ceil(total / perPage)),
+            hasMore: start + perPage < total,
+          },
+        }
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
@@ -1616,6 +1638,25 @@ export const ExampleComponent = ({
   )
 }
 
+const inSelection = (selection: string[], id: string | undefined) =>
+  selection.length === 0 || (id !== undefined && selection.includes(id))
+
+// Narrow by the nested workplace selections (office/space/desk).
+const applyWorkplaceSelection = (
+  users: WorkplaceMockUser[],
+  f: FiltersState<NestedFiltersType>
+) => {
+  const officeSel = (f.office as string[] | undefined) ?? []
+  const spaceSel = (f.space as string[] | undefined) ?? []
+  const deskSel = (f.desk as string[] | undefined) ?? []
+  return users.filter(
+    (u) =>
+      inSelection(officeSel, u.officeId) &&
+      inSelection(spaceSel, u.spaceId) &&
+      inSelection(deskSel, u.deskId)
+  )
+}
+
 export const SubfiltersExampleComponent = () => {
   const dataAdapterMemoized = useMemo(
     () => ({
@@ -1632,26 +1673,14 @@ export const SubfiltersExampleComponent = () => {
             // nested workplace selections (office/space/desk) it doesn't know
             // about. `filterUsers` only filters/sorts, so the surviving items
             // are still the original WorkplaceMockUser objects.
-            const base = filterUsers(
-              subfilterMockUsers,
-              f as FiltersState<FiltersType>,
-              s,
-              undefined,
-              search
-            ) as WorkplaceMockUser[]
+            const base = filterUsers({
+              users: subfilterMockUsers,
+              filterValues: f as FiltersState<FiltersType>,
+              sortingState: s,
+              search,
+            }) as WorkplaceMockUser[]
 
-            const officeSel = (f.office as string[] | undefined) ?? []
-            const spaceSel = (f.space as string[] | undefined) ?? []
-            const deskSel = (f.desk as string[] | undefined) ?? []
-
-            const filtered = base.filter((u) => {
-              if (officeSel.length && !officeSel.includes(u.officeId))
-                return false
-              if (spaceSel.length && !spaceSel.includes(u.spaceId)) return false
-              if (deskSel.length && (!u.deskId || !deskSel.includes(u.deskId)))
-                return false
-              return true
-            })
+            const filtered = applyWorkplaceSelection(base, f)
             resolve({ records: filtered })
           }, 100)
         })
@@ -1960,7 +1989,7 @@ export function createDataAdapter<
                 ) as PaginatedResponse<TRecord>
               )
             } catch (error) {
-              reject(error)
+              reject(error instanceof Error ? error : new Error(String(error)))
             }
           }, delay)
         })
@@ -2029,12 +2058,7 @@ export function createDataAdapter<
               ) as InfiniteScrollPaginatedResponse<TRecord>
               resolve(result)
             } catch (error) {
-              reject({
-                loading: false,
-                error:
-                  error instanceof Error ? error : new Error(String(error)),
-                data: null,
-              })
+              reject(error instanceof Error ? error : new Error(String(error)))
             }
           }, delay)
         })
@@ -2101,7 +2125,7 @@ export function createDataAdapter<
               summaries: summaries as TRecord,
             })
           } catch (error) {
-            reject(error)
+            reject(error instanceof Error ? error : new Error(String(error)))
           }
         }, delay)
       })

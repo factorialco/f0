@@ -90,10 +90,7 @@ const MoneyAnimated = React.forwardRef<SVGSVGElement, MoneyProps>(
           animate={animate}
           transition={defaultTransition}
         >
-          <path
-            d="M9 3H14C15.6569 3 17 4.34315 17 6V14C17 15.6569 15.6569 17 14 17H9C7.34315 17 6 15.6569 6 14V6C6 4.34315 7.34315 3 9 3Z"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d="M9 3H14C15.6569 3 17 4.34315 17 6V14C17 15.6569 15.6569 17 14 17H9C7.34315 17 6 15.6569 6 14V6C6 4.34315 7.34315 3 9 3Z" />
 
           <motion.path
             d="M13.5 7H11C10.1716 7 9.5 7.67157 9.5 8.5V8.5C9.5 9.32843 10.1716 10 11 10H12C12.8284 10 13.5 10.6716 13.5 11.5V11.5C13.5 12.3284 12.8284 13 12 13H9.5"
@@ -101,7 +98,6 @@ const MoneyAnimated = React.forwardRef<SVGSVGElement, MoneyProps>(
             variants={dollarVariants}
             transition={dollarTransition}
             animate={animate}
-            vectorEffect="non-scaling-stroke"
           />
           <motion.line
             x1="11.5"
@@ -112,7 +108,6 @@ const MoneyAnimated = React.forwardRef<SVGSVGElement, MoneyProps>(
             variants={dotsVariants}
             transition={dotsTransition}
             animate={animate}
-            vectorEffect="non-scaling-stroke"
           />
           <motion.line
             x1="11.5"
@@ -123,7 +118,6 @@ const MoneyAnimated = React.forwardRef<SVGSVGElement, MoneyProps>(
             variants={dotsVariants}
             transition={dotsTransition}
             animate={animate}
-            vectorEffect="non-scaling-stroke"
           />
         </motion.g>
         <motion.path
@@ -132,7 +126,6 @@ const MoneyAnimated = React.forwardRef<SVGSVGElement, MoneyProps>(
           variants={foldVariants}
           animate={animate}
           transition={defaultTransition}
-          vectorEffect="non-scaling-stroke"
         />
       </svg>
     )
