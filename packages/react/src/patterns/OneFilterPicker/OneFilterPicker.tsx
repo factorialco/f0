@@ -35,7 +35,12 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
    * An entry listed before the filters inside the panel, with a pane of its
    * own. For a way of filtering that is not one filter.
    */
-  quickFilter?: { label: string; content: React.ReactNode }
+  quickFilter?: {
+    label: string
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => React.ReactNode
+  }
   /**
    * Rendered immediately after the filter button, before the divider the
    * presets sit behind.

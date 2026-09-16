@@ -39,9 +39,16 @@ export interface FilterPickerInternalProps<
   /** Callback when clear filters button is clicked */
   onClear?: () => void
   /** An entry listed before the filters, with a pane of its own */
-  quickFilter?: { label: string; content: ReactNode }
+  quickFilter?: {
+    label: string
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => ReactNode
+  }
   /** Whether that entry is the selected one */
   quickFilterSelected?: boolean
   /** Callback when that entry is picked */
   onQuickFilterSelect?: () => void
+  /** Writes into the draft the apply button commits */
+  onStageFilters?: (filters: Record<string, unknown>) => void
 }

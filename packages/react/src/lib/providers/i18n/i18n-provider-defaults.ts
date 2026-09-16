@@ -219,6 +219,7 @@ export const defaultTranslations = {
     },
     search: {
       searching: "Searching for {{query}}\u2026",
+      assistedHint: "Describe who you are looking for.",
     },
     presets: {
       createTitle: "Save view",

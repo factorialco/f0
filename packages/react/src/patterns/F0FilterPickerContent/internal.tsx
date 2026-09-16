@@ -27,6 +27,7 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
   quickFilter,
   quickFilterSelected,
   onQuickFilterSelect,
+  onStageFilters,
 }: FilterPickerInternalProps<Filters>) {
   const i18n = useI18n()
 
@@ -53,7 +54,9 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           onQuickFilterSelect={onQuickFilterSelect}
         />
         {quickFilterSelected && quickFilter ? (
-          <div className="min-w-[340px] flex-1 p-3">{quickFilter.content}</div>
+          <div className="min-w-[340px] flex-1 p-3">
+            {quickFilter.render({ stage: onStageFilters ?? (() => {}) })}
+          </div>
         ) : null}
         {selectedFilterKey ? (
           <div className="min-w-[340px] flex-1">

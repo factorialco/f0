@@ -52,6 +52,7 @@ import {
   type PresetFormValues,
 } from "./components/PresetFormDialog"
 import { Search } from "./components/Search"
+import { AssistedQueryPanel } from "./components/Search/AssistedQueryPanel"
 import { useSearchPreview } from "./components/Search/useSearchPreview"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
@@ -898,6 +899,35 @@ const OneDataCollectionComp = <
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
 
+  // Words become filters while they are being typed: a recognised stretch is
+  // applied at once, so the chips and the table answer the sentence as it is
+  // written rather than waiting for it to end. Debounced, because a keystroke
+  // is not a decision.
+  const analyze = source.searchPresentation?.analyze
+  const setFilters = source.setCurrentFilters
+  // The consumer may hold the text itself, so read it back from the props the
+  // field is actually given rather than from the local fallback.
+  const assistedValue = source.searchPresentation
+    ? (source.searchPresentation.value ?? assistedQuery)
+    : undefined
+  // Only the field in the toolbar filters as it is typed. The same query
+  // written inside the filters panel waits for the apply button, like every
+  // other filter there — the panel would contradict itself otherwise.
+  const [assistedFrom, setAssistedFrom] = useState<"toolbar" | "panel">(
+    "toolbar"
+  )
+  useEffect(() => {
+    if (!analyze || assistedValue === undefined || assistedFrom === "panel") {
+      return
+    }
+    const timer = setTimeout(() => {
+      setFilters(
+        analyze(assistedValue).filters as Parameters<typeof setFilters>[0]
+      )
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [analyze, assistedValue, assistedFrom, setFilters])
+
   // One field's worth of props, shared by the two places it can be offered
   // from, so whichever one is used they are the same field.
   const assistedSearchProps = source.searchPresentation
@@ -905,9 +935,14 @@ const OneDataCollectionComp = <
         ...source.searchPresentation,
         icon: AiFilterIcon,
         value: source.searchPresentation.value ?? assistedQuery,
-        onChange:
-          source.searchPresentation.onChange ??
-          ((next: string | undefined) => setAssistedQuery(next)),
+        onChange: (next: string | undefined) => {
+          setAssistedFrom("toolbar")
+          if (source.searchPresentation?.onChange) {
+            source.searchPresentation.onChange(next)
+            return
+          }
+          setAssistedQuery(next)
+        },
         onClear: () => {
           setAssistedQuery(undefined)
           source.searchPresentation?.onClear?.()
@@ -1789,11 +1824,24 @@ const OneDataCollectionComp = <
                 search && assistedSearchProps?.triggerLabel
                   ? {
                       label: assistedSearchProps.triggerLabel,
-                      content: (
-                        <Search
-                          {...assistedSearchProps}
-                          triggerLabel={undefined}
-                          alwaysOpen
+                      render: ({ stage }) => (
+                        <AssistedQueryPanel
+                          value={assistedValue ?? ""}
+                          onChange={(next) => {
+                            setAssistedFrom("panel")
+                            assistedSearchProps.onChange(next)
+                            stage(
+                              source.searchPresentation?.analyze?.(next)
+                                ?.filters ?? {}
+                            )
+                          }}
+                          analysis={source.searchPresentation?.analyze?.(
+                            assistedValue ?? ""
+                          )}
+                          placeholder={
+                            source.searchPresentation?.placeholderRotation?.[0]
+                          }
+                          emptyHint={i18n.collections.search.assistedHint}
                         />
                       ),
                     }

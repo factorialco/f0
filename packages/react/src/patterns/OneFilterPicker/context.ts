@@ -20,7 +20,13 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   mode?: FiltersMode
   displayCounter?: boolean
   /** An entry listed before the filters inside the panel, with its own pane */
-  quickFilter?: { label: string; content: ReactNode }
+  quickFilter?: {
+    label: string
+    /** `stage` writes into the draft the apply button commits. */
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => ReactNode
+  }
   /** Rendered next to the filter button, before the presets divider */
   leading?: ReactNode
   /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */

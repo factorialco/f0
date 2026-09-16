@@ -88,6 +88,23 @@ interface SearchProps {
  * Named apart from the datasource's own `SearchOptions`, which configures
  * whether the search runs at all.
  */
+/** A stretch of the query that was recognised, and the filter it stands for. */
+export type QueryAnalysisSpan = { start: number; end: number; key: string }
+
+/**
+ * What a consumer made of a query. Produced outside f0 — only the consumer
+ * knows its own filters, its vocabulary and who is allowed to see what.
+ */
+export type QueryAnalysis = {
+  spans: QueryAnalysisSpan[]
+  /** The filters those spans resolve to, named for a reader. */
+  preview: { key: string; label: string; value: string }[]
+  /** The same thing as filter state, ready to apply. */
+  filters: Record<string, unknown>
+  /** Said when the reading is partial or uncertain. */
+  note?: string
+}
+
 export type SearchPresentation = Pick<
   SearchProps,
   | "placeholderRotation"
@@ -103,6 +120,12 @@ export type SearchPresentation = Pick<
    * the magnifier is the only way in.
    */
   triggerLabel?: string
+  /**
+   * Reads a query as it is typed. Cheap and synchronous: it runs on every
+   * keystroke, so it belongs to whatever vocabulary the consumer already has
+   * on the client, not to a round trip.
+   */
+  analyze?: (query: string) => QueryAnalysis
   /**
    * The query being written. Provide it to drive completions from what is
    * typed; omit it and the collection keeps the text itself.

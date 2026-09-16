@@ -47,7 +47,12 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
   mode?: FiltersMode
   displayCounter?: boolean
   /** An entry listed before the filters, with its own pane */
-  quickFilter?: { label: string; content: ReactNode }
+  quickFilter?: {
+    label: string
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => ReactNode
+  }
 }
 
 const DEFAULT_FORM_HEIGHT = 388
@@ -102,6 +107,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     setSelectedFilterKey(null)
     setQuickFilterSelected(true)
   }
+  // What the query stands for goes into the draft, not into the collection:
+  // inside this popover everything waits for the apply button, and a field
+  // that quietly bypassed it would be the odd one out.
+  const stageFilters = (staged: Record<string, unknown>) => {
+    setLocalFiltersValue(staged as FiltersState<Filters>)
+  }
+
   const selectFilter = (key: keyof Filters) => {
     setQuickFilterSelected(false)
     setSelectedFilterKey(key)
@@ -343,7 +355,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                   />
                   {quickFilterSelected && quickFilter ? (
                     <div className="flex-1 min-w-0 overflow-hidden p-3">
-                      {quickFilter.content}
+                      {quickFilter.render({ stage: stageFilters })}
                     </div>
                   ) : null}
                   {selectedFilterKey ? (
@@ -539,6 +551,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             quickFilter={quickFilter}
             quickFilterSelected={quickFilterSelected}
             onQuickFilterSelect={selectQuickFilter}
+            onStageFilters={stageFilters}
             onFilterChange={updateFilterValue}
             onApply={handleApplyFilters}
             onClear={handleClearFilters}
