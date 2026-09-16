@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils"
 import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { rowEntryTransition } from "../utils/chat-motion"
-import { type ChatRow } from "../utils/grouping"
+import { rowItem, type ChatRow } from "../utils/grouping"
 import { ChatMessageItem } from "./ChatMessageItem"
+import { ChatPostRow } from "./ChatPostRow"
 import { ChatSystemMessage } from "./ChatSystemMessage"
 import { ChatTypingBubble, type TypingEntryState } from "./ChatTypingBubble"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
@@ -39,7 +40,53 @@ const topSpacing = (row: ChatRow): string => {
   if (row.type === "footer") {
     return "pt-0"
   }
+  // NO GAP between posts. A feed is one column of them, divided by a hairline
+  // and nothing else (see `ChatPostRow`) — the gap that separates message
+  // stacks would turn each post back into a floating card.
+  if (row.type === "post") {
+    return "pt-0"
+  }
   return "pt-3"
+}
+
+/**
+ * How a row is keyed for animation: what marks it fresh (`arrivalId`) and what
+ * records it as already shown (`seenId`).
+ *
+ * A separator splits the two — it is fresh because the message it introduces is
+ * (`forId`), but it is remembered under its own key. Anything else animates and
+ * is remembered by the same id. `rowItem` rather than a type check: a post is
+ * an appended item too, so it gates on the same rule as a message or a system
+ * row.
+ */
+const animationKeys = (
+  row: ChatRow
+): { arrivalId: string; seenId: string } | null => {
+  const item = rowItem(row)
+  if (item) {
+    return { arrivalId: item.id, seenId: item.id }
+  }
+  if (row.type === "separator") {
+    return { arrivalId: row.forId, seenId: row.key }
+  }
+  return null
+}
+
+/** Its place in the arriving batch, or `null` for a row that must not animate. */
+const resolveEntryOrder = (
+  row: ChatRow,
+  freshIds: Map<string, number>,
+  animatedIds: Set<string>
+): number | null => {
+  const keys = animationKeys(row)
+  if (!keys) {
+    return null
+  }
+  const order = freshIds.get(keys.arrivalId)
+  if (order === undefined || animatedIds.has(keys.seenId)) {
+    return null
+  }
+  return order
 }
 
 /**
@@ -85,38 +132,37 @@ const ChatMessageRowRendererComponent = ({
   // separator alongside its message (same batch slot, `forId`); system rows
   // are real appended items so they gate like messages. The unread divider
   // never animates (it only (re)appears on conversation entry).
-  const [entry] = useState(() => {
-    if (!enterAnimation) {
-      return null
-    }
-    if (row.type === "message" || row.type === "system") {
-      const order = freshIds.get(row.message.id)
-      if (order === undefined || animatedIds.has(row.message.id)) {
-        return null
-      }
-      return { order }
-    }
-    if (row.type === "separator") {
-      const order = freshIds.get(row.forId)
-      if (order === undefined || animatedIds.has(row.key)) {
-        return null
-      }
-      return { order }
-    }
-    return null
-  })
-  const animate = entry !== null
-  /** Its place in the arriving batch, or `null` for a row already on screen. */
-  const entryOrder = entry?.order ?? null
+  const [entryOrder] = useState(() =>
+    enterAnimation ? resolveEntryOrder(row, freshIds, animatedIds) : null
+  )
+  const animate = entryOrder !== null
   // Mark as "seen" after commit (not during render) so render stays pure and a
   // Strict-Mode double render can't wrongly flag a fresh arrival as already shown.
   useEffect(() => {
-    if (row.type === "message" || row.type === "system") {
-      animatedIds.add(row.message.id)
-    } else if (row.type === "separator") {
-      animatedIds.add(row.key)
+    const seenId = animationKeys(row)?.seenId
+    if (seenId) {
+      animatedIds.add(seenId)
     }
   }, [row, animatedIds])
+
+  if (row.type === "post") {
+    // FULL WIDTH, no gutter and no bubble: the card IS the row. The messages'
+    // `flex flex-col gap-1` exists to stack a bubble over its meta line, and a
+    // post has neither.
+    const card = <ChatPostRow post={row.post} last={row.isLast} />
+    return animate ? (
+      <motion.div
+        className={spacing}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={rowEntryTransition(entryOrder ?? 0)}
+      >
+        {card}
+      </motion.div>
+    ) : (
+      <div className={spacing}>{card}</div>
+    )
+  }
 
   if (row.type === "separator" || row.type === "system") {
     return (
@@ -162,6 +208,37 @@ const ChatMessageRowRendererComponent = ({
     )
   }
 
+  return (
+    <ChatMessageRow
+      row={row}
+      isGroup={isGroup}
+      spacing={spacing}
+      animate={animate}
+      entryOrder={entryOrder}
+    />
+  )
+}
+
+/**
+ * A message row: the bubble, its avatar gutter and its author line.
+ *
+ * Split out of the row dispatcher because it carries all of that branching on
+ * its own — who is speaking, whether they are shown, and where in a run the
+ * bubble sits.
+ */
+const ChatMessageRow = ({
+  row,
+  isGroup,
+  spacing,
+  animate,
+  entryOrder,
+}: {
+  row: Extract<ChatRow, { type: "message" }>
+  isGroup: boolean
+  spacing: string
+  animate: boolean
+  entryOrder: number | null
+}): ReactNode => {
   const { message, isFirstOfRun, isLastOfRun } = row
   const isMine = message.isMine
   const showIdentity = isGroup && !isMine

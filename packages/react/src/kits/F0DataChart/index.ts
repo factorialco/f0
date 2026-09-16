@@ -22,6 +22,7 @@ export type {
   F0DataChartPointClickSeries,
   F0DataChartProps,
   F0DataChartRadarIndicator,
+  F0DataChartReferenceLine,
   F0DataChartRadarProps,
   F0DataChartRadarSeries,
   F0DataChartScatterDataPoint,

@@ -1,7 +1,9 @@
 import {
+  isPost,
   isUserMessage,
   type F0ChatItem,
   type F0ChatMessage,
+  type F0ChatPost,
   type F0ChatSystemMessage,
   type F0ChatUser,
 } from "../types"
@@ -41,6 +43,17 @@ export type ChatRow =
   // A centered system row (membership events). Breaks author runs on both
   // sides and never carries run flags, footer or interactions.
   | { type: "system"; key: string; message: F0ChatSystemMessage }
+  // A POST row: full width, no avatar gutter, no bubble, no run flags. Its own
+  // `type` rather than reusing `message` on purpose — the three places that
+  // read "the item behind this row" (the sticky date, the animation gate,
+  // `sameRow`) then fail to COMPILE instead of silently skipping posts.
+  | {
+      type: "post"
+      key: string
+      post: F0ChatPost
+      /** Nothing follows it, so it draws no divider — see `ChatPostRow`. */
+      isLast?: boolean
+    }
   | {
       type: "message"
       key: string
@@ -62,6 +75,25 @@ export type ChatRow =
   // while someone is typing — an incoming dots bubble.
   | { type: "typing"; key: string; users: F0ChatUser[] }
 
+/**
+ * The transcript ITEM a row stands for, when it stands for one. Exists so
+ * "any item's id / timestamp" has ONE definition instead of a two-branch `||`
+ * repeated at every call site — each of which would have to be remembered when
+ * the item union grows.
+ */
+export const rowItem = (row: ChatRow): F0ChatItem | null => {
+  if (row.type === "message" || row.type === "system") {
+    return row.message
+  }
+  if (row.type === "post") {
+    return row.post
+  }
+  // `footer` is excluded deliberately: it carries a message but IS not one —
+  // it's a derived row under the last one, and the callers here mean "the item
+  // this row is", not "an item this row mentions".
+  return null
+}
+
 export type FlattenedChat = {
   rows: ChatRow[]
   /** item id → index of its row (for jump-to-message + scroll anchor). */
@@ -82,6 +114,12 @@ const sameRow = (a: ChatRow, b: ChatRow): boolean => {
   }
   if (a.type === "system" && b.type === "system") {
     return a.message === b.message
+  }
+  // `isLast` is part of it: without it, the post that WAS last keeps the flag
+  // when a newer one arrives, and the feed ends up with a gap in its dividers
+  // in the middle — the same trap `isLastOfRun` has below.
+  if (a.type === "post" && b.type === "post") {
+    return a.post === b.post && a.isLast === b.isLast
   }
   if (a.type === "message" && b.type === "message") {
     return (
@@ -112,9 +150,19 @@ export function flattenChatRows(
   opts: {
     dividerId?: string | null
     previousRows?: Map<string, ChatRow>
+    /**
+     * Whether a new calendar day breaks the transcript with a dated row.
+     *
+     * A CONVERSATION is read as "when did we say this", so the day is part of
+     * it. A FEED is not: posts arrive days apart by nature, and slicing them
+     * into "Monday / Wednesday / last Tuesday" turns a column of four posts
+     * into a column of four posts and four headings. Off for communities.
+     * @default true
+     */
+    daySeparators?: boolean
   } = {}
 ): FlattenedChat {
-  const { dividerId = null, previousRows } = opts
+  const { dividerId = null, previousRows, daySeparators = true } = opts
   const rows: ChatRow[] = []
   const indexById = new Map<string, number>()
   let lastMessageRowIndex = -1
@@ -125,6 +173,15 @@ export function flattenChatRows(
   // The conversation's last USER message gets the delivery footer — a trailing
   // system item ("X left the group") must not steal the flag from it.
   let lastUserIndex = -1
+  // The last POST, for the same reason in reverse: it is the one that draws no
+  // divider, because there is nothing under it to be divided from.
+  let lastPostIndex = -1
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (isPost(messages[i])) {
+      lastPostIndex = i
+      break
+    }
+  }
   for (let i = messages.length - 1; i >= 0; i--) {
     if (isUserMessage(messages[i])) {
       lastUserIndex = i
@@ -133,9 +190,12 @@ export function flattenChatRows(
   }
 
   messages.forEach((item, index) => {
+    // `separated` still means "a new day starts here" even with the rows off:
+    // it breaks an author's run, which is about the conversation and not about
+    // the heading. Only the ROW is suppressed.
     const separated = needsSeparator(item, messages[index - 1])
 
-    if (separated) {
+    if (separated && daySeparators) {
       rows.push({
         type: "separator",
         key: `sep-${item.id}`,
@@ -151,6 +211,21 @@ export function flattenChatRows(
 
     if (dividerHere) {
       rows.push({ type: "divider", key: "unread-divider" })
+    }
+
+    if (isPost(item)) {
+      // A post BREAKS the run on both sides, like a system row: two messages
+      // from the same author with a post between them are two stacks, not one —
+      // joining them across a full-width card would read as a stray bubble.
+      rows.push({
+        type: "post",
+        key: item.id,
+        post: item,
+        isLast: index === lastPostIndex,
+      })
+      indexById.set(item.id, rows.length - 1)
+      previousUser = undefined
+      return
     }
 
     if (!isUserMessage(item)) {

@@ -339,8 +339,9 @@ listSlot(
 | `maxVisibleItems`     | a number — or omitted to always show every row                                                                 | rows past it fold behind "View more (n)" / "View less" at the list's bottom         |
 | `compact`             | `true`                                                                                                         | forces the compact presentation at any count: descriptions in tooltips, `sm` glyphs |
 
-Rows may also carry `unread` for the accent dot on the left glyph, and
-`actions` for what can be done to that row (see **Row actions**).
+Rows may also carry `unread` for the accent dot on the left glyph, `actions` for
+what can be done to that row (see **Row actions**), and `tooltipDescription` for
+what they say on hover (see **The row on hover**).
 
 ### A subtitle that carries bad news
 
@@ -659,6 +660,27 @@ A `descriptionOptional` list is **exempt**: auto-compacting was written to tame
 a long column of uniformly two-line rows, and a mixed list is not that column —
 most of its rows are already one line, and folding away the few that aren't
 would hide the only thing telling them apart. `compact: true` still forces it.
+
+### The row on hover
+
+A row's `tooltipDescription` is its own line of plain text, drawn as a tooltip
+over the whole row. The second line is one truncating line — the table above
+puts three facts at the edge of what fits — so a row with more to say than fits
+ends in an ellipsis with nowhere to read the rest. This is that somewhere, and
+unlike `compact` it costs the line nothing: the parts stay drawn, and the
+critical one stays red.
+
+Write it **separately** rather than repeating the description. That is the whole
+point of the field: the line states the facts a reader triages by, the tooltip
+the fuller thing it abbreviates — a task's actual detail, an expense's
+breakdown. A tooltip that repeats what is already legible on the row is noise.
+
+Per row, so a row with nothing more to say simply omits it and hovers silently;
+an empty tooltip is a promise of information that isn't there. In a `compact`
+list — where the second line has folded into that same tooltip — a row's
+`tooltipDescription` is what shows instead.
+
+<Canvas of={SlotWidgetStories.TooltipDescriptions} />
 
 ### Recipes
 

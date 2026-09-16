@@ -20,6 +20,21 @@ export interface CameraOptions {
   animate?: boolean
 }
 
+/**
+ * A line to draw under the markers. Colours are already resolved: the caller
+ * owns the palette and the hover policy, the adapter owns the drawing.
+ */
+export interface MapLine {
+  id: string
+  coordinates: LngLat[]
+  color: string
+  width: number
+  opacity: number
+  dashed: boolean
+  /** Applied while the pointer is over the line. */
+  hover?: { color?: string; width?: number; opacity?: number }
+}
+
 /** A DOM element anchored to a coordinate by the engine. */
 export interface DomMarkerHandle {
   setPosition(at: LngLat): void
@@ -97,6 +112,16 @@ export interface MapAdapter {
 
   /** Anchors an element at a coordinate, centred on it. */
   addDomMarker(element: HTMLElement, at: LngLat): DomMarkerHandle
+
+  /**
+   * Replaces every drawn line; `[]` clears them. The adapter owns hover state,
+   * the cursor and re-drawing after a style swap. Beneath the markers, which
+   * are DOM and always paint above the canvas.
+   */
+  setLines(lines: MapLine[], options?: { onClick?: (id: string) => void }): void
+
+  /** The "you are here" dot, beneath the lines. `null` hides it. */
+  setCurrentLocation(at: LngLat | null): void
 
   /** The camera `fitCoordinates` would apply, without applying it. */
   cameraForCoordinates(

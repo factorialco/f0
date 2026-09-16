@@ -28,6 +28,7 @@ import {
   type F0ChatRuntime,
 } from "../types"
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 import { messageSurfaceColorClass } from "../utils/sender-color"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
@@ -585,6 +586,78 @@ describe("F0Chat", () => {
     // why the squared corner works everywhere and a protruding tail would not
     // (these cards clip with overflow-hidden).
     expect(screen.getByTestId("chat-image-album")).toHaveClass("rounded-bl-2xs")
+  })
+
+  it("sizes a lone photo from its own dimensions, keeping the chained corner", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "solo-photo",
+            author: { id: "other", name: "María José" },
+            body: "",
+            createdAt: now,
+            isMine: false,
+            attachments: [
+              {
+                kind: "image",
+                url: "blob:img",
+                name: "panorama.png",
+                width: 2000,
+                height: 400,
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    // 5:1 is past what the box can represent, so it stops at the floor height
+    // and the photo is letterboxed inside — whole, not a cropped third of it.
+    const album = screen.getByTestId("chat-image-album")
+    expect(album).toHaveStyle({ width: "384px" })
+    expect(album).toHaveClass("max-w-full", "rounded-2xl")
+    expect(screen.getByAltText("panorama.png")).toHaveStyle({ height: "60%" })
+  })
+
+  it("keeps the shared media width for an album of several photos", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "album",
+            author: { id: "other", name: "María José" },
+            body: "",
+            createdAt: now,
+            isMine: false,
+            attachments: [
+              {
+                kind: "image",
+                url: "blob:a",
+                name: "a.png",
+                width: 200,
+                height: 2000,
+              },
+              {
+                kind: "image",
+                url: "blob:b",
+                name: "b.png",
+                width: 2000,
+                height: 400,
+              },
+            ],
+          },
+        ],
+      })
+    )
+
+    const album = screen.getByTestId("chat-image-album")
+    expect(album).toHaveClass(...CHAT_MEDIA_WIDTH_CLASS.split(" "))
+    expect(album).not.toHaveStyle({ width: "384px" })
+    // The mosaic still crops to its own ratios — only a lone photo changed.
+    for (const cell of screen.getAllByTestId("chat-image-attachment")) {
+      expect(cell).not.toHaveClass("items-center")
+    }
   })
 
   it("keeps my attachment surfaces neutral", () => {

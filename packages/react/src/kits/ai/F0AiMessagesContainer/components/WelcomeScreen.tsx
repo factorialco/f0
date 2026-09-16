@@ -91,7 +91,7 @@ const TypedPhrase = ({
           : undefined
       }
       className={cn(
-        "min-h-[28px] bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+        "relative min-h-[28px] bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
         interactive &&
           cn(
             "cursor-pointer transition-transform duration-200",
@@ -101,10 +101,28 @@ const TypedPhrase = ({
       )}
       aria-label={interactive ? phrase : undefined}
     >
-      <span aria-hidden="true">
+      {/* THE WHOLE PHRASE, HOLDING ITS SPACE — and what a screen reader reads.
+       *
+       * The typed slice is painted over this rather than laid out itself. Left
+       * in flow, a growing slice grows the paragraph a line at a time (`min-h`
+       * reserves exactly one), and the welcome block is centred — bottom-
+       * anchored in fullscreen — so every wrap steps the composer and the
+       * cards 28px. Sizing on the full phrase fixes the line breaks from the
+       * first character, so nothing below it ever moves.
+       *
+       * It reads as a jump "when the fullscreen animation ends" because the
+       * chat blanks its body across that change (see `useRevealOnChange`)
+       * while this keeps typing underneath: the reveal lands mid-phrase, and
+       * the next wrap arrives just after the panel has settled.
+       *
+       * `opacity-0`, not `invisible` or `sr-only`: it must stay in the layout
+       * AND in the accessibility tree (it replaces the sr-only copy that named
+       * this paragraph before), while painting nothing — the gradient is
+       * clipped to the text, so anything that paints would show through. */}
+      <span className="opacity-0">{phrase}</span>
+      <span aria-hidden="true" className="absolute inset-0">
         {reducedMotion ? phrase : phrase.slice(0, typed)}
       </span>
-      <span className="sr-only">{phrase}</span>
     </p>
   )
 }

@@ -662,10 +662,11 @@ describe("useData grouping", () => {
   }
 
   const buildSource = (
-    currentGrouping: GroupingState<Person, GroupingDefinition<Person>>
+    currentGrouping: GroupingState<Person, GroupingDefinition<Person>>,
+    records: Person[] = people
   ) =>
     ({
-      dataAdapter: { fetchData: () => ({ records: people }) },
+      dataAdapter: { fetchData: () => ({ records }) },
       currentFilters: {},
       setCurrentFilters: vi.fn(),
       currentSortings: null,
@@ -718,6 +719,52 @@ describe("useData grouping", () => {
       "Alice",
       "Bob",
       "Cleo",
+    ])
+  })
+
+  it("keeps a record with no value at the second level as a row of its group", () => {
+    // Erin has a role but no office: she belongs under Engineer, and to none of
+    // the offices Engineer is cut into.
+    const mixed = [
+      ...people,
+      { id: 5, name: "Erin", role: "Engineer", office: "" },
+    ]
+    const { result } = renderHook(() =>
+      useData(
+        buildSource({ field: "role", thenBy: [{ field: "office" }] }, mixed)
+      )
+    )
+
+    const engineer = result.current.data.groups.find(
+      (group) => group.key === "Engineer"
+    )
+    expect(engineer?.subGroups?.map((sub) => sub.label)).toEqual([
+      "Barcelona",
+      "Madrid",
+    ])
+    expect(engineer?.ownRecords?.map((record) => record.name)).toEqual(["Erin"])
+    // And NOT bucketed under the value it is missing.
+    expect(
+      engineer?.subGroups?.some((sub) => `${sub.label}`.includes("undefined"))
+    ).toBe(false)
+  })
+
+  it("leaves a record with no value at the FIRST level out of the groups entirely", () => {
+    // Frank has no role at all, so no heading can name him.
+    const mixed = [
+      ...people,
+      { id: 6, name: "Frank", role: "", office: "Madrid" },
+    ]
+    const { result } = renderHook(() =>
+      useData(buildSource({ field: "role" }, mixed))
+    )
+
+    expect(
+      result.current.data.ungroupedRecords?.map((record) => record.name)
+    ).toEqual(["Frank"])
+    expect(result.current.data.groups.map((group) => group.key)).toEqual([
+      "Engineer",
+      "Designer",
     ])
   })
 

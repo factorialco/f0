@@ -169,8 +169,8 @@ describe("F0AiChat split panel (panelContentSide opposite the chat)", () => {
 
   it("holds a skeleton while restoring the last conversation — no chat flash", async () => {
     // A reload with a conversation showing: open persisted + its id pending.
-    localStorage.setItem("ONE-ai-chat-open", "true")
-    localStorage.setItem("ONE-ai-chat-panel-content-id", '"a"')
+    localStorage.setItem("f0-side-panel-open", "true")
+    localStorage.setItem("f0-side-panel-view-id", '"a"')
     renderSplit()
 
     // The hosted window shows a skeleton; the AI chat never flashes in.

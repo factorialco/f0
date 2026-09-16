@@ -36,6 +36,18 @@ export const chatPermission = (
   if (channelType === "announcement") {
     return false
   }
+  // A community is a feed you READ; writing in it is a privilege the host
+  // grants (`{ canSend: true }`), like the noticeboard's poster. But unlike a
+  // noticeboard, reacting is what everyone came for — so only the WRITING verb
+  // inverts, not all of them. `canReply` follows on its own a few lines below.
+  //
+  // Deliberately not a `canPost` verb of its own: `canSend` already means "you
+  // may write here", and in a community what you write is a post. A new verb
+  // whose default is another verb is exactly the drift this ladder exists to
+  // prevent.
+  if (channelType === "community" && permission === "canSend") {
+    return false
+  }
   // Replying needs a composer to reply into.
   if (permission === "canReply") {
     return chatPermission("canSend", channelType, capabilities)

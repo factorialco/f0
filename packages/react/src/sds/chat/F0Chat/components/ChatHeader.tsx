@@ -4,10 +4,11 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
-import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { useSidePanel } from "@/patterns/ApplicationFrame/SidePanel/SidePanelProvider"
+import { Skeleton } from "@/ui/skeleton"
 import { useChatSearch } from "../providers/ChatUIProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
@@ -64,13 +65,20 @@ export const ChatHeader = ({
   // Read from the panel rather than the viewport: a narrow window no longer
   // implies a covering panel — a laptop at half the screen splits — and the
   // old viewport rule was hiding the button on a chat that plainly had
-  // somewhere to expand into. `useAiChat` answers `false` with no provider, so
+  // somewhere to expand into. `useSidePanel` answers `false` with no panel, so
   // a standalone chat keeps its button.
-  const { panelOverlays } = useAiChat()
+  //
+  // Asked of the PANEL, not of the AI chat: this is the communications chat,
+  // and it used to reach into the AI kit for this one value — which meant it
+  // only got a true answer on customers who happened to have an assistant.
+  const { panelOverlays } = useSidePanel()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
+  // No emoji and no picture ⇒ the ＃ glyph, the same rule the sidebar applies
+  // (see `SidebarChatItem`) and for the same reason: an initials avatar for a
+  // PLACE reads as a person who isn't there. Not restricted to groups — a
+  // community is a channel too, and used to arrive here as an empty avatar box.
   const showGroupFallback =
-    channel.type === "group" &&
     (channel.avatar.type === "team" || channel.avatar.type === "company") &&
     !channel.avatar.src
   const identityEmoji =
@@ -117,12 +125,24 @@ export const ChatHeader = ({
           // full size instead of shrunk inside the bordered avatar box.
           <span
             aria-hidden={showGroupFallback || undefined}
-            className="flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary"
+            className={cn(
+              "flex size-5 items-center justify-center text-lg font-medium",
+              // The ＃ is type and takes the muted colour; an emoji keeps its
+              // own. Same split as the sidebar row.
+              showGroupFallback && "text-f1-foreground-secondary"
+            )}
             data-testid={
               showGroupFallback ? "chat-group-avatar-fallback" : undefined
             }
           >
-            <EmojiImage emoji={identityEmoji} size="sm" />
+            {/* Same split as the sidebar row one panel away, and for the same
+                reasons — see `SidebarChatItem`. The two must agree: they are
+                the same identity, an inch apart. */}
+            {showGroupFallback ? (
+              identityEmoji
+            ) : (
+              <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+            )}
           </span>
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />
@@ -134,9 +154,22 @@ export const ChatHeader = ({
           />
         ) : null}
       </div>
-      <span className="truncate text-base font-medium text-f1-foreground">
-        {channel.title}
-      </span>
+      {channel.title ? (
+        <span className="truncate text-base font-medium text-f1-foreground">
+          {channel.title}
+        </span>
+      ) : (
+        // A NAME THAT HAS NOT ARRIVED, not a channel without one. It often
+        // comes from its own request — a community's title is a second query,
+        // separate from its posts — so the header used to sit blank next to a
+        // transcript that was already drawing itself. An empty title is
+        // therefore read as "not known yet"; a host must never ship one
+        // permanently, or this pulses forever.
+        <Skeleton
+          data-testid="chat-header-title-skeleton"
+          className="h-3.5 w-32 rounded-2xs"
+        />
+      )}
       {channel.statuses?.map((status) => (
         <F0Icon
           key={status.label}

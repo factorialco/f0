@@ -1063,6 +1063,31 @@ const F0SelectComponent = forwardRef(function Select<
     return ["", "pl-5", "pl-10", "pl-16", "pl-20"][Math.min(steps, 4)]
   }, [])
 
+  /**
+   * A group's records as rows, indented to their depth and keyed under the
+   * group so two groups holding the same option stay distinct.
+   *
+   * Collapsible rows clear their own group's chevron, so they sit one step
+   * further in than the header they belong to.
+   */
+  const buildRows = useCallback(
+    (
+      records: ActualRecordType[],
+      keyPrefix: string,
+      depth: number,
+      seenTagTypes: Set<string>
+    ): VirtualItem[] => {
+      const indent = indentClass(collapsible ? depth + 1 : depth)
+
+      return getItems(records, seenTagTypes).map((vi) => ({
+        ...vi,
+        key: `${keyPrefix}:${vi.key}`,
+        item: indent ? <div className={indent}>{vi.item}</div> : vi.item,
+      }))
+    },
+    [collapsible, getItems, indentClass]
+  )
+
   const buildGroupItems = useCallback(
     (
       groups: GroupRecord<ActualRecordType>[],
@@ -1106,43 +1131,59 @@ const F0SelectComponent = forwardRef(function Select<
          * A group with sub-groups shows those instead of its records: its
          * `records` are the union of theirs, so rendering both would list every
          * option twice.
+         *
+         * `ownRecords` is the exception — the records that belong to this group
+         * and to none of its sub-groups, because they have no value at the next
+         * level. They are NOT in any sub-group, so they go first, as this
+         * group's own rows, above the headings that follow.
          */
         if (group.subGroups?.length) {
           items.push(
+            ...buildRows(
+              group.ownRecords ?? [],
+              `${group.key}:own`,
+              depth,
+              seenTagTypes
+            ),
             ...buildGroupItems(group.subGroups, depth + 1, seenTagTypes)
           )
           continue
         }
 
-        // Collapsible rows clear their own group's chevron, so they sit one
-        // step further in than the header they belong to.
-        const rowIndent = indentClass(collapsible ? depth + 1 : depth)
-        items.push(
-          ...getItems(group.records, seenTagTypes).map((vi) => ({
-            ...vi,
-            key: `${group.key}:${vi.key}`,
-            item: rowIndent ? (
-              <div className={rowIndent}>{vi.item}</div>
-            ) : (
-              vi.item
-            ),
-          }))
-        )
+        items.push(...buildRows(group.records, group.key, depth, seenTagTypes))
       }
 
       return items
     },
-    [collapsible, getItems, indentClass, openGroups, setGroupOpen]
+    [buildRows, collapsible, openGroups, setGroupOpen]
   )
 
   const items: VirtualItem[] = useMemo(() => {
     const seenTagTypes = new Set<string>()
 
     if (data.type === "grouped") {
-      return buildGroupItems(data.groups, 0, seenTagTypes)
+      /**
+       * The records belonging to no group lead the list, as plain rows with no
+       * heading over them — they have nothing to be filed under, and putting
+       * them last would read as a trailing group whose name went missing.
+       */
+      return [
+        ...getItems(data.ungroupedRecords ?? [], seenTagTypes).map((vi) => ({
+          ...vi,
+          key: `ungrouped:${vi.key}`,
+        })),
+        ...buildGroupItems(data.groups, 0, seenTagTypes),
+      ]
     }
     return getItems(data.records, seenTagTypes)
-  }, [data.records, data.type, data.groups, getItems, buildGroupItems])
+  }, [
+    data.records,
+    data.type,
+    data.groups,
+    data.ungroupedRecords,
+    getItems,
+    buildGroupItems,
+  ])
 
   const handleScrollBottom = () => {
     loadMore()
@@ -1319,6 +1360,24 @@ const F0SelectComponent = forwardRef(function Select<
     .filter(Boolean)
     .join(", ")
 
+  /**
+   * Whether the trigger is ALREADY showing the whole selection — reported up by
+   * `SelectedItems`, which is the only place that can tell: it knows which
+   * reading it rendered (names, a count, a tag, `…`) and measures whether the
+   * text survived its box.
+   *
+   * The same rule the field's label has always followed, now applied to the
+   * selection too: say what the trigger cannot, stay shut otherwise. So the
+   * tooltip keeps the selection line only where it adds something — text the
+   * box clipped, or a count standing in for the names — and drops it where the
+   * trigger spells it out in full. With `hideLabel` the tooltip still opens on
+   * the field's name alone, which is nowhere on screen.
+   *
+   * Starts `false` so the tooltip is present until measurement says otherwise:
+   * a tooltip that arrives a frame late beats a hover that explains nothing.
+   */
+  const [selectionSpelledOut, setSelectionSpelledOut] = useState(false)
+
   const withTriggerTooltip = (trigger: React.ReactNode) => {
     /**
      * The tooltip needs ONE DOM element to hang its handlers on, and the real
@@ -1351,7 +1410,10 @@ const F0SelectComponent = forwardRef(function Select<
     return (
       <TooltipInternal
         label={hideLabel ? label : undefined}
-        description={selectedTooltipText}
+        // Empty rather than absent: `TooltipCopyProps` demands at least one of
+        // label/description, and this tooltip stays mounted with nothing to say
+        // by design — `hasContent` treats "" as nothing and never opens on it.
+        description={selectionSpelledOut ? "" : selectedTooltipText}
       >
         {box}
       </TooltipInternal>
@@ -1510,6 +1572,12 @@ const F0SelectComponent = forwardRef(function Select<
                     // both put two icons 4px apart on one trigger. Options keep
                     // their icons for the rows regardless.
                     hideItemIcon={!!icon}
+                    // `withTriggerTooltip` below already wraps this whole
+                    // trigger in a tooltip that reads out the label and the
+                    // full selection. A second one on the clipped text would
+                    // share the hover target and fight it — see the prop.
+                    noTooltip
+                    onSpelledOutChange={setSelectionSpelledOut}
                   />
                 ) : null}
               </button>

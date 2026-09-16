@@ -10,6 +10,8 @@ import type {
   MapEvent,
   ScreenPoint,
 } from "../types"
+import { createCurrentLocation } from "./currentLocation"
+import { createLines } from "./lines"
 
 /** Midpoint of MapLibre's wheel (1/90) and pinch (1/40) rates, so both
  * gestures feel alike; its 1/450 wheel default feels sluggish. */
@@ -67,6 +69,9 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
   map.scrollZoom.setWheelZoomRate(ZOOM_RATE)
   map.scrollZoom.setZoomRate(ZOOM_RATE)
 
+  const lines = createLines(map)
+  const currentLocation = createCurrentLocation(map)
+
   let destroyed = false
   // Every style accessor dereferences `map.style`, gone after `remove()`.
   const alive = () => !destroyed && Boolean(map.style)
@@ -92,6 +97,8 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
     isAlive: alive,
     destroy: () => {
       destroyed = true
+      lines.destroy()
+      currentLocation.destroy()
       map.remove()
     },
 
@@ -146,6 +153,9 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
       const center: LngLat = Array.isArray(c) ? [c[0], c[1]] : [c.lng, c.lat]
       return { center, zoom: cam.zoom }
     },
+
+    setLines: (next, options) => lines.set(next, options?.onClick),
+    setCurrentLocation: (at) => currentLocation.set(at),
 
     zoomIn: () => map.zoomIn(),
     zoomOut: () => map.zoomOut(),
