@@ -9,6 +9,7 @@ import { useOnClickOutside } from "usehooks-ts"
 import { F0Avatar } from "../../../../components/avatars/F0Avatar"
 import type { AvatarVariant } from "../../../../components/avatars/F0Avatar"
 import { F0Icon } from "../../../../components/F0Icon"
+import type { IconType } from "../../../../components/F0Icon"
 import {
   CrossedCircle,
   Search as SearchIcon,
@@ -40,13 +41,16 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
-  /**
-   * Bump to open the field from outside it, so a consumer can offer its own
-   * way in — a labelled button, say — without owning the field's open state.
-   */
-  requestOpen?: number
   /** Fired when the query is submitted. */
   onSubmit?: (query: string) => void
+  /** The magnifier to draw. Lets a field say what is on the other end of it. */
+  icon?: IconType
+  /**
+   * Name the field carries while closed. It reads as a button and turns into
+   * the field on click — a magnifier alone never says the box takes a
+   * sentence. Omit it and the plain magnifier is all there is.
+   */
+  triggerLabel?: string
   /**
    * Ways of finishing what is being typed. The consumer decides which ones to
    * offer for the current text; the field only draws them.
@@ -93,6 +97,12 @@ export type SearchPresentation = Pick<
    * the magnifier is the only way in.
    */
   triggerLabel?: string
+  /**
+   * The query being written. Provide it to drive completions from what is
+   * typed; omit it and the collection keeps the text itself.
+   */
+  value?: string
+  onChange?: (value: string | undefined) => void
   /**
    * What the parser could not turn into a filter, rendered under the chips.
    * Never leave an unparsed fragment silent: the chips are what filters, so a
@@ -220,13 +230,88 @@ const DismissButton = ({
   </motion.div>
 )
 
-const IconComponent = ({ loading }: { loading: boolean }) => {
+const IconComponent = ({
+  loading,
+  icon,
+}: {
+  loading: boolean
+  icon: IconType
+}) => {
   return loading ? (
     <F0Icon icon={Spinner} className="animate-spin" />
   ) : (
-    <F0Icon icon={SearchIcon} className="text" />
+    <F0Icon icon={icon} className="text" />
   )
 }
+
+/**
+ * The field at rest. With a label it reads as a button that says what the
+ * field is for; without one it is the magnifier it has always been, showing
+ * whatever was last searched.
+ */
+const ClosedField = ({
+  icon,
+  label,
+  value,
+  loading,
+  clearLabel,
+  onOpen,
+  onKeyDown,
+  onClear,
+}: {
+  icon: IconType
+  label: string | undefined
+  value: string | undefined
+  loading: boolean
+  clearLabel: string
+  onOpen: () => void
+  onKeyDown: (e: React.KeyboardEvent) => void
+  onClear: () => void
+}) => (
+  <motion.div
+    role="button"
+    aria-label={label ?? clearLabel}
+    tabIndex={0}
+    layout
+    layoutId="search-container"
+    className={cn(
+      "relative h-8 w-full bg-f1-border p-px transition-colors hover:bg-f1-border-hover",
+      focusRing()
+    )}
+    onClick={onOpen}
+    onKeyDown={onKeyDown}
+    style={{ borderRadius: 10 }}
+  >
+    <motion.div
+      layout
+      className="relative flex h-full w-full items-center gap-1 overflow-hidden bg-f1-background"
+      style={{ borderRadius: 9 }}
+    >
+      <motion.div
+        className="absolute left-[5px] top-[5px] flex h-5 w-5 items-center justify-center text-f1-icon-bold"
+        layoutId="search-icon"
+      >
+        <IconComponent icon={icon} loading={loading} />
+      </motion.div>
+      {!value && label ? (
+        <motion.span
+          layout
+          className="whitespace-nowrap py-2 pl-7 pr-3 text-base text-f1-foreground"
+        >
+          {label}
+        </motion.span>
+      ) : null}
+      {value ? (
+        <div className="flex h-7 w-full items-center justify-between gap-1.5 overflow-hidden pr-1.5">
+          <motion.div layout className="line-clamp-1 overflow-hidden py-2 pl-7">
+            {value}
+          </motion.div>
+          <DismissButton label={clearLabel} onDismiss={onClear} />
+        </div>
+      ) : null}
+    </motion.div>
+  </motion.div>
+)
 
 export const Search = ({
   value,
@@ -238,8 +323,9 @@ export const Search = ({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
-  requestOpen,
   onSubmit,
+  icon = SearchIcon,
+  triggerLabel,
   suggestions,
   placeholderRotation,
   status = "idle",
@@ -364,13 +450,6 @@ export const Search = ({
     }
   }
 
-  useEffect(() => {
-    if (requestOpen) {
-      handleOpen()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestOpen])
-
   /** Arrows and Enter, once the results list is the thing being driven. */
   const handleResultsKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -476,7 +555,8 @@ export const Search = ({
               // The toolbar slot is content-sized (`shrink-0`), so there is no
               // free space for `flex-1` to claim — size against the viewport
               // instead and cap it so wide screens do not get a runaway field.
-              (expanded || text) && "w-[min(340px,40vw)] min-w-[180px]"
+              (expanded || text) && "w-[min(340px,40vw)] min-w-[180px]",
+              !expanded && !text && triggerLabel && "w-auto"
             )}
           >
             {expanded ? (
@@ -496,6 +576,7 @@ export const Search = ({
                     layoutId="search-icon"
                   >
                     <IconComponent
+                      icon={icon}
                       loading={loading || resultsLoading || searching}
                       key="loading"
                     />
@@ -540,47 +621,16 @@ export const Search = ({
                 </motion.div>
               </motion.div>
             ) : (
-              <motion.div
-                role="button"
-                aria-label={i18n.actions.search}
-                tabIndex={0}
-                layout
-                layoutId="search-container"
-                className={cn(
-                  "relative h-8 w-full bg-f1-border p-px transition-colors hover:bg-f1-border-hover",
-                  focusRing()
-                )}
-                onClick={handleOpen}
+              <ClosedField
+                icon={icon}
+                label={triggerLabel}
+                value={text}
+                loading={loading || resultsLoading}
+                clearLabel={i18n.actions.clear}
+                onOpen={handleOpen}
                 onKeyDown={handleKeyDown}
-                style={{ borderRadius: 10 }}
-              >
-                <motion.div
-                  layout
-                  className="relative flex h-full w-full items-center gap-1 overflow-hidden bg-f1-background"
-                  style={{ borderRadius: 9 }}
-                >
-                  <motion.div
-                    className="absolute left-[5px] top-[5px] flex h-5 w-5 items-center justify-center text-f1-icon-bold"
-                    layoutId="search-icon"
-                  >
-                    <IconComponent loading={loading || resultsLoading} />
-                  </motion.div>
-                  {text ? (
-                    <div className="flex h-7 w-full items-center justify-between gap-1.5 overflow-hidden pr-1.5">
-                      <motion.div
-                        layout
-                        className="line-clamp-1 overflow-hidden py-2 pl-7"
-                      >
-                        {text}
-                      </motion.div>
-                      <DismissButton
-                        label={i18n.actions.clear}
-                        onDismiss={handleClear}
-                      />
-                    </div>
-                  ) : null}
-                </motion.div>
-              </motion.div>
+                onClear={handleClear}
+              />
             )}
             {suggestionsVisible ? (
               <SuggestionList

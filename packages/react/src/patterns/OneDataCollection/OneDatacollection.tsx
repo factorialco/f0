@@ -11,7 +11,6 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { F0ActionBar } from "@/components/F0ActionBar"
-import { F0Button } from "@/components/F0Button"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
@@ -897,7 +896,7 @@ const OneDataCollectionComp = <
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
-  const [openSearchRequests, setOpenSearchRequests] = useState(0)
+  const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
@@ -1778,17 +1777,22 @@ const OneDataCollectionComp = <
                     <Spinner size="small" />
                   </motion.div>
                 ) : null}
-                {search && source.searchPresentation?.triggerLabel ? (
-                  <F0Button
-                    label={source.searchPresentation.triggerLabel}
+                {search && source.searchPresentation ? (
+                  <Search
+                    {...source.searchPresentation}
                     icon={AiSearchIcon}
-                    onClick={() => setOpenSearchRequests((count) => count + 1)}
+                    value={source.searchPresentation.value ?? assistedQuery}
+                    onChange={
+                      source.searchPresentation.onChange ?? setAssistedQuery
+                    }
+                    onClear={() => {
+                      setAssistedQuery(undefined)
+                      source.searchPresentation?.onClear?.()
+                    }}
                   />
                 ) : null}
                 {search ? (
                   <Search
-                    requestOpen={openSearchRequests}
-                    {...source.searchPresentation}
                     onChange={setCurrentSearch}
                     value={currentSearch}
                     results={searchPreview.results}
