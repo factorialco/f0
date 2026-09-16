@@ -898,11 +898,31 @@ const OneDataCollectionComp = <
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
-  // Where the field carries a second action, the text is not a live search:
-  // half a sentence is not a name, and narrowing on every keystroke would
-  // empty the table under someone who has not finished writing. The search
-  // runs on Enter, the action runs on a click, and typing does neither.
+  // The field searches by name as it is typed, rows falling away as usual.
+  // What it will not do is empty the table: a stretch of text that matches
+  // nobody is probably not a name but the start of a sentence, and the way
+  // out of that is the action in the field, not a blank page. So the text
+  // stays written while the search behind it is dropped.
   const [typedSearch, setTypedSearch] = useState<string | undefined>()
+  const unmatchedSearchRef = useRef<string>()
+
+  const searchByName = (next: string | undefined) => {
+    setTypedSearch(next)
+    if (!next) {
+      unmatchedSearchRef.current = undefined
+      setCurrentSearch(undefined)
+      return
+    }
+    // Nothing was called that, so nothing is called that plus one more letter.
+    if (
+      unmatchedSearchRef.current &&
+      next.startsWith(unmatchedSearchRef.current)
+    ) {
+      return
+    }
+    unmatchedSearchRef.current = undefined
+    setCurrentSearch(next)
+  }
   // The query written inside the filters panel is that panel's own: it stages
   // filters there and waits for the apply button, so showing it in the field
   // outside would claim something had been applied that had not.
@@ -1026,6 +1046,13 @@ const OneDataCollectionComp = <
     search,
   }: Parameters<OnLoadDataCallback<R, Filters>>[0]) => {
     if (isInitialLoadingFromCallback) {
+      return
+    }
+
+    if (assistedSearchProps && totalItems === 0 && search) {
+      unmatchedSearchRef.current = search
+      setCurrentSearch(undefined)
+      setEmptyStateType(false)
       return
     }
 
@@ -1851,12 +1878,20 @@ const OneDataCollectionComp = <
                         <AssistedQueryPanel
                           value={panelQuery}
                           onChange={setPanelQuery}
-                          onSettle={(settled) =>
-                            stage(
+                          onSettle={(settled) => {
+                            const staged =
                               source.searchPresentation?.analyze?.(settled)
                                 ?.filters ?? {}
+                            stage(staged)
+                            const serialized = JSON.stringify(staged)
+                            if (serialized === lastAppliedRef.current) {
+                              return
+                            }
+                            lastAppliedRef.current = serialized
+                            setFiltersRef.current(
+                              staged as Parameters<typeof setFilters>[0]
                             )
-                          }
+                          }}
                           analysis={source.searchPresentation?.analyze?.(
                             panelQuery
                           )}
@@ -1887,20 +1922,12 @@ const OneDataCollectionComp = <
                 {search ? (
                   <Search
                     onChange={
-                      assistedSearchProps ? setTypedSearch : setCurrentSearch
+                      assistedSearchProps ? searchByName : setCurrentSearch
                     }
                     value={assistedSearchProps ? typedSearch : currentSearch}
-                    onSubmit={
-                      assistedSearchProps
-                        ? (query) => setCurrentSearch(query)
-                        : undefined
-                    }
                     onClear={
                       assistedSearchProps
-                        ? () => {
-                            setTypedSearch(undefined)
-                            setCurrentSearch(undefined)
-                          }
+                        ? () => searchByName(undefined)
                         : undefined
                     }
                     placeholderRotation={
@@ -1916,8 +1943,7 @@ const OneDataCollectionComp = <
                               // The text stops being a name search and becomes
                               // a question: leaving both on would have the two
                               // of them narrowing the same table at once.
-                              setCurrentSearch(undefined)
-                              setTypedSearch(undefined)
+                              searchByName(undefined)
                               assistedSearchProps.onChange(query)
                               assistedSearchProps.onSubmit?.(query)
                             },
