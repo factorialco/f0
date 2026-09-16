@@ -212,3 +212,13 @@ export const useNestedExpansionContext = <R extends RecordType>() => {
   }
   return context as NestedExpansionContextValue<R>
 }
+
+/**
+ * The expansion context where there may not be one — a `Row` rendered on its
+ * own, outside a table. Callers that can degrade (an expanded-content panel has
+ * nowhere to keep its state) use this instead of throwing.
+ */
+export const useOptionalNestedExpansionContext = <R extends RecordType>() =>
+  useContext(NestedExpansionContext) as
+    | NestedExpansionContextValue<R>
+    | undefined

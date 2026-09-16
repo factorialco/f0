@@ -42,6 +42,14 @@ export const NestedCell = ({
     firstCell,
     !!nestedRowProps?.rowWithChildren
   )
+  const contentExpandable = !!nestedRowProps?.contentExpandable
+  // A leaf's panel toggle. Kept off `expanded`/`onExpand`, which belong to the
+  // children: a leaf is handed its parent's handler, and the tree connector
+  // keys off `expanded`.
+  const showExpander = firstCellWithChildren || (firstCell && contentExpandable)
+  const expanded = firstCellWithChildren
+    ? !!nestedRowProps?.expanded
+    : !!nestedRowProps?.contentExpanded
   const firstCellWithDepth = isFirstCellWithDepth(
     firstCell,
     nestedRowProps?.depth ?? 0
@@ -60,7 +68,7 @@ export const NestedCell = ({
 
   const marginLeft = firstCellWithDepth
     ? getNestedMarginLeft({
-        depth: !firstCellWithChildren ? depth + 1 : depth,
+        depth: !showExpander ? depth + 1 : depth,
       })
     : undefined
 
@@ -77,7 +85,7 @@ export const NestedCell = ({
       className={cn(
         width !== "auto" && "overflow-hidden",
         "relative z-[1] h-full",
-        firstCellWithChildren && "flex items-center gap-2"
+        showExpander && "flex items-center gap-2"
       )}
       style={{
         marginLeft: isActionRow
@@ -171,10 +179,22 @@ export const NestedCell = ({
         </div>
       ) : (
         <>
-          {firstCellWithChildren ? (
+          {showExpander ? (
             <button
               type="button"
-              aria-expanded={!!nestedRowProps?.expanded}
+              aria-expanded={expanded}
+              id={
+                contentExpandable && !firstCellWithChildren
+                  ? nestedRowProps?.expandToggleId
+                  : undefined
+              }
+              // Only while the panel is rendered — a dangling IDREF is an axe
+              // finding.
+              aria-controls={
+                contentExpandable && !firstCellWithChildren && expanded
+                  ? nestedRowProps?.expandPanelId
+                  : undefined
+              }
               className={cn(
                 "flex h-[var(--chevron-parent-size)] w-[var(--chevron-parent-size)] min-w-[var(--chevron-parent-size)] items-center justify-center",
                 "pointer-events-auto cursor-pointer rounded-sm hover:bg-f1-foreground-disabled",
@@ -185,15 +205,19 @@ export const NestedCell = ({
               // not navigate.
               onClick={(e) => {
                 e.stopPropagation()
-                nestedRowProps?.onExpand?.()
+                if (firstCellWithChildren) {
+                  nestedRowProps?.onExpand?.()
+                } else {
+                  nestedRowProps?.onExpandContent?.()
+                }
               }}
             >
               <span className="sr-only">
-                {nestedRowProps?.expanded
+                {expanded
                   ? collections.table.collapseRow
                   : collections.table.expandRow}
               </span>
-              {nestedRowProps?.expanded ? (
+              {expanded ? (
                 <ChevronDown
                   aria-hidden="true"
                   className="pointer-events-none shrink-0"
@@ -215,7 +239,7 @@ export const NestedCell = ({
           )}
           <div
             className={cn(
-              firstCellWithChildren && "min-w-0 w-full h-full",
+              showExpander && "min-w-0 w-full h-full",
               firstCellWithNoChildrenAndTableChildren &&
                 "pl-[var(--spacing-factor)]",
               "relative"

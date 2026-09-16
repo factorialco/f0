@@ -1,5 +1,12 @@
 import { useIsPresent } from "motion/react"
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import {
+  forwardRef,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import type { IconType } from "@/components/F0Icon"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
@@ -29,7 +36,9 @@ import { tableCellContentClassName } from "@/ui/value-display/const"
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { getColumnId } from "../hooks/useColums"
 import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
+import { useRowExpandedContent } from "../hooks/useRowExpandedContent"
 import type {
+  ExpandedContentContext,
   CellRendererProps,
   ColId,
   ReferenceType,
@@ -37,6 +46,7 @@ import type {
   TableColumnDefinition,
 } from "../types"
 import { useSticky } from "../useSticky"
+import { ExpandedContentRow } from "./ExpandedContentRow"
 import { NestedRow } from "./NestedRow"
 
 export type RowProps<
@@ -99,6 +109,16 @@ export type RowProps<
   referenceRowType?: (item: R) => ReferenceType
   /** In a table with nested rows, renders root rows (depth 0) in bold. */
   boldRootRows?: boolean
+  /** Renders a full-width panel beneath this row when it is expanded. */
+  renderExpandedContent?: (
+    item: R,
+    context: ExpandedContentContext
+  ) => ReactNode
+  onExpandedContentChange?: (item: R, expanded: boolean) => void
+  /** Column count the expanded-content panel spans. */
+  rowColSpan?: number
+  /** Reserves the expander box on every first cell, so they stay aligned. */
+  tableWithExpandableRows?: boolean
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
   cellRenderer?: React.ComponentType<
     CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
@@ -136,6 +156,18 @@ export type NestedRowProps = {
   nestedVariant?: NestedVariant
   parentHasChildren?: boolean
   onExpand?: () => void
+  /**
+   * The content panel's own disclosure. Deliberately not `expanded`/`onExpand`:
+   * a leaf is handed its PARENT's `onExpand`, and the tree connector keys off
+   * `expanded`, so reusing either would collapse the parent and draw a stray
+   * connector.
+   */
+  contentExpandable?: boolean
+  contentExpanderColumn?: boolean
+  contentExpanded?: boolean
+  onExpandContent?: () => void
+  expandToggleId?: string
+  expandPanelId?: string
   onLoadMoreChildren?: () => void
   onAddRow?: OnAddRowConfig
   stickyRow?: boolean
@@ -182,6 +214,10 @@ const RowComponentInner = <
     isNew = false,
     referenceRowType: referenceRowTypeFn,
     boldRootRows = false,
+    renderExpandedContent,
+    onExpandedContentChange,
+    rowColSpan,
+    tableWithExpandableRows = false,
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
@@ -211,6 +247,16 @@ const RowComponentInner = <
     id !== undefined &&
     (selectionInherited || source.selectionDisabled?.(item) === true)
   const rowWithChildren = !!source.itemsWithChildren?.(item)
+
+  const expandedContent = useRowExpandedContent({
+    item,
+    index,
+    groupIndex,
+    depth: nestedRowProps?.depth ?? 0,
+    rowWithChildren,
+    renderExpandedContent,
+    onExpandedContentChange,
+  })
 
   // Derived here rather than passed in: as a prop it was an inline arrow built
   // per row per render, which alone made the row's memo comparison fail every
@@ -332,6 +378,10 @@ const RowComponentInner = <
         tableWithChildren={tableWithChildren}
         referenceRowType={referenceRowTypeFn}
         boldRootRows={boldRootRows}
+        renderExpandedContent={renderExpandedContent}
+        onExpandedContentChange={onExpandedContentChange}
+        rowColSpan={rowColSpan}
+        tableWithExpandableRows={tableWithExpandableRows}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         headerGroups={headerGroups}
@@ -356,185 +406,203 @@ const RowComponentInner = <
     : undefined
 
   return (
-    <TableRow
-      ref={ref}
-      key={key}
-      sticky={nestedRowProps?.stickyRow}
-      className={cn(
-        "group transition-colors hover:bg-f1-background-hover",
-        "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
-        noBorder && "after:bg-white-100",
-        disableHover && "hover:bg-transparent",
-        isSelected && "bg-f1-background-selected-secondary",
-        flashing && "animate-row-flash",
-        // Cells inherit the weight; renderers that set their own (tags,
-        // deltas) and the first cell's explicit font-medium keep theirs.
-        boldRootRows &&
-          tableWithChildren &&
-          (nestedRowProps?.depth ?? 0) === 0 &&
-          "font-semibold",
-        referenceTypeClasses[referenceRowType]
-      )}
-    >
-      {source.selectable ? (
-        <TableCell
-          width={checkColumnWidth}
-          sticky={{ left: 0 }}
-          loading={loading}
-          className={cn(
-            loading && tableWithChildren ? "first:pl-4" : "",
-            headerGroups && "[&>div:first-child]:hidden",
-            headerGroups && groupBorderClass,
-            cellRenderedClass
-          )}
-          referenceRowType={referenceRowType}
-        >
-          {id !== undefined ? (
+    <>
+      <TableRow
+        ref={ref}
+        key={key}
+        sticky={nestedRowProps?.stickyRow}
+        className={cn(
+          "group transition-colors hover:bg-f1-background-hover",
+          "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
+          noBorder && "after:bg-white-100",
+          disableHover && "hover:bg-transparent",
+          isSelected && "bg-f1-background-selected-secondary",
+          flashing && "animate-row-flash",
+          // Cells inherit the weight; renderers that set their own (tags,
+          // deltas) and the first cell's explicit font-medium keep theirs.
+          boldRootRows &&
+            tableWithChildren &&
+            (nestedRowProps?.depth ?? 0) === 0 &&
+            "font-semibold",
+          referenceTypeClasses[referenceRowType]
+        )}
+      >
+        {source.selectable ? (
+          <TableCell
+            width={checkColumnWidth}
+            sticky={{ left: 0 }}
+            loading={loading}
+            className={cn(
+              loading && tableWithChildren ? "first:pl-4" : "",
+              headerGroups && "[&>div:first-child]:hidden",
+              headerGroups && groupBorderClass,
+              cellRenderedClass
+            )}
+            referenceRowType={referenceRowType}
+          >
+            {id !== undefined ? (
+              <div
+                className={cn(
+                  "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
+                  // The row is clickable, so the padding would show its hand.
+                  selectionDisabled && "cursor-not-allowed"
+                )}
+              >
+                <Checkbox
+                  checked={selectionInherited || isSelected}
+                  indeterminate={selectionInherited}
+                  onCheckedChange={onCheckedChange}
+                  disabled={selectionDisabled}
+                  title={`Select ${source.selectable(item)}`}
+                  hideLabel
+                />
+              </div>
+            ) : null}
+          </TableCell>
+        ) : null}
+
+        {columns.map((column, cellIndex) => {
+          const headerGroup = headerGroups?.find((group) => {
+            return (
+              group.type === "group" && group.columnIndices.includes(cellIndex)
+            )
+          })
+
+          const isLastInGroup =
+            !!headerGroups &&
+            (!headerGroup ||
+              headerGroup.columnIndices[
+                headerGroup.columnIndices.length - 1
+              ] === cellIndex)
+
+          const defaultContent = (
             <div
               className={cn(
-                "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
-                // The row is clickable, so the padding would show its hand.
-                selectionDisabled && "cursor-not-allowed"
+                column.align === "right" ? "justify-end" : "",
+                "flex",
+                tableCellContentClassName
               )}
             >
-              <Checkbox
-                checked={selectionInherited || isSelected}
-                indeterminate={selectionInherited}
-                onCheckedChange={onCheckedChange}
-                disabled={selectionDisabled}
-                title={`Select ${source.selectable(item)}`}
-                hideLabel
-              />
+              {renderCell(item, column)}
             </div>
-          ) : null}
-        </TableCell>
-      ) : null}
-
-      {columns.map((column, cellIndex) => {
-        const headerGroup = headerGroups?.find((group) => {
-          return (
-            group.type === "group" && group.columnIndices.includes(cellIndex)
           )
-        })
 
-        const isLastInGroup =
-          !!headerGroups &&
-          (!headerGroup ||
-            headerGroup.columnIndices[headerGroup.columnIndices.length - 1] ===
-              cellIndex)
+          return (
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
+              firstCell={cellIndex === 0}
+              href={itemHref}
+              onClick={itemOnClick}
+              width={column.width}
+              minWidth={column.minWidth}
+              sticky={getStickyPosition(cellIndex)}
+              loading={loading}
+              nestedRowProps={{
+                ...nestedRowProps,
+                rowWithChildren,
+                tableWithChildren,
+                selectableRow: !!source.selectable,
+                contentExpandable: expandedContent.expandable,
+                contentExpanderColumn: tableWithExpandableRows,
+                contentExpanded: expandedContent.expanded,
+                onExpandContent: expandedContent.toggle,
+                expandToggleId: expandedContent.toggleId,
+                expandPanelId: expandedContent.panelId,
+              }}
+              fromVisualization={fromVisualization}
+              referenceRowType={referenceRowType}
+              highlighted={!!column.highlighted}
+              className={cn(
+                cellRenderedClass,
+                isLastInGroup && groupBorderClass,
+                collapsingCellClasses?.get(getColumnId(column))
+              )}
+            >
+              {CellRenderer ? (
+                <CellRenderer
+                  item={item}
+                  isLastColumn={
+                    !hasItemActions && cellIndex === columns.length - 1
+                  }
+                  column={column}
+                  cellIndex={cellIndex}
+                >
+                  {defaultContent}
+                </CellRenderer>
+              ) : (
+                defaultContent
+              )}
+            </TableCell>
+          )
+        })}
 
-        const defaultContent = (
-          <div
-            className={cn(
-              column.align === "right" ? "justify-end" : "",
-              "flex",
-              tableCellContentClassName
-            )}
-          >
-            {renderCell(item, column)}
-          </div>
-        )
-
-        return (
-          <TableCell
-            key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
-            firstCell={cellIndex === 0}
-            href={itemHref}
-            onClick={itemOnClick}
-            width={column.width}
-            minWidth={column.minWidth}
-            sticky={getStickyPosition(cellIndex)}
-            loading={loading}
-            nestedRowProps={{
-              ...nestedRowProps,
-              rowWithChildren,
-              tableWithChildren,
-              selectableRow: !!source.selectable,
-            }}
-            fromVisualization={fromVisualization}
-            referenceRowType={referenceRowType}
-            highlighted={!!column.highlighted}
-            className={cn(
-              cellRenderedClass,
-              isLastInGroup && groupBorderClass,
-              collapsingCellClasses?.get(getColumnId(column))
-            )}
-          >
-            {CellRenderer ? (
-              <CellRenderer
-                item={item}
-                isLastColumn={
-                  !hasItemActions && cellIndex === columns.length - 1
-                }
-                column={column}
-                cellIndex={cellIndex}
-              >
-                {defaultContent}
-              </CellRenderer>
-            ) : (
-              defaultContent
-            )}
-          </TableCell>
-        )
-      })}
-
-      {hasItemActions &&
-      !loading &&
-      !nestedRowProps?.onLoadMoreChildren &&
-      !nestedRowProps?.onAddRow ? (
-        fromVisualization === "editableTable" ? (
-          <TableCell
-            key={`table-cell-${groupIndex}-${index}-actions`}
-            sticky={{ right: 0 }}
-            referenceRowType={referenceRowType}
-            className="bg-f1-background !px-3 align-middle"
-          >
-            <ItemActionsRow
-              className="flex flex-nowrap justify-center"
-              primaryItemActions={primaryItemActions}
-              dropdownItemActions={dropdownItemActions}
-              handleDropDownOpenChange={handleDropDownOpenChange}
-            />
-          </TableCell>
-        ) : (
-          <>
-            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-              {/* Narrower fade gutter (pl-8) for tables so the overlay covers
+        {hasItemActions &&
+        !loading &&
+        !nestedRowProps?.onLoadMoreChildren &&
+        !nestedRowProps?.onAddRow ? (
+          fromVisualization === "editableTable" ? (
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-actions`}
+              sticky={{ right: 0 }}
+              referenceRowType={referenceRowType}
+              className="bg-f1-background !px-3 align-middle"
+            >
+              <ItemActionsRow
+                className="flex flex-nowrap justify-center"
+                primaryItemActions={primaryItemActions}
+                dropdownItemActions={dropdownItemActions}
+                handleDropDownOpenChange={handleDropDownOpenChange}
+              />
+            </TableCell>
+          ) : (
+            <>
+              {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+              <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+                {/* Narrower fade gutter (pl-8) for tables so the overlay covers
                   less of the last column's content than the default pl-20. */}
-              <ItemActionsRowContainer
-                dropDownOpen={dropDownOpen}
-                className="pl-8"
-              >
-                <ItemActionsRow
-                  primaryItemActions={primaryItemActions}
-                  dropdownItemActions={dropdownItemActions}
-                  handleDropDownOpenChange={handleDropDownOpenChange}
-                />
-              </ItemActionsRowContainer>
-            </td>
-            {/** Mobile item actions */}
-            {hasMobileItemActions ? (
-              <TableCell
-                key={`table-cell-${groupIndex}-${index}-actions`}
-                width={68}
-                sticky={{
-                  right: 0,
-                }}
-                href={itemHref}
-                className="table-cell md:hidden"
-                loading={loading}
-              >
-                <ItemActionsMobile
-                  items={mobileDropdownItemActions}
-                  onOpenChange={handleDropDownOpenChange}
-                />
-              </TableCell>
-            ) : null}
-          </>
-        )
+                <ItemActionsRowContainer
+                  dropDownOpen={dropDownOpen}
+                  className="pl-8"
+                >
+                  <ItemActionsRow
+                    primaryItemActions={primaryItemActions}
+                    dropdownItemActions={dropdownItemActions}
+                    handleDropDownOpenChange={handleDropDownOpenChange}
+                  />
+                </ItemActionsRowContainer>
+              </td>
+              {/** Mobile item actions */}
+              {hasMobileItemActions ? (
+                <TableCell
+                  key={`table-cell-${groupIndex}-${index}-actions`}
+                  width={68}
+                  sticky={{
+                    right: 0,
+                  }}
+                  href={itemHref}
+                  className="table-cell md:hidden"
+                  loading={loading}
+                >
+                  <ItemActionsMobile
+                    items={mobileDropdownItemActions}
+                    onOpenChange={handleDropDownOpenChange}
+                  />
+                </TableCell>
+              ) : null}
+            </>
+          )
+        ) : null}
+      </TableRow>
+      {expandedContent.expanded ? (
+        <ExpandedContentRow
+          id={expandedContent.panelId}
+          toggleId={expandedContent.toggleId}
+          colSpan={rowColSpan ?? columns.length}
+        >
+          {expandedContent.content}
+        </ExpandedContentRow>
       ) : null}
-    </TableRow>
+    </>
   )
 }
 

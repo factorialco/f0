@@ -13,7 +13,7 @@ import { useTable } from "../utils/TableContext"
 import { NestedCell } from "./NestedCell"
 import { TreeConnector } from "./TreeConnector"
 import {
-  isFirstCellWithChildren,
+  isFirstCellWithDisclosure,
   isFirstCellWithTableChildren,
   SPACING_FACTOR,
 } from "./utils/nested"
@@ -223,9 +223,10 @@ export function TableCell({
               "pointer-events-none h-full items-start"
             )}
           >
-            {isFirstCellWithChildren(
+            {isFirstCellWithDisclosure(
               firstCell,
-              !!nestedRowProps?.rowWithChildren
+              !!nestedRowProps?.rowWithChildren,
+              !!nestedRowProps?.contentExpanderColumn
             ) ? (
               <NestedCell
                 linkRef={linkRef}

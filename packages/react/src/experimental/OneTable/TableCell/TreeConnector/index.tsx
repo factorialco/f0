@@ -21,6 +21,7 @@ interface TreeConnectorProps {
   firstCell: boolean
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
+    contentExpanderColumn?: boolean
     tableWithChildren?: boolean
     selectableRow?: boolean
   }
@@ -53,13 +54,19 @@ export const connectorVariables = (
   height: number,
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
+    contentExpanderColumn?: boolean
     tableWithChildren?: boolean
     selectableRow?: boolean
   },
   fromVisualization?: TableVisualizationType
 ) => {
-  const { rowWithChildren, nestedVariant, onLoadMoreChildren, onAddRow } =
-    nestedRowProps ?? {}
+  const {
+    rowWithChildren,
+    contentExpanderColumn,
+    nestedVariant,
+    onLoadMoreChildren,
+    onAddRow,
+  } = nestedRowProps ?? {}
 
   const isDetailedVariant = nestedVariant === "detailed"
   const isActionRow = onLoadMoreChildren || onAddRow
@@ -68,8 +75,10 @@ export const connectorVariables = (
     ? BUTTON_HEIGHT / 2 - PADDING_TOP
     : CHEVRON_PARENT_SIZE / 2 - PADDING_TOP
 
+  // A reserved expander box narrows the elbow the same way a chevron does,
+  // otherwise the line runs underneath it.
   const connectorWidth =
-    rowWithChildren && !isActionRow
+    (rowWithChildren || contentExpanderColumn) && !isActionRow
       ? CONNECTOR_WIDTH_WITH_CHILDREN
       : isDetailedVariant
         ? CONNECTOR_WIDTH - 6

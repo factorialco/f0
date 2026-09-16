@@ -38,6 +38,7 @@ import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { getRowExpansionId } from "../lib/rowExpansion"
 import { useNestedExpansionContext } from "../providers/NestedProvider"
 import type {
+  ExpandedContentContext,
   CellRendererProps,
   ColId,
   RowWrapperProps,
@@ -98,6 +99,14 @@ export type RowProps<
   referenceRowType?: (item: R) => "none" | "striped" | "striked"
   /** In a table with nested rows, renders root rows (depth 0) in bold. */
   boldRootRows?: boolean
+  /** Renders a full-width panel beneath a leaf row when it is expanded. */
+  renderExpandedContent?: (
+    item: R,
+    context: ExpandedContentContext
+  ) => React.ReactNode
+  onExpandedContentChange?: (item: R, expanded: boolean) => void
+  rowColSpan?: number
+  tableWithExpandableRows?: boolean
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */

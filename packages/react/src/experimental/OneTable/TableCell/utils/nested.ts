@@ -46,6 +46,19 @@ export const isFirstCellWithChildren = (
   return firstCell && hasChildren
 }
 
+/**
+ * Whether the first cell renders a disclosure control — for its children, or
+ * for an expanded-content panel. `hasChildren` still decides the tree
+ * connector; this only decides the chevron and the box it sits in.
+ */
+export const isFirstCellWithDisclosure = (
+  firstCell: boolean,
+  hasChildren: boolean,
+  rowExpandable: boolean
+) => {
+  return firstCell && (hasChildren || rowExpandable)
+}
+
 export const isFirstCellExpanded = (expanded: boolean, firstCell: boolean) => {
   return expanded && firstCell
 }

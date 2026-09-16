@@ -149,6 +149,17 @@ export type HeaderGroupDefinition = {
   highlighted?: boolean
 }
 
+/** What a {@link TableVisualizationOptions.renderExpandedContent} renderer is given. */
+export type ExpandedContentContext = {
+  /** The row's nesting depth; 0 for a flat or root row. */
+  depth: number
+  /**
+   * Closes this row's panel. Call it from inside the panel — after a save, or
+   * from a Cancel button. Focus returns to the row's expander.
+   */
+  collapse: () => void
+}
+
 export type ReferenceType = "none" | "striped" | "striked"
 
 export type TableVisualizationOptions<
@@ -195,6 +206,45 @@ export type TableVisualizationOptions<
    * @default false
    */
   defaultExpanded?: DefaultExpandedPolicy<R>
+
+  /**
+   * Gives a row an expander that opens a full-width panel beneath it — a
+   * free-form region spanning every column, for interactive detail (inputs,
+   * buttons) that does not fit in a cell.
+   *
+   * Return a node to make the row expandable, or `undefined` to leave the row
+   * exactly as it is. Called for every rendered row on every render, so return
+   * early for rows that cannot expand:
+   *
+   * ```tsx
+   * renderExpandedContent: (day, { collapse }) =>
+   *   day.type === "workday" ? <TimeEntryPanel day={day} onSaved={collapse} /> : undefined
+   * ```
+   *
+   * Only rows without children get an expander: a row that `itemsWithChildren`
+   * claims already owns the chevron, and its panel would sit between that row
+   * and its children. Rows without a stable `id` get no expander either — panel
+   * state is keyed by record id, and an index-keyed panel would follow the
+   * wrong row across a page change.
+   *
+   * The panel spans the full table width and scrolls horizontally with the
+   * table body; `frozenColumns` does not pin it. Panels start closed —
+   * `defaultExpanded` governs the nested tree, not panels — and every panel
+   * closes on a filter, sorting or navigation-filter change.
+   *
+   * Pass a stable reference. An inline arrow defeats the per-row memo and
+   * re-renders every row on every parent render.
+   */
+  renderExpandedContent?: (
+    item: R,
+    context: ExpandedContentContext
+  ) => ReactNode
+
+  /**
+   * Called after the table has opened or closed a row's panel. Use it to
+   * persist or instrument the state, not to control it — the table owns it.
+   */
+  onExpandedContentChange?: (item: R, expanded: boolean) => void
 
   /**
    * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
