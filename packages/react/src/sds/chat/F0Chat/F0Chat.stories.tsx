@@ -390,7 +390,7 @@ const BurstConversation = (): ReactNode => {
   }
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat />
         </F0ChatProvider>
@@ -429,7 +429,7 @@ const FlakyNetworkConversation = (): ReactNode => {
   }
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat />
         </F0ChatProvider>
@@ -562,7 +562,7 @@ const StormConversation = ({
 
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <Profiler
           id="f0chat-storm"
           onRender={(_id, _phase, actualDuration) => {
@@ -794,7 +794,7 @@ const MembershipConversation = (): ReactNode => {
   })
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat headerActions={headerActions} />
         </F0ChatProvider>
