@@ -223,7 +223,7 @@ const SuggestionList = ({
   onHover: (index: number) => void
   onPick: (suggestion: string) => void
 }) => (
-  <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-full min-w-[248px] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
+  <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-max min-w-full max-w-[min(520px,80vw)] overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
     {items.map((suggestion, index) => (
       <li key={suggestion}>
         <button
@@ -540,6 +540,7 @@ export const Search = ({
     if (!open) {
       setOpen(true)
       setActiveIndex(-1)
+      inputRef.current?.focus()
       setTimeout(() => {
         inputRef.current?.focus()
       }, 0)
@@ -710,14 +711,14 @@ export const Search = ({
                       onKeyDown={handleKeyDown}
                     />
                   )}
+                  <DismissButton
+                    label={searching ? i18n.actions.cancel : i18n.actions.clear}
+                    onDismiss={handleClearOrCancel}
+                  />
                   <InlineAction
                     action={inlineAction}
                     query={text}
                     busy={searching}
-                  />
-                  <DismissButton
-                    label={searching ? i18n.actions.cancel : i18n.actions.clear}
-                    onDismiss={handleClearOrCancel}
                   />
                 </motion.div>
               </motion.div>

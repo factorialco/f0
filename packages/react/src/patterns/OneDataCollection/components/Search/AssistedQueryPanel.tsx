@@ -7,7 +7,6 @@ export type AssistedQueryPanelProps = {
   onChange: (value: string) => void
   analysis?: QueryAnalysis
   placeholder?: string
-  emptyHint?: string
   /** Queries already run here, newest first. */
   recent?: string[]
   recentTitle?: string
@@ -24,7 +23,6 @@ export const AssistedQueryPanel = ({
   onChange,
   analysis,
   placeholder,
-  emptyHint,
   recent,
   recentTitle,
 }: AssistedQueryPanelProps) => {
@@ -47,9 +45,11 @@ export const AssistedQueryPanel = ({
         spellCheck={false}
         className="w-full resize-none appearance-none rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-base text-f1-foreground outline-none placeholder:text-f1-foreground-secondary focus:border-f1-border-hover"
       />
-      <p className="text-base text-f1-foreground-secondary">
-        {value ? analysis?.note : emptyHint}
-      </p>
+      {value && analysis?.note ? (
+        <p className="text-base text-f1-foreground-secondary">
+          {analysis.note}
+        </p>
+      ) : null}
 
       {!value && recent && recent.length > 0 ? (
         <div className="flex flex-col gap-1">

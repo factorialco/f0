@@ -220,7 +220,7 @@ export const defaultTranslations = {
     search: {
       searching: "Searching for {{query}}\u2026",
       assistedHint: "Describe who you are looking for, in your own words.",
-      filterWithAssistant: "Filter with One",
+      filterWithAssistant: "ONE Filter",
       recent: "Recent",
     },
     presets: {

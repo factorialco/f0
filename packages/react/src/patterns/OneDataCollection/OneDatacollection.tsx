@@ -1862,7 +1862,6 @@ const OneDataCollectionComp = <
                           placeholder={
                             source.searchPresentation?.placeholderRotation?.[0]
                           }
-                          emptyHint={i18n.collections.search.assistedHint}
                           recent={source.searchPresentation?.recent}
                           recentTitle={i18n.collections.search.recent}
                         />
@@ -1888,6 +1887,9 @@ const OneDataCollectionComp = <
                   <Search
                     onChange={setCurrentSearch}
                     value={currentSearch}
+                    placeholderRotation={
+                      source.searchPresentation?.placeholderRotation
+                    }
                     inlineAction={
                       assistedSearchProps
                         ? {
