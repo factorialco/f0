@@ -19,7 +19,7 @@ import {
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { Search as AiSearchIcon } from "@/icons/ai"
+import { One as OneIcon } from "@/icons/ai"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
@@ -1768,6 +1768,23 @@ const OneDataCollectionComp = <
                     <Spinner size="small" />
                   </motion.div>
                 ) : null}
+                {/* Asking is its own field. Sharing one with the plain text
+                    search meant a query had to be readable while the chips did
+                    the filtering, and neither cost was ever visible. */}
+                {source.searchPresentation ? (
+                  <Search
+                    {...source.searchPresentation}
+                    icon={OneIcon}
+                    value={source.searchPresentation.value ?? assistedQuery}
+                    onChange={
+                      source.searchPresentation.onChange ?? setAssistedQuery
+                    }
+                    onClear={() => {
+                      setAssistedQuery(undefined)
+                      source.searchPresentation?.onClear?.()
+                    }}
+                  />
+                ) : null}
                 {search ? (
                   <Search
                     onChange={setCurrentSearch}
@@ -1778,23 +1795,6 @@ const OneDataCollectionComp = <
                     hasMore={searchPreview.hasMore}
                     loadingMore={searchPreview.loadingMore}
                     onLoadMore={searchPreview.onLoadMore}
-                  />
-                ) : null}
-                {/* Asking is its own field. Sharing one with the plain text
-                    search meant a query had to be readable while the chips did
-                    the filtering, and neither cost was ever visible. */}
-                {source.searchPresentation ? (
-                  <Search
-                    {...source.searchPresentation}
-                    icon={AiSearchIcon}
-                    value={source.searchPresentation.value ?? assistedQuery}
-                    onChange={
-                      source.searchPresentation.onChange ?? setAssistedQuery
-                    }
-                    onClear={() => {
-                      setAssistedQuery(undefined)
-                      source.searchPresentation?.onClear?.()
-                    }}
                   />
                 ) : null}
                 {visualizations && visualizations.length > 1 ? (
