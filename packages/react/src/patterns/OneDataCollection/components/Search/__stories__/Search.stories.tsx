@@ -3,11 +3,11 @@ import { useState } from "react"
 import { Search } from "../Search"
 
 const PLACEHOLDERS = [
-  'Try "Hired in the last 6 months"',
-  'Try "Ended agreements in Madrid"',
-  'Try "Waiters hired more than 3 years ago"',
-  'Try "Active employees in Valencia"',
-  'Try "Pending to accept invitation"',
+  "Hired in the last 6 months",
+  "Ended agreements in Madrid",
+  "Waiters hired more than 3 years ago",
+  "Active employees in Valencia",
+  "Pending to accept invitation",
 ]
 
 const meta = {
@@ -34,9 +34,10 @@ export const Default: Story = {
 }
 
 /**
- * An idle field cycles example queries every few seconds, so the kind of thing
- * worth asking is visible without a panel in the way. The rotation stops the
- * moment the field is focused.
+ * An open, empty field types out example queries one after another, so the
+ * kind of thing worth asking is visible without a panel in the way. It holds
+ * while the field is closed or has something written in it, and honours
+ * reduced motion by showing each example whole.
  */
 export const WithRotatingPlaceholder: Story = {
   render: function Render() {
@@ -47,6 +48,28 @@ export const WithRotatingPlaceholder: Story = {
         onChange={setValue}
         placeholderRotation={PLACEHOLDERS}
         onSubmit={(query) => setValue(query)}
+      />
+    )
+  },
+}
+
+/**
+ * The action offered inside the field: the search keeps working as it always
+ * did — enter searches by name — and the button hands the same text to the
+ * assistant instead. It is inert until something is written.
+ */
+export const WithInlineAction: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>()
+    return (
+      <Search
+        value={value}
+        onChange={setValue}
+        placeholderRotation={PLACEHOLDERS}
+        inlineAction={{
+          label: "Ask ONE",
+          onClick: (query) => window.alert(`Asked: ${query}`),
+        }}
       />
     )
   },
