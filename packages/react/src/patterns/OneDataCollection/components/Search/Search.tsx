@@ -334,23 +334,29 @@ const InlineAction = ({
   busy: boolean
 }) =>
   !action ? null : (
-    <div className="max-w-40 shrink-0 overflow-hidden [&_.main]:overflow-hidden [&_.main]:whitespace-nowrap">
-      <F0Button
-        variant="outline"
-        size="sm"
-        label={action.label}
-        icon={action.icon}
-        loading={busy}
-        // Nothing written is nothing to ask: an enabled button promises it
-        // will do something, and a click that only moved the caret was a lie.
-        disabled={!query}
-        onClick={() => {
-          if (query) {
-            action.onClick(query)
-          }
-        }}
+    <>
+      <span
+        aria-hidden
+        className="h-4 w-px shrink-0 bg-f1-background-secondary-hover"
       />
-    </div>
+      <div className="max-w-40 shrink-0 overflow-hidden [&_.main]:overflow-hidden [&_.main]:whitespace-nowrap">
+        <F0Button
+          variant="neutral"
+          size="sm"
+          label={action.label}
+          icon={action.icon}
+          loading={busy}
+          // Nothing written is nothing to ask: an enabled button promises it
+          // will do something, and a click that only moved the caret was a lie.
+          disabled={!query}
+          onClick={() => {
+            if (query) {
+              action.onClick(query)
+            }
+          }}
+        />
+      </div>
+    </>
   )
 
 /**

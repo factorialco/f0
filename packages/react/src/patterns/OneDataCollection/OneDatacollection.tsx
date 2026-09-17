@@ -19,7 +19,7 @@ import {
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { Search as AiSearchIcon } from "@/icons/ai"
+import { One as OneMark } from "@/icons/special"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
@@ -984,7 +984,7 @@ const OneDataCollectionComp = <
   const assistedSearchProps = source.searchPresentation
     ? {
         ...source.searchPresentation,
-        icon: AiSearchIcon,
+        icon: OneMark,
         value: source.searchPresentation.value ?? assistedQuery,
         onChange: (next: string | undefined) => {
           if (source.searchPresentation?.onChange) {
@@ -1913,7 +1913,7 @@ const OneDataCollectionComp = <
                       assistedSearchProps
                         ? {
                             label: i18n.collections.search.filterWithAssistant,
-                            icon: AiSearchIcon,
+                            icon: OneMark,
                             onClick: (query) => {
                               // The text stops being a name search and becomes
                               // a question: leaving both on would have the two
