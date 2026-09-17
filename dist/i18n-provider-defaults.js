@@ -1271,10 +1271,6 @@ const e = {
       },
       phone: {
         invalid: "Enter a valid phone number"
-      },
-      location: {
-        empty: "Enter an address",
-        unresolved: "Select an address from the suggestions"
       }
     }
   },
