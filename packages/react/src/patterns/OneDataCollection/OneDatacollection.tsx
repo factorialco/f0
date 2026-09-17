@@ -953,20 +953,18 @@ const OneDataCollectionComp = <
   setFiltersRef.current = setFilters
   const lastAppliedRef = useRef<string>()
 
-  // Each way in owns only the filters its own query named. Replacing the whole
-  // state instead would have the field on the right undoing the panel on the
-  // left, and either of them undoing what was ticked by hand.
+  // A query only ever names filters; it never clears the ones it did not
+  // mention. That way the field and the panel cannot undo each other, what
+  // was ticked by hand survives, and a follow-up question narrows what is
+  // already there instead of starting again.
   const ownedByRef = useRef<Record<string, string[]>>({})
   const applyFromQuery = (
     origin: string,
     named: Record<string, unknown>
   ): Record<string, unknown> => {
-    const owned = new Set(ownedByRef.current[origin] ?? [])
-    const kept = Object.entries(
-      (source.currentFilters ?? {}) as Record<string, unknown>
-    ).filter(([key]) => !owned.has(key))
+    const current = (source.currentFilters ?? {}) as Record<string, unknown>
     ownedByRef.current[origin] = Object.keys(named)
-    return { ...Object.fromEntries(kept), ...named }
+    return { ...current, ...named }
   }
   useEffect(() => {
     if (!analyze || assistedValue === undefined) {
