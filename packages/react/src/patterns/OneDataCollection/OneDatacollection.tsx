@@ -1881,11 +1881,6 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
-              leading={
-                search && assistedSearchProps?.triggerLabel ? (
-                  <Search {...assistedSearchProps} />
-                ) : null
-              }
               quickFilter={
                 search && assistedSearchProps?.triggerLabel
                   ? {
