@@ -14,6 +14,7 @@ import {
 } from "react"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import type { IconType } from "@/components/F0Icon"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0DialogContext } from "@/patterns/F0Dialog"
@@ -49,6 +50,7 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
   /** An entry listed before the filters, with its own pane */
   quickFilter?: {
     label: string
+    icon?: IconType
     render: (api: {
       stage: (filters: Record<string, unknown>) => void
     }) => ReactNode
@@ -350,6 +352,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     onFilterSelect={selectFilter}
                     onClickApplyFilters={handleApplyFilters}
                     quickFilterLabel={quickFilter?.label}
+                    quickFilterIcon={quickFilter?.icon}
                     quickFilterSelected={quickFilterSelected}
                     onQuickFilterSelect={selectQuickFilter}
                   />

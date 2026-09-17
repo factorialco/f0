@@ -220,6 +220,7 @@ export const defaultTranslations = {
     search: {
       searching: "Searching for {{query}}\u2026",
       filterWithAssistant: "Ask ONE",
+      recent: "Recent",
     },
     presets: {
       createTitle: "Save view",

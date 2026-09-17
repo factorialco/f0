@@ -1881,6 +1881,7 @@ const OneDataCollectionComp = <
                 search && assistedSearchProps?.triggerLabel
                   ? {
                       label: assistedSearchProps.triggerLabel,
+                      icon: OneMark,
                       render: ({ stage }) => (
                         <AssistedQueryPanel
                           value={panelQuery}
@@ -1907,6 +1908,8 @@ const OneDataCollectionComp = <
                           placeholder={
                             source.searchPresentation?.placeholderRotation?.[0]
                           }
+                          recent={source.searchPresentation?.recent}
+                          recentTitle={i18n.collections.search.recent}
                         />
                       ),
                     }

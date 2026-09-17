@@ -1,4 +1,5 @@
 import { createContext, type ReactNode } from "react"
+import type { IconType } from "@/components/F0Icon"
 import {
   FiltersDefinition,
   FiltersMode,
@@ -22,6 +23,7 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   /** An entry listed before the filters inside the panel, with its own pane */
   quickFilter?: {
     label: string
+    icon?: IconType
     /** `stage` writes into the draft the apply button commits. */
     render: (api: {
       stage: (filters: Record<string, unknown>) => void

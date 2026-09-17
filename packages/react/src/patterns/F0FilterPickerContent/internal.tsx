@@ -50,6 +50,7 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           onFilterSelect={onFilterSelect}
           onClickApplyFilters={onApply}
           quickFilterLabel={quickFilter?.label}
+          quickFilterIcon={quickFilter?.icon}
           quickFilterSelected={quickFilterSelected}
           onQuickFilterSelect={onQuickFilterSelect}
         />

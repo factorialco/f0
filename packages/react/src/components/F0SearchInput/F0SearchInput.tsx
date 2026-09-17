@@ -5,12 +5,18 @@ import {
   useImperativeHandle,
   useRef,
 } from "react"
+import { type IconType } from "@/components/F0Icon"
 import { InputFieldProps } from "@/components/F0InputField"
 import { Search } from "@/icons/app"
 import { Input } from "@/ui/input"
 
 export type F0SearchInputProps = {
   value?: string
+  /**
+   * Replaces the magnifier. For a field that searches by some other means
+   * than matching text, and should not promise that it does.
+   */
+  icon?: IconType
   threshold?: number
   debounceTime?: number
   autoFocus?: boolean
@@ -48,6 +54,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
   (
     {
       value,
+      icon = Search,
       threshold = 0,
       onChange,
       onBlur,
@@ -138,7 +145,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         ref={input}
         type="search"
         tabIndex={tabIndex}
-        icon={Search}
+        icon={icon}
         value={value}
         label={props.placeholder ?? "Search"}
         hideLabel
