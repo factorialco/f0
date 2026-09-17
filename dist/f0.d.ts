@@ -13506,32 +13506,14 @@ export declare const F0TextInput: ForwardRefExoticComponent<(Omit<F0TextInputFie
 declare type F0TextInputBaseProps = Omit<InputInternalProps, (typeof privateProps_5)[number] | "variant" | "editing">;
 
 export declare type F0TextInputFieldProps = F0TextInputBaseProps & {
-    /** Standard form-field presentation. This remains the default. */
     variant?: "field";
     editing?: never;
     onDismiss?: never;
 };
 
 export declare type F0TextInputInlineProps = F0TextInputBaseProps & {
-    /**
-     * Detail-row presentation. The input fills the box its row declares, in
-     * both axes, and reads as plain text until `editing` is true.
-     */
     variant: "inline";
-    /**
-     * Which presentation to draw. The component never changes it: it reports
-     * what the user did through `onDismiss` and keeps drawing the editor until
-     * the parent flips this.
-     *
-     * @default false
-     */
     editing?: boolean;
-    /**
-     * The user did something that would end an edit: pressed Enter
-     * (`"commit"`), pressed Escape (`"escape"`), or moved focus away
-     * (`"blur"`). Deciding what that means — commit, revert, stay on a
-     * validation error — belongs to the parent.
-     */
     onDismiss?: (reason: InlineDismissReason) => void;
 };
 
@@ -15398,13 +15380,6 @@ export declare function injectSectionEnds(items: FlatFormItem[], inSectionQuesti
 
 declare type InlineDismissReason = (typeof inlineDismissReasons)[number];
 
-/**
- * Why an inline field stopped being edited. The field reports it and changes
- * nothing: the parent decides whether that ends the edit.
- *
- * Fields whose editor is a popup (select, date picker) add their own reason
- * when they get an inline variant.
- */
 declare const inlineDismissReasons: readonly ["blur", "escape", "commit"];
 
 /**
@@ -15519,19 +15494,7 @@ declare type InputFieldProps<T> = {
         onChange: (selected: boolean) => void;
     };
     transparent?: boolean;
-    /**
-     * `"inline"` is the detail-row presentation: the field fills the box its row
-     * declares, in both axes, and reads as plain text until `editing` is true.
-     * Defaults to `"field"`, the standard form presentation.
-     */
     variant?: InputFieldVariant;
-    /**
-     * Which presentation the `"inline"` variant draws. Controlled by the parent
-     * and never by the field itself — the field reports what the user did and
-     * keeps drawing the editor until this changes.
-     *
-     * @default false
-     */
     editing?: boolean;
 };
 
