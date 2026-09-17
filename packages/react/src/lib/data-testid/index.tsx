@@ -45,7 +45,7 @@ export type WithDataTestIdProps = {
  * Wrapper component that conditionally renders a `data-testid` attribute.
  *
  * When `dataTestId` is provided and the platform context enables test id rendering,
- * wraps children in a `<div data-testid={dataTestId} style={{ display: "contents" }}>`.
+ * wraps children in a `<div data-testid={dataTestId} className="contents">`.
  * Otherwise renders children as-is with no wrapper element.
  *
  * Use this directly inside components with complex generic types (e.g. F0Select,
@@ -71,7 +71,7 @@ export const DataTestIdWrapper = ({
   }
 
   return (
-    <div data-testid={dataTestId} style={{ display: "contents" }}>
+    <div data-testid={dataTestId} className="contents">
       {children}
     </div>
   )

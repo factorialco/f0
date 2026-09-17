@@ -1,8 +1,8 @@
 {
   "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
-  "total": 367,
+  "total": 352,
   "rules": {
-    "f0-styles/no-inline-styles": 253,
+    "f0-styles/no-inline-styles": 238,
     "sonarjs/cognitive-complexity": 114
   },
   "files": {
@@ -91,23 +91,14 @@
       "f0-styles/no-inline-styles": 3,
       "sonarjs/cognitive-complexity": 1
     },
-    "src/components/RichText/internal/Extensions/AIBlock/index.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
     "src/components/RichText/internal/Extensions/Image/index.tsx": {
       "f0-styles/no-inline-styles": 1
     },
     "src/components/RichText/internal/Extensions/Mention/MentionPopover/index.tsx": {
       "f0-styles/no-inline-styles": 3
     },
-    "src/components/RichText/internal/Extensions/MoodTracker/index.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
     "src/components/RichText/internal/Extensions/SlashCommand/index.tsx": {
       "f0-styles/no-inline-styles": 3
-    },
-    "src/components/RichText/internal/Extensions/Transcript/index.tsx": {
-      "f0-styles/no-inline-styles": 1
     },
     "src/components/RichText/internal/Extensions/VideoEmbed/index.tsx": {
       "f0-styles/no-inline-styles": 1
@@ -362,21 +353,15 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/kits/surveys/SurveyFormBuilder/QuestionTypes/BaseQuestion/index.tsx": {
-      "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
     },
-    "src/kits/surveys/SurveyFormBuilder/QuestionTypes/CheckboxQuestion/index.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
     "src/kits/surveys/SurveyFormBuilder/QuestionTypes/SelectQuestion/SelectOption/index.tsx": {
-      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/kits/surveys/SurveyFormBuilder/Section/Item/index.tsx": {
       "f0-styles/no-inline-styles": 1
     },
     "src/kits/surveys/SurveyFormBuilder/Section/index.tsx": {
-      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/layouts/Layout/groups/GroupMasonry/components/SortableBlock.tsx": {
@@ -384,9 +369,6 @@
     },
     "src/lib/VirtualList/index.tsx": {
       "f0-styles/no-inline-styles": 3
-    },
-    "src/lib/data-testid/index.tsx": {
-      "f0-styles/no-inline-styles": 1
     },
     "src/lib/providers/datacollection/dataCollectionUrlParams.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -472,21 +454,18 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/F0Graph/internal/ReactFlowAdapters.tsx": {
-      "f0-styles/no-inline-styles": 6,
+      "f0-styles/no-inline-styles": 5,
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/F0Map/F0Map.tsx": {
       "sonarjs/cognitive-complexity": 1
-    },
-    "src/patterns/F0Map/components/F0MapMarkersLayer.tsx": {
-      "f0-styles/no-inline-styles": 3
     },
     "src/patterns/F0Map/components/internal/BaseMapMarker/BaseMapMarker.tsx": {
       "f0-styles/no-inline-styles": 10,
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/F0Map/components/internal/F0MapCluster/F0MapCluster.tsx": {
-      "f0-styles/no-inline-styles": 4
+      "f0-styles/no-inline-styles": 3
     },
     "src/patterns/F0Map/hooks/useClusters.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -497,9 +476,6 @@
     "src/patterns/Navigation/Sidebar/Chats/SidebarChatItem.tsx": {
       "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
-    },
-    "src/patterns/Navigation/Sidebar/CompanySelector/index.tsx": {
-      "f0-styles/no-inline-styles": 1
     },
     "src/patterns/Navigation/Sidebar/Sidebar.tsx": {
       "sonarjs/cognitive-complexity": 1
