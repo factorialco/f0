@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "7.5.0",
+  "version": "7.2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/factorialco/f0.git",
@@ -53,7 +53,6 @@
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
     "check:api-surface": "tsx .scripts/check-api-surface.ts",
-    "check:aria-surface": "tsx .scripts/check-aria-surface.ts",
     "check:docs-index": "tsx .scripts/check-docs-index.ts",
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",

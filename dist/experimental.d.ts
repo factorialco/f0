@@ -46,6 +46,8 @@ import { F0CommandPaletteProviderProps as F0CommandPaletteProviderProps_2 } from
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0LocationInputProps as F0LocationInputProps_2 } from './types';
+import { F0NumberInputFieldProps as F0NumberInputFieldProps_2 } from './F0NumberInput';
+import { F0NumberInputInlineProps as F0NumberInputInlineProps_2 } from './F0NumberInput';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -54,6 +56,8 @@ import { F0TagCompanyProps } from './types';
 import { F0TagPersonProps } from './types';
 import { F0TagRawProps as F0TagRawProps_2 } from './types';
 import { F0TagTeamProps } from './types';
+import { F0TextInputFieldProps as F0TextInputFieldProps_2 } from './F0TextInput';
+import { F0TextInputInlineProps as F0TextInputInlineProps_2 } from './F0TextInput';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './types/file';
@@ -6195,10 +6199,6 @@ declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
-            readonly location: {
-                readonly empty: "Enter an address";
-                readonly unresolved: "Select an address from the suggestions";
-            };
         };
     };
     readonly graph: {
@@ -9553,13 +9553,34 @@ declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 /** @experimental This is an experimental component, use it at your own risk. */
 export declare const F0LocationInput: ForwardRefExoticComponent<F0LocationInputProps_2 & RefAttributes<HTMLInputElement>>;
 
-declare type F0LocationInputBaseProps = {
+export declare type F0LocationInputChangeMeta = {
+    /**
+     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
+     * `"typed"` in every other case, which includes a suggestion that could not
+     * be resolved, so do not read `"typed"` as "the user did not use the list".
+     * `isResolved` is what says whether the value can be trusted.
+     */
+    source: "picked" | "typed";
+    /** Whether the value still carries trustworthy coordinates and place id */
+    isResolved: boolean;
+};
+
+export declare interface F0LocationInputProps {
     label: string;
     /** Controlled value */
     value?: F0LocationInputValue;
     /** Initial value when uncontrolled */
     defaultValue?: F0LocationInputValue;
     onChange?: (value: F0LocationInputValue | undefined, meta: F0LocationInputChangeMeta) => void;
+    /**
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code.
+     * Changing the country clears the other parts, since they described a
+     * place in the previous one. Without it the component is the address
+     * field alone.
+     * @default false
+     */
+    manualEntry?: boolean;
     /** Overrides for the per-part labels, which default to translated copy */
     partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
@@ -9571,6 +9592,20 @@ declare type F0LocationInputBaseProps = {
      * silently lock every later search to its country.
      */
     defaultCountry?: CountryCode;
+    /**
+     * Suggestion provider. Without it there is no autocomplete and the parts
+     * stand alone as plain fields. Called with the current country so the
+     * consumer can restrict the provider (e.g. Places `componentRestrictions`).
+     */
+    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
+    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
     placeholder?: string;
     hideLabel?: boolean;
     labelIcon?: IconType;
@@ -9587,27 +9622,7 @@ declare type F0LocationInputBaseProps = {
     autoFocus?: boolean;
     onBlur?: () => void;
     onFocus?: () => void;
-};
-
-export declare type F0LocationInputChangeMeta = {
-    /**
-     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
-     * `"typed"` in every other case, which includes a suggestion that could not
-     * be resolved, so do not read `"typed"` as "the user did not use the list".
-     * `isResolved` is what says whether the value can be trusted.
-     */
-    source: "picked" | "typed";
-    /** Whether the value still carries trustworthy coordinates and place id */
-    isResolved: boolean;
-};
-
-export declare type F0LocationInputProps = F0LocationInputBaseProps & F0LocationInputShapeProps;
-
-/**
- * The two shapes a location field takes: a searchable address line, or every
- * part typed by hand.
- */
-export declare type F0LocationInputShapeProps = F0LocationSearchProps | F0LocationManualProps;
+}
 
 /**
  * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
@@ -9635,57 +9650,9 @@ export declare type F0LocationInputValue = {
     timezone?: string;
 };
 
-/**
- * Every part typed by hand. Nothing is searched in this shape, so a provider
- * would never be called: `searchPlaces` and `resolvePlace` are ruled out
- * rather than quietly ignored.
- */
-declare type F0LocationManualProps = {
-    /**
-     * Renders the whole address as separate fields the user can fill in by
-     * hand: country, address line 1 and 2, city, region and postal code.
-     * Changing the country clears the other parts, since they described a
-     * place in the previous one.
-     */
-    manualEntry: true;
-    searchPlaces?: never;
-    resolvePlace?: never;
-    manualEntryFallback?: never;
-};
-
 export declare type F0LocationSearchContext = {
     /** Country to scope the search to, when one is selected or implied */
     country?: CountryCode;
-};
-
-/**
- * The address line as an autocomplete. A provider makes the suggestions, and
- * the user who finds nothing there can still fall back to typing.
- */
-declare type F0LocationSearchProps = {
-    manualEntry?: false;
-    /**
-     * Suggestion provider. Without it there is no autocomplete and the address
-     * line is a plain field. Called with the current country so the consumer
-     * can restrict the provider (e.g. Places `componentRestrictions`).
-     */
-    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /**
-     * Resolves a picked suggestion into a full value. Every field of
-     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
-     * the value needs `formatted` or `addressLine1` to be shown at all, and
-     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
-     * provider's formatted address without its granular parts is supported.
-     */
-    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
-    /**
-     * Whether a search that comes back empty offers to switch to manual entry.
-     * Turn it off where a typed address is of no use to the consumer, such as a
-     * field that feeds a map or a geofence and needs the coordinates only a
-     * picked place carries.
-     * @default true
-     */
-    manualEntryFallback?: boolean;
 };
 
 export declare type F0LocationSuggestion = {
@@ -10168,9 +10135,23 @@ export declare interface F0NotesTextEditorSkeletonProps {
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
  */
-export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const F0NumberInput: ForwardRefExoticComponent<(Omit<F0NumberInputFieldProps, "ref"> | Omit<F0NumberInputInlineProps, "ref">) & RefAttributes<HTMLInputElement>>;
 
-export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
+declare type F0NumberInputBaseProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number] | "variant" | "editing" | "onDismiss">;
+
+export declare type F0NumberInputFieldProps = F0NumberInputBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0NumberInputInlineProps = F0NumberInputBaseProps & {
+    variant: "inline";
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0NumberInputProps = F0NumberInputFieldProps | F0NumberInputInlineProps;
 
 /** @experimental This is an experimental component, use it at your own risk. */
 export declare const F0PhoneInput: ForwardRefExoticComponent<F0PhoneInputProps_2 & RefAttributes<HTMLInputElement>>;
@@ -10502,6 +10483,8 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
     /** Standard form-field presentation. This remains the default. */
     variant?: "field";
+    editing?: never;
+    onDismiss?: never;
     withApplySelection?: boolean;
     applySelectionLabel?: string;
     children?: React.ReactNode;
@@ -10527,12 +10510,24 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
     hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
-declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled" | "hideLabel"> & {
     /**
-     * Compact borderless presentation for single-value controls embedded in rows.
-     * The required label is used as the accessible name and is not shown visually.
+     * Detail-row presentation for single-value controls. The selection reads as
+     * plain text — avatar and icon included — and becomes the dropdown only
+     * while `editing` is true. The required label is the accessible name and is
+     * never shown visually, with or without `hideLabel`.
      */
     variant: "inline";
+    /**
+     * Whether the dropdown is the presentation right now. Controlled: the
+     * component never changes it, it only reports what the user did through
+     * `onDismiss` and keeps the dropdown open until the owner says otherwise.
+     *
+     * @default false
+     */
+    editing?: boolean;
+    /** What ended the edit. The value change still arrives through `onChange`. */
+    onDismiss?: (reason: SelectInlineDismissReason) => void;
     size?: never;
     disableSelectAll?: never;
     withApplySelection?: never;
@@ -10545,7 +10540,6 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     showPreview?: never;
     required?: never;
     loading?: never;
-    hideLabel?: never;
     labelIcon?: never;
     icon?: never;
     name?: never;
@@ -10867,9 +10861,23 @@ export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2
  * F0. For numeric data use F0NumberInput; for durations use F0DurationInput;
  * for queries use F0SearchInput.
  */
-export declare const F0TextInput: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const F0TextInput: ForwardRefExoticComponent<(Omit<F0TextInputFieldProps, "ref"> | Omit<F0TextInputInlineProps, "ref">) & RefAttributes<HTMLInputElement>>;
 
-export declare type F0TextInputProps = Omit<InputInternalProps, (typeof privateProps_3)[number]>;
+declare type F0TextInputBaseProps = Omit<InputInternalProps, (typeof privateProps_3)[number] | "variant" | "editing">;
+
+export declare type F0TextInputFieldProps = F0TextInputBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0TextInputInlineProps = F0TextInputBaseProps & {
+    variant: "inline";
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0TextInputProps = F0TextInputFieldProps | F0TextInputInlineProps;
 
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
@@ -12309,6 +12317,11 @@ declare type InfoHintContent = {
     label?: string;
 };
 
+declare type InlineDismissReason = (typeof inlineDismissReasons)[number];
+
+/** `"popupClose"` only reaches fields whose editor is a popup, such as F0DatePicker. */
+declare const inlineDismissReasons: readonly ["blur", "escape", "commit", "popupClose"];
+
 /**
  * @deprecated Renamed to `F0TextInput` to match the F0 input vocabulary
  * (any component where the user types text in a box has the `Input` suffix
@@ -12320,9 +12333,9 @@ declare type InfoHintContent = {
  *
  * @removeIn 2.0.0
  */
-export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const Input: ForwardRefExoticComponent<(Omit<F0TextInputFieldProps_2, "ref"> | Omit<F0TextInputInlineProps_2, "ref">) & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "editing" | "variant" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle" | "inlineText"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -12417,6 +12430,14 @@ declare type InputFieldProps<T> = {
         onChange: (selected: boolean) => void;
     };
     transparent?: boolean;
+    variant?: InputFieldVariant;
+    editing?: boolean;
+    /**
+     * What the inline variant prints at rest, when the value alone is not what
+     * the editor shows: F0NumberInput appends its `units` to the formatted
+     * number. Defaults to the value.
+     */
+    inlineText?: string;
 };
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
@@ -12433,7 +12454,11 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type InputFieldVariant = (typeof inputFieldVariantNames)[number];
+
+declare const inputFieldVariantNames: readonly ["field", "inline"];
+
+declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "variant" | "editing"> & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
      * masked like a password but with no lock icon and with password managers
@@ -12441,6 +12466,7 @@ declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
+    onPressEscape?: () => void;
 };
 
 /**
@@ -13584,9 +13610,10 @@ declare type NumberFilterValue = {
  *
  * @removeIn 2.0.0
  */
-export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const NumberInput: ForwardRefExoticComponent<(Omit<F0NumberInputFieldProps_2, "ref"> | Omit<F0NumberInputInlineProps_2, "ref">) & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "variant" | "editing"> & {
+    onDismiss?: (reason: InlineDismissReason) => void;
     locale: string;
     value?: number | null;
     step?: number;
@@ -14112,7 +14139,6 @@ export declare const OneRestrictComponent: FC<RestrictComponentProps>;
 
 export declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
-    selectableTotal?: number;
     filters: FiltersState<Filters>;
     search: string | undefined;
     isInitialLoading: boolean;
@@ -14512,7 +14538,7 @@ declare const privateProps: readonly ["append", "className", "pressed", "compact
 
 declare const privateProps_2: readonly ["withBorder"];
 
-declare const privateProps_3: readonly ["buttonToggle"];
+declare const privateProps_3: readonly ["buttonToggle", "onPressEscape"];
 
 declare const privateProps_4: readonly ["buttonToggle"];
 
@@ -15121,6 +15147,15 @@ export declare type SelectedState = {
     id: SelectionId;
     checked: boolean;
 };
+
+export declare type SelectInlineDismissReason = (typeof selectInlineDismissReasons)[number];
+
+/**
+ * Why an edit ended, reported by the inline variant so the owner of `editing`
+ * can decide what to do with it. A narrowing of `InlineDismissReason`: a select
+ * has no blur to report, because the popup takes focus.
+ */
+export declare const selectInlineDismissReasons: readonly ["popupClose", "escape", "commit"];
 
 export declare type SelectionId = number | string;
 
@@ -15977,9 +16012,9 @@ export declare type SummaryType = "sum";
  */
 export declare const Switch: typeof _Switch;
 
-declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, required, ...rest }: SwitchProps): JSX_2.Element;
+declare function _Switch({ variant, editing: _editing, onDismiss: _onDismiss, title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, required, ...rest }: SwitchProps): JSX_2.Element;
 
-declare interface SwitchProps extends DataAttributes_3 {
+declare interface SwitchBaseProps extends DataAttributes_3 {
     /**
      * The title of the switch
      */
@@ -16022,6 +16057,33 @@ declare interface SwitchProps extends DataAttributes_3 {
      */
     required?: boolean;
 }
+
+export declare type SwitchFieldProps = SwitchBaseProps & {
+    /**
+     * @default "field"
+     */
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type SwitchInlineProps = SwitchBaseProps & {
+    /**
+     * `"inline"` is the detail-row presentation: the switch fills the row's box
+     * and carries no chrome of its own.
+     */
+    variant: "inline";
+    /**
+     * A switch has no separate editor — one click commits through
+     * `onCheckedChange` — so there is no edit mode to enter and nothing to
+     * dismiss. Both props exist as `never` so a field layer can hand every
+     * inline component the same prop bag.
+     */
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type SwitchProps = SwitchFieldProps | SwitchInlineProps;
 
 export declare type TabItem = {
     label: string;
