@@ -9913,11 +9913,7 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      * zoom in - best for a world-scale view. Changing it re-projects live.
      */
     projection?: F0MapProjection;
-    /**
-     * Rendering engine. Defaults to the `F0Provider` `map.provider`, and to
-     * `maplibre` when that is unset: it needs no API key, so the library default
-     * cannot depend on a billing account being registered.
-     */
+    /** Defaults to the `F0Provider` `map.provider`, then to `maplibre`. */
     provider?: F0MapProvider;
     /** Show the skeleton instead of the map. */
     loading?: boolean;
@@ -9928,13 +9924,8 @@ export declare interface F0MapProps extends WithDataTestIdProps {
 }
 
 /**
- * Which rendering engine a style or a map is written for. A leaf module on
- * purpose: `F0Provider` and the registry both need the name, and neither may
- * pull an engine (or F0Map itself) in to get it.
- *
- * The tag exists so a style built for one engine can never be handed to
- * another: the shapes are not interchangeable, and without it the mismatch
- * would only surface at runtime.
+ * A leaf module on purpose: `F0Provider` and the registry both need the name,
+ * and neither may pull an engine in to get it.
  */
 export declare type F0MapProvider = "maplibre";
 

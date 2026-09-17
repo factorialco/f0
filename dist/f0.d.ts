@@ -12188,13 +12188,8 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 };
 
 /**
- * Which rendering engine a style or a map is written for. A leaf module on
- * purpose: `F0Provider` and the registry both need the name, and neither may
- * pull an engine (or F0Map itself) in to get it.
- *
- * The tag exists so a style built for one engine can never be handed to
- * another: the shapes are not interchangeable, and without it the mismatch
- * would only surface at runtime.
+ * A leaf module on purpose: `F0Provider` and the registry both need the name,
+ * and neither may pull an engine in to get it.
  */
 declare type F0MapProvider = "maplibre";
 
@@ -15835,11 +15830,7 @@ export declare type LockedSectionNotice = {
 };
 
 declare interface MapContextValue {
-    /**
-     * Engine every `F0Map` in the app uses unless it names its own. Defaults to
-     * `maplibre`: it is keyless, so a library default cannot depend on someone
-     * having registered a billing account.
-     */
+    /** Engine every `F0Map` uses unless it names its own. Keyless by default. */
     provider?: F0MapProvider;
 }
 
