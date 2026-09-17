@@ -43,6 +43,14 @@ export type F0ChatProps = {
   headerActions?:
     | F0ChatHeaderAction[]
     | ((channel: F0ChatChannel) => F0ChatHeaderAction[])
+  /**
+   * Replaces the built-in header. `null` removes it entirely, for hosts that
+   * already frame the chat with their own chrome — the in-call panel puts its
+   * Chat / Transcript / Notes tabs where this header would be.
+   *
+   * Undefined keeps the default header, so no existing usage changes.
+   */
+  header?: ReactNode | null
 }
 
 /**
@@ -124,6 +132,7 @@ const ChatShell = ({
   onToggleFullscreen,
   onClose,
   headerActions,
+  header,
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages, capabilities } = useF0Chat()
   const canSend = chatPermission("canSend", channel.type, capabilities)
@@ -142,17 +151,21 @@ const ChatShell = ({
       className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
       {...dropZoneProps}
     >
-      <ChatHeader
-        channel={channel}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
-        onClose={onClose}
-        actions={
-          typeof headerActions === "function"
-            ? headerActions(channel)
-            : headerActions
-        }
-      />
+      {header === undefined ? (
+        <ChatHeader
+          channel={channel}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={onToggleFullscreen}
+          onClose={onClose}
+          actions={
+            typeof headerActions === "function"
+              ? headerActions(channel)
+              : headerActions
+          }
+        />
+      ) : (
+        header
+      )}
       {/* Under the header and OUTSIDE the transcript: chrome, not a row, and
           the virtualizer must not have to measure around it. Its sheet opens
           OVER the transcript for the same reason. */}
@@ -162,6 +175,7 @@ const ChatShell = ({
         hasTranscript={hasTranscript}
         channelId={channel.id}
       />
+
       {/* A read-only channel (frozen, announcements…) hides the composer and
           says so in its place, so the surface doesn't just end in nothing. */}
       <ChatFooter

@@ -10,10 +10,22 @@ import { WithDataTestIdProps } from "@/lib/data-testid"
  * `now`.
  */
 export const meetingStates = [
+  /**
+   * A call that has been started and is waiting for the other side. Distinct
+   * from `scheduled`, which counts down to a time somebody agreed on earlier —
+   * a ringing call has no such time, it is happening now.
+   */
+  "ringing",
   "scheduled",
   "inProgress",
   "summarizing",
   "finished",
+  /**
+   * Ended without the other side ever joining. Deliberately not `cancelled`:
+   * that one strikes the title through, which on "Missed call" says the
+   * opposite of what happened.
+   */
+  "missed",
   "cancelled",
 ] as const
 
@@ -44,8 +56,15 @@ export type MeetingAttendee =
     }
 
 export interface MeetingJoin {
-  /** Called when the Join button is pressed. */
-  onJoin?: () => void
+  /**
+   * Called when the Join button is pressed.
+   *
+   * Return the promise and the button shows a spinner until it settles, which
+   * is what joining actually needs: a room has to be asked for before there is
+   * anything to walk into, and without this the card sits there looking as if
+   * the press did nothing.
+   */
+  onJoin?: () => void | Promise<unknown>
   /** Navigates to the meeting room instead of handling the click. */
   href?: string
   /**

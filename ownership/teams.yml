@@ -12,6 +12,7 @@ teams:
   - "@factorialco/time-tracking"
   - "@factorialco/growth-product"
   - "@factorialco/platform-ai-building-blocks"
+  - "@factorialco/communications"
   - "@factorialco/talent-engagement"
   - "@factorialco/talent-spaces"
 

@@ -415,6 +415,8 @@ const ESTIMATE_POST_DESCRIPTION_MAX_LINES = 5
 const ESTIMATE_SEPARATOR = 28 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_DIVIDER = 28 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_SYSTEM = 24 + ESTIMATE_STANDALONE_SPACING
+/** A compact `F0MeetingCard`: one title line, one meta line, and its padding. */
+const ESTIMATE_CALL = 72 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_TYPING = 44 + ESTIMATE_STANDALONE_SPACING
 /** `MessageStatus` is `px-1 pt-1 text-sm` in a `pt-0` row. */
 const ESTIMATE_FOOTER = 24
@@ -443,6 +445,8 @@ export function chatRowHeightEstimate(row: ChatRow): number {
       return ESTIMATE_DIVIDER
     case "system":
       return ESTIMATE_SYSTEM
+    case "call":
+      return ESTIMATE_CALL
     case "typing":
       return ESTIMATE_TYPING
     case "footer":

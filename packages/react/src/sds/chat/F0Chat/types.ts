@@ -512,6 +512,73 @@ export type F0ChatSystemMessage = {
   body?: string
 }
 
+export const f0ChatCallStates = ["ringing", "live", "ended", "missed"] as const
+
+/**
+ * Where a call is in its life. One call is ONE transcript item that moves
+ * through these — not a live card plus a log line afterwards.
+ */
+export type F0ChatCallState = (typeof f0ChatCallStates)[number]
+
+export type F0ChatCall = {
+  id: string
+  state: F0ChatCallState
+  /** Who started it. */
+  startedBy: F0ChatUser
+  /** ISO timestamp the call was started. */
+  startedAt: string
+  /** ISO timestamp it ended. Drives the duration on `ended`. */
+  endedAt?: string
+  /**
+   * Who is in the room right now while `ringing` or `live`, and who was in it
+   * once it has `ended`.
+   */
+  participants?: F0ChatUser[]
+  /**
+   * Present only while the call can be joined. Its absence is what removes the
+   * button — the same convention as the rest of the contract: no callback, no
+   * action. A host that omits it on an `ended` call needs no other flag.
+   *
+   * Return the promise and the button spins until it settles. Joining is never
+   * instant — a room has to be asked for first — so a host that drops the
+   * promise leaves the card looking as if the press did nothing.
+   */
+  join?: () => void | Promise<unknown>
+  /**
+   * What the call was about, shown once it has `ended`. Plain text: the card
+   * renders it whole, and a transcript-sized block does not belong in a row of
+   * a conversation.
+   */
+  summary?: string
+  /**
+   * Footer buttons on the ended card. The transcript is the reason this exists
+   * — it is long, and where it opens (a drawer, a modal, a page) is the host's
+   * decision, not the card's.
+   */
+  actions?: {
+    label: string
+    icon?: IconType
+    onClick: () => void
+  }[]
+}
+
+/**
+ * A call in the transcript, rendered as a card with a Join button. Like a system
+ * message it has no author, no reactions and no replies — but unlike one it is
+ * INTERACTIVE and it MUTATES: the same id carries the call from ringing to
+ * ended, so the history keeps one line per call.
+ *
+ * factorial → a Stream message whose custom fields carry the call state, patched
+ * in place from LiveKit's webhooks (see `F0Meeting/SPEC.md`).
+ */
+export type F0ChatCallMessage = {
+  type: "call"
+  id: string
+  /** ISO timestamp — participates in day separators and ordering. */
+  createdAt: string
+  call: F0ChatCall
+}
+
 /**
  * An event a post announces (a talk, an offsite, a townhall). It takes the
  * card's MEDIA SLOT — it replaces the cover rather than stacking under it —
@@ -680,11 +747,18 @@ export type F0ChatPostRequiredAction = {
 }
 
 /** Anything that can appear in the transcript, oldest → newest. */
-export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage | F0ChatPost
+export type F0ChatItem =
+  | F0ChatMessage
+  | F0ChatSystemMessage
+  | F0ChatPost
+  | F0ChatCallMessage
 
 export const isSystemMessage = (
   item: F0ChatItem
 ): item is F0ChatSystemMessage => item.type === "system"
+
+export const isCallMessage = (item: F0ChatItem): item is F0ChatCallMessage =>
+  item.type === "call"
 
 /**
  * A WHITELIST, not "anything that isn't a system row". The transcript's item
@@ -860,8 +934,14 @@ export type F0ChatHeaderAction = {
   label: string
   icon?: IconType
   /** The host decides what happens: call a runtime method (togglePin,
-   * toggleMute), open its own modal, navigate… */
-  onClick: (channel: F0ChatChannel) => void
+   * toggleMute), open its own modal, navigate…
+   *
+   * An `inline` action that returns a promise spins until it settles, and
+   * refuses further presses while it does. Actions that only toggle something
+   * local return nothing and never spin; the ones worth returning are those
+   * that go to a server before anything visibly happens — starting a huddle
+   * being the case this was built for. */
+  onClick: (channel: F0ChatChannel) => void | Promise<unknown>
   /** Where the action renders: inside the ellipsis overflow menu (default) or
    * as its own icon button next to it. Inline requires `icon` — an inline
    * action without one falls back to the menu. */
