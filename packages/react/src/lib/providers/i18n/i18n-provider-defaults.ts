@@ -72,6 +72,9 @@ export const defaultTranslations = {
     language: "Language",
     audio: "Audio",
   },
+  swipeDeck: {
+    label: "Swipe deck",
+  },
   meetingCard: {
     today: "Today",
     yesterday: "Yesterday",
