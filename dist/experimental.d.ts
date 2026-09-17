@@ -46,6 +46,8 @@ import { F0CommandPaletteProviderProps as F0CommandPaletteProviderProps_2 } from
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0LocationInputProps as F0LocationInputProps_2 } from './types';
+import { F0NumberInputFieldProps as F0NumberInputFieldProps_2 } from './F0NumberInput';
+import { F0NumberInputInlineProps as F0NumberInputInlineProps_2 } from './F0NumberInput';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -10128,9 +10130,23 @@ export declare interface F0NotesTextEditorSkeletonProps {
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
  */
-export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const F0NumberInput: ForwardRefExoticComponent<(Omit<F0NumberInputFieldProps, "ref"> | Omit<F0NumberInputInlineProps, "ref">) & RefAttributes<HTMLInputElement>>;
 
-export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
+declare type F0NumberInputBaseProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number] | "variant" | "editing" | "onDismiss">;
+
+export declare type F0NumberInputFieldProps = F0NumberInputBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0NumberInputInlineProps = F0NumberInputBaseProps & {
+    variant: "inline";
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0NumberInputProps = F0NumberInputFieldProps | F0NumberInputInlineProps;
 
 /** @experimental This is an experimental component, use it at your own risk. */
 export declare const F0PhoneInput: ForwardRefExoticComponent<F0PhoneInputProps_2 & RefAttributes<HTMLInputElement>>;
@@ -12301,7 +12317,7 @@ declare const inlineDismissReasons: readonly ["blur", "escape", "commit", "popup
  */
 export declare const Input: ForwardRefExoticComponent<(Omit<F0TextInputFieldProps_2, "ref"> | Omit<F0TextInputInlineProps_2, "ref">) & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "editing" | "variant" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "editing" | "variant" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle" | "inlineText"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -12398,6 +12414,12 @@ declare type InputFieldProps<T> = {
     transparent?: boolean;
     variant?: InputFieldVariant;
     editing?: boolean;
+    /**
+     * What the inline variant prints at rest, when the value alone is not what
+     * the editor shows: F0NumberInput appends its `units` to the formatted
+     * number. Defaults to the value.
+     */
+    inlineText?: string;
 };
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
@@ -13570,9 +13592,10 @@ declare type NumberFilterValue = {
  *
  * @removeIn 2.0.0
  */
-export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const NumberInput: ForwardRefExoticComponent<(Omit<F0NumberInputFieldProps_2, "ref"> | Omit<F0NumberInputInlineProps_2, "ref">) & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "variant" | "editing"> & {
+    onDismiss?: (reason: InlineDismissReason) => void;
     locale: string;
     value?: number | null;
     step?: number;
