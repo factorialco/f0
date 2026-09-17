@@ -381,7 +381,7 @@ describe("buildMarkdown", () => {
     expect(md).toContain("not** reported")
   })
 
-  it("puts breaking changes in the visible table, additive behind a details", () => {
+  it("puts breaking changes in an expanded details, additive behind a closed one", () => {
     const md = buildMarkdown(
       {
         ...empty,
@@ -408,13 +408,42 @@ describe("buildMarkdown", () => {
       },
       { hasBaseline: true }
     )
-    expect(md).toContain("Could break a query")
+    expect(md).toContain("Could break a query (1 change)")
     expect(md).toContain('`button "Clear"`')
+    // Short enough to stay open; the additive table always starts collapsed.
+    expect(md).toContain("<details open>")
     expect(md).toContain("<details>")
     expect(md).toContain('`button "More"`')
     expect(md).toContain("1 change that could break")
     // The additive-only story must not inflate the breaking-scope count.
     expect(md).toContain("across **1 story**")
+  })
+
+  it("collapses a breaking table that would bury the rest of the comment", () => {
+    const md = buildMarkdown(
+      {
+        ...empty,
+        changed: [
+          {
+            id: "a",
+            title: "Components/InputField",
+            name: "Default",
+            file: "f.tsx",
+            removed: Array.from({ length: 21 }, (_, i) => ({
+              key: `button "Clear ${i}"`,
+              before: 1,
+              after: 0,
+            })),
+            added: [],
+            renamed: [],
+          },
+        ],
+      },
+      { hasBaseline: true }
+    )
+    expect(md).toContain("Could break a query (21 changes)")
+    expect(md).not.toContain("<details open>")
+    expect(md).toContain('`button "Clear 20"`')
   })
 
   it("renders a rename as a single before/after row", () => {

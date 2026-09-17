@@ -311,6 +311,20 @@ export function countBreaking(result: AriaDiffResult): number {
   )
 }
 
+/**
+ * A handful of rows reads fine expanded; a few hundred bury the rest of the
+ * comment — and the headline above already carries the count — so a section
+ * longer than this renders shut.
+ */
+const INLINE_ROW_LIMIT = 20
+
+function collapsible(summary: string, body: string, open: boolean): string {
+  return (
+    `\n<details${open ? " open" : ""}>\n` +
+    `<summary><strong>${summary}</strong></summary>\n\n${body}\n</details>\n`
+  )
+}
+
 function describeCount(delta: NodeDelta): string {
   if (delta.before === 0) return "added"
   if (delta.after === 0) return "removed"
@@ -399,21 +413,30 @@ export function buildMarkdown(
         ),
       ])
       .join("\n")
+    const rowCount = withBreaks.reduce(
+      (n, s) => n + s.renamed.length + s.removed.length,
+      0
+    )
     sections.push(
-      "\n#### Could break a query\n\n" +
+      collapsible(
+        `Could break a query (${rowCount} change${rowCount === 1 ? "" : "s"})`,
         "| Story | Change | Before | After |\n| --- | --- | --- | --- |\n" +
-        rows +
-        "\n"
+          rows +
+          "\n",
+        rowCount <= INLINE_ROW_LIMIT
+      )
     )
   }
 
   if (result.deletedStories.length) {
     sections.push(
-      "\n#### Stories that no longer exist\n\n" +
+      collapsible(
+        `Stories that no longer exist (${result.deletedStories.length})`,
         result.deletedStories
           .map((s) => `- ${s.title} / ${s.name} (\`${s.file}\`)`)
-          .join("\n") +
-        "\n"
+          .join("\n") + "\n",
+        result.deletedStories.length <= INLINE_ROW_LIMIT
+      )
     )
   }
 
@@ -427,12 +450,13 @@ export function buildMarkdown(
       )
       .join("\n")
     sections.push(
-      `\n<details>\n<summary>Additive only (${additiveOnly.length} stor${
-        additiveOnly.length === 1 ? "y" : "ies"
-      })</summary>\n\n` +
-        "| Story | Node | Change |\n| --- | --- | --- |\n" +
-        rows +
-        "\n\n</details>\n"
+      collapsible(
+        `Additive only (${additiveOnly.length} stor${
+          additiveOnly.length === 1 ? "y" : "ies"
+        })`,
+        "| Story | Node | Change |\n| --- | --- | --- |\n" + rows + "\n",
+        false
+      )
     )
   }
 
