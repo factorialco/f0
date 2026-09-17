@@ -43,7 +43,7 @@ export const WidgetStage = ({
 
   return (
     <>
-      <div ref={anchorRef} style={{ display: "contents" }} />
+      <div ref={anchorRef} className="contents" />
       {createPortal(children, stage)}
     </>
   )
