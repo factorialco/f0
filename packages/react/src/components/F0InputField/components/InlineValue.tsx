@@ -6,22 +6,16 @@ import {
 } from "../variants"
 
 type InlineValueProps = {
-  /** Accessible name for the value when the visible label is hidden. */
   label: string
   hideLabel?: boolean
-  /** The value already formatted for reading. Empty shows `placeholder`. */
   text: string
   placeholder?: string
   size?: InputFieldSize
 }
 
 /**
- * The at-rest presentation of an inline input: the value as plain text, with
- * no border, no background and no input element.
- *
- * The transparent border and the `px-3` on the text repeat the editor's own
- * chrome, so the first glyph sits at the same x in both modes and the value
- * does not jump when the field is activated.
+ * The transparent border and the `px-3` repeat the editor's chrome, so the
+ * first glyph sits at the same x in both modes.
  */
 const InlineValue = ({
   label,

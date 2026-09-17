@@ -188,19 +188,7 @@ export type InputFieldProps<T> = {
     onChange: (selected: boolean) => void
   }
   transparent?: boolean
-  /**
-   * `"inline"` is the detail-row presentation: the field fills the box its row
-   * declares, in both axes, and reads as plain text until `editing` is true.
-   * Defaults to `"field"`, the standard form presentation.
-   */
   variant?: InputFieldVariant
-  /**
-   * Which presentation the `"inline"` variant draws. Controlled by the parent
-   * and never by the field itself — the field reports what the user did and
-   * keeps drawing the editor until this changes.
-   *
-   * @default false
-   */
   editing?: boolean
 }
 
@@ -253,9 +241,6 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     ref
   ) => {
     const inline = variant === "inline"
-    // The inline variant is mounted at the form size, 40px, because that is
-    // the box a detail row declares. Everywhere else the historical runtime
-    // default wins over the cva one.
     const size = sizeProp ?? (inline ? "md" : "sm")
 
     const generatedId = useId()
@@ -391,8 +376,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const hasAppend = append || appendTag || buttonToggle
 
     // The inline variant at rest: the value as text, no input element, no
-    // chrome. Placed after every hook so the two presentations keep the same
-    // hook order.
+    // chrome.
     if (inline && !editing) {
       return (
         <div

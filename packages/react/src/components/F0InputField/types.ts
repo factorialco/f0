@@ -1,13 +1,6 @@
 export const inputFieldVariantNames = ["field", "inline"] as const
 export type InputFieldVariant = (typeof inputFieldVariantNames)[number]
 
-/**
- * Why an inline field stopped being edited. The field reports it and changes
- * nothing: the parent decides whether that ends the edit.
- *
- * Fields whose editor is a popup (select, date picker) add their own reason
- * when they get an inline variant.
- */
 export const inlineDismissReasons = ["blur", "escape", "commit"] as const
 export type InlineDismissReason = (typeof inlineDismissReasons)[number]
 
