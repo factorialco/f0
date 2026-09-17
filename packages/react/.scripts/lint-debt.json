@@ -1,8 +1,8 @@
 {
   "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
-  "total": 369,
+  "total": 367,
   "rules": {
-    "f0-styles/no-inline-styles": 255,
+    "f0-styles/no-inline-styles": 253,
     "sonarjs/cognitive-complexity": 114
   },
   "files": {
@@ -590,9 +590,6 @@
     "src/sds/Home/WidgetContainer/WidgetStage.tsx": {
       "f0-styles/no-inline-styles": 1
     },
-    "src/sds/Home/WidgetContainer/index.spec.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
     "src/sds/Home/WidgetContainer/index.tsx": {
       "f0-styles/no-inline-styles": 3,
       "sonarjs/cognitive-complexity": 1
@@ -604,9 +601,6 @@
       "f0-styles/no-inline-styles": 1
     },
     "src/sds/Home/slotRenderers.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
-    "src/sds/Home/useScrollFade.spec.tsx": {
       "f0-styles/no-inline-styles": 1
     },
     "src/sds/UpsellingKit/ProductCard/index.tsx": {
