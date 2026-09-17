@@ -1,5 +1,8 @@
 import { forwardRef, useEffect, useState } from "react"
-import { InputFieldProps } from "@/components/F0InputField"
+import {
+  InputFieldProps,
+  type InputFieldVariant,
+} from "@/components/F0InputField"
 import type {
   GranularityDefinition,
   NavigationGranularityKey,
@@ -24,6 +27,10 @@ type DateInputProps = {
   maxDate?: Date
   showIcon?: boolean
   displayFormat?: DateStringFormat
+  variant?: InputFieldVariant
+  editing?: boolean
+  onPressEscape?: () => void
+  onInputBlur?: () => void
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -38,6 +45,10 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       onClear,
       showIcon = true,
       displayFormat,
+      variant,
+      editing,
+      onPressEscape,
+      onInputBlur,
       ...inputProps
     },
     ref
@@ -118,13 +129,21 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
           if (e.key === "Enter") {
             handleBlur()
           }
+          if (e.key === "Escape") {
+            onPressEscape?.()
+          }
         }}
         type="text"
         onChange={handleChange}
         error={error || inputProps.error}
-        onBlur={handleBlur}
+        onBlur={() => {
+          handleBlur()
+          onInputBlur?.()
+        }}
         value={inputValue}
         onClickContent={() => onOpenChange?.(true)}
+        variant={variant}
+        editing={editing}
       />
     )
   }

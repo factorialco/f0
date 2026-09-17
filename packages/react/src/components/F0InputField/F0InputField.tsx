@@ -399,6 +399,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             text={localValue ?? ""}
             placeholder={placeholder}
             size={size}
+            icon={icon}
           />
           <InputMessages status={status} />
         </div>
