@@ -215,7 +215,7 @@ const useRotatingPlaceholder = (
     setPhase("typing")
   }, [phase, shown, example, count, paused, reducedMotion])
 
-  if (reducedMotion || paused) {
+  if (count === 0 || reducedMotion || paused) {
     return example
   }
   return example.slice(0, shown)
