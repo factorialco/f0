@@ -6,6 +6,7 @@ import {
 } from "motion/react"
 import { useEffect, useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
+import { F0Button } from "@/components/F0Button"
 import { useReducedMotion } from "@/lib/a11y"
 import { F0Avatar } from "../../../../components/avatars/F0Avatar"
 import type { AvatarVariant } from "../../../../components/avatars/F0Avatar"
@@ -52,8 +53,6 @@ interface SearchProps {
   inlineAction?: {
     label: string
     icon?: IconType
-    /** What it found in the text, said before it is run. */
-    hint?: string
     onClick: (query: string) => void
   }
   /**
@@ -336,25 +335,13 @@ const InlineAction = ({
   onEmpty: () => void
 }) =>
   !action || busy ? null : (
-    <motion.button
-      type="button"
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <F0Button
+      variant="outline"
+      size="sm"
+      label={action.label}
+      icon={action.icon}
       onClick={() => (query ? action.onClick(query) : onEmpty())}
-      title={action.hint}
-      className={cn(
-        "flex h-6 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-xs border-none bg-f1-background-secondary px-2 text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary-hover",
-        focusRing()
-      )}
-    >
-      {action.icon ? <F0Icon icon={action.icon} size="sm" /> : null}
-      {action.label}
-      {action.hint ? (
-        <span className="text-f1-foreground-secondary">{action.hint}</span>
-      ) : null}
-    </motion.button>
+    />
   )
 
 /**

@@ -52,7 +52,6 @@ import {
   type PresetFormValues,
 } from "./components/PresetFormDialog"
 import { Search } from "./components/Search"
-import { AssistedQueryPanel } from "./components/Search/AssistedQueryPanel"
 import { useSearchPreview } from "./components/Search/useSearchPreview"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
@@ -914,10 +913,6 @@ const OneDataCollectionComp = <
       setCurrentSearch(undefined)
     }
   }
-  // The query written inside the filters panel is that panel's own: it stages
-  // filters there and waits for the apply button, so showing it in the field
-  // outside would claim something had been applied that had not.
-  const [panelQuery, setPanelQuery] = useState("")
 
   // Words become filters while they are being typed: a recognised stretch is
   // applied at once, so the chips and the table answer the sentence as it is
@@ -930,17 +925,6 @@ const OneDataCollectionComp = <
   const assistedValue = source.searchPresentation
     ? (source.searchPresentation.value ?? assistedQuery)
     : undefined
-  // What the query would become, counted before it is run: the recognition is
-  // local and free, so the button can promise what the model will be asked for
-  // without anything being applied yet.
-  const assistedHintFor = (query: string | undefined) => {
-    if (!analyze || !query) {
-      return undefined
-    }
-    const found = Object.keys(analyze(query).filters).length
-    return found > 0 ? String(found) : undefined
-  }
-
   // Held in a ref, and compared against what was last applied: applying
   // filters rebuilds the source, so depending on the setter — or re-applying
   // the same reading — would have the table reloading on a loop.
@@ -1872,43 +1856,8 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
-              quickFilter={
-                search && assistedSearchProps?.triggerLabel
-                  ? {
-                      label: assistedSearchProps.triggerLabel,
-                      render: ({ stage }) => (
-                        <AssistedQueryPanel
-                          value={panelQuery}
-                          onChange={setPanelQuery}
-                          onSettle={(settled) => {
-                            const staged = applyFromQuery(
-                              "panel",
-                              source.searchPresentation?.analyze?.(settled)
-                                ?.filters ?? {}
-                            )
-                            stage(staged)
-                            const serialized = JSON.stringify(staged)
-                            if (serialized === lastAppliedRef.current) {
-                              return
-                            }
-                            lastAppliedRef.current = serialized
-                            setFiltersRef.current(
-                              staged as Parameters<typeof setFilters>[0]
-                            )
-                          }}
-                          analysis={source.searchPresentation?.analyze?.(
-                            panelQuery
-                          )}
-                          placeholder={
-                            source.searchPresentation?.placeholderRotation?.[0]
-                          }
-                          recent={source.searchPresentation?.recent}
-                          recentTitle={i18n.collections.search.recent}
-                        />
-                      ),
-                    }
-                  : undefined
-              }
+              // Hidden while the action inside the field is the one being
+              // weighed. The pane comes back by passing `quickFilter` again.
             >
               <div ref={headerActionsRef} className="flex items-center gap-2">
                 {isLoading ? (
@@ -1948,7 +1897,6 @@ const OneDataCollectionComp = <
                       assistedSearchProps
                         ? {
                             label: i18n.collections.search.filterWithAssistant,
-                            hint: assistedHintFor(currentSearch),
                             onClick: (query) => {
                               // The text stops being a name search and becomes
                               // a question: leaving both on would have the two
