@@ -211,7 +211,12 @@ Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
 - CVA from `"cva"` (not `"class-variance-authority"`) for multi-variant components
 - Design tokens use `f1-` prefix: `text-f1-foreground`, `bg-f1-background`, `border-f1-border`, etc.
 - `focusRing()` from `@/lib/utils` on all focusable elements
-- Inline `style` only for truly dynamic values (hex colors, percentages)
+- Inline `style` only for truly dynamic values (hex colors, percentages) — a
+  measured offset, a `${percentage}%` width, a colour that arrives as data. Take
+  the exception with an `oxlint-disable` comment naming the reason. Everything
+  else is a Tailwind class. Enforced by `f0-styles/no-inline-styles`, a RATCHET
+  rule: existing hits are baselined in `.scripts/lint-debt.json` and that count
+  may only shrink. `src/ui/` is out of scope (re-synced third-party wrappers).
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 
