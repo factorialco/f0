@@ -1,8 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { expect, fn, userEvent, waitFor, within } from "storybook/test"
+import {
+  expect,
+  fireEvent,
+  fn,
+  userEvent,
+  waitFor,
+  within,
+} from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Select, type F0SelectItemProps, type F0SelectProps } from ".."
+import type { SelectInlineDismissReason } from "../types"
 
 type Role = "owner" | "editor" | "viewer"
 
@@ -33,56 +41,105 @@ const longRoleOptions: F0SelectItemProps<Role>[] = roleOptions.map((option) =>
       }
 )
 
+const peopleOptions: F0SelectItemProps<Role>[] = [
+  {
+    value: "viewer",
+    label: "Ada Lovelace",
+    avatar: { type: "person", firstName: "Ada", lastName: "Lovelace" },
+  },
+  {
+    value: "editor",
+    label: "Grace Hopper",
+    avatar: { type: "person", firstName: "Grace", lastName: "Hopper" },
+  },
+]
+
 type InlineRoleSelectProps = {
   value?: Role
   options?: F0SelectItemProps<Role>[]
   label?: string
   placeholder?: string
   disabled?: boolean
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  hideLabel?: boolean
+  editing?: boolean
   onChange?: (value: Role) => void
+  onDismiss?: (reason: SelectInlineDismissReason) => void
   fitContentWidth?: boolean
   actions?: F0SelectProps<Role>["actions"]
   portalContainer?: HTMLElement | null
 }
 
+/**
+ * The parent owns the mode: the story holds `editing`, the component only
+ * reports what the user did.
+ */
 function InlineRoleSelect({
   value: initialValue,
   options = roleOptions,
   label = "Access level",
   placeholder = "Select role",
+  editing: initialEditing = false,
   onChange,
+  onDismiss,
   ...props
 }: InlineRoleSelectProps) {
   const [value, setValue] = useState(initialValue)
+  const [editing, setEditing] = useState(initialEditing)
 
   return (
-    <F0Select
-      {...props}
-      variant="inline"
-      label={label}
-      placeholder={placeholder}
-      options={options}
-      value={value}
-      onChange={(nextValue) => {
-        setValue(nextValue)
-        onChange?.(nextValue)
-      }}
-    />
+    <div className="flex w-[320px] flex-col gap-2">
+      <button
+        type="button"
+        data-testid="toggle-editing"
+        className="w-fit rounded border border-solid border-f1-border bg-f1-background px-2 py-1 text-f1-foreground"
+        onClick={() => setEditing((current) => !current)}
+      >
+        {editing ? "Stop editing" : "Start editing"}
+      </button>
+      {/* Somewhere to send focus without changing the mode, so a dismissal can
+          be told apart from the parent closing the dropdown. */}
+      <button
+        type="button"
+        data-testid="focus-sink"
+        className="w-fit rounded border border-solid border-f1-border bg-f1-background px-2 py-1 text-f1-foreground"
+      >
+        Focus something else
+      </button>
+      <div data-testid="value-box" className="h-10 w-[320px]">
+        <F0Select
+          {...props}
+          variant="inline"
+          label={label}
+          placeholder={placeholder}
+          options={options}
+          value={value}
+          editing={editing}
+          onDismiss={onDismiss}
+          onChange={(nextValue) => {
+            setValue(nextValue)
+            onChange?.(nextValue)
+          }}
+        />
+      </div>
+    </div>
   )
 }
 
-function OpenInlineRoleSelect(props: InlineRoleSelectProps) {
-  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
-    null
-  )
+/** Where the first glyph of the value is painted, inset included. */
+function textStartX(element: Element) {
+  const { left } = element.getBoundingClientRect()
+  return left + parseFloat(getComputedStyle(element).paddingLeft)
+}
 
-  return (
-    <div ref={setPortalContainer} className="relative min-h-[280px] w-[320px]">
-      <InlineRoleSelect {...props} open portalContainer={portalContainer} />
-    </div>
+/** The element that carries the inset, in whichever mode is on screen. */
+function control(canvasElement: HTMLElement) {
+  const element = canvasElement.querySelector(
+    "[data-testid='select-inline-value'], [role='combobox']"
   )
+  if (!element) {
+    throw new Error("the inline select rendered neither text nor a trigger")
+  }
+  return element
 }
 
 const removeAccessAction = {
@@ -102,7 +159,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Use the inline F0Select variant for compact single-value controls embedded in desktop rows, such as roles, statuses, and access levels. It is borderless, non-clearable, and does not support multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props. Its required label provides the accessible name and becomes the visible empty-state fallback when no placeholder is provided. The popup keeps the standard F0Select density and behavior.",
+          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no chevron, no button and no hover background; the dropdown replaces it only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
       },
     },
   },
@@ -111,6 +168,7 @@ const meta = {
     label: "Access level",
     placeholder: "Select role",
     onChange: fn(),
+    onDismiss: fn(),
     actions: [removeAccessAction],
   },
   argTypes: {
@@ -124,71 +182,57 @@ const meta = {
 } satisfies Meta<typeof InlineRoleSelect>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<InlineRoleSelectProps>
 
-export const ViewerSelected: Story = {
+export const AtRest: Story = {
   args: {
     value: "viewer",
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const page = within(canvasElement.closest("body")!)
-    const trigger = canvas.getByRole("combobox", { name: "Access level" })
 
-    await step("Expose the initial combobox state", async () => {
-      await expect(trigger).toHaveAttribute("aria-expanded", "false")
-      await waitFor(() => {
-        expect(canvas.getByText("Viewer")).toBeInTheDocument()
-      })
+    // The label arrives with the dataset, so the first paint is still `...`.
+    await waitFor(async () => {
+      await expect(canvas.getByTestId("select-inline-value")).toHaveTextContent(
+        "Viewer"
+      )
     })
-
-    await step("Open from the keyboard and navigate to Editor", async () => {
-      trigger.focus()
-      await userEvent.keyboard("{Enter}")
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute("aria-expanded", "true")
-      })
-      await waitFor(() => {
-        expect(page.getByRole("listbox")).toBeInTheDocument()
-      })
-      await waitFor(() => {
-        expect(page.getByRole("option", { name: /Viewer/ })).toHaveFocus()
-      })
-
-      await userEvent.keyboard("{ArrowUp}")
-      await waitFor(() => {
-        expect(page.getByRole("option", { name: /Editor/ })).toHaveFocus()
-      })
-    })
-
-    await step("Select the focused role", async () => {
-      await userEvent.keyboard("{Enter}")
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute("aria-expanded", "false")
-        expect(canvas.getByText("Editor")).toBeInTheDocument()
-      })
-      await expect(args.onChange).toHaveBeenCalledWith("editor")
-    })
-
-    await step("Close with Escape and restore trigger focus", async () => {
-      trigger.focus()
-      await userEvent.keyboard("{Enter}")
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute("aria-expanded", "true")
-      })
-
-      await userEvent.keyboard("{Escape}")
-      await waitFor(() => {
-        expect(trigger).toHaveAttribute("aria-expanded", "false")
-      })
-      await waitFor(() => {
-        expect(trigger).toHaveFocus()
-      })
-    })
+    await expect(canvas.queryByRole("combobox")).toBeNull()
+    await expect(
+      canvas.getByTestId("select-inline-value").querySelector("svg")
+    ).toBeNull()
   },
 }
 
-export const EmptyPlaceholder: Story = {}
+export const EmptyPlaceholder: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getByText("Select role")).toBeVisible()
+  },
+}
+
+export const WithAvatar: Story = {
+  args: {
+    value: "viewer",
+    options: peopleOptions,
+  },
+}
+
+export const HiddenLabel: Story = {
+  args: {
+    value: "viewer",
+    hideLabel: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(canvas.getByTestId("select-inline-value")).toHaveAttribute(
+      "aria-label",
+      "Access level"
+    )
+  },
+}
 
 export const Disabled: Story = {
   args: {
@@ -211,16 +255,178 @@ export const LongLabel: Story = {
   ],
 }
 
-export const Open: Story = {
+/**
+ * The value must not move when the row activates it: same first glyph, same
+ * box.
+ */
+export const TextDoesNotMove: Story = {
   args: {
     value: "viewer",
   },
-  // The shared popup currently aria-hides its focusable trigger. Keep axe
-  // running and surface that existing aria-hidden-focus debt as non-blocking.
+  // An open dropdown aria-hides its own focusable trigger. Keep axe running and
+  // surface that existing debt as non-blocking.
   parameters: {
     a11y: { test: "todo" },
   },
-  render: (args) => <OpenInlineRoleSelect {...args} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    const readX = textStartX(control(canvasElement))
+    const readHeight = control(canvasElement).getBoundingClientRect().height
+
+    await step("the read presentation is the row's 40px box", async () => {
+      await expect(readHeight).toBe(40)
+    })
+
+    await userEvent.click(canvas.getByTestId("toggle-editing"))
+    await waitFor(async () => {
+      await expect(control(canvasElement).getAttribute("role")).toBe("combobox")
+    })
+
+    await step("the editor starts its text at the same x", async () => {
+      await expect(
+        Math.abs(textStartX(control(canvasElement)) - readX)
+      ).toBeLessThanOrEqual(1)
+    })
+
+    await step("and is exactly as tall", async () => {
+      await expect(control(canvasElement).getBoundingClientRect().height).toBe(
+        readHeight
+      )
+    })
+  },
+}
+
+/** Both presentations fill whatever box the row declares. */
+export const FillsTheRowBox: Story = {
+  args: {
+    value: "viewer",
+  },
+  parameters: {
+    a11y: { test: "todo" },
+  },
+  render: (args) => <FixedBox {...args} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const box = canvas.getByTestId("fixed-box")
+    const expected = box.getBoundingClientRect()
+
+    await step("the box is the form's 40 by 320", async () => {
+      await expect(expected.height).toBe(40)
+      await expect(expected.width).toBe(320)
+    })
+
+    await step("the read presentation fills it", async () => {
+      const rect = control(canvasElement).getBoundingClientRect()
+      await expect(rect.width).toBe(expected.width)
+      await expect(rect.height).toBe(expected.height)
+    })
+
+    await userEvent.click(canvas.getByTestId("start-editing"))
+
+    await step("and so does the dropdown's trigger", async () => {
+      await waitFor(async () => {
+        const rect = control(canvasElement).getBoundingClientRect()
+        await expect(rect.width).toBe(expected.width)
+        await expect(rect.height).toBe(expected.height)
+      })
+    })
+  },
+}
+
+function FixedBox({
+  value = "viewer" as Role,
+  ...props
+}: InlineRoleSelectProps) {
+  const [editing, setEditing] = useState(false)
+
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        data-testid="start-editing"
+        className="w-fit rounded border border-solid border-f1-border bg-f1-background px-2 py-1 text-f1-foreground"
+        onClick={() => setEditing(true)}
+      >
+        Start editing
+      </button>
+      <div
+        data-testid="fixed-box"
+        // A ring, not a border: it marks the 40 by 320 box without taking any
+        // space out of it, so the measurement stays honest.
+        className="h-10 w-80 ring-1 ring-f1-border"
+      >
+        <F0Select
+          {...props}
+          variant="inline"
+          label="Access level"
+          hideLabel
+          options={roleOptions}
+          value={value}
+          editing={editing}
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Every dismissal is reported and none of them changes what is drawn. The
+ * parent decides, or the row gets stuck.
+ */
+export const ReportsDismissWithoutClosing: Story = {
+  args: {
+    value: "viewer",
+    editing: true,
+  },
+  parameters: {
+    a11y: { test: "todo" },
+  },
+  play: async ({ canvasElement, args, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    // The list is virtualised behind the opening animation: the listbox lands
+    // before its options do.
+    await waitFor(
+      async () => {
+        await expect(page.getAllByRole("option").length).toBeGreaterThan(0)
+      },
+      { timeout: 5000 }
+    )
+
+    await step("Escape reverts", async () => {
+      await userEvent.keyboard("{Escape}")
+      await waitFor(async () => {
+        await expect(args.onDismiss).toHaveBeenCalledWith("escape")
+      })
+    })
+
+    await step("the dropdown is still on screen", async () => {
+      await expect(page.getByRole("listbox")).toBeInTheDocument()
+    })
+
+    await step("selecting an option commits", async () => {
+      await userEvent.click(page.getByRole("option", { name: /Editor/ }))
+      await waitFor(async () => {
+        await expect(args.onDismiss).toHaveBeenCalledWith("commit")
+        await expect(args.onChange).toHaveBeenCalledWith("editor")
+      })
+    })
+
+    await step("and the dropdown is still on screen", async () => {
+      await expect(page.getByRole("listbox")).toBeInTheDocument()
+    })
+
+    await step("closing the popup from outside reports it", async () => {
+      // The open popup sets `pointer-events: none` on the body, which stops
+      // userEvent before it dispatches. The layer listens for pointerdown.
+      fireEvent.pointerDown(document.body)
+      await waitFor(async () => {
+        await expect(args.onDismiss).toHaveBeenCalledWith("popupClose")
+      })
+      await expect(page.getByRole("listbox")).toBeInTheDocument()
+    })
+  },
 }
 
 export const DarkMode: Story = {
@@ -241,33 +447,71 @@ export const DarkMode: Story = {
   ),
 }
 
+/** The row's box, so every sample is measured against the same 40px. */
+function SnapshotRow({
+  width = "w-[320px]",
+  ...props
+}: Omit<InlineRoleSelectProps, "onChange"> & { width?: string }) {
+  return (
+    <div className={`h-10 ${width}`}>
+      <F0Select
+        variant="inline"
+        label={props.label ?? "Access level"}
+        hideLabel
+        placeholder={props.placeholder ?? "Select role"}
+        options={props.options ?? roleOptions}
+        value={props.value}
+        disabled={props.disabled}
+      />
+    </div>
+  )
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   args: {},
   parameters: withSnapshot({ a11y: { test: "todo" } }),
   render: () => (
     <div className="flex min-w-[360px] flex-col gap-4 p-4">
-      <InlineRoleSelect value="viewer" />
-      <InlineRoleSelect />
-      <InlineRoleSelect value="viewer" disabled />
-      <div className="w-48">
-        <InlineRoleSelect value="viewer" options={longRoleOptions} />
-      </div>
+      <SnapshotRow value="viewer" />
+      <SnapshotRow />
+      <SnapshotRow value="viewer" disabled />
+      <SnapshotRow value="viewer" options={peopleOptions} />
+      <SnapshotRow value="viewer" options={longRoleOptions} width="w-48" />
       <div className="dark flex items-center gap-4 rounded-md bg-f1-background p-4">
         <div className="flex flex-col gap-1">
           <span className="text-xs text-f1-foreground-secondary">Enabled</span>
-          <InlineRoleSelect value="viewer" label="Enabled access level" />
+          <SnapshotRow value="viewer" label="Enabled access level" />
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs text-f1-foreground-secondary">Disabled</span>
-          <InlineRoleSelect
-            value="viewer"
-            label="Disabled access level"
-            disabled
-          />
+          <SnapshotRow value="viewer" label="Disabled access level" disabled />
         </div>
       </div>
-      <OpenInlineRoleSelect value="viewer" actions={[removeAccessAction]} />
+      <OpenInlineRoleSelect />
     </div>
   ),
+}
+
+/** The editing presentation, with the popup kept inside the snapshot frame. */
+function OpenInlineRoleSelect() {
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
+    null
+  )
+
+  return (
+    <div ref={setPortalContainer} className="relative min-h-[280px] w-[320px]">
+      <div className="h-10 w-[320px]">
+        <F0Select
+          variant="inline"
+          label="Access level"
+          hideLabel
+          options={roleOptions}
+          value="viewer"
+          editing
+          portalContainer={portalContainer}
+        />
+      </div>
+    </div>
+  )
 }

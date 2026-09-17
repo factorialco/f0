@@ -60,6 +60,7 @@ import type {
   F0SelectItemProps,
   F0SelectProps,
   ResolvedRecordType,
+  SelectInlineDismissReason,
 } from "./types"
 export * from "./types"
 
@@ -109,39 +110,51 @@ const asListContainerVariants = cva({
   },
 })
 
+/**
+ * `px-3` on both the trigger and the read presentation, so the first glyph of
+ * the value sits at the same x whether the row is reading or editing.
+ */
+const INLINE_SELECT_INSET = "px-3"
+
 const inlineSelectTriggerClassName = cn(
-  "group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  "group flex h-full w-full max-w-full items-center gap-1 rounded border-0 bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  INLINE_SELECT_INSET,
   textVariants({ variant: "label" })
 )
 
-type InlineSelectTriggerProps = {
+type InlineSelectValueProps = {
   label: string
   placeholder?: string
   selection: F0SelectItemObject<string>[]
   hasValue: boolean
 }
 
+const InlineSelectValue = ({
+  label,
+  placeholder,
+  selection,
+  hasValue,
+}: InlineSelectValueProps) =>
+  hasValue ? (
+    <SelectedItems selection={selection} totalSelectedCount={1} />
+  ) : (
+    <span className="truncate text-f1-foreground-secondary">
+      {placeholder ?? label}
+    </span>
+  )
+
 const InlineSelectTrigger = forwardRef<
   HTMLButtonElement,
-  InlineSelectTriggerProps
->(function InlineSelectTrigger(
-  { label, placeholder, selection, hasValue },
-  ref
-) {
+  InlineSelectValueProps
+>(function InlineSelectTrigger(props, ref) {
   return (
     <SelectTrigger
       ref={ref}
-      aria-label={label}
+      aria-label={props.label}
       className={cn(inlineSelectTriggerClassName, focusRing())}
     >
       <span className="flex min-w-0 max-w-full items-center">
-        {hasValue ? (
-          <SelectedItems selection={selection} totalSelectedCount={1} />
-        ) : (
-          <span className="truncate text-f1-foreground-secondary">
-            {placeholder ?? label}
-          </span>
-        )}
+        <InlineSelectValue {...props} />
       </span>
       <span
         className="flex size-4 shrink-0 items-center justify-center text-f1-icon"
@@ -154,6 +167,33 @@ const InlineSelectTrigger = forwardRef<
 })
 
 InlineSelectTrigger.displayName = "InlineSelectTrigger"
+
+/**
+ * The selection as text. No button and no chevron: at rest the row owns every
+ * affordance, and the select is only what the value says. `disabled` draws
+ * nothing of its own here — there is no affordance left to grey out, and
+ * dimming static text costs it its contrast.
+ */
+const InlineSelectText = ({
+  hideLabel,
+  ...valueProps
+}: InlineSelectValueProps & {
+  hideLabel?: boolean
+}) => (
+  <div
+    data-testid="select-inline-value"
+    aria-label={hideLabel ? valueProps.label : undefined}
+    className={cn(
+      "flex h-full w-full min-w-0 max-w-full items-center",
+      INLINE_SELECT_INSET,
+      textVariants({ variant: "label" })
+    )}
+  >
+    <span className="flex min-w-0 max-w-full items-center">
+      <InlineSelectValue {...valueProps} />
+    </span>
+  </div>
+)
 
 const F0SelectComponent = forwardRef(function Select<
   T extends string,
@@ -203,6 +243,8 @@ const F0SelectComponent = forwardRef(function Select<
     fitContentWidth,
     getSelectedLabel,
     dataTestId,
+    editing,
+    onDismiss,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -236,15 +278,54 @@ const F0SelectComponent = forwardRef(function Select<
   const [openLocal, setOpenLocal] = useState(open)
   const inlineTriggerRef = useRef<HTMLButtonElement>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
-  const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
 
+  const isInline = variant === "inline"
+  /**
+   * `editing` is the inline variant's open state. `open` stays honoured when
+   * `editing` is not passed, so the prop keeps its old meaning for callers that
+   * have not moved yet. The component never writes to either.
+   */
+  const inlineOpen = editing ?? open ?? false
+  const isOpen = isInline ? inlineOpen : openLocal
+
+  /**
+   * The dropdown takes focus itself when it opens, landing on the selected
+   * option so the arrow keys work. The trigger is only the fallback, for the
+   * frame where the popup has not mounted yet.
+   */
   useEffect(() => {
-    if (variant === "inline" && previousOpenRef.current && !openLocal) {
-      inlineTriggerRef.current?.focus({ preventScroll: true })
+    if (!isInline || !inlineOpen) {
+      return
     }
-    previousOpenRef.current = openLocal
-  }, [openLocal, variant])
+    const frame = requestAnimationFrame(() => {
+      if (document.activeElement && document.activeElement !== document.body) {
+        return
+      }
+      inlineTriggerRef.current?.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isInline, inlineOpen])
+
+  /**
+   * Radix reports a close, never why. Escape is recorded as it is pressed and a
+   * selection as it is made; anything left over is the popup closing on its own
+   * — an outside click, or a dismissal Radix handles internally.
+   */
+  const inlineDismissReasonRef = useRef<SelectInlineDismissReason | null>(null)
+
+  useEffect(() => {
+    if (!isInline || !inlineOpen) {
+      return
+    }
+    const recordEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        inlineDismissReasonRef.current = "escape"
+      }
+    }
+    document.addEventListener("keydown", recordEscape, true)
+    return () => document.removeEventListener("keydown", recordEscape, true)
+  }, [isInline, inlineOpen])
 
   const defaultItems = useMemo(
     () =>
@@ -609,6 +690,9 @@ const F0SelectComponent = forwardRef(function Select<
       }
 
       hasUserInteracted.current = true
+      if (isInline && checked) {
+        inlineDismissReasonRef.current = "commit"
+      }
       handleSelectItemChange(value, checked)
 
       // Only call onChangeSelectedOption if we have the item data
@@ -631,6 +715,7 @@ const F0SelectComponent = forwardRef(function Select<
       onChangeSelectedOption,
       itemsByValue,
       handleSelectItemChange,
+      isInline,
       multiple,
       clearable,
       localValue,
@@ -729,9 +814,9 @@ const F0SelectComponent = forwardRef(function Select<
 
     // Only reset search in single select mode when dropdown is closed
     // Don't clear while user is still typing/searching with dropdown open
-    // Don't clear in asList mode since openLocal is never true (no popover)
+    // Don't clear in asList mode since the popover is never open
     // and clearing would trigger useSelectable to reset the selection
-    if (!multiple && !openLocal && !asList) {
+    if (!multiple && !isOpen && !asList) {
       setCurrentSearch(undefined)
     }
 
@@ -894,6 +979,18 @@ const F0SelectComponent = forwardRef(function Select<
   }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
 
   const handleChangeOpenLocal = (open: boolean) => {
+    // The inline variant does not own its open state, so a close is a report,
+    // not a transition: the dropdown stays up until `editing` says otherwise.
+    if (isInline) {
+      if (!open) {
+        const reason = inlineDismissReasonRef.current ?? "popupClose"
+        inlineDismissReasonRef.current = null
+        onOpenChange?.(false)
+        onDismiss?.(reason)
+      }
+      return
+    }
+
     if (!open && hasDeferredApply && !isApplyingRef.current) {
       restoreCommittedSelection()
     }
@@ -1206,7 +1303,7 @@ const F0SelectComponent = forwardRef(function Select<
     ...props,
     onItemCheckChange,
     disabled,
-    open: openLocal,
+    open: isOpen,
     onOpenChange: handleChangeOpenLocal,
   }
 
@@ -1462,16 +1559,25 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }
 
+  const inlineValueProps = {
+    label,
+    placeholder,
+    selection: getDisplayItemsForSelection,
+    hasValue: !!localValue[0],
+  }
+
+  if (isInline && !inlineOpen) {
+    return (
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        <InlineSelectText {...inlineValueProps} hideLabel={hideLabel} />
+      </DataTestIdWrapper>
+    )
+  }
+
   const triggerWithContent = (
     <SelectPrimitive {...selectPrimitiveProps}>
-      {variant === "inline" ? (
-        <InlineSelectTrigger
-          ref={composedTriggerRef}
-          label={label}
-          placeholder={placeholder}
-          selection={getDisplayItemsForSelection}
-          hasValue={!!localValue[0]}
-        />
+      {isInline ? (
+        <InlineSelectTrigger ref={composedTriggerRef} {...inlineValueProps} />
       ) : (
         <SelectTrigger ref={composedTriggerRef} asChild>
           {children ? (
@@ -1585,15 +1691,13 @@ const F0SelectComponent = forwardRef(function Select<
           )}
         </SelectTrigger>
       )}
-      {openLocal ? selectContent : null}
+      {isOpen ? selectContent : null}
     </SelectPrimitive>
   )
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
-      {variant === "inline"
-        ? triggerWithContent
-        : withTriggerTooltip(triggerWithContent)}
+      {isInline ? triggerWithContent : withTriggerTooltip(triggerWithContent)}
     </DataTestIdWrapper>
   )
 })
