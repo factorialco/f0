@@ -42,7 +42,7 @@ export const AudioDescriptionLineIcon = forwardRef<
       vectorEffect="non-scaling-stroke"
     />
     <text {...AD_TEXT_PROPS} fill="currentColor">
-      {/* i18n-exempt: glyph in the icon artwork, like the CC badge */}
+      {/* oxlint-disable-next-line f0-i18n/no-untranslated-copy -- glyph in the icon artwork, like the CC badge */}
       AD
     </text>
   </svg>
@@ -68,7 +68,7 @@ export const AudioDescriptionFilledIcon = forwardRef<
       <mask id={maskId} maskUnits="userSpaceOnUse">
         <rect x={3} y={6} width={18} height={12} rx={3} fill="white" />
         <text {...AD_TEXT_PROPS} fill="black">
-          {/* i18n-exempt: glyph in the icon artwork, like the CC badge */}
+          {/* oxlint-disable-next-line f0-i18n/no-untranslated-copy -- glyph in the icon artwork, like the CC badge */}
           AD
         </text>
       </mask>
