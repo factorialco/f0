@@ -360,6 +360,79 @@ export const WithClearable: Story = {
   },
 }
 
+/**
+ * March 2026 spans six week rows with a Monday week start — the tallest a
+ * calendar gets, and the case a height cap cuts first.
+ */
+const sixWeekMonth = new Date(2026, 2, 10)
+
+export const KeepsTheCalendarWhole: Story = {
+  async beforeEach() {
+    MockDate.set(sixWeekMonth)
+    return () => MockDate.reset()
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The calendar is a fixed grid: it either shows every week or it is broken. A popover that caps itself at the space Radix measured on the chosen side hides the last weeks behind a scrollbar, so this story opens the picker inside a short container and checks the calendar kept its own height.",
+      },
+    },
+  },
+  args: {
+    label: "Date",
+    placeholder: "Select a date",
+    value: {
+      value: { from: sixWeekMonth, to: sixWeekMonth },
+      granularity: "day",
+    },
+  },
+  render: (args) => (
+    <div className="h-[300px] overflow-auto rounded-md border border-solid border-f1-border-secondary p-4">
+      <F0DatePicker {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("open the calendar", async () => {
+      await userEvent.click(canvas.getByRole("textbox"))
+      await expect((await screen.findAllByRole("grid")).length).toBeGreaterThan(
+        0
+      )
+    })
+
+    // The month transition is framer-motion's, which keeps running under the
+    // runner; polling for opacity settles here and never in a browser, so wait
+    // the known duration out instead.
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
+    // The transition leaves the month it animated from mounted beside the one
+    // it landed on; the first grid is the one being read.
+    const grid = screen.getAllByRole("grid")[0]
+    const popup = grid.closest("[data-radix-popper-content-wrapper]")
+      ?.firstElementChild as HTMLElement
+
+    await step("the popup carries no scroll of its own", async () => {
+      await expect(popup.scrollHeight).toBe(popup.clientHeight)
+      const style = getComputedStyle(popup)
+      await expect(style.maxHeight).toBe("none")
+      await expect(style.overflowY).toBe("visible")
+    })
+
+    await step("every week row is on screen", async () => {
+      const weeks = [...grid.querySelectorAll("tbody tr")]
+      await expect(weeks).toHaveLength(6)
+
+      for (const week of weeks) {
+        const rect = week.getBoundingClientRect()
+        await expect(rect.top).toBeGreaterThanOrEqual(0)
+        await expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight)
+      }
+    })
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({ width: "100%" })),
   args: {
