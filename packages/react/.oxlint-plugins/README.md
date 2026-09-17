@@ -35,6 +35,13 @@ native version of. The aliases are needed because oxlint reserves the names
 `import` and `react` for its own plugins. The same editor caveat below applies
 to them.
 
+`f0-i18n/` holds `no-untranslated-copy`: user-visible copy must come from
+`useI18n()`/`t()`, never a string literal, which no consumer dictionary can reach.
+It reads JSX text, attributes, object properties at any depth and default values,
+since most of that debt hides in lookup tables and defaults rather than in JSX.
+It ships in the RATCHET group; the exclusions (generated icons, fixtures, the
+dictionary itself) are `overrides` in `.oxlintrc.json`.
+
 `f0-react/` is a local wrapper around `eslint-plugin-react`'s
 `jsx-no-leaked-render`. The upstream rule reports `&&` in attribute values as
 well as in children; the wrapper only reports children, where a leaked `0` or

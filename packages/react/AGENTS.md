@@ -245,13 +245,10 @@ renderers) imports the same constant.
 - Translation keys: camelCase, domain-namespaced (`actions.save`), `one`/`other` sub-keys for plurals
 - Missing keys: log `console.warn` and return the key string
 - **Never hardcode user-visible copy.** A string literal is untranslatable by construction — no consumer dictionary can reach it, so every locale renders English. This includes defaults: `label = "Actions"` and `{ label: "Today" }` in a lookup table are the same bug as `<span>Save</span>`.
-- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). The check names the existing key when it finds one.
-- `pnpm check:untranslated-copy` enforces this, and blocks CI on copy a PR **adds**. Existing debt is baselined in `.scripts/untranslated-copy-debt.json`; the list may only shrink.
-  - `--report` — the full inventory across `src/`
-  - `--update` — rewrite the baseline (after translating something, to lock the win in)
-  - `--comment` — the PR-comment markdown CI posts
-  - Genuinely untranslatable literal (brand name, keyboard key)? Put `i18n-exempt` in a comment on that line.
-- On a failing PR the offending lines are annotated **inline on the Files tab** (`::error file=,line=`) and summarised in a PR comment that separates "already has a key, swap it" from "needs a new key" — no digging through CI logs.
+- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). Grep `i18n-provider-defaults.ts` for the English before adding a key, and reuse `actions.*`/`navigation.*` rather than a feature key from another domain.
+- `f0-i18n/no-untranslated-copy` (a local oxlint rule, see `.oxlint-plugins/`) enforces this. It runs in `pnpm lint`, the pre-commit hook and CI, and covers JSX text, attributes, object properties at any depth, and default values.
+- It is a RATCHET rule: on as a warning, with the existing debt baselined per file in `.scripts/lint-debt.json`, which may only shrink. `pnpm check:lint-debt` is what blocks a PR that adds one, and annotates the offending lines inline on the Files tab.
+- Genuinely untranslatable literal (a brand name, a keyboard key)? `// oxlint-disable-next-line f0-i18n/no-untranslated-copy -- reason`. It lands in the diff, so a reviewer sees the claim.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
 
