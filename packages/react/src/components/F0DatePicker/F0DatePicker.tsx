@@ -19,10 +19,6 @@ function getGranularityDefinition(
   }
 }
 
-/**
- * Returns a value range in the correct granularity. Lives at module level so
- * the initial state can be normalised the same way the value effect does.
- */
 function toSafeDatePickerRange(
   value: DatePickerValue | undefined,
   defaultGranularity: NavigationGranularityKey
@@ -63,9 +59,6 @@ export function F0DatePicker({
   selectOnCellOnly,
   ...inputProps
 }: F0DatePickerProps) {
-  // Seeded from the prop so the first paint already carries the value: an empty
-  // first frame flashes F0InputField's placeholder over it. Normalised on the
-  // way in, or the calendar reads its own first selection as a change.
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
     () => toSafeDatePickerRange(value, granularities[0] ?? "day")
   )
