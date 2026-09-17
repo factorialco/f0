@@ -1,8 +1,8 @@
 {
   "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
-  "total": 352,
+  "total": 344,
   "rules": {
-    "f0-styles/no-inline-styles": 238,
+    "f0-styles/no-inline-styles": 230,
     "sonarjs/cognitive-complexity": 114
   },
   "files": {
@@ -78,7 +78,7 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/components/RichText/F0RichTextEditor/F0RichTextEditor.tsx": {
-      "f0-styles/no-inline-styles": 4
+      "f0-styles/no-inline-styles": 1
     },
     "src/components/RichText/F0RichTextEditor/components/Footer/index.tsx": {
       "sonarjs/cognitive-complexity": 1
@@ -99,9 +99,6 @@
     },
     "src/components/RichText/internal/Extensions/SlashCommand/index.tsx": {
       "f0-styles/no-inline-styles": 3
-    },
-    "src/components/RichText/internal/Extensions/VideoEmbed/index.tsx": {
-      "f0-styles/no-inline-styles": 1
     },
     "src/components/RichText/internal/Toolbar/LinkPopup/index.tsx": {
       "f0-styles/no-inline-styles": 1
@@ -258,7 +255,7 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/hooks/toast/ToastProvider.tsx": {
-      "f0-styles/no-inline-styles": 3
+      "f0-styles/no-inline-styles": 2
     },
     "src/icons/special/One.tsx": {
       "f0-styles/no-inline-styles": 1
@@ -283,9 +280,6 @@
     },
     "src/kits/F0DataChart/skeletons.tsx": {
       "f0-styles/no-inline-styles": 2
-    },
-    "src/kits/ai/F0ActionItem/components/ChatSpinner.tsx": {
-      "f0-styles/no-inline-styles": 1
     },
     "src/kits/ai/F0AiChatHeader/components/CreditsPopover.tsx": {
       "f0-styles/no-inline-styles": 1
@@ -480,9 +474,6 @@
     "src/patterns/Navigation/Sidebar/Sidebar.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
-    "src/patterns/Navigation/Sidebar/Tabs/index.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
     "src/patterns/OneDataCollection/OneDatacollection.tsx": {
       "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
@@ -561,9 +552,6 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/WidgetContainer/SortableWidget.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
-    "src/sds/Home/WidgetContainer/WidgetStage.tsx": {
       "f0-styles/no-inline-styles": 1
     },
     "src/sds/Home/WidgetContainer/index.tsx": {
