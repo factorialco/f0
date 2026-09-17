@@ -62,6 +62,8 @@ import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
 import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
+import { F0NumberInputFieldProps as F0NumberInputFieldProps_2 } from './F0NumberInput';
+import { F0NumberInputInlineProps as F0NumberInputInlineProps_2 } from './F0NumberInput';
 import { F0PdfViewerProps as F0PdfViewerProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0SliderProps as F0SliderProps_2 } from './types';
@@ -73,6 +75,8 @@ import { F0TagPersonProps as F0TagPersonProps_2 } from './types';
 import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
+import { F0TextInputFieldProps as F0TextInputFieldProps_2 } from './F0TextInput';
+import { F0TextInputInlineProps as F0TextInputInlineProps_2 } from './F0TextInput';
 import { F0TimelineRowProps as F0TimelineRowProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
@@ -1965,23 +1969,23 @@ declare type BoxVariantProps = VariantProps<typeof boxVariants>;
 
 declare const boxVariants: (props?: ({
     zIndex?: "0" | "auto" | "10" | "20" | "50" | "40" | "30" | undefined;
-    boxShadow?: "lg" | "md" | "sm" | "none" | "xl" | undefined;
+    boxShadow?: "none" | "lg" | "md" | "sm" | "xl" | undefined;
     divider?: "x" | "y" | undefined;
     dividerColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     overflow?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowX?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowY?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     borderColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
-    border?: "default" | "none" | "thick" | undefined;
-    borderTop?: "default" | "none" | "thick" | undefined;
-    borderBottom?: "default" | "none" | "thick" | undefined;
-    borderLeft?: "default" | "none" | "thick" | undefined;
-    borderRight?: "default" | "none" | "thick" | undefined;
-    borderRadius?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusTopLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusTopRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusBottomLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusBottomRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    border?: "none" | "default" | "thick" | undefined;
+    borderTop?: "none" | "default" | "thick" | undefined;
+    borderBottom?: "none" | "default" | "thick" | undefined;
+    borderLeft?: "none" | "default" | "thick" | undefined;
+    borderRight?: "none" | "default" | "thick" | undefined;
+    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -1995,32 +1999,32 @@ declare const boxVariants: (props?: ({
     colSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "full" | undefined;
     colStart?: "1" | "2" | "3" | "4" | "auto" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | undefined;
     rowSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "full" | undefined;
-    gap?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    gap?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     alignItems?: "center" | "end" | "baseline" | "start" | "stretch" | undefined;
     justifyContent?: "center" | "end" | "start" | "between" | "stretch" | "around" | "evenly" | undefined;
     flexDirection?: "row" | "column" | "column-reverse" | "row-reverse" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
     grow?: boolean | undefined;
     shrink?: boolean | undefined;
-    margin?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginX?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginY?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginTop?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginBottom?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginLeft?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginRight?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    padding?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingX?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingY?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingTop?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingBottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    top?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    right?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    bottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    left?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    display?: "block" | "grid" | "none" | "inline" | "flex" | "inline-flex" | undefined;
+    margin?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginX?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginY?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginTop?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginBottom?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginLeft?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginRight?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    padding?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingX?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingY?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingTop?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingBottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    top?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    right?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    bottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    left?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    display?: "block" | "inline" | "flex" | "grid" | "inline-flex" | "none" | undefined;
     position?: "fixed" | "sticky" | "relative" | "static" | "absolute" | undefined;
 } & ({
     class?: ClassValue;
@@ -4628,7 +4632,7 @@ export declare type DataSourceItemId = string | number | symbol;
  * Wrapper component that conditionally renders a `data-testid` attribute.
  *
  * When `dataTestId` is provided and the platform context enables test id rendering,
- * wraps children in a `<div data-testid={dataTestId} className="contents">`.
+ * wraps children in a `<div data-testid={dataTestId} style={{ display: "contents" }}>`.
  * Otherwise renders children as-is with no wrapper element.
  *
  * Use this directly inside components with complex generic types (e.g. F0Select,
@@ -6141,10 +6145,6 @@ export declare const defaultTranslations: {
             };
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
-            };
-            readonly location: {
-                readonly empty: "Enter an address";
-                readonly unresolved: "Select an address from the suggestions";
             };
         };
     };
@@ -10223,9 +10223,9 @@ declare type F0DateOrDateTimeFieldConfig = F0DateFieldConfig | F0TimeFieldConfig
 
 export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicker_2>;
 
-declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, selectOnCellOnly, ...inputProps }: F0DatePickerProps): JSX_2.Element;
+declare function F0DatePicker_2(props: F0DatePickerProps): JSX_2.Element;
 
-export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
+declare type F0DatePickerBaseProps = Pick<DatePickerPopupProps, "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
     /** The picker has no `periods` prop, so it can only offer the calendar granularities. */
     granularities?: GranularityDefinitionKey[];
     showIcon?: boolean;
@@ -10234,6 +10234,21 @@ export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "minDate" | "
     onChange?: (value: DatePickerValue | undefined, stringValue: string | undefined) => void;
     value?: DatePickerValue;
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>;
+
+export declare type F0DatePickerFieldProps = F0DatePickerBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0DatePickerInlineProps = F0DatePickerBaseProps & {
+    variant: "inline";
+    /** The row owns the mode; the picker never changes it. */
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0DatePickerProps = F0DatePickerFieldProps | F0DatePickerInlineProps;
 
 /**
  * F0 config options specific to date range fields
@@ -10898,7 +10913,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0LocationField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -10938,7 +10953,7 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -11498,42 +11513,6 @@ export declare namespace f0FormField {
     export function phone(config: PhoneFieldShortcutConfig & {
         optional?: false;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
-    export type LocationObjectSchema = z.ZodEffects<z.ZodObject<{
-        formatted: z.ZodOptional<z.ZodString>;
-        addressLine1: z.ZodOptional<z.ZodString>;
-        addressLine2: z.ZodOptional<z.ZodString>;
-        city: z.ZodOptional<z.ZodString>;
-        state: z.ZodOptional<z.ZodString>;
-        postalCode: z.ZodOptional<z.ZodString>;
-        country: z.ZodOptional<z.ZodString>;
-        placeId: z.ZodOptional<z.ZodString>;
-        latitude: z.ZodOptional<z.ZodNumber>;
-        longitude: z.ZodOptional<z.ZodNumber>;
-        timezone: z.ZodOptional<z.ZodString>;
-    }>>;
-    export type LocationFieldShortcutConfig = DistributiveOmit<F0LocationFieldConfig, "fieldType"> & {
-        optional?: boolean;
-        /**
-         * Requires a value picked from the suggestions, i.e. one that still
-         * carries a place id and coordinates. Use it when the address feeds a
-         * map or a geofence; a typed address has no coordinates until the
-         * consumer geocodes it. Only satisfiable with `searchPlaces` and
-         * `resolvePlace`, and without `manualEntry`, since nothing else produces
-         * a resolved value.
-         * @default false
-         */
-        requireResolved?: boolean;
-        /** Message shown when the field is empty and required */
-        emptyMessage?: string;
-        /** Message shown when `requireResolved` is not satisfied */
-        unresolvedMessage?: string;
-    };
-    export function location(config: LocationFieldShortcutConfig & {
-        optional: true;
-    }): z.ZodOptional<LocationObjectSchema> & F0ZodType<z.ZodOptional<LocationObjectSchema>>;
-    export function location(config: LocationFieldShortcutConfig & {
-        optional?: false;
-    }): LocationObjectSchema & F0ZodType<LocationObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -12254,131 +12233,6 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     href?: string;
 };
 
-/**
- * F0 config options specific to location fields. The shape props come
- * straight from the component, so the field inherits its rule: manual entry
- * is typed rather than searched, and rules out a suggestion provider instead
- * of accepting one it would never call.
- */
-export declare type F0LocationConfig = {
-    /** Overrides for the per-part labels, which default to translated copy */
-    partLabels?: Partial<Record<LocationPart, string>>;
-    /** Restricts the country selector. A single entry also scopes the search */
-    allowedCountries?: CountryCode[];
-    /** Scopes the search. Never read from the value's own country */
-    defaultCountry?: CountryCode;
-} & F0LocationInputShapeProps;
-
-/**
- * Location field with all properties for rendering
- */
-export declare type F0LocationField = F0BaseField & F0LocationConfig & {
-    type: "location";
-    /** Whether the field can be cleared (derived from optional/nullable) */
-    clearable?: boolean;
-    /** Conditional rendering based on another field's value */
-    renderIf?: LocationFieldRenderIf;
-};
-
-/**
- * Config for location fields (form value is a structured address object)
- */
-export declare type F0LocationFieldConfig = F0BaseConfig & F0LocationConfig & {
-    fieldType: "location";
-};
-
-/**
- * The two shapes a location field takes: a searchable address line, or every
- * part typed by hand.
- */
-declare type F0LocationInputShapeProps = F0LocationSearchProps | F0LocationManualProps;
-
-/**
- * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
- * country so every consumer stores the same thing.
- */
-declare type F0LocationInputValue = {
-    /** Display string. Comes from `resolvePlace` when picked, assembled locally once edited */
-    formatted?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    city?: string;
-    /** Region, state or province, as free text */
-    state?: string;
-    postalCode?: string;
-    country?: CountryCode;
-    /**
-     * Provider id of the picked place. Cleared as soon as a part that describes
-     * where the pin is gets edited; `addressLine2` does not, since a floor
-     * number stays inside the same building.
-     */
-    placeId?: string;
-    latitude?: number;
-    longitude?: number;
-    /** Carried through from `resolvePlace`, never derived here */
-    timezone?: string;
-};
-
-/**
- * Every part typed by hand. Nothing is searched in this shape, so a provider
- * would never be called: `searchPlaces` and `resolvePlace` are ruled out
- * rather than quietly ignored.
- */
-declare type F0LocationManualProps = {
-    /**
-     * Renders the whole address as separate fields the user can fill in by
-     * hand: country, address line 1 and 2, city, region and postal code.
-     * Changing the country clears the other parts, since they described a
-     * place in the previous one.
-     */
-    manualEntry: true;
-    searchPlaces?: never;
-    resolvePlace?: never;
-    manualEntryFallback?: never;
-};
-
-declare type F0LocationSearchContext = {
-    /** Country to scope the search to, when one is selected or implied */
-    country?: CountryCode;
-};
-
-/**
- * The address line as an autocomplete. A provider makes the suggestions, and
- * the user who finds nothing there can still fall back to typing.
- */
-declare type F0LocationSearchProps = {
-    manualEntry?: false;
-    /**
-     * Suggestion provider. Without it there is no autocomplete and the address
-     * line is a plain field. Called with the current country so the consumer
-     * can restrict the provider (e.g. Places `componentRestrictions`).
-     */
-    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /**
-     * Resolves a picked suggestion into a full value. Every field of
-     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
-     * the value needs `formatted` or `addressLine1` to be shown at all, and
-     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
-     * provider's formatted address without its granular parts is supported.
-     */
-    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
-    /**
-     * Whether a search that comes back empty offers to switch to manual entry.
-     * Turn it off where a typed address is of no use to the consumer, such as a
-     * field that feeds a map or a geofence and needs the coordinates only a
-     * picked place carries.
-     * @default true
-     */
-    manualEntryFallback?: boolean;
-};
-
-declare type F0LocationSuggestion = {
-    id: string;
-    label: string;
-    /** Appended to the label, so each suggestion reads as one line */
-    description?: string;
-};
-
 export declare type F0Message = {
     id: string;
     role: "user" | "assistant" | "system" | "tool";
@@ -12530,7 +12384,9 @@ export declare type F0NumberFieldConfig<R extends Record<string, unknown> = Reco
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
  */
-export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const F0NumberInput: ForwardRefExoticComponent<(Omit<F0NumberInputFieldProps, "ref"> | Omit<F0NumberInputInlineProps, "ref">) & RefAttributes<HTMLInputElement>>;
+
+declare type F0NumberInputBaseProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number] | "variant" | "editing" | "onDismiss">;
 
 /**
  * Config for number fields - number input
@@ -12539,7 +12395,19 @@ declare type F0NumberInputConfig = F0BaseConfig & F0NumberConfig & {
     fieldType?: "number" | "percentage";
 };
 
-export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
+export declare type F0NumberInputFieldProps = F0NumberInputBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0NumberInputInlineProps = F0NumberInputBaseProps & {
+    variant: "inline";
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0NumberInputProps = F0NumberInputFieldProps | F0NumberInputInlineProps;
 
 /**
  * Config for money fields - number input with currency suffix
@@ -12558,12 +12426,12 @@ declare type F0NumberSelectConfig<R extends Record<string, unknown> = Record<str
 };
 
 /**
- * Config for object fields (richtext, daterange, phone, location, or custom)
+ * Config for object fields (richtext, daterange, phone, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0LocationFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
+declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -13206,6 +13074,8 @@ export declare type F0SelectField = F0BaseField & F0SelectConfig & {
 declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
     /** Standard form-field presentation. This remains the default. */
     variant?: "field";
+    editing?: never;
+    onDismiss?: never;
     withApplySelection?: boolean;
     applySelectionLabel?: string;
     children?: React.ReactNode;
@@ -13231,12 +13101,24 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
     hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
-declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled" | "hideLabel"> & {
     /**
-     * Compact borderless presentation for single-value controls embedded in rows.
-     * The required label is used as the accessible name and is not shown visually.
+     * Detail-row presentation for single-value controls. The selection reads as
+     * plain text — avatar and icon included — and becomes the dropdown only
+     * while `editing` is true. The required label is the accessible name and is
+     * never shown visually, with or without `hideLabel`.
      */
     variant: "inline";
+    /**
+     * Whether the dropdown is the presentation right now. Controlled: the
+     * component never changes it, it only reports what the user did through
+     * `onDismiss` and keeps the dropdown open until the owner says otherwise.
+     *
+     * @default false
+     */
+    editing?: boolean;
+    /** What ended the edit. The value change still arrives through `onChange`. */
+    onDismiss?: (reason: SelectInlineDismissReason) => void;
     size?: never;
     disableSelectAll?: never;
     withApplySelection?: never;
@@ -13249,7 +13131,6 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     showPreview?: never;
     required?: never;
     loading?: never;
-    hideLabel?: never;
     labelIcon?: never;
     icon?: never;
     name?: never;
@@ -13691,9 +13572,23 @@ export declare type F0TextField = F0BaseField & F0TextConfig & {
  * F0. For numeric data use F0NumberInput; for durations use F0DurationInput;
  * for queries use F0SearchInput.
  */
-export declare const F0TextInput: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const F0TextInput: ForwardRefExoticComponent<(Omit<F0TextInputFieldProps, "ref"> | Omit<F0TextInputInlineProps, "ref">) & RefAttributes<HTMLInputElement>>;
 
-export declare type F0TextInputProps = Omit<InputInternalProps, (typeof privateProps_5)[number]>;
+declare type F0TextInputBaseProps = Omit<InputInternalProps, (typeof privateProps_5)[number] | "variant" | "editing">;
+
+export declare type F0TextInputFieldProps = F0TextInputBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0TextInputInlineProps = F0TextInputBaseProps & {
+    variant: "inline";
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0TextInputProps = F0TextInputFieldProps | F0TextInputInlineProps;
 
 export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
     variant?: (typeof _allowedVariants_2)[number];
@@ -14174,7 +14069,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -15554,6 +15449,11 @@ export declare interface InitialFile {
  */
 export declare function injectSectionEnds(items: FlatFormItem[], inSectionQuestionIds: Set<string>): FlatFormItem[];
 
+declare type InlineDismissReason = (typeof inlineDismissReasons)[number];
+
+/** `"popupClose"` only reaches fields whose editor is a popup, such as F0DatePicker. */
+declare const inlineDismissReasons: readonly ["blur", "escape", "commit", "popupClose"];
+
 /**
  * @deprecated Renamed to `F0TextInput` to match the F0 input vocabulary
  * (any component where the user types text in a box has the `Input` suffix
@@ -15565,9 +15465,9 @@ export declare function injectSectionEnds(items: FlatFormItem[], inSectionQuesti
  *
  * @removeIn 2.0.0
  */
-export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const Input: ForwardRefExoticComponent<(Omit<F0TextInputFieldProps_2, "ref"> | Omit<F0TextInputInlineProps_2, "ref">) & RefAttributes<HTMLInputElement>>;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "editing" | "variant" | "append" | "hideLabel" | "hint" | "isEmpty" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle" | "inlineText"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -15666,6 +15566,14 @@ declare type InputFieldProps<T> = {
         onChange: (selected: boolean) => void;
     };
     transparent?: boolean;
+    variant?: InputFieldVariant;
+    editing?: boolean;
+    /**
+     * What the inline variant prints at rest, when the value alone is not what
+     * the editor shows: F0NumberInput appends its `units` to the formatted
+     * number. Defaults to the value.
+     */
+    inlineText?: string;
 };
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
@@ -15682,7 +15590,11 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type InputFieldVariant = (typeof inputFieldVariantNames)[number];
+
+declare const inputFieldVariantNames: readonly ["field", "inline"];
+
+declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "variant" | "editing"> & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
      * masked like a password but with no lock icon and with password managers
@@ -15690,6 +15602,7 @@ declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
+    onPressEscape?: () => void;
 };
 
 /**
@@ -15985,16 +15898,6 @@ declare interface LocalizedOption<T> {
     /** The value for this locale. */
     value: T;
 }
-
-/**
- * All valid renderIf conditions for location fields
- */
-declare type LocationFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
-
-declare type LocationPart = (typeof locationParts)[number];
-
-/** Every part the manual entry block renders, in the order it renders them */
-declare const locationParts: readonly ["country", "addressLine1", "addressLine2", "city", "state", "postalCode"];
 
 /**
  * The parts of a question that `lockedFields` can freeze on their own, without
@@ -16597,9 +16500,10 @@ declare type NumberFilterValue = {
  *
  * @removeIn 2.0.0
  */
-export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
+export declare const NumberInput: ForwardRefExoticComponent<(Omit<F0NumberInputFieldProps_2, "ref"> | Omit<F0NumberInputInlineProps_2, "ref">) & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "variant" | "editing"> & {
+    onDismiss?: (reason: InlineDismissReason) => void;
     locale: string;
     value?: number | null;
     step?: number;
@@ -17036,7 +16940,6 @@ export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
 declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
-    selectableTotal?: number;
     filters: FiltersState<Filters>;
     search: string | undefined;
     isInitialLoading: boolean;
@@ -17527,7 +17430,7 @@ declare const privateProps_3: readonly ["forceVerticalMetadata", "disableOverlay
 
 declare const privateProps_4: readonly ["buttonToggle"];
 
-declare const privateProps_5: readonly ["buttonToggle"];
+declare const privateProps_5: readonly ["buttonToggle", "onPressEscape"];
 
 declare const privateProps_6: readonly ["compact"];
 
@@ -18471,6 +18374,15 @@ export declare type SelectedState = {
  * All valid renderIf conditions for select fields
  */
 declare type SelectFieldRenderIf = SelectRenderIfCondition | CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+export declare type SelectInlineDismissReason = (typeof selectInlineDismissReasons)[number];
+
+/**
+ * Why an edit ended, reported by the inline variant so the owner of `editing`
+ * can decide what to do with it. A narrowing of `InlineDismissReason`: a select
+ * has no blur to report, because the popup takes focus.
+ */
+export declare const selectInlineDismissReasons: readonly ["popupClose", "escape", "commit"];
 
 export declare type SelectionId = number | string;
 
@@ -21280,10 +21192,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -21291,8 +21201,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
