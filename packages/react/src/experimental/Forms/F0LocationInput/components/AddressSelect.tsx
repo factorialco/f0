@@ -6,6 +6,7 @@ import type { F0SelectItemProps } from "@/components/F0Select"
 import { F0Select } from "@/components/F0Select"
 import type { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
+import type { PlaceSearchStatus } from "../hooks/usePlaceSearch"
 import { MIN_QUERY_LENGTH, usePlaceSearch } from "../hooks/usePlaceSearch"
 import type {
   F0LocationInputProps,
@@ -38,8 +39,12 @@ type Props = {
   searchPlaces: NonNullable<F0LocationInputProps["searchPlaces"]>
   onPick: (suggestion: F0LocationSuggestion) => void
   onClear: () => void
-  /** Hands the way out to the component, with whatever the user had typed */
-  onEnterManually: (query: string) => void
+  /**
+   * Hands the way out to the component, with whatever the user had typed.
+   * Absent where a typed address is of no use, which leaves the empty list
+   * saying only that it found nothing.
+   */
+  onEnterManually?: (query: string) => void
   status?: InputFieldStatus
   required?: boolean
   disabled?: boolean
@@ -48,6 +53,48 @@ type Props = {
   clearable?: boolean
   size: LocationInputSize
   name?: string
+}
+
+/**
+ * What the empty list says, and what a screen reader hears: the list's own
+ * text is not announced when it changes, so the same message goes out through
+ * a live region.
+ */
+const useSearchCopy = ({
+  status,
+  isSearching,
+  query,
+  resultCount,
+}: {
+  status: PlaceSearchStatus
+  isSearching: boolean
+  query: string
+  resultCount: number
+}) => {
+  const i18n = useI18n()
+
+  const emptyMessage =
+    status === "error"
+      ? i18n.locationInput.searchError
+      : isSearching
+        ? i18n.locationInput.searching
+        : query.trim().length < MIN_QUERY_LENGTH
+          ? i18n.locationInput.searchHint
+          : i18n.locationInput.noResults
+
+  const liveStatus =
+    status === "searching" || status === "error" || status === "empty"
+      ? emptyMessage
+      : resultCount
+        ? i18n.t(
+            resultCount === 1
+              ? "locationInput.resultsCount.one"
+              : "locationInput.resultsCount.other",
+            { count: resultCount }
+          )
+        : ""
+
+  return { emptyMessage, liveStatus }
 }
 
 /**
@@ -106,34 +153,18 @@ export const AddressSelect = ({
     [selectedValue, text]
   )
 
-  const emptyMessage =
-    status === "error"
-      ? i18n.locationInput.searchError
-      : isSearching
-        ? i18n.locationInput.searching
-        : query.trim().length < MIN_QUERY_LENGTH
-          ? i18n.locationInput.searchHint
-          : i18n.locationInput.noResults
-
-  // The list's empty text is not read on change, so the search progress is
-  // announced from a live region of its own
-  const liveStatus =
-    status === "searching" || status === "error" || status === "empty"
-      ? emptyMessage
-      : suggestions.length
-        ? i18n.t(
-            suggestions.length === 1
-              ? "locationInput.resultsCount.one"
-              : "locationInput.resultsCount.other",
-            { count: suggestions.length }
-          )
-        : ""
+  const { emptyMessage, liveStatus } = useSearchCopy({
+    status,
+    isSearching,
+    query,
+    resultCount: suggestions.length,
+  })
 
   // Only once the provider has answered with nothing: while it is still
   // searching the address may yet be there, and offering the way out then
   // reads as a dead end
   const searchEmptyAction =
-    status === "empty" ? (
+    status === "empty" && onEnterManually ? (
       <div className="flex w-full items-center gap-2">
         <span className="text-f1-foreground-secondary">
           {i18n.locationInput.noResultsHelp}

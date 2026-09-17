@@ -57,6 +57,7 @@ export const F0LocationInput = forwardRef<
     defaultValue,
     onChange,
     manualEntry = false,
+    manualEntryFallback = true,
     partLabels,
     allowedCountries,
     defaultCountry,
@@ -103,7 +104,7 @@ export const F0LocationInput = forwardRef<
     getCountryName,
   })
 
-  // The empty search result offers a way out, so the field can switch itself
+  // The empty search result can offer a way out, so the field switches itself
   // to manual entry; the prop stays the consumer's to force on
   const [switchedToManual, setSwitchedToManual] = useState(false)
   const manual = manualEntry || switchedToManual
@@ -230,7 +231,7 @@ export const F0LocationInput = forwardRef<
         searchPlaces={searchPlaces}
         onPick={handlePick}
         onClear={handleClear}
-        onEnterManually={handleEnterManually}
+        onEnterManually={manualEntryFallback ? handleEnterManually : undefined}
         status={fieldStatus}
         required={required}
         disabled={disabled}

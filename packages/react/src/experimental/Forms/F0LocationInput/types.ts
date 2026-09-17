@@ -67,40 +67,16 @@ export type F0LocationInputChangeMeta = {
   isResolved: boolean
 }
 
-export interface F0LocationInputProps {
-  label: string
-  /** Controlled value */
-  value?: F0LocationInputValue
-  /** Initial value when uncontrolled */
-  defaultValue?: F0LocationInputValue
-  onChange?: (
-    value: F0LocationInputValue | undefined,
-    meta: F0LocationInputChangeMeta
-  ) => void
+/**
+ * The address line as an autocomplete. A provider makes the suggestions, and
+ * the user who finds nothing there can still fall back to typing.
+ */
+type F0LocationSearchProps = {
+  manualEntry?: false
   /**
-   * Renders the whole address as separate fields the user can fill in by
-   * hand: country, address line 1 and 2, city, region and postal code.
-   * Changing the country clears the other parts, since they described a
-   * place in the previous one. Without it the component is the address
-   * field alone.
-   * @default false
-   */
-  manualEntry?: boolean
-  /** Overrides for the per-part labels, which default to translated copy */
-  partLabels?: Partial<Record<LocationPart, string>>
-  /** Restricts the country selector. A single entry also scopes the search */
-  allowedCountries?: CountryCode[]
-  /**
-   * Country the search is scoped to. The value's own country is never used
-   * for this: the search only exists without manual entry, where nothing on
-   * screen would show or undo that scope, so the first picked address would
-   * silently lock every later search to its country.
-   */
-  defaultCountry?: CountryCode
-  /**
-   * Suggestion provider. Without it there is no autocomplete and the parts
-   * stand alone as plain fields. Called with the current country so the
-   * consumer can restrict the provider (e.g. Places `componentRestrictions`).
+   * Suggestion provider. Without it there is no autocomplete and the address
+   * line is a plain field. Called with the current country so the consumer
+   * can restrict the provider (e.g. Places `componentRestrictions`).
    */
   searchPlaces?: (
     query: string,
@@ -114,6 +90,63 @@ export interface F0LocationInputProps {
    * provider's formatted address without its granular parts is supported.
    */
   resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>
+  /**
+   * Whether a search that comes back empty offers to switch to manual entry.
+   * Turn it off where a typed address is of no use to the consumer, such as a
+   * field that feeds a map or a geofence and needs the coordinates only a
+   * picked place carries.
+   * @default true
+   */
+  manualEntryFallback?: boolean
+}
+
+/**
+ * Every part typed by hand. Nothing is searched in this shape, so a provider
+ * would never be called: `searchPlaces` and `resolvePlace` are ruled out
+ * rather than quietly ignored.
+ */
+type F0LocationManualProps = {
+  /**
+   * Renders the whole address as separate fields the user can fill in by
+   * hand: country, address line 1 and 2, city, region and postal code.
+   * Changing the country clears the other parts, since they described a
+   * place in the previous one.
+   */
+  manualEntry: true
+  searchPlaces?: never
+  resolvePlace?: never
+  manualEntryFallback?: never
+}
+
+/**
+ * The two shapes a location field takes: a searchable address line, or every
+ * part typed by hand.
+ */
+export type F0LocationInputShapeProps =
+  | F0LocationSearchProps
+  | F0LocationManualProps
+
+type F0LocationInputBaseProps = {
+  label: string
+  /** Controlled value */
+  value?: F0LocationInputValue
+  /** Initial value when uncontrolled */
+  defaultValue?: F0LocationInputValue
+  onChange?: (
+    value: F0LocationInputValue | undefined,
+    meta: F0LocationInputChangeMeta
+  ) => void
+  /** Overrides for the per-part labels, which default to translated copy */
+  partLabels?: Partial<Record<LocationPart, string>>
+  /** Restricts the country selector. A single entry also scopes the search */
+  allowedCountries?: CountryCode[]
+  /**
+   * Country the search is scoped to. The value's own country is never used
+   * for this: the search only exists without manual entry, where nothing on
+   * screen would show or undo that scope, so the first picked address would
+   * silently lock every later search to its country.
+   */
+  defaultCountry?: CountryCode
   placeholder?: string
   hideLabel?: boolean
   labelIcon?: IconType
@@ -131,3 +164,6 @@ export interface F0LocationInputProps {
   onBlur?: () => void
   onFocus?: () => void
 }
+
+export type F0LocationInputProps = F0LocationInputBaseProps &
+  F0LocationInputShapeProps

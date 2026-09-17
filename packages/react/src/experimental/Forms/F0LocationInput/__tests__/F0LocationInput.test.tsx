@@ -402,6 +402,26 @@ describe("F0LocationInput", () => {
       )
     })
 
+    it("keeps quiet about manual entry when the fallback is off", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={vi.fn(async () => [])}
+          manualEntryFallback={false}
+        />
+      )
+
+      await searchAddress(user, "Calle Falsa 123")
+
+      await waitFor(() =>
+        expect(listText("No addresses found")).toBeInTheDocument()
+      )
+      expect(
+        screen.queryByRole("button", { name: "Enter it manually" })
+      ).not.toBeInTheDocument()
+    })
+
     it("does not scope the search to the country of the current value", async () => {
       const user = userEvent.setup()
       render(
