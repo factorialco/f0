@@ -19,7 +19,7 @@ import {
 } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { Filter as AiFilterIcon } from "@/icons/ai"
+import { Search as AiSearchIcon } from "@/icons/ai"
 import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
@@ -897,21 +897,37 @@ const OneDataCollectionComp = <
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
-  // Typing leaves the table alone: the text may be a name, or it may be the
-  // start of a sentence meant for the action beside it, and there is no
-  // telling which until the writer says so. Enter searches by name, the
-  // action asks. Even then the table is never emptied — text that matches
-  // nobody is more likely a sentence, so the search behind it is dropped and
-  // the writing stands.
+  // A name is one or two words, so that much is searched as it is typed and
+  // the rows fall away as they always did. Past that the text is a sentence
+  // being written for the action beside the field, and searching it would
+  // empty the table under someone mid-thought — there, nothing happens until
+  // enter or the action says so. Either way the table is never left empty:
+  // text that matches nobody drops the search behind it and the writing
+  // stands.
   const [typedSearch, setTypedSearch] = useState<string | undefined>()
   const unmatchedSearchRef = useRef<string>()
+
+  const looksLikeAName = (text: string) => text.trim().split(/\s+/).length <= 2
 
   const searchByName = (next: string | undefined) => {
     setTypedSearch(next)
     if (!next) {
       unmatchedSearchRef.current = undefined
       setCurrentSearch(undefined)
+      return
     }
+    if (!looksLikeAName(next)) {
+      return
+    }
+    // Nothing was called that, so nothing is called that plus one more letter.
+    if (
+      unmatchedSearchRef.current &&
+      next.startsWith(unmatchedSearchRef.current)
+    ) {
+      return
+    }
+    unmatchedSearchRef.current = undefined
+    setCurrentSearch(next)
   }
 
   // Words become filters while they are being typed: a recognised stretch is
@@ -968,7 +984,7 @@ const OneDataCollectionComp = <
   const assistedSearchProps = source.searchPresentation
     ? {
         ...source.searchPresentation,
-        icon: AiFilterIcon,
+        icon: AiSearchIcon,
         value: source.searchPresentation.value ?? assistedQuery,
         onChange: (next: string | undefined) => {
           if (source.searchPresentation?.onChange) {
@@ -1897,6 +1913,7 @@ const OneDataCollectionComp = <
                       assistedSearchProps
                         ? {
                             label: i18n.collections.search.filterWithAssistant,
+                            icon: AiSearchIcon,
                             onClick: (query) => {
                               // The text stops being a name search and becomes
                               // a question: leaving both on would have the two

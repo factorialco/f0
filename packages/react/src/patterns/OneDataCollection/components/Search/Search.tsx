@@ -328,22 +328,29 @@ const InlineAction = ({
   action,
   query,
   busy,
-  onEmpty,
 }: {
   action: SearchProps["inlineAction"]
   query: string | undefined
   busy: boolean
-  /** Clicked with nothing written: the field is what is missing, not the action. */
-  onEmpty: () => void
 }) =>
-  !action || busy ? null : (
-    <F0Button
-      variant="outline"
-      size="sm"
-      label={action.label}
-      icon={action.icon}
-      onClick={() => (query ? action.onClick(query) : onEmpty())}
-    />
+  !action ? null : (
+    <div className="w-[7.5rem] shrink-0 overflow-hidden [&>button]:w-full [&_.main]:overflow-hidden [&_.main]:whitespace-nowrap">
+      <F0Button
+        variant="outline"
+        size="sm"
+        label={action.label}
+        icon={action.icon}
+        loading={busy}
+        // Nothing written is nothing to ask: an enabled button promises it
+        // will do something, and a click that only moved the caret was a lie.
+        disabled={!query}
+        onClick={() => {
+          if (query) {
+            action.onClick(query)
+          }
+        }}
+      />
+    </div>
   )
 
 /**
@@ -742,7 +749,6 @@ export const Search = ({
                     action={inlineAction}
                     query={text}
                     busy={searching}
-                    onEmpty={() => inputRef.current?.focus()}
                   />
                 </motion.div>
               </motion.div>

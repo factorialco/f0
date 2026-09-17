@@ -219,7 +219,7 @@ export const defaultTranslations = {
     },
     search: {
       searching: "Searching for {{query}}\u2026",
-      filterWithAssistant: "ONE Filter",
+      filterWithAssistant: "Ask ONE",
     },
     presets: {
       createTitle: "Save view",
