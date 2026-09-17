@@ -23,25 +23,33 @@ export function LocationFieldRenderer({
   loading,
   status,
 }: LocationFieldRendererProps) {
-  return (
+  const shared = {
+    ...formField,
+    label: field.label,
+    value: formField.value ?? undefined,
+    placeholder: field.placeholder,
+    disabled: field.disabled,
+    size: FORM_SIZE,
+    hideLabel: true,
+    error,
+    status,
+    loading,
+    clearable: field.clearable,
+    partLabels: field.partLabels,
+    allowedCountries: field.allowedCountries,
+    defaultCountry: field.defaultCountry,
+  } as const
+
+  // Manual entry rules out the provider callbacks, so the two shapes cannot
+  // be handed over as one object
+  return field.manualEntry ? (
+    <F0LocationInput {...shared} manualEntry />
+  ) : (
     <F0LocationInput
-      {...formField}
-      label={field.label}
-      value={formField.value ?? undefined}
-      placeholder={field.placeholder}
-      disabled={field.disabled}
-      size={FORM_SIZE}
-      hideLabel
-      error={error}
-      status={status}
-      loading={loading}
-      clearable={field.clearable}
-      manualEntry={field.manualEntry}
-      partLabels={field.partLabels}
-      allowedCountries={field.allowedCountries}
-      defaultCountry={field.defaultCountry}
+      {...shared}
       searchPlaces={field.searchPlaces}
       resolvePlace={field.resolvePlace}
+      manualEntryFallback={field.manualEntryFallback}
     />
   )
 }

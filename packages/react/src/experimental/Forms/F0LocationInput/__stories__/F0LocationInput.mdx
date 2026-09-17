@@ -164,6 +164,8 @@ A stored value that no suggestion covers is still displayed (the trigger reads t
 
 Once the provider has answered with nothing, the empty list offers "Can't find an address?" and an **Enter it manually** action. Taking it switches the field to manual entry, keeps what the user had typed as address line 1 and moves focus there, so the address that is not in the provider can still be finished. The action is deliberately absent while the search is still running, where it would read as a dead end, and after a failed search, where the answer is to try again.
 
+Set `manualEntryFallback={false}` where a typed address is of no use to you: a field that feeds a map or a geofence needs the coordinates only a picked place carries, and offering to type one is a dead end of a different kind. In F0Form, `requireResolved` turns it off on its own for exactly that reason.
+
 <Canvas of={Stories.NoResultsEscapeHatch} />
 
 ### Country and search scope
@@ -342,9 +344,12 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         <td>
           Renders the whole address as separate fields the user types by hand:
           country, address line 1 and 2, city, region and postal code. There is
-          no suggestion list in this shape. Defaults to <code>false</code>,
-          which is the searchable address field on its own — from which the user
-          can still switch to manual entry when the search finds nothing.
+          no suggestion list in this shape, so the type rules out{" "}
+          <code>searchPlaces</code> and <code>resolvePlace</code> alongside it
+          rather than accepting callbacks that would never run. Defaults to{" "}
+          <code>false</code>, which is the searchable address field on its own —
+          from which the user can still switch to manual entry when the search
+          finds nothing.
         </td>
       </tr>
       <tr>
@@ -427,6 +432,19 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         <td>
           Turns a picked suggestion into a full value. Its result replaces the
           whole value and is reported as <code>picked</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>manualEntryFallback</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Whether a search that comes back empty offers to switch to manual
+          entry. Defaults to <code>true</code>. Turn it off where only a picked
+          place is of use, such as a field that feeds a map or a geofence.
         </td>
       </tr>
     </tbody>

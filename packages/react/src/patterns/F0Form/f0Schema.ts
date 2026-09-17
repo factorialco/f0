@@ -14,6 +14,7 @@ import {
   isPossiblePhoneValue,
   isValidPhoneValue,
 } from "@/experimental/Forms/F0PhoneInput/lib/phone"
+import type { DistributiveOmit } from "@/lib/typescript-utils/distributive-omit"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
@@ -1400,7 +1401,9 @@ export namespace f0FormField {
       timezone: z.ZodOptional<z.ZodString>
     }>
   >
-  export type LocationFieldShortcutConfig = Omit<
+  // Distributive, so the union the config carries - manual entry rules out a
+  // suggestion provider - survives dropping `fieldType`
+  export type LocationFieldShortcutConfig = DistributiveOmit<
     F0LocationFieldConfig,
     "fieldType"
   > & {
@@ -1480,9 +1483,19 @@ export namespace f0FormField {
           })
         }
       })
+    // Switching to manual entry can never satisfy `requireResolved`, so the
+    // empty search stops offering it unless the consumer asks for it back
+    const shape =
+      "manualEntry" in config && config.manualEntry
+        ? config
+        : {
+            ...config,
+            manualEntryFallback: config.manualEntryFallback ?? !requireResolved,
+          }
+
     return f0FormField(
       schema as never,
-      { ...config, fieldType: "location" } as never
+      { ...shape, fieldType: "location" } as never
     )
   }
 

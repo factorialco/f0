@@ -290,6 +290,10 @@ function configToF0Field(
           "searchPlaces" in config ? config.searchPlaces : undefined,
         resolvePlace:
           "resolvePlace" in config ? config.resolvePlace : undefined,
+        manualEntryFallback:
+          "manualEntryFallback" in config
+            ? config.manualEntryFallback
+            : undefined,
         clearable,
         renderIf: config.renderIf,
       } as F0Field

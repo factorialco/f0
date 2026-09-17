@@ -1,7 +1,6 @@
 import type {
+  F0LocationInputShapeProps,
   F0LocationInputValue,
-  F0LocationSearchContext,
-  F0LocationSuggestion,
   LocationPart,
 } from "@/experimental/Forms/F0LocationInput"
 import type { CountryCode } from "@/lib/countries"
@@ -19,38 +18,19 @@ export type LocationFieldRenderIf =
   | F0BaseFieldRenderIfFunction
 
 /**
- * F0 config options specific to location fields
+ * F0 config options specific to location fields. The shape props come
+ * straight from the component, so the field inherits its rule: manual entry
+ * is typed rather than searched, and rules out a suggestion provider instead
+ * of accepting one it would never call.
  */
-export interface F0LocationConfig {
-  /**
-   * Renders the whole address as separate fields the user fills in by hand:
-   * country, address line 1 and 2, city, region and postal code. Manual
-   * entry is typed, not searched, so it leaves `searchPlaces` and
-   * `resolvePlace` unused. Without it the field is the address line alone.
-   * @default false
-   */
-  manualEntry?: boolean
+export type F0LocationConfig = {
   /** Overrides for the per-part labels, which default to translated copy */
   partLabels?: Partial<Record<LocationPart, string>>
   /** Restricts the country selector. A single entry also scopes the search */
   allowedCountries?: CountryCode[]
   /** Scopes the search. Never read from the value's own country */
   defaultCountry?: CountryCode
-  /**
-   * Suggestion provider, which turns the address line into an autocomplete.
-   * Without it the address line is plainly typed.
-   */
-  searchPlaces?: (
-    query: string,
-    context: F0LocationSearchContext
-  ) => Promise<F0LocationSuggestion[]>
-  /**
-   * Resolves a picked suggestion into a full value with coordinates. Without
-   * it the suggestion label is kept as the address line and the value stays
-   * unresolved.
-   */
-  resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>
-}
+} & F0LocationInputShapeProps
 
 /**
  * Location field with all properties for rendering

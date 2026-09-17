@@ -5,12 +5,32 @@ import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import type {
+  F0LocationInputProps,
+  F0LocationInputShapeProps,
   F0LocationInputValue,
   F0LocationSearchContext,
   F0LocationSuggestion,
 } from ".."
 import { F0LocationInput } from ".."
 import { locationInputSizes } from "../types"
+
+/**
+ * The props are a union - manual entry rules out the provider callbacks - and
+ * Storybook cannot carry that through its args, which collapse to `never`.
+ * The stories are typed against the flat shape the controls show instead, and
+ * the union comes back where the component is rendered.
+ */
+type LocationStoryProps = Omit<
+  F0LocationInputProps,
+  keyof F0LocationInputShapeProps
+> & {
+  manualEntry?: boolean
+  searchPlaces?: F0LocationInputProps["searchPlaces"]
+  resolvePlace?: F0LocationInputProps["resolvePlace"]
+  manualEntryFallback?: boolean
+}
+
+const asProps = (args: LocationStoryProps) => args as F0LocationInputProps
 
 type MockPlace = F0LocationSuggestion & { value: F0LocationInputValue }
 
@@ -172,7 +192,7 @@ const meta = {
 } satisfies Meta<typeof F0LocationInput>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<LocationStoryProps>
 
 /** Simple mode: one field, type "Colon" to see suggestions across countries. */
 export const Default: Story = {}
@@ -223,7 +243,7 @@ export const Controlled: Story = {
     return (
       <div className="flex flex-col gap-4">
         <F0LocationInput
-          {...args}
+          {...asProps(args)}
           value={value}
           onChange={(next, meta) => {
             setValue(next)
@@ -244,7 +264,7 @@ export const Controlled: Story = {
   },
 }
 
-const DialogExample = (args: Story["args"]) => {
+const DialogExample = (args: LocationStoryProps) => {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -256,7 +276,7 @@ const DialogExample = (args: Story["args"]) => {
         description="The suggestion list stays inside the dialog, so picking one never closes it."
         primaryAction={{ label: "Create", onClick: () => setOpen(false) }}
       >
-        <F0LocationInput {...args} label="Address" />
+        <F0LocationInput {...asProps(args)} label="Address" />
       </F0Dialog>
     </>
   )
@@ -273,8 +293,8 @@ export const InsideDialog: Story = {
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">
-      <F0LocationInput {...args} label="Medium (default)" size="md" />
-      <F0LocationInput {...args} label="Small" size="sm" />
+      <F0LocationInput {...asProps(args)} label="Medium (default)" size="md" />
+      <F0LocationInput {...asProps(args)} label="Small" size="sm" />
     </div>
   ),
 }
@@ -316,15 +336,15 @@ export const States: Story = {
     return (
       <div className="flex max-w-md flex-col gap-10">
         {states.map(([label, props]) => (
-          <F0LocationInput key={label} {...args} {...props} label={label} />
+          <F0LocationInput
+            key={label}
+            {...asProps({ ...args, ...props, label })}
+          />
         ))}
         {states.map(([label, props]) => (
           <F0LocationInput
             key={`manual-${label}`}
-            {...args}
-            {...props}
-            label={label}
-            manualEntry
+            {...asProps({ ...args, ...props, label, manualEntry: true })}
           />
         ))}
       </div>
@@ -429,38 +449,50 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex flex-col gap-6">
-      <F0LocationInput {...args} label="Address" />
+      <F0LocationInput {...asProps({ ...args, label: "Address" })} />
       <F0LocationInput
-        {...args}
-        label="Address, prefilled"
-        defaultValue={places[0].value}
+        {...asProps({
+          ...args,
+          label: "Address, prefilled",
+          defaultValue: places[0].value,
+        })}
       />
       <F0LocationInput
-        {...args}
-        label="Manual entry"
-        manualEntry
-        defaultValue={places[0].value}
+        {...asProps({
+          ...args,
+          label: "Manual entry",
+          manualEntry: true,
+          defaultValue: places[0].value,
+        })}
       />
       <F0LocationInput
-        {...args}
-        label="Manual entry, small, with error"
-        size="sm"
-        manualEntry
-        error="Enter the office address"
+        {...asProps({
+          ...args,
+          label: "Manual entry, small, with error",
+          size: "sm",
+          manualEntry: true,
+          error: "Enter the office address",
+        })}
       />
       <F0LocationInput
-        {...args}
-        label="With warning"
-        status={{ type: "warning", message: "Check the postal code" }}
+        {...asProps({
+          ...args,
+          label: "With warning",
+          status: { type: "warning", message: "Check the postal code" },
+        })}
       />
-      <F0LocationInput {...args} label="Disabled" disabled />
+      <F0LocationInput
+        {...asProps({ ...args, label: "Disabled", disabled: true })}
+      />
       {/* Side-panel width: the city row must stack on the container, not the viewport */}
       <div className="max-w-[280px]">
         <F0LocationInput
-          {...args}
-          label="Manual entry, narrow"
-          manualEntry
-          defaultValue={places[0].value}
+          {...asProps({
+            ...args,
+            label: "Manual entry, narrow",
+            manualEntry: true,
+            defaultValue: places[0].value,
+          })}
         />
       </div>
     </div>

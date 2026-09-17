@@ -23,7 +23,7 @@ describe("f0FormField.location", () => {
     const schema = f0FormField.location({
       label: "Office address",
       manualEntry: true,
-      countries: ["es", "pt"],
+      allowedCountries: ["es", "pt"],
       defaultCountry: "es",
     })
 
@@ -31,9 +31,37 @@ describe("f0FormField.location", () => {
       fieldType: "location",
       label: "Office address",
       manualEntry: true,
-      countries: ["es", "pt"],
+      allowedCountries: ["es", "pt"],
       defaultCountry: "es",
     })
+  })
+
+  it("keeps the manual-entry fallback out of a field that demands a place", () => {
+    const search = { searchPlaces: async () => [] }
+
+    expect(
+      getF0Config(f0FormField.location({ label: "Address", ...search }))
+    ).toMatchObject({ manualEntryFallback: true })
+    expect(
+      getF0Config(
+        f0FormField.location({
+          label: "Address",
+          ...search,
+          requireResolved: true,
+        })
+      )
+    ).toMatchObject({ manualEntryFallback: false })
+    // The consumer still has the last word
+    expect(
+      getF0Config(
+        f0FormField.location({
+          label: "Address",
+          ...search,
+          requireResolved: true,
+          manualEntryFallback: true,
+        })
+      )
+    ).toMatchObject({ manualEntryFallback: true })
   })
 
   it("accepts a typed address and a resolved one", () => {
