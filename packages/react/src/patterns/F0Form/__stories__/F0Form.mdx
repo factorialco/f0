@@ -1,5 +1,6 @@
 import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./F0Form.stories"
+import * as InlineStories from "./F0FormInline.stories"
 import * as WizardStories from "../../F0WizardForm/__stories__/F0WizardForm.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
@@ -918,3 +919,103 @@ promise will not resolve.
 ## Custom field rendering
 
 <Canvas of={Stories.CustomField} />
+
+## Inline detail rows
+
+`inline` turns the form into a record: each field becomes a row with its label on
+the left and its value on the right, printed as text. Activating a row swaps the
+text for that field's own editor; leaving it puts the text back, with the edit
+kept in the form state. Nothing saves per row — the edits sit in the form as
+unsaved changes and the action bar is what writes them, so one Save covers the
+whole record.
+
+```tsx
+<F0Form
+  name="employee-profile"
+  inline
+  schema={profileSchema}
+  defaultValues={profile}
+  onSubmit={save}
+  submitConfig={{ type: "action-bar", discardable: true }}
+/>
+```
+
+The mode is form-wide: either every field reads as a row or none does.
+
+<Canvas of={InlineStories.EveryTypeReading} />
+
+### What each key does while a row is open
+
+| Key or gesture                            | What happens                                   |
+| ----------------------------------------- | ---------------------------------------------- |
+| Enter                                     | keeps the edit, closes the editor              |
+| Escape                                    | puts the field back to its value at activation |
+| Clicking away (blur)                      | keeps the edit, closes the editor              |
+| Closing a popup                           | keeps the edit, closes the editor              |
+| Any of the above, with a validation error | keeps the editor open                          |
+
+Focus returns to the row's activator a frame after the editor closes, so the
+keyboard stays where the user left it.
+
+<Canvas of={InlineStories.ActionBarAfterAnEdit} />
+
+### Per-row properties
+
+Two field properties are read only in this mode:
+
+- **`editable`** (default `true`) — `false` leaves the value inert: no
+  activator, no edit action, and a switch or checkbox is drawn disabled.
+- **`copyable`** (default `false`) — adds a copy action that writes the value as
+  plain text: the raw string or number with no grouping or units, the rendered
+  date, or the selected option's label. Toggles have nothing to copy and get no
+  action.
+
+```tsx
+const profileSchema = z.object({
+  employeeId: f0FormField(z.string(), {
+    label: "Employee ID",
+    editable: false,
+  }),
+  email: f0FormField(z.string().email(), { label: "Email", copyable: true }),
+})
+```
+
+<Canvas of={InlineStories.NotEditable} />
+
+<Canvas of={InlineStories.Copyable} />
+
+Both are evaluated when the schema is built, which is where a consumer resolves
+per-viewer permissions: `editable: access === "edit"`, and `renderIf` for the
+rows a viewer may not see at all. One schema then serves the admin, the manager
+and the employee.
+
+### Which field types read as rows
+
+`text`, `number` (including `money` and `percentage`), `select`, `date`,
+`switch` and `checkbox` have an inline presentation. Any other type keeps its
+standard field inside the row and logs one development warning, so a single
+textarea or file field does not take a whole profile out of the mode. A
+multi-select falls back the same way — the inline select is single-value.
+
+<Canvas of={InlineStories.UnsupportedTypeFallsBack} />
+
+### Layout
+
+Rows stack inside a bordered card. Section titles stay above their own card, and
+`row` groupings collapse: a detail row already pairs a label with a value, so
+there is nothing left to arrange side by side.
+
+<Canvas of={InlineStories.WithSections} />
+
+<DoDonts
+  do={[
+    "Use it for a record someone reads far more often than they edit — a profile, a settings summary.",
+    "Pair it with `submitConfig: { type: 'action-bar' }`, which is what gives the edits a Save.",
+    "Resolve who may edit what with `editable` and `renderIf` when you build the schema.",
+  ]}
+  dont={[
+    "Reach for it to create a record: a blank form of empty rows gives the user nothing to read.",
+    "Mix it with `styling.showSectionsSidepanel` — the rows carry no anchors for it to jump to.",
+    "Expect a row to save on its own; nothing commits until the action bar does.",
+  ]}
+/>
