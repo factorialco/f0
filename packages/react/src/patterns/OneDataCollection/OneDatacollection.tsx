@@ -894,10 +894,6 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
-  // Kept apart from `totalItems` because the two answer different questions:
-  // `totalItems` is how many items the collection holds (the total-items
-  // summary), this is how many bulk selection acts on. They only diverge for
-  // collections that paginate something other than their selectable rows.
   const [selectableTotal, setSelectableTotal] = useState<undefined | number>(
     undefined
   )

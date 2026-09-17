@@ -62,12 +62,6 @@ export type OnLoadDataCallback<
   Filters extends FiltersDefinition,
 > = (data: {
   totalItems: number | undefined
-  /**
-   * How many items selection acts on, when that differs from `totalItems`. A
-   * tree collection paginates its parent rows but selects the children
-   * rendered underneath them, so its `totalItems` undercounts the selection.
-   * Left undefined by visualizations where the two are the same.
-   */
   selectableTotal?: number
   filters: FiltersState<Filters>
   search: string | undefined
