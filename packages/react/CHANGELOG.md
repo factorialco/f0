@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.2.1](https://github.com/factorialco/f0/compare/f0-react-v7.2.0...f0-react-v7.2.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** report a selection-aware total ([#5532](https://github.com/factorialco/f0/issues/5532)) ([4287f1d](https://github.com/factorialco/f0/commit/4287f1d91da8823f57edabdf94ea63129b8b6c6a))
+
 ## [7.2.0](https://github.com/factorialco/f0/compare/f0-react-v7.1.1...f0-react-v7.2.0) (2026-09-16)
 
 
