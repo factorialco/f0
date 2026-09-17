@@ -174,7 +174,7 @@ const DateNavigatorTrigger = forwardRef<
               size="sm"
               variant="ghost"
               icon={ChevronLeft}
-              label="Previous"
+              label={i18n.navigation.previous}
               hideLabel
               disabled={!nextPrev?.prev}
               onClick={() => handleNavigation(nextPrev?.prev ?? false)}
@@ -194,7 +194,7 @@ const DateNavigatorTrigger = forwardRef<
             <F0Button
               variant="ghost"
               icon={ChevronRight}
-              label="Next"
+              label={i18n.navigation.next}
               hideLabel
               size="sm"
               fontSize="md"

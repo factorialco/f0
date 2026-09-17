@@ -111,7 +111,7 @@ export const F0QuestionCardMultiStep = ({
                 onClick={handlePrev}
                 disabled={currentStep <= 0}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-f1-foreground-secondary transition-colors hover:bg-f1-background-tertiary hover:text-f1-foreground disabled:pointer-events-none disabled:opacity-50"
-                aria-label="Previous"
+                aria-label={translations.navigation.previous}
               >
                 <F0Icon icon={ChevronLeft} size="sm" />
               </button>
@@ -123,7 +123,7 @@ export const F0QuestionCardMultiStep = ({
                 onClick={handleNext}
                 disabled={currentStep >= totalSteps - 1}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-f1-foreground-secondary transition-colors hover:bg-f1-background-tertiary hover:text-f1-foreground disabled:pointer-events-none disabled:opacity-50"
-                aria-label="Next"
+                aria-label={translations.navigation.next}
               >
                 <F0Icon icon={ChevronRight} size="sm" />
               </button>
