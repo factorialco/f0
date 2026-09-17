@@ -3902,6 +3902,14 @@ export declare type DashboardChartConfig = BarChartConfig | LineChartConfig | Fu
 export declare interface DashboardChartData {
     /** Category axis labels. Required for bar/line charts. */
     categories?: string[];
+    /**
+     * Constants to draw across the plot — a peer median, a target, an average.
+     *
+     * Part of the DATA, not the config: a figure like this arrives with the
+     * values it is compared against, and changes when they do. Bar and line
+     * charts render them; every other type ignores them.
+     */
+    referenceLines?: F0DataChartReferenceLine[];
     /** X-axis category labels for heatmap charts. */
     xCategories?: string[];
     /** Y-axis category labels for heatmap charts. */
@@ -4126,6 +4134,30 @@ export declare interface DashboardMetricData {
     value: number;
     /** Optional previous value — used to compute a trend indicator */
     previousValue?: number;
+    /**
+     * A reference figure to show the value against, under the number.
+     *
+     * Distinct from {@link DashboardMetricData.previousValue}, which is this
+     * metric at an earlier time and renders as a rise or a fall. A comparison is
+     * a different quantity entirely — a peer median, a target, a company-wide
+     * average — so it is stated rather than turned into a trend: an arrow next to
+     * it would read as "it moved", which it did not.
+     *
+     * `value` is in the metric's own units and is formatted exactly like the
+     * headline number, so the two can be read against each other. `label` says
+     * what the figure is, in the consumer's own words and language.
+     */
+    comparison?: {
+        value: number;
+        label: string;
+        /**
+         * Where the figure comes from, revealed by an ⓘ icon after it — "the
+         * median across all companies on Factorial", say. A string renders a
+         * plain tooltip; the structured form renders a hoverable card that can
+         * carry a link, the same affordance as `DashboardItemBase.info`.
+         */
+        info?: string | InfoHintContent;
+    };
 }
 
 /**
@@ -4620,6 +4652,10 @@ declare type DateCellConfig = {
     minDate?: Date;
     /** Latest selectable date. Dates after this are disabled in the picker. */
     maxDate?: Date;
+    /** Show the leading calendar icon in the cell. Defaults to `true`. */
+    showIcon?: boolean;
+    /** Show a clear button to empty the cell's date. Defaults to `false`. */
+    clearable?: boolean;
 };
 
 /**
@@ -5559,12 +5595,6 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -5813,138 +5843,16 @@ export declare const defaultTranslations: {
             readonly discard: "Discard";
             readonly keepEditing: "Keep editing";
             readonly publishError: "Couldn't publish this post";
-            readonly emptyTitle: "No posts yet";
-            readonly emptyDescription: "Posts shared in this community will appear here.";
-            readonly emptyDescriptionCanPost: "Be the first to post here.";
             readonly pinnedPost: "Pinned post";
             readonly pinnedPosts: "Pinned";
-            readonly pinnedPostsCount: {
-                readonly one: "{{count}} pinned post";
-                readonly other: "{{count}} pinned posts";
-            };
-            readonly pinPost: "Pin post";
             readonly unpinPost: "Unpin post";
             readonly goToPost: "Go to post";
-            readonly noPinnedPosts: "No pinned posts";
-            readonly noPinnedPostsDescription: "Pin a post and it stays at the top of this community.";
             readonly scheduledPosts: "Scheduled";
-            readonly scheduledPostsCount: {
-                readonly one: "{{count}} scheduled post";
-                readonly other: "{{count}} scheduled posts";
-            };
             readonly scheduledEvent: "Event";
-            /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
-            readonly publishesAt: "Publishes {{when}}";
-            readonly noScheduledPosts: "Nothing scheduled";
-            readonly noScheduledPostsDescription: "Posts you schedule will wait here until their time.";
-            readonly scheduledActions: "Scheduled post actions";
-            readonly publishNow: "Publish now";
-            readonly cancelScheduled: "Cancel";
             readonly draftPosts: "Drafts";
-            readonly draftPostsCount: {
-                readonly one: "{{count}} draft";
-                readonly other: "{{count}} drafts";
-            };
-            /** Where a scheduled row prints its date, a draft prints this. */
             readonly draftUntitled: "Untitled post";
             readonly draftSavedAt: "Saved {{when}}";
-            readonly publishDraft: "Publish";
-            readonly deleteDraft: "Delete draft";
             readonly shelfLabel: "Pinned, scheduled and draft posts";
-        };
-    };
-    readonly communities: {
-        readonly composer: {
-            readonly createPost: "Create post";
-            readonly createEvent: "Create event";
-            readonly editPost: "Edit post";
-            readonly basicInformation: "Basic information";
-            readonly postSettings: "Post settings";
-            readonly postCover: "Post cover";
-            readonly addMedia: "Drag and drop or click here";
-            readonly addMediaSubtitle: "any image, video or GIF";
-            readonly addMediaSize: "1200x600px";
-            readonly deletePhoto: "Delete photo";
-            readonly deleteVideo: "Delete video";
-            readonly coverActions: "Cover options";
-            readonly title: "Title";
-            readonly titlePlaceholder: "e.g. World Mental Health Day";
-            readonly description: "Description";
-            readonly descriptionPlaceholder: "Share what's special about it";
-            readonly attachmentsSizePerPost: "Up to 150 MB in attachments per post";
-            readonly previousAttachments: "Previously added attachments";
-            readonly isEventLabel: "This is an event";
-            readonly isEventDescription: "Select this to include a date, time, and location for this event.";
-            readonly eventStartDate: "Event start date";
-            readonly eventStartTime: "Start time";
-            readonly eventLocation: "Event location";
-            readonly eventLocationPlaceholder: "Where will this take place?";
-            readonly requireAction: "Require action";
-            readonly requireActionDescription: "Select how you want to track that users have taken the required action";
-            readonly actionType: "Action type";
-            readonly actionTypePlaceholder: "Select action type";
-            readonly actionTypeAcknowledge: "Acknowledge post";
-            readonly actionTypeAcknowledgeDescription: "Employees read and acknowledge the post";
-            readonly actionTypeWatchVideo: "Watch video";
-            readonly actionTypeWatchVideoDescription: "Employees watch the entire video";
-            readonly actionTypeClickedLink: "Clicked a link";
-            readonly actionTypeClickedLinkDescription: "Employees click the first link in the post";
-            readonly actionTypeComingSoon: "Coming soon";
-            readonly continue: "Continue";
-            readonly publishTitle: "Publish";
-            readonly publishDescription: "When publishing the post, it will be visible in the dashboard of each employee.";
-            readonly publish: "Publish";
-            readonly selectCommunity: "Select community";
-            readonly allowCommentsAndReactions: "Allow comments and reactions.";
-            readonly sendEmailNotification: "Send email notification";
-            readonly schedulePost: "Schedule post";
-            readonly scheduleDate: "Date";
-            readonly scheduleTime: "Time";
-            readonly confirm: "Confirm";
-            readonly cancel: "Cancel";
-            readonly saveAsDraft: "Save as draft";
-            readonly save: "Save";
-            readonly cantBeEmpty: "can't be empty";
-            readonly invalidInput: "Invalid input. Only alphanumeric characters are allowed";
-            readonly publishedSuccess: "The post has been published";
-            readonly scheduledSuccess: "The post has been scheduled";
-            readonly draftSuccess: "The post has been saved as draft";
-            readonly publishError: "There was an error creating the post, please try again.";
-        };
-        readonly detail: {
-            readonly postActions: "Post actions";
-            readonly edit: "Edit post";
-            readonly delete: "Delete post";
-            readonly deleteDescription: "Are you sure you want to delete this post? This action cannot be undone.";
-            readonly proceed: "Proceed";
-            readonly turnInteractionsOff: "Turn comments and reactions off";
-            readonly turnInteractionsOn: "Turn comments and reactions on";
-            readonly insights: "Insights";
-            readonly visits: {
-                readonly one: "Visit";
-                readonly other: "Visits";
-            };
-            readonly postViews: "Post views";
-            readonly anonymous: "Anonymous";
-            readonly comments: {
-                readonly one: "{{count}} comment";
-                readonly other: "{{count}} comments";
-            };
-            readonly commentPlaceholder: "Click here to write a comment...";
-            readonly submit: "Submit";
-            readonly deleteComment: "Delete comment";
-            readonly deleteCommentDescription: "Are you sure you want to delete this comment? This action cannot be undone.";
-            readonly editComment: "Edit";
-            readonly acknowledgeRequired: "Post acknowledgement required";
-            readonly acknowledge: "I acknowledge";
-            readonly acknowledgeLater: "Acknowledge later";
-            readonly acknowledgedOn: "Acknowledged on {{date}}, at {{time}}";
-            readonly closePostTitle: "Close post?";
-            readonly closePostDescription: "You haven't acknowledged this post yet. You can acknowledge it later.";
-            readonly closePost: "Close post";
-            readonly continueReading: "Continue reading";
-            readonly close: "Close";
-            readonly home: "Home";
         };
     };
     readonly dataChart: {
@@ -6273,19 +6181,14 @@ export declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -6817,7 +6720,8 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     numberConfig?: NumberCellConfig<R>;
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
-     * restrict the selectable date range in the picker.
+     * restrict the selectable date range in the picker, `showIcon` to hide
+     * the leading calendar icon, and `clearable` for a clear button.
      *
      * Can be a static object or a function that receives the current row item
      * to return a per-row range (e.g. bound one date field by another field's
@@ -9506,6 +9410,8 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     type: "bar";
     /** One or more data series to render as bars */
     series: F0DataChartBarSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Bar orientation. @default "vertical" */
     orientation?: "vertical" | "horizontal";
     /** Stack all series into a single bar per category. @default false */
@@ -9856,6 +9762,8 @@ export declare interface F0DataChartLineProps extends F0DataChartBaseProps {
     type: "line";
     /** One or more data series to render as lines */
     series: F0DataChartLineSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Line interpolation type. @default "linear" */
     lineType?: F0DataChartLineType;
     /** Show gradient area fill below lines. @default true */
@@ -10075,6 +9983,35 @@ export declare interface F0DataChartRadarSeries {
     data: number[];
     /** Override color for this series. Must be an F0 design token name. */
     color?: ChartColorToken;
+}
+
+/**
+ * A constant drawn across the whole plot rather than per category.
+ *
+ * For a figure that does not vary with the categories — a peer median, a
+ * target, an average. Drawn as one dashed line with its label at the end, so it
+ * reads as a threshold the bars are measured against rather than as another
+ * series: a constant repeated once per category would claim to be a quantity
+ * each of them has.
+ */
+export declare interface F0DataChartReferenceLine {
+    /** Where on the value axis to draw it. */
+    value: number;
+    /** Shown at the end of the line. Omit for an unlabelled rule. */
+    label?: string;
+    /** Must be an F0 design token name. Falls back to a neutral line colour. */
+    color?: ChartColorToken;
+    /** Solid instead of dashed. @default false */
+    solid?: boolean;
+    /**
+     * Shown when the reader hovers the line, under its label and value.
+     *
+     * For saying what the figure actually is — which companies a peer median
+     * covers, which quarter a target belongs to, whether it is an estimate. A
+     * line with no description is not hoverable: there would be nothing to add
+     * beyond the label already printed beside it.
+     */
+    description?: string;
 }
 
 /**
