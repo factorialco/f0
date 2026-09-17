@@ -42,9 +42,13 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     },
     ref
   ) => {
-    const [inputValue, setInputValue] = useState("")
-    const [error, setError] = useState(false)
     const i18n = useI18n()
+    // Formatted up front, not in the effect below: an empty first frame paints
+    // the placeholder over a value the picker was mounted with.
+    const [inputValue, setInputValue] = useState(() =>
+      granularity.toString(value?.value, i18n, displayFormat ?? "long")
+    )
+    const [error, setError] = useState(false)
 
     useEffect(() => {
       setInputValue(
