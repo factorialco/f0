@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.5.0](https://github.com/factorialco/f0/compare/f0-react-v7.4.0...f0-react-v7.5.0) (2026-09-17)
+
+
+### Features
+
+* **storybook:** add aria surface regression check ([#5217](https://github.com/factorialco/f0/issues/5217)) ([a1b827b](https://github.com/factorialco/f0/commit/a1b827b02b1815b6ad763d73d5a45e5175e136cf))
+
 ## [7.4.0](https://github.com/factorialco/f0/compare/f0-react-v7.3.0...f0-react-v7.4.0) (2026-09-17)
 
 
