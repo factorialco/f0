@@ -1,6 +1,10 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
+import {
+  INPUTFIELD_SIZES,
+  InputFieldProps,
+  type InlineDismissReason,
+} from "@/components/F0InputField"
 import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import type {
@@ -26,6 +30,19 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
 
 export const selectVariants = ["field", "inline"] as const
 export type F0SelectVariant = (typeof selectVariants)[number]
+
+/**
+ * Why an edit ended, reported by the inline variant so the owner of `editing`
+ * can decide what to do with it. A narrowing of `InlineDismissReason`: a select
+ * has no blur to report, because the popup takes focus.
+ */
+export const selectInlineDismissReasons = [
+  "popupClose",
+  "escape",
+  "commit",
+] as const satisfies readonly InlineDismissReason[]
+export type SelectInlineDismissReason =
+  (typeof selectInlineDismissReasons)[number]
 
 /** Props shared by the field and inline select variants. */
 type F0SelectPopupProps<T extends string, R = unknown> = {
@@ -192,6 +209,8 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
   F0SelectSelectionProps<T, R> & {
     /** Standard form-field presentation. This remains the default. */
     variant?: "field"
+    editing?: never
+    onDismiss?: never
     withApplySelection?: boolean
     applySelectionLabel?: string
     children?: React.ReactNode
@@ -237,12 +256,27 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
   R
 > &
   F0SelectSingleSelectionProps<T, R> &
-  Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
+  Pick<
+    InputFieldProps<T>,
+    "label" | "placeholder" | "disabled" | "hideLabel"
+  > & {
     /**
-     * Compact borderless presentation for single-value controls embedded in rows.
-     * The required label is used as the accessible name and is not shown visually.
+     * Detail-row presentation for single-value controls. The selection reads as
+     * plain text — avatar and icon included — and becomes the dropdown only
+     * while `editing` is true. The required label is the accessible name and is
+     * never shown visually, with or without `hideLabel`.
      */
     variant: "inline"
+    /**
+     * Whether the dropdown is the presentation right now. Controlled: the
+     * component never changes it, it only reports what the user did through
+     * `onDismiss` and keeps the dropdown open until the owner says otherwise.
+     *
+     * @default false
+     */
+    editing?: boolean
+    /** What ended the edit. The value change still arrives through `onChange`. */
+    onDismiss?: (reason: SelectInlineDismissReason) => void
     size?: never
     disableSelectAll?: never
     withApplySelection?: never
@@ -255,7 +289,6 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     showPreview?: never
     required?: never
     loading?: never
-    hideLabel?: never
     labelIcon?: never
     icon?: never
     name?: never
