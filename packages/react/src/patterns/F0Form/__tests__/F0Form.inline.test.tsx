@@ -349,6 +349,59 @@ describe("F0Form inline mode", () => {
     expect(warn.mock.calls[0][0]).toContain("textarea")
   })
 
+  it("leaves the last visible row undivided when renderIf hides the one after it", () => {
+    const { container } = renderProfile({
+      schema: z.object({
+        fullName: f0FormField(z.string(), { label: "Full name" }),
+        ssn: f0FormField(z.string(), {
+          label: "Social security number",
+          renderIf: () => false,
+        }),
+      }),
+      defaultValues: { fullName: "Ada Lovelace", ssn: "042-88-1201" },
+    })
+
+    const rows = container.querySelectorAll("[data-slot='inline-field-row']")
+
+    expect(screen.queryByText("Social security number")).toBeNull()
+    expect(rows).toHaveLength(1)
+    // The hidden field keeps its Controller mounted and so stays in the card as
+    // a `<span>`; the divider rule counts rows, which are `div`s.
+    expect(rows[0].className).toContain("last-of-type:border-b-0")
+    expect(rows[0].className).not.toContain("last:border-b-0")
+  })
+
+  it("keeps a hidden field's value so the form still submits it", async () => {
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+    const user = userEvent.setup()
+
+    renderProfile({
+      schema: z.object({
+        fullName: f0FormField(z.string(), { label: "Full name" }),
+        ssn: f0FormField(z.string(), {
+          label: "Social security number",
+          renderIf: () => false,
+        }),
+      }),
+      defaultValues: { fullName: "Ada Lovelace", ssn: "042-88-1201" },
+      onSubmit,
+    })
+
+    await user.click(activator("Full name"))
+    const input = await screen.findByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "Grace Hopper{Enter}")
+
+    const [submit] = await screen.findAllByRole("button", { name: /submit/i })
+    await user.click(submit)
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ ssn: "042-88-1201" })
+      )
+    )
+  })
+
   it("leaves the standard layout untouched when inline is false", () => {
     const { container } = render(
       <F0Form

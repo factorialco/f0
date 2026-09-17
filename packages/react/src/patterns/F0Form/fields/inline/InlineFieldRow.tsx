@@ -165,7 +165,10 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
         data-slot="inline-field-row"
         className={cn(
           "group flex min-h-14 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2",
-          "border-0 border-b border-solid border-f1-border-secondary last:border-b-0"
+          // `last-of-type`, not `last`: a caller may leave non-row siblings in
+          // the list — a field kept mounted but not rendered, say — and only
+          // the last ROW should drop its divider.
+          "border-0 border-b border-solid border-f1-border-secondary last-of-type:border-b-0"
         )}
       >
         <div className="flex min-w-0 flex-[1_1_140px] items-center gap-1">
