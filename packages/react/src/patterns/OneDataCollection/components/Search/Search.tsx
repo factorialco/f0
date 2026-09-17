@@ -187,6 +187,14 @@ const useRotatingPlaceholder = (
   const example = examples[index % Math.max(count, 1)] ?? fallback
 
   useEffect(() => {
+    if (!paused) {
+      return
+    }
+    setShown(0)
+    setPhase("typing")
+  }, [paused])
+
+  useEffect(() => {
     if (count === 0 || paused || reducedMotion) {
       return
     }
@@ -472,7 +480,7 @@ export const Search = ({
     suggestionItems.length > 0
   const placeholder = useRotatingPlaceholder(
     placeholderRotation,
-    Boolean(text) || searching,
+    !expanded || Boolean(text) || searching,
     i18n.actions.search
   )
 
