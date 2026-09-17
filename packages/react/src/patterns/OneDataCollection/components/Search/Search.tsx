@@ -334,7 +334,7 @@ const InlineAction = ({
   busy: boolean
 }) =>
   !action ? null : (
-    <div className="w-[7.5rem] shrink-0 overflow-hidden [&>button]:w-full [&_.main]:overflow-hidden [&_.main]:whitespace-nowrap">
+    <div className="max-w-40 shrink-0 overflow-hidden [&_.main]:overflow-hidden [&_.main]:whitespace-nowrap">
       <F0Button
         variant="outline"
         size="sm"
