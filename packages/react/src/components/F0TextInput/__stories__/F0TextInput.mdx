@@ -174,3 +174,77 @@ A trailing eye-toggle flips between masked and visible text; its accessible name
 **Enter key**
 
 `onPressEnter` fires when `Enter` is pressed while the input has focus. Useful for form-less search boxes, inline editing, or single-field submit flows. It does not call `preventDefault` — wrap the input in a `<form onSubmit>` if native form submission is also needed.
+
+**Inline variant**
+
+`variant="inline"` is the detail-row presentation: a form that reads as rows, where the value prints as text and becomes its own editor when the row activates it. With no `variant`, nothing changes — the field presentation is still the default.
+
+The variant is presentational only. It holds no mode state: the parent passes `editing` and the component draws the matching presentation. When the user does something that would end an edit, the component reports it through `onDismiss` and keeps drawing the editor until `editing` changes. A component that closed itself would leave the row stuck, because the row decides whether a value commits, reverts, or stays in edit with a validation error showing.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Accepted when</th>
+        <th className="text-left">What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>variant</code>
+        </td>
+        <td>Always</td>
+        <td>
+          <code>"field"</code> (default) or <code>"inline"</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>editing</code>
+        </td>
+        <td>
+          <code>variant="inline"</code> only
+        </td>
+        <td>
+          <code>false</code> (default) draws the value as plain text;{" "}
+          <code>true</code> draws the input and focuses it
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onDismiss</code>
+        </td>
+        <td>
+          <code>variant="inline"</code> only
+        </td>
+        <td>
+          Reports <code>"commit"</code> on Enter, <code>"escape"</code> on
+          Escape, and <code>"blur"</code> when focus leaves
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+At rest the value is plain text: no border, no background, no input element, no tab stop — the activator belongs to the row. An empty value shows the `placeholder` in the secondary foreground colour, and a value too long for the box is cut with an ellipsis. Both presentations fill the box they are given in both axes and put the first glyph at the same x, so the text does not move when the row is activated.
+
+`label` stays required. Pass `hideLabel`, as every inline field renderer does, and it becomes the value's accessible name instead of a visible label.
+
+```tsx
+const [editing, setEditing] = useState(false)
+
+<F0TextInput
+  variant="inline"
+  label="Job title"
+  hideLabel
+  value={value}
+  editing={editing}
+  onChange={setValue}
+  onDismiss={(reason) => {
+    if (reason === "escape") setValue(valueAtActivation)
+    setEditing(false)
+  }}
+/>
+```
