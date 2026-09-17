@@ -4,7 +4,7 @@ import { inputFieldStatus } from "@/components/F0InputField"
 import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { F0TextInput } from ".."
+import { F0TextInput, type F0TextInputFieldProps } from ".."
 import { inputSizes } from "../types"
 
 const meta = {
@@ -69,7 +69,10 @@ const meta = {
 } satisfies Meta<typeof F0TextInput>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// The component's props are a discriminated union (`variant="inline"` adds
+// `editing` and `onDismiss`), which collapses `StoryObj<typeof meta>` args to
+// `never`. These stories all exercise the default field variant.
+type Story = StoryObj<F0TextInputFieldProps>
 
 export const Primary: Story = {
   args: {
