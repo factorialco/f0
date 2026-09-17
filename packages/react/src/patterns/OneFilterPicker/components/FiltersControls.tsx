@@ -108,8 +108,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   // What the query stands for goes into the draft, not into the collection:
   // inside this popover everything waits for the apply button, and a field
   // that quietly bypassed it would be the odd one out.
+  const pendingQuickFiltersRef = useRef<Record<string, unknown> | null>(null)
   const stageFilters = (staged: Record<string, unknown>) => {
-    setLocalFiltersValue(staged as FiltersState<Filters>)
+    pendingQuickFiltersRef.current = staged
   }
 
   const selectFilter = (key: keyof Filters) => {
@@ -187,13 +188,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   }
 
   const handleApplyFilters = () => {
+    const pending = pendingQuickFiltersRef.current
+    const applied = pending
+      ? ({ ...localFiltersValue, ...pending } as FiltersState<Filters>)
+      : localFiltersValue
+    pendingQuickFiltersRef.current = null
     // Emit only active filters so a cleared set is applied as `{}` (unfiltered),
     // not `{ key: emptyValue }` which could make the data source return nothing.
-    onChange(getActiveFiltersValue(filtersForValue, localFiltersValue, i18n))
+    onChange(getActiveFiltersValue(filtersForValue, applied, i18n))
     onOpenChange(false)
   }
 
   const handleClearFilters = () => {
+    pendingQuickFiltersRef.current = null
     setLocalFiltersValue(getClearedFiltersValue(filtersForValue))
   }
 
