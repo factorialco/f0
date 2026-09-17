@@ -34,7 +34,7 @@ type InlineStartDateProps = {
  */
 function InlineStartDate({
   label = "Start date",
-  value: initialValue = startDate,
+  value: initialValue,
   placeholder = "Add a start date",
   editing: initialEditing = false,
   hideLabel = true,
@@ -82,6 +82,16 @@ function textStartX(element: Element) {
   return left + parseFloat(getComputedStyle(element).paddingLeft)
 }
 
+/**
+ * The calendar fades its month in over the 150ms DayView declares, and the test
+ * runner pauses CSS animations but not framer-motion. Polling for a settled
+ * opacity passes under the runner and nowhere else, so wait the known duration
+ * before the a11y pass samples colours mid-fade.
+ */
+const MONTH_FADE_MS = 150
+const settleCalendar = () =>
+  new Promise((resolve) => setTimeout(resolve, MONTH_FADE_MS + 100))
+
 function componentRoot(box: HTMLElement) {
   const root = box.firstElementChild
   if (!root) {
@@ -111,6 +121,7 @@ const meta = {
   },
   args: {
     label: "Start date",
+    value: startDate,
     placeholder: "Add a start date",
     onDismiss: fn(),
   },
@@ -129,9 +140,9 @@ export const AtRest: Story = {
 }
 
 export const Empty: Story = {
-  args: {
-    value: undefined,
-  },
+  // Not `args: { value: undefined }`: Storybook merges args by spreading, and a
+  // story that drops a value back to undefined reads as "unset" downstream.
+  render: (args) => <InlineStartDate {...args} value={undefined} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
@@ -152,6 +163,7 @@ export const Editing: Story = {
       await expect(input).toHaveFocus()
     })
     await expect(await screen.findByRole("grid")).toBeVisible()
+    await settleCalendar()
   },
 }
 
@@ -190,6 +202,8 @@ export const TextDoesNotMove: Story = {
         readHeight
       )
     })
+
+    await settleCalendar()
   },
 }
 
@@ -217,6 +231,8 @@ export const FillsTheRowBox: Story = {
         await expect(root.height).toBe(expected.height)
       })
     })
+
+    await settleCalendar()
   },
 }
 
@@ -294,6 +310,8 @@ export const ReportsDismissWithoutClosing: Story = {
       ).toBeVisible()
       await expect(await screen.findByRole("grid")).toBeVisible()
     })
+
+    await settleCalendar()
   },
 }
 
