@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import type { InlineDismissReason } from "@/components/F0InputField"
 import {
   NavigationGranularityKey,
   resolveGranularityDefinition,
@@ -6,7 +7,11 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
 import { DateInput } from "./components/DateInput"
-import { DatePickerValue, F0DatePickerProps } from "./types"
+import {
+  DatePickerValue,
+  F0DatePickerInlineProps,
+  F0DatePickerProps,
+} from "./types"
 
 function getGranularityDefinition(
   granularityKey: NavigationGranularityKey | undefined,
@@ -46,27 +51,37 @@ function toSafeDatePickerRange(
   return { value: range, granularity: value.granularity }
 }
 
-export function F0DatePicker({
-  onChange,
-  value,
-  presets = [],
-  granularities = ["day"],
-  minDate,
-  maxDate,
-  open = false,
-  showIcon = true,
-  displayFormat,
-  selectOnCellOnly,
-  ...inputProps
-}: F0DatePickerProps) {
+export function F0DatePicker(props: F0DatePickerProps) {
+  const {
+    onChange,
+    value,
+    presets = [],
+    granularities = ["day"],
+    minDate,
+    maxDate,
+    open = false,
+    showIcon = true,
+    displayFormat,
+    selectOnCellOnly,
+    variant,
+    editing = false,
+    onDismiss,
+    ...inputProps
+  } = props as F0DatePickerInlineProps
+
+  const inline = variant === "inline"
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
     () => toSafeDatePickerRange(value, granularities[0] ?? "day")
   )
-  const [isOpen, setIsOpen] = useState(open)
+  const [localOpen, setLocalOpen] = useState(open)
 
   useEffect(() => {
-    setIsOpen(open)
+    setLocalOpen(open)
   }, [open])
+
+  // Inline, the calendar is the editor: it is open exactly while the row says
+  // the field is being edited, and a dismissal is reported rather than applied.
+  const isOpen = inline ? editing : localOpen
 
   const i18n = useI18n()
 
@@ -98,9 +113,85 @@ export function F0DatePicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
   }, [value])
 
-  const handlePickerOpenChange = (open: boolean) => {
-    setIsOpen(open)
+  const scheduledRef = useRef(false)
+  const reasonRef = useRef<InlineDismissReason>("popupClose")
+  const escapePressedRef = useRef(false)
+  const closeReportedRef = useRef(false)
+
+  /**
+   * The popup dismisses itself from a capture-phase document listener, so a
+   * close arrives before the input has seen the Escape that caused it. The
+   * reason is only settled once the whole event has been dispatched, and one
+   * gesture ends the edit once.
+   */
+  const reportDismiss = (reason: InlineDismissReason) => {
+    if (reason === "escape") {
+      escapePressedRef.current = true
+    } else {
+      reasonRef.current = reason
+    }
+
+    if (scheduledRef.current) {
+      return
+    }
+    scheduledRef.current = true
+
+    queueMicrotask(() => {
+      const resolved = escapePressedRef.current ? "escape" : reasonRef.current
+      scheduledRef.current = false
+      escapePressedRef.current = false
+      reasonRef.current = "popupClose"
+      // Escape leaves focus where it is; the others move it, and that move must
+      // not be reported a second time as a blur.
+      closeReportedRef.current = resolved !== "escape"
+      onDismiss?.(resolved)
+    })
+  }
+
+  const handlePickerOpenChange = (
+    open: boolean,
+    reason: InlineDismissReason = "popupClose"
+  ) => {
+    if (inline) {
+      if (!open) {
+        reportDismiss(reason)
+      }
+      return
+    }
+
+    setLocalOpen(open)
     inputProps.onOpenChange?.(open)
+  }
+
+  const handlePressEscape = () => {
+    if (inline) {
+      reportDismiss("escape")
+    }
+  }
+
+  /**
+   * The click that closes the calendar also blurs the input, and that close is
+   * the reason; a blur is only its own reason when focus left on its own.
+   */
+  const handleInputBlur = () => {
+    if (!inline) {
+      return
+    }
+    requestAnimationFrame(() => {
+      if (closeReportedRef.current) {
+        closeReportedRef.current = false
+        return
+      }
+      const active = document.activeElement
+      const insidePicker =
+        active === inputRef.current ||
+        (active instanceof Element &&
+          active.closest("[data-radix-popper-content-wrapper]") !== null)
+      if (insidePicker) {
+        return
+      }
+      onDismiss?.("blur")
+    })
   }
 
   const handleSelect = (value: DatePickerValue | undefined) => {
@@ -114,7 +205,7 @@ export function F0DatePicker({
 
     // If the granularity is not a range, close the popup
     if (shouldClose) {
-      handlePickerOpenChange(false)
+      handlePickerOpenChange(false, "commit")
     }
   }
 
@@ -142,6 +233,33 @@ export function F0DatePicker({
     }
   }, [isOpen])
 
+  useEffect(() => {
+    escapePressedRef.current = false
+    closeReportedRef.current = false
+  }, [editing])
+
+  const dateInput = (
+    <DateInput
+      ref={inputRef}
+      {...inputProps}
+      value={localValue}
+      granularity={granularity}
+      onDateChange={handleChangeDate}
+      showIcon={showIcon}
+      displayFormat={displayFormat}
+      variant={variant}
+      editing={editing}
+      onPressEscape={handlePressEscape}
+      onInputBlur={handleInputBlur}
+    />
+  )
+
+  // At rest there is nothing to trigger: the popover trigger would put its
+  // `aria-haspopup` and `aria-expanded` on a piece of text the row owns.
+  if (inline && !editing) {
+    return dateInput
+  }
+
   return (
     <DatePickerPopup
       hideCalendarInput
@@ -156,15 +274,7 @@ export function F0DatePicker({
       selectOnCellOnly={selectOnCellOnly}
       asChild
     >
-      <DateInput
-        ref={inputRef}
-        {...inputProps}
-        value={localValue}
-        granularity={granularity}
-        onDateChange={handleChangeDate}
-        showIcon={showIcon}
-        displayFormat={displayFormat}
-      />
+      {dateInput}
     </DatePickerPopup>
   )
 }

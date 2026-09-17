@@ -12,7 +12,11 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
-import { datepickerSizes, DatePickerValue } from "../types"
+import {
+  datepickerSizes,
+  DatePickerValue,
+  type F0DatePickerFieldProps,
+} from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
@@ -37,6 +41,9 @@ const meta = {
           "For each granularity the input selector will show a button to navigate to the current date in the granularity, you can hide that via props",
           "The component also allows you navigation arrows to allow user to navigate to the next or previous item in the granularity.",
           "Note the value and defaultValue are objects with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
+          '<strong>Inline variant.</strong> `variant="inline"` is the detail-row presentation: the date reads as the same string the input prints, and becomes the input plus its open calendar when the row activates it. It adds two props of its own, `editing` and `onDismiss`, and accepts everything the default variant does. See the <em>Inline</em> stories',
+          "The variant holds no mode state: the parent passes `editing` and the picker draws the matching presentation. A pick reports `commit`, Escape reports `escape`, a click outside reports `popupClose`, and focus leaving without a pick reports `blur` — all through `onDismiss`, and none of them closes the calendar. The parent closes it by setting `editing` to false, so it can keep the row in edit when the value failed to validate",
+          "The calendar icon keeps its place in both presentations, so the date sits at the same x whether it is being read or edited",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
@@ -128,7 +135,10 @@ const meta = {
 } satisfies Meta<typeof F0DatePicker>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// The component's props are a discriminated union (`variant="inline"` adds
+// `editing` and `onDismiss`), which collapses `StoryObj<typeof meta>` args to
+// `never`. These stories all exercise the default field variant.
+type Story = StoryObj<F0DatePickerFieldProps>
 
 const today = mockDate
 const presets = [
