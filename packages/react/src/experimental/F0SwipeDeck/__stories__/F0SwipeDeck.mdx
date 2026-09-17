@@ -1,0 +1,80 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0SwipeDeck.stories"
+
+<Meta of={Stories} />
+
+# F0SwipeDeck
+
+Presents a queue one card at a time and asks for a binary decision on each:
+drag right to accept, left to reject. The deck renders and animates; the
+`useSwipeDeck` hook owns the queue, so the same decision can be driven by a
+gesture, a button or a keyboard shortcut.
+
+---
+
+# Overview
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+The deck is a labelled group holding one card at a time. The card is the
+consumer's own content, rendered through `renderCard` — the deck adds only the
+drag surface, the rotation as the card travels, and the exit animation.
+
+## Guidelines
+
+Pair `F0SwipeDeck` with `useSwipeDeck`. The hook is the source of truth for the
+queue, so anything that decides a card — the gesture, an action button, a
+shortcut — calls the same `decide`, `swipeLeft`, `swipeRight` and `undo`.
+
+<Canvas of={Stories.DecidedWithoutDragging} />
+
+A decision fires as the card leaves, not when the consumer's mutation resolves.
+Pass the `rollback` given to `onDecide` to put the card back when that mutation
+fails, and treat `onUndo` as the user changing their mind about a decision that
+already happened.
+
+Each item is decided exactly once, however fast the decisions arrive, so a
+double-tap or a fast pair of swipes can never skip a card silently.
+
+<DoDonts
+  do={{
+    description: "Give the deck a queue it can finish.",
+    guidelines: [
+      "Keep the queue short enough to review in one sitting, and use `onNeedMore` to extend it.",
+      "Render an `empty` slot that tells the user what just happened.",
+      "Offer buttons alongside the gesture — a swipe is never the only way through.",
+    ],
+  }}
+  dont={{
+    description: "Don't make the gesture carry irreversible work.",
+    guidelines: [
+      "Don't block the deck on a network round trip; decide optimistically and roll back.",
+      "Don't put a drag-conflicting control inside a card without opting it out of the gesture.",
+      "Don't use it for more than two outcomes — that is a list, not a deck.",
+    ],
+  }}
+/>
+
+## When not to use
+
+- The user needs to compare items, or revisit them out of order: use a list or
+  a table, where everything stays on screen.
+- There are more than two outcomes per item, or the outcome needs a form.
+- The queue is long enough that reviewing it card by card would be a chore.
+
+<Canvas of={Stories.Empty} />
+
+## Accessibility
+
+The deck renders as a labelled group, named through the `label` prop or the
+`swipeDeck.label` translation. Because a drag is not an accessible control, the
+decisions must also be reachable from buttons wired to the same hook — the
+deck deliberately ships no gesture-only path. Under `prefers-reduced-motion`
+the card neither rotates nor animates out.
+
+## Props
+
+<Controls />

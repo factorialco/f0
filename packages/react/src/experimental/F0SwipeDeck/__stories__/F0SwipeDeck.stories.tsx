@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
+import { expect, userEvent, within } from "storybook/test"
+import { F0Button } from "@/components/F0Button"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0SwipeDeck } from "../F0SwipeDeck"
 import { useSwipeDeck } from "../hooks/useSwipeDeck"
 import type { SwipeDirection } from "../types"
@@ -26,6 +29,7 @@ const meta: Meta = {
   tags: ["autodocs", "experimental"],
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
 }
 
@@ -41,13 +45,13 @@ const Card = ({ candidate }: { candidate: Candidate }) => (
   </div>
 )
 
-const Demo = () => {
+const Demo = ({ items = candidates }: { items?: Candidate[] }) => {
   const [decisions, setDecisions] = useState<
     { name: string; direction: SwipeDirection }[]
   >([])
 
   const deck = useSwipeDeck<Candidate>({
-    items: candidates,
+    items,
     getItemId: (candidate) => candidate.id,
     onDecide: ({ item, direction }) =>
       setDecisions((previous) => [...previous, { name: item.name, direction }]),
@@ -65,10 +69,20 @@ const Demo = () => {
           </span>
         }
       />
+      <div className="flex gap-2">
+        <F0Button variant="outline" label="Skip" onClick={deck.swipeLeft} />
+        <F0Button
+          variant="outline"
+          label="Undo"
+          disabled={!deck.canUndo}
+          onClick={deck.undo}
+        />
+        <F0Button label="Invite" onClick={deck.swipeRight} />
+      </div>
       <ul className="flex w-full flex-col gap-1 text-f1-foreground-secondary">
         {decisions.map((decision) => (
           <li key={decision.name}>
-            {decision.direction === "right" ? "Invited" : "Discarded"}{" "}
+            {decision.direction === "right" ? "Invited" : "Skipped"}{" "}
             {decision.name}
           </li>
         ))}
@@ -82,5 +96,40 @@ const Demo = () => {
  * the decision and moves to the next candidate.
  */
 export const Default: Story = {
+  parameters: withSnapshot({}),
   render: () => <Demo />,
+}
+
+/**
+ * Every decision is also reachable without the gesture: the deck is driven by
+ * `useSwipeDeck`, so buttons and a drag run the same code path, and `undo`
+ * puts the last candidate back on top.
+ */
+export const DecidedWithoutDragging: Story = {
+  render: () => <Demo />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Invite the first candidate", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Invite" }))
+      await expect(await canvas.findByText("Leire Etxeberria")).toBeVisible()
+      await expect(canvas.getByText("Invited Jorge Manrique")).toBeVisible()
+    })
+
+    await step("Undo puts the candidate back on top", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Undo" }))
+      await expect(await canvas.findByText("Jorge Manrique")).toBeVisible()
+      await expect(
+        canvas.queryByText("Invited Jorge Manrique")
+      ).not.toBeInTheDocument()
+    })
+  },
+}
+
+/**
+ * Once every candidate has been decided the deck renders the `empty` slot.
+ */
+export const Empty: Story = {
+  parameters: withSnapshot({}),
+  render: () => <Demo items={[]} />,
 }
