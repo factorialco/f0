@@ -2,6 +2,7 @@ import { ControllerRenderProps } from "react-hook-form"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { F0NumberInput } from "@/components/F0NumberInput"
 import { FORM_SIZE } from "../../constants"
+import type { InlineEditing } from "../inline/useInlineField"
 import type { ResolvedField } from "../types"
 import type { F0NumberField } from "./types"
 
@@ -11,6 +12,8 @@ interface NumberFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+  /** Set by the inline (detail-row) path; absent everywhere else. */
+  inline?: InlineEditing
 }
 
 /**
@@ -22,28 +25,42 @@ export function NumberFieldRenderer({
   error,
   loading,
   status,
+  inline,
 }: NumberFieldRendererProps) {
-  return (
-    <F0NumberInput
-      {...formField}
-      label={field.label}
-      placeholder={field.placeholder}
-      disabled={field.disabled}
-      step={field.step}
-      min={field.min}
-      max={field.max}
-      maxDecimals={field.maxDecimals}
-      units={field.units}
-      locale={field.locale ?? "en-US"}
-      value={formField.value != null ? Number(formField.value) : undefined}
-      onChange={(value) => formField.onChange(value)}
-      size={FORM_SIZE}
-      hideLabel
-      hint=""
-      error={error}
-      status={status}
-      loading={loading}
-      clearable={field.clearable}
-    />
-  )
+  const shared = {
+    ...formField,
+    label: field.label,
+    placeholder: field.placeholder,
+    disabled: field.disabled,
+    step: field.step,
+    min: field.min,
+    max: field.max,
+    maxDecimals: field.maxDecimals,
+    units: field.units,
+    locale: field.locale ?? "en-US",
+    value: formField.value != null ? Number(formField.value) : undefined,
+    onChange: (value: number | null) => formField.onChange(value),
+    size: FORM_SIZE,
+    hideLabel: true,
+    hint: "",
+    error,
+    status,
+    loading,
+    clearable: field.clearable,
+  }
+
+  // Two branches, not a spread: the props are a discriminated union, and a
+  // conditional spread widens `variant` back to `"inline" | undefined`.
+  if (inline) {
+    return (
+      <F0NumberInput
+        {...shared}
+        variant="inline"
+        editing={inline.editing}
+        onDismiss={inline.onDismiss}
+      />
+    )
+  }
+
+  return <F0NumberInput {...shared} />
 }

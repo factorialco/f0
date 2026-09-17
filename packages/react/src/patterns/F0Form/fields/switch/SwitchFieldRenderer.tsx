@@ -2,12 +2,18 @@ import { ControllerRenderProps } from "react-hook-form"
 import { ZodTypeAny } from "zod"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
+import type { InlineEditing } from "../inline/useInlineField"
 import type { ResolvedField } from "../types"
 import type { F0SwitchField } from "./types"
 
 interface SwitchFieldRendererProps {
   field: ResolvedField<F0SwitchField>
   formField: ControllerRenderProps
+  /**
+   * Set by the inline (detail-row) path. A switch is its own editor, so only
+   * the presentation changes: `editing` and `onDismiss` never apply.
+   */
+  inline?: InlineEditing
 }
 
 /**
@@ -25,19 +31,24 @@ function isMustBeTrue(schema: ZodTypeAny): boolean {
 export function SwitchFieldRenderer({
   field,
   formField,
+  inline,
 }: SwitchFieldRendererProps) {
   // Switch is "required" only if it must be true (z.literal(true))
   const isRequired = field.validation && isMustBeTrue(field.validation)
 
-  return (
-    <Switch
-      {...formField}
-      title={field.label}
-      disabled={field.disabled}
-      required={isRequired}
-      checked={Boolean(formField.value)}
-      onCheckedChange={formField.onChange}
-      hideLabel
-    />
-  )
+  const shared = {
+    ...formField,
+    title: field.label,
+    disabled: field.disabled,
+    required: isRequired,
+    checked: Boolean(formField.value),
+    onCheckedChange: formField.onChange,
+    hideLabel: true,
+  }
+
+  if (inline) {
+    return <Switch {...shared} variant="inline" />
+  }
+
+  return <Switch {...shared} />
 }

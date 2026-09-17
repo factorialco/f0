@@ -11,8 +11,15 @@ import { describe, expect, it } from "vitest"
  */
 const MODULE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..")
 
+/**
+ * The folder holds the field layer too, and that one is allowed to know what a
+ * field is. Only the row's own modules are checked; `index.ts` is the folder's
+ * barrel and re-exports both layers, so it is not one of them.
+ */
+const ROW_FILES = new Set(["InlineFieldRow.tsx", "types.ts"])
+
 const SOURCES = readdirSync(MODULE_DIR)
-  .filter((file) => file.endsWith(".ts") || file.endsWith(".tsx"))
+  .filter((file) => ROW_FILES.has(file))
   .map((file) => ({ file, text: readFileSync(join(MODULE_DIR, file), "utf8") }))
 
 /** `from "…"` and `import("…")`, which is every specifier a module can have. */
@@ -45,7 +52,6 @@ describe("InlineFieldRow module boundary", () => {
   it("has sources to check", () => {
     expect(SOURCES.map(({ file }) => file).sort()).toEqual([
       "InlineFieldRow.tsx",
-      "index.ts",
       "types.ts",
     ])
   })

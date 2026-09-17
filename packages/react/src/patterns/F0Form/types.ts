@@ -423,6 +423,14 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    */
   styling?: F0FormStylingConfig
   /**
+   * Renders the form as detail rows: every value reads as plain text and
+   * becomes its own editor when activated, saved through the action bar like
+   * any other change. Form-wide — either every field reads as a row or none
+   * does. Per-row behaviour comes from the field's `editable` and `copyable`.
+   * @default false
+   */
+  inline?: boolean
+  /**
    * Ref to control the form programmatically from outside.
    * Use with the `useF0Form` hook to get a ref and submit/reset functions.
    */

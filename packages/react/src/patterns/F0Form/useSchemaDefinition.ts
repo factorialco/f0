@@ -63,6 +63,8 @@ function configToF0Field(
     alert: config.alert,
     customFieldName:
       "customFieldName" in config ? config.customFieldName : undefined,
+    editable: config.editable,
+    copyable: config.copyable,
     validation: schema,
   }
 

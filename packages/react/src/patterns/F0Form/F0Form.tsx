@@ -30,6 +30,11 @@ import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "./fields/FieldRenderer"
+import {
+  flattenInlineFields,
+  InlineFieldList,
+} from "./fields/inline/InlineFieldList"
+import type { F0Field } from "./fields/types"
 import { evaluateRenderIf } from "./fields/utils"
 import {
   buildCardSelectContentMap,
@@ -708,6 +713,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     defaultValuesFn,
     description,
     module,
+    inline = false,
   } = props
 
   const { useUpload } = props
@@ -1320,6 +1326,32 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
 
+  // Inline mode ignores switch grouping and row grouping: a run of fields is
+  // one card of detail rows, and a section keeps its header above its own card.
+  const inlineItems = useMemo(() => {
+    if (!inline) {
+      return []
+    }
+    const items: (
+      | { type: "fields"; fields: F0Field[] }
+      | { type: "section"; section: SectionDefinition }
+    )[] = []
+    for (const item of definition) {
+      if (item.type === "section") {
+        items.push({ type: "section", section: item })
+        continue
+      }
+      const last = items[items.length - 1]
+      const fields = flattenInlineFields([item])
+      if (last?.type === "fields") {
+        last.fields.push(...fields)
+      } else {
+        items.push({ type: "fields", fields })
+      }
+    }
+    return items
+  }, [inline, definition])
+
   // Context value for anchor links
   const contextValue = useMemo(
     () => ({
@@ -1331,8 +1363,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       useUpload,
       registerUploadState,
       submitConfig,
+      inline,
     }),
     [
+      inline,
       name,
       props.initialFiles,
       props.isLoadingInitialFiles,
@@ -1375,65 +1409,93 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         showSectionsSidepanel && "[&>div:last-child]:pb-6"
       )}
     >
-      {/* Render definition items with switch grouping */}
-      {groupedItems.map((groupedItem, index) => {
-        // Apply field gap margin to non-section items (sections have their own margin)
-        const fieldGapClass =
-          index !== 0 && groupedItem.type !== "section" ? "mt-4" : ""
-
-        switch (groupedItem.type) {
-          case "switchGroup":
-            return (
-              <div key={`switch-group-${index}`} className={fieldGapClass}>
-                <SwitchGroupRenderer
-                  fields={groupedItem.fields}
-                  dependentFields={groupedItem.dependentFields}
-                  cardSelectDependentFields={
-                    groupedItem.cardSelectDependentFields
-                  }
+      {inline
+        ? inlineItems.map((item, index) =>
+            item.type === "section" ? (
+              <div
+                key={item.section.id}
+                className={cn(index !== 0 && SECTION_MARGIN)}
+              >
+                <SectionRenderer section={item.section} />
+              </div>
+            ) : (
+              <div
+                key={`inline-fields-${index}`}
+                className={cn(index !== 0 && "mt-4")}
+              >
+                <InlineFieldList
+                  fields={item.fields}
+                  renderField={(field) => <FieldRenderer field={field} />}
                 />
               </div>
             )
-          case "field": {
-            const fieldContent = groupedItem.cardSelectDependentFields ? (
-              <CardSelectDepsContext.Provider
-                value={buildCardSelectContentMap(
-                  groupedItem.cardSelectDependentFields
-                )}
-              >
-                <FieldRenderer field={groupedItem.item.field} />
-              </CardSelectDepsContext.Provider>
-            ) : (
-              <FieldRenderer field={groupedItem.item.field} />
-            )
-            return (
-              <div
-                key={groupedItem.item.field.id}
-                className={cn(fieldGapClass, "has-[>span.hidden]:hidden")}
-              >
-                {fieldContent}
-              </div>
-            )
-          }
-          case "row":
-            return (
-              <div key={`row-${groupedItem.index}`} className={fieldGapClass}>
-                <RowRenderer row={groupedItem.item} />
-              </div>
-            )
-          case "section":
-            return (
-              <div
-                key={groupedItem.item.id}
-                className={cn(index !== 0 && SECTION_MARGIN)}
-              >
-                <SectionRenderer section={groupedItem.item} />
-              </div>
-            )
-          default:
-            return null
-        }
-      })}
+          )
+        : null}
+
+      {/* Render definition items with switch grouping */}
+      {inline
+        ? null
+        : groupedItems.map((groupedItem, index) => {
+            // Apply field gap margin to non-section items (sections have their own margin)
+            const fieldGapClass =
+              index !== 0 && groupedItem.type !== "section" ? "mt-4" : ""
+
+            switch (groupedItem.type) {
+              case "switchGroup":
+                return (
+                  <div key={`switch-group-${index}`} className={fieldGapClass}>
+                    <SwitchGroupRenderer
+                      fields={groupedItem.fields}
+                      dependentFields={groupedItem.dependentFields}
+                      cardSelectDependentFields={
+                        groupedItem.cardSelectDependentFields
+                      }
+                    />
+                  </div>
+                )
+              case "field": {
+                const fieldContent = groupedItem.cardSelectDependentFields ? (
+                  <CardSelectDepsContext.Provider
+                    value={buildCardSelectContentMap(
+                      groupedItem.cardSelectDependentFields
+                    )}
+                  >
+                    <FieldRenderer field={groupedItem.item.field} />
+                  </CardSelectDepsContext.Provider>
+                ) : (
+                  <FieldRenderer field={groupedItem.item.field} />
+                )
+                return (
+                  <div
+                    key={groupedItem.item.field.id}
+                    className={cn(fieldGapClass, "has-[>span.hidden]:hidden")}
+                  >
+                    {fieldContent}
+                  </div>
+                )
+              }
+              case "row":
+                return (
+                  <div
+                    key={`row-${groupedItem.index}`}
+                    className={fieldGapClass}
+                  >
+                    <RowRenderer row={groupedItem.item} />
+                  </div>
+                )
+              case "section":
+                return (
+                  <div
+                    key={groupedItem.item.id}
+                    className={cn(index !== 0 && SECTION_MARGIN)}
+                  >
+                    <SectionRenderer section={groupedItem.item} />
+                  </div>
+                )
+              default:
+                return null
+            }
+          })}
 
       {/* Root error message */}
       {rootError ? (

@@ -7,6 +7,10 @@ import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
+import {
+  flattenInlineFields,
+  InlineFieldList,
+} from "../fields/inline/InlineFieldList"
 import { evaluateRenderIf } from "../fields/utils"
 import {
   buildCardSelectContentMap,
@@ -29,7 +33,7 @@ interface SectionRendererProps {
 export function SectionRenderer({ section }: SectionRendererProps) {
   const form = useFormContext()
   const values = form.watch()
-  const { formName } = useF0FormContext()
+  const { formName, inline } = useF0FormContext()
 
   const { title, description, withInset, renderIf, action, fields } =
     section.section
@@ -66,58 +70,67 @@ export function SectionRenderer({ section }: SectionRendererProps) {
           />
         ) : null}
       </div>
-      <div className={`flex flex-col ${FIELD_GAP}`}>
-        {groupedItems.map((item, index) => {
-          if (item.type === "switchGroup") {
-            return (
-              <SwitchGroupRenderer
-                key={`switch-group-${index}`}
-                fields={item.fields}
-                dependentFields={item.dependentFields}
-                cardSelectDependentFields={item.cardSelectDependentFields}
-                sectionId={sectionId}
-              />
-            )
-          }
-          if (item.type === "field") {
-            const fieldContent = item.cardSelectDependentFields ? (
-              <CardSelectDepsContext.Provider
-                value={buildCardSelectContentMap(
-                  item.cardSelectDependentFields,
-                  sectionId
-                )}
-              >
+      {inline ? (
+        <InlineFieldList
+          fields={flattenInlineFields(fields)}
+          renderField={(field) => (
+            <FieldRenderer field={field} sectionId={sectionId} />
+          )}
+        />
+      ) : (
+        <div className={`flex flex-col ${FIELD_GAP}`}>
+          {groupedItems.map((item, index) => {
+            if (item.type === "switchGroup") {
+              return (
+                <SwitchGroupRenderer
+                  key={`switch-group-${index}`}
+                  fields={item.fields}
+                  dependentFields={item.dependentFields}
+                  cardSelectDependentFields={item.cardSelectDependentFields}
+                  sectionId={sectionId}
+                />
+              )
+            }
+            if (item.type === "field") {
+              const fieldContent = item.cardSelectDependentFields ? (
+                <CardSelectDepsContext.Provider
+                  value={buildCardSelectContentMap(
+                    item.cardSelectDependentFields,
+                    sectionId
+                  )}
+                >
+                  <FieldRenderer
+                    key={item.item.field.id}
+                    field={item.item.field}
+                    sectionId={sectionId}
+                  />
+                </CardSelectDepsContext.Provider>
+              ) : (
                 <FieldRenderer
                   key={item.item.field.id}
                   field={item.item.field}
                   sectionId={sectionId}
                 />
-              </CardSelectDepsContext.Provider>
-            ) : (
-              <FieldRenderer
-                key={item.item.field.id}
-                field={item.item.field}
-                sectionId={sectionId}
-              />
-            )
-            return (
-              <React.Fragment key={item.item.field.id}>
-                {fieldContent}
-              </React.Fragment>
-            )
-          }
-          if (item.type === "row") {
-            return (
-              <RowRenderer
-                key={`row-${item.index}`}
-                row={item.item}
-                sectionId={sectionId}
-              />
-            )
-          }
-          return null
-        })}
-      </div>
+              )
+              return (
+                <React.Fragment key={item.item.field.id}>
+                  {fieldContent}
+                </React.Fragment>
+              )
+            }
+            if (item.type === "row") {
+              return (
+                <RowRenderer
+                  key={`row-${item.index}`}
+                  row={item.item}
+                  sectionId={sectionId}
+                />
+              )
+            }
+            return null
+          })}
+        </div>
+      )}
     </section>
   )
 }

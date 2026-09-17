@@ -11,6 +11,7 @@ import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
 import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import type { InitialFile } from "./file/types"
+import type { InlineEditing } from "./inline/useInlineField"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
 import { PhoneFieldRenderer } from "./phone/PhoneFieldRenderer"
@@ -38,6 +39,11 @@ export interface RenderFieldInputOptions {
   initialFiles?: InitialFile[]
   /** Whether the form is loading async defaultValues */
   isFormLoading?: boolean
+  /**
+   * Set only by the inline (detail-row) path, and only for a field type that
+   * has an inline presentation. Any other type ignores it and renders as usual.
+   */
+  inline?: InlineEditing
 }
 
 /**
@@ -53,6 +59,7 @@ export function renderFieldInput({
   values,
   initialFiles,
   isFormLoading,
+  inline,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
@@ -80,6 +87,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          inline={inline}
         />
       )
     case "number":
@@ -89,6 +97,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          inline={inline}
         />
       )
     case "duration":
@@ -116,6 +125,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          inline={inline}
         />
       )
     case "checkbox":
@@ -123,6 +133,7 @@ export function renderFieldInput({
         <CheckboxFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+          inline={inline}
         />
       )
     case "switch":
@@ -130,6 +141,7 @@ export function renderFieldInput({
         <SwitchFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+          inline={inline}
         />
       )
     case "date":
@@ -145,6 +157,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          inline={inline}
         />
       )
     case "time":

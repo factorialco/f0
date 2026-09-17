@@ -1,6 +1,8 @@
 import { useId } from "react"
 import type { ControllerRenderProps } from "react-hook-form"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
+import { InlineFieldRenderer } from "@/patterns/F0Form/fields/inline/InlineFieldRenderer"
+import { InlineFieldRowList } from "@/patterns/F0Form/fields/inline/InlineFieldRow"
 import { renderFieldInput } from "@/patterns/F0Form/fields/renderFieldInput"
 import { isFieldRequired } from "@/patterns/F0Form/fields/schema"
 import type { F0FormFieldProps } from "./types"
@@ -26,6 +28,7 @@ export function F0FormField({
   disabled,
   hideLabel: hideLabelProp,
   initialFiles,
+  inline,
 }: F0FormFieldProps) {
   const id = useId()
 
@@ -61,6 +64,24 @@ export function F0FormField({
 
   const resolvedField = disabled !== undefined ? { ...field, disabled } : field
   const fileInitialFiles = field.type === "file" ? initialFiles : undefined
+
+  if (inline) {
+    return (
+      <div id={id}>
+        <InlineFieldRowList>
+          <InlineFieldRenderer
+            field={resolvedField}
+            formField={formField}
+            fieldState={fieldState}
+            isSubmitting={false}
+            isRequired={isRequired}
+            values={{}}
+            restoreValue={onChange}
+          />
+        </InlineFieldRowList>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-2" id={id}>

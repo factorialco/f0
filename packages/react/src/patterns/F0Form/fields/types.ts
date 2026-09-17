@@ -146,6 +146,18 @@ export interface F0BaseField {
    * Used with the form-level `renderCustomField` callback.
    */
   customFieldName?: string
+  /**
+   * Inline mode only. When false the value reads but never becomes an editor:
+   * the row offers no activator and a toggle is drawn disabled.
+   * @default true
+   */
+  editable?: boolean
+  /**
+   * Inline mode only. Adds a copy action to the row, writing the field's value
+   * as plain text.
+   * @default false
+   */
+  copyable?: boolean
 }
 
 /**

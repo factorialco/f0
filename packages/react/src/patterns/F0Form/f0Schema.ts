@@ -212,6 +212,21 @@ export interface F0BaseConfig {
    * field-specific configuration (e.g. data source, options) or a custom component.
    */
   customFieldName?: string
+  /**
+   * Inline mode only. When false the value reads but never becomes an editor:
+   * the row offers no activator and a toggle is drawn disabled.
+   *
+   * Resolve per-viewer permissions here when you build the schema:
+   * `editable: access === "edit"`.
+   * @default true
+   */
+  editable?: boolean
+  /**
+   * Inline mode only. Adds a copy action to the row, writing the field's value
+   * as plain text.
+   * @default false
+   */
+  copyable?: boolean
 }
 
 // Re-export field-specific config types

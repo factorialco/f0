@@ -41,6 +41,14 @@ interface F0FormFieldCommonProps {
   disabled?: boolean
   /** Whether to hide the label (useful when label is rendered externally) */
   hideLabel?: boolean
+  /**
+   * Renders the field as a detail row: the value reads as plain text and
+   * becomes its own editor when activated. The row owns the label, so
+   * `hideLabel` no longer applies. Nothing saves on its own — the caller's
+   * `onChange` is still where every edit lands.
+   * @default false
+   */
+  inline?: boolean
 }
 
 export interface F0FormFieldFileProps extends F0FormFieldCommonProps {

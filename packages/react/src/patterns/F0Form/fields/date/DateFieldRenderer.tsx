@@ -3,6 +3,7 @@ import { ControllerRenderProps } from "react-hook-form"
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { FORM_SIZE } from "../../constants"
+import type { InlineEditing } from "../inline/useInlineField"
 import type { F0DateField, ResolvedDateField } from "./types"
 
 interface DateFieldRendererProps {
@@ -11,6 +12,8 @@ interface DateFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+  /** Set by the inline (detail-row) path; absent everywhere else. */
+  inline?: InlineEditing
 }
 
 /**
@@ -48,6 +51,7 @@ export function DateFieldRenderer({
   error,
   loading,
   status,
+  inline,
 }: DateFieldRendererProps) {
   // Convert form Date value to DatePickerValue for the picker
   // Form value may be null (used instead of undefined to prevent
@@ -81,24 +85,46 @@ export function DateFieldRenderer({
     }
   }
 
-  return (
-    <F0DatePicker
-      label={field.label}
-      placeholder={field.placeholder}
-      disabled={field.disabled}
-      granularities={field.granularities}
-      minDate={field.minDate}
-      maxDate={field.maxDate}
-      presets={field.presets}
-      clearable={field.clearable}
-      value={pickerValue}
-      onChange={handleChange}
-      onOpenChange={handleOpenChange}
-      size={FORM_SIZE}
-      hideLabel
-      error={error}
-      status={status}
-      loading={loading}
-    />
-  )
+  // Inline the calendar never reports `onOpenChange` — `editing` is the open
+  // state and the close arrives as a dismissal — so validation hangs off that
+  // instead, with the same deferral.
+  const handleInlineDismiss = (
+    reason: Parameters<InlineEditing["onDismiss"]>[0]
+  ) => {
+    setTimeout(() => formField.onBlur(), 0)
+    inline?.onDismiss(reason)
+  }
+
+  const shared = {
+    label: field.label,
+    placeholder: field.placeholder,
+    disabled: field.disabled,
+    granularities: field.granularities,
+    minDate: field.minDate,
+    maxDate: field.maxDate,
+    presets: field.presets,
+    clearable: field.clearable,
+    value: pickerValue,
+    onChange: handleChange,
+    size: FORM_SIZE,
+    hideLabel: true,
+    error,
+    status,
+    loading,
+  }
+
+  // Two branches, not a spread: the props are a discriminated union, and a
+  // conditional spread widens `variant` back to `"inline" | undefined`.
+  if (inline) {
+    return (
+      <F0DatePicker
+        {...shared}
+        variant="inline"
+        editing={inline.editing}
+        onDismiss={handleInlineDismiss}
+      />
+    )
+  }
+
+  return <F0DatePicker {...shared} onOpenChange={handleOpenChange} />
 }

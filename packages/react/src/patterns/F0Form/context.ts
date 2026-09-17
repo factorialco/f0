@@ -25,6 +25,11 @@ interface F0FormContextValue {
    * Submit configuration for the form.
    */
   submitConfig?: F0FormSubmitConfig
+  /**
+   * Whether the form renders as detail rows: every value reads as text and
+   * becomes its own editor when activated. Form-wide, never per field.
+   */
+  inline?: boolean
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)
