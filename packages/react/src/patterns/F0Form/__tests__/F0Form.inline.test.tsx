@@ -225,6 +225,31 @@ describe("F0Form inline mode", () => {
     expect(activator("Team")).toBeInTheDocument()
   })
 
+  describe("what the pointer promises over a value", () => {
+    const boxFor = (label: string) =>
+      activator(label).querySelector('[data-slot="inline-field-row-value"]')
+
+    it("offers a caret on a row that turns into an input", () => {
+      renderProfile()
+      expect(boxFor("Full name")).toHaveClass("cursor-text")
+    })
+
+    it("offers a click on a row that opens a list", () => {
+      renderProfile()
+      expect(boxFor("Team")).toHaveClass("cursor-pointer")
+    })
+
+    it("offers a click on a row that opens a calendar", () => {
+      renderProfile({
+        schema: z.object({
+          startDate: f0FormField(z.date(), { label: "Start date" }),
+        }),
+        defaultValues: { startDate: new Date(2026, 3, 10) },
+      })
+      expect(boxFor("Start date")).toHaveClass("cursor-pointer")
+    })
+  })
+
   it("keeps the picked option and returns the row to reading", async () => {
     const user = userEvent.setup()
     renderProfile()

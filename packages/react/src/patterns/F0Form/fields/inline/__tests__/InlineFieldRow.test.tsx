@@ -136,6 +136,31 @@ describe("InlineFieldRow", () => {
     expect(screen.queryByRole("button", { name: "Job title" })).toBeNull()
   })
 
+  describe("the activator's cursor", () => {
+    const valueBox = () =>
+      document.querySelector('[data-slot="inline-field-row-value"]')
+
+    it("promises a caret by default", () => {
+      renderRow({ onActivate: vi.fn() })
+
+      expect(valueBox()).toHaveClass("cursor-text")
+    })
+
+    it("promises a click when the caller asks for one", () => {
+      renderRow({ onActivate: vi.fn(), activatorCursor: "pointer" })
+
+      expect(valueBox()).toHaveClass("cursor-pointer")
+      expect(valueBox()).not.toHaveClass("cursor-text")
+    })
+
+    it("promises nothing on a row that cannot be activated", () => {
+      renderRow({ activatorCursor: "pointer" })
+
+      expect(valueBox()).not.toHaveClass("cursor-pointer")
+      expect(valueBox()).not.toHaveClass("cursor-text")
+    })
+  })
+
   it("keeps the value's DOM in place when the row starts editing", () => {
     const { rerender } = renderRow({ onActivate: vi.fn() })
 

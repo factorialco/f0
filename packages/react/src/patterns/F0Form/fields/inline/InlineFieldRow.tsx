@@ -120,9 +120,13 @@ const RowValue = forwardRef<
     value: ReactNode
     editing: boolean
     activatable: boolean
+    cursor: "caret" | "pointer"
     onActivate: (() => void) | undefined
   }
->(function RowValue({ label, value, editing, activatable, onActivate }, ref) {
+>(function RowValue(
+  { label, value, editing, activatable, cursor, onActivate },
+  ref
+) {
   const { t } = useI18n()
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -155,7 +159,9 @@ const RowValue = forwardRef<
         className={cn(
           "h-10 w-full min-w-0 rounded-md [&>*]:h-full [&>*]:w-full",
           !editing && "transition-colors motion-reduce:transition-none",
-          activatable && "cursor-text group-hover:bg-f1-background-secondary"
+          activatable && "group-hover:bg-f1-background-secondary",
+          activatable &&
+            (cursor === "pointer" ? "cursor-pointer" : "cursor-text")
         )}
       >
         {value}
@@ -174,7 +180,17 @@ const RowValue = forwardRef<
  */
 export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
   function InlineFieldRow(
-    { label, hint, value, actions, copyValue, onActivate, editing, message },
+    {
+      label,
+      hint,
+      value,
+      actions,
+      copyValue,
+      onActivate,
+      activatorCursor = "caret",
+      editing,
+      message,
+    },
     ref
   ) {
     const { t } = useI18n()
@@ -222,6 +238,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
               value={value}
               editing={editing}
               activatable={activatable}
+              cursor={activatorCursor}
               onActivate={onActivate}
             />
 

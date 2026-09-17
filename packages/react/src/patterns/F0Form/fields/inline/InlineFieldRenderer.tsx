@@ -50,6 +50,9 @@ export function InlineFieldRenderer({
   const supported = isInlineSupported(field)
   const toggle = isInlineToggle(field)
   const isSelect = supported && field.type === "select"
+  // A select opens a list and a date opens a calendar; neither puts a caret
+  // anywhere, so neither may promise one.
+  const opensPopup = isSelect || (supported && field.type === "date")
   const editable = field.editable ?? true
 
   if (!supported) {
@@ -124,6 +127,7 @@ export function InlineFieldRenderer({
       actions={actions}
       copyValue={field.copyable ? copyValue : undefined}
       onActivate={activate}
+      activatorCursor={opensPopup ? "pointer" : "caret"}
       editing={editing}
       message={message}
     />

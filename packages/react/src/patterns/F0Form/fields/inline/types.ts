@@ -30,6 +30,12 @@ export type InlineFieldRowProps = {
   copyValue?: string
   /** Absent means the value is inert: no activator, nothing focusable. */
   onActivate?: () => void
+  /**
+   * What the pointer promises over the value: a caret for anything that turns
+   * into an input, a click for a value that opens a list or a calendar. The row
+   * cannot tell the two apart, so the caller says which.
+   */
+  activatorCursor?: "caret" | "pointer"
   editing: boolean
   /**
    * Why the value is being refused, under the box. A node rather than a string
