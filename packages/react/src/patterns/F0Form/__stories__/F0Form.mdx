@@ -1,6 +1,7 @@
 import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./F0Form.stories"
 import * as InlineStories from "./F0FormInline.stories"
+import * as ProfileStories from "./F0FormInlineProfile.stories"
 import * as WizardStories from "../../F0WizardForm/__stories__/F0WizardForm.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
@@ -1006,6 +1007,32 @@ Rows stack inside a bordered card. Section titles stay above their own card, and
 there is nothing left to arrange side by side.
 
 <Canvas of={InlineStories.WithSections} />
+
+### One schema, three viewers
+
+The employee profile is what the mode was shaped for: three sections of work,
+personal and identification rows, where an HR admin edits everything, a manager
+reads most of it, and the employee edits their own names and sees neither the
+legal entity nor their seniority date. That is one access map — `hidden`, `read`
+or `edit` per field — resolved into `renderIf` and `editable` while the schema
+is built, so the three viewers share a single form component.
+
+```tsx
+const tier = (id: string) => ({
+  renderIf: () => access(id) !== "hidden",
+  editable: access(id) === "edit",
+})
+
+f0FormField(z.string(), {
+  label: "Job title",
+  section: "work",
+  ...tier("jobTitle"),
+})
+```
+
+<Canvas of={ProfileStories.AsAdmin} />
+
+<Canvas of={ProfileStories.AsSelf} />
 
 <DoDonts
   do={[

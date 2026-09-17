@@ -70,7 +70,9 @@ export const EveryTypeReading: Story = {
 
     await step("Print every value as text", async () => {
       await expect(canvas.getByText("Ada Lovelace")).toBeVisible()
-      await expect(canvas.getByText("Design")).toBeVisible()
+      // The select resolves its options through a data source, so the first
+      // paint is still the loading placeholder.
+      await expect(await canvas.findByText("Design")).toBeVisible()
       await expect(canvas.getByText("10 Apr 2026")).toBeVisible()
       await expect(canvas.queryByRole("textbox")).toBeNull()
     })
@@ -165,13 +167,16 @@ export const ActionBarAfterAnEdit: Story = {
     await step("Keep the draft and float the bar", async () => {
       await waitFor(() => expect(canvas.queryByRole("textbox")).toBeNull())
       await expect(canvas.getByText("Grace Hopper")).toBeVisible()
-      // The bar renders outside the canvas, so query the document.
+      // The bar renders outside the canvas, so query the document. Asserted
+      // present rather than visible: it fades itself in with framer-motion,
+      // which the test runner does not pause, so its opacity is whatever the
+      // animation is on when the assertion runs.
       await waitFor(() =>
         expect(
           within(document.body).getByText(
             "You have changes pending to be saved"
           )
-        ).toBeVisible()
+        ).toBeInTheDocument()
       )
     })
   },
@@ -332,6 +337,56 @@ export const UnsupportedTypeFallsBack: Story = {
       await expect(
         canvas.getByRole("button", { name: "Edit Full name" })
       ).toBeInTheDocument()
+    })
+  },
+}
+
+/**
+ * A field `renderIf` hides keeps its Controller mounted, so it stays in the
+ * card as a hidden `<span>`. The divider rule counts rows, not children, or the
+ * last visible row would keep a border running to nothing.
+ */
+export const HiddenLastRowLeavesNoDivider: Story = {
+  render: () => (
+    <div className="w-[640px]">
+      <F0Form
+        name="inline-hidden-last"
+        inline
+        schema={z.object({
+          fullName: f0FormField(z.string(), { label: "Full name" }),
+          team: f0FormField(z.enum(["design", "engineering"]), {
+            label: "Team",
+            options: TEAMS,
+          }),
+          ssn: f0FormField(z.string(), {
+            label: "Social security number",
+            renderIf: () => false,
+          }),
+        })}
+        defaultValues={{
+          fullName: "Ada Lovelace",
+          team: "design",
+          ssn: "042-88-1201",
+        }}
+        onSubmit={submit}
+        submitConfig={actionBar}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const rows = canvasElement.querySelectorAll<HTMLElement>(
+      "[data-slot='inline-field-row']"
+    )
+
+    await step("Leave the hidden field out of the reading", async () => {
+      await expect(canvas.queryByText("Social security number")).toBeNull()
+      await expect(rows).toHaveLength(2)
+    })
+
+    await step("Draw no divider under the last visible row", async () => {
+      await expect(getComputedStyle(rows[0]).borderBottomWidth).not.toBe("0px")
+      await expect(getComputedStyle(rows[1]).borderBottomWidth).toBe("0px")
     })
   },
 }
