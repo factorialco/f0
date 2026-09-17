@@ -161,6 +161,25 @@ describe("F0DatePicker inline variant", () => {
       await waitFor(() => expect(onDismiss).toHaveBeenCalledWith("commit"))
     })
 
+    it("swallows the Enter so it does not submit the form around it", () => {
+      render(
+        <F0DatePicker
+          variant="inline"
+          editing
+          label="Start date"
+          value={april10}
+        />
+      )
+
+      // `fireEvent` returns false once something called `preventDefault`, which
+      // is what stops a browser's implicit submission.
+      expect(
+        fireEvent.keyDown(screen.getByRole("textbox", { name: "Start date" }), {
+          key: "Enter",
+        })
+      ).toBe(false)
+    })
+
     it("reports escape when Escape is pressed in the input", async () => {
       const onDismiss = vi.fn()
 

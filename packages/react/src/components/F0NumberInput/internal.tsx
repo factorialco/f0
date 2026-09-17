@@ -421,6 +421,9 @@ export const NumberInputInternal = forwardRef<
           inline
             ? (event) => {
                 if (event.key === "Enter") {
+                  // Inline, Enter ends the row's edit and nothing else. Left
+                  // alone it is also a form's implicit submission.
+                  event.preventDefault()
                   onDismiss?.("commit")
                 }
                 if (event.key === "Escape") {

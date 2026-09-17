@@ -150,6 +150,36 @@ describe("F0TextInput inline variant", () => {
       expect(onDismiss).toHaveBeenCalledWith("commit")
     })
 
+    it("swallows the Enter so it does not submit the form around it", () => {
+      renderEditing(vi.fn())
+
+      const submitted = fireEvent.keyDown(
+        screen.getByRole("textbox", { name: "Job title" }),
+        { key: "Enter" }
+      )
+
+      // `fireEvent` returns false once something called `preventDefault`, which
+      // is what stops a browser's implicit submission.
+      expect(submitted).toBe(false)
+    })
+
+    it("leaves Enter alone in the field variant", () => {
+      render(
+        <F0TextInput
+          label="Job title"
+          value="Head of design"
+          onChange={vi.fn()}
+        />
+      )
+
+      const submitted = fireEvent.keyDown(
+        screen.getByRole("textbox", { name: "Job title" }),
+        { key: "Enter" }
+      )
+
+      expect(submitted).toBe(true)
+    })
+
     it("reports escape when Escape is pressed", () => {
       const onDismiss = vi.fn()
       renderEditing(onDismiss)

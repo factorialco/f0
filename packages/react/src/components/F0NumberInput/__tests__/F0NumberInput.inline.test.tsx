@@ -222,6 +222,18 @@ describe("F0NumberInput inline variant", () => {
       expect(onDismiss).toHaveBeenCalledWith("commit")
     })
 
+    it("swallows the Enter so it does not submit the form around it", () => {
+      renderEditing(vi.fn())
+
+      // `fireEvent` returns false once something called `preventDefault`, which
+      // is what stops a browser's implicit submission.
+      expect(
+        fireEvent.keyDown(screen.getByRole("textbox", { name: "Salary" }), {
+          key: "Enter",
+        })
+      ).toBe(false)
+    })
+
     it("reports escape when Escape is pressed", () => {
       const onDismiss = vi.fn()
       renderEditing(onDismiss)

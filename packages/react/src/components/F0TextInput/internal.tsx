@@ -126,6 +126,12 @@ const InputInternal = ({
       }
       onKeyDown={(event) => {
         if (event.key === "Enter") {
+          // Inline, Enter ends the row's edit and nothing else. Left alone it
+          // is also a form's implicit submission, which saves the whole record
+          // from a keystroke that meant "I am done with this field".
+          if (props.variant === "inline") {
+            event.preventDefault()
+          }
           onPressEnter?.()
         }
         if (event.key === "Escape") {
