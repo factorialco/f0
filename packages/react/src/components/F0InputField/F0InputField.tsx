@@ -190,6 +190,12 @@ export type InputFieldProps<T> = {
   transparent?: boolean
   variant?: InputFieldVariant
   editing?: boolean
+  /**
+   * What the inline variant prints at rest, when the value alone is not what
+   * the editor shows: F0NumberInput appends its `units` to the formatted
+   * number. Defaults to the value.
+   */
+  inlineText?: string
 }
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -236,6 +242,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       transparent,
       variant = "field",
       editing = false,
+      inlineText,
       ...props
     }: InputFieldProps<string>,
     ref
@@ -396,7 +403,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           <InlineValue
             label={label}
             hideLabel={hideLabel}
-            text={localValue ?? ""}
+            text={inlineText ?? localValue ?? ""}
             placeholder={placeholder}
             size={size}
           />

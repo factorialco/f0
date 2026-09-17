@@ -12,7 +12,10 @@ import {
 } from "react"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { InputFieldProps } from "@/components/F0InputField"
+import {
+  InputFieldProps,
+  type InlineDismissReason,
+} from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
 import { InputFieldStatus } from "@/components/F0InputField/types"
@@ -161,7 +164,10 @@ export type NumberInputInternalProps = Pick<
     | "transparent"
     | "onBlur"
     | "readonly"
+    | "variant"
+    | "editing"
   > & {
+    onDismiss?: (reason: InlineDismissReason) => void
     locale: string
     value?: number | null
     step?: number
@@ -209,6 +215,9 @@ export const NumberInputInternal = forwardRef<
     readonly,
     loading,
     onBlur,
+    variant,
+    editing = false,
+    onDismiss,
     ...props
   },
   ref
@@ -247,6 +256,12 @@ export const NumberInputInternal = forwardRef<
     return undefined
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to re-render when the i18n changes
   }, [hint, min, max])
+
+  const inline = variant === "inline"
+  // At rest the row reads the same string the editor shows, units included, so
+  // no glyph moves when the row is activated.
+  const inlineText =
+    fieldValue && units ? `${fieldValue} ${units}` : (fieldValue ?? "")
 
   const hasExtraContent = Boolean(extraContent)
   const isDeferredPopover = popover?.commitMode === "deferred"
@@ -390,7 +405,7 @@ export const NumberInputInternal = forwardRef<
     : undefined
 
   const innerInput = (
-    <div className="group relative">
+    <div className={cn("group relative", inline && "h-full w-full")}>
       <Input
         type="text"
         ref={ref}
@@ -399,6 +414,21 @@ export const NumberInputInternal = forwardRef<
         inputMode={maxDecimals === 0 ? "numeric" : "decimal"}
         onChange={handleChange}
         {...props}
+        variant={variant}
+        editing={editing}
+        inlineText={inlineText}
+        onKeyDown={
+          inline
+            ? (event) => {
+                if (event.key === "Enter") {
+                  onDismiss?.("commit")
+                }
+                if (event.key === "Escape") {
+                  onDismiss?.("escape")
+                }
+              }
+            : undefined
+        }
         label={usesExternalMessages ? (label ?? "") : label}
         hideLabel={hideLabel || usesExternalMessages}
         hint={usesExternalMessages ? "" : localHint}
@@ -413,6 +443,9 @@ export const NumberInputInternal = forwardRef<
         onBlur={() => {
           setIsFocused(false)
           onBlur?.()
+          if (inline) {
+            onDismiss?.("blur")
+          }
         }}
         onBeforeInput={handleBeforeInput}
         appendTag={units}
