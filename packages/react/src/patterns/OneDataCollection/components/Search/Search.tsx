@@ -144,6 +144,12 @@ export type SearchPresentation = Pick<
    */
   analyze?: (query: string) => QueryAnalysis
   /**
+   * The query as asked, once the typing has settled. Asking is what costs an
+   * allowance, so this is where a consumer refuses — out of credits, or
+   * anything else it will not answer.
+   */
+  onAsk?: (query: string) => void
+  /**
    * Queries this person already ran here, newest first. Offered before any
    * example we could invent: they are the proof the thing works, and running
    * one again costs nothing.

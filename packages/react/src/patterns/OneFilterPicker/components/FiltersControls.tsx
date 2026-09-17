@@ -99,9 +99,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     keyof Filters | null
   >(mode === "compact" ? null : firstFilterKey)
   // The quick filter is not one of the filters, so it cannot be held in
-  // `selectedFilterKey`; the two selections exclude each other. It is never
-  // chosen for the reader — the panel opens on a filter, as it always did,
-  // and this is taken only when it is asked for.
+  // `selectedFilterKey`; the two selections exclude each other.
   const [quickFilterSelected, setQuickFilterSelected] = useState(false)
   const selectQuickFilter = () => {
     setSelectedFilterKey(null)
@@ -237,6 +235,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
     if (isOpen && mode === "default") {
       const firstFilterWithValue = getFirstFilterNotEmpty()
+      // Asking is where the panel starts, unless something is already applied
+      // — then the panel was opened to see or change that, and it wins.
+      if (quickFilter && !firstFilterWithValue) {
+        setQuickFilterSelected(true)
+        setSelectedFilterKey(null)
+        return
+      }
       setQuickFilterSelected(false)
       if (firstFilterWithValue) {
         setSelectedFilterKey(firstFilterWithValue[0] as keyof Filters)

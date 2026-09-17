@@ -1886,6 +1886,7 @@ const OneDataCollectionComp = <
                           value={panelQuery}
                           onChange={setPanelQuery}
                           onSettle={(settled) => {
+                            source.searchPresentation?.onAsk?.(settled)
                             const staged = applyFromQuery(
                               "panel",
                               source.searchPresentation?.analyze?.(settled)
