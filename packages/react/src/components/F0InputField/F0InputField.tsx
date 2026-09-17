@@ -19,11 +19,18 @@ import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Spinner } from "@/ui/Spinner"
 import { AppendTag } from "./AppendTag"
+import { InlineValue } from "./components/InlineValue"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
-import { InputFieldStatus } from "./types"
-export const INPUTFIELD_SIZES = ["sm", "md"] as const
-export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
+import { InputFieldStatus, InputFieldVariant } from "./types"
+import {
+  INPUTFIELD_SIZES,
+  inputElementVariants,
+  inputFieldVariants,
+  type InputFieldSize,
+} from "./variants"
+
+export { INPUTFIELD_SIZES, type InputFieldSize }
 
 const defaultEmptyValue = ""
 
@@ -34,59 +41,6 @@ const defaultIsEmpty = (value: string | number | undefined | null) => {
 }
 const defaultLengthProvider = (value: string | number | undefined | null) =>
   value ? value.toString().length : 0
-
-const inputElementVariants = cva({
-  base: "",
-  variants: {
-    size: {
-      sm: "py-1",
-      md: "py-2",
-    },
-  },
-  defaultVariants: {
-    size: "md",
-  },
-})
-
-const inputFieldVariants = cva({
-  base: "",
-  variants: {
-    canGrow: {
-      true: "flex-1",
-      false: "flex-none",
-    },
-    size: {
-      sm: "rounded",
-      md: "rounded-md",
-    },
-  },
-  compoundVariants: [
-    {
-      size: "sm",
-      canGrow: true,
-      class: "min-h-[32px]",
-    },
-    {
-      size: "md",
-      canGrow: true,
-      class: "min-h-[40px]",
-    },
-    {
-      size: "sm",
-      canGrow: false,
-      class: "h-[32px]",
-    },
-    {
-      size: "md",
-      canGrow: false,
-      class: "h-[40px]",
-    },
-  ],
-  defaultVariants: {
-    size: "md",
-    canGrow: false,
-  },
-})
 
 const inputFieldWrapperVariants = cva({
   base: "",
@@ -234,6 +188,20 @@ export type InputFieldProps<T> = {
     onChange: (selected: boolean) => void
   }
   transparent?: boolean
+  /**
+   * `"inline"` is the detail-row presentation: the field fills the box its row
+   * declares, in both axes, and reads as plain text until `editing` is true.
+   * Defaults to `"field"`, the standard form presentation.
+   */
+  variant?: InputFieldVariant
+  /**
+   * Which presentation the `"inline"` variant draws. Controlled by the parent
+   * and never by the field itself — the field reports what the user did and
+   * keeps drawing the editor until this changes.
+   *
+   * @default false
+   */
+  editing?: boolean
 }
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -250,7 +218,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       error,
       status,
       hint,
-      size = "sm",
+      size: sizeProp,
       icon,
       canGrow = false,
       value,
@@ -278,10 +246,18 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-autocomplete": ariaAutocomplete,
       buttonToggle,
       transparent,
+      variant = "field",
+      editing = false,
       ...props
     }: InputFieldProps<string>,
     ref
   ) => {
+    const inline = variant === "inline"
+    // The inline variant is mounted at the form size, 40px, because that is
+    // the box a detail row declares. Everywhere else the historical runtime
+    // default wins over the cva one.
+    const size = sizeProp ?? (inline ? "md" : "sm")
+
     const generatedId = useId()
     const id = props.id ?? generatedId
 
@@ -414,12 +390,44 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const hasAppend = append || appendTag || buttonToggle
 
+    // The inline variant at rest: the value as text, no input element, no
+    // chrome. Placed after every hook so the two presentations keep the same
+    // hook order.
+    if (inline && !editing) {
+      return (
+        <div
+          className={cn("flex h-full w-full flex-col gap-2", className)}
+          ref={ref}
+        >
+          {!hideLabel && label ? (
+            <Label
+              label={label}
+              required={required}
+              htmlFor={id}
+              icon={labelIcon}
+              className="min-w-0 flex-1"
+              disabled={disabled}
+            />
+          ) : null}
+          <InlineValue
+            label={label}
+            hideLabel={hideLabel}
+            text={localValue ?? ""}
+            placeholder={placeholder}
+            size={size}
+          />
+          <InputMessages status={status} />
+        </div>
+      )
+    }
+
     return (
       <div
         className={cn(
           "flex flex-col gap-2",
           "pointer-events-none",
           disabled && "cursor-not-allowed",
+          inline && "h-full w-full",
           transparent && "bg-transparent h-full w-full",
           className
         )}
@@ -456,7 +464,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         ) : null}
         <div
           className={cn(
-            "relative h-fit transition-all",
+            "relative transition-all",
+            inline ? "h-full" : "h-fit",
             !noEdit && !disabled && "hover:border-f1-border-hover",
             !transparent && [
               "border-[1px] border-solid border-f1-border bg-f1-background",
@@ -466,7 +475,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 status: status?.type ?? "default",
                 disabled: disabled || readonly,
               }),
-              inputFieldVariants({ size, canGrow }),
+              inputFieldVariants({ size, canGrow: canGrow || inline }),
             ],
             "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
             readonly && "border-f1-border-secondary bg-f1-background-secondary",

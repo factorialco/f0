@@ -39,6 +39,8 @@ export type InputInternalProps = Pick<
     | "transparent"
     | "onBlur"
     | "readonly"
+    | "variant"
+    | "editing"
   > & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
@@ -47,6 +49,7 @@ export type InputInternalProps = Pick<
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private"
     onPressEnter?: () => void
+    onPressEscape?: () => void
   }
 
 /**
@@ -65,6 +68,7 @@ const passwordManagerAvoidance = {
 const InputInternal = ({
   type,
   onPressEnter,
+  onPressEscape,
   ...props
 }: InputInternalProps) => {
   const [showPassword, setShowPassword] = useState(false)
@@ -123,6 +127,9 @@ const InputInternal = ({
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           onPressEnter?.()
+        }
+        if (event.key === "Escape") {
+          onPressEscape?.()
         }
       }}
       icon={localIcon}
