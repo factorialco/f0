@@ -1,5 +1,6 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as CheckboxStories from "./F0Checkbox.stories"
+import * as CheckboxInlineStories from "./F0Checkbox.inline.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { F0Checkbox } from "../F0Checkbox"
 
@@ -71,6 +72,36 @@ its current visual state but cannot be toggled by the user, and is skipped by
 keyboard navigation.
 
 <Canvas of={CheckboxStories.Disabled} />
+
+## Inline variant
+
+`variant="inline"` is the detail-row presentation: a form that reads as rows,
+where the checkbox fills the value column instead of carrying its own chrome.
+With no `variant`, nothing changes — the field presentation is still the
+default.
+
+The control is live at rest. A checkbox is already its own editor, so the
+inline variant has no read-as-text state to activate, no `editing` prop and no
+`onDismiss`: one click commits through `onCheckedChange`, exactly as it does in
+the field variant. Both props are declared as `never` so a field layer can hand
+every inline component the same prop bag and still be told, by the type, that a
+toggle has no edit mode.
+
+The box is the form's 40px row height, and the control starts at the same inset
+an inline text input puts its first glyph, so a column of rows lines up.
+
+Pass `hideLabel` — the row's own label column names the field — and the `title`
+stays the checkbox's accessible name.
+
+<Canvas of={CheckboxInlineStories.DetailRowChecked} />
+
+### Read-only rows
+
+A row the viewer may see but not change is `disabled`. The checkbox keeps its
+name and its value in the accessibility tree, so the record's state is still
+announced rather than the row being skipped.
+
+<Canvas of={CheckboxInlineStories.DetailRowDisabled} />
 
 ## Guidelines
 

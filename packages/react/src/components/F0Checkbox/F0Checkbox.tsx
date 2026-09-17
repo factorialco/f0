@@ -1,8 +1,9 @@
 import { DataAttributes } from "@/global.types"
 import { withDataTestId } from "@/lib/data-testid"
+import { inlineControlBox } from "@/lib/inline-variant"
 import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
 
-interface CheckboxProps extends DataAttributes {
+interface CheckboxBaseProps extends DataAttributes {
   /**
    * The title of the checkbox
    */
@@ -78,7 +79,40 @@ interface CheckboxProps extends DataAttributes {
   required?: boolean
 }
 
+export type F0CheckboxFieldProps = CheckboxBaseProps & {
+  /**
+   * @default "field"
+   */
+  variant?: "field"
+  editing?: never
+  onDismiss?: never
+}
+
+export type F0CheckboxInlineProps = CheckboxBaseProps & {
+  /**
+   * `"inline"` is the detail-row presentation: the checkbox fills the row's
+   * box and carries no chrome of its own.
+   */
+  variant: "inline"
+
+  /**
+   * A checkbox has no separate editor — one click commits through
+   * `onCheckedChange` — so there is no edit mode to enter and nothing to
+   * dismiss. Both props exist as `never` so a field layer can hand every
+   * inline component the same prop bag.
+   */
+  editing?: never
+  onDismiss?: never
+}
+
+export type F0CheckboxProps = F0CheckboxFieldProps | F0CheckboxInlineProps
+
 function _F0Checkbox({
+  variant = "field",
+  // Typed `never`, stripped here so a stray prop from an untyped caller never
+  // reaches the DOM.
+  editing: _editing,
+  onDismiss: _onDismiss,
   title,
   description,
   onCheckedChange,
@@ -93,8 +127,8 @@ function _F0Checkbox({
   name,
   required = false,
   ...rest
-}: CheckboxProps) {
-  return (
+}: F0CheckboxProps) {
+  const control = (
     <CheckboxRoot
       title={title}
       description={description}
@@ -111,6 +145,16 @@ function _F0Checkbox({
       onClick={(e) => stopPropagation && e.stopPropagation()}
       {...rest}
     />
+  )
+
+  if (variant !== "inline") {
+    return control
+  }
+
+  return (
+    <div data-testid="checkbox-inline-box" className={inlineControlBox}>
+      {control}
+    </div>
   )
 }
 
