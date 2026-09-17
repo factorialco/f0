@@ -31,8 +31,8 @@ const meta: Meta<typeof F0AvatarPulse> = {
     ...getBaseAvatarArgTypes(["aria-label", "aria-labelledby"]),
   },
   args: {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: "Jordan",
+    lastName: "Avery",
     onPulseClick: () => {
       console.log("Pulse clicked")
     },
@@ -70,8 +70,8 @@ export const Snapshot: Story = {
           {[...pulses, undefined].map((pulse, index) => (
             <F0AvatarPulse
               key={`${pulse ?? "none"}-${index}`}
-              firstName="Dani"
-              lastName="Moreno"
+              firstName="Jordan"
+              lastName="Avery"
               pulse={pulse}
               onPulseClick={() => {}}
             />
@@ -85,8 +85,8 @@ export const Snapshot: Story = {
           {[...pulses, undefined].map((pulse, index) => (
             <F0AvatarPulse
               key={`${pulse ?? "none"}-${index}`}
-              firstName="Dani"
-              lastName="Moreno"
+              firstName="Jordan"
+              lastName="Avery"
               src={mockImage("person", index)}
               pulse={pulse}
               onPulseClick={() => {}}

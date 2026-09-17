@@ -27,10 +27,28 @@ import type {
   SurveyAnsweringFormInlineReadonlyProps,
   SurveyAnsweringFormPreviewProps,
   SurveyAnsweringFormProps,
+  SurveyFormSubmitResult,
   SurveySubmitAnswers,
 } from "./types"
 
 const noop = () => {}
+
+/**
+ * The form's values as the host's answers: an unanswered field is stored as
+ * null rather than dropped, so a cleared answer overwrites the old one.
+ */
+function toSubmitAnswers(values: Record<string, unknown>): SurveySubmitAnswers {
+  const answers: SurveySubmitAnswers = {}
+  for (const [key, val] of Object.entries(values)) {
+    answers[key] = (val === undefined ? null : val) as
+      | string
+      | number
+      | string[]
+      | Date
+      | null
+  }
+  return answers
+}
 
 export function SurveyAnsweringForm(props: SurveyAnsweringFormProps) {
   if (props.inline) {
@@ -130,6 +148,21 @@ function SurveyAnsweringFormDialog({
     [onClose]
   )
 
+  /**
+   * The host's result, as F0Form's — and the dialog closes on a success, after
+   * a beat when there is a message to read.
+   */
+  const settleResult = useCallback(
+    (result: SurveyFormSubmitResult): F0FormSubmitResult => {
+      if (result.success) {
+        scheduleClose(result.message ? 1000 : 0)
+        return { success: true, message: result.message }
+      }
+      return { success: false, errors: result.errors }
+    },
+    [scheduleClose]
+  )
+
   const handleF0Submit = useCallback(
     async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
       if (preview) {
@@ -152,40 +185,26 @@ function SurveyAnsweringFormDialog({
         ? { ...accumulatedValuesRef.current, ...data }
         : data
 
-      const submitData: SurveySubmitAnswers = {}
-      for (const [key, val] of Object.entries(allData)) {
-        submitData[key] = (val === undefined ? null : val) as
-          | string
-          | number
-          | string[]
-          | Date
-          | null
-      }
+      const submitData = toSubmitAnswers(allData)
+
       if (isStepped) {
         stepper.setProgress(100)
         const [result] = await Promise.all([
           onSubmitProp(submitData),
           new Promise((r) => setTimeout(r, 1000)),
         ])
-        if (result.success) {
-          scheduleClose(result.message ? 1000 : 0)
-          return { success: true, message: result.message }
+        if (!result.success) {
+          stepper.setProgress(null)
         }
-        stepper.setProgress(null)
-        return { success: false, errors: result.errors }
+        return settleResult(result)
       }
 
-      const result = await onSubmitProp(submitData)
-      if (result.success) {
-        scheduleClose(result.message ? 1000 : 0)
-        return { success: true, message: result.message }
-      }
-      return { success: false, errors: result.errors }
+      return settleResult(await onSubmitProp(submitData))
     },
     [
       onSubmitProp,
       preview,
-      scheduleClose,
+      settleResult,
       isStepped,
       stepper.isLastStep,
       stepper.goToNext,

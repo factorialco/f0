@@ -62,6 +62,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The lint debt step diffs against the branch point. A pull_request
+          # checkout is the merge commit, so its first parent is the main tip
+          # the branch was merged with; depth 2 makes that parent available.
+          fetch-depth: 2
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
@@ -74,6 +79,19 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
+      # Rules with too many hits to fix at once run as warnings (the RATCHET
+      # group in .oxlintrc.json). This compares them per file against
+      # .scripts/lint-debt.json, a baseline that may only shrink, so a PR
+      # cannot add to the debt. A step here rather than its own job: the job
+      # has already installed and built core, which is most of the cost.
+      #
+      # `--changed`, not the whole tree: main moves under an open PR, and the
+      # run that green-lights a merge is the one CI last took. Debt added or
+      # fixed on main after that point is never measured, and a full gate then
+      # fails the next PR for files it never opened. A file can only gain debt
+      # by being edited, so judging the branch's own files loses nothing.
+      - name: Check the PR adds no lint debt
+        run: pnpm --filter @factorialco/f0-react run check:lint-debt --changed
       - name: Check no CSS custom properties are animated through motion
         run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts
   lint-react-native:

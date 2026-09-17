@@ -43,6 +43,7 @@ import {
   type WidgetParams,
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
+import { HomeWidgetIdProvider } from "../tracking"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { Footnote } from "./Footnote"
@@ -720,7 +721,23 @@ export function WidgetContainer({
     onReorder?.(next)
   }
 
+  /**
+   * Every card is drawn inside its own scope, so the slots within it can report
+   * WHICH widget they belong to without the renderers being handed a place in
+   * the layout. The provider draws no DOM, so nothing about placement or
+   * dragging changes.
+   */
   const render = (
+    widget: HomeWidgetItem,
+    drag?: { isDragging: boolean },
+    params: WidgetParams | undefined = widget.params
+  ) => (
+    <HomeWidgetIdProvider widgetId={widget.id}>
+      {renderCard(widget, drag, params)}
+    </HomeWidgetIdProvider>
+  )
+
+  const renderCard = (
     widget: HomeWidgetItem,
     drag?: { isDragging: boolean },
     /** Params to draw it with instead of its own — the params dialog's preview. */

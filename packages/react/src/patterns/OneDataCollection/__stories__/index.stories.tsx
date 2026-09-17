@@ -699,8 +699,8 @@ export const RendererTypes: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
+                          firstName: "Jordan",
+                          lastName: "Avery",
                           src: "/avatars/person04.jpg",
                         },
                         {
@@ -767,8 +767,8 @@ export const CustomCardProperties: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
+                          firstName: "Jordan",
+                          lastName: "Avery",
                           src: "/avatars/person04.jpg",
                         },
                         {

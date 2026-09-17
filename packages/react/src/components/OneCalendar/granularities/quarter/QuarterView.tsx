@@ -2,6 +2,7 @@ import { isAfter, isBefore, isWithinInterval } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import { cn, focusRing } from "@/lib/utils"
 import { CalendarMode, DateRange } from "../../types"
+import { isDateRange, rangeAfterPeriodClick } from "../periodClick"
 
 const getQuarterFromMonth = (month: number): number => {
   return Math.floor(month / 3) + 1
@@ -49,55 +50,27 @@ export const QuarterView = ({
   const baseYear = Math.floor(year / 5) * 5
   const years = Array.from({ length: 5 }, (_, i) => baseYear + i)
 
-  // Check if a value is a DateRange
-  const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
-  }
-
   // Handle click on a quarter
   const handleQuarterClick = (quarter: number, year: number) => {
     const quarterRange = getQuarterRange(quarter, year)
 
     if (mode === "single") {
       onSelect?.(quarterRange.from)
-    } else if (mode === "range") {
-      if (selected && isDateRange(selected) && selected.from && !selected.to) {
-        const fromDate = selected.from
-        const fromQuarter = getQuarterFromMonth(fromDate.getMonth())
-        const fromYear = fromDate.getFullYear()
+      return
+    }
 
-        if (fromQuarter === quarter && fromYear === year) {
-          // If clicking the same quarter, select just that quarter
-          onSelect?.({
-            from: quarterRange.from,
-            to: quarterRange.to,
-          })
-        } else {
-          // Create a range between the two quarters
-          const fromQuarterRange = getQuarterRange(fromQuarter, fromYear)
-
-          const start = isBefore(fromQuarterRange.from, quarterRange.from)
-            ? fromQuarterRange.from
-            : quarterRange.from
-
-          const end = isAfter(fromQuarterRange.to!, quarterRange.to!)
-            ? fromQuarterRange.to
-            : quarterRange.to
-
-          onSelect?.({
-            from: start,
-            to: end,
-          })
-        }
-      } else {
-        // Start a new range
-        onSelect?.({
-          from: quarterRange.from,
-          to: undefined,
+    if (mode === "range") {
+      onSelect?.(
+        rangeAfterPeriodClick({
+          selected,
+          clicked: quarterRange,
+          periodRangeOf: (date) =>
+            getQuarterRange(
+              getQuarterFromMonth(date.getMonth()),
+              date.getFullYear()
+            ),
         })
-      }
+      )
     }
   }
 

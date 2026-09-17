@@ -6,6 +6,7 @@
 
 import { documentPreviewKind, isVideoFileAttachment } from "./attachments"
 import { type ChatRow } from "./grouping"
+import { stripHtml } from "./posts"
 
 /**
  * Base for `firstItemIndex`. Virtuoso retains the viewport position on a
@@ -366,7 +367,12 @@ const ESTIMATE_CHARS_PER_LINE = 52
 const ESTIMATE_SENDER_NAME = 20
 const ESTIMATE_REPLY_QUOTE = 46
 const ESTIMATE_REACTIONS = 32
+/** Title, description and host — a card with no banner is only its texts. */
 const ESTIMATE_LINK_PREVIEW = 96
+/** Plus a banner: 24rem at the Open Graph 1.91:1 is ~200px of picture. A lone
+ * preview with an image is the only card that gets one (several stack as
+ * compact rows with a thumbnail, which fits inside the texts' own height). */
+const ESTIMATE_LINK_PREVIEW_BANNER = ESTIMATE_LINK_PREVIEW + 200
 /** Media cards are `w-[24rem]`; the album's tallest common shape is ~1:1. */
 const ESTIMATE_ALBUM = 300
 const ESTIMATE_VIDEO = 220
@@ -375,6 +381,36 @@ const ESTIMATE_VOICE = 58
 const ESTIMATE_DOCUMENT_CARD = 96
 const ESTIMATE_CARD = 120
 const ESTIMATE_FILE_CHIP = 56
+
+/**
+ * Post rows. A post is the one row whose height is genuinely PREDICTABLE: its
+ * media sits in a reserved `aspect-video` box, and the transcript column is
+ * `max-w-content` (712px), which never trips `CommunityPost`'s `@[744px]`
+ * container query — so the media is always the full column and its height is
+ * exactly `width · 9/16`.
+ *
+ * ⚠️ `ESTIMATE_POST_MEDIA` is CALIBRATED TO THAT 712px COLUMN. Widen the
+ * transcript and this drifts, taking the entry position with it.
+ */
+/** The row's own 1px divider. Posts have no gap between them — see
+ * `topSpacing` in the row renderer. */
+const ESTIMATE_POST_SPACING = 1
+/** The card's `p-4`, top and bottom. */
+const ESTIMATE_POST_PADDING = 32
+/** 32px avatar next to two lines of author/community. */
+const ESTIMATE_POST_HEADER = 44
+/** `text-xl`, one line (the card clamps the title to two). */
+const ESTIMATE_POST_TITLE = 28
+const ESTIMATE_POST_MEDIA = 400
+const ESTIMATE_POST_EVENT = 180
+const ESTIMATE_POST_COUNTERS = 24
+const ESTIMATE_POST_REACTIONS = 40
+/**
+ * A collapsed `PostDescription` is `line-clamp-5`: the body CANNOT exceed five
+ * lines however long the HTML is, so the estimate caps there instead of growing
+ * with a page-long post.
+ */
+const ESTIMATE_POST_DESCRIPTION_MAX_LINES = 5
 
 const ESTIMATE_SEPARATOR = 28 + ESTIMATE_STANDALONE_SPACING
 const ESTIMATE_DIVIDER = 28 + ESTIMATE_STANDALONE_SPACING
@@ -411,6 +447,29 @@ export function chatRowHeightEstimate(row: ChatRow): number {
       return ESTIMATE_TYPING
     case "footer":
       return ESTIMATE_FOOTER
+    case "post": {
+      const { post } = row
+      let height =
+        ESTIMATE_POST_SPACING +
+        ESTIMATE_POST_PADDING +
+        ESTIMATE_POST_HEADER +
+        ESTIMATE_POST_TITLE +
+        ESTIMATE_POST_COUNTERS +
+        ESTIMATE_POST_REACTIONS
+      // The event REPLACES the cover rather than stacking under it.
+      if (post.event) {
+        height += ESTIMATE_POST_EVENT
+      } else if (post.mediaUrl) {
+        height += ESTIMATE_POST_MEDIA
+      }
+      if (post.description) {
+        height += Math.min(
+          estimateTextHeight(stripHtml(post.description)),
+          ESTIMATE_POST_DESCRIPTION_MAX_LINES * ESTIMATE_LINE_HEIGHT
+        )
+      }
+      return height
+    }
     case "message":
       break
   }
@@ -460,7 +519,11 @@ export function chatRowHeightEstimate(row: ChatRow): number {
     if (row.isFirstOfRun && !hasMedia) {
       height += ESTIMATE_SENDER_NAME
     }
-    height += (message.linkPreviews?.length ?? 0) * ESTIMATE_LINK_PREVIEW
+    const previews = message.linkPreviews ?? []
+    height +=
+      previews.length === 1 && previews[0]?.imageUrl
+        ? ESTIMATE_LINK_PREVIEW_BANNER
+        : previews.length * ESTIMATE_LINK_PREVIEW
   }
   if ((message.reactions?.length ?? 0) > 0) {
     height += ESTIMATE_REACTIONS
@@ -484,3 +547,61 @@ export const followDecision = (
   reducedMotion: boolean
 ): "auto" | "smooth" | false =>
   isAtBottom ? (reducedMotion ? "auto" : "smooth") : false
+
+/**
+ * Rows between the reader and a jump target past which a continuous scroll
+ * stops being navigation and becomes a wait. It is a count of rows, not a
+ * fraction of the conversation: a message halfway through a 40,000-message
+ * history is next door if the reader is already standing there, and a world
+ * away if they are not. Distance from the viewport is the only thing that
+ * decides.
+ */
+export const CHAT_TELEPORT_THRESHOLD_ROWS = 40
+
+/**
+ * Rows the visible part of a far jump travels. The hidden phase lands ON the
+ * target, then steps back by the measured span of this many rows, so the
+ * approach is a short scroll in the direction of travel — what makes the
+ * arrival read as movement rather than a cut. The span is capped at one
+ * viewport, so tall rows never turn the approach into a tour.
+ */
+export const CHAT_TELEPORT_APPROACH_ROWS = 10
+
+/**
+ * How a jump to a message should be performed, given where the reader is.
+ *
+ *   - `instant`  nothing measured to travel from, so there is no motion to
+ *                convey; animating from an unknown position is just latency.
+ *   - `smooth`   near enough to scroll continuously.
+ *   - `teleport` far: land on `index` while hidden, step back by the approach
+ *                rows, then glide them into view.
+ */
+export type ChatJumpPlan =
+  | { kind: "instant"; index: number }
+  | { kind: "smooth"; index: number }
+  | { kind: "teleport"; index: number }
+
+export function planJump({
+  from,
+  to,
+  rowCount,
+  threshold = CHAT_TELEPORT_THRESHOLD_ROWS,
+}: {
+  /** Top visible row, in local index space, or null when nothing is measured. */
+  from: number | null
+  /** Target row, in the same space. */
+  to: number
+  rowCount: number
+  threshold?: number
+}): ChatJumpPlan {
+  const last = Math.max(0, rowCount - 1)
+  const target = Math.min(Math.max(to, 0), last)
+
+  if (from === null) {
+    return { kind: "instant", index: target }
+  }
+  if (Math.abs(target - from) <= threshold) {
+    return { kind: "smooth", index: target }
+  }
+  return { kind: "teleport", index: target }
+}

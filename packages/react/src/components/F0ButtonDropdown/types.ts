@@ -76,6 +76,13 @@ type F0ButtonDropdownBaseProps<T = string> = {
    * @default undefined
    */
   tooltip?: string
+  /**
+   * Where the menu is portalled. Defaults to the document body; inside a modal
+   * layer pass that layer's own element (an `F0Dialog` publishes it as
+   * `portalContainer`) so its focus trap contains the menu rather than fighting
+   * it.
+   */
+  container?: HTMLElement | null
 }
 
 /**

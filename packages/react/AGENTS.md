@@ -211,7 +211,12 @@ Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
 - CVA from `"cva"` (not `"class-variance-authority"`) for multi-variant components
 - Design tokens use `f1-` prefix: `text-f1-foreground`, `bg-f1-background`, `border-f1-border`, etc.
 - `focusRing()` from `@/lib/utils` on all focusable elements
-- Inline `style` only for truly dynamic values (hex colors, percentages)
+- Inline `style` only for truly dynamic values (hex colors, percentages) — a
+  measured offset, a `${percentage}%` width, a colour that arrives as data. Take
+  the exception with an `oxlint-disable` comment naming the reason. Everything
+  else is a Tailwind class. Enforced by `f0-styles/no-inline-styles`, a RATCHET
+  rule: existing hits are baselined in `.scripts/lint-debt.json` and that count
+  may only shrink. `src/ui/` is out of scope (re-synced third-party wrappers).
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 
@@ -250,6 +255,21 @@ renderers) imports the same constant.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
 
+## Lint debt (ratchet)
+
+Rules with more violations than one PR can fix run as `"warn"` in the RATCHET
+group of `.oxlintrc.json`. `pnpm lint` shows only errors; `pnpm check:lint-debt`
+compares the warnings per file against `.scripts/lint-debt.json`, a baseline
+that may only shrink. It runs on staged files in the pre-commit hook and over
+the whole tree in CI.
+
+- A file that gains a warning fails the check. Fix the warning.
+- A file that loses one also fails: run `pnpm check:lint-debt --update` and
+  commit the baseline. That is what locks the win in.
+- `sonarjs/cognitive-complexity` (threshold 15) is in the group. Reduce it by
+  extracting the nested branches into named functions, not by raising the
+  threshold.
+
 ## Accessibility
 
 - `focusRing()` on all focusable elements
@@ -277,8 +297,9 @@ pnpm build          # build library and generate types
 pnpm vitest         # unit tests (watch)
 pnpm vitest:ci      # unit tests (CI, run once)
 pnpm test-storybook # Storybook interaction + a11y tests
-pnpm lint           # lint check
+pnpm lint           # lint check (errors only; warnings belong to the ratchet)
 pnpm lint-fix       # auto-fix lint issues
+pnpm check:lint-debt # ratchet rules: no file may gain a warning
 pnpm tsc            # type-check
 pnpm format         # auto-fix formatting (oxfmt) — run before every commit
 pnpm format:check   # check formatting without modifying files (same as CI)

@@ -14,6 +14,7 @@ import {
   DataCollectionStorageHandler,
 } from "@/lib/providers/datacollection/types"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
+import { StoredStatusDefinition } from "../pruneStoredStatus"
 import {
   DataCollectionStorageFeaturesDefinition,
   FeatureProviders,
@@ -124,6 +125,16 @@ const buildFeatureProviders = (
   }
 }
 
+/**
+ * Declares every filter key and visualization these tests persist, so hydration
+ * validation is a no-op here and the assertions stay about the write race.
+ * `pruneStoredStatus` is covered on its own.
+ */
+const definition: StoredStatusDefinition = {
+  filters: { x: {}, y: {}, seeded: {}, fromA: {}, fromB: {} },
+  visualizationCount: 2,
+}
+
 const wrapperWith = (handler: DataCollectionStorageHandler) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <TestProviders>
@@ -184,7 +195,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           "test/v1",
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          { definition }
         ),
       {
         wrapper: wrapperWith(handler),
@@ -240,7 +252,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           "test/v1",
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          { definition }
         ),
       {
         wrapper: wrapperWith(handler),
@@ -282,7 +295,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           "test/v1",
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          { definition }
         ),
       {
         wrapper: wrapperWith(handler),
@@ -329,7 +343,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           undefined,
           features,
-          buildProviders() as AnyFeatureProviders
+          buildProviders() as AnyFeatureProviders,
+          { definition }
         ),
       {
         wrapper: wrapperWith(handler),
@@ -354,7 +369,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
           "test/v1",
           features,
           buildProviders() as AnyFeatureProviders,
-          true
+          { definition, disabled: true }
         ),
       {
         wrapper: wrapperWith(handler),
@@ -391,7 +406,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           storageKey,
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          { definition }
         ),
       {
         wrapper: wrapperWith(handler),
@@ -463,5 +479,76 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
     for (const call of setSpy.mock.calls) {
       expect(call[0]).toBe("key-b/v1")
     }
+  })
+})
+
+describe("useDataCollectionStorage — the selected view", () => {
+  // The views themselves are always persisted; which one is active belongs with
+  // them, so a consumer that allowlists only its filters still gets both.
+  const features: DataCollectionStorageFeaturesDefinition = ["filters"]
+
+  const providersWith = (
+    value: string | undefined,
+    setValue: (value: string | undefined) => void
+  ) =>
+    ({
+      selectedPresetId: { value, setValue },
+    }) as unknown as AnyFeatureProviders
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it("restores it, despite the consumer's features listing neither it nor the views", async () => {
+    const { handler, resolveGet } = createDeferredHandler()
+    const setValue = vi.fn()
+
+    zeroRenderHook(
+      () =>
+        useDataCollectionStorage(
+          "test/v1",
+          features,
+          providersWith(undefined, setValue),
+          { definition }
+        ),
+      { wrapper: wrapperWith(handler) }
+    )
+
+    await act(async () => {
+      resolveGet({ selectedPresetId: "mine" })
+    })
+    await flushMicrotasks()
+
+    expect(setValue).toHaveBeenCalledWith("mine")
+  })
+
+  it("persists it", async () => {
+    const { handler, resolveGet, state } = createDeferredHandler()
+
+    zeroRenderHook(
+      () =>
+        useDataCollectionStorage(
+          "test/v1",
+          features,
+          providersWith("mine", vi.fn()),
+          { definition }
+        ),
+      { wrapper: wrapperWith(handler) }
+    )
+
+    await act(async () => {
+      resolveGet({})
+    })
+    await flushMicrotasks()
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+
+    expect(state.value.selectedPresetId).toBe("mine")
   })
 })

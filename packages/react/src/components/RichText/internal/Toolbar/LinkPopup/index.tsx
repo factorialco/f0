@@ -17,6 +17,37 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Badge } from "@/ui/IconBadge"
 
+/** A pasted or typed link, checked before it is set on the mark. */
+const checkIfUrlIsValid = (url: string) => {
+  const trimmedUrl = url.trim()
+  const isValidUrl =
+    /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:\d{1,5})?(\/.*)?$/i.test(trimmedUrl)
+  return isValidUrl
+}
+
+/** Reads the field back: nothing typed yet, a link, or not a link. */
+const UrlStateBadge = ({ url }: { url: string }) => {
+  if (url.length === 0) {
+    return (
+      <div className="flex w-4 items-center justify-center">
+        <Badge icon={LinkIcon} type="neutral" size="lg" />
+      </div>
+    )
+  }
+
+  const isValid = checkIfUrlIsValid(url)
+
+  return (
+    <div className="flex w-6 items-center justify-center">
+      <Badge
+        icon={isValid ? Check : Alert}
+        type={isValid ? "positive" : "warning"}
+        size="sm"
+      />
+    </div>
+  )
+}
+
 interface LinkPopupProps {
   editor: Editor
   disabled: boolean
@@ -35,13 +66,6 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
       return
     }
     setOpenLinkPopover(!openLinkPopover)
-  }
-
-  const checkIfUrlIsValid = (url: string) => {
-    const trimmedUrl = url.trim()
-    const isValidUrl =
-      /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:\d{1,5})?(\/.*)?$/i.test(trimmedUrl)
-    return isValidUrl
   }
 
   const handleSave = () => {
@@ -139,30 +163,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                         : "cursor-auto"
                     )}
                   >
-                    <div
-                      className={cn(
-                        "flex items-center justify-center",
-                        url.length > 0 ? "w-6" : "w-4"
-                      )}
-                    >
-                      <Badge
-                        icon={
-                          url.length > 0
-                            ? checkIfUrlIsValid(url)
-                              ? Check
-                              : Alert
-                            : LinkIcon
-                        }
-                        type={
-                          url
-                            ? checkIfUrlIsValid(url)
-                              ? "positive"
-                              : "warning"
-                            : "neutral"
-                        }
-                        size={url.length > 0 ? "sm" : "lg"}
-                      />
-                    </div>
+                    <UrlStateBadge url={url} />
 
                     <input
                       className="w-full shrink text-f1-foreground disabled:cursor-not-allowed"

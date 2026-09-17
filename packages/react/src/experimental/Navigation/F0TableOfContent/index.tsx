@@ -765,6 +765,130 @@ function TOCContent({
     [sortableItems, handleMoveItem]
   )
 
+  const cancelPendingDragTimeouts = useCallback(() => {
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current)
+      dragOverTimeoutRef.current = null
+    }
+    if (safetyTimeoutRef.current) {
+      clearTimeout(safetyTimeoutRef.current)
+      safetyTimeoutRef.current = null
+    }
+  }, [])
+
+  const beginItemDrag = useCallback(
+    (sourceId: string) => {
+      // Cancel any pending timeouts from previous drag
+      cancelPendingDragTimeouts()
+
+      draggedItemIdRef.current = sourceId
+      handleDropCalledRef.current = false // Reset flag for new drag
+      // Clear lastDragOverRef when starting a new drag
+      lastDragOverRef.current = null
+      setDraggedItemId(sourceId)
+    },
+    [cancelPendingDragTimeouts]
+  )
+
+  const cancelItemDrag = useCallback(() => {
+    // For cancel, clear everything immediately
+    isPlaceholderLockedRef.current = false
+    handleDropCalledRef.current = false
+    lastDragOverRef.current = null
+    lastItemIndexRef.current = null
+    currentStateSetTimeRef.current = 0
+    lastDragOverCallTimeRef.current = 0
+    cancelPendingDragTimeouts()
+    setDragOverItemId(null)
+    setDragOverPosition(null)
+    dragOverItemIdRef.current = null
+    dragOverPositionRef.current = null
+    setDraggedItemId(null)
+    draggedItemIdRef.current = null
+  }, [cancelPendingDragTimeouts])
+
+  const finishItemDrag = useCallback(() => {
+    // For drop, DON'T clear visual state immediately
+    // The dropTargetForElements onDrop handler needs the state to process the drop
+    // We'll clear it in handleDrop after processing, or with a safety timeout
+
+    // CRITICAL: Cancel any pending handleDragLeave timeout
+    // This prevents handleDragLeave from clearing state before onDrop executes
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current)
+      dragOverTimeoutRef.current = null
+    }
+
+    // Only clear timeouts and refs, but keep visual state for handleDrop
+    isPlaceholderLockedRef.current = false
+
+    // If we have a valid dragOverItemId and dragOverPosition, and handleDrop hasn't been called yet,
+    // try to execute handleDrop directly in case the drop was on the placeholder
+    // This is a fallback in case onDrop from Item doesn't fire (e.g., drop on placeholder)
+    // Also check lastDragOverRef as fallback in case handleDragLeave cleared the state
+    const currentDragOverItemId =
+      dragOverItemIdRef.current || lastDragOverRef.current?.itemId
+    const currentDragOverPosition =
+      dragOverPositionRef.current || lastDragOverRef.current?.position
+    if (
+      !handleDropCalledRef.current &&
+      currentDragOverItemId &&
+      currentDragOverPosition &&
+      draggedItemIdRef.current &&
+      draggedItemIdRef.current !== currentDragOverItemId
+    ) {
+      // Use requestAnimationFrame to execute in the next frame
+      // This gives onDrop from Item a chance to fire first, but is faster than setTimeout
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!handleDropCalledRef.current) {
+            // Check refs first, then lastDragOverRef as fallback
+            const finalItemId =
+              dragOverItemIdRef.current || lastDragOverRef.current?.itemId
+            const finalPosition =
+              dragOverPositionRef.current || lastDragOverRef.current?.position
+            if (finalItemId && finalPosition) {
+              handleDrop(finalItemId, finalPosition)
+            }
+          }
+        })
+      })
+    }
+
+    // DON'T reset the flag here - handleDrop will set it to true when it executes
+    // The flag will be reset when a new drag starts (in "start" phase)
+
+    // Cancel any existing safety timeout
+    if (safetyTimeoutRef.current) {
+      clearTimeout(safetyTimeoutRef.current)
+      safetyTimeoutRef.current = null
+    }
+
+    // Set a safety timeout to clear state if handleDrop doesn't fire
+    // This prevents the placeholder from staying visible forever if something goes wrong
+    // Note: handleDrop may execute before or after this event, so we check the flag
+    const timeoutId = setTimeout(() => {
+      // Double-check the flag - handleDrop may have executed between scheduling and execution
+      if (!handleDropCalledRef.current) {
+        lastDragOverRef.current = null
+        lastItemIndexRef.current = null
+        currentStateSetTimeRef.current = 0
+        lastDragOverCallTimeRef.current = 0
+        setDragOverItemId(null)
+        setDragOverPosition(null)
+        dragOverItemIdRef.current = null
+        dragOverPositionRef.current = null
+        setDraggedItemId(null)
+        draggedItemIdRef.current = null
+      }
+      // Only clear the ref if this is still the active timeout
+      if (safetyTimeoutRef.current === timeoutId) {
+        safetyTimeoutRef.current = null
+      }
+    }, 500) // 500ms should be enough for handleDrop to fire
+    safetyTimeoutRef.current = timeoutId
+  }, [handleDrop])
+
   // Monitor drag start/end using useDndEvents
   useDndEvents(
     useCallback(
@@ -773,127 +897,14 @@ function TOCContent({
         source: { kind: string; id: string; data?: unknown }
       }) => {
         if (e.phase === "start" && e.source.kind === "toc-item") {
-          // Cancel any pending timeouts from previous drag
-          if (dragOverTimeoutRef.current) {
-            clearTimeout(dragOverTimeoutRef.current)
-            dragOverTimeoutRef.current = null
-          }
-          if (safetyTimeoutRef.current) {
-            clearTimeout(safetyTimeoutRef.current)
-            safetyTimeoutRef.current = null
-          }
-
-          draggedItemIdRef.current = e.source.id
-          handleDropCalledRef.current = false // Reset flag for new drag
-          // Clear lastDragOverRef when starting a new drag
-          lastDragOverRef.current = null
-          setDraggedItemId(e.source.id)
+          beginItemDrag(e.source.id)
         } else if (e.phase === "cancel") {
-          // For cancel, clear everything immediately
-          isPlaceholderLockedRef.current = false
-          handleDropCalledRef.current = false
-          lastDragOverRef.current = null
-          lastItemIndexRef.current = null
-          currentStateSetTimeRef.current = 0
-          lastDragOverCallTimeRef.current = 0
-          if (dragOverTimeoutRef.current) {
-            clearTimeout(dragOverTimeoutRef.current)
-            dragOverTimeoutRef.current = null
-          }
-          if (safetyTimeoutRef.current) {
-            clearTimeout(safetyTimeoutRef.current)
-            safetyTimeoutRef.current = null
-          }
-          setDragOverItemId(null)
-          setDragOverPosition(null)
-          dragOverItemIdRef.current = null
-          dragOverPositionRef.current = null
-          setDraggedItemId(null)
-          draggedItemIdRef.current = null
+          cancelItemDrag()
         } else if (e.phase === "drop") {
-          // For drop, DON'T clear visual state immediately
-          // The dropTargetForElements onDrop handler needs the state to process the drop
-          // We'll clear it in handleDrop after processing, or with a safety timeout
-
-          // CRITICAL: Cancel any pending handleDragLeave timeout
-          // This prevents handleDragLeave from clearing state before onDrop executes
-          if (dragOverTimeoutRef.current) {
-            clearTimeout(dragOverTimeoutRef.current)
-            dragOverTimeoutRef.current = null
-          }
-
-          // Only clear timeouts and refs, but keep visual state for handleDrop
-          isPlaceholderLockedRef.current = false
-
-          // If we have a valid dragOverItemId and dragOverPosition, and handleDrop hasn't been called yet,
-          // try to execute handleDrop directly in case the drop was on the placeholder
-          // This is a fallback in case onDrop from Item doesn't fire (e.g., drop on placeholder)
-          // Also check lastDragOverRef as fallback in case handleDragLeave cleared the state
-          const currentDragOverItemId =
-            dragOverItemIdRef.current || lastDragOverRef.current?.itemId
-          const currentDragOverPosition =
-            dragOverPositionRef.current || lastDragOverRef.current?.position
-          if (
-            !handleDropCalledRef.current &&
-            currentDragOverItemId &&
-            currentDragOverPosition &&
-            draggedItemIdRef.current &&
-            draggedItemIdRef.current !== currentDragOverItemId
-          ) {
-            // Use requestAnimationFrame to execute in the next frame
-            // This gives onDrop from Item a chance to fire first, but is faster than setTimeout
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                if (!handleDropCalledRef.current) {
-                  // Check refs first, then lastDragOverRef as fallback
-                  const finalItemId =
-                    dragOverItemIdRef.current || lastDragOverRef.current?.itemId
-                  const finalPosition =
-                    dragOverPositionRef.current ||
-                    lastDragOverRef.current?.position
-                  if (finalItemId && finalPosition) {
-                    handleDrop(finalItemId, finalPosition)
-                  }
-                }
-              })
-            })
-          }
-
-          // DON'T reset the flag here - handleDrop will set it to true when it executes
-          // The flag will be reset when a new drag starts (in "start" phase)
-
-          // Cancel any existing safety timeout
-          if (safetyTimeoutRef.current) {
-            clearTimeout(safetyTimeoutRef.current)
-            safetyTimeoutRef.current = null
-          }
-
-          // Set a safety timeout to clear state if handleDrop doesn't fire
-          // This prevents the placeholder from staying visible forever if something goes wrong
-          // Note: handleDrop may execute before or after this event, so we check the flag
-          const timeoutId = setTimeout(() => {
-            // Double-check the flag - handleDrop may have executed between scheduling and execution
-            if (!handleDropCalledRef.current) {
-              lastDragOverRef.current = null
-              lastItemIndexRef.current = null
-              currentStateSetTimeRef.current = 0
-              lastDragOverCallTimeRef.current = 0
-              setDragOverItemId(null)
-              setDragOverPosition(null)
-              dragOverItemIdRef.current = null
-              dragOverPositionRef.current = null
-              setDraggedItemId(null)
-              draggedItemIdRef.current = null
-            }
-            // Only clear the ref if this is still the active timeout
-            if (safetyTimeoutRef.current === timeoutId) {
-              safetyTimeoutRef.current = null
-            }
-          }, 500) // 500ms should be enough for handleDrop to fire
-          safetyTimeoutRef.current = timeoutId
+          finishItemDrag()
         }
       },
-      [handleDrop]
+      [beginItemDrag, cancelItemDrag, finishItemDrag]
     )
   )
 

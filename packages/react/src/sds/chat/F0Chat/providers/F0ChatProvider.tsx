@@ -14,6 +14,8 @@ import {
   type F0ChatEditInput,
   type F0ChatEmit,
   type F0ChatEvents,
+  type F0ChatPost,
+  type F0ChatPostAction,
   type F0ChatRuntime,
   type F0ChatUser,
 } from "../types"
@@ -36,6 +38,10 @@ export type F0ChatStable = {
    * permissions with it (see `utils/capabilities.ts`) and it only changes when
    * the conversation does. */
   channelType: F0ChatChannelType
+  /** The community's name, for the post card's "in <community>" line. Lives
+   * here rather than being read off `channel` so a post row never subscribes to
+   * the full runtime. */
+  channelTitle: string
   capabilities?: F0ChatCapabilities
   editWindowMs?: number
   toggleReaction: (messageId: string, emoji: string) => void
@@ -48,6 +54,15 @@ export type F0ChatStable = {
   deleteMessage: (id: string) => void
   deleteFailedMessage?: (id: string) => void
   editMessage?: (id: string, input: F0ChatEditInput) => void
+  /** Present only when the host wired {@link F0ChatRuntime.openPost} — an
+   * absent one is what makes a post card non-clickable, on purpose. */
+  openPost?: (id: string, context: { source: "card" | "comment" }) => void
+  /** Present only when the host wired {@link F0ChatRuntime.openCommunity} —
+   * absent leaves an aggregated feed's origin label as plain text. */
+  openCommunity?: (communityId: string) => void
+  /** Resolves a post's overflow menu through the LATEST runtime, so the host
+   * may rebuild the function every render without re-rendering the feed. */
+  postActions: (post: F0ChatPost) => F0ChatPostAction[]
 }
 
 const F0ChatStableContext = createContext<F0ChatStable | null>(null)
@@ -88,10 +103,16 @@ const NO_EMIT: F0ChatEmit = {
   onLocationOpened: noop,
   onLinkPreviewClicked: noop,
   onCardActivated: noop,
+  onPostOpened: noop,
+  onPostActionInvoked: noop,
+  onPostCompositionStarted: noop,
+  onPostCompositionCancelled: noop,
   onSearchOpened: noop,
   onSearchResultNavigated: noop,
   onJumpedToQuotedMessage: noop,
   onJumpedToBottom: noop,
+  onShelfOpened: noop,
+  onScheduledPostOpened: noop,
 }
 
 /**
@@ -120,6 +141,9 @@ const NO_VOICE_PLAY_LOG: F0ChatVoicePlayLog = {
 
 const F0ChatVoicePlayContext =
   createContext<F0ChatVoicePlayLog>(NO_VOICE_PLAY_LOG)
+
+/** See {@link useChatActivePostId}. */
+const F0ChatActivePostContext = createContext<string | undefined>(undefined)
 
 /** Keep the previous capabilities object while its fields are unchanged, so a
  * host rebuilding `{ canSend: false }` per render doesn't churn the context. */
@@ -238,6 +262,12 @@ export const F0ChatProvider = ({
         void runtimeRef.current.deleteFailedMessage?.(id),
       editMessage: (id: string, input: F0ChatEditInput) =>
         void runtimeRef.current.editMessage?.(id, input),
+      openPost: (id: string, context: { source: "card" | "comment" }) =>
+        runtimeRef.current.openPost?.(id, context),
+      openCommunity: (communityId: string) =>
+        runtimeRef.current.openCommunity?.(communityId),
+      postActions: (post: F0ChatPost): F0ChatPostAction[] =>
+        runtimeRef.current.postActions?.(post) ?? [],
     }),
     []
   )
@@ -293,12 +323,22 @@ export const F0ChatProvider = ({
       onLinkPreviewClicked: () =>
         call((events) => events.onLinkPreviewClicked?.()),
       onCardActivated: (p) => call((events) => events.onCardActivated?.(p)),
+      onPostOpened: (p) => call((events) => events.onPostOpened?.(p)),
+      onPostActionInvoked: (p) =>
+        call((events) => events.onPostActionInvoked?.(p)),
+      onPostCompositionStarted: () =>
+        call((events) => events.onPostCompositionStarted?.()),
+      onPostCompositionCancelled: (p) =>
+        call((events) => events.onPostCompositionCancelled?.(p)),
       onSearchOpened: () => call((events) => events.onSearchOpened?.()),
       onSearchResultNavigated: (p) =>
         call((events) => events.onSearchResultNavigated?.(p)),
       onJumpedToQuotedMessage: () =>
         call((events) => events.onJumpedToQuotedMessage?.()),
       onJumpedToBottom: () => call((events) => events.onJumpedToBottom?.()),
+      onShelfOpened: (p) => call((events) => events.onShelfOpened?.(p)),
+      onScheduledPostOpened: () =>
+        call((events) => events.onScheduledPostOpened?.()),
     }
   }, [])
 
@@ -308,11 +348,14 @@ export const F0ChatProvider = ({
   const hasEditMessage = !!runtime.editMessage
   const hasDeleteFailedMessage = !!runtime.deleteFailedMessage
   const hasLoadReactionUsers = !!runtime.loadReactionUsers
+  const hasOpenPost = !!runtime.openPost
+  const hasOpenCommunity = !!runtime.openCommunity
 
   const stable = useMemo<F0ChatStable>(
     () => ({
       currentUserId: runtime.currentUserId,
       channelType: runtime.channel.type,
+      channelTitle: runtime.channel.title,
       capabilities,
       editWindowMs: runtime.editWindowMs,
       toggleReaction: delegates.toggleReaction,
@@ -325,15 +368,21 @@ export const F0ChatProvider = ({
         ? delegates.deleteFailedMessage
         : undefined,
       editMessage: hasEditMessage ? delegates.editMessage : undefined,
+      openPost: hasOpenPost ? delegates.openPost : undefined,
+      openCommunity: hasOpenCommunity ? delegates.openCommunity : undefined,
+      postActions: delegates.postActions,
     }),
     [
       runtime.currentUserId,
       runtime.channel.type,
+      runtime.channel.title,
       capabilities,
       runtime.editWindowMs,
       hasEditMessage,
       hasDeleteFailedMessage,
       hasLoadReactionUsers,
+      hasOpenPost,
+      hasOpenCommunity,
       delegates,
     ]
   )
@@ -343,12 +392,26 @@ export const F0ChatProvider = ({
       <F0ChatEmitContext.Provider value={emit}>
         <F0ChatVoicePlayContext.Provider value={voicePlayLog}>
           <F0ChatStableContext.Provider value={stable}>
-            {children}
+            {/* Innermost and on its own: opening a post changes this on every
+                navigation, and post cards are the only thing that cares. Folded
+                into `F0ChatStable` it would re-render the entire transcript —
+                every message row included — each time the reader opens one. */}
+            <F0ChatActivePostContext.Provider value={runtime.activePostId}>
+              {children}
+            </F0ChatActivePostContext.Provider>
           </F0ChatStableContext.Provider>
         </F0ChatVoicePlayContext.Provider>
       </F0ChatEmitContext.Provider>
     </F0ChatContext.Provider>
   )
+}
+
+/**
+ * The post whose page is open beside the feed, so its card can say so.
+ * `undefined` where the host doesn't track it, or outside a provider.
+ */
+export function useChatActivePostId(): string | undefined {
+  return useContext(F0ChatActivePostContext)
 }
 
 /** Read the chat runtime. Throws when used outside an {@link F0ChatProvider}. */
