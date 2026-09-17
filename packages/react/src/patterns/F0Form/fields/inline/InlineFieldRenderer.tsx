@@ -49,6 +49,7 @@ export function InlineFieldRenderer({
 
   const supported = isInlineSupported(field)
   const toggle = isInlineToggle(field)
+  const isSelect = supported && field.type === "select"
   const editable = field.editable ?? true
 
   if (!supported) {
@@ -78,8 +79,10 @@ export function InlineFieldRenderer({
   const input = renderFieldInput({
     field:
       // The read-only tier of a toggle is the disabled control: there is no
-      // read presentation to fall back to.
-      toggle && !editable ? { ...field, disabled: true } : field,
+      // read presentation to fall back to. A select reads as text either way,
+      // but its chevron is an offer to open a list, so a row that cannot be
+      // activated must not draw one.
+      !editable && (toggle || isSelect) ? { ...field, disabled: true } : field,
     formField,
     fieldState,
     fieldStatus: field.status,
@@ -97,16 +100,20 @@ export function InlineFieldRenderer({
       (isRequired ? forms.validation.required : forms.validation.invalidType))
     : undefined
 
-  const actions: RowAction[] = activate
-    ? [
-        {
-          key: "edit",
-          icon: Pencil,
-          label: t("forms.inline.edit", { label: field.label }),
-          onClick: activate,
-        },
-      ]
-    : []
+  // A select already carries its own affordance: the chevron the inline
+  // variant reveals at the trailing edge of the value. A pencil beside it
+  // would be a second icon for the same click.
+  const actions: RowAction[] =
+    activate && !isSelect
+      ? [
+          {
+            key: "edit",
+            icon: Pencil,
+            label: t("forms.inline.edit", { label: field.label }),
+            onClick: activate,
+          },
+        ]
+      : []
 
   return (
     <InlineFieldRow

@@ -1,7 +1,12 @@
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 import {
@@ -57,7 +62,18 @@ function editAction(label: string) {
 }
 
 describe("F0Form inline mode", () => {
-  beforeEach(() => resetInlineWarnings())
+  global.ResizeObserver = class MockResizeObserver {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  } as typeof ResizeObserver
+
+  beforeEach(() => {
+    resetInlineWarnings()
+    // The select's list is virtualised and measures itself; jsdom reports 0.
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", { value: 800 })
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", { value: 800 })
+  })
   afterEach(() => vi.restoreAllMocks())
 
   it("reads every value as text until a row is activated", () => {
@@ -200,6 +216,51 @@ describe("F0Form inline mode", () => {
   it("offers an edit action on an editable row", () => {
     renderProfile()
     expect(editAction("Full name")).toBeInTheDocument()
+  })
+
+  it("leaves a select row's affordance to its own chevron", () => {
+    renderProfile()
+    expect(screen.queryByRole("button", { name: "Edit Team" })).toBeNull()
+    // The row is still the activator; only the pencil is gone.
+    expect(activator("Team")).toBeInTheDocument()
+  })
+
+  it("keeps the picked option and returns the row to reading", async () => {
+    const user = userEvent.setup()
+    renderProfile()
+
+    expect(screen.getByText("Design")).toBeInTheDocument()
+
+    await user.click(activator("Team"))
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    fireEvent.animationStart(screen.getByRole("listbox"))
+    await user.click(await screen.findByRole("option", { name: "Engineering" }))
+
+    await waitFor(() => expect(screen.queryByRole("listbox")).toBeNull())
+    expect(screen.getByText("Engineering")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    )
+  })
+
+  it("keeps the component mounted across a mode change", async () => {
+    const user = userEvent.setup()
+    const { container } = renderProfile()
+
+    const valueBox = () =>
+      container.querySelectorAll<HTMLElement>(
+        "[data-slot='inline-field-row-value']"
+      )[0]
+    const before = valueBox()
+
+    await user.click(activator("Full name"))
+    await screen.findByRole("textbox")
+
+    // Remounting the box remounts the component inside it, and a component
+    // that keeps state across the edit loses it before it can report a change.
+    expect(valueBox()).toBe(before)
   })
 
   it("copies a text value raw", async () => {

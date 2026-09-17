@@ -104,6 +104,67 @@ export const InlineFieldRowList = ({ children }: { children: ReactNode }) => (
 )
 
 /**
+ * The value box and the activator around it — one wrapper in both modes,
+ * gaining and losing its button role rather than appearing and disappearing.
+ * Swapping the element tree instead remounts the value below it, and a
+ * component that keeps state across the edit — the select's "the user picked
+ * something" flag — loses it before it can emit the change.
+ *
+ * The box's height is the row's and never varies, so clicking a value does not
+ * move the row under the pointer.
+ */
+const RowValue = forwardRef<
+  HTMLDivElement,
+  {
+    label: string
+    value: ReactNode
+    editing: boolean
+    activatable: boolean
+    onActivate: (() => void) | undefined
+  }
+>(function RowValue({ label, value, editing, activatable, onActivate }, ref) {
+  const { t } = useI18n()
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return
+    }
+    event.preventDefault()
+    onActivate?.()
+  }
+
+  const interactive = activatable
+    ? {
+        role: "button",
+        tabIndex: 0,
+        "aria-label": label,
+        title: t("forms.inline.edit", { label }),
+        onClick: onActivate,
+        onKeyDown: handleKeyDown,
+      }
+    : {}
+
+  return (
+    <div
+      ref={ref}
+      {...interactive}
+      className={cn("w-full min-w-0 rounded-md", focusRing())}
+    >
+      <div
+        data-slot="inline-field-row-value"
+        className={cn(
+          "h-10 w-full min-w-0 rounded-md [&>*]:h-full [&>*]:w-full",
+          !editing && "transition-colors motion-reduce:transition-none",
+          activatable && "cursor-text group-hover:bg-f1-background-secondary"
+        )}
+      >
+        {value}
+      </div>
+    </div>
+  )
+})
+
+/**
  * A record row: a label, the value beside it, and whatever can be done with the
  * value revealed on hover. The value arrives already rendered and the actions
  * already decided, so this file knows nothing about forms or field types.
@@ -137,29 +198,6 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
 
     const activatable = !!onActivate && !editing
 
-    const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== "Enter" && event.key !== " ") {
-        return
-      }
-      event.preventDefault()
-      onActivate?.()
-    }
-
-    const box = (
-      // The height the row declares and the component fills, identical in both
-      // modes, so clicking a value never moves the row under the pointer.
-      <div
-        data-slot="inline-field-row-value"
-        className={cn(
-          "h-10 w-full min-w-0 rounded-md [&>*]:h-full [&>*]:w-full",
-          !editing && "transition-colors motion-reduce:transition-none",
-          activatable && "cursor-text group-hover:bg-f1-background-secondary"
-        )}
-      >
-        {value}
-      </div>
-    )
-
     return (
       <div
         data-slot="inline-field-row"
@@ -178,22 +216,14 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
 
         <div className="flex min-w-[160px] max-w-96 flex-[1_1_160px] flex-col gap-1">
           <div className="relative flex w-full min-w-0 items-center">
-            {activatable ? (
-              <div
-                ref={ref}
-                role="button"
-                tabIndex={0}
-                aria-label={label}
-                title={t("forms.inline.edit", { label })}
-                onClick={onActivate}
-                onKeyDown={handleKeyDown}
-                className={cn("w-full min-w-0 rounded-md", focusRing())}
-              >
-                {box}
-              </div>
-            ) : (
-              box
-            )}
+            <RowValue
+              ref={ref}
+              label={label}
+              value={value}
+              editing={editing}
+              activatable={activatable}
+              onActivate={onActivate}
+            />
 
             {/* A sibling of the activator, never its parent: a button inside a
                 `role="button"` is axe's `nested-interactive`. */}

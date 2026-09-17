@@ -136,6 +136,27 @@ describe("InlineFieldRow", () => {
     expect(screen.queryByRole("button", { name: "Job title" })).toBeNull()
   })
 
+  it("keeps the value's DOM in place when the row starts editing", () => {
+    const { rerender } = renderRow({ onActivate: vi.fn() })
+
+    const before = screen.getByText("Hello")
+
+    rerender(
+      <InlineFieldRow
+        label="Job title"
+        value={<span>Hello</span>}
+        actions={[]}
+        onActivate={vi.fn()}
+        editing
+      />
+    )
+
+    // Swapping the wrapper's element instead of its attributes remounts
+    // everything below it, and a value that keeps state across the edit loses
+    // it before it can report the change.
+    expect(screen.getByText("Hello")).toBe(before)
+  })
+
   it("keeps the strip reachable where there is no hover to reveal it with", () => {
     renderRow({ actions: fakeActions() })
 
