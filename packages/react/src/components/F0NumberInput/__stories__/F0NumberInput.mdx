@@ -1,6 +1,8 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import * as Stories from "./F0NumberInput.stories"
+import { F0NumberInput } from "../index"
 
 <Meta of={Stories} />
 
@@ -41,6 +43,37 @@ import * as Stories from "./F0NumberInput.stories"
 - The value is a duration in hours/minutes. Use [F0DurationInput](?path=/docs/components-inputs-duration-input--documentation).
 - The value is one of a small, discrete set of numbers (e.g. a 1–5 rating). Use a selector with the available options instead.
 - The value is an identifier that happens to look numeric (phone, postal code, credit card). These are formatted strings, not quantities — leading zeros, spaces and country variants matter, and locale-aware formatting would corrupt them. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation) with the right `autocomplete` and `inputMode`.
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Turn `grouping` on for amounts and quantities. The resting display gets the locale's thousands separators, and the field drops them again while it is focused so the number stays easy to edit.",
+    children: (
+      <F0NumberInput
+        locale="en-US"
+        label="Gross salary"
+        value={45000}
+        units="EUR"
+        grouping
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't turn `grouping` on for a number that is read digit by digit — a year, a headcount cap, a document number. `2,026` reads as a quantity and invites the user to delete the separator.",
+    children: (
+      <F0NumberInput
+        locale="en-US"
+        label="Start year"
+        value={2026}
+        maxDecimals={0}
+        grouping
+      />
+    ),
+  }}
+/>
 
 ---
 
