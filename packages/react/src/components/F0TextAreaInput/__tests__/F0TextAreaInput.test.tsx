@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { fireEvent, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
@@ -57,5 +60,37 @@ describe("F0TextAreaInput", () => {
     render(<F0TextAreaInput label="Counter" maxLength={20} value="hello" />)
 
     expect(screen.getByText("5/20")).toBeInTheDocument()
+  })
+})
+
+/**
+ * `textarea` has no inline (detail-row) presentation, so the form never hands
+ * this component the inline prop bag. Both prop lists are `Pick`s, and a name
+ * added to either would let `variant="inline"` through `ui/textarea.tsx`'s
+ * trailing spread into `F0InputField` and swap the box for read-as-text. The
+ * type system can express that rule but nothing in this repo typechecks a test
+ * file, so it is checked against the source.
+ */
+describe("F0TextAreaInput inline boundary", () => {
+  const SRC = join(dirname(fileURLToPath(import.meta.url)), "../../..")
+
+  const INLINE_PROP_NAMES = new Set([
+    "variant",
+    "editing",
+    "inlineText",
+    "onDismiss",
+  ])
+
+  const pickedNamesOf = (text: string): string[] =>
+    Array.from(text.matchAll(/^\s*\|\s*"([^"]+)"/gm)).map((match) => match[1])
+
+  it.each([
+    "components/F0TextAreaInput/F0TextAreaInput.tsx",
+    "ui/textarea.tsx",
+  ])("%s picks no inline prop", (file) => {
+    const picked = pickedNamesOf(readFileSync(join(SRC, file), "utf8"))
+
+    expect(picked.length).toBeGreaterThan(0)
+    expect(picked.filter((name) => INLINE_PROP_NAMES.has(name))).toEqual([])
   })
 })

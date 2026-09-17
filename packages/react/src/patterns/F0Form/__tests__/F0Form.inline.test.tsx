@@ -4,7 +4,11 @@ import { z } from "zod"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
-import { resetInlineWarnings } from "../fields/inline/support"
+import {
+  isInlineSupported,
+  resetInlineWarnings,
+} from "../fields/inline/support"
+import type { F0Field } from "../fields/types"
 
 const profileSchema = z.object({
   fullName: f0FormField(z.string(), { label: "Full name" }),
@@ -343,10 +347,28 @@ describe("F0Form inline mode", () => {
       defaultValues: { bio: "Mathematician", notes: "" },
     })
 
-    expect(screen.getByRole("textbox", { name: "Bio" })).toBeInTheDocument()
+    const bio = screen.getByRole("textbox", { name: "Bio" })
+
+    // `variant="inline"` at rest renders the value as text and no input at all,
+    // so a live textarea holding the value is the proof none of the inline prop
+    // bag reached it.
+    expect(bio.tagName).toBe("TEXTAREA")
+    expect(bio).toHaveValue("Mathematician")
+    expect(bio).not.toHaveAttribute("variant")
+    expect(bio).not.toHaveAttribute("editing")
     expect(screen.queryByRole("button", { name: "Edit Bio" })).toBeNull()
     expect(warn).toHaveBeenCalledTimes(1)
     expect(warn.mock.calls[0][0]).toContain("textarea")
+  })
+
+  it("keeps textarea out of the inline supported set", () => {
+    expect(
+      isInlineSupported({
+        id: "bio",
+        type: "textarea",
+        label: "Bio",
+      } as F0Field)
+    ).toBe(false)
   })
 
   it("leaves the last visible row undivided when renderIf hides the one after it", () => {
