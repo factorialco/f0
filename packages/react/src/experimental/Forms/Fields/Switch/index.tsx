@@ -1,8 +1,9 @@
 import { DataAttributes } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
+import { inlineControlBox } from "@/lib/inline-variant"
 import { Switch as SwitchRoot } from "@/ui/switch"
 
-interface SwitchProps extends DataAttributes {
+interface SwitchBaseProps extends DataAttributes {
   /**
    * The title of the switch
    */
@@ -54,7 +55,40 @@ interface SwitchProps extends DataAttributes {
   required?: boolean
 }
 
+export type SwitchFieldProps = SwitchBaseProps & {
+  /**
+   * @default "field"
+   */
+  variant?: "field"
+  editing?: never
+  onDismiss?: never
+}
+
+export type SwitchInlineProps = SwitchBaseProps & {
+  /**
+   * `"inline"` is the detail-row presentation: the switch fills the row's box
+   * and carries no chrome of its own.
+   */
+  variant: "inline"
+
+  /**
+   * A switch has no separate editor — one click commits through
+   * `onCheckedChange` — so there is no edit mode to enter and nothing to
+   * dismiss. Both props exist as `never` so a field layer can hand every
+   * inline component the same prop bag.
+   */
+  editing?: never
+  onDismiss?: never
+}
+
+export type SwitchProps = SwitchFieldProps | SwitchInlineProps
+
 function _Switch({
+  variant = "field",
+  // Typed `never`, stripped here so a stray prop from an untyped caller never
+  // reaches the DOM.
+  editing: _editing,
+  onDismiss: _onDismiss,
   title,
   onCheckedChange,
   id,
@@ -66,7 +100,7 @@ function _Switch({
   required = false,
   ...rest
 }: SwitchProps) {
-  return (
+  const control = (
     <SwitchRoot
       title={title}
       onCheckedChange={onCheckedChange}
@@ -79,6 +113,16 @@ function _Switch({
       tabIndex={presentational ? -1 : undefined}
       {...rest}
     />
+  )
+
+  if (variant !== "inline") {
+    return control
+  }
+
+  return (
+    <div data-testid="switch-inline-box" className={inlineControlBox}>
+      {control}
+    </div>
   )
 }
 
