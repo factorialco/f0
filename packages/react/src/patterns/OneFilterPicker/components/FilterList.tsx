@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useId, useMemo } from "react"
 import { F0Button } from "@/components/F0Button"
-import { F0Icon, type IconType } from "@/components/F0Icon"
+import { F0Icon } from "@/components/F0Icon"
 import { ChevronRight } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -35,8 +35,6 @@ interface FilterListProps<Definition extends FiltersDefinition> {
   onClickApplyFilters: () => void
   /** Label for the entry that opens the quick filter, listed before the filters */
   quickFilterLabel?: string
-  /** Marks that entry as something other than a filter */
-  quickFilterIcon?: IconType
   /** Whether that entry is the selected one */
   quickFilterSelected?: boolean
   /** Callback fired when that entry is picked */
@@ -64,7 +62,6 @@ export function FilterList<Definition extends FiltersDefinition>({
   isCompactMode,
   onClickApplyFilters,
   quickFilterLabel,
-  quickFilterIcon,
   quickFilterSelected,
   onQuickFilterSelect,
 }: FilterListProps<Definition>) {
@@ -117,10 +114,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                 onClick={onQuickFilterSelect}
                 aria-label={quickFilterLabel}
               >
-                <div className="flex w-full items-center justify-start gap-2 overflow-hidden">
-                  {quickFilterIcon ? (
-                    <F0Icon icon={quickFilterIcon} size="sm" />
-                  ) : null}
+                <div className="flex w-full items-center justify-start gap-2.5 overflow-hidden">
                   <OneEllipsis className="flex-1 text-left text-f1-foreground">
                     {quickFilterLabel}
                   </OneEllipsis>

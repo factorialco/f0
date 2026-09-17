@@ -1881,7 +1881,6 @@ const OneDataCollectionComp = <
                 search && assistedSearchProps?.triggerLabel
                   ? {
                       label: assistedSearchProps.triggerLabel,
-                      icon: OneMark,
                       render: ({ stage }) => (
                         <AssistedQueryPanel
                           value={panelQuery}

@@ -1,6 +1,5 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-import type { IconType } from "@/components/F0Icon"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
@@ -38,7 +37,6 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
    */
   quickFilter?: {
     label: string
-    icon?: IconType
     render: (api: {
       stage: (filters: Record<string, unknown>) => void
     }) => React.ReactNode
