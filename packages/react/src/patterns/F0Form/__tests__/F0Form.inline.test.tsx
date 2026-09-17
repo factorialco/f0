@@ -136,15 +136,34 @@ describe("F0Form inline mode", () => {
     const input = await screen.findByRole("textbox")
     await user.clear(input)
     await user.type(input, "Ad")
-    // The inline row has no message slot, so the error shows on the control.
-    await waitFor(() =>
-      expect(screen.getByTestId("input-field-wrapper")).toHaveClass(
-        "border-f1-border-critical-bold"
-      )
-    )
+    await waitFor(() => expect(screen.getByText("Too short")).toBeVisible())
 
     await user.keyboard("{Enter}")
     expect(screen.getByRole("textbox")).toBeInTheDocument()
+  })
+
+  it("prints the reason a failing row was refused", async () => {
+    const user = userEvent.setup()
+    renderProfile({
+      schema: z.object({
+        fullName: f0FormField(z.string().min(4, "Too short"), {
+          label: "Full name",
+        }),
+      }),
+      defaultValues: { fullName: "Ada Lovelace" },
+      errorTriggerMode: "on-change",
+    })
+
+    await user.click(activator("Full name"))
+    const input = await screen.findByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "Ad")
+
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-slot="inline-field-row-message"]')
+      ).toHaveTextContent("Too short")
+    )
   })
 
   it("restores focus to the activator a frame after the edit ends", async () => {

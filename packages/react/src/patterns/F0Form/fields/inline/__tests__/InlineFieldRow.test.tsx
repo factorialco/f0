@@ -232,6 +232,42 @@ describe("InlineFieldRow", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders no message slot when there is nothing to say", () => {
+    renderRow()
+
+    expect(
+      document.querySelector('[data-slot="inline-field-row-message"]')
+    ).toBeNull()
+  })
+
+  it("prints the message under the value, in the critical token", () => {
+    renderRow({ message: "Enter a valid email address" })
+
+    const slot = document.querySelector(
+      '[data-slot="inline-field-row-message"]'
+    )
+    const box = document.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    ) as HTMLElement
+
+    expect(slot).toHaveTextContent("Enter a valid email address")
+    expect(slot?.className).toContain("text-f1-foreground-critical")
+    // Under the box, not beside it: the message follows it in document order
+    // inside the same value column.
+    expect(
+      box.compareDocumentPosition(slot as Node) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("keeps the message while the row is editing", () => {
+    renderRow({ message: "Too short", editing: true, onActivate: vi.fn() })
+
+    expect(
+      document.querySelector('[data-slot="inline-field-row-message"]')
+    ).toHaveTextContent("Too short")
+  })
+
   it("forwards a ref to the activator so the caller can focus it again", () => {
     const ref = { current: null as HTMLDivElement | null }
     render(

@@ -31,4 +31,10 @@ export type InlineFieldRowProps = {
   /** Absent means the value is inert: no activator, nothing focusable. */
   onActivate?: () => void
   editing: boolean
+  /**
+   * Why the value is being refused, under the box. A node rather than a string
+   * so the caller keeps its own wording; the row only places it and paints it
+   * critical.
+   */
+  message?: ReactNode
 }

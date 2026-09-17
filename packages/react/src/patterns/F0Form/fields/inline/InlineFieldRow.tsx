@@ -113,7 +113,7 @@ export const InlineFieldRowList = ({ children }: { children: ReactNode }) => (
  */
 export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
   function InlineFieldRow(
-    { label, hint, value, actions, copyValue, onActivate, editing },
+    { label, hint, value, actions, copyValue, onActivate, editing, message },
     ref
   ) {
     const { t } = useI18n()
@@ -173,39 +173,52 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
           {hint ? <Hint hint={hint} /> : null}
         </div>
 
-        <div className="relative flex min-w-[160px] max-w-96 flex-[1_1_160px] items-center">
-          {activatable ? (
-            <div
-              ref={ref}
-              role="button"
-              tabIndex={0}
-              aria-label={label}
-              title={t("forms.inline.edit", { label })}
-              onClick={onActivate}
-              onKeyDown={handleKeyDown}
-              className={cn("w-full min-w-0 rounded-md", focusRing())}
-            >
-              {box}
-            </div>
-          ) : (
-            box
-          )}
+        <div className="flex min-w-[160px] max-w-96 flex-[1_1_160px] flex-col gap-1">
+          <div className="relative flex w-full min-w-0 items-center">
+            {activatable ? (
+              <div
+                ref={ref}
+                role="button"
+                tabIndex={0}
+                aria-label={label}
+                title={t("forms.inline.edit", { label })}
+                onClick={onActivate}
+                onKeyDown={handleKeyDown}
+                className={cn("w-full min-w-0 rounded-md", focusRing())}
+              >
+                {box}
+              </div>
+            ) : (
+              box
+            )}
 
-          {/* A sibling of the activator, never its parent: a button inside a
-              `role="button"` is axe's `nested-interactive`. */}
-          {!editing && strip.length > 0 ? (
+            {/* A sibling of the activator, never its parent: a button inside a
+                `role="button"` is axe's `nested-interactive`. */}
+            {!editing && strip.length > 0 ? (
+              <div
+                data-slot="inline-field-row-actions"
+                className={cn(
+                  "absolute inset-y-0 right-1 flex items-center gap-0.5",
+                  // The confirmation has to outlast the pointer: copying and
+                  // then moving away would otherwise take the check with it.
+                  copied ? "opacity-100" : REVEAL_CLASS
+                )}
+              >
+                {strip.map((action) => (
+                  <ActionButton key={action.key} action={action} />
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Under the box rather than beside it: the value keeps its width and
+              the row grows downwards, so a failing row moves nothing sideways. */}
+          {message ? (
             <div
-              data-slot="inline-field-row-actions"
-              className={cn(
-                "absolute inset-y-0 right-1 flex items-center gap-0.5",
-                // The confirmation has to outlast the pointer: copying and then
-                // moving away would otherwise take the check with it.
-                copied ? "opacity-100" : REVEAL_CLASS
-              )}
+              data-slot="inline-field-row-message"
+              className="px-3 text-base font-medium text-f1-foreground-critical"
             >
-              {strip.map((action) => (
-                <ActionButton key={action.key} action={action} />
-              ))}
+              {message}
             </div>
           ) : null}
         </div>

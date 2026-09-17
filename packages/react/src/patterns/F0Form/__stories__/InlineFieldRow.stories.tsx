@@ -92,6 +92,33 @@ export const WithActions: Story = {
   },
 }
 
+/**
+ * The reason the value was refused, under the box. The row grows downwards, so
+ * the value keeps its own width and the box its 40px.
+ */
+export const WithMessage: Story = {
+  args: {
+    label: "Email",
+    editing: true,
+    value: editValue("Email", "ada@"),
+    message: "Enter a valid email address",
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Print the reason under the value", async () => {
+      await expect(
+        canvas.getByText("Enter a valid email address")
+      ).toBeVisible()
+      await expect(
+        canvasElement
+          .querySelector<HTMLElement>('[data-slot="inline-field-row-value"]')
+          ?.getBoundingClientRect().height
+      ).toBe(40)
+    })
+  },
+}
+
 const FIVE_ROWS = [
   { label: "Full name", value: "Marta Ibáñez", copyValue: "Marta Ibáñez" },
   { label: "Job title", value: "Senior product designer" },

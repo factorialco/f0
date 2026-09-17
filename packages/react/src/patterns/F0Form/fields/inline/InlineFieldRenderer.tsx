@@ -45,7 +45,7 @@ export function InlineFieldRenderer({
   isFormLoading,
   restoreValue,
 }: InlineFieldRendererProps) {
-  const { t } = useI18n()
+  const { t, forms } = useI18n()
 
   const supported = isInlineSupported(field)
   const toggle = isInlineToggle(field)
@@ -90,6 +90,13 @@ export function InlineFieldRenderer({
     inline: supported ? { editing, onDismiss } : undefined,
   })
 
+  // The same text `FormMessage` would print for this error, resolved here
+  // because the row takes a node and knows nothing about validation.
+  const message = fieldState.error
+    ? (fieldState.error.message ??
+      (isRequired ? forms.validation.required : forms.validation.invalidType))
+    : undefined
+
   const actions: RowAction[] = activate
     ? [
         {
@@ -111,6 +118,7 @@ export function InlineFieldRenderer({
       copyValue={field.copyable ? copyValue : undefined}
       onActivate={activate}
       editing={editing}
+      message={message}
     />
   )
 }
