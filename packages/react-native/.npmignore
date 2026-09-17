@@ -1,9 +1,0 @@
-# Expo Router - only needed for local development/playground
-expo-router/
-
-# Generated build files
-lib/typescript/react-native/package/
-
-# Development files
-playground/
-*.tgz
