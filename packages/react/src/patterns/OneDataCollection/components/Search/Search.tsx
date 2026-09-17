@@ -6,6 +6,7 @@ import {
 } from "motion/react"
 import { useEffect, useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
+import { useReducedMotion } from "@/lib/a11y"
 import { F0Avatar } from "../../../../components/avatars/F0Avatar"
 import type { AvatarVariant } from "../../../../components/avatars/F0Avatar"
 import { F0Icon } from "../../../../components/F0Icon"
@@ -162,7 +163,10 @@ export type SearchPresentation = Pick<
 const LOAD_MORE_SCROLL_MARGIN = 56
 
 // Long enough to read a whole example query before it is swapped out.
-const PLACEHOLDER_ROTATION_MS = 3000
+/** Written out rather than swapped, at about the speed of a person typing. */
+const PLACEHOLDER_TYPE_MS = 45
+const PLACEHOLDER_ERASE_MS = 25
+const PLACEHOLDER_HOLD_MS = 2200
 
 /**
  * Cycles the example queries while the field has nothing in it. The examples
@@ -176,20 +180,44 @@ const useRotatingPlaceholder = (
   fallback: string
 ) => {
   const [index, setIndex] = useState(0)
+  const [shown, setShown] = useState(0)
+  const [phase, setPhase] = useState<"typing" | "holding" | "erasing">("typing")
+  const reducedMotion = useReducedMotion()
   const examples = rotation ?? []
   const count = examples.length
+  const example = examples[index % Math.max(count, 1)] ?? fallback
 
   useEffect(() => {
-    if (count < 2 || paused) {
+    if (count === 0 || paused || reducedMotion) {
       return
     }
-    const timer = setInterval(() => {
-      setIndex((current) => (current + 1) % count)
-    }, PLACEHOLDER_ROTATION_MS)
-    return () => clearInterval(timer)
-  }, [count, paused])
+    if (phase === "typing") {
+      if (shown >= example.length) {
+        setPhase("holding")
+        return
+      }
+      const timer = setTimeout(() => setShown(shown + 1), PLACEHOLDER_TYPE_MS)
+      return () => clearTimeout(timer)
+    }
+    if (phase === "holding") {
+      if (count < 2) {
+        return
+      }
+      const timer = setTimeout(() => setPhase("erasing"), PLACEHOLDER_HOLD_MS)
+      return () => clearTimeout(timer)
+    }
+    if (shown > 0) {
+      const timer = setTimeout(() => setShown(shown - 1), PLACEHOLDER_ERASE_MS)
+      return () => clearTimeout(timer)
+    }
+    setIndex((current) => (current + 1) % count)
+    setPhase("typing")
+  }, [phase, shown, example, count, paused, reducedMotion])
 
-  return examples[index % Math.max(count, 1)] ?? fallback
+  if (reducedMotion || paused) {
+    return example
+  }
+  return example.slice(0, shown)
 }
 
 /**

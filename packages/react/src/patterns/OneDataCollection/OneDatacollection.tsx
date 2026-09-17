@@ -898,11 +898,12 @@ const OneDataCollectionComp = <
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [assistedQuery, setAssistedQuery] = useState<string | undefined>()
-  // The field searches by name as it is typed, rows falling away as usual.
-  // What it will not do is empty the table: a stretch of text that matches
-  // nobody is probably not a name but the start of a sentence, and the way
-  // out of that is the action in the field, not a blank page. So the text
-  // stays written while the search behind it is dropped.
+  // Typing leaves the table alone: the text may be a name, or it may be the
+  // start of a sentence meant for the action beside it, and there is no
+  // telling which until the writer says so. Enter searches by name, the
+  // action asks. Even then the table is never emptied — text that matches
+  // nobody is more likely a sentence, so the search behind it is dropped and
+  // the writing stands.
   const [typedSearch, setTypedSearch] = useState<string | undefined>()
   const unmatchedSearchRef = useRef<string>()
 
@@ -911,17 +912,7 @@ const OneDataCollectionComp = <
     if (!next) {
       unmatchedSearchRef.current = undefined
       setCurrentSearch(undefined)
-      return
     }
-    // Nothing was called that, so nothing is called that plus one more letter.
-    if (
-      unmatchedSearchRef.current &&
-      next.startsWith(unmatchedSearchRef.current)
-    ) {
-      return
-    }
-    unmatchedSearchRef.current = undefined
-    setCurrentSearch(next)
   }
   // The query written inside the filters panel is that panel's own: it stages
   // filters there and waits for the apply button, so showing it in the field
@@ -1936,6 +1927,11 @@ const OneDataCollectionComp = <
                   <Search
                     onChange={
                       assistedSearchProps ? searchByName : setCurrentSearch
+                    }
+                    onSubmit={
+                      assistedSearchProps
+                        ? (query) => setCurrentSearch(query)
+                        : undefined
                     }
                     value={
                       assistedSearchProps ? (typedSearch ?? "") : currentSearch
