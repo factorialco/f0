@@ -116,10 +116,16 @@ const asListContainerVariants = cva({
  */
 const INLINE_SELECT_INSET = "px-3"
 
+/**
+ * `body`, not `label`: `F0InputField`'s `InlineValue` prints at the ambient
+ * weight, and the two read one under the other in a column of detail rows.
+ */
+const INLINE_SELECT_TEXT = textVariants({ variant: "body" })
+
 const inlineSelectTriggerClassName = cn(
   "group flex h-full w-full max-w-full items-center gap-1 rounded border-0 bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
   INLINE_SELECT_INSET,
-  textVariants({ variant: "label" })
+  INLINE_SELECT_TEXT
 )
 
 type InlineSelectValueProps = {
@@ -186,7 +192,7 @@ const InlineSelectText = ({
     className={cn(
       "flex h-full w-full min-w-0 max-w-full items-center",
       INLINE_SELECT_INSET,
-      textVariants({ variant: "label" })
+      INLINE_SELECT_TEXT
     )}
   >
     <span className="flex min-w-0 max-w-full items-center">

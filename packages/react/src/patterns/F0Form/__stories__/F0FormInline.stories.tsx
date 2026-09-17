@@ -75,6 +75,13 @@ export const EveryTypeReading: Story = {
       await expect(canvas.queryByRole("textbox")).toBeNull()
     })
 
+    await step("Print the select at the weight the text rows use", async () => {
+      const weightOf = (text: string) =>
+        getComputedStyle(canvas.getByText(text)).fontWeight
+
+      await expect(weightOf("Design")).toBe(weightOf("Ada Lovelace"))
+    })
+
     await step(
       "Leave the toggles live, with no activator of their own",
       async () => {

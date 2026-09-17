@@ -459,7 +459,9 @@ describe("Select", () => {
       expect(text.className).toContain("h-full")
       expect(text.className).toContain("w-full")
       expect(text.className).toContain("text-base")
-      expect(text.className).toContain("font-medium")
+      // The ambient weight, which is what `InlineValue` prints at: a select
+      // reading bolder than the text row above it breaks the column.
+      expect(text.className).not.toContain("font-medium")
       expect(text.className).not.toContain("text-sm")
       expect(text.querySelector("svg")).toBeNull()
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
@@ -486,7 +488,7 @@ describe("Select", () => {
       expect(trigger.className).toContain("w-full")
       expect(trigger.className).not.toContain("w-fit")
       expect(trigger.className).toContain("text-base")
-      expect(trigger.className).toContain("font-medium")
+      expect(trigger.className).not.toContain("font-medium")
       expect(chevron).toHaveClass("text-f1-icon")
       expect(chevron).not.toHaveClass("text-f1-icon-secondary")
     })
