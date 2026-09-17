@@ -105,7 +105,9 @@ function InlineRoleSelect({
       >
         Focus something else
       </button>
-      <div data-testid="value-box" className="h-10 w-[320px]">
+      {/* `group`, like the detail row that hosts this in a form: it is what
+          the at-rest chevron watches to know it should show itself. */}
+      <div data-testid="value-box" className="group h-10 w-[320px]">
         <F0Select
           {...props}
           variant="inline"
@@ -159,7 +161,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no chevron, no button and no hover background; the dropdown replaces it only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
+          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no button and no hover background of its own; a chevron sits at the far edge of the value, hidden until the surrounding row is hovered or holds focus, and it is the row's only affordance for a select. The dropdown replaces the text only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
       },
     },
   },
@@ -198,6 +200,30 @@ export const AtRest: Story = {
       )
     })
     await expect(canvas.queryByRole("combobox")).toBeNull()
+
+    // The chevron waits at the far edge of the value, hidden until the row is
+    // hovered. It is the only affordance the row offers for a select.
+    const chevron = canvas.getByTestId("select-inline-value").lastElementChild
+    await expect(chevron).toHaveAttribute("aria-hidden", "true")
+    await expect(chevron?.querySelector("svg")).not.toBeNull()
+    await expect(chevron).toHaveStyle({ opacity: "0" })
+  },
+}
+
+/** Nothing to open, so nothing to point at. */
+export const DisabledHasNoChevron: Story = {
+  args: {
+    value: "viewer",
+    disabled: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await waitFor(async () => {
+      await expect(canvas.getByTestId("select-inline-value")).toHaveTextContent(
+        "Viewer"
+      )
+    })
     await expect(
       canvas.getByTestId("select-inline-value").querySelector("svg")
     ).toBeNull()

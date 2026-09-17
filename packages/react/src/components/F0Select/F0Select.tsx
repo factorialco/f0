@@ -123,9 +123,33 @@ const INLINE_SELECT_INSET = "px-3"
 const INLINE_SELECT_TEXT = textVariants({ variant: "body" })
 
 const inlineSelectTriggerClassName = cn(
-  "group flex h-full w-full max-w-full items-center gap-1 rounded border-0 bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  "group flex h-full w-full max-w-full items-center justify-between gap-1 rounded border-0 bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
   INLINE_SELECT_INSET,
   INLINE_SELECT_TEXT
+)
+
+/**
+ * The chevron is the row's only affordance for a select, so it behaves like the
+ * row's action strip: hidden until the row is hovered or something inside it
+ * takes focus, and always out on a screen that cannot hover. It tracks the
+ * detail row's `group`, which is the nearest one at rest.
+ */
+const INLINE_SELECT_CHEVRON_REVEAL = cn(
+  "opacity-0 transition-opacity motion-reduce:transition-none",
+  "group-hover:opacity-100 group-focus-within:opacity-100",
+  "[@media(hover:none)]:opacity-100"
+)
+
+const InlineSelectChevron = ({ className }: { className?: string }) => (
+  <span
+    className={cn(
+      "flex size-4 shrink-0 items-center justify-center text-f1-icon",
+      className
+    )}
+    aria-hidden="true"
+  >
+    <F0Icon icon={ChevronDown} size="sm" />
+  </span>
 )
 
 type InlineSelectValueProps = {
@@ -159,15 +183,10 @@ const InlineSelectTrigger = forwardRef<
       aria-label={props.label}
       className={cn(inlineSelectTriggerClassName, focusRing())}
     >
-      <span className="flex min-w-0 max-w-full items-center">
+      <span className="flex min-w-0 flex-1 items-center">
         <InlineSelectValue {...props} />
       </span>
-      <span
-        className="flex size-4 shrink-0 items-center justify-center text-f1-icon"
-        aria-hidden="true"
-      >
-        <F0Icon icon={ChevronDown} size="sm" />
-      </span>
+      <InlineSelectChevron />
     </SelectTrigger>
   )
 })
@@ -175,29 +194,35 @@ const InlineSelectTrigger = forwardRef<
 InlineSelectTrigger.displayName = "InlineSelectTrigger"
 
 /**
- * The selection as text. No button and no chevron: at rest the row owns every
- * affordance, and the select is only what the value says. `disabled` draws
- * nothing of its own here — there is no affordance left to grey out, and
- * dimming static text costs it its contrast.
+ * The selection as text, with the chevron waiting at the trailing edge for a
+ * hover. No button: the row's activator is what takes the click, and the
+ * chevron only says that this value opens a list. `disabled` draws nothing of
+ * its own here — there is no affordance left to grey out, and dimming static
+ * text costs it its contrast.
  */
 const InlineSelectText = ({
   hideLabel,
+  disabled,
   ...valueProps
 }: InlineSelectValueProps & {
   hideLabel?: boolean
+  disabled?: boolean
 }) => (
   <div
     data-testid="select-inline-value"
     aria-label={hideLabel ? valueProps.label : undefined}
     className={cn(
-      "flex h-full w-full min-w-0 max-w-full items-center",
+      "flex h-full w-full min-w-0 max-w-full items-center justify-between gap-1",
       INLINE_SELECT_INSET,
       INLINE_SELECT_TEXT
     )}
   >
-    <span className="flex min-w-0 max-w-full items-center">
+    <span className="flex min-w-0 flex-1 items-center">
       <InlineSelectValue {...valueProps} />
     </span>
+    {disabled ? null : (
+      <InlineSelectChevron className={INLINE_SELECT_CHEVRON_REVEAL} />
+    )}
   </div>
 )
 
@@ -1575,7 +1600,11 @@ const F0SelectComponent = forwardRef(function Select<
   if (isInline && !inlineOpen) {
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
-        <InlineSelectText {...inlineValueProps} hideLabel={hideLabel} />
+        <InlineSelectText
+          {...inlineValueProps}
+          hideLabel={hideLabel}
+          disabled={disabled}
+        />
       </DataTestIdWrapper>
     )
   }

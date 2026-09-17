@@ -463,7 +463,6 @@ describe("Select", () => {
       // reading bolder than the text row above it breaks the column.
       expect(text.className).not.toContain("font-medium")
       expect(text.className).not.toContain("text-sm")
-      expect(text.querySelector("svg")).toBeNull()
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
       expect(screen.queryByRole("button")).not.toBeInTheDocument()
 
