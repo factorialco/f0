@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.3.0](https://github.com/factorialco/f0/compare/f0-react-v7.2.1...f0-react-v7.3.0) (2026-09-17)
+
+
+### Features
+
+* **react:** gate inline styles with a lint rule ([#5318](https://github.com/factorialco/f0/issues/5318)) ([d225cf0](https://github.com/factorialco/f0/commit/d225cf0398267170c36df8d8eb3e386c62d234dc))
+
 ## [7.2.1](https://github.com/factorialco/f0/compare/f0-react-v7.2.0...f0-react-v7.2.1) (2026-09-17)
 
 
