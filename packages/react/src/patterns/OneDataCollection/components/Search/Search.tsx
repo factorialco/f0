@@ -53,6 +53,11 @@ interface SearchProps {
   inlineAction?: {
     label: string
     icon?: IconType
+    /**
+     * Drops to the icon alone when the toolbar has no room for the words —
+     * the label lives on as the button's tooltip.
+     */
+    hideLabel?: boolean
     onClick: (query: string) => void
   }
   /**
@@ -345,6 +350,7 @@ const InlineAction = ({
           size="sm"
           label={action.label}
           icon={action.icon}
+          hideLabel={action.hideLabel}
           loading={busy}
           // Nothing written is nothing to ask: an enabled button promises it
           // will do something, and a click that only moved the caret was a lie.
@@ -685,7 +691,7 @@ export const Search = ({
               // The toolbar slot is content-sized (`shrink-0`), so there is no
               // free space for `flex-1` to claim — size against the viewport
               // instead and cap it so wide screens do not get a runaway field.
-              (expanded || text) && "w-[min(340px,40vw)] min-w-[180px]",
+              (expanded || text) && "w-[min(300px,40vw)] min-w-[180px]",
               !expanded && !text && triggerLabel && "w-auto"
             )}
           >

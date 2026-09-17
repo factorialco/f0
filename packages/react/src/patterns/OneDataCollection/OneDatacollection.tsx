@@ -52,6 +52,7 @@ import {
   type PresetFormValues,
 } from "./components/PresetFormDialog"
 import { Search } from "./components/Search"
+import { AssistedQueryPanel } from "./components/Search/AssistedQueryPanel"
 import { useSearchPreview } from "./components/Search/useSearchPreview"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
@@ -904,6 +905,10 @@ const OneDataCollectionComp = <
   // enter or the action says so. Either way the table is never left empty:
   // text that matches nobody drops the search behind it and the writing
   // stands.
+  // The query written inside the filters panel is that panel's own: showing
+  // it in the field outside would claim something had been applied that had
+  // not.
+  const [panelQuery, setPanelQuery] = useState("")
   const [typedSearch, setTypedSearch] = useState<string | undefined>()
   const unmatchedSearchRef = useRef<string>()
 
@@ -1872,8 +1877,41 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
-              // Hidden while the action inside the field is the one being
-              // weighed. The pane comes back by passing `quickFilter` again.
+              quickFilter={
+                search && assistedSearchProps?.triggerLabel
+                  ? {
+                      label: assistedSearchProps.triggerLabel,
+                      render: ({ stage }) => (
+                        <AssistedQueryPanel
+                          value={panelQuery}
+                          onChange={setPanelQuery}
+                          onSettle={(settled) => {
+                            const staged = applyFromQuery(
+                              "panel",
+                              source.searchPresentation?.analyze?.(settled)
+                                ?.filters ?? {}
+                            )
+                            stage(staged)
+                            const serialized = JSON.stringify(staged)
+                            if (serialized === lastAppliedRef.current) {
+                              return
+                            }
+                            lastAppliedRef.current = serialized
+                            setFiltersRef.current(
+                              staged as Parameters<typeof setFilters>[0]
+                            )
+                          }}
+                          analysis={source.searchPresentation?.analyze?.(
+                            panelQuery
+                          )}
+                          placeholder={
+                            source.searchPresentation?.placeholderRotation?.[0]
+                          }
+                        />
+                      ),
+                    }
+                  : undefined
+              }
             >
               <div ref={headerActionsRef} className="flex items-center gap-2">
                 {isLoading ? (
@@ -1914,6 +1952,10 @@ const OneDataCollectionComp = <
                         ? {
                             label: i18n.collections.search.filterWithAssistant,
                             icon: OneMark,
+                            // Shares the toolbar's own crowding rule: where
+                            // the view switcher drops its labels, so does
+                            // this, rather than pushing what is beside it.
+                            hideLabel: collapseHeaderActions,
                             onClick: (query) => {
                               // The text stops being a name search and becomes
                               // a question: leaving both on would have the two
