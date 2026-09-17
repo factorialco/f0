@@ -10743,14 +10743,11 @@ export declare type F0SelectVariant = (typeof selectVariants)[number];
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
-export declare const F0SwipeDeck: <T>(props: F0SwipeDeckProps<T>) => ReturnType<typeof F0SwipeDeckBase>;
-
-declare const F0SwipeDeckBase: <T>({ deck, renderCard, label, empty, offsetThreshold, velocityThreshold, }: F0SwipeDeckProps<T>) => JSX_2.Element;
+export declare const F0SwipeDeck: <T>({ deck, renderCard, label, empty, dataTestId, offsetThreshold, velocityThreshold, }: F0SwipeDeckProps<T>) => JSX_2.Element;
 
 export declare type F0SwipeDeckProps<T> = WithDataTestIdProps & {
     deck: UseSwipeDeckResult<T>;
     renderCard: (item: T) => ReactNode;
-    directions?: SwipeDirectionsConfig;
     label?: string;
     empty?: ReactNode;
     /** Drag distance in pixels that commits a decision. */
@@ -15994,18 +15991,18 @@ export declare type SwipeDecision<T> = {
     direction: SwipeDirection;
 };
 
-export declare type SwipeDirection = (typeof swipeDirections)[number];
-
-export declare type SwipeDirectionConfig = {
-    label: string;
-    tone?: SwipeTone;
+export declare type SwipeDeckAction = {
+    type: "decide";
+    direction: SwipeDirection;
+} | {
+    type: "undo";
+} | {
+    type: "rollback";
 };
 
+export declare type SwipeDirection = (typeof swipeDirections)[number];
+
 export declare const swipeDirections: readonly ["left", "right"];
-
-export declare type SwipeDirectionsConfig = Record<SwipeDirection, SwipeDirectionConfig>;
-
-export declare type SwipeTone = "positive" | "negative" | "neutral";
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -17085,10 +17082,19 @@ export declare function useSidePanel(): SidePanelContextValue;
 export declare const useSwipeDeck: <T>({ items, getItemId, onDecide, onUndo, onNeedMore, undoDepth, needMoreThreshold, }: UseSwipeDeckOptions<T>) => UseSwipeDeckResult<T>;
 
 export declare type UseSwipeDeckOptions<T> = {
+    /**
+     * Append-only: the deck reads it by position, so a page of new items must be
+     * added to the end. Replacing the array with a differently ordered or
+     * filtered one makes the deck skip items.
+     */
     items: T[];
     /** Keys the exit animation and the one-decision-per-item guard. */
     getItemId: (item: T) => string;
-    /** `rollback` returns the item to the deck, for a consumer whose mutation failed. */
+    /**
+     * `rollback` returns the item to the deck, for a consumer whose mutation
+     * failed: as the current card when it was the most recent decision, at the
+     * end of the deck otherwise.
+     */
     onDecide?: (decision: SwipeDecision<T>, rollback: () => void) => void;
     onUndo?: (item: T) => void;
     /** Fires once each time the remaining items drop to `needMoreThreshold`. */
@@ -17104,7 +17110,7 @@ export declare type UseSwipeDeckResult<T> = {
     total: number;
     remaining: number;
     canUndo: boolean;
-    lastDirection: SwipeDirection | undefined;
+    lastAction: SwipeDeckAction | undefined;
     decide: (direction: SwipeDirection) => void;
     swipeLeft: () => void;
     swipeRight: () => void;
