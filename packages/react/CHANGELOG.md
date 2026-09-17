@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.4.0](https://github.com/factorialco/f0/compare/f0-react-v7.3.0...f0-react-v7.4.0) (2026-09-17)
+
+
+### Features
+
+* **F0Form:** add the location field type ([#5428](https://github.com/factorialco/f0/issues/5428)) ([5e0a0e6](https://github.com/factorialco/f0/commit/5e0a0e6d780d1661f82215eb53b4ed790987cae7))
+
 ## [7.3.0](https://github.com/factorialco/f0/compare/f0-react-v7.2.1...f0-react-v7.3.0) (2026-09-17)
 
 
