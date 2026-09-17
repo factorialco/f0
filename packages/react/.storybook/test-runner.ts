@@ -1,3 +1,5 @@
+import { appendFileSync, readFileSync } from "fs"
+import { join } from "path"
 import type { TestRunnerConfig } from "@storybook/test-runner"
 import { getStoryContext } from "@storybook/test-runner"
 import {
@@ -7,9 +9,6 @@ import {
   injectAxe,
 } from "axe-playwright"
 import type Reporter from "axe-playwright/dist/types"
-import { appendFileSync, readFileSync } from "fs"
-import { join } from "path"
-
 // NOTE: the `.ts` extension is required — the test-runner's loader does not
 // resolve extensionless sibling imports (Storybook warns "extensionless imports
 // detected" and the module fails to load at runtime).

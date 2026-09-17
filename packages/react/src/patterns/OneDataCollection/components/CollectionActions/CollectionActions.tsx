@@ -19,6 +19,7 @@ type CollectionActionProps = {
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
   upsellAction?: UpsellActionDefinition
+  primaryActionsMenuClassName?: string
 }
 
 export const CollectionActions = ({
@@ -27,6 +28,7 @@ export const CollectionActions = ({
   secondaryActions,
   otherActions,
   upsellAction,
+  primaryActionsMenuClassName,
 }: CollectionActionProps) => {
   const primaryActionsButtons = (
     Array.isArray(primaryActions) ? primaryActions : [primaryActions]
@@ -81,6 +83,7 @@ export const CollectionActions = ({
           onClick={(value) => {
             primaryActionsButtons[Number(value)]?.onClick?.()
           }}
+          contentClassName={primaryActionsMenuClassName}
         />
       ) : primaryActionsButtons.length === 1 ? (
         (() => {

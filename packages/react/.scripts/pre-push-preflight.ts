@@ -29,9 +29,7 @@
 import { spawnSync } from "node:child_process"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import consola from "consola"
-
 import { computeComponentStatusData } from "../scripts/component-status-build.mjs"
 import {
   isBugfixTitle,
@@ -43,8 +41,8 @@ import {
   gatherSignals,
   reportResult,
 } from "./check-new-component-dod"
-import { runGate as untranslatedCopyGate } from "./check-untranslated-copy"
 import { type StatusEntry } from "./check-stable-dod"
+import { runGate as untranslatedCopyGate } from "./check-untranslated-copy"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const PKG_PREFIX = "packages/react/"

@@ -63,6 +63,12 @@ export type DropdownInternalProps = {
    */
   disabled?: boolean
   /**
+   * Extra classes merged onto the menu content, e.g. to cap its width
+   * (`max-w-[280px]`) when an item's `description` is long. Unset by
+   * default, so existing dropdowns keep their current sizing behavior.
+   */
+  contentClassName?: string
+  /**
    * Where the menu is portalled. Defaults to the document body; pass the
    * element of a surrounding modal layer — a dialog's own content node, which
    * it publishes as `portalContainer` — so that layer's focus trap CONTAINS
@@ -175,6 +181,7 @@ export function DropdownInternal({
   onOpenChange: controlledOnOpenChange,
   label,
   disabled,
+  contentClassName,
   container,
   ...rest
 }: DropdownInternalProps) {
@@ -244,7 +251,11 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} container={container}>
+      <DropdownMenuContent
+        align={align}
+        className={contentClassName}
+        container={container}
+      >
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>

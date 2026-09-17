@@ -53,10 +53,8 @@ import { spawnSync } from "node:child_process"
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import consola from "consola"
 import ts from "typescript"
-
 import { defaultTranslations } from "../src/lib/providers/i18n/i18n-provider-defaults"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
