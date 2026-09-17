@@ -1885,19 +1885,12 @@ const OneDataCollectionComp = <
                           onChange={setPanelQuery}
                           onSettle={(settled) => {
                             source.searchPresentation?.onAsk?.(settled)
-                            const staged = applyFromQuery(
-                              "panel",
-                              source.searchPresentation?.analyze?.(settled)
-                                ?.filters ?? {}
-                            )
-                            stage(staged)
-                            const serialized = JSON.stringify(staged)
-                            if (serialized === lastAppliedRef.current) {
-                              return
-                            }
-                            lastAppliedRef.current = serialized
-                            setFiltersRef.current(
-                              staged as Parameters<typeof setFilters>[0]
+                            stage(
+                              applyFromQuery(
+                                "panel",
+                                source.searchPresentation?.analyze?.(settled)
+                                  ?.filters ?? {}
+                              )
                             )
                           }}
                           analysis={source.searchPresentation?.analyze?.(
