@@ -84,6 +84,11 @@ export function F0DatePicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to update the local value when the value changes
   }, [value])
 
+  const handlePickerOpenChange = (open: boolean) => {
+    setIsOpen(open)
+    inputProps.onOpenChange?.(open)
+  }
+
   const handleSelect = (value: DatePickerValue | undefined) => {
     const safeValue = toSafeRange(value)
     const newGranularity = getGranularity(safeValue?.granularity)
@@ -95,7 +100,7 @@ export function F0DatePicker({
 
     // If the granularity is not a range, close the popup
     if (shouldClose) {
-      setIsOpen(false)
+      handlePickerOpenChange(false)
     }
   }
 
@@ -106,11 +111,6 @@ export function F0DatePicker({
       const granularity = getGranularity(safeValue?.granularity)
       onChange?.(safeValue, granularity.toString(safeValue?.value, i18n))
     }
-  }
-
-  const handlePickerOpenChange = (open: boolean) => {
-    setIsOpen(open)
-    inputProps.onOpenChange?.(open)
   }
 
   const availablePresets = useMemo(() => {
