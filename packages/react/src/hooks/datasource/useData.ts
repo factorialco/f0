@@ -126,6 +126,105 @@ const decorateWithGroupId = <R extends RecordType>(
 }
 
 /**
+ * Joins a nested group's key to its parent's. Sub-group keys have to be unique
+ * across the whole tree — "Barcelona" under Engineering and "Barcelona" under
+ * Sales are two different groups, and everything downstream (open/closed state,
+ * selection) addresses a group by its key alone. A unit separator keeps the key
+ * unambiguous without colliding with anything that can appear in a field value.
+ */
+export const GROUP_KEY_SEPARATOR = "\u001F"
+
+type GroupByFieldConfig = {
+  label: (
+    groupId: unknown,
+    filters: FiltersState<FiltersDefinition>
+  ) => string | Promise<string>
+  itemCount?: (
+    groupId: unknown,
+    filters: FiltersState<FiltersDefinition>
+  ) => number | undefined | Promise<number | undefined>
+}
+
+/**
+ * Cuts `records` by the first of `fields`, then each of those buckets by the
+ * next, down the list.
+ *
+ * The records are already in hand — these levels are a client-side split of a
+ * group the first level produced — so a sub-group's count is its own length.
+ * The definition's `itemCount` answers a question about a whole field ("how
+ * many people are in Barcelona"), which is not the question a nested header
+ * asks ("how many of THIS team's people are in Barcelona"), and is left to the
+ * top level where it does answer it.
+ */
+const buildSubGroups = <R extends RecordType>({
+  records,
+  parentKey,
+  fields,
+  groupByConfig,
+  filters,
+}: {
+  records: R[]
+  parentKey: string
+  fields: string[]
+  groupByConfig: Record<string, GroupByFieldConfig>
+  filters: FiltersState<FiltersDefinition>
+}): { groups: GroupRecord<R>[]; own: R[] } => {
+  const [field, ...remainingFields] = fields
+  const config = groupByConfig[field]
+  const own: R[] = []
+
+  const buckets = new Map<string, R[]>()
+  for (const record of records) {
+    const value = getValueByPath(record, field)
+
+    // NO VALUE AT THIS LEVEL: the record belongs to the group above rather than
+    // to one of this level's. Bucketing it would name a group after the missing
+    // value and draw a heading with nothing to say — see `ownRecords`.
+    if (!value) {
+      own.push(record)
+      continue
+    }
+
+    const groupKey = String(value)
+    const bucket = buckets.get(groupKey)
+    if (bucket) {
+      bucket.push(record)
+    } else {
+      buckets.set(groupKey, [record])
+    }
+  }
+
+  const groups = Array.from(buckets.entries()).map(
+    ([groupKey, groupRecords]) => {
+      const key = `${parentKey}${GROUP_KEY_SEPARATOR}${groupKey}`
+      const nested =
+        remainingFields.length > 0
+          ? buildSubGroups({
+              records: groupRecords,
+              parentKey: key,
+              fields: remainingFields,
+              groupByConfig,
+              filters,
+            })
+          : undefined
+
+      return {
+        key,
+        label: config.label(groupKey as unknown, filters),
+        itemCount: groupRecords.length,
+        records: groupRecords,
+        ...(nested?.groups.length && {
+          subGroups: nested.groups,
+          ...(nested.own.length && { ownRecords: nested.own }),
+        }),
+      }
+    }
+  )
+
+  return { groups, own }
+}
+
+/**
  * Hook return type for useData
  */
 export interface UseDataReturn<R extends RecordType> {
@@ -172,12 +271,40 @@ export type GroupRecord<RecordType> = {
   label: string | Promise<string>
   itemCount: number | undefined | Promise<number | undefined>
   records: RecordType[]
+  /**
+   * The next grouping level cut out of `records`, present only when the
+   * grouping state asked for one (`thenBy`). `records` stays complete either
+   * way, so a renderer that ignores this field shows exactly what it showed
+   * before nesting existed.
+   */
+  subGroups?: GroupRecord<RecordType>[]
+  /**
+   * The records that belong to THIS group and to none of its `subGroups` —
+   * the ones with no value at the next level down.
+   *
+   * A tree whose branches differ in depth has these: a subproject with tasks
+   * under it becomes a sub-group, while one without stays a row of its parent.
+   * Without somewhere to put them they would bucket under the missing value
+   * and surface beneath a heading with no name.
+   *
+   * Only set when `subGroups` is, and only when some record lacks that value.
+   */
+  ownRecords?: RecordType[]
 }
 
 export type Data<R extends RecordType> = {
   records: WithGroupId<R>[]
   type: "grouped" | "flat"
   groups: GroupRecord<R>[]
+  /**
+   * The records with no value at the FIRST grouping level — they belong to no
+   * group at all, and read as plain rows above the ones that do.
+   *
+   * The counterpart of a group's `ownRecords` one level up: between them a list
+   * can be grouped without being uniformly grouped, which is what a real
+   * hierarchy looks like — some rows nested two deep, some one, some loose.
+   */
+  ungroupedRecords?: WithGroupId<R>[]
 }
 
 /**
@@ -540,34 +667,42 @@ export function useData<
 
   const data = useMemo(() => {
     const groupingField = currentGrouping?.field as string | undefined
+    const groupByConfig = grouping?.groupBy as
+      | Record<string, GroupByFieldConfig | undefined>
+      | undefined
     const isGrouped =
-      !!groupingField &&
-      !!grouping &&
-      !!(grouping.groupBy as Record<string, unknown>)[groupingField]
+      !!groupingField && !!groupByConfig && !!groupByConfig[groupingField]
 
     /**
      * Grouped data
      */
     if (isGrouped) {
       const data = decorateWithGroupId(rawData, groupingField, groupIdCacheRef)
-      const groupedData = groupBy(data, GROUP_ID_SYMBOL)
-      const fieldName = groupingField
-      const groupConfig = (grouping.groupBy as Record<string, unknown>)[
-        fieldName
-      ] as {
-        label: (
-          groupId: unknown,
-          filters: FiltersState<FiltersDefinition>
-        ) => string | Promise<string>
-        itemCount?: (
-          groupId: unknown,
-          filters: FiltersState<FiltersDefinition>
-        ) => number | undefined | Promise<number | undefined>
-      }
+      // A record with nothing at this level is not a group of its own: it is
+      // ungrouped, and says so by sitting above the groups rather than under a
+      // heading named after the value it is missing.
+      const ungroupedRecords = data.filter(
+        (record) => record[GROUP_ID_SYMBOL] === undefined
+      )
+      const groupedData = groupBy(
+        data.filter((record) => record[GROUP_ID_SYMBOL] !== undefined),
+        GROUP_ID_SYMBOL
+      )
+      const groupConfig = groupByConfig[groupingField] as GroupByFieldConfig
+
+      /**
+       * The levels nested under the first one. A level naming a field the
+       * definition doesn't declare is dropped instead of throwing: `thenBy` can
+       * outlive a definition change, and losing a level beats losing the list.
+       */
+      const subFields = (currentGrouping?.thenBy ?? [])
+        .map((level) => String(level.field))
+        .filter((field) => !!groupByConfig[field])
 
       return {
         type: "grouped" as const,
         records: data,
+        ...(ungroupedRecords.length && { ungroupedRecords }),
         groups: Array.from(groupedData.entries()).map(
           ([groupKey, groupRecords]) => ({
             key: groupKey,
@@ -577,6 +712,33 @@ export function useData<
               mergedFilters
             ),
             records: groupRecords,
+            ...(() => {
+              if (!subFields.length) {
+                return {}
+              }
+
+              const nested = buildSubGroups({
+                records: groupRecords,
+                parentKey: groupKey,
+                fields: subFields,
+                groupByConfig: groupByConfig as Record<
+                  string,
+                  GroupByFieldConfig
+                >,
+                filters: mergedFilters,
+              })
+
+              // Every record lacking the next level means there is no nesting
+              // here at all — this group's rows are simply its own.
+              if (!nested.groups.length) {
+                return {}
+              }
+
+              return {
+                subGroups: nested.groups,
+                ...(nested.own.length && { ownRecords: nested.own }),
+              }
+            })(),
           })
         ),
       }
@@ -667,6 +829,15 @@ export function useData<
                   field: currentGrouping.field as string,
                   order: currentGrouping.order ?? "asc",
                 },
+                // The nested levels too, outermost first. Grouping asks the
+                // adapter to sort so a group's records arrive contiguous; a
+                // second level needs the same of its parent's records, or the
+                // sub-groups come out in whatever order the rows happened to
+                // arrive in.
+                ...(currentGrouping.thenBy ?? []).map((level) => ({
+                  field: level.field as string,
+                  order: level.order ?? "asc",
+                })),
               ]
             : []),
         ]

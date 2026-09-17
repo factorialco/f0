@@ -1,3 +1,8 @@
+import "maplibre-gl/dist/maplibre-gl.css"
+import "./maplibre.css"
+// Bundled with the package as a same-origin URL asset (not a runtime CDN
+// fetch), so it works offline and adds no third-party dependency.
+import rtlTextPluginUrl from "@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.js?url"
 import maplibregl from "maplibre-gl"
 import { FLY_OPTS } from "../../constants"
 import type {
@@ -10,6 +15,23 @@ import type {
   MapEvent,
   ScreenPoint,
 } from "../types"
+import { createCurrentLocation } from "./currentLocation"
+import { createLines } from "./lines"
+
+// Arabic / Hebrew labels need the RTL text plugin to shape and order glyphs
+// correctly. Registered once, lazily - MapLibre only pulls it in when RTL text
+// actually appears. Guarded for SSR and for the mocked map in tests.
+if (
+  typeof window !== "undefined" &&
+  typeof maplibregl.getRTLTextPluginStatus === "function" &&
+  maplibregl.getRTLTextPluginStatus() === "unavailable"
+) {
+  try {
+    maplibregl.setRTLTextPlugin(rtlTextPluginUrl, true)
+  } catch {
+    // Already registered (HMR / multiple entrypoints) - safe to ignore.
+  }
+}
 
 /** Midpoint of MapLibre's wheel (1/90) and pinch (1/40) rates, so both
  * gestures feel alike; its 1/450 wheel default feels sluggish. */
@@ -59,13 +81,16 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
     minZoom: init.minZoom,
     maxZoom: init.maxZoom,
     interactive: init.interactive,
-    // The hint overlay MapLibre adds for this is hidden in F0Map.css.
+    // The hint overlay MapLibre adds for this is hidden in maplibre.css.
     cooperativeGestures: init.cooperativeGestures,
     renderWorldCopies: false,
     attributionControl: { compact: true },
   })
   map.scrollZoom.setWheelZoomRate(ZOOM_RATE)
   map.scrollZoom.setZoomRate(ZOOM_RATE)
+
+  const lines = createLines(map)
+  const currentLocation = createCurrentLocation(map)
 
   let destroyed = false
   // Every style accessor dereferences `map.style`, gone after `remove()`.
@@ -92,6 +117,8 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
     isAlive: alive,
     destroy: () => {
       destroyed = true
+      lines.destroy()
+      currentLocation.destroy()
       map.remove()
     },
 
@@ -146,6 +173,9 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
       const center: LngLat = Array.isArray(c) ? [c[0], c[1]] : [c.lng, c.lat]
       return { center, zoom: cam.zoom }
     },
+
+    setLines: (next, options) => lines.set(next, options?.onClick),
+    setCurrentLocation: (at) => currentLocation.set(at),
 
     zoomIn: () => map.zoomIn(),
     zoomOut: () => map.zoomOut(),

@@ -5,25 +5,25 @@ ESLint-format rules loaded by oxlint through its `jsPlugins` option (see
 
 ## Why rules here, and a ratchet script in `.scripts/`
 
-f0 has two enforcement mechanisms and they are not interchangeable. Pick by
-**how much existing debt the rule has**:
+Almost every rule worth adding belongs **here**, whatever its violation count.
+The RATCHET group in `.oxlintrc.json` is what makes that true: the rule runs as
+`"warn"`, `pnpm lint` hides warnings (`--quiet`), and `pnpm check:lint-debt`
+compares them per file against `.scripts/lint-debt.json`, a baseline that may
+only shrink. It runs on staged files in the pre-commit hook and over the whole
+tree in CI.
 
-|                                  | Violations today | Mechanism                                                           |
-| -------------------------------- | ---------------- | ------------------------------------------------------------------- |
-| Inline styles                    | 244              | `.scripts/check-inline-styles.ts` — AST scan + shrink-only baseline |
-| `dangerouslySetInnerHTML` misuse | 1–2              | a rule in here, shipped as `error`                                  |
+So pick the **severity**, not the mechanism:
 
-A lint rule is on or off for the whole codebase. With hundreds of pre-existing
-violations that leaves "ship it as `off`", "add hundreds of suppressions", or
-the RATCHET group in `.oxlintrc.json`: the rule runs as `"warn"`, `pnpm lint`
-hides warnings (`--quiet`), and `pnpm check:lint-debt` compares them per file
-against `.scripts/lint-debt.json`, a baseline that may only shrink. It runs on
-staged files in the pre-commit hook and over the whole tree in CI. With one or
-two violations you just fix them and turn the rule on as `error`.
+| Violations today | How to ship it                                              |
+| ---------------- | ----------------------------------------------------------- |
+| A handful        | fix them, ship the rule as `"error"`                        |
+| Hundreds         | ship as `"warn"` in the RATCHET group and seed the baseline |
 
-So: **a handful of violations → write a rule here. Hundreds → write a ratchet
-script.** If a rule you want lands in between, that is the signal to fix the
-code first.
+A bespoke script in `.scripts/` is for the checks a lint rule genuinely cannot
+express — ones that need to compare against another commit, read the built
+`.d.ts`, or reason across the whole module graph (`check-api-surface`,
+`check-cycle-dependencies`, `check-docs-index`). "This rule has a lot of hits"
+is _not_ a reason to write one: that is what the RATCHET group is for.
 
 ## External JS plugins
 
@@ -50,16 +50,18 @@ CI. Keep the messages self-contained enough to act on from a CI log.
 
 ## Adding a rule
 
-1. Write it in `f0-security/rules/<name>.js` using the standard ESLint shape
+1. Write it in `<plugin>/rules/<name>.js` using the standard ESLint shape
    (`meta`, `create(context)`). Visitor keys are ESTree node types.
-2. Register it in `f0-security/index.js`.
+2. Register it in that plugin's `index.js`.
 3. Turn it on in `.oxlintrc.json`.
-4. Add cases to `__tests__/f0-security.test.ts`. Those tests shell out to the
+4. Add cases to `__tests__/<plugin>.test.ts`. Those tests shell out to the
    real oxlint binary rather than using ESLint's `RuleTester`: the rules only
    matter insofar as `pnpm lint` enforces them, and oxlint's JS-plugin AST is
    what they actually see.
 
 ## Rules
+
+### `f0-security`
 
 - **`no-spread-after-inner-html`** — a props spread after
   `dangerouslySetInnerHTML` overwrites it, so a caller can replace sanitized
@@ -73,3 +75,22 @@ CI. Keep the messages self-contained enough to act on from a CI log.
   silently by a strict CSP. The two elements that predate the rule are listed in
   the `allow` option rather than suppressed inline, so the debt stays in one
   readable place and the rule still blocks new ones.
+
+### `f0-styles`
+
+- **`no-inline-styles`** — styling comes from Tailwind classes. An inline
+  `style` bypasses the design tokens, outranks any class a consumer writes, and
+  is invisible to the Tailwind build, so it gets no theming, no responsive
+  variants and no purging. A RATCHET rule: existing hits are in
+  `.scripts/lint-debt.json` and that count may only shrink.
+
+  Two carve-outs. `src/ui/` is off (an override in `.oxlintrc.json`): those are
+  re-synced third-party wrappers whose styling is upstream's decision. Stories,
+  tests and mocks are off with the other ratchet rules: demo scaffolding is not
+  shipped styling. A style that only sets CSS custom properties is allowed
+  outright — that is how a dynamic value gets threaded _into_ the token system
+  rather than around it.
+
+  Genuinely dynamic values (a measured offset, a `${percentage}%` width, a
+  colour from data) cannot be classes. Keep them, with an `oxlint-disable`
+  comment naming the reason so it lands in the diff.

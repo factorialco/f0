@@ -92,7 +92,15 @@ export function EmojiImage({
         className={cn(
           emojiVariants({ size }),
           nativeEmojiVariants({ size }),
-          "inline-flex items-center justify-center leading-none font-emoji"
+          "inline-flex items-center justify-center leading-none font-emoji",
+          // An emoji is ARTWORK, so it does not take the colour of the type
+          // around it. Plenty of them default to TEXT presentation (▶ ✅ ☑ ‼ ⏰)
+          // and are painted in `currentColor`, so a muted context — a sidebar
+          // row, a header, a secondary label — rendered them grey and washed
+          // out beside the very same emoji drawn anywhere else. The colour ones
+          // are unaffected either way, which is why this is safe to state here
+          // rather than at each call site.
+          "text-f1-foreground"
         )}
         aria-label={alt === "" ? undefined : (alt ?? emoji)}
         role={alt === "" ? undefined : "img"}

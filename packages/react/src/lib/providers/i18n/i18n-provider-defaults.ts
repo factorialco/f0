@@ -30,6 +30,10 @@ export const defaultTranslations = {
         placeholder: "Select a company",
       },
     },
+    sidePanel: {
+      resize: "Resize side panel",
+      width: "{{width}} pixels",
+    },
     previous: "Previous",
     next: "Next",
   },
@@ -396,9 +400,6 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    // How long the turn has been thinking, shown beside the step that is
-    // running. Two keys rather than one unbounded second count, because "137s"
-    // reads badly past a couple of minutes — the consumer picks.
     thinkingElapsedSeconds: "{{seconds}}s",
     thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
     attribution: "Suggested by One",
@@ -481,12 +482,6 @@ export const defaultTranslations = {
       exporting: "Exporting…",
     },
     dashboardItem: {
-      /**
-       * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-       * override it — factorial renders it as plain "Ask" for the widget and
-       * insight-card buttons). This menu entry needs the product name spelled
-       * out, so it owns its own key.
-       */
       askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
@@ -569,8 +564,6 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
-    // Shown where the composer would be on a read-only channel. Hosts that can
-    // name the poster override it per channel (`channel.readOnlyNotice`).
     readOnly: "You can't send messages in this conversation",
     online: "Online",
     muted: "Muted",
@@ -578,8 +571,6 @@ export const defaultTranslations = {
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
-    // The picker lives in F0Chat and is used only while having a conversation;
-    // everywhere else in the product keeps the emoji-mart one.
     emojiPicker: {
       search: "Search emoji",
       frequentlyUsed: "Frequently used",
@@ -603,7 +594,6 @@ export const defaultTranslations = {
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
     removeNamedFile: "Remove {{name}}",
-    // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
     messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
@@ -614,8 +604,6 @@ export const defaultTranslations = {
     transcriptionError: "Couldn't transcribe the audio. Try again.",
     sent: "Sent",
     read: "Read",
-    // Plural shape (one/other) so other languages can diverge — selected by the
-    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
     readBy: {
       one: "Read by {{count}}",
       other: "Read by {{count}}",
@@ -627,26 +615,19 @@ export const defaultTranslations = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
-    // Shared-location attachments (map preview card + reply quote descriptor).
     location: "Location",
-    // Voice notes (mic in the composer records + sends audio, no transcript).
     voiceNote: "Voice note",
     sendVoiceNote: "Send voice note",
     sendingVoiceNote: "Sending voice note…",
-    // Delivery-state indicators beside your own bubble (icon labels + the
-    // failed message's reduced actions menu).
     sending: "Sending…",
     notSent: "Not sent",
     retry: "Retry",
     moreActions: "Message actions",
-    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
     pin: "Pin",
     unpin: "Unpin",
     info: "Info",
     viewProfile: "View profile",
-    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
-    // for a group-wide ping (localize the word, e.g. es "aquí").
     mentionEveryone: "here",
     mentionEveryoneDescription: "Notify everyone in this group",
     reply: "Reply",
@@ -654,16 +635,12 @@ export const defaultTranslations = {
     download: "Download",
     downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
-    // Editing your own message (within the edit window). `editing` heads the
-    // composer chip; `edited` is the muted marker after an edited message body.
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
-    // Shown as the quoted sender's name when the replied-to message is your own.
     you: "You",
-    // In-chat image lightbox.
     openImage: "Open image",
     imagePreview: "Image preview",
     closePreview: "Close",
@@ -674,8 +651,6 @@ export const defaultTranslations = {
     documentPreview: "Document preview",
     videoPlayerLabel: "Video player: {{name}}",
     loadingVideo: "Loading video: {{name}}",
-    // Attachment previews in reply quotes + the composer chip (a lone file shows
-    // its real name instead of a count).
     photo: "Photo",
     photoCount: {
       one: "{{count}} photo",
@@ -691,12 +666,6 @@ export const defaultTranslations = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
-    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
-    // are replaced with React nodes (`@name` hover-card chips) by the component
-    // via token split — NOT through `t(key, args)`, whose interpolation is
-    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
-    // @Raúl" / "…and 5 more") so every language words the conjunction its own
-    // way. Plural shape mirrors `readBy`.
     system: {
       memberAdded: {
         one: "{{members}} was added to the group",
@@ -710,7 +679,6 @@ export const defaultTranslations = {
         one: "{{members}} left the group",
         other: "{{members}} left the group",
       },
-      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
       membersWithLast: "{{names}} and {{last}}",
       membersWithMore: "{{names}} and {{count}} more",
     },
@@ -730,6 +698,52 @@ export const defaultTranslations = {
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
     loadingOlder: "Loading earlier messages…",
+    newPosts: "New posts",
+    newPostsCount: {
+      one: "{{count}} new post",
+      other: "{{count}} new posts",
+    },
+    unreadMentionCount: {
+      one: "{{count}} unread, mentions you",
+      other: "{{count}} unread, mentions you",
+    },
+    post: {
+      in: "in",
+      comment: "Comment",
+      views: {
+        one: "{{count}} view",
+        other: "{{count}} views",
+      },
+      comments: {
+        one: "{{count}} comment",
+        other: "{{count}} comments",
+      },
+    },
+    community: {
+      readOnly: "You can't post in this community",
+      writePost: "Write a post…",
+      newPost: "New post",
+      postTitle: "Title",
+      postTitlePlaceholder: "Add a title",
+      postBodyPlaceholder: "Share something with the community…",
+      publish: "Publish",
+      cancel: "Cancel",
+      discardTitle: "Discard this post?",
+      discardDescription: "What you've written won't be saved.",
+      discard: "Discard",
+      keepEditing: "Keep editing",
+      publishError: "Couldn't publish this post",
+      pinnedPost: "Pinned post",
+      pinnedPosts: "Pinned",
+      unpinPost: "Unpin post",
+      goToPost: "Go to post",
+      scheduledPosts: "Scheduled",
+      scheduledEvent: "Event",
+      draftPosts: "Drafts",
+      draftUntitled: "Untitled post",
+      draftSavedAt: "Saved {{when}}",
+      shelfLabel: "Pinned, scheduled and draft posts",
+    },
   },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
@@ -776,6 +790,31 @@ export const defaultTranslations = {
     countryWithDialCode: "{{country}} {{dialCode}}",
     searchCountry: "Search country or dial code",
     noResults: "No country found",
+  },
+  locationInput: {
+    country: "Country",
+    addressLine1: "Address line 1",
+    addressLine2: "Address line 2",
+    city: "City",
+    state: "Region",
+    postalCode: "Postal code",
+    placeholder: "Enter an address",
+    selectCountry: "Select a country",
+    searchCountry: "Search country",
+    noCountryResults: "No country found",
+    noResults: "No addresses found",
+    searchHint: "Type an address to search",
+    noResultsHelp: "Can't find an address?",
+    enterManually: "Enter it manually",
+    addressLine1Placeholder: "Enter a street and number",
+    addressLine2Placeholder: "Enter a floor or unit",
+    postalCodePlaceholder: "e.g., 08001",
+    searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found",
+    },
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -999,6 +1038,10 @@ export const defaultTranslations = {
       phone: {
         invalid: "Enter a valid phone number",
       },
+      location: {
+        empty: "Enter an address",
+        unresolved: "Select an address from the suggestions",
+      },
     },
   },
   graph: {
@@ -1038,19 +1081,14 @@ export const defaultTranslations = {
     stepOf: "Step {{current}} of {{total}}",
   },
   widgets: {
-    /** Turns a widget over to read what it is telling you (Home's `info`). */
     whatThisMeans: "What this info means?",
-    /** The button on that other side, which turns it back. */
     gotIt: "Got it",
-    /** The widget menu's own items, and the dialogs they open. */
     editParams: "Edit params",
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
     configureWidget: "Configure {{title}}",
-    /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
-    /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
     cannotMoveHere: "You can't move a widget here — {{title}} is locked.",
   },
   pdfViewer: {

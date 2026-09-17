@@ -228,15 +228,11 @@ export type AiChatMode = "chat" | "voice"
 export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel. Defined by the panel,
+ * not by the chat — the chat is simply what the panel falls back to when
+ * nothing else has claimed it. Re-exported here so this path keeps working.
  */
-export type SidePanelContent = {
-  id: string
-  content: React.ReactNode
-}
+export type { SidePanelContent } from "@/patterns/ApplicationFrame/SidePanel/types"
 
 /**
  * Tracking options for the AI chat

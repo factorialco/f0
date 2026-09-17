@@ -23,6 +23,7 @@ import {
   BaseResponse,
   FiltersDefinition,
   getDataSourcePaginationType,
+  GroupRecord,
   PaginatedDataAdapter,
   PromiseOrObservable,
   SelectedItemsState,
@@ -208,6 +209,7 @@ const F0SelectComponent = forwardRef(function Select<
     onSearchChange,
     searchBoxPlaceholder,
     searchEmptyMessage,
+    searchEmptyAction,
     size: sizeProp,
     actions,
     onCreate,
@@ -227,8 +229,10 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
+    hideArrow = false,
     preserveSelectionOnDatasetChange = true,
     fitContentWidth,
+    getSelectedLabel,
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
@@ -606,8 +610,16 @@ const F0SelectComponent = forwardRef(function Select<
       }
     }
 
-    return result
-  }, [localValue, itemsByValue, defaultItems])
+    // Formatting happens on the way OUT, so the cache above keeps the option
+    // as the data produced it — a formatter swapped at runtime then re-labels
+    // selections made before it arrived, instead of leaving them stale.
+    return getSelectedLabel
+      ? result.map((option) => ({
+          ...option,
+          selectedLabel: getSelectedLabel({ option, item: option.item }),
+        }))
+      : result
+  }, [localValue, itemsByValue, defaultItems, getSelectedLabel])
 
   /**
    * Status tags render as pills, which need more vertical room than the "sm"
@@ -1144,55 +1156,135 @@ const F0SelectComponent = forwardRef(function Select<
     [optionMapper, inlineSearch, optionIdFor]
   )
 
-  const items: VirtualItem[] = useMemo(() => {
-    const seenTagTypes = new Set<string>()
+  /**
+   * One step of indent per grouping level. The list is virtualized — every row
+   * is a sibling of every other row in one flat scroller — so depth can only be
+   * shown as padding on the row itself, not as nesting in the DOM.
+   */
+  const indentClass = useCallback((steps: number) => {
+    return ["", "pl-5", "pl-10", "pl-16", "pl-20"][Math.min(steps, 4)]
+  }, [])
 
-    if (data.type === "grouped") {
+  /**
+   * A group's records as rows, indented to their depth and keyed under the
+   * group so two groups holding the same option stay distinct.
+   *
+   * Collapsible rows clear their own group's chevron, so they sit one step
+   * further in than the header they belong to.
+   */
+  const buildRows = useCallback(
+    (
+      records: ActualRecordType[],
+      keyPrefix: string,
+      depth: number,
+      seenTagTypes: Set<string>
+    ): VirtualItem[] => {
+      const indent = indentClass(collapsible ? depth + 1 : depth)
+
+      return getItems(records, seenTagTypes).map((vi) => ({
+        ...vi,
+        key: `${keyPrefix}:${vi.key}`,
+        item: indent ? <div className={indent}>{vi.item}</div> : vi.item,
+      }))
+    },
+    [collapsible, getItems, indentClass]
+  )
+
+  const buildGroupItems = useCallback(
+    (
+      groups: GroupRecord<ActualRecordType>[],
+      depth: number,
+      seenTagTypes: Set<string>
+    ): VirtualItem[] => {
       const items: VirtualItem[] = []
-      data.groups.map((group) => {
+
+      for (const group of groups) {
+        const header = (
+          <GroupHeader
+            label={group.label}
+            itemCount={group.itemCount}
+            showOpenChange={collapsible}
+            onOpenChange={(open) => setGroupOpen(group.key, open)}
+            open={openGroups[group.key]}
+            chevronPosition="leading"
+            closedRotation={-90}
+            openRotation={0}
+            className="relative cursor-pointer rounded px-3 py-2 outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:z-0 after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] hover:after:opacity-100 [&_*]:z-10"
+          />
+        )
+
         items.push({
           height: 36,
           key: `group-header-${group.key}`,
           type: "group-header",
-          item: (
-            <GroupHeader
-              label={group.label}
-              itemCount={group.itemCount}
-              showOpenChange={collapsible}
-              onOpenChange={(open) => setGroupOpen(group.key, open)}
-              open={openGroups[group.key]}
-              chevronPosition="leading"
-              closedRotation={-90}
-              openRotation={0}
-              className="relative cursor-pointer rounded px-3 py-2 outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:z-0 after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] hover:after:opacity-100 [&_*]:z-10"
-            />
-          ),
+          item:
+            depth > 0 ? (
+              <div className={indentClass(depth)}>{header}</div>
+            ) : (
+              header
+            ),
         })
-        if (!collapsible || openGroups[group.key]) {
-          items.push(
-            ...getItems(group.records, seenTagTypes).map((vi) => ({
-              ...vi,
-              key: `${group.key}:${vi.key}`,
-              item: collapsible ? (
-                <div className="pl-5">{vi.item}</div>
-              ) : (
-                vi.item
-              ),
-            }))
-          )
+
+        if (collapsible && !openGroups[group.key]) {
+          continue
         }
-      })
+
+        /**
+         * A group with sub-groups shows those instead of its records: its
+         * `records` are the union of theirs, so rendering both would list every
+         * option twice.
+         *
+         * `ownRecords` is the exception — the records that belong to this group
+         * and to none of its sub-groups, because they have no value at the next
+         * level. They are NOT in any sub-group, so they go first, as this
+         * group's own rows, above the headings that follow.
+         */
+        if (group.subGroups?.length) {
+          items.push(
+            ...buildRows(
+              group.ownRecords ?? [],
+              `${group.key}:own`,
+              depth,
+              seenTagTypes
+            ),
+            ...buildGroupItems(group.subGroups, depth + 1, seenTagTypes)
+          )
+          continue
+        }
+
+        items.push(...buildRows(group.records, group.key, depth, seenTagTypes))
+      }
+
       return items
+    },
+    [buildRows, collapsible, openGroups, setGroupOpen]
+  )
+
+  const items: VirtualItem[] = useMemo(() => {
+    const seenTagTypes = new Set<string>()
+
+    if (data.type === "grouped") {
+      /**
+       * The records belonging to no group lead the list, as plain rows with no
+       * heading over them — they have nothing to be filed under, and putting
+       * them last would read as a trailing group whose name went missing.
+       */
+      return [
+        ...getItems(data.ungroupedRecords ?? [], seenTagTypes).map((vi) => ({
+          ...vi,
+          key: `ungrouped:${vi.key}`,
+        })),
+        ...buildGroupItems(data.groups, 0, seenTagTypes),
+      ]
     }
     return getItems(data.records, seenTagTypes)
   }, [
     data.records,
     data.type,
     data.groups,
+    data.ungroupedRecords,
     getItems,
-    openGroups,
-    setGroupOpen,
-    collapsible,
+    buildGroupItems,
   ])
 
   const handleScrollBottom = () => {
@@ -1419,7 +1511,8 @@ const F0SelectComponent = forwardRef(function Select<
     : i18n.select.create
 
   const emptyAction =
-    handleCreate && currentSearch?.trim() ? (
+    searchEmptyAction ??
+    (handleCreate && currentSearch?.trim() ? (
       <div className="flex w-full">
         <F0Button
           type="button"
@@ -1429,7 +1522,7 @@ const F0SelectComponent = forwardRef(function Select<
           label={createLabel}
         />
       </div>
-    ) : undefined
+    ) : undefined)
 
   const selectContent = (
     <SelectContent
@@ -1547,6 +1640,24 @@ const F0SelectComponent = forwardRef(function Select<
 
   const selectionDescriptionId = `${id}-selection`
 
+  /**
+   * Whether the trigger is ALREADY showing the whole selection — reported up by
+   * `SelectedItems`, which is the only place that can tell: it knows which
+   * reading it rendered (names, a count, a tag, `…`) and measures whether the
+   * text survived its box.
+   *
+   * The same rule the field's label has always followed, now applied to the
+   * selection too: say what the trigger cannot, stay shut otherwise. So the
+   * tooltip keeps the selection line only where it adds something — text the
+   * box clipped, or a count standing in for the names — and drops it where the
+   * trigger spells it out in full. With `hideLabel` the tooltip still opens on
+   * the field's name alone, which is nowhere on screen.
+   *
+   * Starts `false` so the tooltip is present until measurement says otherwise:
+   * a tooltip that arrives a frame late beats a hover that explains nothing.
+   */
+  const [selectionSpelledOut, setSelectionSpelledOut] = useState(false)
+
   /** What the trigger shows when it is not being typed into. */
   const selectedItemsNode = (
     <SelectedItems
@@ -1557,6 +1668,11 @@ const F0SelectComponent = forwardRef(function Select<
       // The field's own icon already occupies the glyph slot; two icons would
       // sit 4px apart. Rows keep their icons either way.
       hideItemIcon={!!icon}
+      // `withTriggerTooltip` already wraps the whole trigger in a tooltip that
+      // reads out the label and the full selection. A second one on the clipped
+      // text would share the hover target and fight it — see the prop.
+      noTooltip
+      onSpelledOutChange={setSelectionSpelledOut}
     />
   )
 
@@ -1617,8 +1733,16 @@ const F0SelectComponent = forwardRef(function Select<
     return (
       <TooltipInternal
         label={hideLabel ? label : undefined}
-        // It would cover the list the user is typing to see.
-        description={inlineSearch && openLocal ? "" : selectedTooltipText}
+        // Empty rather than absent: `TooltipCopyProps` demands at least one of
+        // label/description, and this tooltip stays mounted with nothing to say
+        // by design — `hasContent` treats "" as nothing and never opens on it.
+        description={
+          // Open inline search is the second case with nothing to say: the
+          // tooltip would cover the list the user is typing to see.
+          selectionSpelledOut || (inlineSearch && openLocal)
+            ? ""
+            : selectedTooltipText
+        }
       >
         {box}
       </TooltipInternal>
@@ -1794,12 +1918,14 @@ const F0SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow
-                  ref={arrowRef}
-                  open={openLocal}
-                  disabled={disabled}
-                  size={effectiveSize}
-                />
+                hideArrow ? undefined : (
+                  <Arrow
+                    ref={arrowRef}
+                    open={openLocal}
+                    disabled={disabled}
+                    size={effectiveSize}
+                  />
+                )
               }
             >
               {inlineSearch ? (

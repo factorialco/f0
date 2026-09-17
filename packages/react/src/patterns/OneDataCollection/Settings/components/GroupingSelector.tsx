@@ -21,6 +21,32 @@ type GroupingSelectorProps<
 
 const EmptyGroupingValue = "__no-grouping__"
 
+/**
+ * Whether the grouping picker has anything to offer.
+ *
+ * Two ways it has nothing. `hideSelector` is the definition saying so outright:
+ * the grouping is the product's decision, not the user's, so it applies and the
+ * control never appears. A MANDATORY grouping over a single field is the same
+ * situation arrived at by arithmetic — the grouping applies, there is simply no
+ * second option to switch to.
+ *
+ * Exported because "is the picker there?" and "is there a bar to put it in?"
+ * are asked in different files, and they have to agree — a container that keeps
+ * itself open for a control that renders null is an empty strip of chrome.
+ *
+ * Takes the three fields it actually reads rather than a `GroupingDefinition<R>`:
+ * every caller holds a definition for a different record type, and the answer
+ * does not depend on which.
+ */
+export const canSelectGrouping = (grouping?: {
+  mandatory?: boolean
+  hideSelector?: boolean
+  groupBy: object
+}): boolean =>
+  !!grouping &&
+  !grouping.hideSelector &&
+  !(!!grouping.mandatory && Object.keys(grouping.groupBy).length < 2)
+
 export const GroupingSelector = <
   R extends RecordType,
   Grouping extends GroupingDefinition<R>,
@@ -31,10 +57,7 @@ export const GroupingSelector = <
   hideLabel = false,
 }: GroupingSelectorProps<R, Grouping>) => {
   const i18n = useI18n()
-  if (
-    !grouping ||
-    (!!grouping.mandatory && Object.entries(grouping.groupBy).length < 2)
-  ) {
+  if (!grouping || !canSelectGrouping(grouping)) {
     return null
   }
 
@@ -71,6 +94,9 @@ export const GroupingSelector = <
             options={groupingOptions}
             hideLabel={hideLabel}
             value={currentGrouping?.field.toString() ?? EmptyGroupingValue}
+            // Picking a field here replaces the whole grouping, nested levels
+            // included: the selector offers one field, so any `then` the state
+            // carried belonged to the grouping the user just left behind.
             onChange={(value: string) =>
               onGroupingChange?.(
                 value !== EmptyGroupingValue
@@ -98,7 +124,7 @@ export const GroupingSelector = <
             icon={currentGrouping?.order === "asc" ? ArrowUp : ArrowDown}
             onClick={() =>
               onGroupingChange?.({
-                field: currentGrouping.field,
+                ...currentGrouping,
                 order: currentGrouping.order === "asc" ? "desc" : "asc",
               })
             }

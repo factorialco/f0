@@ -317,6 +317,7 @@
     // .scripts/lint-debt.json, a baseline that may only shrink. Add a rule
     // here when it has too many hits to fix in one PR.
     "sonarjs/cognitive-complexity": "warn", // 187 at the default threshold of 15
+    "f0-styles/no-inline-styles": "warn", // see the src/ui override below
 
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.
@@ -382,6 +383,7 @@
   "jsPlugins": [
     "eslint-plugin-react-refresh",
     "./.oxlint-plugins/f0-security/index.js",
+    "./.oxlint-plugins/f0-styles/index.js",
     "./.oxlint-plugins/f0-react/index.js",
     "eslint-plugin-sonarjs",
     {
@@ -394,6 +396,14 @@
     }
   ],
   "overrides": [
+    {
+      // src/ui is third-party primitive wrappers (Radix, shadcn) — generated or
+      // re-synced from upstream and never re-exported publicly. Their styling is
+      // upstream's decision, and a shrink-only baseline over regenerated code
+      // fights every sync.
+      "files": ["src/ui/**"],
+      "rules": { "f0-styles/no-inline-styles": "off" }
+    },
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
       "rules": {
@@ -428,6 +438,7 @@
         "**/*.stories.*",
         "**/__stories__/**",
         "**/*.test.*",
+        "**/*.spec.*",
         "**/__tests__/**",
         "**/mocks/**",
         "**/__mocks__/**"
@@ -436,7 +447,8 @@
         "no-console": "off",
         "no-await-in-loop": "off", // stories and tests step through flows one await at a time
         "sonarjs/no-identical-functions": "off", // each story and test case reads on its own
-        "sonarjs/cognitive-complexity": "off" // fixture tables and story flows score on their size, splitting them makes them harder to read
+        "sonarjs/cognitive-complexity": "off", // fixture tables and story flows score on their size, splitting them makes them harder to read
+        "f0-styles/no-inline-styles": "off" // demo scaffolding, not shipped styling
       }
     },
     {
