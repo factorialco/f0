@@ -42,9 +42,11 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     },
     ref
   ) => {
-    const [inputValue, setInputValue] = useState("")
-    const [error, setError] = useState(false)
     const i18n = useI18n()
+    const [inputValue, setInputValue] = useState(() =>
+      granularity.toString(value?.value, i18n, displayFormat ?? "long")
+    )
+    const [error, setError] = useState(false)
 
     useEffect(() => {
       setInputValue(
