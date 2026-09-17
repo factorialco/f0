@@ -1,8 +1,8 @@
 {
   "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
-  "total": 357,
+  "total": 352,
   "rules": {
-    "f0-styles/no-inline-styles": 243,
+    "f0-styles/no-inline-styles": 238,
     "sonarjs/cognitive-complexity": 114
   },
   "files": {
@@ -353,21 +353,15 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/kits/surveys/SurveyFormBuilder/QuestionTypes/BaseQuestion/index.tsx": {
-      "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
     },
-    "src/kits/surveys/SurveyFormBuilder/QuestionTypes/CheckboxQuestion/index.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
     "src/kits/surveys/SurveyFormBuilder/QuestionTypes/SelectQuestion/SelectOption/index.tsx": {
-      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/kits/surveys/SurveyFormBuilder/Section/Item/index.tsx": {
       "f0-styles/no-inline-styles": 1
     },
     "src/kits/surveys/SurveyFormBuilder/Section/index.tsx": {
-      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/layouts/Layout/groups/GroupMasonry/components/SortableBlock.tsx": {
