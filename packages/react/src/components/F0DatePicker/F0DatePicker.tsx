@@ -119,10 +119,10 @@ export function F0DatePicker(props: F0DatePickerProps) {
   const closeReportedRef = useRef(false)
 
   /**
-   * The popup dismisses itself from a capture-phase document listener, so a
-   * close arrives before the input has seen the Escape that caused it. The
-   * reason is only settled once the whole event has been dispatched, and one
-   * gesture ends the edit once.
+   * The popup dismisses itself from a capture-phase document listener, so the
+   * close and the key that caused it land in the same dispatch, in either
+   * order. The reason is settled once that dispatch is over, and one gesture
+   * ends the edit once.
    */
   const reportDismiss = (reason: InlineDismissReason) => {
     if (reason === "escape") {
@@ -163,11 +163,25 @@ export function F0DatePicker(props: F0DatePickerProps) {
     inputProps.onOpenChange?.(open)
   }
 
-  const handlePressEscape = () => {
-    if (inline) {
-      reportDismiss("escape")
+  const reportDismissRef = useRef(reportDismiss)
+  useEffect(() => {
+    reportDismissRef.current = reportDismiss
+  })
+
+  // Escape has to be caught on the document: once a day has been clicked, focus
+  // sits in the calendar and the input never sees the key.
+  useEffect(() => {
+    if (!inline || !editing) {
+      return
     }
-  }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        reportDismissRef.current("escape")
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown, true)
+    return () => document.removeEventListener("keydown", handleKeyDown, true)
+  }, [inline, editing])
 
   /**
    * The click that closes the calendar also blurs the input, and that close is
@@ -249,7 +263,6 @@ export function F0DatePicker(props: F0DatePickerProps) {
       displayFormat={displayFormat}
       variant={variant}
       editing={editing}
-      onPressEscape={handlePressEscape}
       onInputBlur={handleInputBlur}
     />
   )

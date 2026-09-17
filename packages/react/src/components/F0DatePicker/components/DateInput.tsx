@@ -29,7 +29,6 @@ type DateInputProps = {
   displayFormat?: DateStringFormat
   variant?: InputFieldVariant
   editing?: boolean
-  onPressEscape?: () => void
   onInputBlur?: () => void
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
@@ -47,7 +46,6 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       displayFormat,
       variant,
       editing,
-      onPressEscape,
       onInputBlur,
       ...inputProps
     },
@@ -128,9 +126,6 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleBlur()
-          }
-          if (e.key === "Escape") {
-            onPressEscape?.()
           }
         }}
         type="text"
