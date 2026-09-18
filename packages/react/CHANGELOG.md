@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.0](https://github.com/factorialco/f0/compare/f0-react-v7.7.1...f0-react-v7.8.0) (2026-09-18)
+
+
+### Features
+
+* **tooling:** run lint-staged from lefthook, type-check on pre-push ([#5584](https://github.com/factorialco/f0/issues/5584)) ([85150a1](https://github.com/factorialco/f0/commit/85150a12d17dfb96011de63229b786e3b067a8eb))
+
 ## [7.7.1](https://github.com/factorialco/f0/compare/f0-react-v7.7.0...f0-react-v7.7.1) (2026-09-18)
 
 

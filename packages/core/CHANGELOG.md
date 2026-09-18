@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/factorialco/f0/compare/f0-core-v2.3.0...f0-core-v2.4.0) (2026-09-18)
+
+
+### Features
+
+* **tooling:** run lint-staged from lefthook, type-check on pre-push ([#5584](https://github.com/factorialco/f0/issues/5584)) ([85150a1](https://github.com/factorialco/f0/commit/85150a12d17dfb96011de63229b786e3b067a8eb))
+
 ## [2.3.0](https://github.com/factorialco/f0/compare/f0-core-v2.2.1...f0-core-v2.3.0) (2026-09-10)
 
 
