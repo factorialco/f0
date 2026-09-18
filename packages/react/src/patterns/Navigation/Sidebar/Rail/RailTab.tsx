@@ -79,11 +79,22 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
           />
           {!!tab.badge && <UnreadDot />}
         </span>
-        {/* Truncated, never hidden. Unlike the horizontal row there is nothing
-            to measure: 68px is 68px whatever the translation says, so a long
-            label can only ever be cut — and the full one is in the title and
-            in the accessible name. */}
-        <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
+        {/* Wrapped, never hidden. Unlike the horizontal row there is nothing
+            to measure: 68px is 68px whatever the translation says, and a
+            German or Finnish module name will not fit on one line at any
+            width we would accept for a rail. So it wraps, hyphenating where
+            the language allows it, and only past the third line does it give
+            up and ellipses — by then the item is 100px tall and the label has
+            stopped being a label. The full one is in the title and in the
+            accessible name either way.
+
+            `hyphens` rather than `break-words`: a forced break wins over
+            hyphenation in Blink, so asking for both is asking for neither and
+            "Comunicaciones" splits as "Comunicaci|ones" with nothing to say it
+            was cut. Hyphenation reads the nearest `lang`, which the app sets
+            on <html> — a story that shows translated copy under `lang="en"`
+            is reading the wrong dictionary, not a broken label. */}
+        <span className="line-clamp-3 w-full hyphens-auto px-0.5 text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
           {tab.label}
         </span>
       </button>
