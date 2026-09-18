@@ -7,6 +7,13 @@ import { OneTable, TableBody, TableCell, TableRow } from "../.."
 // as conflicting, so a sticky row silently ends up with no hover at all.
 const COMPILABLE_HOVER = /hover:!?bg-f1-background-hover(?!!)/
 
+// `bg-f1-background-hover` is a 4%-alpha tint. Owning `background-color` is
+// right for a plain row — it tints the page behind it — but a sticky row is
+// lifted above the rows scrolling underneath, which would then show through it.
+const OPAQUE_HOVER_BACKGROUND = "hover:bg-f1-background"
+const HOVER_TINT_LAYER =
+  "hover:bg-[linear-gradient(hsl(var(--neutral-5)),hsl(var(--neutral-5)))]"
+
 const renderRow = (sticky: boolean) => {
   zeroRender(
     <OneTable>
@@ -30,6 +37,16 @@ describe("TableRow hover background", () => {
     const row = renderRow(true)
 
     expect(row?.className).toContain("bg-f1-background")
-    expect(row?.className).toMatch(COMPILABLE_HOVER)
+    expect(row?.className).toContain(HOVER_TINT_LAYER)
+  })
+
+  it("keeps a sticky row opaque while hovered", () => {
+    const row = renderRow(true)
+
+    // The alpha tint must not survive as the row's hover `background-color`:
+    // that is what let the rows scrolling underneath read through the pinned
+    // parent row of a nested table.
+    expect(row?.className).toContain(OPAQUE_HOVER_BACKGROUND)
+    expect(row?.className).not.toMatch(COMPILABLE_HOVER)
   })
 })

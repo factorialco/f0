@@ -13,10 +13,6 @@ import { OnChangeSectionParams, QuestionElement } from "../types"
 import { Item } from "./Item"
 import { SectionProps } from "./types"
 
-const TEXT_AREA_STYLE: object = {
-  fieldSizing: "content",
-}
-
 export const Section = ({
   id,
   title = "",
@@ -193,9 +189,8 @@ export const Section = ({
               )}
               onChange={handleChangeDescription}
               disabled={inputDisabled}
-              style={TEXT_AREA_STYLE}
               className={cn(
-                "w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+                "w-full [field-sizing:content] resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
                 inputDisabled && "cursor-not-allowed"
               )}
             />

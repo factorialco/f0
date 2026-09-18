@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { cn, focusRing } from "@/lib/utils"
 import type {
   FiltersDefinition,
@@ -96,9 +97,12 @@ function computeTrend(
 export function MetricValue({
   value,
   trend,
+  comparison,
 }: {
   value: string
   trend?: MetricTrend
+  /** Already formatted, so it reads in the same units as the value above it. */
+  comparison?: { value: string; label: string; info?: string | InfoHintContent }
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const { height, width } = useContainerSize(ref)
@@ -112,7 +116,15 @@ export function MetricValue({
         (element.scrollWidth > element.clientWidth ||
           element.scrollHeight > element.clientHeight)
     )
-  }, [height, trend?.direction, trend?.percent, value, width])
+  }, [
+    comparison?.label,
+    comparison?.value,
+    height,
+    trend?.direction,
+    trend?.percent,
+    value,
+    width,
+  ])
 
   return (
     <div
@@ -129,7 +141,7 @@ export function MetricValue({
     >
       <div
         className={cn(
-          "flex items-baseline gap-3",
+          "flex flex-col gap-1",
           // Nudge up to offset the widget header, so the value reads as
           // optically centered against the whole card rather than the body.
           // Auto margins center content that fits, but collapse to zero when
@@ -137,41 +149,58 @@ export function MetricValue({
           centered && "mx-auto -translate-y-4"
         )}
       >
-        <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
-          {value}
-        </span>
-        {trend && trend.direction !== "flat" ? (
-          <div className="flex shrink-0 items-center">
-            {trend.direction === "up" ? (
-              <F0Icon
-                icon={ArrowUp}
-                color="positive"
-                size="sm"
-                aria-hidden="true"
-              />
-            ) : (
-              <F0Icon
-                icon={ArrowDown}
-                color="critical"
-                size="sm"
-                aria-hidden="true"
-              />
-            )}
-            <span className="sr-only">
-              {trend.direction === "up" ? "+" : "−"}
-              {trend.percent.toFixed(1)}%
-            </span>
-            <span
-              aria-hidden="true"
-              className={cn(
-                "whitespace-nowrap text-base font-medium",
-                trend.direction === "up"
-                  ? "text-f1-foreground-positive"
-                  : "text-f1-foreground-critical"
+        <div className="flex items-baseline gap-3">
+          <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
+            {value}
+          </span>
+          {trend && trend.direction !== "flat" ? (
+            <div className="flex shrink-0 items-center">
+              {trend.direction === "up" ? (
+                <F0Icon
+                  icon={ArrowUp}
+                  color="positive"
+                  size="sm"
+                  aria-hidden="true"
+                />
+              ) : (
+                <F0Icon
+                  icon={ArrowDown}
+                  color="critical"
+                  size="sm"
+                  aria-hidden="true"
+                />
               )}
-            >
-              {trend.percent.toFixed(1)}%
+              <span className="sr-only">
+                {trend.direction === "up" ? "+" : "−"}
+                {trend.percent.toFixed(1)}%
+              </span>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "whitespace-nowrap text-base font-medium",
+                  trend.direction === "up"
+                    ? "text-f1-foreground-positive"
+                    : "text-f1-foreground-critical"
+                )}
+              >
+                {trend.percent.toFixed(1)}%
+              </span>
+            </div>
+          ) : null}
+        </div>
+        {comparison ? (
+          // Stated, never arrowed: a peer median or a target is a different
+          // quantity from this metric's own past, and an up/down arrow beside
+          // it would read as a movement that never happened.
+          <div className="flex items-center gap-1 text-f1-foreground-secondary">
+            <span className="whitespace-nowrap text-base font-medium">
+              {comparison.label} {comparison.value}
             </span>
+            {comparison.info ? (
+              // Says where the figure comes from, so a reader can judge it
+              // before comparing against it.
+              <InfoHint info={comparison.info} label={comparison.label} />
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -203,6 +232,12 @@ export function MetricItem<Filters extends FiltersDefinition>({
   >(item.fetchData, filters, enabled, itemFiltersKey)
 
   const trend = data ? computeTrend(data.value, data.previousValue) : undefined
+  // One formatter for both figures: a comparison in different units than the
+  // number above it is worse than no comparison at all.
+  const format = (value: number) =>
+    item.valueFormatter
+      ? item.valueFormatter(value)
+      : formatValue(value, item.format, item.decimals)
 
   return (
     <DashboardItem
@@ -224,12 +259,17 @@ export function MetricItem<Filters extends FiltersDefinition>({
     >
       {data ? (
         <MetricValue
-          value={
-            item.valueFormatter
-              ? item.valueFormatter(data.value)
-              : formatValue(data.value, item.format, item.decimals)
-          }
+          value={format(data.value)}
           trend={trend}
+          comparison={
+            data.comparison
+              ? {
+                  value: format(data.comparison.value),
+                  label: data.comparison.label,
+                  info: data.comparison.info,
+                }
+              : undefined
+          }
         />
       ) : null}
     </DashboardItem>

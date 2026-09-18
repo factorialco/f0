@@ -19,6 +19,8 @@ type ChatTextareaFieldProps = {
   isAutocompleteOpen: boolean
   autocompleteListboxId?: string
   activeAutocompleteOptionId?: string
+  isInvalid?: boolean
+  errorMessageId?: string
   /** When true, a typed `@mention` / ghost completion is shown via the overlay
    * and the textarea text is hidden (caret stays visible). */
   hasOverlay: boolean
@@ -60,6 +62,8 @@ export const ChatTextareaField = ({
   isAutocompleteOpen,
   autocompleteListboxId,
   activeAutocompleteOptionId,
+  isInvalid,
+  errorMessageId,
   hasOverlay,
 }: ChatTextareaFieldProps) => {
   return (
@@ -142,6 +146,8 @@ export const ChatTextareaField = ({
         aria-expanded={isAutocompleteOpen}
         aria-controls={autocompleteListboxId}
         aria-activedescendant={activeAutocompleteOptionId}
+        aria-invalid={isInvalid || undefined}
+        aria-describedby={isInvalid ? errorMessageId : undefined}
         className={cn(
           "col-start-1 row-start-1",
           "w-full resize-none bg-transparent outline-none",

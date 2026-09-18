@@ -192,9 +192,9 @@ describe("useSearchPreview", () => {
     const callsBefore = (preview.search as ReturnType<typeof vi.fn>).mock.calls
       .length
     act(() => result.current.onLoadMore())
-    expect((preview.search as ReturnType<typeof vi.fn>).mock.calls.length).toBe(
-      callsBefore
-    )
+    expect(
+      (preview.search as ReturnType<typeof vi.fn>).mock.calls
+    ).toHaveLength(callsBefore)
     expect(result.current.results).toHaveLength(12)
   })
 
@@ -235,9 +235,9 @@ describe("useSearchPreview", () => {
       .length
     act(() => result.current.onLoadMore())
     // No `hasMore`, so load-more is a no-op — no extra fetch.
-    expect((preview.search as ReturnType<typeof vi.fn>).mock.calls.length).toBe(
-      callsBefore
-    )
+    expect(
+      (preview.search as ReturnType<typeof vi.fn>).mock.calls
+    ).toHaveLength(callsBefore)
   })
 
   it("drops a stale response when the query changes before it resolves", async () => {

@@ -185,9 +185,11 @@ const concretelyTypedItem = (
   getItemHref: (value: string, employee?: Employee) =>
     employee ? `/employees/${value}` : undefined,
 })
-void concretelyTypedItem
-
 describe("BreadcrumbCollectionSelect", () => {
+  it("accepts a concretely typed collection item", () => {
+    expect(concretelyTypedItem).toBeTypeOf("function")
+  })
+
   it("seeds the persisted filters and sortings into the fetch", async () => {
     localStorage.setItem(
       STORAGE_KEY,

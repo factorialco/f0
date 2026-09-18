@@ -25,7 +25,7 @@ const EXPORT_PAGE_SIZE = 100
  */
 type DownloadableSource = {
   dataAdapter: {
-    paginationType?: "pages" | "infinite-scroll" | undefined
+    paginationType?: "pages" | "infinite-scroll"
     fetchData: (params: Record<string, unknown>) => unknown
     exportFetchData?: (params: Record<string, unknown>) => unknown
   }

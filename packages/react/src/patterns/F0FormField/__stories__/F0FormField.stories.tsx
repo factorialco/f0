@@ -119,7 +119,7 @@ export const Textarea: Story = {
 /**
  * A number input field.
  */
-export const Number: Story = {
+const NumberField: Story = {
   render() {
     const [value, setValue] = useState<number | undefined>(undefined)
 
@@ -177,7 +177,7 @@ export const Select: Story = {
 /**
  * A date picker field.
  */
-export const Date: Story = {
+const DateField: Story = {
   render() {
     const [value, setValue] = useState<globalThis.Date | undefined>(undefined)
 
@@ -734,3 +734,9 @@ export const LoadingState: Story = {
     )
   },
 }
+
+// Exported under the global's name so the story id stays `--number`.
+export { NumberField as Number }
+
+// Exported under the global's name so the story id stays `--date`.
+export { DateField as Date }

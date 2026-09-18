@@ -27,10 +27,6 @@ import { BaseQuestionProps } from "./types"
 export type { BaseQuestionPropsForOtherQuestionComponents } from "./types"
 export { useQuestionDisabled } from "./useQuestionDisabled"
 
-const TEXT_AREA_STYLE: object = {
-  fieldSizing: "content",
-}
-
 /**
  * Wraps a field that `lockedFields` has frozen. Such a field has no affordance
  * of its own — no lock, since that icon means the whole card is frozen — so the
@@ -238,10 +234,9 @@ export const BaseQuestion = ({
                   onChange={handleChangeTitle}
                   disabled={titleDisabled}
                   className={cn(
-                    "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
+                    "w-full [field-sizing:content] resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                     !answering && titleDisabled && "!cursor-not-allowed"
                   )}
-                  style={TEXT_AREA_STYLE}
                 />
                 <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
                   <span className="opacity-0">{title || titlePlaceholder}</span>
@@ -341,10 +336,9 @@ export const BaseQuestion = ({
               onChange={handleChangeDescription}
               disabled={descriptionDisabled}
               className={cn(
-                "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+                "w-full [field-sizing:content] resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
                 !answering && descriptionDisabled && "!cursor-not-allowed"
               )}
-              style={TEXT_AREA_STYLE}
             />
           </FrozenFieldNotice>
         ) : null}

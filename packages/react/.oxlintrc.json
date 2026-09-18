@@ -1,5 +1,11 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // `pnpm lint` and the CI job cover src/. The repo's own tooling lives
+  // outside it and cannot be type-aware linted at all: .scripts/tsconfig.json
+  // inherits `moduleResolution: "node"`, which tsgolint rejects. Without this,
+  // staging a file in there made `git commit` impossible, because the
+  // pre-commit hook passes staged paths straight to oxlint.
+  "ignorePatterns": [".scripts/**", ".oxlint-plugins/**"],
   "plugins": ["react", "typescript", "vitest", "import", "unicorn", "oxc", "promise"],
   "categories": {
     "correctness": "error"
@@ -285,6 +291,19 @@
     "sonarjs/x-powered-by": "error",
     "sonarjs/xml-parser-xxe": "error",
 
+    // sonarjs rules that were debt and are now fixed.
+    "sonarjs/no-nested-functions": ["error", { "threshold": 5 }], // the default of 4 has 110 hits, most of them JSX callbacks inside hooks
+    "sonarjs/no-identical-functions": "error", // off for stories and tests below, they repeat on purpose
+    "sonarjs/prefer-specific-assertions": "error",
+    "sonarjs/no-redundant-optional": "error",
+    "sonarjs/assertions-in-tests": "error",
+    "sonarjs/no-floating-point-equality": "error",
+    "sonarjs/use-type-alias": "error",
+    "sonarjs/parameterized-tests": "error",
+    "sonarjs/void-use": "error",
+    "sonarjs/no-globals-shadowing": "error",
+    "max-params": ["error", { "max": 4 }], // five or more parameters: move all of them into one options object, do not mix positionals with an object
+
     // eslint-plugin-react, loaded as a JS plugin (`react-js`). It has no type
     // information, so only the syntax-based rules are useful. `f0-react` wraps
     // its jsx-no-leaked-render to check JSX children only, not attributes.
@@ -292,6 +311,14 @@
     "f0-react/jsx-no-leaked-render": ["error", { "validStrategies": ["ternary"] }],
     "react-js/no-deprecated": "error",
     "react-js/no-invalid-html-attribute": "error",
+
+    // RATCHET. On as warnings. `pnpm lint` hides warnings (`--quiet`);
+    // `pnpm check:lint-debt` compares them per file against
+    // .scripts/lint-debt.json, a baseline that may only shrink. Add a rule
+    // here when it has too many hits to fix in one PR.
+    "sonarjs/cognitive-complexity": "warn", // 187 at the default threshold of 15
+    "f0-styles/no-inline-styles": "warn", // see the src/ui override below
+    "f0-i18n/no-untranslated-copy": "warn", // 133; copy must come from useI18n()/t()
 
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.
@@ -315,21 +342,7 @@
     "react/rules-of-hooks": "off", // 65 from the _Component naming convention, 414 from story render functions
     "import/named": "off", // nursery rule, false positives
     "import/export": "off", // nursery rule, false positives on export *
-    "sonarjs/cognitive-complexity": "off", // 143
-    "sonarjs/no-nested-functions": "off", // 110 at depth 4, 17 at depth 5
-    "sonarjs/prefer-specific-assertions": "off", // 75
-    "sonarjs/no-identical-functions": "off", // 51
-    "sonarjs/pseudo-random": "off", // 41; Math.random for ids and shuffles, not security
-    "sonarjs/no-redundant-optional": "off", // 35
-    "sonarjs/redundant-type-aliases": "off", // 31; public aliases like type ColId = string
     "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
-    "sonarjs/assertions-in-tests": "off", // 23
-    "sonarjs/no-floating-point-equality": "off", // 22
-    "sonarjs/use-type-alias": "off", // 21
-    "sonarjs/parameterized-tests": "off", // 12
-    "sonarjs/super-linear-regex": "off", // 10
-    "sonarjs/void-use": "off", // 10
-    "sonarjs/no-globals-shadowing": "off", // 6; story exports named Error
     "react-js/no-unstable-nested-components": "off", // 25
     "react-js/jsx-no-constructed-context-values": "off", // 35
     "react-js/no-unused-prop-types": "off", // 34
@@ -340,6 +353,9 @@
     "typescript/no-unnecessary-type-assertion": "off", // tsgolint (TS 7 semantics) reports assertions tsc 5.9 still needs; the autofix broke the build
 
     // OFF ON PURPOSE. Not planned to be enabled.
+    "sonarjs/pseudo-random": "off", // Math.random is used for ids and shuffles, never for security
+    "sonarjs/redundant-type-aliases": "off", // aliases like `type ColId = string` name intent, and most are exported
+    "sonarjs/super-linear-regex": "off", // the flagged regexes run on short strings we build ourselves
     "typescript/ban-types": "off", // deprecated upstream; it bans `(string & {})`, which keeps autocomplete on open string unions. no-unsafe-function-type covers the useful part
     "oxc/no-map-spread": "off", // wants Object.assign onto the mapped item, which mutates the input; props and state are immutable here. Its autofix also breaks code (oxlint 1.43)
     "typescript/no-namespace": "off", // namespaces are allowed
@@ -368,6 +384,8 @@
   "jsPlugins": [
     "eslint-plugin-react-refresh",
     "./.oxlint-plugins/f0-security/index.js",
+    "./.oxlint-plugins/f0-styles/index.js",
+    "./.oxlint-plugins/f0-i18n/index.js",
     "./.oxlint-plugins/f0-react/index.js",
     "eslint-plugin-sonarjs",
     {
@@ -380,6 +398,35 @@
     }
   ],
   "overrides": [
+    {
+      // Strings here are not shipped product copy. Generated icon/flag glyphs,
+      // sample data and Storybook helpers never reach a user; component-status
+      // is the contributor-facing maturity dashboard; and the dictionary files
+      // ARE the translations.
+      "files": [
+        "src/component-status/**",
+        "src/icons/**",
+        "src/flags/**",
+        "src/mocks/**",
+        "src/testing/**",
+        "src/examples/**",
+        "src/lib/storybook-utils/**",
+        "src/lib/providers/i18n/**",
+        "**/*.factory.*",
+        "**/*.fixture.*",
+        "**/*.test-d.ts",
+        "**/__storybook__/**"
+      ],
+      "rules": { "f0-i18n/no-untranslated-copy": "off" }
+    },
+    {
+      // src/ui is third-party primitive wrappers (Radix, shadcn) — generated or
+      // re-synced from upstream and never re-exported publicly. Their styling is
+      // upstream's decision, and a shrink-only baseline over regenerated code
+      // fights every sync.
+      "files": ["src/ui/**"],
+      "rules": { "f0-styles/no-inline-styles": "off" }
+    },
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
       "rules": {
@@ -414,11 +461,37 @@
         "**/*.stories.*",
         "**/__stories__/**",
         "**/*.test.*",
-        "**/__tests__/**"
+        "**/*.spec.*",
+        "**/__tests__/**",
+        "**/mocks/**",
+        "**/__mocks__/**"
       ],
       "rules": {
         "no-console": "off",
-        "no-await-in-loop": "off" // stories and tests step through flows one await at a time
+        "no-await-in-loop": "off", // stories and tests step through flows one await at a time
+        "sonarjs/no-identical-functions": "off", // each story and test case reads on its own
+        "sonarjs/cognitive-complexity": "off", // fixture tables and story flows score on their size, splitting them makes them harder to read
+        "f0-styles/no-inline-styles": "off", // demo scaffolding, not shipped styling
+        "f0-i18n/no-untranslated-copy": "off" // fixture and demo copy is never translated
+      }
+    },
+    {
+      // Hand-run generators (`node src/patterns/F0Map/styles/buildStyles.mjs`).
+      // Their score is the shape of a data table — one row per colour, each
+      // picking a light or dark value — and splitting that up is what would
+      // make it unreadable. Not shipped code, like `.scripts/**` above.
+      "files": ["**/*.mjs"],
+      "rules": {
+        "sonarjs/cognitive-complexity": "off"
+      }
+    },
+    {
+      // Extracted from @radix-ui/react-select and kept diffable against the
+      // upstream file it names (see the directory's README), so its functions
+      // are not ours to reshape.
+      "files": ["**/components/radix-ui/**"],
+      "rules": {
+        "sonarjs/cognitive-complexity": "off"
       }
     },
     {

@@ -62,6 +62,7 @@ export type OnLoadDataCallback<
   Filters extends FiltersDefinition,
 > = (data: {
   totalItems: number | undefined
+  selectableTotal?: number
   filters: FiltersState<Filters>
   search: string | undefined
   isInitialLoading: boolean

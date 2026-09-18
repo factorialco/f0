@@ -2,7 +2,12 @@ import { format, isAfter, isBefore, isEqual, max, min } from "date-fns"
 import { Matcher } from "react-day-picker"
 import { GranularityDefinition } from "./granularities"
 import { rangeSeparator } from "./granularities/consts"
-import { DateRange, DateRangeComplete, DateRangeString } from "./types"
+import {
+  DateRange,
+  DateRangeComplete,
+  DateRangeString,
+  OptionalCalendarSelection,
+} from "./types"
 
 /**
  * Converts a date-fns format string to a human-readable placeholder pattern.
@@ -29,7 +34,7 @@ export const earliestDate = (a?: Date, b?: Date): Date | undefined =>
   a && b ? min([a, b]) : (a ?? b)
 
 export const toDateRange = (
-  value: Date | DateRange | undefined | null
+  value: OptionalCalendarSelection
 ): DateRange | undefined => {
   if (value instanceof Date) {
     return { from: value }
@@ -99,7 +104,7 @@ export const formatDate = (date: Date, formatStr: string): string => {
  * @returns
  */
 export const formatDateRange = (
-  date: Date | DateRange | undefined | null,
+  date: OptionalCalendarSelection,
   formatStr: string
 ): DateRangeString => {
   const dateRange = toDateRange(date)
@@ -120,7 +125,7 @@ export const formatDateRange = (
 }
 
 export const formatDateToString = (
-  date: Date | DateRange | undefined | null,
+  date: OptionalCalendarSelection,
   formatStr: string
 ): string => {
   const dateRange = formatDateRange(date, formatStr)
@@ -133,10 +138,8 @@ export const formatDateToString = (
   return `${from}${toPart}`
 }
 
-export function toGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
->(
-  date: Date | DateRange | undefined | null,
+export function toGranularityDateRange<T extends OptionalCalendarSelection>(
+  date: OptionalCalendarSelection,
   fromFn: (date: Date) => Date,
   toFn: (date: Date) => Date
 ): T extends Date | DateRange ? DateRangeComplete : T {

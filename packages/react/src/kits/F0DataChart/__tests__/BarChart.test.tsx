@@ -189,6 +189,175 @@ beforeEach(() => {
   containerSize.height = 320
 })
 
+describe("BarChart — reference lines", () => {
+  const props = {
+    type: "bar" as const,
+    categories: ["People", "Sales", "Operations"],
+    series: [{ name: "Salary gap", data: [24.98, 12.17, 9.4] }],
+  }
+
+  beforeEach(() => {
+    containerSize.width = 720
+  })
+
+  // The whole point: a constant drawn once across the plot, not repeated per
+  // category, where it would claim to be a quantity each category has.
+  it("draws one dashed markLine for the value, not a series per category", () => {
+    render(
+      <F0DataChart
+        {...props}
+        referenceLines={[{ value: 11, label: "Peer median" }]}
+      />
+    )
+
+    const option = getLatestOption()
+    const withMarkLine = option.series.filter(
+      (s: { markLine?: unknown }) => s.markLine
+    )
+    expect(withMarkLine).toHaveLength(1)
+    expect(withMarkLine[0].markLine.data).toEqual([
+      expect.objectContaining({ yAxis: 11 }),
+    ])
+    expect(withMarkLine[0].markLine.data[0].lineStyle.type).toBe("dashed")
+    expect(withMarkLine[0].markLine.data[0].label).toMatchObject({
+      show: true,
+      formatter: "Peer median",
+    })
+    // The data series is untouched — one bar per category, as authored.
+    expect(option.series[0].data).toHaveLength(3)
+  })
+
+  it("keeps the line out of the legend", () => {
+    render(
+      <F0DataChart
+        {...props}
+        referenceLines={[{ value: 11, label: "Peer median" }]}
+      />
+    )
+
+    const option = getLatestOption()
+    const lineSeries = option.series.find(
+      (s: { markLine?: unknown }) => s.markLine
+    )
+    expect(option.legend?.data ?? []).not.toContain(lineSeries.name)
+  })
+
+  it("draws several, and an unlabelled one", () => {
+    render(
+      <F0DataChart
+        {...props}
+        referenceLines={[
+          { value: 11, label: "Peer median" },
+          { value: 19, solid: true },
+        ]}
+      />
+    )
+
+    const option = getLatestOption()
+    const marks = option.series.find((s: { markLine?: unknown }) => s.markLine)
+      .markLine.data
+    expect(marks).toHaveLength(2)
+    expect(marks[1].lineStyle.type).toBe("solid")
+    expect(marks[1].label).toEqual({ show: false })
+  })
+
+  // Horizontal bars measure along the X axis. Pinned to Y — the default for
+  // vertical bars and lines — the line lands off the plot and never renders.
+  it("pins the line to the axis the values are on", () => {
+    render(
+      <F0DataChart
+        {...props}
+        orientation="horizontal"
+        referenceLines={[{ value: 11, label: "Peer median" }]}
+      />
+    )
+
+    const marks = getLatestOption().series.find(
+      (s: { markLine?: unknown }) => s.markLine
+    ).markLine.data
+    expect(marks[0]).toMatchObject({ xAxis: 11 })
+    expect(marks[0].yAxis).toBeUndefined()
+  })
+
+  // A bar chart triggers its tooltip on the ITEM, so the pointer does reach the
+  // mark. ECharts routes that hover to the chart's GLOBAL tooltip rather than
+  // to the series' own, so the line has to be recognised there — otherwise the
+  // reader is shown the internal series name and a bare number.
+  it("answers its own hover with its label, value and description", () => {
+    render(
+      <F0DataChart
+        {...props}
+        valueFormatter={(v: number) => `${v}%`}
+        referenceLines={[
+          {
+            value: 11,
+            label: "Peer median",
+            description: "Companies in Spain with 51–200 employees",
+          },
+        ]}
+      />
+    )
+
+    const option = getLatestOption()
+    const lineSeries = option.series.find(
+      (s: { markLine?: unknown }) => s.markLine
+    )
+    // A silent mark receives no pointer events at all, which is what kept this
+    // from ever firing.
+    expect(lineSeries.silent).toBe(false)
+    expect(lineSeries.markLine.silent).toBe(false)
+
+    const html = option.tooltip.formatter({
+      seriesName: lineSeries.name,
+      dataIndex: 0,
+      value: 11,
+    })
+    expect(html).toContain("Peer median")
+    expect(html).toContain("11%")
+    expect(html).toContain("Companies in Spain with 51")
+    // Never the internal series name.
+    expect(html).not.toContain("__reference_lines__")
+  })
+
+  // Repeating a constant on every bar's card buries the bar's own figure under
+  // a sentence that never changes.
+  it("stays out of each bar's own tooltip", () => {
+    render(
+      <F0DataChart
+        {...props}
+        valueFormatter={(v: number) => `${v}%`}
+        referenceLines={[
+          {
+            value: 11,
+            label: "Peer median",
+            description: "Companies in Spain with 51–200 employees",
+          },
+        ]}
+      />
+    )
+
+    const html = getLatestOption().tooltip.formatter({
+      seriesName: "Salary gap",
+      name: "Sales",
+      value: 12.17,
+      dataIndex: 1,
+      marker: "",
+    })
+    expect(html).toContain("Sales")
+    expect(html).not.toContain("Peer median")
+  })
+
+  it("adds nothing when a chart declares none", () => {
+    render(<F0DataChart {...props} />)
+
+    const option = getLatestOption()
+    expect(
+      option.series.filter((s: { markLine?: unknown }) => s.markLine)
+    ).toHaveLength(0)
+    expect(option.series).toHaveLength(1)
+  })
+})
+
 describe("BarChart — responsive breakpoints", () => {
   const verticalProps = {
     type: "bar" as const,
@@ -626,8 +795,8 @@ describe("BarChart — stacked segment polish", () => {
     const series = getMainSeries()
     for (const entry of series) {
       expect(entry?.emphasis?.focus).toBe("series")
-      expect(entry?.blur?.itemStyle?.opacity).toBe(0.4)
-      expect(entry?.blur?.label?.opacity).toBe(0.4)
+      expect(entry?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
+      expect(entry?.blur?.label?.opacity).toBeCloseTo(0.4)
     }
   })
 
@@ -652,7 +821,7 @@ describe("BarChart — stacked segment polish", () => {
     // [main, target] — the ghost is a separate series, so `focus: "series"`
     // blurs it too; it must dim to the same 40%.
     const target = getMainSeries()[1]
-    expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
+    expect(target?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
   })
 
   it("runs the blur cross-fade without animating entrance or updates", () => {
@@ -714,7 +883,7 @@ describe("BarChart — stacked segment polish", () => {
       // just arrives instantly instead of fading.
       expect(getAnimationOptions().stateAnimation?.duration).toBe(0)
       expect(getMainSeries()[0]?.emphasis?.focus).toBe("series")
-      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBe(0.4)
+      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
     })
 
     it("overrides a consumer-provided cross-fade duration", () => {

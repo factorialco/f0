@@ -71,6 +71,9 @@ function qRot(ax: number, ay: number, az: number, ang: number): Q {
 // hot loop doesn't allocate a 3-tuple per call (~1100 allocations/frame saved).
 const _scratchV: V = [0, 0, 0]
 
+// Hot path (runs per vertex per frame). Primitives avoid allocating a vector
+// per call.
+// oxlint-disable-next-line max-params
 function rotVecInto(q: Q, x: number, y: number, z: number, out: V): void {
   const w = q[0]
   const qx = q[1]
@@ -204,6 +207,35 @@ export function createGlobeSpinState(): GlobeSpinState {
 }
 
 /**
+ * Rotate one lens's grid into the caller's pool. Mutates `grid` in place.
+ * Colatitude runs 0..LENS_EDGE[si], so the patch boundary follows the mark's
+ * lens instead of a circle of constant radius.
+ */
+function buildLensGrid(grid: GridPoint[], q: Q): void {
+  for (let li = 0; li <= LAT_STEPS; li++) {
+    const f = li / LAT_STEPS
+    const t = Math.sin(f * Math.PI)
+    const row = li * GRID_STRIDE
+    for (let si = 0; si <= SEGS; si++) {
+      const colat = f * LENS_EDGE[si]
+      const sc = Math.sin(colat)
+      rotVecInto(
+        q,
+        sc * COS_LON[si],
+        Math.cos(colat),
+        sc * SIN_LON[si],
+        _scratchV
+      )
+      const cell = grid[row + si]
+      cell.x = _scratchV[0]
+      cell.y = _scratchV[1]
+      cell.z = _scratchV[2]
+      cell.t = t
+    }
+  }
+}
+
+/**
  * Build one frame of the globe-spin animation into a caller-owned state pool.
  * Returns the count of active (non-culled) quads — those occupy `state.quads[0..count)`
  * after the call, sorted by ascending `avgZ` (back-to-front).
@@ -241,30 +273,7 @@ export function buildFrameInto(
   for (let capIdx = 0; capIdx < 4; capIdx++) {
     const q = _capQs[capIdx]
 
-    // Build the grid for this lens into the pool. Mutates `grid` in place.
-    // Colatitude runs 0..LENS_EDGE[si], so the patch boundary follows the
-    // mark's lens instead of a circle of constant radius.
-    for (let li = 0; li <= LAT_STEPS; li++) {
-      const f = li / LAT_STEPS
-      const t = Math.sin(f * Math.PI)
-      const row = li * GRID_STRIDE
-      for (let si = 0; si <= SEGS; si++) {
-        const colat = f * LENS_EDGE[si]
-        const sc = Math.sin(colat)
-        rotVecInto(
-          q,
-          sc * COS_LON[si],
-          Math.cos(colat),
-          sc * SIN_LON[si],
-          _scratchV
-        )
-        const cell = grid[row + si]
-        cell.x = _scratchV[0]
-        cell.y = _scratchV[1]
-        cell.z = _scratchV[2]
-        cell.t = t
-      }
-    }
+    buildLensGrid(grid, q)
 
     // Build quads from the grid into the pool.
     for (let li = 0; li < LAT_STEPS; li++) {

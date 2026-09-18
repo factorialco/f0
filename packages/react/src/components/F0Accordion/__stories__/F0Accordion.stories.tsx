@@ -129,7 +129,7 @@ export const WithSegmentedControlAndDropdown: Story = {
     const triggers = canvas.getAllByRole("button", {
       name: /^Expand |^Collapse /,
     })
-    expect(triggers.length).toBe(baseItems.length)
+    expect(triggers).toHaveLength(baseItems.length)
   },
 }
 

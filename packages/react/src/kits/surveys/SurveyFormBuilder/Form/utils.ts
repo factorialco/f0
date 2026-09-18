@@ -51,40 +51,34 @@ export function reconstructElements(
   let currentSection: SectionElement | null = null
   let currentQuestions: QuestionElement[] = []
 
-  for (const item of flatItems) {
-    if (item.type === "section-header") {
-      if (currentSection) {
-        result.push({
-          type: "section",
-          section: { ...currentSection, questions: currentQuestions },
-        })
-      }
-      currentSection = item.section
-      currentQuestions = []
-    } else if (item.type === "section-end") {
-      if (currentSection) {
-        result.push({
-          type: "section",
-          section: { ...currentSection, questions: currentQuestions },
-        })
-        currentSection = null
-        currentQuestions = []
-      }
-    } else {
-      if (currentSection) {
-        currentQuestions.push(item.question)
-      } else {
-        result.push({ type: "question", question: item.question })
-      }
+  /** Close the section being accumulated, if there is one. */
+  const closeSection = () => {
+    if (!currentSection) {
+      return
     }
-  }
-
-  if (currentSection) {
     result.push({
       type: "section",
       section: { ...currentSection, questions: currentQuestions },
     })
+    currentSection = null
+    currentQuestions = []
   }
+
+  for (const item of flatItems) {
+    if (item.type === "section-header") {
+      closeSection()
+      currentSection = item.section
+      currentQuestions = []
+    } else if (item.type === "section-end") {
+      closeSection()
+    } else if (currentSection) {
+      currentQuestions.push(item.question)
+    } else {
+      result.push({ type: "question", question: item.question })
+    }
+  }
+
+  closeSection()
 
   return result
 }

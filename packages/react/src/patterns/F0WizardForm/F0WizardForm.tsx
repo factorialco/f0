@@ -158,17 +158,27 @@ function useWizardActionBar() {
 // Step derivation
 // =============================================================================
 
-function deriveWizardSteps(
-  sectionIds: string[],
+type DeriveWizardStepsOptions = {
+  sectionIds: string[]
   sections:
     | Record<string, F0SectionConfig | F0PerSectionSectionConfig>
-    | undefined,
-  customSteps: F0WizardFormStep[] | undefined,
-  isStepAllDisabled: (sectionIds: string[]) => boolean,
-  onNextForStep: (stepIndex: number) => () => Promise<void>,
-  hasErrorsForStep?: (stepIndex: number) => boolean,
+    | undefined
+  customSteps: F0WizardFormStep[] | undefined
+  isStepAllDisabled: (sectionIds: string[]) => boolean
+  onNextForStep: (stepIndex: number) => () => Promise<void>
+  hasErrorsForStep?: (stepIndex: number) => boolean
   isStepDataFilled?: (stepIndex: number) => boolean
-): F0WizardStep[] {
+}
+
+function deriveWizardSteps({
+  sectionIds,
+  sections,
+  customSteps,
+  isStepAllDisabled,
+  onNextForStep,
+  hasErrorsForStep,
+  isStepDataFilled,
+}: DeriveWizardStepsOptions): F0WizardStep[] {
   const stepsConfig: F0WizardFormStep[] =
     customSteps ??
     sectionIds.map((id) => ({
@@ -373,15 +383,15 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
   const wizardSteps = useMemo(
     () =>
-      deriveWizardSteps(
+      deriveWizardSteps({
         sectionIds,
         sections,
-        effectiveSteps,
+        customSteps: effectiveSteps,
         isStepAllDisabled,
         onNextForStep,
         hasErrorsForStep,
-        autoSkipCompletedSteps ? isStepDataFilled : undefined
-      ),
+        isStepDataFilled: autoSkipCompletedSteps ? isStepDataFilled : undefined,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       sectionIds,
@@ -718,15 +728,15 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
 
   const wizardSteps = useMemo(
     () =>
-      deriveWizardSteps(
+      deriveWizardSteps({
         sectionIds,
         sections,
-        resolvedSteps,
+        customSteps: resolvedSteps,
         isStepAllDisabled,
         onNextForStep,
         hasErrorsForStep,
-        autoSkipCompletedSteps ? isStepDataFilled : undefined
-      ),
+        isStepDataFilled: autoSkipCompletedSteps ? isStepDataFilled : undefined,
+      }),
     [
       sectionIds,
       sections,

@@ -228,6 +228,6 @@ describe("SidebarTabs persistence", () => {
     const onTabChange = vi.fn()
     renderTabs({ onTabChange })
     expect(onTabChange).not.toHaveBeenCalled()
-    expect(localStorage.length).toBe(0)
+    expect(localStorage).toHaveLength(0)
   })
 })

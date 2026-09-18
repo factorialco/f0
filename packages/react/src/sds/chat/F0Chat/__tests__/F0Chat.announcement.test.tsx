@@ -31,7 +31,7 @@ const FACTORIAL = { id: "factorial", name: "Factorial" }
 const welcome: F0ChatMessage = {
   id: "m1",
   author: FACTORIAL,
-  body: "Hi Jordan. This is your team's chat.",
+  body: "👋 Hi Jordan! Welcome to your company's chat.",
   createdAt: "2026-06-21T22:14:00",
   isMine: false,
 }
@@ -45,10 +45,10 @@ const cardMessage = (onClick?: () => void): F0ChatMessage => ({
   attachments: [
     {
       kind: "card",
-      title: "Give your team access",
-      description: "One step.",
+      title: "Set up the chat for your company",
+      description: "Choose who sees each channel and who can post 🔐",
       action: {
-        label: "Give your team access",
+        label: "Manage permissions",
         onClick: onClick ?? (() => {}),
       },
     },
@@ -97,7 +97,7 @@ describe("announcement channel", () => {
 
     // The messages are there…
     expect(
-      screen.getByText("Hi Jordan. This is your team's chat.")
+      screen.getByText("👋 Hi Jordan! Welcome to your company's chat.")
     ).toBeInTheDocument()
     // …and nothing to answer them with.
     expect(
@@ -108,11 +108,28 @@ describe("announcement channel", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("says who can post, where the composer would be", () => {
+  it("says who can post, at the end of the transcript", () => {
     renderChat(makeRuntime())
     expect(screen.getByTestId("chat-read-only-notice")).toHaveTextContent(
       "Only Factorial can send messages"
     )
+  })
+
+  it("puts the notice INSIDE the scroll, so it scrolls away", () => {
+    // It used to be a fixed strip under the transcript, charging every screen
+    // for a sentence worth reading once. As the transcript's footer it is
+    // there when you arrive at the bottom, and gone as soon as you scroll up.
+    renderChat(makeRuntime())
+
+    const notice = screen.getByTestId("chat-read-only-notice")
+    const scroller = screen.getByTestId("chat-message-viewport")
+    expect(scroller.contains(notice)).toBe(true)
+    // Last, after the messages — not floating over them.
+    expect(
+      notice.compareDocumentPosition(
+        screen.getByText("👋 Hi Jordan! Welcome to your company's chat.")
+      ) & Node.DOCUMENT_POSITION_PRECEDING
+    ).toBeTruthy()
   })
 
   // The whole hover affordance, not just its contents: an ellipsis that opens
@@ -160,10 +177,12 @@ describe("announcement channel", () => {
     renderChat(makeRuntime({ messages: [welcome, cardMessage(onClick)] }))
 
     const card = screen.getByTestId("chat-card-attachment")
-    expect(within(card).getByText("One step.")).toBeInTheDocument()
+    expect(
+      within(card).getByText("Choose who sees each channel and who can post 🔐")
+    ).toBeInTheDocument()
 
     await userEvent.click(
-      within(card).getByRole("button", { name: "Give your team access" })
+      within(card).getByRole("button", { name: "Manage permissions" })
     )
     expect(onClick).toHaveBeenCalledTimes(1)
   })

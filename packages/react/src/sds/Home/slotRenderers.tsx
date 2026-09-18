@@ -35,6 +35,7 @@ import {
   type DescriptionPart,
   type HomeListItemAction,
 } from "./HomeListItem"
+import { useHomeWidgetTracking } from "./tracking"
 
 /**
  * The item-churn animation, re-exported so a BESPOKE renderer draws its items
@@ -464,6 +465,25 @@ export type ListItem<S extends ListSchema = ListSchema> = {
   id: string | number
   /** An accent dot on the left glyph — unseen/pending. */
   unread?: boolean
+  /**
+   * What this row says ON HOVER: its own line of plain text, drawn as a tooltip
+   * over the whole row.
+   *
+   * For what the row could not fit. A second line is ONE truncating line —
+   * around 40 characters at the rail's width — so a row with more to say ends
+   * in an ellipsis; this is where the rest can live. Written SEPARATELY rather
+   * than repeating the description, so the tooltip can say the fuller thing (a
+   * task's actual detail, an expense's full breakdown) instead of the
+   * abbreviation the line had room for.
+   *
+   * Per ROW, like `unread` and `actions`: whether there is more to say is a
+   * state of the row's own data. Rows without it hover silently — an empty
+   * tooltip promises information that isn't there.
+   *
+   * It also OVERRIDES what a {@link ListSchema.compact} row would otherwise
+   * surface, which is its folded-away description.
+   */
+  tooltipDescription?: string
   /**
    * What can be DONE to this row, revealed on hover (and on focus, so they are
    * reachable by keyboard) behind a fade over whatever the row trails. Keep it
@@ -976,6 +996,7 @@ type ListRow = {
   subtitleCritical?: boolean
   description?: string | DescriptionPart[]
   descriptionCritical?: boolean
+  tooltipDescription?: string
   unread?: boolean
   avatar?: object & { icon?: IconType; color?: ListIconColor }
   module?: ModuleId
@@ -1091,6 +1112,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const { schema, items } = params
   const allRows = items as ListRow[]
   const [expanded, setExpanded] = useState(false)
+  const { reportAction, reportItemActivate } = useHomeWidgetTracking()
   // ASKED, not measured: the slot is built before the frame renders but drawn
   // inside it, so the card it landed in is the one thing it can only learn from
   // context. `false` for a list rendered outside a `Widget`.
@@ -1119,13 +1141,17 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
       {/* Keyed by the row's OWN id, so a row that goes away is the one that
           animates out and the rest close the gap. */}
       <HomeSlotItems>
-        {rows.map(({ href, description, ...row }) => {
-          // A compact row hides its second line and offers it on hover
-          // instead — as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
-          // segmented description arrives dot-joined and untinted. Computed
-          // rather than checking `description` for truthiness: an empty parts
-          // list is a row with nothing to say, and `[]` is truthy.
-          const tooltip = compact ? descriptionText(description) : ""
+        {rows.map(({ href, description, ...row }, index) => {
+          // What the row says on hover: its own `tooltipDescription` where it
+          // wrote one — the fuller thing the line had no room for — and
+          // otherwise, in a COMPACT list, the second line that folded away.
+          // Both as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
+          // segmented description arrives dot-joined and untinted. The fallback
+          // is computed rather than checking `description` for truthiness: an
+          // empty parts list is a row with nothing to say, and `[]` is truthy.
+          const tooltip =
+            row.tooltipDescription ??
+            (compact ? descriptionText(description) : "")
           const node = (
             <HomeListItem
               title={row.title}
@@ -1138,13 +1164,15 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
               right={listRight(schema.right, row, rightAvatarSize)}
               actions={row.actions}
               href={schema.clickBehavior === "link" ? href : undefined}
+              onActivate={() => reportItemActivate(row.id, index + 1)}
             />
           )
           return (
             <HomeSlotItem key={row.id} animated={!isBulkChange}>
               {tooltip ? (
-                // The hidden second line surfaces on hover. The span is the
-                // tooltip's trigger — HomeListItem doesn't forward trigger props.
+                // What the row had no room for surfaces on hover. The span is
+                // the tooltip's trigger — HomeListItem doesn't forward trigger
+                // props.
                 <Tooltip label={tooltip}>
                   <span className="block">{node}</span>
                 </Tooltip>
@@ -1171,7 +1199,14 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             label={
               expanded ? "View less" : `View more (${allRows.length - max})`
             }
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              // Reported on the way OUT of the cap only: collapsing the list
+              // again is not a reader reaching for more.
+              if (!expanded) {
+                reportAction("view-more")
+              }
+              setExpanded(!expanded)
+            }}
           />
         </div>
       ) : null}

@@ -46,6 +46,9 @@ export interface ViewportRect {
  * Whether a node box (top-left `x`/`y`, size `width`/`height`) overlaps `rect`.
  * Pure AABB intersection — the core predicate behind node-array windowing.
  */
+// Hot path (runs per node on every pan and zoom). Primitives avoid allocating
+// a box object per call.
+// oxlint-disable-next-line max-params
 export function nodeIntersectsRect(
   x: number,
   y: number,

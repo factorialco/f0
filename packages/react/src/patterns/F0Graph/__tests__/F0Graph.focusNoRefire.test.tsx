@@ -87,7 +87,7 @@ describe("F0Graph — focusedNode fly-to does not re-fire on layout changes", ()
     settle()
 
     // No extra fly-to: the effect only reacts to a focusedNode change.
-    expect(mockReactFlow.fitView.mock.calls.length).toBe(afterEntry)
+    expect(mockReactFlow.fitView.mock.calls).toHaveLength(afterEntry)
   })
 
   it("applies the initial frame once and does not re-frame on a later collapse", () => {
@@ -124,7 +124,7 @@ describe("F0Graph — focusedNode fly-to does not re-fire on layout changes", ()
     settle()
 
     // No re-frame: the initial frame is one-shot.
-    expect(mockReactFlow.setCenter.mock.calls.length).toBe(afterEntry)
+    expect(mockReactFlow.setCenter.mock.calls).toHaveLength(afterEntry)
   })
 
   it("still flies when focusedNode changes to a new value", () => {
@@ -153,7 +153,7 @@ describe("F0Graph — focusedNode fly-to does not re-fire on layout changes", ()
     )
     settle()
 
-    expect(mockReactFlow.fitView.mock.calls.length).toBe(afterEntry + 1)
+    expect(mockReactFlow.fitView.mock.calls).toHaveLength(afterEntry + 1)
     expect(mockReactFlow.fitView).toHaveBeenLastCalledWith(
       expect.objectContaining({ nodes: [{ id: "a" }] })
     )

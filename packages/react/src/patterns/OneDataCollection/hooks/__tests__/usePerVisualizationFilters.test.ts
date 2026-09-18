@@ -516,7 +516,7 @@ describe("usePerVisualizationFilters", () => {
 
       rerender({ currentViz: 0 })
 
-      expect(sourceSetCurrentFilters.mock.calls.length).toBe(
+      expect(sourceSetCurrentFilters.mock.calls).toHaveLength(
         callCountAfterFirst
       )
     })

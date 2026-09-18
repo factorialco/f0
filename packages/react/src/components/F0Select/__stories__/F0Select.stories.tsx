@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { IconType } from "@/components/F0Icon"
 import { inputFieldStatus } from "@/components/F0InputField"
 import {
@@ -27,6 +27,28 @@ const icons: Record<string, IconType> = {
   dark: Appearance,
   system: Desktop,
 }
+
+/**
+ * The value the grouping stories start out with.
+ *
+ * Grouping sorts the first page by the group field, so a record with a low id
+ * is not on it — the trigger has no label for the selection and falls back to
+ * "…". `defaultItem` is how a consumer names a pre-selected value the first
+ * page does not carry, so the stories that ship with one selected pass it.
+ */
+const GROUPED_PRESELECTED_VALUE = "42"
+
+const groupedPreselectedItem = () => {
+  const item = mockItems.find((i) => i.value === GROUPED_PRESELECTED_VALUE)
+  return item
+    ? {
+        value: item.value,
+        label: item.label,
+        avatar: item.avatar,
+        description: item.description,
+      }
+    : undefined
+}
 const items = [
   {
     id: "light",
@@ -48,6 +70,14 @@ const items = [
   },
 ]
 
+const themeOptions = items.map((item) => ({
+  value: item.id,
+  label: item.name,
+  icon: icons[item.id],
+  description: item.description,
+  item,
+}))
+
 const meta: Meta = {
   title: "Select",
   component: F0Select,
@@ -61,6 +91,7 @@ const meta: Meta = {
           "<p>Renders a select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so it can handle a large number of items.</p>" +
           '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
+          "<p>With <code>showSearchBox</code>, a field select is searched from its own trigger: the field is the search box, so there is one place to look and one place to type. Filters are what keep the search box in the dropdown instead, beside the filter picker. A grouping selector does not move the search: the dropdown's row keeps it and the field keeps the query.</p>" +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
@@ -140,8 +171,11 @@ const meta: Meta = {
         "Custom trigger content for the select. When provided, replaces the default input field trigger",
     },
     showSearchBox: {
+      control: "boolean",
       description:
-        "Shows a search box. The component will filter the items by name and by description unless searchFunc will be in use",
+        "Whether the list can be searched. " +
+        "Where the search field lands depends on the filters: with no filters the trigger itself becomes the search field, and with filters it stays in the dropdown's top row beside the filter picker. " +
+        '`variant="inline"`, `asList` and custom triggers always use the row. Filtering matches label, description and a metadata dial code unless `searchFn` is in use.',
     },
     searchValue: {
       description: "Default value for the search box",
@@ -233,7 +267,6 @@ const meta: Meta = {
       }
     }),
     disabled: false,
-    showSearchBox: false,
   },
   decorators: [
     ((Story, { args }) => {
@@ -705,10 +738,11 @@ export const Clearable: Story = {
   },
 }
 
+/** `searchFn` replaces the built-in matching over label, description and dial code. */
 export const WithSearchBox: Story = {
   args: {
     searchEmptyMessage: "No results found",
-    searchBoxPlaceholder: "Search for a theme",
+    placeholder: "Search for a theme",
   },
   render: (args) => {
     return (
@@ -737,7 +771,7 @@ export const WithActions: Story = {
   args: {
     showSearchBox: true,
     searchEmptyMessage: "No results found",
-    searchBoxPlaceholder: "Search for a theme",
+    placeholder: "Search for a theme",
     label: "Select a theme",
     actions: [
       {
@@ -814,7 +848,10 @@ export const WithDataSourceGrouping: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    // Without this the trigger reads "…": grouping sorts the first page by the
+    // group field, so this record is not in it and there is no label to show.
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -896,7 +933,8 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
     placeholder: "Select a value",
     showSearchBox: true,
     onChange: fn(),
-    value: "option-2",
+    value: GROUPED_PRESELECTED_VALUE,
+    defaultItem: groupedPreselectedItem(),
     source: createDataSourceDefinition<MockItem>({
       grouping: {
         mandatory: true,
@@ -947,6 +985,341 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
   },
 }
 
+/**
+ * Grouping nested more than one level deep. The `grouping.groupBy` map is the
+ * same one a single-level select uses — the extra levels are chosen in the
+ * grouping STATE, where `thenBy` names further fields of that map in the order
+ * they nest. Each level reuses its field's own `name` and `label`.
+ *
+ * The records themselves are listed under the deepest level only, and a
+ * sub-group's counter is the number of records in THAT branch (five offices'
+ * worth of Engineers is not what "Barcelona" under "Engineer" means).
+ */
+export const WithMultiLevelGrouping: Story = {
+  args: {
+    label: "Multi-level grouping",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          legalEntity: {
+            name: "Legal entity",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.legalEntity === groupId).length,
+          },
+          workplace: {
+            name: "Workplace",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.workplace === groupId).length,
+          },
+          role: {
+            name: "Role",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+        },
+      },
+      // Legal entity → workplace → role.
+      defaultGrouping: {
+        field: "legalEntity",
+        thenBy: [{ field: "workplace" }, { field: "role" }],
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: item.description,
+    }),
+  },
+}
+
+/**
+ * The hierarchy shape: pick a TASK, with its project and subproject as the two
+ * levels of header above it.
+ *
+ * Three things this story exists to show, because each is easy to get wrong:
+ *
+ * 1. Group by ID, label by NAME. "Backend" is a subproject of both Apollo and
+ *    Zephyr — grouping by name would fuse them into one list. The `groupBy`
+ *    fields are dotted paths to the ids (`project.id`), and each level's
+ *    `label` resolves the id it is handed. `label` may return a promise, so a
+ *    name that has to be fetched is a valid answer here.
+ * 2. The row's own label is short ("Ship the public API") because the headers
+ *    above it supply the rest. The TRIGGER has no headers, so `getSelectedLabel`
+ *    puts the path back on — leaf first, ancestors in parentheses — otherwise a
+ *    chosen task reads as a bare verb once the dropdown closes. It builds that
+ *    from the RECORD, so it still reads correctly for a selection whose group
+ *    is not in the loaded page.
+ * 3. `hideSelector` takes the grouping picker and its direction toggle away.
+ *    The hierarchy is what this select IS, so there is nothing here for the
+ *    user to choose — and the picker offers one field, which would drop the
+ *    `thenBy` chain and flatten the tree.
+ * 4. A real book of work is NOT uniform, and the list says so. A task with a
+ *    project but no subproject is a row of its project, above the subproject
+ *    headings; one with no project at all belongs to no group and leads the
+ *    list, with no heading over it. Neither is filed under the value it is
+ *    missing — a record with nothing at a level belongs to the level above.
+ */
+const PROJECTS = [
+  { id: "p1", name: "Apollo" },
+  { id: "p2", name: "Zephyr" },
+]
+
+const SUBPROJECTS = [
+  { id: "s1", projectId: "p1", name: "Backend" },
+  { id: "s2", projectId: "p1", name: "Web" },
+  { id: "s3", projectId: "p2", name: "Backend" },
+  { id: "s4", projectId: "p2", name: "Mobile" },
+]
+
+type ProjectTask = {
+  id: string
+  title: string
+  assignee: string
+  project: { id: string; name: string }
+  subproject: { id: string; name: string }
+}
+
+const TASK_TITLES: Record<string, string[]> = {
+  s1: ["Ship the public API", "Add a response cache", "Retire the v1 routes"],
+  s2: ["Dark mode", "Empty states for the dashboard"],
+  s3: ["Rate limits per tenant", "Backfill the audit log"],
+  s4: ["Offline queue", "Push notification opt-in", "Biometric unlock"],
+}
+
+const ASSIGNEES = ["Ada", "Grace", "Hedy", "Katherine", "Radia"]
+
+/** Nothing at this level — the record belongs to the level above. */
+const NONE = { id: "", name: "" }
+
+const projectTasks: ProjectTask[] = [
+  // Belongs to no project at all: it leads the list, under no heading.
+  {
+    id: "loose-1",
+    title: "Write the incident post-mortem",
+    assignee: "Radia",
+    project: NONE,
+    subproject: NONE,
+  },
+  ...SUBPROJECTS.flatMap((subproject, index) => {
+    const project = PROJECTS.find((p) => p.id === subproject.projectId)!
+    return TASK_TITLES[subproject.id].map((title, taskIndex) => ({
+      id: `${subproject.id}-${taskIndex}`,
+      title,
+      assignee: ASSIGNEES[(index + taskIndex) % ASSIGNEES.length],
+      project: { id: project.id, name: project.name },
+      subproject: { id: subproject.id, name: subproject.name },
+    }))
+  }),
+  // In a project but in none of its subprojects: a row of Apollo itself,
+  // sitting above the Backend and Web headings.
+  {
+    id: "p1-loose",
+    title: "Plan the Apollo roadmap",
+    assignee: "Ada",
+    project: { id: "p1", name: "Apollo" },
+    subproject: NONE,
+  },
+]
+
+const nameById = (entities: { id: string; name: string }[], groupId: unknown) =>
+  entities.find((entity) => entity.id === groupId)?.name ?? `${groupId}`
+
+export const WithProjectHierarchyGrouping: Story = {
+  args: {
+    label: "Task",
+    placeholder: "Pick a task",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<ProjectTask>({
+      grouping: {
+        mandatory: true,
+        // The hierarchy is the point of this select, not a view the user picks.
+        // The selector could only take it apart: choosing a field there replaces
+        // the whole grouping, `thenBy` included, and there is no way back to
+        // project > subproject from it.
+        hideSelector: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          "project.id": {
+            name: "Project",
+            label: (groupId) => nameById(PROJECTS, groupId),
+            itemCount: (groupId) =>
+              projectTasks.filter((task) => task.project.id === groupId).length,
+          },
+          "subproject.id": {
+            name: "Subproject",
+            label: (groupId) => nameById(SUBPROJECTS, groupId),
+          },
+        },
+      },
+      // Project → subproject, with the tasks themselves as the rows.
+      defaultGrouping: {
+        field: "project.id",
+        thenBy: [{ field: "subproject.id" }],
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: ({ search, pagination }) =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = projectTasks.filter(
+                (task) =>
+                  !search ||
+                  task.title.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          }),
+      },
+    }),
+    getSelectedLabel: ({ item }: { item?: ProjectTask }) =>
+      item
+        ? `${item.title} (${item.subproject.name}, ${item.project.name})`
+        : "",
+    mapOptions: (task: ProjectTask) => ({
+      value: task.id,
+      label: task.title,
+      description: task.assignee,
+      item: task,
+    }),
+  },
+}
+
+/**
+ * A grouping and a sorting the PRODUCT decides, not the user.
+ *
+ * `hideSelector` on the grouping definition takes the picker away and leaves
+ * the grouping in force — pair it with `mandatory: true` and a
+ * `defaultGrouping`, or the state can still arrive as "no grouping" with no
+ * control left to leave it. Two `groupBy` fields are declared here precisely to
+ * show the picker is hidden because it was asked to be, not because there was
+ * nothing to choose between.
+ *
+ * The sorting is fixed by `defaultSortings` alone: F0Select has never rendered
+ * a sorting control, so a sorting set on the source is already one the user
+ * cannot reach. Grouping appends its own field to what the adapter is asked to
+ * sort by, so a group's records arrive together.
+ */
+export const WithFixedGroupingAndSorting: Story = {
+  args: {
+    label: "Employee",
+    placeholder: "Select an employee",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        hideSelector: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          workplace: {
+            name: "Workplace",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.workplace === groupId).length,
+          },
+          role: {
+            name: "Role",
+            label: (groupId) => groupId,
+          },
+        },
+      },
+      defaultGrouping: { field: "workplace" },
+      sortings: { label: { label: "Name" } },
+      defaultSortings: { field: "label", order: "asc" },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: ({ search, pagination, sortings }) =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = [...mockItems]
+                .filter(
+                  (item) =>
+                    !search ||
+                    item.label.toLowerCase().includes(search.toLowerCase())
+                )
+                .sort((a, b) => {
+                  for (const { field, order } of sortings ?? []) {
+                    const key = field as keyof MockItem
+                    const comparison = String(a[key]).localeCompare(
+                      String(b[key])
+                    )
+                    if (comparison !== 0) {
+                      return order === "desc" ? -comparison : comparison
+                    }
+                  }
+                  return 0
+                })
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          }),
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+  },
+}
 export const WithManyCollapsibleGroups: Story = {
   args: {
     label: "Many Collapsible Groups",
@@ -1372,6 +1745,84 @@ export const MultipleSelectAllWithFilters: Story = {
 }
 
 /**
+ * The default for a static list: the trigger IS the search field, and the
+ * selection is drawn where the text goes until the user types over it.
+ *
+ * The caret never leaves the field, so the text keys keep working. The arrows
+ * move the active option, Enter takes it, Escape or the arrow glyph closes.
+ */
+export const SearchInTheTrigger: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Search themes",
+    showSearchBox: true,
+    value: "dark",
+    clearable: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+
+    const trigger = canvas.getByRole("combobox")
+
+    // The selected label is the field's own text. It resolves asynchronously.
+    await waitFor(async () => expect(trigger).toHaveValue("Dark"))
+
+    // Backspace on a selection edits its label: "Dark" becomes "Dar", the
+    // selection goes, and the list narrows to what is left.
+    trigger.focus()
+    await userEvent.keyboard("{Backspace}")
+
+    await waitFor(async () => expect(trigger).toHaveValue("Dar"))
+    await waitFor(async () =>
+      expect(trigger).toHaveAttribute("aria-expanded", "true")
+    )
+
+    // The field must survive the open dropdown's aria-hidden sweep.
+    await waitFor(async () => expect(body.getByRole("combobox")).toBe(trigger))
+
+    // The rows are virtualized behind the entrance animation, so they arrive
+    // a beat after the keystroke.
+    await waitFor(
+      async () => {
+        const options = body.getAllByRole("option")
+        expect(options).toHaveLength(1)
+        expect(options[0]).toHaveTextContent("Dark")
+      },
+      { timeout: 5000 }
+    )
+
+    // Named on the field rather than focused, which is what keeps the caret
+    // in place while the arrows walk the list.
+    await waitFor(async () =>
+      expect(trigger).toHaveAttribute("aria-activedescendant")
+    )
+    expect(canvasElement.ownerDocument.activeElement).toBe(trigger)
+  },
+}
+
+/** Multiple selection keeps the same field, showing how many are selected. */
+export const SearchInTheTriggerMultiple: Story = {
+  args: {
+    label: "Select themes",
+    placeholder: "Search themes",
+    showSearchBox: true,
+    multiple: true,
+    clearable: true,
+    value: ["light", "dark"],
+  },
+}
+
+/** Without `showSearchBox`, the trigger is a plain button. */
+export const SearchDisabled: Story = {
+  args: {
+    label: "Select a theme",
+    value: undefined,
+    placeholder: undefined,
+  },
+}
+
+/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.
@@ -1549,6 +2000,61 @@ export const Snapshot: Story = {
       },
       { name: "Hint", props: { ...base, hint: "Hint message" } },
     ]
+
+    /**
+     * The variants above render with no value, so they are all the empty
+     * search field. These carry a selection, so the capture covers what the
+     * field draws beside the caret, and the plain button trigger.
+     */
+    const triggerVariants = [
+      {
+        name: "Search field with a selection",
+        props: {
+          ...base,
+          showSearchBox: true,
+          value: "dark",
+          options: themeOptions,
+        },
+      },
+      {
+        name: "Search field with a status pill",
+        props: {
+          ...base,
+          showSearchBox: true,
+          icon: undefined,
+          value: "approved",
+          options: [
+            {
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status" as const,
+                text: "Approved",
+                variant: "positive" as const,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: "Search field, multiple selection",
+        props: {
+          ...base,
+          showSearchBox: true,
+          multiple: true as const,
+          value: ["light", "dark"],
+          options: themeOptions,
+        },
+      },
+      {
+        name: "Button trigger, search off",
+        props: {
+          ...base,
+          value: "dark",
+          options: themeOptions,
+        },
+      },
+    ]
     return (
       <div className="flex flex-col gap-4">
         {selectSizes.map((size) => (
@@ -1569,6 +2075,15 @@ export const Snapshot: Story = {
                   label={`${variant.name} select, ${size}`}
                   onChange={fn()}
                   options={[]}
+                />
+              ))}
+              {triggerVariants.map((variant) => (
+                <F0Select
+                  key={`${size}-${variant.name}`}
+                  size={size}
+                  {...variant.props}
+                  label={`${variant.name}, ${size}`}
+                  onChange={fn()}
                 />
               ))}
             </div>

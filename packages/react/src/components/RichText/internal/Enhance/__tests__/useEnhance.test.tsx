@@ -57,7 +57,7 @@ describe("useEnhance", () => {
       resolveEnhance({ success: true, text: "<p>Enhanced</p>" })
       await enhancePromise
     })
-    expect(editor.view.dom.querySelectorAll(".enhance-highlight").length).toBe(
+    expect(editor.view.dom.querySelectorAll(".enhance-highlight")).toHaveLength(
       0
     )
   })

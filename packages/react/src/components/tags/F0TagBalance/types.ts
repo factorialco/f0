@@ -7,7 +7,7 @@ export interface NumericValue {
   number: number
   units?: string
   unitsPosition?: "left" | "right"
-  decimalPlaces?: number | undefined
+  decimalPlaces?: number
   locale?: string
 }
 

@@ -812,6 +812,30 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
+    const settleBulkAction = (
+      bulkAction: BulkActionDefinition,
+      result: Promise<void>
+    ) => {
+      setInternalBulkActionStatus("loading")
+      result.then(
+        () => {
+          setInternalBulkActionStatus("success")
+          // Always wipe on success — prevents already-processed items from
+          // mixing with new selections made during loading.
+          scheduleDismiss(() => {
+            if (!bulkAction.keepSelection) {
+              clearSelectedItems()
+            }
+            setInternalBulkActionStatus("idle")
+          }, !bulkAction.keepSelection)
+        },
+        () => {
+          setInternalBulkActionStatus("error")
+          actionBarRef.current?.wiggle({ errorHighlight: true })
+        }
+      )
+    }
+
     const mapBulkActions = (
       action: BulkActionDefinition | { type: "separator" }
     ): MappedBulkAction => {
@@ -852,24 +876,7 @@ const OneDataCollectionComp = <
             return
           }
 
-          setInternalBulkActionStatus("loading")
-          ;(result as Promise<void>).then(
-            () => {
-              setInternalBulkActionStatus("success")
-              // Always wipe on success — prevents already-processed items from
-              // mixing with new selections made during loading.
-              scheduleDismiss(() => {
-                if (!bulkAction.keepSelection) {
-                  clearSelectedItems()
-                }
-                setInternalBulkActionStatus("idle")
-              }, !bulkAction.keepSelection)
-            },
-            () => {
-              setInternalBulkActionStatus("error")
-              actionBarRef.current?.wiggle({ errorHighlight: true })
-            }
-          )
+          settleBulkAction(bulkAction, result as Promise<void>)
         },
       }
     }
@@ -887,6 +894,9 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
+  const [selectableTotal, setSelectableTotal] = useState<undefined | number>(
+    undefined
+  )
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   const elementsRightActions = useMemo(
@@ -928,6 +938,7 @@ const OneDataCollectionComp = <
 
   const onLoadData = ({
     totalItems,
+    selectableTotal,
     filters,
     isInitialLoading: isInitialLoadingFromCallback,
     search,
@@ -938,6 +949,7 @@ const OneDataCollectionComp = <
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
+    setSelectableTotal(selectableTotal ?? totalItems)
     setFirstDataLoaded(true)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
@@ -1217,6 +1229,17 @@ const OneDataCollectionComp = <
   )
 
   /**
+   * Saved views live in the persisted collection status, so they only survive a
+   * navigation when there is somewhere to write them: a storage key (`id`) and
+   * storage left enabled. Without both, `useDataCollectionStorage` is inactive
+   * and a saved view would exist only in this component's state until unmount.
+   */
+  const canPersistViews = useMemo(
+    () => storage !== false && !!id,
+    [storage, id]
+  )
+
+  /**
    * Whether to offer "Save view" (create a new view):
    * - a view is selected → "none" (diverging from it auto-deselects via the
    *   effect above; while it still matches there's nothing to save)
@@ -1232,6 +1255,11 @@ const OneDataCollectionComp = <
     // Consumer opted out of saving views (e.g. the org-chart graph): never show
     // the "Save view" chip regardless of how the view diverges from the baseline.
     if (savingViewsDisabled) {
+      return "none"
+    }
+    // Nothing can be persisted, so offering to save would silently discard the
+    // view on unmount.
+    if (!canPersistViews) {
       return "none"
     }
     // Compares everything except the view mode, so a visualization-only change
@@ -1269,6 +1297,7 @@ const OneDataCollectionComp = <
     return "none"
   }, [
     savingViewsDisabled,
+    canPersistViews,
     selectedPresetId,
     mergedPresets,
     capturedState,
@@ -1436,7 +1465,12 @@ const OneDataCollectionComp = <
     if (!sharedPreset) {
       return
     }
-    setPresetDialog({ mode: "create", shared: sharedPreset })
+    // Saving is the only way a shared view materializes, so skip the dialog
+    // when there is nowhere to persist it rather than offer a save that is
+    // discarded on unmount. The param is still stripped either way.
+    if (canPersistViews) {
+      setPresetDialog({ mode: "create", shared: sharedPreset })
+    }
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search)
       params.delete(SHARED_PRESET_PARAM)
@@ -1498,6 +1532,10 @@ const OneDataCollectionComp = <
         value: customPresets,
         setValue: setCustomPresets,
       },
+      selectedPresetId: {
+        value: selectedPresetId,
+        setValue: setSelectedPresetId,
+      },
       ...(hasPerVisualizationFilters
         ? {
             visualizationFilters: {
@@ -1507,7 +1545,20 @@ const OneDataCollectionComp = <
           }
         : {}),
     },
-    storage === false
+    {
+      definition: {
+        // The collection-level filters, not `effectiveFilters`: validation must
+        // use the superset so state stored for one visualization is not dropped
+        // while another is active.
+        filters,
+        sortings,
+        grouping,
+        navigationFilters,
+        search,
+        visualizationCount: visualizations.length,
+      },
+      disabled: storage === false,
+    }
   )
 
   // Capture the session baseline once storage has settled, so "Save as preset"
@@ -1840,7 +1891,7 @@ const OneDataCollectionComp = <
               onUnselect={() => clearSelectedItemsFunc?.()}
               allPagesSelection={!!source.allPagesSelection}
               isAllItemsSelected={isAllItemsSelected}
-              totalItems={totalItems}
+              totalItems={selectableTotal}
             />
           ) : null}
         </>

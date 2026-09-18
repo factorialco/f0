@@ -470,6 +470,71 @@ describe("list slot schema", () => {
     )
   })
 
+  test("tooltipDescription hovers what the row had no room for, keeping the second line as it is", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ descriptionOptional: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              description: [
+                { text: "2 days overdue", critical: true },
+                { text: "€340" },
+              ],
+              tooltipDescription: "Flights and two nights in Berlin",
+            },
+            // Wrote none, so nothing to hover: an empty tooltip would promise
+            // information that isn't there.
+            { id: "2", title: "Contract change", description: "Due Friday" },
+          ]),
+        ]}
+      />
+    )
+
+    // The line is untouched — still drawn, still tinted. What separates this
+    // from `compact`, which trades it away to get the tooltip.
+    expect(screen.getByText("2 days overdue")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+
+    await user.hover(screen.getByText("Expenses report"))
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Flights and two nights in Berlin"
+    )
+
+    await user.unhover(screen.getByText("Expenses report"))
+    await user.hover(screen.getByText("Contract change"))
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  })
+
+  test("tooltipDescription wins over the description a COMPACT row would otherwise surface", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ descriptionRequired: true, compact: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              description: "2 days overdue",
+              tooltipDescription: "Flights and two nights in Berlin",
+            },
+          ]),
+        ]}
+      />
+    )
+
+    await user.hover(screen.getByText("Expenses report"))
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Flights and two nights in Berlin"
+    )
+    expect(screen.queryByRole("tooltip")).not.toHaveTextContent(
+      "2 days overdue"
+    )
+  })
+
   test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
     const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
       id: String(i),

@@ -76,6 +76,9 @@ import {
 import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
 
+type FrozenColumns = 0 | 1 | 2
+type NestedRecordsType = "basic" | "detailed" | "mixed"
+
 const CHILDREN_PER_PAGE = 2
 
 // Mock data for nested subfilters (office → space → desk)
@@ -365,9 +368,9 @@ export const mockUsers = generateMockUsers(10)
 
 export const getMockVisualizations = (options?: {
   // @deprecated
-  frozenColumns?: 0 | 1 | 2
+  frozenColumns?: FrozenColumns
   table?: {
-    frozenColumns?: 0 | 1 | 2
+    frozenColumns?: FrozenColumns
     allowColumnHiding?: boolean
     allowColumnReordering?: boolean
     noSorting?: boolean
@@ -735,8 +738,8 @@ export const getMockVisualizations = (options?: {
                   },
                   {
                     type: "person",
-                    firstName: "Dani",
-                    lastName: "Moreno",
+                    firstName: "Jordan",
+                    lastName: "Avery",
                     src: "/avatars/person04.jpg",
                   },
                   {
@@ -831,8 +834,8 @@ export const getMockVisualizations = (options?: {
                   },
                   {
                     type: "person",
-                    firstName: "Dani",
-                    lastName: "Moreno",
+                    firstName: "Jordan",
+                    lastName: "Avery",
                     src: "/avatars/person04.jpg",
                   },
                   {
@@ -1036,13 +1039,21 @@ export const sortings = {
 } as const
 
 // Helper function to filter users based on filters
-export const filterUsers = (
-  users: MockUser[],
-  filterValues: FiltersState<typeof filters>,
-  sortingState: SortingsStateMultiple,
-  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>,
+type FilterUsersOptions = {
+  users: MockUser[]
+  filterValues: FiltersState<typeof filters>
+  sortingState: SortingsStateMultiple
+  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   search?: string
-) => {
+}
+
+export const filterUsers = ({
+  users,
+  filterValues,
+  sortingState,
+  navigationFilters,
+  search,
+}: FilterUsersOptions) => {
   let filteredUsers = [...users]
 
   const searchValue = filterValues.search
@@ -1164,12 +1175,12 @@ export const createObservableDataFetch = (delay = 0) => {
       })
 
       const timeoutId = setTimeout(() => {
-        const filteredData = filterUsers(
-          mockUsers,
-          filters,
-          sortingsState,
-          navigationFilters
-        )
+        const filteredData = filterUsers({
+          users: mockUsers,
+          filterValues: filters,
+          sortingState: sortingsState,
+          navigationFilters,
+        })
 
         // Calculate summaries like in createPromiseDataFetch
         const summaries = {
@@ -1259,7 +1270,7 @@ const createdDetailedNestedRecords = (filteredData: MockUser[]) => {
 
 const createdNestedRecords = (
   filteredData: MockUser[],
-  nestedRecordsType?: "basic" | "detailed" | "mixed"
+  nestedRecordsType?: NestedRecordsType
 ) => {
   if (nestedRecordsType === "mixed") {
     return createdMixedNestedRecords(filteredData)
@@ -1276,7 +1287,7 @@ export const createPromiseDataFetch = (
   delay = 500,
   cache?: MockDataCache<MockUser>,
   nestedRecords = false,
-  nestedRecordsType?: "basic" | "detailed" | "mixed"
+  nestedRecordsType?: NestedRecordsType
 ) => {
   return (
     options: DataCollectionBaseFetchOptions<
@@ -1297,13 +1308,13 @@ export const createPromiseDataFetch = (
       setTimeout(() => {
         // Use cache if provided, otherwise use static mockUsers
         const sourceData = cache ? cache.getData() : mockUsers
-        const filteredData = filterUsers(
-          sourceData,
-          filters,
-          sortingsState,
+        const filteredData = filterUsers({
+          users: sourceData,
+          filterValues: filters,
+          sortingState: sortingsState,
           navigationFilters,
-          search
-        )
+          search,
+        })
 
         const summaries = {
           salary: filteredData.reduce((total, user) => {
@@ -1384,7 +1395,7 @@ export const ExampleComponent = ({
   usePresets?: boolean
   /** Override the developer-provided presets used when `usePresets` is true. */
   presets?: PresetsDefinition<typeof filters>
-  frozenColumns?: 0 | 1 | 2
+  frozenColumns?: FrozenColumns
   fullHeight?: boolean
   visualizations?: readonly Visualization<
     MockUser,
@@ -1410,7 +1421,7 @@ export const ExampleComponent = ({
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
   navigationFilters?: NavigationFiltersDefinition
   totalItemSummary?: true | ((totalItems: number) => string)
-  grouping?: GroupingDefinition<MockUser> | undefined
+  grouping?: GroupingDefinition<MockUser>
   currentGrouping?: GroupingState<MockUser, GroupingDefinition<MockUser>>
   noSorting?: boolean
   paginationType?: PaginationType
@@ -1429,7 +1440,7 @@ export const ExampleComponent = ({
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   tmpFullWidth?: boolean
   nestedRecords?: boolean
-  nestedRecordsType?: "basic" | "detailed" | "mixed"
+  nestedRecordsType?: NestedRecordsType
   csvExport?: boolean | { filename?: string }
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
@@ -1627,6 +1638,25 @@ export const ExampleComponent = ({
   )
 }
 
+const inSelection = (selection: string[], id: string | undefined) =>
+  selection.length === 0 || (id !== undefined && selection.includes(id))
+
+// Narrow by the nested workplace selections (office/space/desk).
+const applyWorkplaceSelection = (
+  users: WorkplaceMockUser[],
+  f: FiltersState<NestedFiltersType>
+) => {
+  const officeSel = (f.office as string[] | undefined) ?? []
+  const spaceSel = (f.space as string[] | undefined) ?? []
+  const deskSel = (f.desk as string[] | undefined) ?? []
+  return users.filter(
+    (u) =>
+      inSelection(officeSel, u.officeId) &&
+      inSelection(spaceSel, u.spaceId) &&
+      inSelection(deskSel, u.deskId)
+  )
+}
+
 export const SubfiltersExampleComponent = () => {
   const dataAdapterMemoized = useMemo(
     () => ({
@@ -1643,33 +1673,14 @@ export const SubfiltersExampleComponent = () => {
             // nested workplace selections (office/space/desk) it doesn't know
             // about. `filterUsers` only filters/sorts, so the surviving items
             // are still the original WorkplaceMockUser objects.
-            const base = filterUsers(
-              subfilterMockUsers,
-              f as FiltersState<FiltersType>,
-              s,
-              undefined,
-              search
-            ) as WorkplaceMockUser[]
+            const base = filterUsers({
+              users: subfilterMockUsers,
+              filterValues: f as FiltersState<FiltersType>,
+              sortingState: s,
+              search,
+            }) as WorkplaceMockUser[]
 
-            const officeSel = (f.office as string[] | undefined) ?? []
-            const spaceSel = (f.space as string[] | undefined) ?? []
-            const deskSel = (f.desk as string[] | undefined) ?? []
-
-            const filtered = base.filter((u) => {
-              if (officeSel.length && !officeSel.includes(u.officeId)) {
-                return false
-              }
-              if (spaceSel.length && !spaceSel.includes(u.spaceId)) {
-                return false
-              }
-              if (
-                deskSel.length &&
-                (!u.deskId || !deskSel.includes(u.deskId))
-              ) {
-                return false
-              }
-              return true
-            })
+            const filtered = applyWorkplaceSelection(base, f)
             resolve({ records: filtered })
           }, 100)
         })

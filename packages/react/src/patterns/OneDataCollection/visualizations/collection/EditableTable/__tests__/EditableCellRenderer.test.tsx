@@ -276,8 +276,9 @@ describe("EditableCellRenderer", () => {
       const input = screen.getByRole("textbox")
       await user.clear(input)
 
-      // Error message should appear after the change is processed
-      // This depends on how TextCell/Input displays errors
+      await waitFor(() => expect(onCellChange).toHaveBeenCalled())
+      // The message renders inline and in the error tooltip.
+      expect(await screen.findAllByText("Name is required")).not.toHaveLength(0)
     })
 
     it("applies right border except for last column", () => {

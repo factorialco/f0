@@ -106,6 +106,34 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   idProviderRef.current = idProvider
   setActiveItemIdRef.current = setActiveItemId
 
+  /**
+   * The fallback for a "next after current" jump: with more records loaded than
+   * when it started, activate the one after the record we navigated away from.
+   */
+  const selectRecordAfterPrevious = useCallback(
+    (pending: Extract<PendingNavigation, { type: "next-after-current" }>) => {
+      const currentRecords = recordsRef.current
+      if (currentRecords.length <= pending.loadedItemsCount) {
+        return
+      }
+
+      const prevIndex =
+        pending.previousId == null
+          ? -1
+          : currentRecords.findIndex(
+              (record, i) =>
+                idProviderRef.current(record, i) === pending.previousId
+            )
+      const nextItem = currentRecords[prevIndex + 1]
+      if (nextItem) {
+        setActiveItemIdRef.current(
+          idProviderRef.current(nextItem, prevIndex + 1)
+        )
+      }
+    },
+    []
+  )
+
   const schedulePendingFallbackClear = useCallback(() => {
     clearPendingTimeout()
     pendingClearTimeout.current = setTimeout(() => {
@@ -128,27 +156,12 @@ export function useDataSourceItemNavigation<R extends RecordType>(
           clearPendingNavigation()
         }
       } else if (pending.type === "next-after-current") {
-        const currentRecords = recordsRef.current
-        if (currentRecords.length > pending.loadedItemsCount) {
-          const prevIndex =
-            pending.previousId == null
-              ? -1
-              : currentRecords.findIndex(
-                  (record, i) =>
-                    idProviderRef.current(record, i) === pending.previousId
-                )
-          const nextItem = currentRecords[prevIndex + 1]
-          if (nextItem) {
-            setActiveItemIdRef.current(
-              idProviderRef.current(nextItem, prevIndex + 1)
-            )
-          }
-        }
+        selectRecordAfterPrevious(pending)
       }
 
       clearPendingNavigation()
     }, 0)
-  }, [clearPendingNavigation, clearPendingTimeout])
+  }, [clearPendingNavigation, clearPendingTimeout, selectRecordAfterPrevious])
 
   useEffect(() => clearPendingTimeout, [clearPendingTimeout])
 

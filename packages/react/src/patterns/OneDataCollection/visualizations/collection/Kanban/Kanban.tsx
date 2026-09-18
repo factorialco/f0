@@ -25,6 +25,8 @@ import type {
 import { KanbanBoard } from "./KanbanBoard"
 import { KanbanCollectionProps } from "./types"
 
+type ItemCount = number | undefined
+
 const isInfiniteScrollPaginationInfo = (
   paginationInfo: PaginationInfo | undefined | null
 ): paginationInfo is InfiniteScrollPaginatedResponse<unknown> => {
@@ -303,7 +305,7 @@ export const KanbanCollection = <
             itemCount?: (
               groupId: unknown,
               filters: unknown
-            ) => number | undefined | Promise<number | undefined>
+            ) => ItemCount | Promise<ItemCount>
           }
         >
       | undefined

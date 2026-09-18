@@ -124,4 +124,64 @@ describe("useGroups", () => {
       expect(result.current.openGroups).toEqual({ a: true, b: false })
     })
   })
+
+  describe("nested groups", () => {
+    const nested: GroupRecord<TestRecord>[] = [
+      {
+        key: "a",
+        label: "a",
+        itemCount: 0,
+        records: [],
+        subGroups: [
+          { key: "a-1", label: "1", itemCount: 0, records: [] },
+          {
+            key: "a-2",
+            label: "2",
+            itemCount: 0,
+            records: [],
+            subGroups: [
+              { key: "a-2-i", label: "i", itemCount: 0, records: [] },
+            ],
+          },
+        ],
+      },
+      { key: "b", label: "b", itemCount: 0, records: [] },
+    ]
+
+    it("seeds every level, not just the top one", () => {
+      const { result } = renderHook(() => useGroups(nested, true))
+
+      expect(result.current.openGroups).toEqual({
+        a: true,
+        "a-1": true,
+        "a-2": true,
+        "a-2-i": true,
+        b: true,
+      })
+    })
+
+    it("opens only the listed keys at any depth", () => {
+      const { result } = renderHook(() => useGroups(nested, ["a", "a-2-i"]))
+
+      expect(result.current.openGroups).toEqual({
+        a: true,
+        "a-1": false,
+        "a-2": false,
+        "a-2-i": true,
+        b: false,
+      })
+    })
+
+    it("toggles a nested group without affecting its parent or siblings", () => {
+      const { result } = renderHook(() => useGroups(nested, true))
+
+      act(() => {
+        result.current.setGroupOpen("a-1", false)
+      })
+
+      expect(result.current.openGroups.a).toBe(true)
+      expect(result.current.openGroups["a-1"]).toBe(false)
+      expect(result.current.openGroups["a-2"]).toBe(true)
+    })
+  })
 })
