@@ -155,14 +155,6 @@ const referenceTypeClasses: Record<ReferenceType, string> = {
     "[&_*:not([data-no-strike]):not([data-no-strike]_*)]:line-through text-f1-foreground-secondary",
 }
 
-const editableActionsClass = (onHover: boolean, dropDownOpen: boolean) =>
-  cn(
-    "flex flex-nowrap justify-center",
-    onHover &&
-      !dropDownOpen &&
-      "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
-  )
-
 const RowComponentInner = <
   R extends RecordType,
   Filters extends FiltersDefinition,
@@ -211,6 +203,11 @@ const RowComponentInner = <
   >,
   ref: React.ForwardedRef<HTMLTableRowElement>
 ) => {
+  // The editable table gives its actions a column of their own. Revealing them on hover
+  // instead means taking the overlay the plain table uses, which reserves no width at all —
+  // fading a column's contents would leave the empty column behind.
+  const actionsAsColumn =
+    fromVisualization === "editableTable" && !itemActionsOnHover
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const id = source.selectable ? source.selectable(item) : undefined
@@ -493,17 +490,15 @@ const RowComponentInner = <
       !loading &&
       !nestedRowProps?.onLoadMoreChildren &&
       !nestedRowProps?.onAddRow ? (
-        fromVisualization === "editableTable" ? (
+        actionsAsColumn ? (
           <TableCell
             key={`table-cell-${groupIndex}-${index}-actions`}
             sticky={{ right: 0 }}
             referenceRowType={referenceRowType}
             className="bg-f1-background !px-3 align-middle"
           >
-            {/* The cell keeps its width whether or not the actions show, so entering a row
-                cannot shift its content sideways. An open dropdown outlives the hover. */}
             <ItemActionsRow
-              className={editableActionsClass(itemActionsOnHover, dropDownOpen)}
+              className="flex flex-nowrap justify-center"
               primaryItemActions={primaryItemActions}
               dropdownItemActions={dropdownItemActions}
               handleDropDownOpenChange={handleDropDownOpenChange}

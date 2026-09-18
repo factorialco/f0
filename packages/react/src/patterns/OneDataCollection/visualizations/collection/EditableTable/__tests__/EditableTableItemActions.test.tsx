@@ -144,6 +144,27 @@ describe("EditableTable Item Actions", () => {
     expect(actions).not.toHaveClass("opacity-0")
   })
 
+  // Regression: revealing them on hover first faded a column's contents, which left the
+  // column — and so its width — behind as an empty strip down the right edge. The overlay
+  // the plain table uses is absolutely positioned, so it occupies none.
+  it("gives the row actions no column of their own when itemActionsOnHover is set", async () => {
+    const itemActions: ItemActionsDefinition<Person> = () => [
+      { label: "Edit", type: "primary", onClick: vi.fn() },
+    ]
+
+    renderEditableTable(itemActions, true)
+
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument()
+    })
+
+    const actions = screen.getAllByRole("button", { name: /edit/i })[0]
+
+    expect(actions.closest("aside")?.parentElement).toHaveClass("absolute")
+    // A cell would sit in the row's flow; the overlay hangs off a zero-width sticky td.
+    expect(actions.closest("td")).not.toHaveAttribute("width")
+  })
+
   // jsdom computes no Tailwind styles, so the assertion reaches the class the row's
   // `group` hover drives rather than computed visibility.
   it("reveals the row actions on hover when itemActionsOnHover is set", async () => {
@@ -157,11 +178,13 @@ describe("EditableTable Item Actions", () => {
       expect(screen.getByText("John Doe")).toBeInTheDocument()
     })
 
-    const actions = screen
+    const overlay = screen
       .getAllByRole("button", { name: /edit/i })[0]
-      .closest("aside")
+      .closest("aside")?.parentElement
 
-    expect(actions).toHaveClass("opacity-0", "group-hover:opacity-100")
+    expect(overlay).toHaveClass("opacity-0", "group-hover:opacity-100")
+    // A keyboard user never hovers, so the actions must surface on focus too.
+    expect(overlay).toHaveClass("focus-within:opacity-100")
   })
 
   it("calls onClick handler when an action button is clicked", async () => {
