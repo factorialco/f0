@@ -168,9 +168,12 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
         <PopoverTrigger asChild>{button}</PopoverTrigger>
         <PopoverContent
           side="right"
-          align="start"
+          // Centred on the chip it came out of, not hung from its top edge: a
+          // menu that grows from the middle of its trigger stays pointed at it
+          // whatever length the catalog happens to be.
+          align="center"
           sideOffset={8}
-          alignOffset={-8}
+          collisionPadding={8}
           onOpenAutoFocus={(event) => {
             if (openedByPointer.current) event.preventDefault()
           }}
@@ -184,7 +187,7 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
           // an inverse background: it flips every token inside, so the rows
           // that come out of it are the ones the navigation already ships
           // rather than a second, hand-tinted set of them.
-          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/75 p-1.5 shadow-xl backdrop-blur-xl"
+          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl backdrop-blur-2xl backdrop-saturate-150"
         >
           {flyout}
         </PopoverContent>

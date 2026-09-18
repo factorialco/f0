@@ -1471,7 +1471,12 @@ const toolsMenuTree: MenuCategory[] = [
 const ToolsFlyout = () => (
   <div className="flex flex-col gap-1">
     <SearchBar placeholder="Search..." onClick={() => {}} />
-    <Menu tree={toolsMenuTree} />
+    {/* The menu's groups carry the sidebar's own 12px gutter, which inside a
+        box that already has one reads as a 20px indent. The box's padding is
+        the only one there should be. */}
+    <div className="[&>div>div]:px-0">
+      <Menu tree={toolsMenuTree} />
+    </div>
   </div>
 )
 
@@ -1847,9 +1852,7 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
-    ) : isRail ? // module IS the content, and a column beside it would be a table of // Only Chats has a second level in a panel. The rest are pages: the
-    // contents for one screen. Tools is a menu, and menus fly out.
-    undefined : (
+    ) : isRail ? undefined : ( // contents for one screen. Tools is a menu, and menus fly out. // module IS the content, and a column beside it would be a table of // Only Chats has a second level in a panel. The rest are pages: the
       <Menu tree={toolsMenuTree} />
     )
 
