@@ -2263,6 +2263,10 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -2709,12 +2713,6 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -2928,6 +2926,52 @@ export declare const defaultTranslations: {
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledEvent: "Event";
+            readonly draftPosts: "Drafts";
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -2974,6 +3018,31 @@ export declare const defaultTranslations: {
         readonly countryWithDialCode: "{{country}} {{dialCode}}";
         readonly searchCountry: "Search country or dial code";
         readonly noResults: "No country found";
+    };
+    readonly locationInput: {
+        readonly country: "Country";
+        readonly addressLine1: "Address line 1";
+        readonly addressLine2: "Address line 2";
+        readonly city: "City";
+        readonly state: "Region";
+        readonly postalCode: "Postal code";
+        readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
+        readonly searchCountry: "Search country";
+        readonly noCountryResults: "No country found";
+        readonly noResults: "No addresses found";
+        readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
+        readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -3191,6 +3260,10 @@ export declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -3230,19 +3303,14 @@ export declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -5524,10 +5592,10 @@ export declare interface ScatterComputation {
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
  */
 export declare type SidePanelContent = {
     id: string;
@@ -5698,10 +5766,13 @@ export declare type UsageLimitsPopoverSide = (typeof usageLimitsPopoverSides)[nu
 export declare const usageLimitsPopoverSides: readonly ["top", "bottom"];
 
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
@@ -5957,9 +6028,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -5967,11 +6040,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }

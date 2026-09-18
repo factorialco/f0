@@ -1965,23 +1965,23 @@ declare type BoxVariantProps = VariantProps<typeof boxVariants>;
 
 declare const boxVariants: (props?: ({
     zIndex?: "0" | "auto" | "10" | "20" | "50" | "40" | "30" | undefined;
-    boxShadow?: "none" | "lg" | "md" | "sm" | "xl" | undefined;
+    boxShadow?: "lg" | "md" | "sm" | "none" | "xl" | undefined;
     divider?: "x" | "y" | undefined;
     dividerColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     overflow?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowX?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowY?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     borderColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
-    border?: "none" | "default" | "thick" | undefined;
-    borderTop?: "none" | "default" | "thick" | undefined;
-    borderBottom?: "none" | "default" | "thick" | undefined;
-    borderLeft?: "none" | "default" | "thick" | undefined;
-    borderRight?: "none" | "default" | "thick" | undefined;
-    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    border?: "default" | "none" | "thick" | undefined;
+    borderTop?: "default" | "none" | "thick" | undefined;
+    borderBottom?: "default" | "none" | "thick" | undefined;
+    borderLeft?: "default" | "none" | "thick" | undefined;
+    borderRight?: "default" | "none" | "thick" | undefined;
+    borderRadius?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -1995,32 +1995,32 @@ declare const boxVariants: (props?: ({
     colSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "full" | undefined;
     colStart?: "1" | "2" | "3" | "4" | "auto" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | undefined;
     rowSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "full" | undefined;
-    gap?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    gap?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     alignItems?: "center" | "end" | "baseline" | "start" | "stretch" | undefined;
     justifyContent?: "center" | "end" | "start" | "between" | "stretch" | "around" | "evenly" | undefined;
     flexDirection?: "row" | "column" | "column-reverse" | "row-reverse" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
     grow?: boolean | undefined;
     shrink?: boolean | undefined;
-    margin?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginX?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginY?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginTop?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginBottom?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginLeft?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginRight?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    padding?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingX?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingY?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingTop?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingBottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    top?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    right?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    bottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    left?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    display?: "block" | "inline" | "flex" | "grid" | "inline-flex" | "none" | undefined;
+    margin?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginX?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginY?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginTop?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginBottom?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginLeft?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginRight?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    padding?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingX?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingY?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingTop?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingBottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    top?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    right?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    bottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    left?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    display?: "block" | "grid" | "none" | "inline" | "flex" | "inline-flex" | undefined;
     position?: "fixed" | "sticky" | "relative" | "static" | "absolute" | undefined;
 } & ({
     class?: ClassValue;
@@ -3902,6 +3902,14 @@ export declare type DashboardChartConfig = BarChartConfig | LineChartConfig | Fu
 export declare interface DashboardChartData {
     /** Category axis labels. Required for bar/line charts. */
     categories?: string[];
+    /**
+     * Constants to draw across the plot — a peer median, a target, an average.
+     *
+     * Part of the DATA, not the config: a figure like this arrives with the
+     * values it is compared against, and changes when they do. Bar and line
+     * charts render them; every other type ignores them.
+     */
+    referenceLines?: F0DataChartReferenceLine[];
     /** X-axis category labels for heatmap charts. */
     xCategories?: string[];
     /** Y-axis category labels for heatmap charts. */
@@ -4126,6 +4134,30 @@ export declare interface DashboardMetricData {
     value: number;
     /** Optional previous value — used to compute a trend indicator */
     previousValue?: number;
+    /**
+     * A reference figure to show the value against, under the number.
+     *
+     * Distinct from {@link DashboardMetricData.previousValue}, which is this
+     * metric at an earlier time and renders as a rise or a fall. A comparison is
+     * a different quantity entirely — a peer median, a target, a company-wide
+     * average — so it is stated rather than turned into a trend: an arrow next to
+     * it would read as "it moved", which it did not.
+     *
+     * `value` is in the metric's own units and is formatted exactly like the
+     * headline number, so the two can be read against each other. `label` says
+     * what the figure is, in the consumer's own words and language.
+     */
+    comparison?: {
+        value: number;
+        label: string;
+        /**
+         * Where the figure comes from, revealed by an ⓘ icon after it — "the
+         * median across all companies on Factorial", say. A string renders a
+         * plain tooltip; the structured form renders a hoverable card that can
+         * carry a link, the same affordance as `DashboardItemBase.info`.
+         */
+        info?: string | InfoHintContent;
+    };
 }
 
 /**
@@ -4163,6 +4195,15 @@ export declare type Data<R extends RecordType> = {
     records: WithGroupId<R>[];
     type: "grouped" | "flat";
     groups: GroupRecord<R>[];
+    /**
+     * The records with no value at the FIRST grouping level — they belong to no
+     * group at all, and read as plain rows above the ones that do.
+     *
+     * The counterpart of a group's `ownRecords` one level up: between them a list
+     * can be grouped without being uniformly grouped, which is what a real
+     * hierarchy looks like — some rows nested two deep, some one, some loose.
+     */
+    ungroupedRecords?: WithGroupId<R>[];
 };
 
 /**
@@ -4587,7 +4628,7 @@ export declare type DataSourceItemId = string | number | symbol;
  * Wrapper component that conditionally renders a `data-testid` attribute.
  *
  * When `dataTestId` is provided and the platform context enables test id rendering,
- * wraps children in a `<div data-testid={dataTestId} style={{ display: "contents" }}>`.
+ * wraps children in a `<div data-testid={dataTestId} className="contents">`.
  * Otherwise renders children as-is with no wrapper element.
  *
  * Use this directly inside components with complex generic types (e.g. F0Select,
@@ -4611,6 +4652,10 @@ declare type DateCellConfig = {
     minDate?: Date;
     /** Latest selectable date. Dates after this are disabled in the picker. */
     maxDate?: Date;
+    /** Show the leading calendar icon in the cell. Defaults to `true`. */
+    showIcon?: boolean;
+    /** Show a clear button to empty the cell's date. Defaults to `false`. */
+    clearable?: boolean;
 };
 
 /**
@@ -5100,6 +5145,10 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Select a company";
             };
         };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
+        };
         readonly previous: "Previous";
         readonly next: "Next";
     };
@@ -5546,12 +5595,6 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -5765,6 +5808,52 @@ export declare const defaultTranslations: {
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledEvent: "Event";
+            readonly draftPosts: "Drafts";
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -5811,6 +5900,31 @@ export declare const defaultTranslations: {
         readonly countryWithDialCode: "{{country}} {{dialCode}}";
         readonly searchCountry: "Search country or dial code";
         readonly noResults: "No country found";
+    };
+    readonly locationInput: {
+        readonly country: "Country";
+        readonly addressLine1: "Address line 1";
+        readonly addressLine2: "Address line 2";
+        readonly city: "City";
+        readonly state: "Region";
+        readonly postalCode: "Postal code";
+        readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
+        readonly searchCountry: "Search country";
+        readonly noCountryResults: "No country found";
+        readonly noResults: "No addresses found";
+        readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
+        readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -6028,6 +6142,10 @@ export declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -6067,19 +6185,14 @@ export declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -6611,7 +6724,8 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     numberConfig?: NumberCellConfig<R>;
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
-     * restrict the selectable date range in the picker.
+     * restrict the selectable date range in the picker, `showIcon` to hide
+     * the leading calendar icon, and `clearable` for a clear button.
      *
      * Can be a static object or a function that receives the current row item
      * to return a per-row range (e.g. bound one date field by another field's
@@ -8744,6 +8858,13 @@ declare type F0ButtonDropdownBaseProps<T = string> = {
      * @default undefined
      */
     tooltip?: string;
+    /**
+     * Where the menu is portalled. Defaults to the document body; inside a modal
+     * layer pass that layer's own element (an `F0Dialog` publishes it as
+     * `portalContainer`) so its focus trap contains the menu rather than fighting
+     * it.
+     */
+    container?: HTMLElement | null;
 };
 
 /**
@@ -9293,6 +9414,8 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     type: "bar";
     /** One or more data series to render as bars */
     series: F0DataChartBarSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Bar orientation. @default "vertical" */
     orientation?: "vertical" | "horizontal";
     /** Stack all series into a single bar per category. @default false */
@@ -9643,6 +9766,8 @@ export declare interface F0DataChartLineProps extends F0DataChartBaseProps {
     type: "line";
     /** One or more data series to render as lines */
     series: F0DataChartLineSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Line interpolation type. @default "linear" */
     lineType?: F0DataChartLineType;
     /** Show gradient area fill below lines. @default true */
@@ -9862,6 +9987,35 @@ export declare interface F0DataChartRadarSeries {
     data: number[];
     /** Override color for this series. Must be an F0 design token name. */
     color?: ChartColorToken;
+}
+
+/**
+ * A constant drawn across the whole plot rather than per category.
+ *
+ * For a figure that does not vary with the categories — a peer median, a
+ * target, an average. Drawn as one dashed line with its label at the end, so it
+ * reads as a threshold the bars are measured against rather than as another
+ * series: a constant repeated once per category would claim to be a quantity
+ * each of them has.
+ */
+export declare interface F0DataChartReferenceLine {
+    /** Where on the value axis to draw it. */
+    value: number;
+    /** Shown at the end of the line. Omit for an unlabelled rule. */
+    label?: string;
+    /** Must be an F0 design token name. Falls back to a neutral line colour. */
+    color?: ChartColorToken;
+    /** Solid instead of dashed. @default false */
+    solid?: boolean;
+    /**
+     * Shown when the reader hovers the line, under its label and value.
+     *
+     * For saying what the figure actually is — which companies a peer median
+     * covers, which quarter a target belongs to, whether it is an estimate. A
+     * line with no description is not hoverable: there would be nothing to add
+     * beyond the label already printed beside it.
+     */
+    description?: string;
 }
 
 /**
@@ -10717,7 +10871,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0LocationField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -10757,7 +10911,7 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -11317,6 +11471,42 @@ export declare namespace f0FormField {
     export function phone(config: PhoneFieldShortcutConfig & {
         optional?: false;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
+    export type LocationObjectSchema = z.ZodEffects<z.ZodObject<{
+        formatted: z.ZodOptional<z.ZodString>;
+        addressLine1: z.ZodOptional<z.ZodString>;
+        addressLine2: z.ZodOptional<z.ZodString>;
+        city: z.ZodOptional<z.ZodString>;
+        state: z.ZodOptional<z.ZodString>;
+        postalCode: z.ZodOptional<z.ZodString>;
+        country: z.ZodOptional<z.ZodString>;
+        placeId: z.ZodOptional<z.ZodString>;
+        latitude: z.ZodOptional<z.ZodNumber>;
+        longitude: z.ZodOptional<z.ZodNumber>;
+        timezone: z.ZodOptional<z.ZodString>;
+    }>>;
+    export type LocationFieldShortcutConfig = DistributiveOmit<F0LocationFieldConfig, "fieldType"> & {
+        optional?: boolean;
+        /**
+         * Requires a value picked from the suggestions, i.e. one that still
+         * carries a place id and coordinates. Use it when the address feeds a
+         * map or a geofence; a typed address has no coordinates until the
+         * consumer geocodes it. Only satisfiable with `searchPlaces` and
+         * `resolvePlace`, and without `manualEntry`, since nothing else produces
+         * a resolved value.
+         * @default false
+         */
+        requireResolved?: boolean;
+        /** Message shown when the field is empty and required */
+        emptyMessage?: string;
+        /** Message shown when `requireResolved` is not satisfied */
+        unresolvedMessage?: string;
+    };
+    export function location(config: LocationFieldShortcutConfig & {
+        optional: true;
+    }): z.ZodOptional<LocationObjectSchema> & F0ZodType<z.ZodOptional<LocationObjectSchema>>;
+    export function location(config: LocationFieldShortcutConfig & {
+        optional?: false;
+    }): LocationObjectSchema & F0ZodType<LocationObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -12037,6 +12227,131 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     href?: string;
 };
 
+/**
+ * F0 config options specific to location fields. The shape props come
+ * straight from the component, so the field inherits its rule: manual entry
+ * is typed rather than searched, and rules out a suggestion provider instead
+ * of accepting one it would never call.
+ */
+export declare type F0LocationConfig = {
+    /** Overrides for the per-part labels, which default to translated copy */
+    partLabels?: Partial<Record<LocationPart, string>>;
+    /** Restricts the country selector. A single entry also scopes the search */
+    allowedCountries?: CountryCode[];
+    /** Scopes the search. Never read from the value's own country */
+    defaultCountry?: CountryCode;
+} & F0LocationInputShapeProps;
+
+/**
+ * Location field with all properties for rendering
+ */
+export declare type F0LocationField = F0BaseField & F0LocationConfig & {
+    type: "location";
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean;
+    /** Conditional rendering based on another field's value */
+    renderIf?: LocationFieldRenderIf;
+};
+
+/**
+ * Config for location fields (form value is a structured address object)
+ */
+export declare type F0LocationFieldConfig = F0BaseConfig & F0LocationConfig & {
+    fieldType: "location";
+};
+
+/**
+ * The two shapes a location field takes: a searchable address line, or every
+ * part typed by hand.
+ */
+declare type F0LocationInputShapeProps = F0LocationSearchProps | F0LocationManualProps;
+
+/**
+ * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
+ * country so every consumer stores the same thing.
+ */
+declare type F0LocationInputValue = {
+    /** Display string. Comes from `resolvePlace` when picked, assembled locally once edited */
+    formatted?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    /** Region, state or province, as free text */
+    state?: string;
+    postalCode?: string;
+    country?: CountryCode;
+    /**
+     * Provider id of the picked place. Cleared as soon as a part that describes
+     * where the pin is gets edited; `addressLine2` does not, since a floor
+     * number stays inside the same building.
+     */
+    placeId?: string;
+    latitude?: number;
+    longitude?: number;
+    /** Carried through from `resolvePlace`, never derived here */
+    timezone?: string;
+};
+
+/**
+ * Every part typed by hand. Nothing is searched in this shape, so a provider
+ * would never be called: `searchPlaces` and `resolvePlace` are ruled out
+ * rather than quietly ignored.
+ */
+declare type F0LocationManualProps = {
+    /**
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code.
+     * Changing the country clears the other parts, since they described a
+     * place in the previous one.
+     */
+    manualEntry: true;
+    searchPlaces?: never;
+    resolvePlace?: never;
+    manualEntryFallback?: never;
+};
+
+declare type F0LocationSearchContext = {
+    /** Country to scope the search to, when one is selected or implied */
+    country?: CountryCode;
+};
+
+/**
+ * The address line as an autocomplete. A provider makes the suggestions, and
+ * the user who finds nothing there can still fall back to typing.
+ */
+declare type F0LocationSearchProps = {
+    manualEntry?: false;
+    /**
+     * Suggestion provider. Without it there is no autocomplete and the address
+     * line is a plain field. Called with the current country so the consumer
+     * can restrict the provider (e.g. Places `componentRestrictions`).
+     */
+    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
+    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
+    /**
+     * Whether a search that comes back empty offers to switch to manual entry.
+     * Turn it off where a typed address is of no use to the consumer, such as a
+     * field that feeds a map or a geofence and needs the coordinates only a
+     * picked place carries.
+     * @default true
+     */
+    manualEntryFallback?: boolean;
+};
+
+declare type F0LocationSuggestion = {
+    id: string;
+    label: string;
+    /** Appended to the label, so each suggestion reads as one line */
+    description?: string;
+};
+
 export declare type F0Message = {
     id: string;
     role: "user" | "assistant" | "system" | "tool";
@@ -12216,12 +12531,12 @@ declare type F0NumberSelectConfig<R extends Record<string, unknown> = Record<str
 };
 
 /**
- * Config for object fields (richtext, daterange, phone, or custom)
+ * Config for object fields (richtext, daterange, phone, location, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
+declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0LocationFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -12879,6 +13194,14 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * Hides the trigger's dropdown arrow. For fields where the select is an
+     * implementation detail rather than the affordance: the value is a typed
+     * search result, not one of a few known options, and the arrow promises a
+     * list the user is not meant to browse.
+     * @default false
+     */
+    hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
@@ -12894,6 +13217,8 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     children?: never;
     className?: never;
     asList?: never;
+    hideArrow?: never;
+    searchEmptyAction?: never;
     showPreview?: never;
     required?: never;
     loading?: never;
@@ -12952,7 +13277,18 @@ export declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R>
 declare type F0SelectPopupProps<T extends string, R = unknown> = {
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     open?: boolean;
+    /**
+     * Whether the list can be searched.
+     *
+     * With no filters the trigger itself is the search field: you type where the
+     * value shows. With filters, and for `variant="inline"`, `asList` and custom
+     * triggers, the search box stays in the dropdown's top row.
+     */
     showSearchBox?: boolean;
+    /**
+     * Placeholder for the search field. When the trigger is the search field the
+     * select's own `placeholder` wins and this stands in.
+     */
     searchBoxPlaceholder?: string;
     onSearchChange?: (value: string) => void;
     searchValue?: string;
@@ -12964,6 +13300,12 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
      */
     onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
+    /**
+     * Rendered under the empty state, for the way out when the list has nothing
+     * to offer. `onCreate` draws its own action, so this is for the cases where
+     * the answer is not "create what you typed".
+     */
+    searchEmptyAction?: React.ReactNode;
     actions?: Action_2[];
     /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
     onCreate?: (value: string) => Promise<void> | void;
@@ -13816,7 +14158,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -14828,6 +15170,18 @@ export declare type GroupRecord<RecordType> = {
      * before nesting existed.
      */
     subGroups?: GroupRecord<RecordType>[];
+    /**
+     * The records that belong to THIS group and to none of its `subGroups` —
+     * the ones with no value at the next level down.
+     *
+     * A tree whose branches differ in depth has these: a subproject with tasks
+     * under it becomes a sub-group, while one without stays a row of its parent.
+     * Without somewhere to put them they would bucket under the missing value
+     * and surface beneath a heading with no name.
+     *
+     * Only set when `subGroups` is, and only when some record lacks that value.
+     */
+    ownRecords?: RecordType[];
 };
 
 /**
@@ -15227,10 +15581,29 @@ declare type InputFieldProps<T> = {
     labelIcon?: IconType;
     hideLabel?: boolean;
     hidePlaceholder?: boolean;
+    /**
+     * Rich content drawn where the typed text would be, for a field whose value
+     * is not text: icons, avatars, a count. Dropped as soon as there is text,
+     * and it hides the placeholder while shown.
+     */
+    valueSlot?: React.ReactNode;
+    /**
+     * Leaves the typed text alone when the clear button is pressed, so `onClear`
+     * is the whole behavior. For a field whose value is not its text, the button
+     * clears that value and the text is the user's query.
+     */
+    clearKeepsText?: boolean;
+    /**
+     * Whether there is anything to clear, when `isEmpty` cannot answer it: with
+     * a `valueSlot` the placeholder follows the text and the clear button
+     * follows the value.
+     */
+    canClear?: boolean;
     name?: string;
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
-    onClickContent?: () => void;
+    /** Receives the click, so a caller can tell where in the field it landed. */
+    onClickContent?: (event: React.MouseEvent) => void;
     value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
@@ -15253,9 +15626,11 @@ declare type InputFieldProps<T> = {
      * selection moves elsewhere, so a screen reader hears nothing. */
     "aria-activedescendant"?: AriaAttributes["aria-activedescendant"];
     "aria-autocomplete"?: AriaAttributes["aria-autocomplete"];
+    /** How a `valueSlot` value reaches a screen reader. */
+    "aria-describedby"?: AriaAttributes["aria-describedby"];
     onClear?: () => void;
     onFocus?: () => void;
-    onBlur?: () => void;
+    onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     canGrow?: boolean;
     children: React.ReactNode & {
@@ -15615,6 +15990,16 @@ declare interface LocalizedOption<T> {
     /** The value for this locale. */
     value: T;
 }
+
+/**
+ * All valid renderIf conditions for location fields
+ */
+declare type LocationFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+declare type LocationPart = (typeof locationParts)[number];
+
+/** Every part the manual entry block renders, in the order it renders them */
+declare const locationParts: readonly ["country", "addressLine1", "addressLine2", "city", "state", "postalCode"];
 
 /**
  * The parts of a question that `lockedFields` can freeze on their own, without
@@ -16656,6 +17041,7 @@ export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
 declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
+    selectableTotal?: number;
     filters: FiltersState<Filters>;
     search: string | undefined;
     isInitialLoading: boolean;
@@ -18176,10 +18562,10 @@ export declare const setDataCollectionUrlParams: <CurrentFiltersState extends Fi
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
  */
 export declare type SidePanelContent = {
     id: string;
@@ -18732,6 +19118,17 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      */
     onLockedColumnIdsChange?: (columnIds: ColId[]) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
+    /**
+     * Reveals the row-actions button only while its row is hovered or focused,
+     * instead of painting it on every row. Editable-table only — the plain table
+     * always reveals its actions on hover.
+     *
+     * The cell keeps its width either way, so a row's content cannot shift
+     * sideways as the pointer enters it.
+     *
+     * @default false
+     */
+    itemActionsOnHover?: boolean;
     referenceRowType?: (item: R) => ReferenceType;
     /**
      * In a table with nested rows, renders the cell text of the root rows
@@ -19618,10 +20015,13 @@ export declare type UsageLimitsPopoverSide = (typeof usageLimitsPopoverSides)[nu
 export declare const usageLimitsPopoverSides: readonly ["top", "bottom"];
 
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
@@ -20854,9 +21254,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20864,11 +21266,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
