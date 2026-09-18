@@ -105,7 +105,7 @@ export const betweenSpacing: ThemeConfig["spacing"] = {
  * Used by page headers, data collections, layouts, and tab navigation.
  */
 export const pageSpacing: ThemeConfig["spacing"] = {
-  page: absoluteSpacing[4], // 16px
+  page: absoluteSpacing[6], // 24px
 }
 
 /**
