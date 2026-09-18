@@ -16,6 +16,7 @@ type InlineValueProps = {
 }
 
 /** Match the editor border, padding, and icon offsets to prevent text movement. */
+
 const InlineValue = ({
   label,
   hideLabel,

@@ -190,11 +190,7 @@ export type InputFieldProps<T> = {
   transparent?: boolean
   variant?: InputFieldVariant
   editing?: boolean
-  /**
-   * What the inline variant prints at rest, when the value alone is not what
-   * the editor shows: F0NumberInput appends its `units` to the formatted
-   * number. Defaults to the value.
-   */
+  /** At-rest display text, including units when present. Defaults to value. */
   inlineText?: string
 }
 
