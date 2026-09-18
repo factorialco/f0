@@ -117681,22 +117681,22 @@ const RY1 = ({ text: e }) => /* @__PURE__ */ i(
     {
       size: "sm",
       canGrow: !0,
-      class: "min-h-[32px]"
+      class: "min-h-8"
     },
     {
       size: "md",
       canGrow: !0,
-      class: "min-h-[40px]"
+      class: "min-h-10"
     },
     {
       size: "sm",
       canGrow: !1,
-      class: "h-[32px]"
+      class: "h-8"
     },
     {
       size: "md",
       canGrow: !1,
-      class: "h-[40px]"
+      class: "h-10"
     }
   ],
   defaultVariants: {
@@ -117727,8 +117727,8 @@ const RY1 = ({ text: e }) => /* @__PURE__ */ i(
           {
             "data-slot": "icon",
             className: U(
-              "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
-              a === "md" && "left-3 top-[9px]"
+              "pointer-events-none absolute left-2 top-1.25 my-auto h-5 w-5 shrink-0",
+              a === "md" && "left-3 top-2.25"
             ),
             children: /* @__PURE__ */ i(C1, { icon: o, color: "default" })
           }
