@@ -112582,8 +112582,8 @@ function QI(e) {
   return !!(e instanceof Date || e && typeof e == "object" && ("toLocaleDateString" in e || "getTime" in e));
 }
 function b32(e) {
-  const t = e.full === !0, n = t ? 1 : e.lines ?? 1;
-  return { lines: n, full: t, wraps: t || n > 1 };
+  const t = e.lines;
+  return t === void 0 ? { lines: 1, full: !0, wraps: !0 } : { lines: t, full: !1, wraps: t > 1 };
 }
 const L32 = (e, t) => {
   const n = mr(e, "number"), r = hr(e, "number"), a = {
