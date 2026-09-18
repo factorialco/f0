@@ -1,7 +1,7 @@
 import { cP as v_, cQ as l0, cR as b_, cS as __, cT as DA, cU as k_, cV as x_, cW as D_, cX as S_, cY as Rh, cZ as c0, c_ as Vc, c$ as vA, d0 as R_, b_ as Ot, cu as bs, u as xt, d1 as M_, d2 as P_, d3 as Mh, d4 as EA, d5 as TA, bZ as In, bF as V_, bE as By, W as ii, A as G_, B as E_, bS as ci, bb as Fy, L as T_, E as N_, n as pi, al as aC, S as Bt, c4 as Go, d6 as Z_, d7 as K_, d8 as W_, $ as z_, d9 as Y_, as as Og, bc as Ph, ak as Vh, bV as Ma, cb as ps, da as H_, e as Gh, c6 as Po, db as O_, a9 as Eh, cM as qA, w as Hn, s as nn, z as NA, v as $A, x as Fd, bw as Th, y as el, a$ as yy, bQ as J_, ai as Uy, bX as Yn, t as Cg, cG as mr, cw as tl, bP as d0, Z as j_, bY as Pn, dc as Qy, dd as rh, cL as Eo, de as Nh, df as L_, m as Zh, dg as oC, aS as X_, bJ as q_, Y as $_, i as ek, cF as tk, dh as pr, di as Kh, dj as fa, bi as ik, dk as nk, af as gk, cc as Vo, dl as yd, dm as wy, dn as ak, dp as ok, b8 as rk, dq as Ud, dr as vy, j as Qd, ds as sk, at as Ik, k as iC, dt as by, bp as Ck, du as Ak, dv as lk, dw as ck, dx as dk, dy as sh, dz as _y, cf as wd, ab as ky, dA as uk, dB as fk, dC as hk, dD as mk, dE as io, dF as Ih, cd as Wh, dG as xy, cm as _s, dH as id, dI as Dy, dJ as zh, cj as pk, dK as Qs, dL as Bk, dM as Fk, dN as yk, c5 as SA, bo as Uk, bt as vd, aA as nd, aq as Qk, dO as Sy, dP as wk, b as Yh, dQ as vk, dR as Mo, a as bk, dS as Rf, dT as bd, g as _k, dU as Ry, F as kk, bu as My, cn as xk, q as _d, cp as Dk, by as Hh, K as Sk, bs as Rk, a6 as Py, cy as Mk, am as kd, dV as Oh, bh as Pk, bg as Vk, au as gd, dW as Gk, dX as Ek, dY as Tk, dZ as Nk, d_ as Zk, d$ as Kk, e0 as Wk, e1 as zk, ce as Ch, l as xd, bU as Jh, Q as Ah, R as RA, aZ as Yk, aO as Hk, b9 as Ok, be as Vy, bl as Gy, bm as jh, ao as Jk, e2 as Ey, e3 as Ty, e4 as Ny, e5 as Zy, cO as jk, cN as Lk, e6 as Lh, bn as Xk, c1 as qk, c3 as Xh, bT as $k, e7 as Ky, e8 as Wy, e9 as zy, bM as ex, o as tx, c7 as ix, c8 as nx, c9 as gx, ca as Yy, az as Dd, U as ax, V as ox, a7 as Hy, a0 as u0, a5 as Oy, bx as rx, aQ as sx, an as qh, cq as Ix, c0 as Cx, aP as Jy, ah as jy, ea as no, eb as Ax, ec as lx, ed as cx, ee as dx, ef as ux, cz as fx, b0 as Ly, eg as ad, eh as hx, bq as mx, bH as px, ax as Bx, bC as Mf, aw as Fx, a_ as yx, ar as Ux, ei as Qx, bB as wx, cs as vx, ct as bx, ej as _x, ek as Xy, el as kx, em as xx } from "./F0CanvasPanel-lGbbYLLt.js";
 import { jsx as h, jsxs as $, Fragment as oi } from "react/jsx-runtime";
 import Kt, { forwardRef as Ui, useRef as Re, useTransition as Dx, useState as Ne, useLayoutEffect as yg, useId as ws, useContext as Ug, createContext as Vn, useEffect as Xe, useCallback as Je, useMemo as kt, useImperativeHandle as Sx, Fragment as Fg, isValidElement as $h, cloneElement as qy, Suspense as il, lazy as Fr, createElement as Hc, memo as em, Children as tm } from "react";
-import { d as ye, T as Rx, a as Mx, b as Px, f as Ji, c as Vx, g as Gx } from "./tooltip-CMBdJvJA.js";
+import { d as Fe, T as Rx, a as Mx, b as Px, f as Ji, c as Vx, g as Gx } from "./tooltip-CMBdJvJA.js";
 import { C as Ex, P as Tx, c as Sd, n as $y, E as Nx, a as Zx, u as Kx, b as e1, e as Wx, f as zx, g as Yx, h as Hx, i as f0, M as Ox, p as Jx, j as t1, R as h0, k as i1, l as jx, m as Lx, o as Xx, q as qx, r as $x, s as eD, O as n1, t as g1, v as tD, W as Us, A as iD, B as nD, L as gD, w as aD, V as oD, x as rD, y as sD, z as ID, D as im, S as CD, G as a1, H as o1, I as AD, J as lD, K as cD, N as dD, Q as uD, T as fD, U as hD, X as mD, Y as pD, Z as BD, _ as m0, $ as FD, a0 as yD } from "./CoachmarkProvider-7hmtkpLE.js";
 import { g as UD } from "./_commonjsHelpers-ByX85dGu.js";
 import QD, { createPortal as lh } from "react-dom";
@@ -253,7 +253,7 @@ const RD = bs({
   return /* @__PURE__ */ h(
     "div",
     {
-      className: ye(RD({ size: I }), K),
+      className: Fe(RD({ size: I }), K),
       style: {
         background: "transparent",
         perspective: a ? "10px" : void 0,
@@ -326,7 +326,7 @@ const RD = bs({
                 children: /* @__PURE__ */ h(
                   "div",
                   {
-                    className: ye(
+                    className: Fe(
                       !f && "[animation:rotate-gradient_6s_linear_infinite] motion-reduce:[animation:none]"
                     ),
                     style: {
@@ -411,7 +411,7 @@ const C1 = ({
         },
         checked: Q,
         "aria-label": Q ? k.ai.closeChat : k.ai.openChat,
-        className: ye(
+        className: Fe(
           "group relative h-8 w-12 rounded-full border-none bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary transition-all hover:bg-f1-background-hover",
           "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.04)] data-[state=checked]:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.6)]",
           "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] data-[state=checked]:after:ring-f1-border-inverse",
@@ -427,7 +427,7 @@ const C1 = ({
         children: /* @__PURE__ */ h(
           P_,
           {
-            className: ye(
+            className: Fe(
               "block h-[1.375rem] w-[1.375rem] translate-x-[0.3125rem] rounded-full transition-transform duration-300 data-[state=checked]:translate-x-[1.3125rem]"
             ),
             style: {
@@ -528,7 +528,7 @@ const y0 = Ot.create(ii), U0 = {
   return /* @__PURE__ */ h(In, { mode: "wait", children: /* @__PURE__ */ h(
     "button",
     {
-      className: ye(
+      className: Fe(
         "flex h-6 w-6 items-center justify-center rounded",
         Ji()
       ),
@@ -700,7 +700,7 @@ const y0 = Ot.create(ii), U0 = {
           target: "_blank",
           referrerPolicy: "no-referrer",
           rel: "noopener noreferrer",
-          className: ye(U, "text-f1-foreground no-underline"),
+          className: Fe(U, "text-f1-foreground no-underline"),
           children: [
             /* @__PURE__ */ h("div", { className: "px-1 pt-1", children: r ? /* @__PURE__ */ h("div", { className: "overflow-clip rounded border border-solid border-f1-border-secondary", children: /* @__PURE__ */ h(
               "video",
@@ -739,7 +739,7 @@ const y0 = Ot.create(ii), U0 = {
   unread: B = !1,
   onClick: Q
 }) => {
-  const k = ye("flex flex-col items-stretch gap-3 w-full");
+  const k = Fe("flex flex-col items-stretch gap-3 w-full");
   return /* @__PURE__ */ h(W_, { asChild: !0, className: k, onClick: Q, children: /* @__PURE__ */ h(
     Go,
     {
@@ -747,7 +747,7 @@ const y0 = Ot.create(ii), U0 = {
       target: "_blank",
       referrerPolicy: "no-referrer",
       rel: "noopener noreferrer",
-      className: ye(
+      className: Fe(
         k,
         "text-f1-foreground no-underline hover:cursor-pointer"
       ),
@@ -794,7 +794,7 @@ const y0 = Ot.create(ii), U0 = {
   /* @__PURE__ */ h(
     "div",
     {
-      className: ye(
+      className: Fe(
         "grid size-14 place-items-center overflow-clip rounded border border-solid border-f1-border-secondary bg-f1-background-tertiary *:block",
         Q
       ),
@@ -856,7 +856,7 @@ const y0 = Ot.create(ii), U0 = {
   "div",
   {
     "aria-hidden": "true",
-    className: ye("size-2 rounded bg-f1-background-selected-bold", a)
+    className: Fe("size-2 rounded bg-f1-background-selected-bold", a)
   }
 ), HD = ({
   isVisible: a,
@@ -963,7 +963,7 @@ function WK({
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "flex items-center justify-between px-page py-4",
         Q ? "h-12" : "h-16"
       ),
@@ -990,7 +990,7 @@ function WK({
           /* @__PURE__ */ $(
             "div",
             {
-              className: ye(
+              className: Fe(
                 "flex flex-grow items-center gap-2",
                 se && "justify-center"
               ),
@@ -1044,7 +1044,7 @@ function WK({
                 currentModule: a.name
               }
             ) }),
-            te && /* @__PURE__ */ h("div", { className: "items-right flex gap-2", children: B.map((Fe, Y) => /* @__PURE__ */ h(JD, { action: Fe }, Y)) })
+            te && /* @__PURE__ */ h("div", { className: "items-right flex gap-2", children: B.map((ye, Y) => /* @__PURE__ */ h(JD, { action: ye }, Y)) })
           ] }),
           /* @__PURE__ */ $("div", { className: "flex items-center gap-3", children: [
             !G && /* @__PURE__ */ h(
@@ -1231,7 +1231,7 @@ const zK = O_, c1 = process.env.NODE_ENV !== "production", d1 = (a) => {
   return /* @__PURE__ */ $(
     Ot.div,
     {
-      className: ye(
+      className: Fe(
         "relative isolate m-3 mt-2 flex flex-col gap-3 rounded-lg border border-solid border-f1-border",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-[inherit] after:bg-f1-foreground-secondary after:opacity-0 after:blur-[5px] after:content-['']",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943] after:scale-90 after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
@@ -1246,7 +1246,7 @@ const zK = O_, c1 = process.env.NODE_ENV !== "production", d1 = (a) => {
             disabled: !0,
             name: "one-ai-input",
             placeholder: a.ai.inputPlaceholder,
-            className: ye(
+            className: Fe(
               "col-start-1 row-start-1",
               "mx-3 mb-0 mt-3 flex-1 resize-none outline-none transition-all",
               "bg-white text-f1-foreground placeholder:text-f1-foreground-secondary",
@@ -1523,7 +1523,7 @@ const zK = O_, c1 = process.env.NODE_ENV !== "production", d1 = (a) => {
               /* @__PURE__ */ h(
                 Nx,
                 {
-                  className: ye(
+                  className: Fe(
                     "box-border border border-solid border-f1-border-secondary shadow-none [--color-border-over:rgba(1,22,55,0.2)] [--color-border:rgba(1,22,55,0.08)] [--shadow:none]",
                     j && "rounded-b-none border-b-0"
                   ),
@@ -1610,7 +1610,7 @@ const HK = ["sm", "md", "lg"], OK = Hn(
             /* @__PURE__ */ $(
               "div",
               {
-                className: ye(
+                className: Fe(
                   "flex flex-row items-center gap-2",
                   _0[k]
                 ),
@@ -1642,7 +1642,7 @@ const HK = ["sm", "md", "lg"], OK = Hn(
             /* @__PURE__ */ h(
               "div",
               {
-                className: ye(
+                className: Fe(
                   "bg-f1-background px-4 py-3",
                   r ? "rounded-t-[13.25px]" : "rounded-[13.25px]"
                 ),
@@ -1678,7 +1678,7 @@ const HK = ["sm", "md", "lg"], OK = Hn(
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "rounded-t-[13.25px] bg-f1-background px-4 py-3",
               a && "rounded-[13.25px]"
             ),
@@ -1793,7 +1793,7 @@ const JK = Cg(
       left: /* @__PURE__ */ h(
         "div",
         {
-          className: ye(
+          className: Fe(
             "m-1 aspect-square w-2 rounded-full bg-f1-icon-info",
             !I && "animate-pulse"
           ),
@@ -1907,7 +1907,7 @@ const JK = Cg(
       windowMinutes: K?.windowMinutes,
       invitedCount: T,
       presentCount: S
-    }), Fe = vS(V, I), Y = Fe === "avatars" && U.length > 0, ee = Fe === "count" ? se : void 0, ge = f ?? (I === "inProgress" ? ie.inProgressTitle : void 0), me = !f && I === "inProgress", we = L ? [
+    }), ye = vS(V, I), Y = ye === "avatars" && U.length > 0, ee = ye === "count" ? se : void 0, ge = f ?? (I === "inProgress" ? ie.inProgressTitle : void 0), me = !f && I === "inProgress", we = L ? [
       // No footer band in compact, so the countdown has to ride along the
       // headline as text. The clock time is dropped while the meeting runs —
       // "started 4 mins ago" is the useful fact then, not when it began.
@@ -1927,7 +1927,7 @@ const JK = Cg(
         {
           variant: "body",
           content: ge,
-          className: ye(
+          className: Fe(
             "break-words font-medium",
             // Struck through but at full contrast: the strike says it's off, and
             // dimming on top would make the title harder to read for no
@@ -1962,7 +1962,7 @@ const JK = Cg(
       Nh,
       {
         ref: j,
-        className: ye(
+        className: Fe(
           // Container geometry and border deliberately match F0AudioPlayerCard
           // (rounded-2xl / p-3 / border-f1-border-secondary) rather than the
           // heavier ui/Card defaults, so a meeting and its recording read as the
@@ -1988,7 +1988,7 @@ const JK = Cg(
           (Be || De) && /* @__PURE__ */ $(
             "div",
             {
-              className: ye(
+              className: Fe(
                 "flex flex-row items-center gap-2",
                 Be && "-mx-3 -mb-3 mt-0.5 border-0 border-t border-solid border-t-f1-border-secondary px-3 pb-3 pt-3"
               ),
@@ -2007,7 +2007,7 @@ F1.displayName = "F0MeetingCard";
 const GS = ({ compact: a = !1 }) => /* @__PURE__ */ h(
   Nh,
   {
-    className: ye(
+    className: Fe(
       "rounded-2xl border-f1-border-secondary bg-f1-background p-3 shadow-none",
       a ? "gap-1.5" : "gap-2.5"
     ),
@@ -2055,23 +2055,23 @@ const GS = ({ compact: a = !1 }) => /* @__PURE__ */ h(
 }) => {
   const G = L_(), Z = a.findIndex((Pe) => Pe.id === I), K = Z < 0, O = K ? 0 : Z, L = a[O], j = a.length, ie = k?.total ?? j, X = k?.hasMore ?? !1, T = k?.isLoading ?? !1, te = Q && !X, pe = K ? void 0 : te ? a[(O - 1 + j) % j]?.id : a[O - 1]?.id, Ce = K ? void 0 : te ? a[(O + 1) % j]?.id : a[O + 1]?.id, de = Je(() => {
     pe && f(pe);
-  }, [pe, f]), [se, Fe] = Ne(!1), Y = Re(-1), ee = Je(() => {
+  }, [pe, f]), [se, ye] = Ne(!1), Y = Re(-1), ee = Je(() => {
     !k || T || Y.current !== j && (Y.current = j, k.onLoadMore());
   }, [k, T, j]), ge = Je(() => {
     if (Ce) {
       f(Ce);
       return;
     }
-    K || !X || !k || (Fe(!0), ee());
+    K || !X || !k || (ye(!0), ee());
   }, [Ce, f, K, X, k, ee]), me = Re(T);
   Xe(() => {
     const Pe = me.current && !T;
     if (me.current = T, !!se) {
       if (Ce) {
-        Fe(!1), f(Ce);
+        ye(!1), f(Ce);
         return;
       }
-      Pe && Fe(!1);
+      Pe && ye(!1);
     }
   }, [se, Ce, T, f]), Xe(() => {
     !r || K || Ce || !X || ee();
@@ -2341,7 +2341,7 @@ function ZS() {
           var e = n[0], i = n[1], o = n[2];
           return Math.sqrt(e * e + i * i + o * o);
         }
-        function Fe(n, e, i) {
+        function ye(n, e, i) {
           var o = new te(3);
           return o[0] = n, o[1] = e, o[2] = i, o;
         }
@@ -2400,7 +2400,7 @@ function ZS() {
           var i = new te(2);
           return i[0] = n, i[1] = e, i;
         }
-        de(), me = new te(4), te != Float32Array && (me[0] = 0, me[1] = 0, me[2] = 0, me[3] = 0), de(), Fe(1, 0, 0), Fe(0, 1, 0), Qe(), Qe(), pe(), Be();
+        de(), me = new te(4), te != Float32Array && (me[0] = 0, me[1] = 0, me[2] = 0, me[3] = 0), de(), ye(1, 0, 0), ye(0, 1, 0), Qe(), Qe(), pe(), Be();
         const Pe = 8192;
         function Ge(n, e, i) {
           return e * (Pe / (n.tileSize * Math.pow(2, i - n.tileID.overscaledZ)));
@@ -14641,9 +14641,9 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }));
           }
         }
-        function G(Fe, Y, ee) {
+        function G(ye, Y, ee) {
           const ge = new U.J(Y);
-          for (const me of Fe) me.recalculate(ge, ee);
+          for (const me of ye) me.recalculate(ge, ee);
         }
         class Z {
           constructor() {
@@ -14717,20 +14717,20 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             this.layers[Y.name] = Y;
           }
         }
-        function ie(Fe) {
-          let Y = U.cS(Fe);
-          return Y.byteOffset === 0 && Y.byteLength === Y.buffer.byteLength || (Y = new Uint8Array(Y)), { vectorTile: Fe, rawData: Y.buffer };
+        function ie(ye) {
+          let Y = U.cS(ye);
+          return Y.byteOffset === 0 && Y.byteLength === Y.buffer.byteLength || (Y = new Uint8Array(Y)), { vectorTile: ye, rawData: Y.buffer };
         }
-        function X(Fe, Y, ee) {
-          const { extent: ge } = Fe, me = Math.pow(2, ee.z - Y.z), we = (ee.x - Y.x * me) * ge, ve = (ee.y - Y.y * me) * ge, Qe = [];
-          for (let De = 0; De < Fe.length; De++) {
-            const Be = Fe.feature(De);
+        function X(ye, Y, ee) {
+          const { extent: ge } = ye, me = Math.pow(2, ee.z - Y.z), we = (ee.x - Y.x * me) * ge, ve = (ee.y - Y.y * me) * ge, Qe = [];
+          for (let De = 0; De < ye.length; De++) {
+            const Be = ye.feature(De);
             let ke = Be.loadGeometry();
             for (const Ge of ke) for (const $e of Ge) $e.x = $e.x * me - we, $e.y = $e.y * me - ve;
             const Pe = 128;
             ke = U.cT(ke, Be.type, -Pe, -Pe, ge + Pe, ge + Pe), ke.length !== 0 && Qe.push(new O(Be.type, ke, Be.properties, Be.id, ge));
           }
-          return new L(Qe, Fe.name, ge);
+          return new L(Qe, ye.name, ge);
         }
         class T {
           constructor(Y, ee, ge) {
@@ -14974,26 +14974,26 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             return this._geoJSONIndex.getClusterLeaves(Y.clusterId, Y.limit, Y.offset);
           }
         }
-        function Ce(Fe, Y) {
+        function Ce(ye, Y) {
           const ee = U.e(Y.geojsonVtOptions || {}, { updateable: !0, clusterOptions: de(Y) });
-          return new U.d0(Fe, ee);
+          return new U.d0(ye, ee);
         }
-        function de({ geojsonVtOptions: Fe, clusterProperties: Y }) {
-          if (!Y || !Fe.clusterOptions) return Fe.clusterOptions;
+        function de({ geojsonVtOptions: ye, clusterProperties: Y }) {
+          if (!Y || !ye.clusterOptions) return ye.clusterOptions;
           const ee = {}, ge = {}, me = { accumulated: null, zoom: 0 }, we = { properties: null }, ve = Object.keys(Y);
           for (const Qe of ve) {
             const [De, Be] = Y[Qe], ke = U.c$(Be), Pe = U.c$(typeof De == "string" ? [De, ["accumulated"], ["get", Qe]] : De);
             ee[Qe] = ke.value, ge[Qe] = Pe.value;
           }
-          return Fe.clusterOptions.map = (Qe) => {
+          return ye.clusterOptions.map = (Qe) => {
             we.properties = Qe;
             const De = {};
             for (const Be of ve) De[Be] = ee[Be].evaluate(me, we);
             return De;
-          }, Fe.clusterOptions.reduce = (Qe, De) => {
+          }, ye.clusterOptions.reduce = (Qe, De) => {
             we.properties = De;
             for (const Be of ve) me.accumulated = Qe[Be], Qe[Be] = ge[Be].evaluate(me, we);
-          }, Fe.clusterOptions;
+          }, ye.clusterOptions;
         }
         class se {
           constructor(Y) {
@@ -15397,7 +15397,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             return t;
           }
         }
-        const Fe = 1e20, Y = new Float64Array(256);
+        const ye = 1e20, Y = new Float64Array(256);
         for (let d = 0; d < 256; d++) {
           const t = 0.5 - Math.pow(d / 255, 0.45454545454545453);
           Y[d] = t * Math.abs(t);
@@ -15407,7 +15407,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           for (let R = g; R < g + l; R++) ge(d, R * m + t, 1, C, w, b, x);
         }
         function ge(d, t, g, C, l, m, w) {
-          m[0] = 0, w[0] = -Fe, w[1] = Fe, l[0] = d[t];
+          m[0] = 0, w[0] = -ye, w[1] = ye, l[0] = d[t];
           for (let b = 1, x = 0, R = 0; b < C; b++) {
             l[b] = d[t + b * g];
             const M = b * b;
@@ -15415,7 +15415,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               const N = m[x];
               R = (l[b] - l[N] + M - N * N) / (b - N) / 2;
             } while (R <= w[x] && --x > -1);
-            x++, m[x] = b, w[x] = R, w[x + 1] = Fe;
+            x++, m[x] = b, w[x] = R, w[x + 1] = ye;
           }
           for (let b = 0, x = 0; b < C; b++) {
             for (; w[x + 1] < b; ) x++;
@@ -15423,7 +15423,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             d[t + b * g] = l[R] + M * M;
           }
         }
-        Y[255] = -Fe;
+        Y[255] = -ye;
         const me = r.v.layout_symbol["text-font"].default.join(",");
         class we {
           constructor(t, g, C) {
@@ -15527,7 +15527,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const { ctx: Ie, buffer: ue, gridInner: le, gridOuter: fe } = this;
             this.lang && (Ie.lang = this.lang), Ie.clearRect(ue, ue, x, R), Ie.fillText(d, ue - b, ue + w);
             const _e = Ie.getImageData(ue, ue, x, R);
-            fe.fill(Fe, 0, W), le.fill(0, 0, W);
+            fe.fill(ye, 0, W), le.fill(0, 0, W);
             let he = 3;
             for (let Ue = 0; Ue < R; Ue++) {
               let Ve = (Ue + ue) * M + ue;
@@ -26957,7 +26957,7 @@ const I2 = (a, I) => {
         id: U,
         "aria-label": Z,
         tabIndex: -1,
-        className: ye(
+        className: Fe(
           "outline-none",
           Q ? "absolute inset-0 z-20 overflow-auto bg-f1-background p-4" : "sr-only",
           S
@@ -26970,7 +26970,7 @@ const I2 = (a, I) => {
               type: "button",
               "aria-current": K.id === f || void 0,
               onClick: () => B(K.id),
-              className: ye(
+              className: Fe(
                 "w-full text-left",
                 Q && "text-f1-foreground hover:bg-f1-background-hover aria-[current=true]:bg-f1-background-selected rounded-md px-3 py-2 text-sm"
               ),
@@ -26996,14 +26996,14 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
     let r = 0;
     const S = () => {
       const G = I.map((de) => a.project(de.coordinates)), Z = I.length, K = B * B, O = Q * Q, L = (de, se) => {
-        const Fe = G[de].x - G[se].x, Y = G[de].y - G[se].y;
-        return Fe * Fe + Y * Y;
+        const ye = G[de].x - G[se].x, Y = G[de].y - G[se].y;
+        return ye * ye + Y * Y;
       }, j = Array.from({ length: Z }, (de, se) => se), ie = (de) => {
         for (; j[de] !== de; ) de = j[de] = j[j[de]];
         return de;
       }, X = (de, se) => {
-        const Fe = ie(de), Y = ie(se);
-        Fe !== Y && (j[Fe] = Y);
+        const ye = ie(de), Y = ie(se);
+        ye !== Y && (j[ye] = Y);
       }, T = new Array(Z).fill(!1);
       for (let de = 0; de < Z; de++)
         for (let se = de + 1; se < Z; se++)
@@ -27013,8 +27013,8 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
           (T[de] || T[se]) && L(de, se) <= O && X(de, se);
       const te = /* @__PURE__ */ new Map();
       for (let de = 0; de < Z; de++) {
-        const se = ie(de), Fe = te.get(se);
-        Fe ? Fe.push(de) : te.set(se, [de]);
+        const se = ie(de), ye = te.get(se);
+        ye ? ye.push(de) : te.set(se, [de]);
       }
       const pe = [], Ce = [];
       for (const de of te.values()) {
@@ -27022,15 +27022,15 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
           Ce.push(I[de[0]]);
           continue;
         }
-        let se = 0, Fe = 0, Y = 1 / 0, ee = 1 / 0, ge = -1 / 0, me = -1 / 0;
+        let se = 0, ye = 0, Y = 1 / 0, ee = 1 / 0, ge = -1 / 0, me = -1 / 0;
         for (const ve of de) {
           const [Qe, De] = I[ve].coordinates;
-          se += Qe, Fe += De, Y = Math.min(Y, Qe), ge = Math.max(ge, Qe), ee = Math.min(ee, De), me = Math.max(me, De);
+          se += Qe, ye += De, Y = Math.min(Y, Qe), ge = Math.max(ge, Qe), ee = Math.min(ee, De), me = Math.max(me, De);
         }
         const we = de.length;
         pe.push({
           id: `cluster:${de.map((ve) => I[ve].id).sort().join(",")}`,
-          coordinates: [se / we, Fe / we],
+          coordinates: [se / we, ye / we],
           count: we,
           pointIds: de.map((ve) => I[ve].id),
           bounds: [
@@ -27039,7 +27039,7 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
           ]
         });
       }
-      U((de) => de.clusters.length === pe.length && de.singles.length === Ce.length && de.clusters.every((Fe, Y) => Fe.id === pe[Y].id) && de.singles.every((Fe, Y) => Fe === Ce[Y]) ? de : { clusters: pe, singles: Ce });
+      U((de) => de.clusters.length === pe.length && de.singles.length === Ce.length && de.clusters.every((ye, Y) => ye.id === pe[Y].id) && de.singles.every((ye, Y) => ye === Ce[Y]) ? de : { clusters: pe, singles: Ce });
     }, V = () => {
       cancelAnimationFrame(r), r = requestAnimationFrame(S);
     };
@@ -27159,11 +27159,11 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
       presentational: Z = !1,
       dataTestId: K,
       className: O
-    } = I, L = I.variant ?? "color", j = Jc[Q ? "xl" : B], ie = !!V, X = L === "color" || L === "icon" || L === "letter", T = L === "person" && "firstName" in I ? I.firstName + I.lastName : (L === "team" || L === "company") && "name" in I ? I.name : null, te = X ? I.color ?? "radical" : T ? L === "person" && "src" in I && I.src ? "grey" : Kh(T) ?? "grey" : "neutral", pe = Kx(), Ce = Q ? 32 : { xs: 12, sm: 16, md: 20, lg: 24 }[j.icon], de = { xs: 20, sm: 24, md: 32, lg: 40 }, se = Jc[B].avatar, Fe = Q ? de[j.avatar] / de[se] : 1, Y = (ut) => /* @__PURE__ */ h(
+    } = I, L = I.variant ?? "color", j = Jc[Q ? "xl" : B], ie = !!V, X = L === "color" || L === "icon" || L === "letter", T = L === "person" && "firstName" in I ? I.firstName + I.lastName : (L === "team" || L === "company") && "name" in I ? I.name : null, te = X ? I.color ?? "radical" : T ? L === "person" && "src" in I && I.src ? "grey" : Kh(T) ?? "grey" : "neutral", pe = Kx(), Ce = Q ? 32 : { xs: 12, sm: 16, md: 20, lg: 24 }[j.icon], de = { xs: 20, sm: 24, md: 32, lg: 40 }, se = Jc[B].avatar, ye = Q ? de[j.avatar] / de[se] : 1, Y = (ut) => /* @__PURE__ */ h(
       "span",
       {
         className: "flex shrink-0 items-center justify-center transition-transform duration-200 ease-out",
-        style: { transform: `scale(${Fe})` },
+        style: { transform: `scale(${ye})` },
         children: ut
       }
     ), ee = L === "color" ? null : L === "icon" && "icon" in I ? /* @__PURE__ */ h(
@@ -27321,7 +27321,7 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
     }[Pe], nt = U && r && !k && /* @__PURE__ */ h(
       "span",
       {
-        className: ye(
+        className: Fe(
           "absolute left-0 top-0 font-semibold leading-tight transition-all duration-200 ease-out",
           It
         ),
@@ -27375,7 +27375,7 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
         type: "button",
         ...Z ? { tabIndex: -1, "aria-hidden": !0 } : { "aria-label": G, "aria-pressed": Q },
         onClick: V,
-        className: ye(
+        className: Fe(
           // Hover grows from the center (transform-only, no extra layout).
           "relative inline-flex cursor-pointer border-0 bg-transparent p-0",
           "transition-transform duration-150 hover:scale-[1.05]",
@@ -27389,7 +27389,7 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
       {
         role: "img",
         "aria-label": G,
-        className: ye("relative inline-flex", O),
+        className: Fe("relative inline-flex", O),
         children: Le
       }
     ) });
@@ -27436,12 +27436,12 @@ const M1 = (a, I) => (!_A && typeof document < "u" && (_A = document.createEleme
       for (let T = 0; T < Z; T++) {
         const te = I[T];
         if (!te.label) continue;
-        const pe = G[T], Ce = "right", de = [Ce, ...u2.filter((Fe) => Fe !== Ce)];
+        const pe = G[T], Ce = "right", de = [Ce, ...u2.filter((ye) => ye !== Ce)];
         let se = null;
-        for (const Fe of de) {
-          const Y = h2(Fe, pe.x, pe.y, te, f), ee = V.some((me) => sd(Y, me)), ge = ie.some((me) => sd(Y, me));
+        for (const ye of de) {
+          const Y = h2(ye, pe.x, pe.y, te, f), ee = V.some((me) => sd(Y, me)), ge = ie.some((me) => sd(Y, me));
           if (!ee && !ge) {
-            se = Fe, ie.push(Y);
+            se = ye, ie.push(Y);
             break;
           }
         }
@@ -27580,7 +27580,7 @@ const V1 = P1, P0 = 4, V0 = 3, U2 = 1.3, Q2 = 1.08, G0 = "cubic-bezier(0.16, 1, 
         onPointerLeave: () => G(!1),
         onFocus: () => G(!0),
         onBlur: () => G(!1),
-        className: ye("group cursor-pointer outline-none", U),
+        className: Fe("group cursor-pointer outline-none", U),
         style: { position: "relative", width: 0, height: 0 },
         children: [
           /* @__PURE__ */ h(
@@ -27605,7 +27605,7 @@ const V1 = P1, P0 = 4, V0 = 3, U2 = 1.3, Q2 = 1.08, G0 = "cubic-bezier(0.16, 1, 
             return /* @__PURE__ */ $(
               "span",
               {
-                className: ye(
+                className: Fe(
                   "absolute left-0 top-0 flex h-6 min-w-6 items-center justify-center overflow-hidden rounded-full px-1.5",
                   "border border-solid border-f1-border-secondary",
                   // White-90 base with the translucent hover layer on top.
@@ -27993,7 +27993,7 @@ const K2 = ({
   {
     "aria-busy": "true",
     "aria-live": "polite",
-    className: ye(
+    className: Fe(
       "h-full w-full animate-pulse bg-f1-background-secondary",
       I
     )
@@ -28045,7 +28045,7 @@ const K2 = ({
   projection: Ce = "mercator",
   loading: de = !1,
   ariaLabel: se,
-  dataTestId: Fe,
+  dataTestId: ye,
   className: Y
 }, ee) {
   const ge = xt(), me = Re(null), we = Re(null), [ve, Qe] = Ne(null), [De, Be] = Ne(!1), [ke, Pe] = Ne(!1), Ge = ws(), $e = Pn(), { containerRef: mt, isDark: It } = zS(), rt = Je(
@@ -28190,13 +28190,13 @@ const K2 = ({
     Tt && ri && Gf(Tt, ri, !$e);
   }, [V, $e]);
   const Ii = f.length > 0 || B.length > 0;
-  return /* @__PURE__ */ h(oC, { dataTestId: Fe, children: de ? /* @__PURE__ */ h(K2, { className: Y }) : /* @__PURE__ */ $(
+  return /* @__PURE__ */ h(oC, { dataTestId: ye, children: de ? /* @__PURE__ */ h(K2, { className: Y }) : /* @__PURE__ */ $(
     "div",
     {
       ref: rt,
       role: "region",
       "aria-label": se ?? ge.map.region,
-      className: ye(
+      className: Fe(
         "f0-map relative h-full w-full overflow-hidden",
         // Re-assert the detected theme on the container so every DOM
         // overlay (controls, markers, list, banners) swaps its tokens along
@@ -28250,7 +28250,7 @@ const K2 = ({
         !De && ve && X && O && /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "absolute z-10",
               pe ? "bottom-6 left-6" : "bottom-2 left-2"
             ),
@@ -28313,11 +28313,11 @@ const e9 = Z1, K1 = Ui(
           current: r,
           total: U
         }),
-        className: ye("flex h-2 w-full gap-1"),
+        className: Fe("flex h-2 w-full gap-1"),
         children: S.map((G, Z) => /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "flex-1 rounded-full bg-f1-background-secondary",
               "transition-all duration-300 ease-in-out motion-reduce:transition-none"
             ),
@@ -28342,7 +28342,7 @@ function z2({
     "button",
     {
       type: "button",
-      className: ye(
+      className: Fe(
         "flex w-full flex-row items-center gap-[6px] rounded-md p-[6px] pr-2 text-left transition-colors",
         I && "bg-f1-background-tertiary",
         f && "cursor-pointer hover:bg-f1-background-hover",
@@ -28377,7 +28377,7 @@ function Y2({
     "button",
     {
       type: "button",
-      className: ye(
+      className: Fe(
         "flex w-full flex-col gap-[6px] rounded-md px-2 py-[6px] text-left transition-colors",
         B && "bg-f1-background-tertiary",
         f && "cursor-pointer hover:bg-f1-background-hover",
@@ -28477,7 +28477,7 @@ const i9 = Hn(
       "div",
       {
         ref: U,
-        className: ye("scrollbar-macos w-full overflow-auto", B),
+        className: Fe("scrollbar-macos w-full overflow-auto", B),
         style: {
           height: `${a}px`
         },
@@ -28518,16 +28518,16 @@ const dh = nn("VirtualList", W1), z1 = ({
   semiBold: B = !1
 }) => {
   if (!I)
-    return /* @__PURE__ */ h("span", { className: ye("line-clamp-1", B ? "font-semibold" : ""), children: a });
+    return /* @__PURE__ */ h("span", { className: Fe("line-clamp-1", B ? "font-semibold" : ""), children: a });
   if (a.toLowerCase().indexOf(I.toLowerCase()) === -1)
     if (f.find(
       (U) => U.toLowerCase().indexOf(I.toLowerCase().trim()) >= 0
     ))
       I = a.split(" ")[0];
     else
-      return /* @__PURE__ */ h("span", { className: ye("line-clamp-1", B ? "font-semibold" : ""), children: a });
+      return /* @__PURE__ */ h("span", { className: Fe("line-clamp-1", B ? "font-semibold" : ""), children: a });
   const Q = new RegExp(`(${I})`, "gi"), k = a.split(Q);
-  return /* @__PURE__ */ h("span", { className: ye("line-clamp-1", B ? "font-semibold" : ""), children: k.map(
+  return /* @__PURE__ */ h("span", { className: Fe("line-clamp-1", B ? "font-semibold" : ""), children: k.map(
     (U, r) => U.toLowerCase() === I.toLowerCase() ? /* @__PURE__ */ h(
       "span",
       {
@@ -28578,7 +28578,7 @@ const O2 = ({
     "label",
     {
       "aria-label": a.name,
-      className: ye(
+      className: Fe(
         Q,
         "flex flex-row flex-wrap items-center gap-2 rounded border px-2 py-1.5 hover:cursor-pointer",
         "focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:bg-f1-background-hover",
@@ -28598,7 +28598,7 @@ const O2 = ({
         /* @__PURE__ */ h("div", { className: "flex flex-1 flex-col", children: /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "flex flex-1 flex-row items-center gap-2 break-all",
               a.deactivated ? "text-f1-foreground/[0.61]" : void 0
             ),
@@ -28620,7 +28620,7 @@ const O2 = ({
             disabled: V,
             onClick: L,
             onKeyDown: j,
-            className: ye(
+            className: Fe(
               "pointer-events-none ml-auto",
               S ? "opacity-0" : ""
             )
@@ -28747,7 +28747,7 @@ const O2 = ({
                   de.stopPropagation(), T(!1);
                 },
                 "data-avatarname-navigator-element": "true",
-                className: ye("ml-auto", L ? "opacity-0" : "")
+                className: Fe("ml-auto", L ? "opacity-0" : "")
               }
             )
           ]
@@ -28769,7 +28769,7 @@ const Y0 = ({
   "label",
   {
     "aria-label": a,
-    className: ye(
+    className: Fe(
       "flex flex-row flex-wrap items-center gap-1.5 rounded border px-1.5 py-1.5 hover:cursor-pointer",
       "focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:bg-f1-background-hover",
       "select-none"
@@ -28786,7 +28786,7 @@ const Y0 = ({
           variant: "outline"
         }
       ),
-      /* @__PURE__ */ h("div", { className: "flex flex-1 flex-col", children: /* @__PURE__ */ h("div", { className: "flex flex-1 flex-row items-center gap-2 break-all", children: /* @__PURE__ */ h("span", { className: ye("line-clamp-1"), children: a }) }) })
+      /* @__PURE__ */ h("div", { className: "flex flex-1 flex-col", children: /* @__PURE__ */ h("div", { className: "flex flex-1 flex-row items-center gap-2 break-all", children: /* @__PURE__ */ h("span", { className: Fe("line-clamp-1"), children: a }) }) })
     ]
   }
 ) }), kA = ({ primaryAction: a, secondaryActions: I }) => {
@@ -28926,7 +28926,7 @@ const Y0 = ({
   actions: Ce,
   onCreate: de,
   onCreateLabel: se,
-  singleSelector: Fe = !1,
+  singleSelector: ye = !1,
   loading: Y = !1,
   disabled: ee = !1,
   hiddenAvatar: ge = !1
@@ -28999,7 +28999,7 @@ const Y0 = ({
           selected: ut,
           partialSelected: ft,
           showGroupIcon: q2(f, B),
-          singleSelector: Fe,
+          singleSelector: ye,
           goToFirst: ve,
           goToLast: Qe,
           disabled: ee,
@@ -29024,7 +29024,7 @@ const Y0 = ({
       L,
       Q,
       B,
-      Fe
+      ye
     ]
   ), Pe = kt(() => a ? I.flatMap((nt) => {
     const Ke = Ec(
@@ -29103,7 +29103,7 @@ const Y0 = ({
             selected: St,
             partialSelected: Nt,
             showGroupIcon: f.find((Et) => Et.value === B)?.groupType === "team",
-            singleSelector: Fe,
+            singleSelector: ye,
             goToFirst: ve,
             goToLast: Qe,
             hideLine: Ke === Pe.length - 1,
@@ -29143,7 +29143,7 @@ const Y0 = ({
           onRemove: () => r(Le, ut),
           selected: !!ft,
           partialSelected: !1,
-          singleSelector: Fe,
+          singleSelector: ye,
           goToFirst: ve,
           goToLast: Qe,
           isChild: !0,
@@ -29155,7 +29155,7 @@ const Y0 = ({
       Pe,
       K,
       Q,
-      Fe,
+      ye,
       ve,
       Qe,
       k,
@@ -29194,22 +29194,22 @@ const Y0 = ({
     }
     const Le = nt > 0 && Ke === nt, ut = Ke > 0;
     return [Le, ut];
-  }, [I, De, a]), It = Pe.length, rt = !Fe && (ie || X), Yt = Ce && Ce.length > 0, Gt = !Y && (!Fe && rt || Yt);
+  }, [I, De, a]), It = Pe.length, rt = !ye && (ie || X), Yt = Ce && Ce.length > 0, Gt = !Y && (!ye && rt || Yt);
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "flex w-full flex-col rounded-l-xl border-0",
-        Fe || Y ? "rounded-r-xl" : "",
+        ye || Y ? "rounded-r-xl" : "",
         pe
       ),
       children: [
         /* @__PURE__ */ $(
           "header",
           {
-            className: ye(
+            className: Fe(
               "flex h-[48px] justify-between gap-2 rounded-tl-xl border-0 border-b-[1px] border-r-[1px] border-solid border-f1-border-secondary bg-f1-background/30 p-2 backdrop-blur-2xl",
-              Fe || Y ? "rounded-t-xl border-r-0" : ""
+              ye || Y ? "rounded-t-xl border-r-0" : ""
             ),
             children: [
               /* @__PURE__ */ h("div", { className: "flex-1", children: /* @__PURE__ */ h(
@@ -29231,7 +29231,7 @@ const Y0 = ({
                   onChange: O,
                   options: f,
                   value: B,
-                  className: ye(
+                  className: Fe(
                     "h-8 rounded bg-transparent py-[5px]",
                     B === "all" ? "text-f1-foreground-secondary" : ""
                   )
@@ -29243,7 +29243,7 @@ const Y0 = ({
         /* @__PURE__ */ $(
           "section",
           {
-            className: ye(
+            className: Fe(
               "flex-grow-1 flex h-96 flex-col justify-start gap-1 border-0 border-r-[1px] border-solid border-f1-border-secondary bg-f1-background",
               Gt ? "" : "rounded-b-xl border-r-0"
             ),
@@ -29293,7 +29293,7 @@ const Y0 = ({
           {
             onSelectAll: G,
             onClear: V,
-            singleSelector: Fe,
+            singleSelector: ye,
             totalFilteredEntities: we,
             allVisibleSelected: $e,
             anyVisibleSelected: mt,
@@ -29315,7 +29315,7 @@ const Y0 = ({
 }) => /* @__PURE__ */ h("div", { className: "pr-2 pt-1.5", children: /* @__PURE__ */ h(
   Qy,
   {
-    className: ye(
+    className: Fe(
       "max-w-54 w-fit gap-1 text-ellipsis break-all border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]",
       "rounded-full",
       Q ? "pl-2" : "pl-0"
@@ -29501,21 +29501,21 @@ const Y0 = ({
 }) => {
   const pe = kt(
     () => f.some(
-      (Fe) => Fe.subItems && Fe.subItems.length > 0
+      (ye) => ye.subItems && ye.subItems.length > 0
     ),
     [f]
   ), Ce = kt(() => pe ? f.flatMap(
-    (Fe) => (Fe.subItems ?? []).map((Y) => ({
-      parent: Fe,
+    (ye) => (ye.subItems ?? []).map((Y) => ({
+      parent: ye,
       subItem: Y
     }))
-  ) : f.map((Fe) => ({
+  ) : f.map((ye) => ({
     parent: null,
     subItem: {
-      subId: Fe.id,
-      subName: Fe.name,
-      subAvatar: Fe.avatar,
-      subDeactivated: Fe.deactivated
+      subId: ye.id,
+      subName: ye.name,
+      subAvatar: ye.avatar,
+      subDeactivated: ye.deactivated
     }
   })), [pe, f]), de = Ce.length === 0 ? void 0 : Ce.length === 1 ? Ce[0].subItem.subName : Ce.length + " " + I, se = Ce.length === 1 ? Ce[0].subItem.subName : void 0;
   return /* @__PURE__ */ h(
@@ -29552,7 +29552,7 @@ const Y0 = ({
         "span",
         {
           role: "button",
-          className: ye(
+          className: Fe(
             "my-auto flex items-center pr-1",
             a && "text-f1-foreground-secondary",
             de && "text-f1-foreground",
@@ -29804,17 +29804,17 @@ const Y0 = ({
     G,
     k
   ]);
-  const de = Re(null), [se, Fe] = Ne(0);
+  const de = Re(null), [se, ye] = Ne(0);
   return yg(() => {
     const Y = () => {
-      de.current && Fe(de.current.offsetWidth);
+      de.current && ye(de.current.offsetWidth);
     };
     return Y(), window.addEventListener("resize", Y), () => window.removeEventListener("resize", Y);
   }, []), a.alwaysOpen ? /* @__PURE__ */ h(
     "div",
     {
       ref: de,
-      className: ye(
+      className: Fe(
         "scrollbar-macos relative overflow-hidden rounded-xl border-[1px] border-solid border-f1-border-secondary bg-transparent p-0",
         a.width ? "w-fit" : "w-full"
       ),
@@ -29890,7 +29890,7 @@ const Y0 = ({
       el,
       {
         container: O,
-        className: ye(
+        className: Fe(
           "scrollbar-macos relative w-full overflow-hidden overscroll-contain rounded-xl border-[1px] border-solid border-f1-border-secondary bg-transparent p-0"
         ),
         children: /* @__PURE__ */ h(
@@ -30130,7 +30130,7 @@ function uR({
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "relative h-32 w-full overflow-hidden rounded-md bg-f1-background",
         f ? "" : dR[Kh(
           [a, I].join("")
@@ -30166,7 +30166,7 @@ function uR({
             "div",
             {
               ref: U,
-              className: ye(
+              className: Fe(
                 "absolute -right-0.5",
                 f ? "bottom-0.5" : "-bottom-[3px]"
               ),
@@ -30246,7 +30246,7 @@ const hR = ({
     {
       href: a,
       onClick: Q,
-      className: ye(
+      className: Fe(
         "relative flex flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary no-underline transition-shadow hover:shadow",
         Ji()
       ),
@@ -30354,7 +30354,7 @@ function pR({
       onClick: (Ce) => {
         T(Ce, a);
       },
-      className: ye(
+      className: Fe(
         "flex items-center gap-1 px-0.5 font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
         r && "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
       ),
@@ -30369,7 +30369,7 @@ function pR({
             duration: 200,
             easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)"
           },
-          className: ye(
+          className: Fe(
             "tabular-nums",
             r ? "text-f1-foreground-selected" : "text-f1-foreground"
           )
@@ -30421,7 +30421,7 @@ const FR = nn("Reactions", BR), H1 = Ui(function({ content: I, collapsed: f, id:
       id: B,
       content: I,
       tabIndex: k,
-      className: ye(
+      className: Fe(
         "FactorialOneTextEditor",
         f && "line-clamp-5 break-words",
         Q
@@ -30439,7 +30439,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
 ), $0 = ({ tags: a, right: I }) => /* @__PURE__ */ h(
   "div",
   {
-    className: ye(
+    className: Fe(
       "flex flex-1 flex-row items-center gap-1.5",
       I && "justify-end"
     ),
@@ -30634,7 +30634,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
     "button",
     {
       type: "button",
-      className: ye(
+      className: Fe(
         "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
         Ji()
       ),
@@ -30670,7 +30670,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
   pinnedLabel: Ce,
   relativeDate: de = !1
 }) => {
-  const se = ws(), Fe = ws(), Y = Eo(), ee = Re(null), [ge, me] = Ne(null), [we, ve] = Ne(!1), Qe = [V.views, V.comments].filter(Boolean).join(" · "), De = ie && ge?.id === a && ge.description === k, Be = !De && !X, ke = de ? yk(B, Y) : _y(B, { locale: Y }), Pe = !!U, Ge = U ? () => U(a) : void 0, $e = (rt) => {
+  const se = ws(), ye = ws(), Y = Eo(), ee = Re(null), [ge, me] = Ne(null), [we, ve] = Ne(!1), Qe = [V.views, V.comments].filter(Boolean).join(" · "), De = ie && ge?.id === a && ge.description === k, Be = !De && !X, ke = de ? yk(B, Y) : _y(B, { locale: Y }), Pe = !!U, Ge = U ? () => U(a) : void 0, $e = (rt) => {
     rt.stopPropagation();
   }, mt = I ? `${I.firstName} ${I.lastName}` : void 0, It = (rt) => {
     rt.preventDefault(), rt.stopPropagation(), k && me({ id: a, description: k });
@@ -30696,7 +30696,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
   }, [ie, De, k]), /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 md:pb-4 md:pt-3",
         // The affordances belong to the click, so they come and go with it.
         Pe && "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"
@@ -30749,7 +30749,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
                 /* @__PURE__ */ h(
                   "span",
                   {
-                    className: ye(
+                    className: Fe(
                       "text-f1-foreground-secondary",
                       !I && "capitalize"
                     ),
@@ -30827,8 +30827,8 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
             "p",
             {
               id: se,
-              className: ye(
-                T ? "sr-only" : ye("text-xl font-semibold", "line-clamp-2 break-words")
+              className: Fe(
+                T ? "sr-only" : Fe("text-xl font-semibold", "line-clamp-2 break-words")
               ),
               children: Q
             }
@@ -30838,18 +30838,18 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
               Cm,
               {
                 ref: ee,
-                id: Fe,
+                id: ye,
                 content: k,
                 collapsed: Be,
                 tabIndex: De ? -1 : void 0,
-                className: ye(De && Ji())
+                className: Fe(De && Ji())
               }
             ),
             ie && !X && we && !De && /* @__PURE__ */ h(
               vR,
               {
                 describedBy: se,
-                controls: Fe,
+                controls: ye,
                 expanded: De,
                 onClick: It
               }
@@ -30966,7 +30966,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
     {
       href: a.href,
       onClick: a.onClick,
-      className: ye(
+      className: Fe(
         "no-underline visited:text-f1-foreground",
         // THE STRETCH: the anchor's own box is the title, its hit area is the
         // whole card.
@@ -30981,7 +30981,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
     {
       type: "button",
       onClick: a.onClick,
-      className: ye(
+      className: Fe(
         "cursor-pointer border-none bg-transparent p-0 text-left",
         eF,
         Ji()
@@ -30995,7 +30995,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
     /* @__PURE__ */ $(
       "article",
       {
-        className: ye(
+        className: Fe(
           // NO `gap` ON THE TILE. Its two parts are the cover and the column of
           // words, and the air between them is the column's own `pt-3` — a tile
           // with no cover has its title flush against the padding instead, which a
@@ -31013,7 +31013,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
             /* @__PURE__ */ $(
               "div",
               {
-                className: ye(
+                className: Fe(
                   // NO `w-full`. It resolves against the tile's PADDED content box, so
                   // the negative margins below only shifted the picture left and left
                   // 24px of card showing on the right. Stretched instead — the tile is
@@ -31052,7 +31052,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
           /* @__PURE__ */ $(
             "div",
             {
-              className: ye(
+              className: Fe(
                 "flex min-h-0 grow flex-col gap-2",
                 a.imageUrl && "pt-3"
               ),
@@ -31088,19 +31088,19 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
   /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "flex flex-col rounded-xl border border-solid border-f1-border-secondary p-4",
         L1
       ),
       children: [
         a ? (
           // Same bleed as the real cover, so the two are the same shape.
-          /* @__PURE__ */ h(Bt, { className: ye("-mx-3 -mt-3 rounded-md", j1) })
+          /* @__PURE__ */ h(Bt, { className: Fe("-mx-3 -mt-3 rounded-md", j1) })
         ) : null,
         /* @__PURE__ */ $(
           "div",
           {
-            className: ye("flex min-h-0 grow flex-col gap-2", a && "pt-3"),
+            className: Fe("flex min-h-0 grow flex-col gap-2", a && "pt-3"),
             children: [
               /* @__PURE__ */ h(Bt, { className: "h-5 w-3/4 rounded-2xs" }),
               /* @__PURE__ */ $("div", { className: "flex min-h-0 flex-1 flex-col gap-2 overflow-hidden", children: [
@@ -31177,7 +31177,7 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
     "div",
     {
       ref: B,
-      className: ye(
+      className: Fe(
         "flex w-full flex-row flex-wrap items-center gap-2 rounded-md border p-2 hover:bg-f1-background-hover focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold",
         f.withPointerCursor && "cursor-pointer"
       ),
@@ -31406,9 +31406,9 @@ function $R({
     panelSide: Ce,
     panelContent: de,
     panelContentSide: se,
-    restoringPanelContentId: Fe,
+    restoringPanelContentId: ye,
     isResizing: Y
-  } = Yh(), ee = K === "fullscreen", ge = K === "canvas", { open: me } = Rd(), we = pe ? ie ?? Rf : Math.min(Rf, X?.max ?? Rf), Qe = O?.coversChat === !0 ? 0 : we, De = Ce === "left", Be = se !== Ce, ke = !!(de || Fe), Pe = Re(ke);
+  } = Yh(), ee = K === "fullscreen", ge = K === "canvas", { open: me } = Rd(), we = pe ? ie ?? Rf : Math.min(Rf, X?.max ?? Rf), Qe = O?.coversChat === !0 ? 0 : we, De = Ce === "left", Be = se !== Ce, ke = !!(de || ye), Pe = Re(ke);
   Xe(() => {
     Pe.current = ke;
   });
@@ -31492,7 +31492,7 @@ function $R({
           /* @__PURE__ */ h(In, { children: k === "unlocked" && /* @__PURE__ */ h(
             Ot.nav,
             {
-              className: ye(
+              className: Fe(
                 "fixed inset-0 z-20 bg-f1-background-inverse",
                 !r && "hidden"
               ),
@@ -31506,7 +31506,7 @@ function $R({
           /* @__PURE__ */ $(
             Ot.div,
             {
-              className: ye(
+              className: Fe(
                 "shrink-0",
                 k !== "locked" ? "z-30" : "z-0",
                 // Dropped when collapsed: with `box-sizing: border-box` a
@@ -31540,7 +31540,7 @@ function $R({
                   "main",
                   {
                     id: "content",
-                    className: ye(
+                    className: Fe(
                       "relative z-10 flex h-full max-w-full flex-1 xs:py-1",
                       rt ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto",
                       !Z && !me && "xs:pr-1",
@@ -31556,7 +31556,7 @@ function $R({
                     children: /* @__PURE__ */ h(
                       "div",
                       {
-                        className: ye(
+                        className: Fe(
                           "flex max-w-full flex-1",
                           rt ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto"
                         ),
@@ -31568,7 +31568,7 @@ function $R({
                 a?.enabled && ge && O && /* @__PURE__ */ h(
                   Ot.div,
                   {
-                    className: ye(
+                    className: Fe(
                       // z-[21] sits above the chat wrapper (z-20 in canvas
                       // mode) so the canvas card's seam-side shadow paints
                       // over the chat surface instead of being clipped by it.
@@ -31576,7 +31576,7 @@ function $R({
                       // Canvas sits opposite the panel, hugging the seam between
                       // them: panel-right -> canvas on the left, and vice versa.
                       De ? "justify-start" : "justify-end",
-                      _t ? "fixed inset-0 z-[50]" : ye(
+                      _t ? "fixed inset-0 z-[50]" : Fe(
                         "absolute bottom-0 top-0 z-[21]",
                         De ? "right-0" : "left-0"
                       )
@@ -31598,10 +31598,10 @@ function $R({
                   const ai = (Ct, Pt, ni, Fi) => /* @__PURE__ */ h(
                     Ot.div,
                     {
-                      className: ye(
+                      className: Fe(
                         "pointer-events-none",
                         "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                        _t ? "fixed inset-0 z-[30]" : ye(
+                        _t ? "fixed inset-0 z-[30]" : Fe(
                           "absolute top-0 bottom-0",
                           Ct === "left" ? "left-0" : "right-0",
                           // In canvas mode the chat wrapper must sit above
@@ -31842,7 +31842,7 @@ function nU({
             /* @__PURE__ */ $(
               "div",
               {
-                className: ye(
+                className: Fe(
                   "flex flex-row items-center",
                   r ? "gap-1.5" : "gap-3"
                 ),
@@ -31869,7 +31869,7 @@ function nU({
                     /* @__PURE__ */ h(
                       "p",
                       {
-                        className: ye(
+                        className: Fe(
                           r ? "text-lg" : "text-2xl",
                           "font-semibold text-f1-foreground"
                         ),
@@ -31879,7 +31879,7 @@ function nU({
                     I.description && /* @__PURE__ */ h(
                       "p",
                       {
-                        className: ye(
+                        className: Fe(
                           r ? "text-md" : "text-lg",
                           "text-f1-foreground-secondary"
                         ),
@@ -31899,7 +31899,7 @@ function nU({
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "isolate flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden [&>*]:flex-1",
               r && "-mt-3"
             ),
@@ -31934,7 +31934,7 @@ function iM({ label: a, options: I, hasNewUpdate: f }) {
       children: /* @__PURE__ */ h(Po, { items: tM(I), children: /* @__PURE__ */ $(
         "button",
         {
-          className: ye(
+          className: Fe(
             "relative flex h-6 w-6 items-center justify-center rounded-full bg-f1-background-inverse text-f1-foreground-inverse shadow-md transition-all",
             Ji()
           ),
@@ -31955,7 +31955,7 @@ function gU({ children: a, header: I, embedded: f = !1 }) {
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "relative flex min-h-full w-full flex-col overflow-hidden bg-f1-special-page",
         !f && "xs:rounded-xl"
       ),
@@ -32073,7 +32073,7 @@ const l9 = Hn(nn("Page", gU)), nM = (a) => a.reduce(
       "button",
       {
         type: "button",
-        className: ye(
+        className: Fe(
           "group relative flex w-full select-none items-center gap-1 rounded p-1.5 pr-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
           Ji("focus-visible:ring-inset"),
           f && "hidden"
@@ -32085,7 +32085,7 @@ const l9 = Hn(nn("Page", gU)), nM = (a) => a.reduce(
           /* @__PURE__ */ h(
             "span",
             {
-              className: ye(
+              className: Fe(
                 "transition-colors py-0.5",
                 K && "font-[900] text-f1-foreground"
               ),
@@ -32130,7 +32130,7 @@ const l9 = Hn(nn("Page", gU)), nM = (a) => a.reduce(
 }) => /* @__PURE__ */ $(
   "div",
   {
-    className: ye(
+    className: Fe(
       "flex w-full -mt-px items-center gap-1 rounded bg-f1-background-inverse-secondary p-1.5 text-f1-foreground-secondary ring-1 ring-inset ring-f1-border-secondary transition-colors hover:ring-f1-border-hover dark:bg-f1-background-tertiary",
       // Focus only recolours the existing inset ring (like hover). No extra
       // offset layer → no white halo in dark mode and no flicker on focus.
@@ -32158,7 +32158,7 @@ const l9 = Hn(nn("Page", gU)), nM = (a) => a.reduce(
   {
     type: "button",
     onClick: a.onClick,
-    className: ye(
+    className: Fe(
       "flex w-full cursor-pointer items-center gap-1.5 rounded py-1.5 pl-1.5 pr-2 text-left font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary",
       Ji("focus-visible:ring-inset")
     ),
@@ -32185,7 +32185,7 @@ const l9 = Hn(nn("Page", gU)), nM = (a) => a.reduce(
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye("flex w-full flex-col gap-4 px-3", S),
+      className: Fe("flex w-full flex-col gap-4 px-3", S),
       "data-sidebar-tab-panel-searching": O,
       children: [
         f !== void 0 && /* @__PURE__ */ h(
@@ -32319,7 +32319,7 @@ const AM = Hn(CM), sU = ({
   "div",
   {
     "aria-hidden": "true",
-    className: ye("flex h-9 w-full items-center gap-2 pl-1.5 pr-2", a),
+    className: Fe("flex h-9 w-full items-center gap-2 pl-1.5 pr-2", a),
     children: [
       /* @__PURE__ */ h(Bt, { className: "h-6 w-6 flex-shrink-0 rounded-full" }),
       /* @__PURE__ */ h(Bt, { className: "h-3.5 flex-1 rounded" })
@@ -32393,7 +32393,7 @@ const AM = Hn(CM), sU = ({
       "span",
       {
         "aria-hidden": "true",
-        className: ye(
+        className: Fe(
           // The ring follows the item's hover/active state so the dot blends
           // with the highlighted row background.
           "ring-2 ring-f1-background-tertiary transition-[box-shadow] group-hover:ring-f1-background-secondary-hover",
@@ -32420,7 +32420,7 @@ const AM = Hn(CM), sU = ({
         type: "button",
         onClick: f,
         "aria-pressed": I,
-        className: ye(
+        className: Fe(
           "group flex w-full cursor-pointer items-center gap-2 rounded py-1.5 pl-1.5 pr-2 text-left transition-colors",
           Ji("focus-visible:ring-inset"),
           I ? "bg-f1-background-secondary" : "hover:bg-f1-background-secondary"
@@ -32453,7 +32453,7 @@ const AM = Hn(CM), sU = ({
             Yn,
             {
               tag: "span",
-              className: ye(
+              className: Fe(
                 "line-clamp-1 flex-1 py-0.5",
                 Q ? "text-f1-foreground font-semibold" : (
                   // Avatar-less rows (e.g. AI chat history) read as primary text;
@@ -32468,7 +32468,7 @@ const AM = Hn(CM), sU = ({
           (U.length > 0 || a.unreadCount) && /* @__PURE__ */ $(
             "div",
             {
-              className: ye(
+              className: Fe(
                 "gap-1 flex items-center justify-center transition-opacity",
                 // On hover the pin button takes this spot, so fade the badge/status out.
                 a.onTogglePin && "group-hover/row:opacity-0",
@@ -32516,7 +32516,7 @@ const AM = Hn(CM), sU = ({
     ) : /* @__PURE__ */ h(
       "div",
       {
-        className: ye(
+        className: Fe(
           "absolute right-1.5 top-1/2 -translate-y-1/2",
           "opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100"
         ),
@@ -32594,7 +32594,7 @@ const AM = Hn(CM), sU = ({
     const X = L.ownerDocument.createElement("div"), T = L.ownerDocument.createElement("div");
     X.dataset.sidebarUnreadPortal = "above", T.dataset.sidebarUnreadPortal = "below", X.style.display = "contents", T.style.display = "contents", ie.insertBefore(X, j), ie.insertBefore(T, j.nextSibling), Q({ above: X, below: T });
     let te = null, pe = null, Ce = null, de = !1, se = "";
-    const Fe = () => {
+    const ye = () => {
       if (L.querySelector(
         "[data-sidebar-tab-panel-searching='true']"
       )) return "searching";
@@ -32613,7 +32613,7 @@ const AM = Hn(CM), sU = ({
         return `${De}:open:${ke.join(",")}`;
       }).join("|");
     }, Y = () => {
-      const me = Fe();
+      const me = ye();
       if (te && se === me)
         return;
       se = me, te?.disconnect();
@@ -32941,7 +32941,7 @@ const BM = ({
       children: /* @__PURE__ */ $(
         "div",
         {
-          className: ye(
+          className: Fe(
             "group flex flex-nowrap items-center justify-center text-f1-foreground transition-colors",
             k ? (
               // The whole header row is the target — the rail is 68px wide and
@@ -32990,7 +32990,7 @@ const BM = ({
 }) => /* @__PURE__ */ $(
   "div",
   {
-    className: ye(
+    className: Fe(
       "flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden text-lg font-semibold text-f1-foreground transition-colors"
     ),
     children: [
@@ -33012,7 +33012,7 @@ function AU({
       type: "button",
       "aria-label": B ? Q : void 0,
       title: B ? Q : void 0,
-      className: ye(
+      className: Fe(
         "group flex items-center font-medium transition-colors",
         B ? (
           // The whole rail row is the target; the chip inside it is what
@@ -33111,7 +33111,7 @@ function lU({ isExpanded: a }) {
             strokeWidth: "1.3",
             strokeLinecap: "round",
             strokeLinejoin: "round",
-            className: ye(
+            className: Fe(
               "translate-x-0 stroke-current transition-all duration-200 ease-out motion-reduce:transition-none",
               a ? "opacity-0 group-hover:-translate-x-1 group-hover:opacity-100" : "opacity-1 group-hover:translate-x-[3px]"
             )
@@ -33124,7 +33124,7 @@ function lU({ isExpanded: a }) {
             d: "M7.5 5L7.5 15",
             strokeWidth: "1.3",
             strokeLinecap: "round",
-            className: ye(
+            className: Fe(
               "stroke-current transition-all duration-200 ease-out motion-reduce:transition-none",
               a ? "translate-x-0 opacity-100 group-hover:-translate-x-0.5 group-hover:opacity-0" : "-translate-x-0.5 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
             )
@@ -33150,8 +33150,8 @@ function cU() {
       compact: !0,
       "aria-label": "Close Sidebar",
       children: [
-        /* @__PURE__ */ h("div", { className: ye("hidden", { flex: !B }), children: /* @__PURE__ */ h(lU, { isExpanded: I === "locked" }) }),
-        /* @__PURE__ */ h("div", { className: ye("hidden", { flex: B }), children: /* @__PURE__ */ h(ii, { icon: Og, size: "md" }) })
+        /* @__PURE__ */ h("div", { className: Fe("hidden", { flex: !B }), children: /* @__PURE__ */ h(lU, { isExpanded: I === "locked" }) }),
+        /* @__PURE__ */ h("div", { className: Fe("hidden", { flex: B }), children: /* @__PURE__ */ h(ii, { icon: Og, size: "md" }) })
       ]
     }
   );
@@ -33212,7 +33212,7 @@ const UM = ({
       {
         icon: a.icon,
         size: "md",
-        className: ye(
+        className: Fe(
           "transition-colors",
           I ? "text-f1-icon-bold" : "text-f1-icon"
         )
@@ -33230,7 +33230,7 @@ const UM = ({
     Go,
     {
       ...Q,
-      className: ye(
+      className: Fe(
         "flex cursor-pointer items-center rounded py-1.5 pl-1.5 pr-2 no-underline transition-colors",
         Ji("focus-visible:ring-inset"),
         k ? "bg-f1-background-secondary text-f1-foreground" : "hover:bg-f1-background-secondary"
@@ -33267,12 +33267,12 @@ const UM = ({
     }), me;
   }, [Ce, te, pe, V, U, Q, B, a]), se = () => {
     Z(!0), T(!1), O(a.href || null), ie.current = !0;
-  }, Fe = () => {
+  }, ye = () => {
     Z(!1), O(null), r(), setTimeout(() => {
       ie.current = !1;
     }, 0);
   }, Y = G && K === a.href, ee = kt(
-    () => ye(
+    () => Fe(
       "group relative cursor-pointer select-none list-none rounded backdrop-blur-sm active:cursor-grabbing",
       S && "touch-none",
       j ? "bg-f1-background-secondary text-f1-foreground" : "hover:bg-f1-background-secondary",
@@ -33287,7 +33287,7 @@ const UM = ({
         onClick: a.onClick,
         href: a.href,
         exactMatch: a.exactMatch,
-        className: ye(
+        className: Fe(
           // w-[calc(100%-24px-2px)] - here 24px is the size of the dropdown button and 2 px is the gap
           "flex w-[calc(100%-24px-2px)] items-center gap-1.5 no-underline",
           Y && "pointer-events-none"
@@ -33299,7 +33299,7 @@ const UM = ({
             {
               icon: a.icon,
               size: "md",
-              className: ye(
+              className: Fe(
                 "transition-colors",
                 j ? "text-f1-icon-bold" : "text-f1-icon"
               )
@@ -33321,7 +33321,7 @@ const UM = ({
     /* @__PURE__ */ h(
       "div",
       {
-        className: ye(
+        className: Fe(
           "absolute inset-y-1 right-1 z-10 flex h-6 w-6 items-center justify-center rounded-sm opacity-0 transition-opacity duration-100 hover:bg-f1-background-secondary group-hover:opacity-100",
           X && "bg-f1-background-secondary opacity-100",
           Y && "opacity-100"
@@ -33346,7 +33346,7 @@ const UM = ({
       dragConstraints: f,
       dragElastic: 0.1,
       onDragStart: se,
-      onDragEnd: Fe,
+      onDragEnd: ye,
       className: ee,
       whileDrag: {
         scale: 1.05
@@ -33382,7 +33382,7 @@ const UM = ({
       children: /* @__PURE__ */ h(
         "div",
         {
-          className: ye(
+          className: Fe(
             "flex flex-col gap-0.5",
             U && !S.current && "pointer-events-none"
           ),
@@ -33497,17 +33497,17 @@ function vM({
       De.splice(Qe, 0, Be), X(De), r?.(De);
     },
     [ie, r]
-  ), [de, se] = Ne(!1), Fe = Re(null);
+  ), [de, se] = Ne(!1), ye = Re(null);
   Xe(() => {
     I.length > 0 && !de && (f([...I]), se(!0));
   }, [I, f, de]), Xe(() => {
     const ve = () => {
-      Fe.current !== null && window.clearTimeout(Fe.current), Fe.current = window.setTimeout(() => {
+      ye.current !== null && window.clearTimeout(ye.current), ye.current = window.setTimeout(() => {
         B.current && I.length > 0 && S();
       }, 50);
     };
     return window.addEventListener("resize", ve), () => {
-      window.removeEventListener("resize", ve), Fe.current !== null && window.clearTimeout(Fe.current);
+      window.removeEventListener("resize", ve), ye.current !== null && window.clearTimeout(ye.current);
     };
   }, [B, I, S]);
   const Y = "flex flex-col gap-0.5", ee = kt(
@@ -33558,7 +33558,7 @@ function vM({
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "relative",
         Z && "cursor-grabbing [&_*]:cursor-grabbing"
       ),
@@ -33592,7 +33592,7 @@ function vM({
         L && /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none"
             ),
             ref: B,
@@ -33659,7 +33659,7 @@ function uU(a, I, f, B) {
       }
   }, [Q, f]);
 }
-const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100", _M = () => /* @__PURE__ */ h(
+const fU = "transition-[background-color,transform] duration-150 ease-out group-active:scale-[0.97] motion-reduce:transition-none motion-reduce:group-active:scale-100", _M = () => /* @__PURE__ */ h(
   "span",
   {
     "aria-hidden": "true",
@@ -33679,17 +33679,17 @@ const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motio
         tabIndex: B ? 0 : -1,
         onClick: Q,
         onKeyDown: k,
-        className: ye(
+        className: Fe(
           "group flex w-full cursor-pointer flex-col items-center gap-1 rounded-[10px] py-2",
-          fU,
           Ji()
         ),
         children: [
           /* @__PURE__ */ $(
             "span",
             {
-              className: ye(
-                "relative flex size-9 items-center justify-center rounded-lg transition-colors",
+              className: Fe(
+                "relative flex size-9 items-center justify-center rounded-lg",
+                fU,
                 f ? "bg-f1-background-secondary text-f1-icon-bold" : "group-hover:bg-f1-background-secondary"
               ),
               children: [
@@ -33717,22 +33717,30 @@ const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motio
     "aria-label": a.label,
     title: a.label,
     onClick: a.onClick,
-    className: ye(
+    className: Fe(
       "group flex w-full cursor-pointer items-center justify-center",
-      fU,
       Ji("focus-visible:ring-inset")
     ),
-    children: /* @__PURE__ */ $("span", { className: "relative flex size-9 items-center justify-center rounded-lg transition-colors group-hover:bg-f1-background-secondary", children: [
-      /* @__PURE__ */ h(ii, { icon: a.icon, size: "lg", color: "default" }),
-      a.hasUpdates && /* @__PURE__ */ h(
-        "span",
-        {
-          "aria-hidden": "true",
-          className: "absolute -right-1 -top-1 rounded-full bg-f1-background",
-          children: /* @__PURE__ */ h(Oh, { type: "highlight", size: "sm", icon: kd })
-        }
-      )
-    ] })
+    children: /* @__PURE__ */ $(
+      "span",
+      {
+        className: Fe(
+          "relative flex size-9 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary",
+          fU
+        ),
+        children: [
+          /* @__PURE__ */ h(ii, { icon: a.icon, size: "lg", color: "default" }),
+          a.hasUpdates && /* @__PURE__ */ h(
+            "span",
+            {
+              "aria-hidden": "true",
+              className: "absolute -right-1 -top-1 rounded-full bg-f1-background",
+              children: /* @__PURE__ */ h(Oh, { type: "highlight", size: "sm", icon: kd })
+            }
+          )
+        ]
+      }
+    )
   }
 );
 function B9({
@@ -33771,14 +33779,15 @@ function B9({
     "div",
     {
       "data-testid": "sidebar-rail",
-      className: ye(
+      className: Fe(
         "flex h-full w-[var(--ds-sidebar-rail-width)] shrink-0 flex-col items-center overflow-y-auto",
-        // No surface of its own: the navigation sits on whatever the app
-        // paints behind it, so it reads as the floor the content is raised
-        // off rather than as a second card beside it. The seam is drawn on
-        // the rail itself so the 1px lands INSIDE the 48px the frame reserves
-        // (border-box) rather than widening the pair.
-        "border-0 border-r border-solid border-f1-border-secondary",
+        // No surface of its own, and no seam: the navigation sits on whatever
+        // the app paints behind it, so it reads as the floor the content is
+        // raised off rather than as a second card beside it. The hairline
+        // between the two levels is the PANEL's left edge — it separates the
+        // rail from the panel, so it has to leave when the panel does, and a
+        // border here would outlive it and hang off a rail with nothing
+        // beside it.
         // The rail runs edge to edge, so it owns the notch and the home
         // indicator: without this the account avatar sits under the latter.
         "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.5rem)]"
@@ -33825,7 +33834,7 @@ function F9({
     "button",
     {
       onClick: a,
-      className: ye(
+      className: Fe(
         "mb-[calc(0.75rem-1px)] flex w-full cursor-pointer items-center justify-between rounded bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary p-1.5 text-f1-foreground-secondary ring-1 ring-inset ring-f1-border-secondary transition-all hover:ring-f1-border-hover",
         Ji()
       ),
@@ -33848,7 +33857,7 @@ const sF = ({ position: a }) => /* @__PURE__ */ h(
     animate: { opacity: 0.5 },
     exit: { opacity: 0 },
     transition: { duration: 0.2, ease: "easeOut" },
-    className: ye(
+    className: Fe(
       "pointer-events-none absolute inset-x-0 z-10 h-3 after:absolute after:inset-x-0 after:h-px after:bg-f1-background-inverse after:opacity-[0.04] after:content-['']",
       a === "top" ? [
         "top-0",
@@ -33921,15 +33930,21 @@ function DM({
         onDropdownClick: B
       }
     ) : f : null })
-  ] }), te = ye(
+  ] }), te = Fe(
     "absolute bottom-0 top-0 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
-    k === "locked" ? (
-      // Docked, the panel has no surface and no seam of its own — it is the
-      // floor, like the rail, and the content's own card edge is what
-      // separates the two. A border here would land flush against that edge
-      // and read as a doubled line.
-      "h-full"
-    ) : ye(
+    k === "locked" ? Fe(
+      // Docked, the panel has no surface of its own — it is the floor,
+      // like the rail, and the content's own card edge is what separates
+      // it from the content. A border on THAT side would land flush
+      // against the card's edge and read as a doubled line.
+      "h-full",
+      // The hairline between the two levels of the navigation. It is the
+      // panel's, not the rail's: it exists to separate the pair, so it
+      // leaves when the panel leaves. Inside the panel's own width
+      // (border-box), so the 1px does not push it off the room the frame
+      // reserved.
+      Q && "border-0 border-l border-solid border-f1-border-secondary"
+    ) : Fe(
       "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
       U ? "h-full border-y-transparent border-l-transparent bg-f1-background/90" : "h-[calc(100%-16px)] bg-f1-background/60"
     )
@@ -33959,7 +33974,7 @@ function DM({
           {
             initial: !1,
             ref: G,
-            className: ye(te, "z-0"),
+            className: Fe(te, "z-0"),
             animate: Ce,
             transition: ie,
             children: T
@@ -33972,7 +33987,7 @@ function DM({
     {
       initial: !1,
       "aria-label": j.navigation.sidebar.label,
-      className: ye(te, "left-0 z-10"),
+      className: Fe(te, "left-0 z-10"),
       animate: Ce,
       transition: ie,
       children: T
@@ -33982,7 +33997,7 @@ function DM({
 const y9 = Hn(DM), SM = ({ isActive: a }) => /* @__PURE__ */ h("div", { className: "absolute right-0 top-0 flex h-2 w-2 items-center justify-center rounded-full bg-f1-background", children: /* @__PURE__ */ h(
   "div",
   {
-    className: ye(
+    className: Fe(
       "flex h-2 w-2 items-center justify-center rounded-full",
       a ? " bg-f1-background-secondary" : "bg-f1-background-secondary-hover"
     ),
@@ -34013,7 +34028,7 @@ const y9 = Hn(DM), SM = ({ isActive: a }) => /* @__PURE__ */ h("div", { classNam
       onClick: k,
       disabled: Q,
       tabIndex: Q ? -1 : void 0,
-      className: ye(
+      className: Fe(
         // With every label revealed all tabs share the space, so switching
         // never resizes them — the pill slide is the only motion. When labels
         // are collapsed, the active tab hugs its content (label always
@@ -34062,7 +34077,7 @@ const y9 = Hn(DM), SM = ({ isActive: a }) => /* @__PURE__ */ h("div", { classNam
           /* @__PURE__ */ $(
             "span",
             {
-              className: ye(
+              className: Fe(
                 "relative flex items-center text-f1-icon transition-colors",
                 "group-hover:text-f1-icon-bold",
                 I && "text-f1-icon-bold"
@@ -34076,14 +34091,14 @@ const y9 = Hn(DM), SM = ({ isActive: a }) => /* @__PURE__ */ h("div", { classNam
           /* @__PURE__ */ h(
             "span",
             {
-              className: ye(
+              className: Fe(
                 "grid transition-[grid-template-columns] duration-300 ease-out motion-reduce:transition-none",
                 f ? "grid-cols-[1fr]" : "grid-cols-[0fr]"
               ),
               children: /* @__PURE__ */ h("span", { className: "min-w-0 overflow-hidden", children: /* @__PURE__ */ h(
                 "span",
                 {
-                  className: ye(
+                  className: Fe(
                     "block whitespace-nowrap pl-1 pr-0.5 font-semibold group-hover:text-f1-foreground transition-colors",
                     I ? "text-f1-foreground" : "text-f1-foreground-secondary"
                   ),
@@ -34227,7 +34242,7 @@ const GM = ({
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "flex size-5 items-center justify-center rounded-xs text-sm font-medium",
               k < B ? "bg-f1-background-selected-bold text-f1-foreground-inverse" : "border border-solid border-f1-border-secondary bg-f1-background-secondary text-f1-foreground"
             ),
@@ -34308,9 +34323,9 @@ function w9(a) {
   pe.current = L;
   const Ce = Re(null), de = Z === void 0 ? null : JSON.stringify(Z), se = Re(Z);
   se.current = Z;
-  const Fe = Re(null), Y = () => {
+  const ye = Re(null), Y = () => {
     const tt = se.current;
-    tt !== void 0 && (Fe.current = JSON.stringify(tt), te.current.setCurrentFilters(tt));
+    tt !== void 0 && (ye.current = JSON.stringify(tt), te.current.setCurrentFilters(tt));
   };
   Xe(() => {
     if (!V || Ce.current === f) return;
@@ -34337,7 +34352,7 @@ function w9(a) {
       tt = !0;
     };
   }, [f, V, G]), Xe(() => {
-    !T || de === null || Fe.current !== de && Y();
+    !T || de === null || ye.current !== de && Y();
   }, [T, de]), Xe(() => {
     if (!(!V || !G))
       return Kk(f, async () => {
@@ -34547,10 +34562,10 @@ const hU = Vn(null), lm = Vn(null), Ei = () => {
         if (se) return se;
         for (const Y of r.current.keys())
           Y.startsWith(Ce) && r.current.delete(Y);
-        const Fe = pe.loadReactionUsers(X, T);
-        return r.current.set(de, Fe), Fe.catch(() => {
-          r.current.get(de) === Fe && r.current.delete(de);
-        }), Fe;
+        const ye = pe.loadReactionUsers(X, T);
+        return r.current.set(de, ye), ye.catch(() => {
+          r.current.get(de) === ye && r.current.delete(de);
+        }), ye;
       },
       retryMessage: (X) => {
         B.current.retryMessage(X);
@@ -34750,15 +34765,15 @@ function OM({
   searchMembers: k,
   everyoneLabel: U
 }) {
-  const r = On(), [S, V] = Ne(!1), [G, Z] = Ne(""), [K, O] = Ne([]), [L, j] = Ne(!1), [ie, X] = Ne(0), [T, te] = Ne([]), pe = Re(-1), Ce = Re(null), de = Re(0), se = Re(-1), Fe = Je(
+  const r = On(), [S, V] = Ne(!1), [G, Z] = Ne(""), [K, O] = Ne([]), [L, j] = Ne(!1), [ie, X] = Ne(0), [T, te] = Ne([]), pe = Re(-1), Ce = Re(null), de = Re(0), se = Re(-1), ye = Je(
     (ke) => !!U && (ke.length === 0 || U.toLowerCase().startsWith(ke.toLowerCase())),
     [U]
   ), Y = kt(() => {
     const ke = [];
-    U && Fe(G) && ke.push({ kind: "everyone", label: U });
+    U && ye(G) && ke.push({ kind: "everyone", label: U });
     for (const Pe of K) ke.push({ kind: "user", user: Pe });
     return ke;
-  }, [U, Fe, G, K]);
+  }, [U, ye, G, K]);
   Xe(() => {
     if (!Q || !k) {
       V(!1);
@@ -34774,7 +34789,7 @@ function OM({
     const Pe = ++de.current;
     return Ce.current = setTimeout(() => {
       k(ke.query).then((Ge) => {
-        Pe === de.current && (O(Ge), X(0), Ge.length === 0 && !Fe(ke.query) && ke.query.length > 0 && (se.current = ke.atIndex, V(!1)));
+        Pe === de.current && (O(Ge), X(0), Ge.length === 0 && !ye(ke.query) && ke.query.length > 0 && (se.current = ke.atIndex, V(!1)));
       }).catch(() => {
         Pe === de.current && (O([]), V(!1));
       }).finally(() => {
@@ -34789,7 +34804,7 @@ function OM({
     Q,
     k,
     T,
-    Fe
+    ye
   ]);
   const ee = Je(() => {
     V(!1), Z(""), O([]), X(0), pe.current = -1;
@@ -35233,7 +35248,7 @@ function mP({
       te,
       Q
     ]
-  ), Fe = kt(() => {
+  ), ye = kt(() => {
     if (!X || !j) return null;
     const ee = Q.current;
     if (!ee) return null;
@@ -35248,7 +35263,7 @@ function mP({
     query: j?.query ?? "",
     results: ie,
     selectedIndex: T,
-    popoverPosition: Fe,
+    popoverPosition: ye,
     listboxId: r,
     activeDescendantId: X && Y ? bU(r, Y.id) : void 0,
     handleKeyDown: se,
@@ -35370,7 +35385,7 @@ const b9 = [
   L.current = r;
   const j = Re(k?.canSend);
   j.current = k?.canSend;
-  const ie = Re(null), [X, T] = Ne(null), [te, pe] = Ne(null), [Ce, de] = Ne(!1), [se, Fe] = Ne(""), [Y, ee] = Ne([]), [ge, me] = Ne(-1), [we, ve] = Ne(!1), Qe = Re(I);
+  const ie = Re(null), [X, T] = Ne(null), [te, pe] = Ne(null), [Ce, de] = Ne(!1), [se, ye] = Ne(""), [Y, ee] = Ne([]), [ge, me] = Ne(-1), [we, ve] = Ne(!1), Qe = Re(I);
   Qe.current = I;
   const De = Re(f);
   De.current = f;
@@ -35484,7 +35499,7 @@ const b9 = [
   const Qi = Je(() => {
     de(!0), U.onSearchOpened();
   }, [U]), Mi = Je(() => {
-    Ge.current++, de(!1), Fe(""), ee([]), me(-1), ve(!1), G(null);
+    Ge.current++, de(!1), ye(""), ee([]), me(-1), ve(!1), G(null);
   }, []), bi = Je(() => {
     const Ct = ke.current;
     Ct.length !== 0 && (U.onSearchResultNavigated({ direction: "next" }), Xt((Pe.current + 1) % Ct.length, Ct));
@@ -35528,7 +35543,7 @@ const b9 = [
       openSearch: Qi,
       closeSearch: Mi,
       searchQuery: se,
-      setSearchQuery: Fe,
+      setSearchQuery: ye,
       searching: we,
       matchCurrent: it,
       matchTotal: gi,
@@ -35667,7 +35682,7 @@ const Ed = (a, I) => {
   "span",
   {
     title: a,
-    className: ye(
+    className: Fe(
       "line-clamp-1 min-w-0 max-w-full overflow-hidden whitespace-normal",
       I
     ),
@@ -35678,7 +35693,7 @@ const Ed = (a, I) => {
   "span",
   {
     title: a,
-    className: ye(
+    className: Fe(
       "block min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap",
       I
     ),
@@ -35703,7 +35718,7 @@ const Ed = (a, I) => {
   return K ? k ? /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
         f,
         U
@@ -35741,7 +35756,7 @@ const Ed = (a, I) => {
   ) : /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "group/attachment relative flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
         k && "box-border h-16 w-16",
         f,
@@ -35781,7 +35796,7 @@ const Ed = (a, I) => {
             disabled: Q,
             "aria-busy": L ? void 0 : !0,
             "aria-label": r.t("chat.openNamedDocument", { name: a.name }),
-            className: ye(
+            className: Fe(
               "relative block w-full overflow-hidden border-0 border-solid border-f1-border-secondary bg-f1-background-secondary p-0 transition-opacity enabled:hover:opacity-90",
               !k && "border-t",
               Ji("focus-visible:ring-inset"),
@@ -35792,7 +35807,7 @@ const Ed = (a, I) => {
               /* @__PURE__ */ h(
                 Bt,
                 {
-                  className: ye(
+                  className: Fe(
                     "absolute inset-0 h-full w-full rounded-none motion-reduce:animate-none",
                     U
                   )
@@ -35801,7 +35816,7 @@ const Ed = (a, I) => {
               /* @__PURE__ */ h(
                 "div",
                 {
-                  className: ye(
+                  className: Fe(
                     "relative",
                     !S && "transition-opacity duration-200",
                     L ? "opacity-100" : "opacity-0"
@@ -35876,7 +35891,7 @@ const Ed = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Td = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-D8iUoYxy.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
+}, Td = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-U0wc2Fjo.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -35894,7 +35909,7 @@ const Ed = (a, I) => {
       target: "_blank",
       rel: "noopener noreferrer",
       "aria-label": a.name ?? Q.chat.location,
-      className: ye(
+      className: Fe(
         "flex min-w-0 max-w-full flex-col overflow-hidden no-underline",
         XP,
         "border border-solid border-f1-border bg-f1-background-tertiary",
@@ -35945,7 +35960,7 @@ const Ed = (a, I) => {
 }, hF = ({ surface: a }) => /* @__PURE__ */ h(
   Bt,
   {
-    className: ye(
+    className: Fe(
       "h-full w-full rounded-none motion-reduce:animate-none",
       a
     )
@@ -36039,11 +36054,11 @@ const CV = (a) => {
     (Ce) => {
       const de = Z.current;
       if (!de || j <= 0) return;
-      const se = de.getBoundingClientRect(), Fe = Math.min(
+      const se = de.getBoundingClientRect(), ye = Math.min(
         1,
         Math.max(0, (Ce.clientX - se.left) / se.width)
       );
-      r.seek(Fe * j);
+      r.seek(ye * j);
     },
     [r, j]
   ), pe = Je(
@@ -36076,7 +36091,7 @@ const CV = (a) => {
   return /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         // The shared media width, not `w-full`: a waveform reads better wide
         // and shouldn't look like a stray chip next to an album, but sizing it
         // off the column made the column stretch. The fixed height is also used
@@ -36110,7 +36125,7 @@ const CV = (a) => {
             ref: Z,
             onClick: te,
             onKeyDown: pe,
-            className: ye(
+            className: Fe(
               "flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5 overflow-hidden rounded-sm",
               Ji("focus-visible:ring-inset")
             ),
@@ -36124,7 +36139,7 @@ const CV = (a) => {
             children: S.map((Ce, de) => /* @__PURE__ */ h(
               "span",
               {
-                className: ye(
+                className: Fe(
                   "w-0.5 min-w-px shrink rounded-full transition-colors",
                   // Played part reads darker, WhatsApp-style.
                   de / S.length <= ie && ie > 0 ? "bg-f1-foreground" : "bg-f1-foreground-tertiary"
@@ -36171,7 +36186,7 @@ const CV = (a) => {
   "div",
   {
     "data-testid": "chat-voice-attachment-shell",
-    className: ye("flex w-full flex-col gap-1 bg-f1-background", f),
+    className: Fe("flex w-full flex-col gap-1 bg-f1-background", f),
     children: /* @__PURE__ */ h(
       cV,
       {
@@ -36205,7 +36220,7 @@ const CV = (a) => {
       onLoad: (V) => {
         S(), I?.(V);
       },
-      className: ye(
+      className: Fe(
         !k && "transition-opacity duration-200",
         U ? "opacity-100" : "opacity-0",
         a
@@ -36488,7 +36503,7 @@ const CV = (a) => {
       }
     ) })
   ] }) });
-}, WA = 32, jU = (a) => ye(
+}, WA = 32, jU = (a) => Fe(
   "flex shrink-0 items-center justify-center rounded",
   "bg-transparent text-f1-foreground",
   // One property list rather than `transition-colors` plus
@@ -37305,14 +37320,14 @@ const jV = {
   offsetWidth: "width"
 }, go = Ti(
   ([{ log: a }, { recalcInProgress: I }]) => {
-    const f = Di(), B = Di(), Q = xg(B, 0), k = Di(), U = Di(), r = yt(0), S = yt([]), V = yt(void 0), G = yt(void 0), Z = yt(void 0), K = yt(void 0), O = yt((se, Fe) => Br(se, jV[Fe])), L = yt(void 0), j = yt(0), ie = NV(), X = xg(
+    const f = Di(), B = Di(), Q = xg(B, 0), k = Di(), U = Di(), r = yt(0), S = yt([]), V = yt(void 0), G = yt(void 0), Z = yt(void 0), K = yt(void 0), O = yt((se, ye) => Br(se, jV[ye])), L = yt(void 0), j = yt(0), ie = NV(), X = xg(
       ct(f, yi(S, a, j), to(YV, ie), fn()),
       ie
     ), T = xg(
       ct(
         S,
         fn(),
-        to((se, Fe) => ({ current: Fe, prev: se.current }), {
+        to((se, ye) => ({ current: ye, prev: se.current }), {
           current: [],
           prev: []
         }),
@@ -37325,10 +37340,10 @@ const jV = {
         S,
         Ai((se) => se.length > 0),
         yi(X, j),
-        Vt(([se, Fe, Y]) => {
-          const ee = se.reduce((ge, me, we) => na(ge, me, OA(me, Fe.offsetTree, Y) || we), eC());
+        Vt(([se, ye, Y]) => {
+          const ee = se.reduce((ge, me, we) => na(ge, me, OA(me, ye.offsetTree, Y) || we), eC());
           return {
-            ...Fe,
+            ...ye,
             groupIndices: se,
             groupOffsetTree: ee
           };
@@ -37339,10 +37354,10 @@ const jV = {
       ct(
         B,
         yi(X),
-        Ai(([se, { lastIndex: Fe }]) => se < Fe),
-        Vt(([se, { lastIndex: Fe, lastSize: Y }]) => [
+        Ai(([se, { lastIndex: ye }]) => se < ye),
+        Vt(([se, { lastIndex: ye, lastSize: Y }]) => [
           {
-            endIndex: Fe,
+            endIndex: ye,
             size: Y,
             startIndex: se
           }
@@ -37362,9 +37377,9 @@ const jV = {
         G,
         Ai((se) => se !== void 0 && $i(yn(X).sizeTree)),
         Vt((se) => {
-          const Fe = yn(Z), Y = yn(S).length > 0;
-          return Fe !== void 0 && Fe !== 0 ? Y ? [
-            { endIndex: 0, size: Fe, startIndex: 0 },
+          const ye = yn(Z), Y = yn(S).length > 0;
+          return ye !== void 0 && ye !== 0 ? Y ? [
+            { endIndex: 0, size: ye, startIndex: 0 },
             { endIndex: 1, size: se, startIndex: 1 }
           ] : [] : [{ endIndex: 0, size: se, startIndex: 0 }];
         })
@@ -37375,21 +37390,21 @@ const jV = {
         K,
         Ai((se) => se !== void 0 && se.length > 0 && $i(yn(X).sizeTree)),
         Vt((se) => {
-          const Fe = [];
+          const ye = [];
           let Y = se[0], ee = 0;
           for (let ge = 1; ge < se.length; ge++) {
             const me = se[ge];
-            me !== Y && (Fe.push({
+            me !== Y && (ye.push({
               endIndex: ge - 1,
               size: Y,
               startIndex: ee
             }), Y = me, ee = ge);
           }
-          return Fe.push({
+          return ye.push({
             endIndex: se.length - 1,
             size: Y,
             startIndex: ee
-          }), Fe;
+          }), ye;
         })
       ),
       f
@@ -37397,15 +37412,15 @@ const jV = {
       ct(
         S,
         yi(Z, G),
-        Ai(([, se, Fe]) => se !== void 0 && Fe !== void 0),
-        Vt(([se, Fe, Y]) => {
+        Ai(([, se, ye]) => se !== void 0 && ye !== void 0),
+        Vt(([se, ye, Y]) => {
           const ee = [];
           for (let ge = 0; ge < se.length; ge++) {
             const me = se[ge], we = se[ge + 1];
             ee.push({
               startIndex: me,
               endIndex: me,
-              size: Fe
+              size: ye
             }), we !== void 0 && ee.push({
               startIndex: me + 1,
               endIndex: we - 1,
@@ -37422,7 +37437,7 @@ const jV = {
         f,
         yi(X),
         to(
-          ({ sizes: se }, [Fe, Y]) => ({
+          ({ sizes: se }, [ye, Y]) => ({
             changed: Y !== se,
             sizes: Y
           }),
@@ -37435,22 +37450,22 @@ const jV = {
       ct(
         r,
         to(
-          (se, Fe) => ({ diff: se.prev - Fe, prev: Fe }),
+          (se, ye) => ({ diff: se.prev - ye, prev: ye }),
           { diff: 0, prev: 0 }
         ),
         Vt((se) => se.diff)
       ),
       (se) => {
-        const { groupIndices: Fe } = yn(X);
+        const { groupIndices: ye } = yn(X);
         if (se > 0)
-          mi(I, !0), mi(k, se + wF(se, Fe));
+          mi(I, !0), mi(k, se + wF(se, ye));
         else if (se < 0) {
           const Y = yn(T);
           Y.length > 0 && (se -= wF(-se, Y)), mi(U, se);
         }
       }
-    ), Oi(ct(r, yi(a)), ([se, Fe]) => {
-      se < 0 && Fe(
+    ), Oi(ct(r, yi(a)), ([se, ye]) => {
+      se < 0 && ye(
         "`firstItemIndex` prop should not be set to less than zero. If you don't know the total count, just use a very high value",
         { firstItemIndex: r },
         $n.ERROR
@@ -37461,13 +37476,13 @@ const jV = {
       ct(
         k,
         yi(X),
-        Vt(([se, Fe]) => {
-          const Y = Fe.groupIndices.length > 0, ee = [], ge = Fe.lastSize;
+        Vt(([se, ye]) => {
+          const Y = ye.groupIndices.length > 0, ee = [], ge = ye.lastSize;
           if (Y) {
-            const me = YA(Fe.sizeTree, 0);
+            const me = YA(ye.sizeTree, 0);
             let we = 0, ve = 0;
             for (; we < se; ) {
-              const De = Fe.groupIndices[ve], Be = Fe.groupIndices.length === ve + 1 ? 1 / 0 : Fe.groupIndices[ve + 1] - De - 1;
+              const De = ye.groupIndices[ve], Be = ye.groupIndices.length === ve + 1 ? 1 / 0 : ye.groupIndices[ve + 1] - De - 1;
               ee.push({
                 endIndex: De,
                 size: me,
@@ -37478,7 +37493,7 @@ const jV = {
                 startIndex: De + 1
               }), ve++, we += Be + 1;
             }
-            const Qe = Fs(Fe.sizeTree);
+            const Qe = Fs(ye.sizeTree);
             return we !== se && Qe.shift(), Qe.reduce(
               (De, { k: Be, v: ke }) => {
                 let Pe = De.ranges;
@@ -37502,7 +37517,7 @@ const jV = {
               }
             ).ranges;
           }
-          return Fs(Fe.sizeTree).reduce(
+          return Fs(ye.sizeTree).reduce(
             (me, { k: we, v: ve }) => ({
               prevIndex: we + se,
               prevSize: ve,
@@ -37522,9 +37537,9 @@ const jV = {
       ct(
         U,
         yi(X, j),
-        Vt(([se, { offsetTree: Fe }, Y]) => {
+        Vt(([se, { offsetTree: ye }, Y]) => {
           const ee = -se;
-          return OA(ee, Fe, Y);
+          return OA(ee, ye, Y);
         })
       )
     );
@@ -37532,10 +37547,10 @@ const jV = {
       ct(
         U,
         yi(X, j),
-        Vt(([se, Fe, Y]) => {
-          if (Fe.groupIndices.length > 0) {
-            if ($i(Fe.sizeTree))
-              return Fe;
+        Vt(([se, ye, Y]) => {
+          if (ye.groupIndices.length > 0) {
+            if ($i(ye.sizeTree))
+              return ye;
             let ge = eC();
             const me = yn(T);
             let we = 0, ve = 0, Qe = 0;
@@ -37544,23 +37559,23 @@ const jV = {
               const De = me[ve + 1] - Qe - 1;
               ve++, we += De + 1;
             }
-            if (ge = Fs(Fe.sizeTree).reduce((De, { k: Be, v: ke }) => na(De, Math.max(0, Be + se), ke), ge), we !== -se) {
-              const De = YA(Fe.sizeTree, Qe);
+            if (ge = Fs(ye.sizeTree).reduce((De, { k: Be, v: ke }) => na(De, Math.max(0, Be + se), ke), ge), we !== -se) {
+              const De = YA(ye.sizeTree, Qe);
               ge = na(ge, 0, De);
-              const Be = Pa(Fe.sizeTree, -se + 1)[1];
+              const Be = Pa(ye.sizeTree, -se + 1)[1];
               ge = na(ge, 1, Be);
             }
             return {
-              ...Fe,
+              ...ye,
               sizeTree: ge,
-              ...vh(Fe.offsetTree, 0, ge, Y)
+              ...vh(ye.offsetTree, 0, ge, Y)
             };
           }
-          const ee = Fs(Fe.sizeTree).reduce((ge, { k: me, v: we }) => na(ge, Math.max(0, me + se), we), eC());
+          const ee = Fs(ye.sizeTree).reduce((ge, { k: me, v: we }) => na(ge, Math.max(0, me + se), we), eC());
           return {
-            ...Fe,
+            ...ye,
             sizeTree: ee,
-            ...vh(Fe.offsetTree, 0, ee, Y)
+            ...vh(ye.offsetTree, 0, ee, Y)
           };
         })
       ),
@@ -37675,14 +37690,14 @@ const ol = Ti(
         yi(a, k, Q),
         Vt(
           ([
-            [pe, Ce, de, se, Fe, Y, ee, ge],
+            [pe, Ce, de, se, ye, Y, ee, ge],
             me,
             we,
             ve
           ]) => {
             const Qe = lQ(pe), { align: De, behavior: Be, offset: ke } = Qe, Pe = se - 1, Ge = CQ(Qe, Ce, Pe);
             let $e = OA(Ge, Ce.offsetTree, me) + Y;
-            De === "end" ? ($e += we + Pa(Ce.sizeTree, Ge)[1] - de + ve, Ge === Pe && ($e += ee)) : De === "center" ? $e += (we + Pa(Ce.sizeTree, Ge)[1] - de + ve) / 2 : $e -= Fe, ke !== void 0 && ke !== 0 && ($e += ke);
+            De === "end" ? ($e += we + Pa(Ce.sizeTree, Ge)[1] - de + ve, Ge === Pe && ($e += ee)) : De === "center" ? $e += (we + Pa(Ce.sizeTree, Ge)[1] - de + ve) / 2 : $e -= ye, ke !== void 0 && ke !== 0 && ($e += ke);
             const mt = (It) => {
               te(), It ? (ge("retrying to scroll to", { location: pe }, $n.DEBUG), mi(O, pe)) : (mi(L, !0), ge("list did not change, scroll successful", {}, $n.DEBUG));
             };
@@ -37817,8 +37832,8 @@ const JA = "up", VA = "down", $V = "none", eG = {
   const L = ga(
     ct(
       zn(B, Ci(k), Ci(I), Ci(a), Ci(G)),
-      to((T, [{ scrollHeight: te, scrollTop: pe }, Ce, de, se, Fe]) => {
-        const Y = pe + Ce - te > -Fe, ee = {
+      to((T, [{ scrollHeight: te, scrollTop: pe }, Ce, de, se, ye]) => {
+        const Y = pe + Ce - te > -ye, ee = {
           scrollHeight: te,
           scrollTop: pe,
           viewportHeight: Ce
@@ -37962,9 +37977,9 @@ const _m = Ti(
           ]) => {
             const pe = G - T, Ce = ie + X, de = Math.max(K - pe, 0);
             let se = vF;
-            const Fe = _F(te, jA), Y = _F(te, LA);
-            return O -= T, O += K + X, L += K + X, L -= T, O > G + Ce - Fe && (se = JA), L < G - de + Z + Y && (se = VA), se !== vF ? [
-              Math.max(pe - K - bF(j, jA, se) - Fe, 0),
+            const ye = _F(te, jA), Y = _F(te, LA);
+            return O -= T, O += K + X, L += K + X, L -= T, O > G + Ce - ye && (se = JA), L < G - de + Z + Y && (se = VA), se !== vF ? [
+              Math.max(pe - K - bF(j, jA, se) - ye, 0),
               pe - de - X + Z + bF(j, LA, se) + Y
             ] : null;
           }
@@ -38103,15 +38118,15 @@ const Ds = Ti(
           Ci(T),
           a
         ),
-        Ai(([se, Fe, , Y, , , , , , , , ee]) => {
+        Ai(([se, ye, , Y, , , , , , , , ee]) => {
           const ge = ee !== void 0 && ee.length !== Y;
-          return se && !Fe && !ge;
+          return se && !ye && !ge;
         }),
         Vt(
           ([
             ,
             ,
-            [se, Fe],
+            [se, ye],
             Y,
             ee,
             ge,
@@ -38125,7 +38140,7 @@ const Ds = Ti(
             const ke = ee, { offsetTree: Pe, sizeTree: Ge } = ke, $e = yn(ie);
             if (Y === 0)
               return { ...Yf, totalCount: Y };
-            if (se === 0 && Fe === 0)
+            if (se === 0 && ye === 0)
               return $e === 0 ? { ...Yf, totalCount: Y } : dQ($e, ge, ee, ve, Qe, Be || []);
             if ($i(Ge))
               return $e > 0 ? null : $c(
@@ -38148,7 +38163,7 @@ const Ds = Ti(
             }
             if (!me)
               return $c([], mt, Y, Qe, ke, ve);
-            const It = we.length > 0 ? we[we.length - 1] + 1 : 0, rt = zV(Pe, se, Fe, It);
+            const It = we.length > 0 ? we[we.length - 1] + 1 : 0, rt = zV(Pe, se, ye, It);
             if (rt.length === 0)
               return null;
             const Yt = Y - 1, Gt = Zd([], (Le) => {
@@ -38163,7 +38178,7 @@ const Ds = Ti(
                 }
                 je < It && (tt += (It - je) * Qt, je = It);
                 const St = Math.min(ut.end, Yt);
-                for (let Nt = je; Nt <= St && !(tt >= Fe); Nt++)
+                for (let Nt = je; Nt <= St && !(tt >= ye); Nt++)
                   Le.push({ data: Be?.[Nt], index: Nt, offset: tt, size: Qt }), tt += Qt + Qe;
               }
             }), nt = xF(De, jA), Ke = xF(De, LA);
@@ -38227,8 +38242,8 @@ const Ds = Ti(
         te,
         Ai(({ items: se }) => se.length > 0),
         yi(Q, a),
-        Ai(([{ items: se }, Fe]) => se[se.length - 1].originalIndex === Fe - 1),
-        Vt(([, se, Fe]) => [se - 1, Fe]),
+        Ai(([{ items: se }, ye]) => se[se.length - 1].originalIndex === ye - 1),
+        Vt(([, se, ye]) => [se - 1, ye]),
         fn(HA),
         Vt(([se]) => se)
       )
@@ -38236,7 +38251,7 @@ const Ds = Ti(
       ct(
         te,
         Ro(200),
-        Ai(({ items: se, topItems: Fe }) => se.length > 0 && se[0].originalIndex === Fe.length),
+        Ai(({ items: se, topItems: ye }) => se.length > 0 && se[0].originalIndex === ye.length),
         Vt(({ items: se }) => se[0].index),
         fn()
       )
@@ -38246,14 +38261,14 @@ const Ds = Ti(
         Ai(({ items: se }) => se.length > 0),
         // oxlint-disable-next-line array-callback-return -- callback always returns after trimming group sentinels
         Vt(({ items: se }) => {
-          let Fe = 0, Y = se.length - 1;
-          for (; se[Fe].type === "group" && Fe < Y; )
-            Fe++;
-          for (; se[Y].type === "group" && Y > Fe; )
+          let ye = 0, Y = se.length - 1;
+          for (; se[ye].type === "group" && ye < Y; )
+            ye++;
+          for (; se[Y].type === "group" && Y > ye; )
             Y--;
           return {
             endIndex: se[Y].index,
-            startIndex: se[Fe].index
+            startIndex: se[ye].index
           };
         }),
         fn(rQ)
@@ -38332,9 +38347,9 @@ const Ds = Ti(
         yi(I, S, f, k, Q, B, r),
         yi(a),
         Vt(([[Z, K, O, L, j, ie, X, T], te]) => {
-          const { calculateViewLocation: pe = gG, done: Ce, ...de } = Z, se = CQ(Z, K, L - 1), Fe = OA(se, K.offsetTree, te) + j + ie, Y = Fe + Pa(K.sizeTree, se)[1], ee = T + ie, ge = T + O - X, me = pe({
+          const { calculateViewLocation: pe = gG, done: Ce, ...de } = Z, se = CQ(Z, K, L - 1), ye = OA(se, K.offsetTree, te) + j + ie, Y = ye + Pa(K.sizeTree, se)[1], ee = T + ie, ge = T + O - X, me = pe({
             itemBottom: Y,
-            itemTop: Fe,
+            itemTop: ye,
             locationParams: de,
             viewportBottom: ge,
             viewportTop: ee
@@ -38388,9 +38403,9 @@ const aG = (a, I) => typeof a == "function" ? DF(a(I)) : I && DF(a), oG = Ti(
       ct(
         zn(ct(Ci(I), vs(1)), S),
         yi(Ci(L), k, r, Z),
-        Vt(([[Ce, de], se, Fe, Y, ee]) => {
+        Vt(([[Ce, de], se, ye, Y, ee]) => {
           let ge = de && Y, me = "auto";
-          return ge && (me = aG(se, Fe || ee), ge = ge && me !== !1), { followOutputBehavior: me, shouldFollow: ge, totalCount: Ce };
+          return ge && (me = aG(se, ye || ee), ge = ge && me !== !1), { followOutputBehavior: me, shouldFollow: ge, totalCount: Ce };
         }),
         Ai(({ shouldFollow: Ce }) => Ce)
       ),
@@ -38441,7 +38456,7 @@ const aG = (a, I) => typeof a == "function" ? DF(a(I)) : I && DF(a), oG = Ti(
       ct(
         zn(ct(pe, vs(1)), S),
         yi(Ci(te), r, Z, K),
-        Vt(([[Ce, de], se, Fe, Y, ee]) => de && Fe && se?.({ context: ee, totalCount: Ce, scrollingInProgress: Y })),
+        Vt(([[Ce, de], se, ye, Y, ee]) => de && ye && se?.({ context: ee, totalCount: Ce, scrollingInProgress: Y })),
         Ai((Ce) => !!Ce),
         Ro(0)
       ),
@@ -38635,10 +38650,10 @@ const lG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
         S,
         yi(U),
         to(
-          ([, X, T, te], [{ bottom: pe, items: Ce, offsetBottom: de, totalCount: se }, Fe]) => {
+          ([, X, T, te], [{ bottom: pe, items: Ce, offsetBottom: de, totalCount: se }, ye]) => {
             const Y = pe + de;
             let ee = 0;
-            return T === se && X.length > 0 && Ce.length > 0 && (Ce[0].originalIndex === 0 && X[0].originalIndex === 0 || (ee = Y - te, ee !== 0 && (ee += Fe))), [ee, Ce, se, Y];
+            return T === se && X.length > 0 && Ce.length > 0 && (Ce[0].originalIndex === 0 && X[0].originalIndex === 0 || (ee = Y - te, ee !== 0 && (ee += ye))), [ee, Ce, se, Y];
           },
           [0, [], 0, 0]
         ),
@@ -38678,12 +38693,12 @@ const lG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
           if (T.length === 0)
             return de(X);
           let se = 0;
-          const Fe = YA(pe, 0);
+          const ye = YA(pe, 0);
           let Y = 0, ee = 0;
           for (; Y < X; ) {
-            Y++, se += Fe;
+            Y++, se += ye;
             let ge = T.length === ee + 1 ? 1 / 0 : T[ee + 1] - T[ee] - 1;
-            Y + ge > X && (se -= Fe, ge = X - Y + 1), Y += ge, se += de(ge), ee++;
+            Y + ge > X && (se -= ye, ge = X - Y + 1), Y += ge, se += de(ge), ee++;
           }
           return se;
         })
@@ -38763,7 +38778,7 @@ const lG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
     { scrollToIndex: Ce },
     de,
     { topItemCount: se },
-    { groupCounts: Fe },
+    { groupCounts: ye },
     Y
   ]) => {
     const { listState: ee, minOverscanItemCount: ge, topItemsIndexes: me, rangeChanged: we, ...ve } = pe;
@@ -38780,7 +38795,7 @@ const lG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
       fixedItemHeight: B,
       fixedGroupHeight: Q,
       gap: k,
-      groupCounts: Fe,
+      groupCounts: ye,
       heightEstimates: r,
       initialItemFinalLocationReached: L,
       initialTopMostItemIndex: j,
@@ -39031,7 +39046,7 @@ const hG = /* @__PURE__ */ Ti(() => {
   Rm("deviation", (ve) => {
     X !== ve && T(ve);
   });
-  const te = ui("EmptyPlaceholder"), pe = ui("ScrollSeekPlaceholder") ?? pG, Ce = ui("ListComponent"), de = ui("ItemComponent"), se = ui("GroupComponent"), Fe = ui("computeItemKey"), Y = ui("isSeeking"), ee = ui("groupIndices").length > 0, ge = ui("alignToBottom"), me = ui("initialItemFinalLocationReached"), we = a ? {} : {
+  const te = ui("EmptyPlaceholder"), pe = ui("ScrollSeekPlaceholder") ?? pG, Ce = ui("ListComponent"), de = ui("ItemComponent"), se = ui("GroupComponent"), ye = ui("computeItemKey"), Y = ui("isSeeking"), ee = ui("groupIndices").length > 0, ge = ui("alignToBottom"), me = ui("initialItemFinalLocationReached"), we = a ? {} : {
     boxSizing: "border-box",
     ...j ? {
       display: "inline-block",
@@ -39055,7 +39070,7 @@ const hG = /* @__PURE__ */ Ti(() => {
       ref: ie,
       style: we,
       children: (a ? I.topItems : I.items).map((ve) => {
-        const Qe = ve.originalIndex, De = Fe(Qe + I.firstItemIndex, ve.data, V);
+        const Qe = ve.originalIndex, De = ye(Qe + I.firstItemIndex, ve.data, V);
         return Y ? /* @__PURE__ */ Hc(
           pe,
           {
@@ -39378,7 +39393,7 @@ const NG = /* @__PURE__ */ Ti(
     { customScrollParent: ie, useWindowScroll: X, windowScrollContainerState: T, windowScrollTo: te, windowViewportRect: pe },
     Ce
   ]) => {
-    const de = yt(0), se = yt(0), Fe = yt(MF), Y = yt({ height: 0, width: 0 }), ee = yt({ height: 0, width: 0 }), ge = Di(), me = Di(), we = yt(0), ve = yt(null), Qe = yt({ column: 0, row: 0 }), De = Di(), Be = Di(), ke = yt(!1), Pe = yt(0), Ge = yt(!0), $e = yt(!1), mt = yt(!1);
+    const de = yt(0), se = yt(0), ye = yt(MF), Y = yt({ height: 0, width: 0 }), ee = yt({ height: 0, width: 0 }), ge = Di(), me = Di(), we = yt(0), ve = yt(null), Qe = yt({ column: 0, row: 0 }), De = Di(), Be = Di(), ke = yt(!1), Pe = yt(0), Ge = yt(!0), $e = yt(!1), mt = yt(!1);
     Oi(
       ct(
         L,
@@ -39487,7 +39502,7 @@ const NG = /* @__PURE__ */ Ti(
           }
         )
       ),
-      Fe
+      ye
     ), jt(
       ct(
         ve,
@@ -39497,7 +39512,7 @@ const NG = /* @__PURE__ */ Ti(
       de
     ), jt(
       ct(
-        zn(Y, ee, Fe, Qe),
+        zn(Y, ee, ye, Qe),
         Ai(([Ke, Le, { items: ut }]) => ut.length > 0 && Le.height !== 0 && Ke.height !== 0),
         Vt(([Ke, Le, { items: ut }, ft]) => {
           const { bottom: tt, top: je } = EF(Ke, ft, Le, ut);
@@ -39518,7 +39533,7 @@ const NG = /* @__PURE__ */ Ti(
     );
     const rt = ga(
       ct(
-        zn(Fe, de),
+        zn(ye, de),
         Ai(([{ items: Ke }]) => Ke.length > 0),
         yi(It),
         Ai(([[Ke, Le], ut]) => {
@@ -39530,14 +39545,14 @@ const NG = /* @__PURE__ */ Ti(
       )
     ), Yt = ga(
       ct(
-        Ci(Fe),
+        Ci(ye),
         Ai(({ items: Ke }) => Ke.length > 0 && Ke[0].index === 0),
         eo(0),
         fn()
       )
     ), Gt = ga(
       ct(
-        Ci(Fe),
+        Ci(ye),
         yi(ke),
         Ai(([{ items: Ke }, Le]) => Ke.length > 0 && !Le),
         Vt(([{ items: Ke }]) => ({
@@ -39564,7 +39579,7 @@ const NG = /* @__PURE__ */ Ti(
     );
     const nt = xg(
       ct(
-        Fe,
+        ye,
         Vt((Ke) => Ke.offsetBottom + Ke.bottom)
       ),
       0
@@ -39603,7 +39618,7 @@ const NG = /* @__PURE__ */ Ti(
       windowViewportRect: pe,
       ...O,
       // output
-      gridState: Fe,
+      gridState: ye,
       horizontalDirection: mt,
       initialTopMostItemIndex: Pe,
       totalListHeight: nt,
@@ -39827,7 +39842,7 @@ const NF = 9, ZF = WA, KF = () => /* @__PURE__ */ h("div", { className: "h-2" })
   return /* @__PURE__ */ $(
     Ey,
     {
-      className: ye("overflow-hidden", B),
+      className: Fe("overflow-hidden", B),
       scrollHideDelay: 200,
       children: [
         /* @__PURE__ */ h(
@@ -40033,17 +40048,17 @@ const NF = 9, ZF = WA, KF = () => /* @__PURE__ */ h("div", { className: "h-2" })
     X,
     k.chat.emojiPicker.frequentlyUsed,
     de
-  ]), Fe = Z.trim().length > 0, Y = kt(() => {
-    if (!Fe) return se;
+  ]), ye = Z.trim().length > 0, Y = kt(() => {
+    if (!ye) return se;
     const Be = UU(Z, { maxVersion: X, localizedTerms: pe });
     return Be.length > 0 ? [{ id: "results", label: "", emojis: Be }] : [];
-  }, [Fe, Z, X, pe, se]), ee = kt(
+  }, [ye, Z, X, pe, se]), ee = kt(
     () => WF(Y, NF),
     [Y]
   );
   Xe(() => {
-    Fe && V.current?.scrollToIndex({ index: 0, align: "start" });
-  }, [Z, Fe]);
+    ye && V.current?.scrollToIndex({ index: 0, align: "start" });
+  }, [Z, ye]);
   const ge = Math.min(
     O,
     Math.max(0, ee.flat.length - 1)
@@ -40092,15 +40107,15 @@ const NF = 9, ZF = WA, KF = () => /* @__PURE__ */ h("div", { className: "h-2" })
     },
     [se]
   ), De = kt(() => {
-    if (Fe) return null;
+    if (ye) return null;
     const Be = ee.rows[j]?.sectionIndex;
     return Be === void 0 ? null : Y[Be]?.id ?? null;
-  }, [Fe, ee, j, Y]);
+  }, [ye, ee, j, Y]);
   return /* @__PURE__ */ $(
     "div",
     {
       onKeyDown: ve,
-      className: ye(
+      className: Fe(
         "flex w-[304px] flex-col overflow-hidden",
         // No border, surface or shadow of its own — the popover around it owns
         // all three. Drawing them here is what made the shadow disappear: the
@@ -40237,7 +40252,7 @@ function r3({
         bottom: B ? `${B.bottom}px` : "100%",
         left: B ? `${B.left}px` : 0
       },
-      className: ye(
+      className: Fe(
         "z-50",
         "w-72 max-h-[328px] overflow-y-auto",
         "rounded-lg border border-solid border-f1-border-secondary",
@@ -40253,7 +40268,7 @@ function r3({
             id: bU(Q, G.id),
             role: "option",
             "aria-selected": K,
-            className: ye(
+            className: Fe(
               "flex cursor-pointer items-center gap-2 rounded p-2",
               "transition-colors",
               K ? "bg-f1-background-secondary" : "hover:bg-f1-background-secondary-hover"
@@ -40318,7 +40333,7 @@ function I3({
         bottom: k ? `${k.bottom}px` : "100%",
         left: k ? `${k.left}px` : 0
       },
-      className: ye(
+      className: Fe(
         "z-50",
         "w-64 max-h-60 overflow-y-auto",
         "rounded-lg border border-solid border-f1-border-secondary",
@@ -40335,7 +40350,7 @@ function I3({
               id: MQ(I, K),
               role: "option",
               "aria-selected": L,
-              className: ye(
+              className: Fe(
                 "flex cursor-pointer items-center gap-2 p-2 rounded",
                 "transition-colors",
                 L ? "bg-f1-background-secondary" : "hover:bg-f1-background-secondary-hover"
@@ -40377,7 +40392,7 @@ function I3({
               /* @__PURE__ */ h(
                 Bt,
                 {
-                  className: ye("h-4 rounded", O === 1 ? "w-24" : "w-32")
+                  className: Fe("h-4 rounded", O === 1 ? "w-24" : "w-32")
                 }
               )
             ]
@@ -40440,7 +40455,7 @@ const C3 = {
       /* @__PURE__ */ h(
         Yn,
         {
-          className: ye(
+          className: Fe(
             "text-sm font-medium",
             Pm(a.author)
           ),
@@ -40487,7 +40502,7 @@ const C3 = {
     "div",
     {
       "aria-hidden": !0,
-      className: ye(
+      className: Fe(
         "col-start-1 row-start-1",
         "pointer-events-none invisible",
         Lf,
@@ -40502,7 +40517,7 @@ const C3 = {
     {
       ref: I,
       "aria-hidden": !0,
-      className: ye(
+      className: Fe(
         "col-start-1 row-start-1",
         "pointer-events-none text-f1-foreground",
         Lf,
@@ -40555,7 +40570,7 @@ const C3 = {
       "aria-expanded": O,
       "aria-controls": L,
       "aria-activedescendant": j,
-      className: ye(
+      className: Fe(
         "col-start-1 row-start-1",
         "w-full resize-none bg-transparent outline-none",
         "placeholder:text-f1-foreground-secondary",
@@ -40591,11 +40606,11 @@ const C3 = {
     searchMembers: G,
     currentUserId: Z,
     capabilities: K
-  } = Jg(), O = !!k && Ga("canUpload", V.type, K), { target: L } = _P(), { clearComposeTarget: j, registerComposerHandle: ie } = Gd(), X = DP(), { registerFileDropHandler: T } = TU(), te = On(), { reducedMotion: pe } = Va(), [Ce, de] = Ne(""), [se, Fe] = Ne(0), [Y, ee] = Ne([]), [ge, me] = Ne(!1), we = Re(null), ve = Re(null), Qe = Re(null), De = Re(null), Be = Re(/* @__PURE__ */ new Set()), ke = mP({
+  } = Jg(), O = !!k && Ga("canUpload", V.type, K), { target: L } = _P(), { clearComposeTarget: j, registerComposerHandle: ie } = Gd(), X = DP(), { registerFileDropHandler: T } = TU(), te = On(), { reducedMotion: pe } = Va(), [Ce, de] = Ne(""), [se, ye] = Ne(0), [Y, ee] = Ne([]), [ge, me] = Ne(!1), we = Re(null), ve = Re(null), Qe = Re(null), De = Re(null), Be = Re(/* @__PURE__ */ new Set()), ke = mP({
     inputValue: Ce,
     setInputValue: de,
     cursorPosition: se,
-    setCursorPosition: Fe,
+    setCursorPosition: ye,
     textareaRef: we
   }), Ge = OM({
     inputValue: Ce,
@@ -40652,7 +40667,7 @@ const C3 = {
   Mi.current = Ce;
   const bi = Je((ot) => {
     const Jt = Qi.current, di = Jt ? `${Jt} ${ot}` : ot;
-    de(di), Fe(di.length);
+    de(di), ye(di.length);
   }, []), wi = {
     "permission-denied": a.chat.micPermissionDenied,
     "device-error": a.chat.micError,
@@ -40696,7 +40711,7 @@ const C3 = {
   const Fi = Je(
     (ot, Jt) => {
       const di = hP(ot, Jt), st = di?.value ?? ot, vt = di?.cursorPosition ?? Jt;
-      de(st), Fe(vt), B(), di && requestAnimationFrame(() => {
+      de(st), ye(vt), B(), di && requestAnimationFrame(() => {
         we.current?.setSelectionRange(
           vt,
           vt
@@ -40712,7 +40727,7 @@ const C3 = {
     [Q]
   );
   const Cn = Je(() => {
-    Fe(we.current?.selectionStart ?? 0);
+    ye(we.current?.selectionStart ?? 0);
   }, []), ji = Je(() => {
     ve.current && we.current && (ve.current.scrollTop = we.current.scrollTop);
   }, []), Pi = Je(
@@ -40819,7 +40834,7 @@ const C3 = {
     },
     [O, Pi]
   ), vn = L.kind === "edit", xn = L.kind === "edit" ? L.message : null, Me = L.kind === "reply" ? L.message : null, Wi = Je(() => {
-    Ge.close(), Ge.seedMentions([]), de(""), Fe(0), Ki(Y), ee([]);
+    Ge.close(), Ge.seedMentions([]), de(""), ye(0), Ki(Y), ee([]);
   }, [
     Ge.close,
     Ge.seedMentions,
@@ -40827,7 +40842,7 @@ const C3 = {
     Y
   ]), Dn = Je(
     (ot) => {
-      de(ot.body), Fe(ot.body.length), ee((Jt) => (Ki(Jt), (ot.attachments ?? []).filter((di) => di.kind !== "card").map((di) => ({
+      de(ot.body), ye(ot.body.length), ee((Jt) => (Ki(Jt), (ot.attachments ?? []).filter((di) => di.kind !== "card").map((di) => ({
         id: `att-${ft.current++}`,
         status: "ready",
         attachment: di
@@ -40896,7 +40911,7 @@ const C3 = {
       replyToId: Me?.id,
       mentions: Jt.length > 0 ? Jt : void 0,
       mentionedEveryone: di || void 0
-    }), Ge.close(), de(""), Fe(0), ee([]), j();
+    }), Ge.close(), de(""), ye(0), ee([]), j();
   }, [
     Y,
     qt,
@@ -40911,7 +40926,7 @@ const C3 = {
   ]), mn = Je(
     (ot) => {
       const Jt = we.current, di = Jt?.selectionStart ?? Jt?.value.length ?? 0, st = Jt?.selectionEnd ?? Jt?.value.length ?? 0, vt = di + ot.length;
-      de((zt) => zt.slice(0, di) + ot + zt.slice(st)), Fe(vt), $e(), B(), te.onEmojiInserted({ emoji: ot, source: "picker" }), requestAnimationFrame(() => {
+      de((zt) => zt.slice(0, di) + ot + zt.slice(st)), ye(vt), $e(), B(), te.onEmojiInserted({ emoji: ot, source: "picker" }), requestAnimationFrame(() => {
         const zt = we.current;
         zt && (zt.focus(), zt.setSelectionRange(vt, vt));
       });
@@ -41038,7 +41053,7 @@ const C3 = {
             children: /* @__PURE__ */ $(
               "div",
               {
-                className: ye(
+                className: Fe(
                   "flex w-full flex-row items-center gap-2 rounded-md p-2 pr-3",
                   "bg-f1-background-critical text-f1-foreground"
                 ),
@@ -41343,7 +41358,7 @@ const C3 = {
     "div",
     {
       "aria-hidden": !a,
-      className: ye(
+      className: Fe(
         "pointer-events-none absolute inset-1 z-50 flex flex-col items-center justify-center gap-2 rounded-xl",
         "border border-dashed border-f1-border bg-f1-background-tertiary/80 backdrop-blur",
         "transition-opacity duration-150 ease-out motion-reduce:transition-none",
@@ -41384,7 +41399,7 @@ const C3 = {
     /* @__PURE__ */ h(
       "span",
       {
-        className: ye(
+        className: Fe(
           "shrink-0 whitespace-nowrap text-sm tabular-nums",
           Z ? "text-f1-foreground-critical" : "text-f1-foreground-secondary"
         ),
@@ -41471,7 +41486,7 @@ const C3 = {
       "span",
       {
         "aria-hidden": "true",
-        className: ye("h-2 w-2 rounded-full", "bg-f1-background-positive-bold")
+        className: Fe("h-2 w-2 rounded-full", "bg-f1-background-positive-bold")
       }
     )
   }
@@ -41958,8 +41973,8 @@ function QE({
     }
     Ce.current = { messages: B, rows: a, hasMoreNewer: r, state: Dt };
   }
-  const de = `${G}:${Ce.current.state.epoch}`, se = Ce.current.state.firstItemIndex, Fe = Re(se);
-  Fe.current = se;
+  const de = `${G}:${Ce.current.state.epoch}`, se = Ce.current.state.firstItemIndex, ye = Re(se);
+  ye.current = se;
   const Y = Re(
     null
   );
@@ -42066,7 +42081,7 @@ function QE({
       if (ri.current = null, ft.current) return;
       const at = X.current;
       if (!at || !j.current) return;
-      const Dt = Fe.current;
+      const Dt = ye.current;
       if (at.provisional) {
         Tt("down", Dt);
         return;
@@ -42487,7 +42502,7 @@ const RE = 1e3, ME = ({
         target: "_blank",
         stopPropagation: !0,
         title: r ? k : void 0,
-        className: ye("whitespace-normal", r ? "break-words" : "break-all"),
+        className: Fe("whitespace-normal", r ? "break-words" : "break-all"),
         children: r ?? k
       },
       `link-${U}`
@@ -42521,7 +42536,7 @@ const RE = 1e3, ME = ({
     const { token: K } = G, O = /* @__PURE__ */ h(
       "span",
       {
-        className: ye(
+        className: Fe(
           "font-medium text-f1-foreground-secondary hover:text-f1-foreground"
         ),
         children: B.slice(G.start, G.end)
@@ -42539,7 +42554,7 @@ const RE = 1e3, ME = ({
   } catch {
     return a;
   }
-}, TE = (a, I, f, B) => ye(
+}, TE = (a, I, f, B) => Fe(
   "flex w-full flex-col overflow-hidden rounded-xl text-left no-underline",
   "bg-f1-background-secondary",
   "transition-shadow hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
@@ -42555,7 +42570,7 @@ const RE = 1e3, ME = ({
   a.description && /* @__PURE__ */ h(
     "span",
     {
-      className: ye(
+      className: Fe(
         "text-sm text-f1-foreground-secondary",
         I ? "line-clamp-1" : "line-clamp-2"
       ),
@@ -42636,7 +42651,7 @@ const RE = 1e3, ME = ({
       "span",
       {
         "aria-hidden": !0,
-        className: ye(
+        className: Fe(
           "absolute bottom-2.5 right-3 select-none whitespace-nowrap text-xs leading-none [unicode-bidi:isolate]",
           // `f1-foreground-secondary` is white 50% in dark, which lands just
           // under AA on the coloured bubbles; 60% clears it on every hue.
@@ -42668,7 +42683,7 @@ const RE = 1e3, ME = ({
       onClick: () => {
         B(a.id), Q.onJumpedToQuotedMessage();
       },
-      className: ye(
+      className: Fe(
         "flex w-full items-center overflow-hidden rounded-xl text-left",
         // Sits INSIDE a tinted bubble, so it needs a heavier neutral than
         // `f1-background-tertiary` (4%) to stay legible against the stronger
@@ -42694,7 +42709,7 @@ const RE = 1e3, ME = ({
           /* @__PURE__ */ h(
             KA,
             {
-              className: ye(
+              className: Fe(
                 "text-sm font-medium",
                 Pm(a.author)
               ),
@@ -42738,7 +42753,7 @@ const RE = 1e3, ME = ({
   layer: Q = "inner"
 }) => {
   const k = zE[Q], [U, r] = k[a ? "right" : "left"], S = a ? k.endRight : k.endLeft;
-  return ye(
+  return Fe(
     // The radius transitions because extending a run flips the previous
     // bubble's tail corner (square → sm) — animated, not a dry class swap.
     k.base,
@@ -42804,7 +42819,7 @@ const RE = 1e3, ME = ({
       initial: V.current || S ? !1 : { opacity: 0 },
       animate: { opacity: 1 },
       transition: { duration: 0.15 },
-      className: ye(
+      className: Fe(
         K,
         "relative w-fit max-w-full px-3.5 py-2.5",
         "text-sm italic text-f1-foreground",
@@ -42815,10 +42830,10 @@ const RE = 1e3, ME = ({
         /* @__PURE__ */ h(XI, { message: a, placement: "bubble" })
       ]
     }
-  ) : /* @__PURE__ */ h("div", { className: ye("min-w-0 max-w-full bg-f1-background", K), children: /* @__PURE__ */ $(
+  ) : /* @__PURE__ */ h("div", { className: Fe("min-w-0 max-w-full bg-f1-background", K), children: /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         K,
         "flex w-fit max-w-full flex-col text-f1-foreground font-normal",
         "whitespace-pre-wrap break-words",
@@ -42847,7 +42862,7 @@ const RE = 1e3, ME = ({
           f && /* @__PURE__ */ h(Il, { user: f, children: /* @__PURE__ */ h(
             "span",
             {
-              className: ye(
+              className: Fe(
                 "mb-0.5 block w-fit cursor-default text-sm font-medium",
                 Pm(f)
               ),
@@ -42916,7 +42931,7 @@ const RE = 1e3, ME = ({
       "div",
       {
         "aria-label": f.chat.info,
-        className: ye(
+        className: Fe(
           "max-h-80 overflow-y-auto rounded-b-lg",
           Ji("focus-visible:ring-inset")
         ),
@@ -42962,7 +42977,7 @@ const RE = 1e3, ME = ({
   {
     type: "button",
     onClick: f,
-    className: ye(LE, Ji("focus-visible:ring-inset")),
+    className: Fe(LE, Ji("focus-visible:ring-inset")),
     children: [
       /* @__PURE__ */ h(ii, { icon: a, size: "md" }),
       /* @__PURE__ */ h("span", { className: "line-clamp-1 flex-1", children: I }),
@@ -42991,7 +43006,7 @@ const RE = 1e3, ME = ({
     capabilities: Z,
     hasEditMessage: !!S,
     editWindowMs: V
-  }, pe = YQ(te), Ce = HQ(te), de = zQ(te), se = WQ(te), Fe = JQ(te), Y = OQ(te), ee = (De) => {
+  }, pe = YQ(te), Ce = HQ(te), de = zQ(te), se = WQ(te), ye = JQ(te), Y = OQ(te), ee = (De) => {
     B(De), De || X("menu");
   }, ge = (De, Be) => {
     LQ(j, a, De, Be), k(a.id, De), ee(!1);
@@ -43136,10 +43151,10 @@ const RE = 1e3, ME = ({
               }
             )
           ] }),
-          (Fe || Y) && /* @__PURE__ */ $(oi, { children: [
+          (ye || Y) && /* @__PURE__ */ $(oi, { children: [
             (pe || se || Ce || de) && /* @__PURE__ */ h("div", { className: "h-px bg-f1-border-secondary" }),
             /* @__PURE__ */ $("div", { className: "flex flex-col gap-0 p-1", children: [
-              Fe && /* @__PURE__ */ h(
+              ye && /* @__PURE__ */ h(
                 fs,
                 {
                   icon: jh,
@@ -43237,7 +43252,7 @@ const RE = 1e3, ME = ({
       type: "button",
       onClick: k,
       style: { aspectRatio: I },
-      className: ye(
+      className: Fe(
         "relative flex overflow-hidden p-0 transition-opacity hover:opacity-90",
         Ji("focus-visible:ring-inset"),
         f && "col-span-2",
@@ -43264,7 +43279,7 @@ const RE = 1e3, ME = ({
             src: a.thumbnailUrl ?? a.url,
             alt: a.name,
             eager: !0,
-            className: ye(
+            className: Fe(
               "h-full w-full object-cover",
               // A blur underneath deserves a longer dissolve than a bare tint.
               a.blurUrl && !r && "duration-300"
@@ -43304,7 +43319,7 @@ const RE = 1e3, ME = ({
     {
       "aria-label": a.name,
       "aria-busy": V ? void 0 : !0,
-      className: ye(
+      className: Fe(
         // Shares the transcript's single media width. The placeholder and the
         // loaded player get the same box so mounting controls cannot resize the
         // row. This used to be a fixed 36rem, which also made video the largest
@@ -43328,7 +43343,7 @@ const RE = 1e3, ME = ({
         /* @__PURE__ */ $(
           "div",
           {
-            className: ye(
+            className: Fe(
               "pointer-events-none absolute inset-0 transition-opacity duration-150 motion-reduce:transition-none",
               V && "opacity-0"
             ),
@@ -43348,7 +43363,7 @@ const RE = 1e3, ME = ({
               /* @__PURE__ */ h(
                 "span",
                 {
-                  className: ye(
+                  className: Fe(
                     "absolute left-1/2 top-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-f1-foreground-inverse",
                     tV
                   ),
@@ -43358,7 +43373,7 @@ const RE = 1e3, ME = ({
               Z && /* @__PURE__ */ h(
                 "span",
                 {
-                  className: ye(
+                  className: Fe(
                     "absolute bottom-2 left-2 rounded-full px-2 py-0.5 text-sm font-medium text-f1-foreground-inverse",
                     iV
                   ),
@@ -43422,7 +43437,7 @@ const RE = 1e3, ME = ({
       ) : /* @__PURE__ */ h(
         Bt,
         {
-          className: ye(
+          className: Fe(
             "h-full w-full",
             f ? "motion-reduce:animate-none" : "animate-none",
             B
@@ -43453,7 +43468,7 @@ const RE = 1e3, ME = ({
     hasAvatar: Q,
     isFirstOfRun: f,
     isLastOfRun: L.length === 0 && !Ce
-  }), se = L.length > 0 || j.length > 0 || X > 0 || pe || te || !B, Fe = (Qe) => ms({
+  }), se = L.length > 0 || j.length > 0 || X > 0 || pe || te || !B, ye = (Qe) => ms({
     isMine: I,
     hasAvatar: Q,
     isFirstOfRun: f && G.length === 0 && Qe === 0,
@@ -43478,7 +43493,7 @@ const RE = 1e3, ME = ({
     "div",
     {
       "data-chat-attachments": "",
-      className: ye(
+      className: Fe(
         // w-full only spans whatever the message column already is — every card
         // carries its own width now, so this no longer decides how wide the
         // message gets (see CHAT_MEDIA_WIDTH_CLASS).
@@ -43493,7 +43508,7 @@ const RE = 1e3, ME = ({
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "grid grid-cols-2 overflow-hidden border border-solid border-f1-border-secondary",
               Td,
               qP,
@@ -43519,7 +43534,7 @@ const RE = 1e3, ME = ({
                     "span",
                     {
                       "aria-hidden": !0,
-                      className: ye(
+                      className: Fe(
                         "absolute inset-0 flex items-center justify-center text-2xl font-semibold text-f1-foreground-inverse",
                         nV
                       ),
@@ -43537,7 +43552,7 @@ const RE = 1e3, ME = ({
           sT,
           {
             file: Qe,
-            cornerClass: Fe(De),
+            cornerClass: ye(De),
             surfaceClassName: V,
             meta: T === "video" && De === Z.length - 1 ? /* @__PURE__ */ h(XI, { message: a, placement: "overlay" }) : void 0
           },
@@ -43575,7 +43590,7 @@ const RE = 1e3, ME = ({
         )),
         ie.map((Qe, De) => /* @__PURE__ */ h(gT, { card: Qe }, `${Qe.title}-${De}`)),
         O.length > 0 && // Files flow side by side and wrap, instead of stacking vertically.
-        /* @__PURE__ */ h("div", { className: ye("flex flex-wrap gap-1", I && "justify-end"), children: O.map((Qe, De) => /* @__PURE__ */ h(
+        /* @__PURE__ */ h("div", { className: Fe("flex flex-wrap gap-1", I && "justify-end"), children: O.map((Qe, De) => /* @__PURE__ */ h(
           Jh,
           {
             size: "md",
@@ -43636,7 +43651,7 @@ const RE = 1e3, ME = ({
       size: "md",
       compact: !0,
       onClick: T,
-      className: ye(
+      className: Fe(
         "flex items-center gap-1 px-0.5 font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
         r && "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
       ),
@@ -43651,7 +43666,7 @@ const RE = 1e3, ME = ({
             duration: 200,
             easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)"
           },
-          className: ye(
+          className: Fe(
             "tabular-nums",
             r ? "text-f1-foreground-selected" : "text-f1-foreground"
           )
@@ -43677,7 +43692,7 @@ const RE = 1e3, ME = ({
   return !a.reactions || a.reactions.length === 0 ? null : /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "flex flex-wrap items-center gap-2 py-1",
         I && "justify-end"
       ),
@@ -43730,7 +43745,7 @@ const RE = 1e3, ME = ({
     "span",
     {
       "aria-hidden": !I,
-      className: ye(
+      className: Fe(
         "flex items-center transition-opacity duration-150",
         I ? "opacity-100" : "opacity-0"
       ),
@@ -43781,14 +43796,14 @@ const RE = 1e3, ME = ({
     currentUserId: Ce,
     channelType: de,
     capabilities: se,
-    editMessage: Fe,
+    editMessage: ye,
     editWindowMs: Y
   } = rC(), ee = PE({
     message: a,
     isMine: I,
     channelType: de,
     capabilities: se,
-    hasEditMessage: !!Fe,
+    hasEditMessage: !!ye,
     editWindowMs: Y
   }), ge = te === a.id, me = !a.deleted && (a.reactions?.length ?? 0) > 0, we = Re(me), ve = Re(a.status === "failed");
   Xe(() => {
@@ -43804,7 +43819,7 @@ const RE = 1e3, ME = ({
     "div",
     {
       "data-msg-id": a.id,
-      className: ye(
+      className: Fe(
         "group flex flex-col",
         I ? "items-end" : "items-start"
       ),
@@ -43813,7 +43828,7 @@ const RE = 1e3, ME = ({
         Be && /* @__PURE__ */ $(
           "div",
           {
-            className: ye(
+            className: Fe(
               // 4px here + the outer surface's own 2px of padding stand the
               // bubble 6px off the avatar, so the run-end corner points at it
               // instead of touching it. The reaction and delivery-status rows
@@ -43826,7 +43841,7 @@ const RE = 1e3, ME = ({
               /* @__PURE__ */ $(
                 "div",
                 {
-                  className: ye(
+                  className: Fe(
                     "flex min-w-0 items-center gap-0.5",
                     I ? "flex-row-reverse" : "flex-row"
                   ),
@@ -43834,7 +43849,7 @@ const RE = 1e3, ME = ({
                     /* @__PURE__ */ $(
                       "div",
                       {
-                        className: ye(
+                        className: Fe(
                           // Match the bubble's chained corners so the highlight ring and
                           // hover surface follow its exact shape (not a fixed 2xl box).
                           ms({
@@ -43890,7 +43905,7 @@ const RE = 1e3, ME = ({
                       "div",
                       {
                         ref: L,
-                        className: ye(
+                        className: Fe(
                           a.status === "failed" ? "opacity-100" : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
                           G && "opacity-100"
                         ),
@@ -44018,7 +44033,7 @@ const RE = 1e3, ME = ({
         "data-testid": "chat-post-row",
         "aria-current": O ? "true" : void 0,
         "data-active": O || void 0,
-        className: ye(
+        className: Fe(
           // ONE COLUMN OF POSTS, divided by a hairline — the shape every feed
           // worth reading has. Boxed cards with a gap between them made a short
           // channel look like a search results page: four rounded rectangles
@@ -44133,7 +44148,7 @@ const RE = 1e3, ME = ({
 }, bT = ({ animate: a }) => /* @__PURE__ */ h("span", { className: "flex items-center gap-1 py-px", "aria-hidden": "true", children: [0, 1, 2].map((I) => /* @__PURE__ */ h(
   "span",
   {
-    className: ye(
+    className: Fe(
       "size-1.5 rounded-full bg-f1-foreground-secondary",
       // A soft rise-and-dim wave with a rest phase (WhatsApp) — `bounce`'s
       // ball-drop curve reads as UI chrome, not as someone writing.
@@ -44166,7 +44181,7 @@ const RE = 1e3, ME = ({
     {
       role: "status",
       "aria-label": S,
-      className: ye("flex w-full items-end gap-1 shrink-0", B),
+      className: Fe("flex w-full items-end gap-1 shrink-0", B),
       initial: U || !r ? !1 : { opacity: 0 },
       animate: f ? { opacity: 0 } : { opacity: 1 },
       transition: { duration: 0.14, ease: Sa },
@@ -44197,7 +44212,7 @@ const RE = 1e3, ME = ({
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "flex w-fit items-center justify-center rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4",
               I && "rounded-bl-2xs"
             ),
@@ -44220,7 +44235,7 @@ const RE = 1e3, ME = ({
   return /* @__PURE__ */ h(
     "div",
     {
-      className: ye("flex justify-center", B ? "py-6" : "py-0"),
+      className: Fe("flex justify-center", B ? "py-6" : "py-0"),
       "data-testid": "chat-date-separator",
       children: /* @__PURE__ */ $("span", { className: "flex items-center gap-1.5 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2.5 py-0.5 backdrop-blur", children: [
         f && /* @__PURE__ */ h(qA, { size: "small", className: "h-3.5 w-3.5" }),
@@ -44244,7 +44259,7 @@ const RE = 1e3, ME = ({
       role: "status",
       "aria-live": "polite",
       "aria-atomic": "true",
-      className: ye(
+      className: Fe(
         "px-1 pt-1 text-sm text-f1-foreground-secondary",
         a.isMine ? "text-right" : "text-left"
       ),
@@ -44351,7 +44366,7 @@ const RE = 1e3, ME = ({
     );
   if (a.type === "footer") {
     const te = I && !a.message.isMine;
-    return /* @__PURE__ */ $("div", { className: ye("flex w-full gap-1.5", S), children: [
+    return /* @__PURE__ */ $("div", { className: Fe("flex w-full gap-1.5", S), children: [
       te && /* @__PURE__ */ h("span", { "aria-hidden": !0, className: "size-5 shrink-0" }),
       /* @__PURE__ */ h("div", { className: "min-w-0 flex-1", children: /* @__PURE__ */ h(kT, { message: a.message, isGroup: I }) })
     ] });
@@ -44380,14 +44395,14 @@ const RE = 1e3, ME = ({
     /* @__PURE__ */ h(
       Ot.div,
       {
-        className: ye("flex flex-col gap-1", S),
+        className: Fe("flex flex-col gap-1", S),
         initial: { opacity: 0 },
         animate: { opacity: 1 },
         transition: Kf(V?.order ?? 0),
         children: T
       }
     )
-  ) : /* @__PURE__ */ h("div", { className: ye("flex flex-col gap-1", S), children: T });
+  ) : /* @__PURE__ */ h("div", { className: Fe("flex flex-col gap-1", S), children: T });
 }, MT = em(RT), qQ = ({
   channel: a
 }) => {
@@ -44504,7 +44519,7 @@ const RE = 1e3, ME = ({
   return /* @__PURE__ */ $(
     Ey,
     {
-      className: ye("overflow-hidden", B),
+      className: Fe("overflow-hidden", B),
       scrollHideDelay: 200,
       children: [
         /* @__PURE__ */ $(
@@ -44599,7 +44614,7 @@ const RE = 1e3, ME = ({
     firstUnreadId: Z,
     markRead: K,
     capabilities: O
-  } = Jg(), { reducedMotion: L } = Va(), j = I.type === "group", ie = I.type === "community", X = Ga("canSend", I.type, O), { registerScrollToMessage: T } = fm(), [te, pe] = Ne(!1), [Ce] = Ne(Z), de = Re(void 0), { rows: se, indexById: Fe } = kt(() => {
+  } = Jg(), { reducedMotion: L } = Va(), j = I.type === "group", ie = I.type === "community", X = Ga("canSend", I.type, O), { registerScrollToMessage: T } = fm(), [te, pe] = Ne(!1), [Ce] = Ne(Z), de = Re(void 0), { rows: se, indexById: ye } = kt(() => {
     const ei = DE(a, {
       dividerId: Ce,
       previousRows: de.current,
@@ -44683,7 +44698,7 @@ const RE = 1e3, ME = ({
     reassertEntry: ni
   } = QE({
     rows: se,
-    indexById: Fe,
+    indexById: ye,
     itemCount: ft.length,
     messages: a,
     hasMoreOlder: B,
@@ -44779,7 +44794,7 @@ const RE = 1e3, ME = ({
             skipAnimationFrameInResizeObserver: !0,
             context: eg,
             components: WT,
-            className: ye(
+            className: Fe(
               "size-full",
               // Read-only only: stretch Virtuoso's inner viewport to the height of
               // the scroller and lay it out as a column, so the footer can be
@@ -44816,7 +44831,7 @@ const RE = 1e3, ME = ({
     }
   );
 }, JT = /* @__PURE__ */ new Set(), jT = Fr(
-  () => import("./ChatPostComposerDialog-x26KqRQL.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-Ax8tugUV.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), LT = () => {
@@ -45123,7 +45138,7 @@ const RE = 1e3, ME = ({
     /* @__PURE__ */ h(
       "span",
       {
-        className: ye(
+        className: Fe(
           "w-full truncate font-medium",
           // A stand-in, drawn as one: it is F0 talking, not the writer.
           I ? "italic text-f1-foreground-secondary" : "text-f1-foreground"
@@ -45140,14 +45155,14 @@ const RE = 1e3, ME = ({
 }) => /* @__PURE__ */ $(
   "div",
   {
-    className: ye("flex w-full items-end gap-2", a && "flex-row-reverse"),
+    className: Fe("flex w-full items-end gap-2", a && "flex-row-reverse"),
     children: [
       !a && /* @__PURE__ */ h(Bt, { className: "size-6 shrink-0 rounded-full" }),
       /* @__PURE__ */ h(
         "div",
         {
-          className: ye("flex flex-col gap-1", a ? "items-end" : "items-start"),
-          children: I.map((f, B) => /* @__PURE__ */ h(Bt, { className: ye("h-8 rounded-2xl", f) }, B))
+          className: Fe("flex flex-col gap-1", a ? "items-end" : "items-start"),
+          children: I.map((f, B) => /* @__PURE__ */ h(Bt, { className: Fe("h-8 rounded-2xl", f) }, B))
         }
       )
     ]
@@ -45327,7 +45342,7 @@ const RE = 1e3, ME = ({
         // The colour last: it has to land after `F0ButtonToggle`'s own
         // unselected `text-f1-icon` for tailwind-merge to keep it. Never on
         // the ANSWERED face — that one's colour is the toggle's to draw.
-        className: ye(
+        className: Fe(
           IN[Q],
           S === void 0 ? CN[K] : K !== S && AN
         )
@@ -45401,10 +45416,10 @@ const x9 = Hn(
     gap: "4"
   }
 }), dN = Kt.forwardRef(function({ className: I, gap: f, children: B, tileSize: Q, ...k }, U) {
-  return /* @__PURE__ */ h("div", { className: ye("@container", "grow"), ref: U, ...k, children: /* @__PURE__ */ h(
+  return /* @__PURE__ */ h("div", { className: Fe("@container", "grow"), ref: U, ...k, children: /* @__PURE__ */ h(
     "div",
     {
-      className: ye(cN({ gap: f, tileSize: Q }), I),
+      className: Fe(cN({ gap: f, tileSize: Q }), I),
       ref: U,
       ...k,
       children: B
@@ -45506,7 +45521,7 @@ const x9 = Hn(
   return /* @__PURE__ */ h(
     "div",
     {
-      className: ye(
+      className: Fe(
         uN({
           paddingX: k,
           basis: B,
@@ -45544,7 +45559,7 @@ const x9 = Hn(
   return /* @__PURE__ */ h(
     tw,
     {
-      className: ye(fN({ gap: f, wrap: B }), I),
+      className: Fe(fN({ gap: f, wrap: B }), I),
       ref: k,
       ...Q
     }
@@ -45561,7 +45576,7 @@ const x9 = Hn(
   return /* @__PURE__ */ h(
     tw,
     {
-      className: ye(mN({ gap: f }), I),
+      className: Fe(mN({ gap: f }), I),
       ref: k,
       ...Q,
       children: B
@@ -46027,18 +46042,18 @@ const x9 = Hn(
     return /* @__PURE__ */ $(
       Nh,
       {
-        className: ye(
+        className: Fe(
           "relative flex gap-4 overflow-hidden border-dashed",
           S
         ),
         ref: r,
         children: [
           /* @__PURE__ */ h(Ax, { className: "-mt-0.5", children: /* @__PURE__ */ h(lx, { children: I }) }),
-          /* @__PURE__ */ $(cx, { className: ye("flex flex-col gap-4", V), children: [
+          /* @__PURE__ */ $(cx, { className: Fe("flex flex-col gap-4", V), children: [
             /* @__PURE__ */ $(
               "div",
               {
-                className: ye(
+                className: Fe(
                   "absolute -top-12 bottom-0 left-0 right-0 flex flex-col justify-end bg-gradient-to-b to-transparent opacity-30",
                   G
                 ),
@@ -46143,7 +46158,7 @@ const Yd = function({
     "div",
     {
       ref: r,
-      className: ye("relative flex h-full flex-col", B),
+      className: Fe("relative flex h-full flex-col", B),
       style: {
         minHeight: `${k}px`
       },
@@ -46199,7 +46214,7 @@ const Z9 = ({
   return a ? /* @__PURE__ */ h(
     "a",
     {
-      className: ye(
+      className: Fe(
         f,
         "cursor-pointer focus:border-f1-background-selected-bold focus:outline-none"
       ),
@@ -46219,7 +46234,7 @@ function K9({
   return /* @__PURE__ */ h(KN, { onClick: Q, children: /* @__PURE__ */ $(
     "div",
     {
-      className: ye(
+      className: Fe(
         "flex flex-col gap-0.5 rounded-md border border-solid border-f1-border-secondary px-3 py-2.5",
         Q && "hover:border-f1-border-hover"
       ),
@@ -46246,8 +46261,8 @@ const WN = Ui(
             children: f
           }
         ),
-        "icon" in Q && Q.icon && /* @__PURE__ */ h("span", { className: ye("flex", B), children: /* @__PURE__ */ h(ii, { icon: Q.icon }) }),
-        "emoji" in Q && Q.emoji && /* @__PURE__ */ h("span", { className: ye("flex", B), children: /* @__PURE__ */ h(io, { emoji: Q.emoji, size: "md" }) })
+        "icon" in Q && Q.icon && /* @__PURE__ */ h("span", { className: Fe("flex", B), children: /* @__PURE__ */ h(ii, { icon: Q.icon }) }),
+        "emoji" in Q && Q.emoji && /* @__PURE__ */ h("span", { className: Fe("flex", B), children: /* @__PURE__ */ h(io, { emoji: Q.emoji, size: "md" }) })
       ] })
     ] }, f);
   }
@@ -46277,7 +46292,7 @@ const WN = Ui(
   withPointerCursor: f,
   children: B
 }) => {
-  const Q = ye(
+  const Q = Fe(
     "flex flex-row items-center rounded-md border border-solid border-transparent p-2 text-f1-foreground",
     I ? "gap-2" : "gap-2.5",
     f ? "cursor-pointer" : "cursor-default",
@@ -46331,7 +46346,7 @@ function ey({
   onClick: B,
   module: Q
 }) {
-  const k = ye(
+  const k = Fe(
     "flex flex-row gap-2 rounded-md border border-solid border-transparent p-2 text-f1-foreground",
     B ? "cursor-pointer hover:bg-f1-background-tertiary focus:border-f1-background-selected-bold focus:outline-none" : void 0
   );
@@ -46358,7 +46373,7 @@ function Sh({
   rightIconClassName: S = "text-f1-icon-secondary",
   onClick: V
 }) {
-  const G = ye(
+  const G = Fe(
     "flex flex-row items-start gap-1 rounded-md border border-solid border-transparent px-2 py-1.5 text-f1-foreground",
     V ? "cursor-pointer hover:bg-f1-background-tertiary focus:border-f1-background-selected-bold focus:outline-none" : void 0
   );
@@ -46371,7 +46386,7 @@ function Sh({
         {
           icon: k,
           size: "md",
-          className: ye("mt-0.5", r)
+          className: Fe("mt-0.5", r)
         }
       ),
       /* @__PURE__ */ h("p", { className: "mt-0.5 line-clamp-2 font-medium", children: I }),
@@ -46380,7 +46395,7 @@ function Sh({
         {
           icon: U,
           size: "md",
-          className: ye("mt-0.5", S)
+          className: Fe("mt-0.5", S)
         }
       )
     ] }),
@@ -46474,7 +46489,7 @@ function O9({
     !!B && /* @__PURE__ */ h("div", { className: Q ? "mt-1" : "mt-2", children: /* @__PURE__ */ h(
       "span",
       {
-        className: ye(
+        className: Fe(
           "text-f1-foreground",
           Q ? "text-sm" : "text-base"
         ),
@@ -46598,7 +46613,7 @@ function t4({ segments: a }) {
         const Q = I[B], k = /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "min-w-0 rounded-full",
               // Only a segment with something to say behaves like a target: an
               // INVISIBLE hit area, because a 6px rail is nothing to aim at, and
@@ -46903,7 +46918,7 @@ function s4({
         /* @__PURE__ */ h(
           "span",
           {
-            className: ye(
+            className: Fe(
               "font-medium",
               a ? "text-f1-foreground" : "text-f1-foreground-secondary"
             ),
@@ -47018,7 +47033,7 @@ function J9({
   projectId: Ce,
   onChangeProjectId: de,
   projectSelectorDisabled: se = !1,
-  projectRequired: Fe = !0,
+  projectRequired: ye = !0,
   locationRequired: Y = !0,
   breakTypeName: ee,
   onBreakPromote: ge,
@@ -47088,7 +47103,7 @@ function J9({
       onChangeProjectId: de,
       label: B.selectProject,
       searchPlaceholder: B.searchProject,
-      required: Fe,
+      required: ye,
       disabled: !Yt
     }
   ) : null, Qt = ge ?? ((I ?? 0) < 0 ? "clock-out" : "resume"), St = /* @__PURE__ */ $(oi, { children: [
@@ -47193,7 +47208,7 @@ function J9({
   ] }), Mi = U && !!Nt, bi = X && !!Et, wi = Mi ? /* @__PURE__ */ h(
     "div",
     {
-      className: ye(
+      className: Fe(
         "flex min-w-0 flex-1 flex-row",
         rt && ny
       ),
@@ -47202,7 +47217,7 @@ function J9({
   ) : null, gi = bi ? /* @__PURE__ */ h(
     "div",
     {
-      className: ye("min-w-0 flex-1", Yt && ny),
+      className: Fe("min-w-0 flex-1", Yt && ny),
       children: Et
     }
   ) : null, it = Mi && bi, _t = it ? gi : null, $t = it ? wi : wi ?? gi;
@@ -47481,14 +47496,14 @@ const Nm = [0.05, 0.7, 0.1, 1], gC = { duration: 0 }, rw = 320, sw = 10, c4 = 55
   return /* @__PURE__ */ h(
     Ot.div,
     {
-      className: ye(B && "h-full", Q),
+      className: Fe(B && "h-full", Q),
       initial: f ? { opacity: 0, y: U ? 0 : sw } : !1,
       animate: { opacity: 1, y: 0 },
       transition: Zm(a, I, U),
       children: k
     }
   );
-}, D4 = ye(
+}, D4 = Fe(
   "pointer-events-none absolute inset-y-0 right-0 z-10 flex items-center gap-1 rounded-r-md pl-16 pr-2",
   "bg-gradient-to-l from-f1-background from-60% to-transparent",
   // Hidden but still in the DOM and still focusable, so Tab reaches them —
@@ -47537,7 +47552,7 @@ function M4({
           /* @__PURE__ */ $(
             "span",
             {
-              className: ye(
+              className: Fe(
                 "truncate",
                 k ? "text-f1-foreground-critical" : "text-f1-foreground-secondary"
               ),
@@ -47562,7 +47577,7 @@ function M4({
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "truncate",
               T.length === 1 && T[0].critical ? "text-f1-foreground-critical" : "text-f1-foreground-secondary"
             ),
@@ -47582,7 +47597,7 @@ function M4({
     ] }),
     S,
     K ? /* @__PURE__ */ h(ii, { icon: aC, size: "sm", color: "secondary" }) : null
-  ] }), pe = ye(
+  ] }), pe = Fe(
     "flex w-full items-center gap-3 rounded-md p-2 text-left",
     Z && // `ring-inset`: the row is drawn inside a box that CLIPS (the item-churn
     // animation closes a row's height, which needs `overflow: hidden` — see
@@ -47601,14 +47616,14 @@ function M4({
     Go,
     {
       href: Z,
-      className: ye(pe, "no-underline"),
+      className: Fe(pe, "no-underline"),
       ...Sy(Z) ? { target: "_blank", rel: "noreferrer" } : {},
       children: te
     }
   ) : /* @__PURE__ */ h("div", { className: pe, children: te });
   return O ? /* @__PURE__ */ $("div", { className: "group relative", children: [
     Ce,
-    /* @__PURE__ */ h("div", { className: ye(D4, j && S4), children: V?.map((de) => {
+    /* @__PURE__ */ h("div", { className: Fe(D4, j && S4), children: V?.map((de) => {
       const se = /* @__PURE__ */ h(
         pi,
         {
@@ -47626,8 +47641,8 @@ function M4({
           items: de.items,
           align: "end",
           open: j === de.label,
-          onOpenChange: (Fe) => ie(
-            (Y) => Fe ? de.label : Y === de.label ? null : Y
+          onOpenChange: (ye) => ie(
+            (Y) => ye ? de.label : Y === de.label ? null : Y
           ),
           children: se
         },
@@ -47665,7 +47680,7 @@ const P4 = (a) => a == null ? void 0 : typeof a == "function" ? { render: a } : 
   if (!/^[0-9a-f]{6}$/i.test(f)) return;
   const B = parseInt(f, 16);
   return `${B >> 16 & 255} ${B >> 8 & 255} ${B & 255}`;
-}, E4 = ye(
+}, E4 = Fe(
   "bg-[rgb(var(--list-icon-tint)_/_0.1)] text-[rgb(var(--list-icon-tint))]",
   "dark:bg-[rgb(var(--list-icon-tint)_/_0.24)]"
 ), T4 = (a) => {
@@ -47687,7 +47702,7 @@ const P4 = (a) => a == null ? void 0 : typeof a == "function" ? { render: a } : 
 }) => /* @__PURE__ */ h(
   "div",
   {
-    className: ye(
+    className: Fe(
       "flex aspect-square items-center justify-center",
       N4[f],
       I.className
@@ -47722,7 +47737,7 @@ const P4 = (a) => a == null ? void 0 : typeof a == "function" ? { render: a } : 
     ...I,
     status: "status" in a ? a.status : void 0
   };
-}, z4 = "-m-2", Od = (a) => ye(z4, "mt-0", !a.isLastSlot && "mb-0"), Y4 = "ml-1.5 mt-1 self-start", yw = (a) => ye(Y4, a.isLastSlot && !a.hasFooter && "mb-1.5"), Uw = "gap-2", H4 = (a, I, f) => {
+}, z4 = "-m-2", Od = (a) => Fe(z4, "mt-0", !a.isLastSlot && "mb-0"), Y4 = "ml-1.5 mt-1 self-start", yw = (a) => Fe(Y4, a.isLastSlot && !a.hasFooter && "mb-1.5"), Uw = "gap-2", H4 = (a, I, f) => {
   if (a === "module" && I.module)
     return { left: /* @__PURE__ */ h(Wh, { module: I.module, size: f }) };
   if (a === "alert" && I.alert)
@@ -47759,7 +47774,7 @@ const P4 = (a) => a == null ? void 0 : typeof a == "function" ? { render: a } : 
 }, Qw = (a, I) => I ? a ? "lg" : "md" : a ? "md" : "sm";
 function J4({ params: a, ctx: I }) {
   const { schema: f, items: B } = a, Q = B, [k, U] = Ne(!1), r = im(), S = f.maxVisibleItems, V = S != null && Q.length > S, G = V && !k ? Q.slice(0, S) : Q, Z = fw(G.length), K = Bw(f, G.length), O = (!!f.descriptionRequired || !!f.descriptionOptional) && !K, L = Qw(O, r), j = r ? "md" : "sm";
-  return /* @__PURE__ */ $("div", { className: ye(Od(I), "flex flex-col"), children: [
+  return /* @__PURE__ */ $("div", { className: Fe(Od(I), "flex flex-col"), children: [
     /* @__PURE__ */ h(hw, { children: G.map(({ href: ie, description: X, ...T }) => {
       const te = K ? R4(X) : "", pe = /* @__PURE__ */ h(
         M4,
@@ -47798,13 +47813,13 @@ function j4({
   ctx: I
 }) {
   const { events: f } = a, B = fw(f.length);
-  return /* @__PURE__ */ h("div", { className: ye(Od(I), "flex flex-col", Uw), children: /* @__PURE__ */ h(hw, { children: f.map((Q) => /* @__PURE__ */ h(mw, { animated: !B, children: /* @__PURE__ */ h(Ad, { ...Q }) }, Q.title)) }) });
+  return /* @__PURE__ */ h("div", { className: Fe(Od(I), "flex flex-col", Uw), children: /* @__PURE__ */ h(hw, { children: f.map((Q) => /* @__PURE__ */ h(mw, { animated: !B, children: /* @__PURE__ */ h(Ad, { ...Q }) }, Q.title)) }) });
 }
 const L4 = 3, Jd = "slot-skeleton-item", Iy = ["w-1/2", "w-2/3", "w-2/5", "w-3/5"], X4 = {
   sm: "size-6",
   md: "size-8",
   lg: "size-10"
-}, Km = (a) => Iy[a % Iy.length], XA = ({ className: a }) => /* @__PURE__ */ h("div", { className: "flex h-5 items-center", children: /* @__PURE__ */ h(Bt, { className: ye("h-3", a) }) }), q4 = ({
+}, Km = (a) => Iy[a % Iy.length], XA = ({ className: a }) => /* @__PURE__ */ h("div", { className: "flex h-5 items-center", children: /* @__PURE__ */ h(Bt, { className: Fe("h-3", a) }) }), q4 = ({
   params: a,
   ctx: I
 }) => {
@@ -47812,7 +47827,7 @@ const L4 = 3, Jd = "slot-skeleton-item", Iy = ["w-1/2", "w-2/3", "w-2/5", "w-3/5
     0,
     Math.min(I.expectedItemsCount, f.maxVisibleItems ?? 1 / 0)
   ), k = Bw(f, Q), U = (!!f.descriptionRequired || !!f.descriptionOptional) && !k, r = !!f.descriptionRequired && !k, S = I.expectedItemsCount > Q;
-  return /* @__PURE__ */ $("div", { className: ye(Od(I), "flex flex-col"), children: [
+  return /* @__PURE__ */ $("div", { className: Fe(Od(I), "flex flex-col"), children: [
     Array.from({ length: Q }, (V, G) => (
       // The row's own geometry (see `HomeListItem`): p-2, gap-3, centered.
       /* @__PURE__ */ $(
@@ -47824,7 +47839,7 @@ const L4 = 3, Jd = "slot-skeleton-item", Iy = ["w-1/2", "w-2/3", "w-2/5", "w-3/5
             f.left ? /* @__PURE__ */ h(
               Bt,
               {
-                className: ye(
+                className: Fe(
                   "shrink-0",
                   // The size the real glyph will be — same rule, same card.
                   X4[Qw(U, B)],
@@ -47844,7 +47859,7 @@ const L4 = 3, Jd = "slot-skeleton-item", Iy = ["w-1/2", "w-2/3", "w-2/5", "w-3/5
     )),
     S ? /* @__PURE__ */ h("div", { className: yw(I), children: /* @__PURE__ */ h(Bt, { className: "h-6 w-24 rounded-sm" }) }) : null
   ] });
-}, $4 = ({ ctx: a }) => /* @__PURE__ */ h("div", { className: ye(Od(a), "flex flex-col", Uw), children: Array.from({ length: a.expectedItemsCount }, (I, f) => /* @__PURE__ */ $(
+}, $4 = ({ ctx: a }) => /* @__PURE__ */ h("div", { className: Fe(Od(a), "flex flex-col", Uw), children: Array.from({ length: a.expectedItemsCount }, (I, f) => /* @__PURE__ */ $(
   "div",
   {
     "data-testid": Jd,
@@ -47870,7 +47885,7 @@ const L4 = 3, Jd = "slot-skeleton-item", Iy = ["w-1/2", "w-2/3", "w-2/5", "w-3/5
     ]
   },
   f
-)) }), tZ = (a, I) => /* @__PURE__ */ h("div", { className: "flex flex-col gap-2", children: Array.from({ length: I.expectedItemsCount }, (f, B) => /* @__PURE__ */ h("div", { "data-testid": Jd, children: /* @__PURE__ */ h(Bt, { className: ye("h-6", Km(B)) }) }, B)) }), Cy = {
+)) }), tZ = (a, I) => /* @__PURE__ */ h("div", { className: "flex flex-col gap-2", children: Array.from({ length: I.expectedItemsCount }, (f, B) => /* @__PURE__ */ h("div", { "data-testid": Jd, children: /* @__PURE__ */ h(Bt, { className: Fe("h-6", Km(B)) }) }, B)) }), Cy = {
   list: {
     render: (a, I) => /* @__PURE__ */ h(J4, { params: a, ctx: I }),
     skeleton: (a, I) => (
@@ -47963,10 +47978,10 @@ function Wm({
     const Be = setTimeout(() => Ce(!1), ih);
     return () => clearTimeout(Be);
   }, [L, te]);
-  const [se, Fe] = Ne(void 0), Y = r ? se ?? r.value ?? r.options[0]?.value : void 0, ee = r?.options.find(
+  const [se, ye] = Ne(void 0), Y = r ? se ?? r.value ?? r.options[0]?.value : void 0, ee = r?.options.find(
     (Be) => Be.value === Y
   ), ge = (Be) => {
-    Fe(Be), r?.onChange?.(Be);
+    ye(Be), r?.onChange?.(Be);
   }, me = U?.length || r ? /* @__PURE__ */ $(oi, { children: [
     U?.map((Be, ke) => /* @__PURE__ */ h(pi, { variant: "ghost", size: "sm", ...Be }, ke)),
     r ? /* @__PURE__ */ h(
@@ -48051,7 +48066,7 @@ function Wm({
                   /* @__PURE__ */ h(
                     "div",
                     {
-                      className: ye(
+                      className: Fe(
                         "[backface-visibility:hidden]",
                         L && "pointer-events-none"
                       ),
@@ -48063,7 +48078,7 @@ function Wm({
                     "div",
                     {
                       "aria-hidden": !L,
-                      className: ye(
+                      className: Fe(
                         "absolute inset-0 flex flex-col gap-4",
                         "rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-4",
                         "[backface-visibility:hidden] [transform:rotateY(180deg)]",
@@ -48138,7 +48153,7 @@ const rZ = "(min-width: 2200px) and (min-height: 900px)", ww = () => {
      */
     width: "xl",
     /** The body's own classes: one column on a narrow screen, two otherwise. */
-    bodyClassName: ye(
+    bodyClassName: Fe(
       "flex h-full min-h-96 gap-4",
       I ? "flex-col" : "flex-row"
     ),
@@ -48160,7 +48175,7 @@ function vw({
     /* @__PURE__ */ h(
       "div",
       {
-        className: ye("w-full", sZ),
+        className: Fe("w-full", sZ),
         style: { maxWidth: `${B}px` },
         children: I
       },
@@ -48207,7 +48222,7 @@ function AZ({
         }
       },
       children: /* @__PURE__ */ $("div", { className: O, children: [
-        /* @__PURE__ */ h("div", { className: ye("overflow-y-auto", L), children: /* @__PURE__ */ h(
+        /* @__PURE__ */ h("div", { className: Fe("overflow-y-auto", L), children: /* @__PURE__ */ h(
           o1,
           {
             formRef: j,
@@ -48292,7 +48307,7 @@ const lZ = (a) => {
       ref: Q,
       style: S,
       "data-widget-id": a,
-      className: ye(
+      className: Fe(
         !I && "cursor-grab active:cursor-grabbing",
         // The overlay clone is the visible card while this one is dragged;
         // this stays in the flow (invisible, not display-none) so the other
@@ -48391,7 +48406,7 @@ const wZ = ({ transform: a }) => ({
   return /* @__PURE__ */ h(
     Ot.div,
     {
-      className: ye(f && "h-full"),
+      className: Fe(f && "h-full"),
       initial: a?.arriving ? { opacity: 0, y: Q ? 0 : sw } : !1,
       animate: { opacity: k ? 0 : 1, y: 0 },
       transition: r,
@@ -48502,7 +48517,7 @@ function ly({
   removeLabel: Ce,
   editParamsLabel: de,
   ctx: se = {},
-  className: Fe,
+  className: ye,
   style: Y
 }) {
   const ee = xt(), ge = !U, me = (it) => K !== void 0 && it.id !== K, we = ge && Z != null && a.filter((it) => !it.locked).length > 1, [ve, Qe] = Ne(null), De = cD(
@@ -48660,7 +48675,7 @@ function ly({
     "div",
     {
       ref: tt.listRef,
-      className: ye("flex flex-col", I === "main" ? "gap-6" : "gap-4"),
+      className: Fe("flex flex-col", I === "main" ? "gap-6" : "gap-4"),
       style: tt.window ? {
         // THE HEIGHT OF THE COLUMN THAT WOULD BE, so the scrollbar
         // describes all the widgets rather than the three that are
@@ -48680,7 +48695,7 @@ function ly({
     "div",
     {
       ref: mt,
-      className: ye(
+      className: Fe(
         // `relative` so this column is what a widget's `offsetTop` is measured
         // from: the stow maps a widget onto its glyph by that offset, and an
         // unpositioned column would hand the job to whatever ancestor happened to
@@ -48689,7 +48704,7 @@ function ly({
         // The main column's freeform content wants more air than the rail's
         // stack of cards.
         I === "main" ? "gap-6" : "gap-4",
-        Fe
+        ye
       ),
       style: Y,
       children: [
@@ -48825,7 +48840,7 @@ const GZ = ({
   "div",
   {
     "aria-hidden": !0,
-    className: ye(
+    className: Fe(
       "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
       EZ[a],
       I
@@ -48940,7 +48955,7 @@ const GZ = ({
   return S ? /* @__PURE__ */ h(Ma, { label: S.label, instant: !0, children: /* @__PURE__ */ $(
     Ot.div,
     {
-      className: ye(
+      className: Fe(
         // `pointer-events-auto` against the strip's `none`: a pill is wider
         // than the rail's column, and the box holding it must not become a
         // 100px dead margin down the side of the feed.
@@ -48962,7 +48977,7 @@ const GZ = ({
         // the pointer that was aiming at it. Taken back out of the flow at each
         // edge the band overhangs, the pill occupies exactly the glyph's slot
         // whether it is carrying a reading or not, and nothing below it moves.
-        G ? ye(
+        G ? Fe(
           "-mr-1 -my-1 flex flex-row items-center gap-1 rounded-lg p-1",
           Z.pill
         ) : "rounded-lg"
@@ -48979,7 +48994,7 @@ const GZ = ({
             type: "button",
             variant: "ghost",
             size: "lg",
-            className: ye(
+            className: Fe(
               // `[&_.main]:px-0` — the button is 40px of icon, not a label with
               // room around it, and an `lg` button's own padding would squeeze a
               // 24px glyph out of a 40px box. The tile centres it instead.
@@ -49051,7 +49066,7 @@ const GZ = ({
     bleed: Ce = 24,
     stackedPinsAfter: de = 2,
     ctx: se = {},
-    className: Fe,
+    className: ye,
     oneSwitchTooltip: Y,
     oneSwitchAutoOpen: ee,
     hideOneSwitch: ge = !1
@@ -49197,11 +49212,11 @@ const GZ = ({
         ref: (Me) => {
           Pe.current = Me, typeof me == "function" ? me(Me) : me && (me.current = Me);
         },
-        className: ye(
+        className: Fe(
           // `isolate` so the surface layer's -z-10 stays INSIDE this layout
           // instead of escaping behind an ancestor's background.
           "relative isolate grid grid-rows-[auto_minmax(0,1fr)] items-stretch gap-4 text-f1-foreground",
-          Fe
+          ye
         ),
         style: {
           // The rail's column, as a motion value the grid template reads: the
@@ -49294,7 +49309,7 @@ const GZ = ({
             "div",
             {
               ref: Et.ref,
-              className: ye(
+              className: Fe(
                 // `isolate` — A STACKING CONTEXT OF ITS OWN, and the reason the
                 // floating panel is not buried by the feed. Without it the column is
                 // `relative` at `z-index: auto`, which is no context at all: every
@@ -49378,7 +49393,7 @@ const GZ = ({
               Ot.aside,
               {
                 ref: Qi.ref,
-                className: ye(
+                className: Fe(
                   // `items-end` so a glyph is its own 40px whatever the column is
                   // doing: the strip lives in the rail's column, and that column
                   // spends the collapse on its way DOWN from the full rail width —
@@ -49471,7 +49486,7 @@ const GZ = ({
             {
               ref: Xt.ref,
               hidden: ni && Pt.panelHidden,
-              className: ye(
+              className: Fe(
                 "min-h-0 overflow-y-auto overflow-x-hidden",
                 ah,
                 ni && "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150",
@@ -49578,7 +49593,7 @@ function iW({
 }) {
   const G = xt(), { position: Z, width: K, bodyClassName: O, asideClassName: L } = ww(), [j, ie] = Ne(""), [X, T] = Ne(null), [te, pe] = Ne("pick"), [Ce, de] = Ne(!1), se = (It) => {
     de(!0), pe(It);
-  }, [Fe, Y] = Ne(null), { formRef: ee, getValues: ge, trigger: me } = a1(), we = j.trim().toLowerCase(), ve = U ?? (k ? uy[k] : uy.right), Qe = kt(() => {
+  }, [ye, Y] = Ne(null), { formRef: ee, getValues: ge, trigger: me } = a1(), we = j.trim().toLowerCase(), ve = U ?? (k ? uy[k] : uy.right), Qe = kt(() => {
     const It = k ? f.filter((Le) => !Le.areas || Le.areas.includes(k)) : f, rt = we ? It.filter((Le) => Le.title.toLowerCase().includes(we)) : It, Yt = rt.filter((Le) => Le.recommended), Gt = rt.filter((Le) => !Le.recommended), nt = new Set((Q ?? []).map((Le) => Le.id)), Ke = Gt.filter((Le) => !Le.group || !nt.has(Le.group));
     return [
       ...Yt.length ? [
@@ -49598,7 +49613,7 @@ function iW({
       // for them would claim they do.
       ...Ke.length ? [{ id: "ungrouped", items: Ke }] : []
     ];
-  }, [f, Q, we, k, G]), De = Qe.flatMap((It) => It.items), Be = De.find((It) => It.id === X) ?? De[0] ?? null, ke = Be ? XZ(Be) : void 0, Pe = ke !== void 0 && !(Be?.addWithDefaults && W4(ke, fy(Be))), Ge = te === "configure" && Pe, $e = Be && Fe?.id === Be.id ? Fe.params : Be ? fy(Be) : {}, mt = Ge && Be && S ? S(Be, $e) : Be?.preview;
+  }, [f, Q, we, k, G]), De = Qe.flatMap((It) => It.items), Be = De.find((It) => It.id === X) ?? De[0] ?? null, ke = Be ? XZ(Be) : void 0, Pe = ke !== void 0 && !(Be?.addWithDefaults && W4(ke, fy(Be))), Ge = te === "configure" && Pe, $e = Be && ye?.id === Be.id ? ye.params : Be ? fy(Be) : {}, mt = Ge && Be && S ? S(Be, $e) : Be?.preview;
   return Xe(() => {
     a && (pe("pick"), de(!1), Y(null));
   }, [a]), Xe(() => {
@@ -49635,10 +49650,10 @@ function iW({
         /* @__PURE__ */ h(
           "div",
           {
-            className: ye(
+            className: Fe(
               "flex min-h-0 flex-col gap-2",
               L,
-              Ce && ye(
+              Ce && Fe(
                 "duration-300 ease-out animate-in fade-in motion-reduce:animate-none",
                 Ge ? "slide-in-from-right-4" : "slide-in-from-left-4"
               )
