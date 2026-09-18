@@ -37,8 +37,7 @@ function toSafeDatePickerRange(
       : (value.value?.from ?? undefined)
   )
 
-  // Normalize { value: undefined } to undefined so isSameDatePickerValue
-  // correctly detects "no change" on subsequent blur events after a clear.
+  // Normalize cleared values so blur does not emit another change.
   if (!range) {
     return undefined
   }
