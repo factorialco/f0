@@ -14323,7 +14323,7 @@ declare interface SidebarProps {
  * screen there is no state in which the app has no navigation, so nothing has
  * to put an "open main menu" button back into the content to compensate.
  */
-export declare function SidebarRail({ company, tabs, activeTab, onTabChange, persistKey, onActiveTabPress, actions, user, }: SidebarRailProps): JSX_2.Element;
+export declare function SidebarRail({ company, tabs, activeTab, onTabChange, persistKey, onActiveTabPress, flyouts, actions, user, }: SidebarRailProps): JSX_2.Element;
 
 /** A shortcut pinned to the foot of the rail — marketplace, security, activity. */
 export declare type SidebarRailAction = {
@@ -14348,6 +14348,12 @@ export declare type SidebarRailProps = {
     persistKey?: string;
     /** Pressing the module you are already in. Hosts use it to fold the panel. */
     onActiveTabPress?: () => void;
+    /**
+     * Second levels shown beside the rail instead of in the panel, keyed by tab
+     * id. A tab listed here is a menu rather than a destination: hovering or
+     * clicking it opens its flyout and leaves the active module alone.
+     */
+    flyouts?: Record<string, ReactNode>;
     actions?: SidebarRailAction[];
     user?: Omit<SidebarUserMenuProps, "compact">;
 };
@@ -16788,11 +16794,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -16800,9 +16804,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
