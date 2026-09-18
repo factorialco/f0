@@ -106,9 +106,19 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
         tabIndex={isFocusable ? 0 : -1}
         onClick={
           flyout
-            ? () => {
-                // Radix's trigger toggles `open`; all this has to do is stop a
-                // pending hover timer from undoing it a frame later.
+            ? (event) => {
+                // The flyout is hover-only: a click on a menu you are already
+                // pointing at can only close what you came for. Radix's
+                // trigger toggles on click, and it skips its own handler once
+                // this one has defaulted the event.
+                //
+                // `detail` is 0 for the click Enter and Space synthesise, and
+                // that one has to go through — hover is not a thing you can do
+                // from the keyboard, so it is the only way in.
+                if (event.detail > 0) {
+                  event.preventDefault()
+                  return
+                }
                 clearTimer()
                 openedByPointer.current = false
               }
@@ -182,12 +192,10 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
             if (event.pointerType === "touch") return
             schedule(false, FLYOUT_CLOSE_DELAY)
           }}
-          // A dark, translucent sheet — a menu that floats over the page is
-          // not part of the page, and the surface is what says so. `dark`
-          // rather than an inverse background: it flips every token inside, so
-          // the rows that come out of it are the ones the navigation already
-          // ships rather than a second, hand-tinted set of them.
-          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl backdrop-blur-[4px]"
+          // A translucent sheet with a shadow under it: a menu that floats
+          // over the page is not part of the page, and the surface is what
+          // says so.
+          className="w-[264px] flex max-h-[min(36rem,var(--radix-popover-content-available-height))] flex-col overflow-hidden rounded-xl border-solid border-f1-border-secondary bg-f1-background/80 p-2 shadow-xl backdrop-blur-[6px] duration-[180ms] ease-out"
         >
           {flyout}
         </PopoverContent>

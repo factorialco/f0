@@ -50,6 +50,12 @@ export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
   aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
   banner?: React.ReactNode
+  /**
+   * A strip across the top of the content column, above the page's card and
+   * outside it: search, or anything else belonging to the window rather than
+   * to the page under it. Omit it and the card starts where it always did.
+   */
+  topBar?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
 }
@@ -57,6 +63,7 @@ export interface ApplicationFrameProps {
 function _ApplicationFrame({
   children,
   sidebar,
+  topBar,
   banner,
   ai,
   aiPromotion,
@@ -67,6 +74,7 @@ function _ApplicationFrame({
         ai={ai}
         aiPromotion={aiPromotion}
         sidebar={sidebar}
+        topBar={topBar}
         banner={banner}
       >
         {children}
@@ -81,6 +89,7 @@ function _ApplicationFrame({
 function ApplicationFrameWithProvider({
   children,
   sidebar,
+  topBar,
   banner,
   ai,
   aiPromotion,
@@ -102,6 +111,7 @@ function ApplicationFrameWithProvider({
         ai={ai}
         aiPromotion={aiPromotion}
         sidebar={sidebar}
+        topBar={topBar}
         banner={banner}
       >
         {children}
@@ -185,11 +195,18 @@ function useAutoCloseSidebar(
  *   z-30  Sidebar (unlocked/floating)
  *   z-0   Chat (normal)
  */
+/**
+ * The strip above the page: 8 clear of the window, the search box's own 32,
+ * and 2 down to the card's edge.
+ */
+const TOP_BAR_HEIGHT = 42
+
 function ApplicationFrameContent({
   ai,
   aiPromotion,
   children,
   sidebar,
+  topBar,
   banner,
 }: ApplicationFrameProps) {
   const {
@@ -199,6 +216,7 @@ function ApplicationFrameContent({
     setForceFloat,
     railWidth,
     panelWidth,
+    setTopBarHeight,
     isLayoutJumping,
     hasRail,
   } = useSidebar()
@@ -386,6 +404,10 @@ function ApplicationFrameContent({
   // and it would cross `splitMinFrame` early on a narrow window.
   const sidebarSlotWidth =
     railWidth + (sidebarState === "locked" ? panelWidth : 0)
+
+  useEffect(() => {
+    setTopBarHeight(topBar ? TOP_BAR_HEIGHT : 0)
+  }, [topBar, setTopBarHeight])
   useEffect(() => {
     const row = mainAreaRef.current?.parentElement
     if (!row || !setFrameWidth) return
@@ -611,11 +633,19 @@ function ApplicationFrameContent({
               // navigation, the one edge it exists to show. This element does
               // not scroll, so it can cast.
               className={cn(
-                "relative z-20 min-w-0 flex-1",
-                "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:z-0 before:shadow before:content-[''] xs:before:inset-y-1 xs:before:rounded-xl",
+                "relative z-20 flex min-w-0 flex-1 flex-col",
+                // The shadow traces the CARD, so with a strip above it starts
+                // below the strip rather than behind it.
+                "after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:z-0 after:shadow after:content-[''] xs:after:bottom-1 xs:after:rounded-xl",
+                topBar
+                  ? // The strip's own height: 8 above the search box, its 32,
+                    // and 2 below — so the card's edge starts where the strip
+                    // ends rather than under it.
+                    "after:top-[42px]"
+                  : "after:top-0 xs:after:top-1",
                 !isAiChatOpen && !isAiPromotionChatOpen
-                  ? "before:right-0 xs:before:right-1"
-                  : "before:right-0"
+                  ? "after:right-0 xs:after:right-1"
+                  : "after:right-0"
               )}
               // Both paddings animate together, so swapping the visible side
               // (split mode) slides the main content from one edge to the
@@ -634,6 +664,23 @@ function ApplicationFrameContent({
                 paddingLeft: contentTransition,
               }}
             >
+              {topBar ? (
+                // Outside the card and above it, on the frame's own ground —
+                // it belongs to the window, not to the page under it.
+                //
+                // Pulled back over the room the panel takes, so it starts at
+                // the rail's edge and stays there: a second level opening is
+                // not a reason for the window's own search to move. The panel
+                // gets out of its way by starting below it (`topBarHeight`),
+                // which is the whole point of the offset.
+                <motion.div
+                  className="relative z-10 flex shrink-0 items-center pb-0.5 pr-4 pt-2"
+                  animate={{ marginLeft: railWidth - sidebarSlotWidth }}
+                  transition={{ marginLeft: contentTransition }}
+                >
+                  {topBar}
+                </motion.div>
+              ) : null}
               {/* Main content */}
               {/* Deliberately NOT layout-animated. It carried a `layoutId`
                   with no counterpart anywhere in the tree — shared-element

@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useRef } from "react"
 
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { Circle as CircleIcon, Search as SearchIcon } from "@/icons/app"
+import { Circle as CircleIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { cn, focusRing } from "@/lib/utils"
@@ -43,14 +43,6 @@ export type SidebarRailProps = {
    * clicking it opens its flyout and leaves the active module alone.
    */
   flyouts?: Record<string, ReactNode>
-  /**
-   * Search, under the workspace mark and above the modules.
-   *
-   * It sits there rather than in a panel because it is not a module's search
-   * — it is the app's, and the app is what the rail stands for. A panel's own
-   * search filters that panel; this one finds anything.
-   */
-  search?: Omit<SidebarRailAction, "id" | "icon"> & { icon?: IconType }
   actions?: SidebarRailAction[]
   user?: Omit<SidebarUserMenuProps, "compact">
 }
@@ -102,7 +94,6 @@ export function SidebarRail({
   persistKey,
   onActiveTabPress,
   flyouts,
-  search,
   actions = [],
   user,
 }: SidebarRailProps) {
@@ -163,21 +154,16 @@ export function SidebarRail({
         // beside it.
         // The rail runs edge to edge, so it owns the notch and the home
         // indicator: without this the account avatar sits under the latter.
-        "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.5rem)]"
+        "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.75rem)]"
       )}
     >
-      {/* 60px, the same height as the panel's title bar beside it, so the logo
-          and the section title sit on one line. Full width: the selector takes
+      {/* 48px: 12 less than the panel's title bar beside it. The mark is a
+          40px chip in a row of its own, and the extra 12 only pushed the whole
+          rail down from the top of the window. Full width: the selector takes
           the whole row as its target. */}
-      <div className="flex h-[60px] w-full shrink-0 items-stretch justify-center">
+      <div className="flex h-12 w-full shrink-0 items-stretch justify-center">
         <CompanySelector {...company} variant="compact" />
       </div>
-
-      {search && (
-        <div className="mt-2 flex w-full shrink-0 flex-col">
-          <RailAction action={{ id: "search", icon: SearchIcon, ...search }} />
-        </div>
-      )}
 
       <div
         role="group"

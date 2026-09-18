@@ -73,6 +73,7 @@ export function CompanySelector({
       <CompanyAvatar
         company={selectedCompany}
         withNotification={withNotification}
+        size="md"
       />
     ) : (
       <div className="p-1.5" style={{ maxWidth: "168px" }}>
@@ -97,6 +98,7 @@ export function CompanySelector({
           <CompanyAvatar
             company={selectedCompany}
             withNotification={withNotification}
+            size="md"
           />
         ) : (
           <SelectedCompanyLabel

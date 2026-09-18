@@ -77,6 +77,7 @@ function _Sidebar({
     isSmallScreen,
     setRailWidth,
     setPanelWidth,
+    topBarHeight,
     isLayoutJumping,
   } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
@@ -213,22 +214,11 @@ function _Sidebar({
           // like the rail, and the content's own card edge is what separates
           // it from the content. A border on THAT side would land flush
           // against the card's edge and read as a doubled line.
-          "h-full",
-          // The hairline between the two levels of the navigation. It is the
-          // panel's, not the rail's: it exists to separate the pair, so it
-          // leaves when the panel leaves.
           //
-          // Drawn as a masked pseudo-element rather than a border so it can
-          // end before the panel does: nothing for the first 6px, fully drawn
-          // by 24, and the same in reverse at the foot. A hairline that runs the
-          // full height reads as a frame around the rail; one that dissolves
-          // into the ground reads as a seam between two things standing on it,
-          // which is what these are. It is inside the panel's own box, so the
-          // 1px does not push it off the room the frame reserved.
-          rail && [
-            "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-f1-border-secondary before:content-['']",
-            "before:[mask-image:linear-gradient(to_bottom,transparent_0,transparent_6px,#000_24px,#000_calc(100%-24px),transparent_calc(100%-6px),transparent_100%)]",
-          ]
+          // Height from its own insets rather than `h-full`: under a top bar
+          // the panel starts below the strip, and a full-height box would
+          // hang that far off the bottom of the window.
+          "h-auto"
         )
       : cn(
           "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
@@ -239,7 +229,7 @@ function _Sidebar({
   )
   const seam = isSmallScreen ? 0 : 8
   const panelAnimate = {
-    top: !floats ? 0 : isSmallScreen ? 0 : "8px",
+    top: !floats ? topBarHeight : isSmallScreen ? 0 : "8px",
     borderRadius: !floats ? "0" : isSmallScreen ? "0" : "12px",
     left: !floats ? railWidth : railWidth + seam,
     // Without a rail the panel leaves by sliding out past the left edge.
@@ -276,11 +266,35 @@ function _Sidebar({
       className="absolute bottom-0 left-0 top-0 z-10 flex h-full"
     >
       {/* Above the panel in the stack, so a panel on its way out slides behind
-          the rail rather than across it. The rail itself never moves. Its
-          surface and its seam belong to `SidebarRail`, not to this wrapper:
-          a border here would sit OUTSIDE the rail's 48px and push the panel
-          a pixel off the width the frame has reserved for the pair. */}
-      <div className="relative z-10 h-full">{rail}</div>
+          the rail rather than across it. The rail itself never moves.
+          
+          The seam between the two levels is drawn HERE, on the rail's right
+          edge, because the rail is what is always on screen: a line owned by
+          the panel is a line that has to be re-derived every time the panel
+          arrives. It still only exists while there IS a second level — a
+          hairline hanging off a rail with nothing beside it separates nothing
+          — so it fades with the panel rather than switching off under it.
+
+          A masked pseudo-element rather than a border, for two reasons: a
+          border would sit outside the rail's reserved width and push the
+          panel a pixel off the room the frame gave the pair, and the mask is
+          what lets the line end before the rail does — nothing for the first
+          6px, fully drawn by 24, and the same in reverse at the foot. A
+          hairline running the full height reads as a frame around the rail;
+          one that dissolves into the ground reads as a seam between two
+          things standing on it, which is what these are. */}
+      <div
+        className={cn(
+          "relative z-10 h-full",
+          "after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-f1-border-secondary after:transition-opacity after:content-['']",
+          "after:[mask-image:linear-gradient(to_bottom,transparent_0,transparent_6px,#000_24px,#000_calc(100%-24px),transparent_calc(100%-6px),transparent_100%)]",
+          hasPanel && sidebarState !== "hidden"
+            ? "after:opacity-100"
+            : "after:opacity-0"
+        )}
+      >
+        {rail}
+      </div>
       {hasPanel && (
         <motion.div
           initial={false}

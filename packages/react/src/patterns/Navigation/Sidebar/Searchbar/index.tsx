@@ -18,11 +18,15 @@ export function SearchBar({
   ...props
 }: SearchBarProps) {
   return (
-    <div className="px-3">
+    // No gutter and no gap of its own: in the sidebar the panel gives it both,
+    // and anywhere else — a strip across the top of the content, say — they
+    // were an 11px bottom margin nobody asked for, holding the box above the
+    // centre of whatever it sat in.
+    <div>
       <button
         onClick={onClick}
         className={cn(
-          "mb-[calc(0.75rem-1px)] flex w-full cursor-pointer items-center justify-between rounded bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary p-1.5 text-f1-foreground-secondary ring-1 ring-inset ring-f1-border-secondary transition-all hover:ring-f1-border-hover",
+          "flex w-full cursor-pointer items-center justify-between rounded-3xl bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary p-1.5 pr-2.5 text-f1-foreground-secondary ring-1 ring-inset ring-f1-border-secondary transition-all hover:ring-f1-border-hover",
           focusRing()
         )}
         type="button"

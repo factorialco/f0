@@ -16,6 +16,9 @@ import { expect, waitFor, within } from "storybook/test"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Button } from "@/components/F0Button"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import One from "@/icons/ai/One"
 import {
   Bell,
@@ -930,6 +933,389 @@ const FilesPage = () => (
   </Page>
 )
 
+/* -------------------------------------------------------------------------- *
+ * Directory — the monolith's Organization screen, on dummy data              *
+ *                                                                            *
+ * The real one is `EmployeeCollectionPage`: a resource header with the        *
+ * organization's tabs over a full-height employees table, with the list's     *
+ * own search, filters and column chrome. Everything under it here is fake —   *
+ * no query, no permissions, no policies — but the shape is the shape.         *
+ * -------------------------------------------------------------------------- */
+
+type DirectoryPerson = {
+  id: string
+  firstName: string
+  lastName: string
+  jobTitle: string
+  team: string
+  workplace: string
+  hiredAt: Date
+  access: "Active" | "Invited" | "Not invited"
+  contract: "Ongoing" | "Upcoming" | "Ended"
+}
+
+const DIRECTORY_TEAMS = [
+  "Design",
+  "Engineering",
+  "Finance",
+  "People Ops",
+  "Sales",
+  "Talent",
+]
+
+const DIRECTORY_WORKPLACES = ["Barcelona", "Lisbon", "Remote", "São Paulo"]
+
+const DIRECTORY_ACCESS_STATES = ["Active", "Invited", "Not invited"]
+
+const DIRECTORY_PEOPLE: DirectoryPerson[] = [
+  {
+    id: "1",
+    firstName: "Jordan",
+    lastName: "Avery",
+    jobTitle: "Product Design Lead",
+    team: "Design",
+    workplace: "Barcelona",
+    hiredAt: new Date("2021-03-01"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "2",
+    firstName: "Amaia",
+    lastName: "Bengoetxea",
+    jobTitle: "Staff Engineer",
+    team: "Engineering",
+    workplace: "Barcelona",
+    hiredAt: new Date("2019-09-16"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "3",
+    firstName: "Tomás",
+    lastName: "Ferreira",
+    jobTitle: "Backend Engineer",
+    team: "Engineering",
+    workplace: "Lisbon",
+    hiredAt: new Date("2022-01-10"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "4",
+    firstName: "Nadia",
+    lastName: "Rahman",
+    jobTitle: "People Partner",
+    team: "People Ops",
+    workplace: "Remote",
+    hiredAt: new Date("2020-06-02"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "5",
+    firstName: "Luca",
+    lastName: "Moretti",
+    jobTitle: "Financial Controller",
+    team: "Finance",
+    workplace: "Barcelona",
+    hiredAt: new Date("2023-02-13"),
+    access: "Invited",
+    contract: "Ongoing",
+  },
+  {
+    id: "6",
+    firstName: "Priya",
+    lastName: "Nair",
+    jobTitle: "Design Systems Engineer",
+    team: "Design",
+    workplace: "Remote",
+    hiredAt: new Date("2023-08-21"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "7",
+    firstName: "Beatriz",
+    lastName: "Salgado",
+    jobTitle: "Account Executive",
+    team: "Sales",
+    workplace: "São Paulo",
+    hiredAt: new Date("2024-04-08"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "8",
+    firstName: "Oskar",
+    lastName: "Lindqvist",
+    jobTitle: "Technical Recruiter",
+    team: "Talent",
+    workplace: "Remote",
+    hiredAt: new Date("2024-09-02"),
+    access: "Invited",
+    contract: "Ongoing",
+  },
+  {
+    id: "9",
+    firstName: "Chiara",
+    lastName: "Rossi",
+    jobTitle: "Payroll Specialist",
+    team: "People Ops",
+    workplace: "Lisbon",
+    hiredAt: new Date("2022-11-07"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "10",
+    firstName: "Idris",
+    lastName: "Okonkwo",
+    jobTitle: "Data Engineer",
+    team: "Engineering",
+    workplace: "Remote",
+    hiredAt: new Date("2025-01-13"),
+    access: "Not invited",
+    contract: "Upcoming",
+  },
+  {
+    id: "11",
+    firstName: "Marta",
+    lastName: "Quintana",
+    jobTitle: "Head of Finance",
+    team: "Finance",
+    workplace: "Barcelona",
+    hiredAt: new Date("2018-05-21"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "12",
+    firstName: "Sven",
+    lastName: "Aaltonen",
+    jobTitle: "Sales Manager",
+    team: "Sales",
+    workplace: "Remote",
+    hiredAt: new Date("2021-10-04"),
+    access: "Active",
+    contract: "Ended",
+  },
+  {
+    id: "13",
+    firstName: "Leila",
+    lastName: "Haddad",
+    jobTitle: "Brand Designer",
+    team: "Design",
+    workplace: "Lisbon",
+    hiredAt: new Date("2024-02-26"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "14",
+    firstName: "Gabriel",
+    lastName: "Costa",
+    jobTitle: "Talent Partner",
+    team: "Talent",
+    workplace: "São Paulo",
+    hiredAt: new Date("2023-05-15"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+]
+
+const directoryFilters = {
+  team: {
+    type: "in",
+    label: "Team",
+    options: {
+      options: DIRECTORY_TEAMS.map((value) => ({ value, label: value })),
+    },
+  },
+  workplace: {
+    type: "in",
+    label: "Workplace",
+    options: {
+      options: DIRECTORY_WORKPLACES.map((value) => ({ value, label: value })),
+    },
+  },
+  access: {
+    type: "in",
+    label: "Status",
+    options: {
+      options: DIRECTORY_ACCESS_STATES.map((value) => ({
+        value,
+        label: value,
+      })),
+    },
+  },
+} as const
+
+const directorySortings = {
+  firstName: { label: "First name" },
+  lastName: { label: "Last name" },
+  hiredAt: { label: "Hired" },
+} as const
+
+/** The contract column's traffic light, the way the real list colours it. */
+const CONTRACT_STATUS = {
+  Ongoing: "positive",
+  Upcoming: "info",
+  Ended: "neutral",
+} as const
+
+/**
+ * The organization's tabs. Only Employees has a screen here: the rest are the
+ * real header's, kept so the page is the page rather than a bare table.
+ */
+const DirectoryTabs = () => (
+  <Tabs
+    activeTabId="employees"
+    tabs={[
+      { id: "employees", label: "Employees", index: true },
+      { id: "activity", label: "Activity" },
+      { id: "teams", label: "Teams" },
+      { id: "workplaces", label: "Workplaces" },
+      { id: "org-chart", label: "Org chart" },
+      { id: "job-catalog", label: "Job catalog" },
+    ]}
+  />
+)
+
+const DirectoryCollection = () => {
+  const source = useDataCollectionSource({
+    filters: directoryFilters,
+    sortings: directorySortings,
+    search: { enabled: true, sync: true },
+    primaryActions: () => ({ label: "Add employee", icon: Icons.Add }),
+    itemUrl: (person: DirectoryPerson) => `/directory/${person.id}`,
+    selectable: (person: DirectoryPerson) => person.id,
+    dataAdapter: {
+      fetchData: ({ filters, search }) => ({
+        records: DIRECTORY_PEOPLE.filter((person) => {
+          const q = typeof search === "string" ? search.toLowerCase() : ""
+          const matchesSearch =
+            !q ||
+            `${person.firstName} ${person.lastName} ${person.jobTitle}`
+              .toLowerCase()
+              .includes(q)
+          const inList = (values: unknown, value: string) =>
+            !Array.isArray(values) ||
+            values.length === 0 ||
+            values.includes(value)
+          return (
+            matchesSearch &&
+            inList(filters.team, person.team) &&
+            inList(filters.workplace, person.workplace) &&
+            inList(filters.access, person.access)
+          )
+        }),
+      }),
+    },
+  })
+
+  return (
+    <OneDataCollection
+      source={source}
+      fullHeight
+      visualizations={[
+        {
+          type: "table",
+          options: {
+            frozenColumns: 1,
+            allowColumnHiding: true,
+            allowColumnReordering: true,
+            columns: [
+              {
+                id: "employee",
+                label: "Employee",
+                width: 240,
+                sorting: "firstName",
+                render: (person) => ({
+                  type: "person",
+                  value: {
+                    firstName: person.firstName,
+                    lastName: person.lastName,
+                  },
+                }),
+              },
+              {
+                id: "job",
+                label: "Job",
+                render: (person) => person.jobTitle,
+              },
+              {
+                id: "team",
+                label: "Team",
+                render: (person) => ({
+                  type: "team",
+                  value: { name: person.team },
+                }),
+              },
+              {
+                id: "workplace",
+                label: "Workplace",
+                render: (person) => person.workplace,
+              },
+              {
+                id: "hired",
+                label: "Hired",
+                sorting: "hiredAt",
+                render: (person) => ({
+                  type: "date",
+                  value: { date: person.hiredAt },
+                }),
+              },
+              {
+                id: "access",
+                label: "Access",
+                render: (person) => ({
+                  type: "tag",
+                  value: { label: person.access },
+                }),
+              },
+              {
+                id: "contract",
+                label: "Contract status",
+                render: (person) => ({
+                  type: "status",
+                  value: {
+                    status: CONTRACT_STATUS[person.contract],
+                    label: person.contract,
+                  },
+                }),
+              },
+            ],
+          },
+        },
+      ]}
+    />
+  )
+}
+
+const DirectoryPage = () => (
+  <Page
+    header={
+      <PageHeader
+        module={{ id: "employees", name: "Directory", href: "/directory" }}
+      />
+    }
+  >
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* The tab row's hairline is drawn edge to edge inside the nav, so the
+          gutter goes on the list rather than around it — padding out here
+          would pull the line short of the page on both sides. 16px, the
+          header's own `px-page`, so the first tab starts under the title. */}
+      <div className="pt-1 [&_ul]:px-4">
+        <DirectoryTabs />
+      </div>
+      <div className="mt-5 flex min-h-0 flex-1 flex-col">
+        <DirectoryCollection />
+      </div>
+    </div>
+  </Page>
+)
+
 /**
  * A placeholder, not a calendar. `OneCalendar` is a date PICKER — a month grid
  * you choose from — and dressing it up as the module's page would have this
@@ -995,13 +1381,7 @@ const CommunityMain = ({
         says="Aquí va el calendar"
       />
     )
-  if (module === "directory")
-    return (
-      <PlaceholderPage
-        module={{ id: "employees", name: "Directory", href: "/directory" }}
-        says="Aquí va organizations"
-      />
-    )
+  if (module === "directory") return <DirectoryPage />
   if (module === "files") return <FilesPage />
   return <MockCommunitySurface fallback={children ?? <HomePage />} />
 }
@@ -1871,7 +2251,6 @@ const ConversationsSidebarInner = ({
               if (sidebarState !== "locked") toggleSidebar()
             }}
             persistKey={tabsPersistKey}
-            search={{ label: "Search", onClick: () => {} }}
             flyouts={{ tools: <ToolsFlyout /> }}
             actions={[
               {
@@ -1931,7 +2310,9 @@ const ConversationsSidebarInner = ({
           {/* Search lives with the tabs in the (fixed) header so it stays put
               while the body scrolls. Only the Home tab uses it. */}
           {tab === "home" && (
-            <SearchBar placeholder="Search..." onClick={() => {}} />
+            <div className="px-3 pb-3">
+              <SearchBar placeholder="Search..." onClick={() => {}} />
+            </div>
           )}
         </>
       }

@@ -38,6 +38,16 @@ interface FrameContextType {
    */
   panelWidth: number
   /**
+   * The strip the frame draws above the page, or 0 when it has none. The panel
+   * starts UNDER it rather than beside it: what the strip carries is the
+   * window's — a search that finds anything, not this page's rows — so a
+   * second level opening must not push it sideways.
+   *
+   * Registered by the frame, read by `Sidebar`, for the same reason
+   * `railWidth` goes the other way: neither can see inside the other.
+   */
+  topBarHeight: number
+  /**
    * Whether navigation is permanently on screen. What reads this is the
    * "Open main menu" button in the page surfaces: with a rail there is no
    * state without navigation, so the button has nothing to restore.
@@ -54,6 +64,7 @@ interface FrameContextType {
   jumpLayout: () => void
   setRailWidth: (width: number) => void
   setPanelWidth: (width: number) => void
+  setTopBarHeight: (height: number) => void
 }
 
 const FrameContext = createContext<FrameContextType | undefined>(undefined)
@@ -70,11 +81,13 @@ export function useSidebar(): FrameContextType {
       setForceFloat: () => {},
       railWidth: 0,
       panelWidth: sidebarWidths.panel,
+      topBarHeight: 0,
       hasRail: false,
       isLayoutJumping: false,
       jumpLayout: () => {},
       setRailWidth: () => {},
       setPanelWidth: () => {},
+      setTopBarHeight: () => {},
     }
   }
   return context
@@ -89,6 +102,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
   const [forceFloat, setForceFloat] = useState(false)
   const [railWidth, setRailWidth] = useState(0)
   const [panelWidth, setPanelWidth] = useState(sidebarWidths.panel)
+  const [topBarHeight, setTopBarHeight] = useState(0)
   const [isLayoutJumping, setIsLayoutJumping] = useState(false)
 
   // Held for a beat rather than a frame or two. A module change is not one
@@ -207,11 +221,13 @@ export function FrameProvider({ children }: FrameProviderProps) {
         setForceFloat,
         railWidth,
         panelWidth,
+        topBarHeight,
         isLayoutJumping,
         jumpLayout,
         hasRail,
         setRailWidth,
         setPanelWidth,
+        setTopBarHeight,
       }}
     >
       <div onPointerMove={handlePointerMove} className="h-screen w-screen">
