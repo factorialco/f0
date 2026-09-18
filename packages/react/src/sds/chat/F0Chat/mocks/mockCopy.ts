@@ -12,7 +12,7 @@
  *
  * Read by property rather than by key string, so a typo is a type error instead
  * of a warning and a raw key on screen. Literals are fine here:
- * `.scripts/check-untranslated-copy.ts` excludes `mocks/` for this reason.
+ * `f0-i18n/no-untranslated-copy` is off for `mocks/` for this reason.
  */
 export const mockCopy = {
   composer: {

@@ -123,8 +123,7 @@ const FullscreenToolbarSlot = ({ children }: { children: ReactNode }) => (
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: 20 }}
     transition={{ duration: 0.2, ease: "easeOut" }}
-    className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-    style={{ pointerEvents: "none" }}
+    className="pointer-events-none absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
   >
     {children}
   </motion.div>
@@ -163,8 +162,7 @@ const FullscreenEditingToolbar = ({
         <FullscreenToolbarSlot>
           <div
             ref={toolbarRef}
-            className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
-            style={{ pointerEvents: "auto" }}
+            className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md pointer-events-auto"
           >
             <div className="flex items-center gap-1">
               <F0Button
@@ -219,10 +217,7 @@ const FullscreenReviewMenu = ({
   <AnimatePresence>
     {visible ? (
       <FullscreenToolbarSlot>
-        <div
-          className="absolute -bottom-4 left-1/2 -translate-x-1/2"
-          style={{ pointerEvents: "auto" }}
-        >
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 pointer-events-auto">
           <AIEnhanceMenu
             onSelect={() => {}}
             enhancementOptions={[]}

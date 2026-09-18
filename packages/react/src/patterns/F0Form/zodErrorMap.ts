@@ -125,6 +125,14 @@ export function createZodErrorMap(i18n: TranslationsType): ZodErrorMap {
         if (issue.params?.type === "phone") {
           return { message: validation.phone.invalid }
         }
+        if (issue.params?.type === "location") {
+          return {
+            message:
+              issue.params.reason === "unresolved"
+                ? validation.location.unresolved
+                : validation.location.empty,
+          }
+        }
         break
     }
 

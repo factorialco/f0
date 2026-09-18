@@ -154,7 +154,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
           </div>
         ) : null}
       </div>
-      <NodeViewContent style={{ display: "none" }} />
+      <NodeViewContent className="hidden" />
     </NodeViewWrapper>
   )
 }

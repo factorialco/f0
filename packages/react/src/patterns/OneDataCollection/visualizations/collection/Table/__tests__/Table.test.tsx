@@ -2884,6 +2884,76 @@ describe("TableCollection", () => {
       expect(document.body.textContent).toMatch(/All 50 items selected/)
     })
 
+    it("reports a selectableTotal covering every rendered selectable row when the pagination total only counts parent rows", async () => {
+      const onLoadData = vi.fn()
+      const treeRecords: Person[] = Array.from({ length: 5 }, (_, index) => ({
+        id: index + 1,
+        name: `Person ${index + 1}`,
+        email: `person${index + 1}@example.com`,
+        displayName: `Dr. Person ${index + 1}`,
+      }))
+
+      // A tree collection reports its two fixed parent rows as the pagination
+      // total while rendering the selectable children underneath them.
+      const treeSource: DataCollectionSource<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      > = {
+        ...createTestSource(),
+        selectable: (item: Person) => item.id,
+        allPagesSelection: true,
+        dataAdapter: {
+          paginationType: "pages",
+          perPage: treeRecords.length,
+          fetchData: async () => ({
+            records: treeRecords,
+            total: 2,
+            currentPage: 1,
+            perPage: treeRecords.length,
+            pagesCount: 1,
+            type: "pages" as const,
+          }),
+        },
+      }
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={treeSource}
+          onSelectItems={vi.fn()}
+          onLoadData={onLoadData}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(treeRecords[0].name)).toBeInTheDocument()
+      })
+
+      await waitFor(() => {
+        const lastCall = onLoadData.mock.calls.at(-1)?.[0]
+        // `totalItems` keeps describing the paginated rows, so the total-items
+        // summary stays correct...
+        expect(lastCall?.totalItems).toBe(2)
+        // ...while selection gets the count it actually acts on, matching the
+        // "Select all N items" banner rather than contradicting it.
+        expect(lastCall?.selectableTotal).toBe(treeRecords.length)
+      })
+    })
+
     it("shows header checkbox as indeterminate (unchecked + minus icon) when only some items are selected", async () => {
       const user = userEvent.setup()
 

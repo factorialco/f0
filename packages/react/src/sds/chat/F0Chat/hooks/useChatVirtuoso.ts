@@ -24,6 +24,7 @@ import {
   shouldPrefetchOlder,
   shouldRepinOnGrowth,
 } from "../utils/virtuoso-chat"
+import { type ChatViewportMeasure, useChatTeleport } from "./useChatTeleport"
 import { useTranscriptResizeAnchor } from "./useTranscriptResizeAnchor"
 
 type ScrollMessage = { id: string; isMine?: boolean }
@@ -91,6 +92,9 @@ type UseChatVirtuosoReturn = {
   /** Local index of the top-most visible row (sticky date), or null. */
   stickyIndex: number | null
   scrollToBottom: () => void
+  /** True while a far jump is repositioning behind a fade. The transcript must
+   * be hidden for it: the whole point is that the reposition is not seen. */
+  teleporting: boolean
   /** Jump to a loaded message, or park the id until its window loads. */
   scrollToMessage: (id: string) => void
   /** Park a jump-to-latest until the live tail window replaces the current one. */
@@ -355,7 +359,18 @@ export function useChatVirtuoso({
   // deliberately frozen while the width moves — that's what gets restored.
   const anchorRef = useRef<ChatScrollAnchor | null>(null)
 
+  // Held true by the teleport hook (below) for the whole jump, glide included.
+  // A jump owns the scroll position outright: restoring the reader's pre-jump
+  // anchor in the middle of one drags it straight back where it started.
+  const teleportingRef = useRef(false)
+  // Written once the teleport hook exists, below: the wheel/touch handlers are
+  // registered on the scroller before it does.
+  const cancelTeleportRef = useRef<() => void>(() => {})
+
   const restoreAnchor = useCallback(() => {
+    if (teleportingRef.current) {
+      return
+    }
     const anchor = anchorRef.current
     const virtuoso = virtuosoRef.current
     if (!anchor || !virtuoso) {
@@ -728,22 +743,38 @@ export function useChatVirtuoso({
       if (resizingRef.current) {
         return
       }
+      // Pre-growth distance, same reasoning as pinToBottom's own gate.
+      const atBottom =
+        !followPausedRef.current &&
+        distanceFromBottomRef.current <= AT_BOTTOM_THRESHOLD_PX
       if (
         shouldRepinOnGrowth({
           prevHeight: prev.height,
           height,
           prevCount: prev.count,
           count,
-          // Pre-growth distance, same reasoning as pinToBottom's own gate.
-          atBottom:
-            !followPausedRef.current &&
-            distanceFromBottomRef.current <= AT_BOTTOM_THRESHOLD_PX,
+          atBottom,
         })
       ) {
         pinToBottom(height - prev.height)
+        return
+      }
+      // Content changing under a reader who is NOT following produces no
+      // scroll event, so everything derived from the last one — the distance
+      // to the tail, and with it the jump button — goes stale while the tail
+      // moves away from them. One read per height change keeps it honest.
+      // Only once a real scroll has happened: before that the viewport is
+      // still Virtuoso's provisional entry window, and reading it would derive
+      // a position from geometry that is not final (see handleScrollerRef).
+      if (
+        !atBottom &&
+        height !== prev.height &&
+        scrollMetricsRef.current?.provisional === false
+      ) {
+        measureScrollState()
       }
     },
-    [pinToBottom, resizingRef]
+    [measureScrollState, pinToBottom, resizingRef]
   )
 
   // The user taking over beats every re-pin (WhatsApp cancels the follow).
@@ -755,6 +786,11 @@ export function useChatVirtuoso({
   // when the gesture could not move because it was already at the boundary.
   const handleWheel = useCallback(
     (event: WheelEvent) => {
+      // A wheel during a jump is the reader taking the position back. The jump
+      // must not finish by dragging them to where it was going.
+      if (teleportingRef.current && event.deltaY !== 0) {
+        cancelTeleportRef.current()
+      }
       if (event.deltaY >= 0) {
         return
       }
@@ -780,6 +816,9 @@ export function useChatVirtuoso({
     [pauseFollowing, resumeFollowing]
   )
   const handleTouchMove = useCallback(() => {
+    if (teleportingRef.current) {
+      cancelTeleportRef.current()
+    }
     pauseFollowing()
   }, [pauseFollowing])
 
@@ -830,33 +869,97 @@ export function useChatVirtuoso({
     [handleTouchMove, handleWheel, measureScrollState, observeResize]
   )
 
+  const indexByIdRef = useRef(indexById)
+  indexByIdRef.current = indexById
+  const resolveIndex = useCallback(
+    (id: string) => indexByIdRef.current.get(id) ?? null,
+    []
+  )
+  // Read at the moment it is asked for, straight off the scroller: a teleport
+  // decides on the reader's position NOW, and the cached metrics are a frame
+  // behind whenever the list is still settling — which is exactly when a jump
+  // is in progress.
+  const measure = useCallback((): ChatViewportMeasure => {
+    const element = scrollerElRef.current
+    const scrollTop = element?.scrollTop ?? 0
+    return {
+      index: topVisibleRowIndex(
+        renderedItemsRef.current,
+        scrollTop,
+        firstItemIndexRef.current
+      ),
+      scrollTop,
+      scrollHeight: element?.scrollHeight ?? 0,
+      clientHeight: element?.clientHeight ?? 0,
+    }
+  }, [])
+  // Pixel span of a run of rows, from Virtuoso's own measurements. Null while
+  // any of them is unmounted, so the caller knows it would be reading an
+  // estimate — the very thing a far jump's approach must not be built on.
+  const rowSpan = useCallback((start: number, end: number): number | null => {
+    const first = firstItemIndexRef.current
+    const items = renderedItemsRef.current
+    const head = items.find((item) => item.index - first === start)
+    const tail = items.find((item) => item.index - first === end)
+    if (!head || !tail) {
+      return null
+    }
+    return tail.offset + tail.size - head.offset
+  }, [])
+  const rowCount = useCallback(() => itemCountRef.current, [])
+  // A jump to the tail ends with the reader at the true bottom, verified. The
+  // growth that landed during the glide never produced a scroll event, so read
+  // reality once, then re-arm following: the pins and followOutput take over
+  // from here exactly as they do after a reader's own scroll to the edge.
+  const arriveAtBottom = useCallback(() => {
+    measureScrollState()
+    anchorRef.current = { kind: "bottom" }
+    resumeFollowing()
+  }, [measureScrollState, resumeFollowing])
+  const teleport = useChatTeleport({
+    virtuosoRef,
+    reducedMotion,
+    resolveIndex,
+    measure,
+    rowSpan,
+    rowCount,
+    epoch: listKey,
+    activeRef: teleportingRef,
+    onArriveBottom: arriveAtBottom,
+  })
+  const {
+    jumpTo: teleportTo,
+    jumpToBottom: teleportToBottom,
+    cancel: cancelTeleport,
+  } = teleport
+  cancelTeleportRef.current = cancelTeleport
+
   // ---- imperative scrolls ----
   const scrollToBottom = useCallback(() => {
     resumeFollowing()
-    virtuosoRef.current?.scrollToIndex({
-      index: "LAST",
-      align: "end",
-      behavior: reducedMotion ? "auto" : "smooth",
-    })
-  }, [reducedMotion, resumeFollowing])
+    teleportToBottom()
+  }, [resumeFollowing, teleportToBottom])
 
-  const indexByIdRef = useRef(indexById)
-  indexByIdRef.current = indexById
-  const scrollToMessage = useCallback((id: string) => {
-    const index = indexByIdRef.current.get(id)
-    if (index != null) {
-      virtuosoRef.current?.scrollToIndex({ index, align: "center" })
-    } else {
-      // Not loaded yet (a far-back search hit) — resolved when its window
-      // lands: a REPLACED window re-enters centered on it (see entryRef), a
-      // page that merely grows to include it scrolls below.
-      pendingRef.current = { kind: "id", id }
-    }
-  }, [])
+  const scrollToMessage = useCallback(
+    (id: string) => {
+      const index = resolveIndex(id)
+      if (index !== null) {
+        teleportTo(id, index)
+      } else {
+        // Not loaded yet (a far-back search hit) — resolved when its window
+        // lands: a REPLACED window re-enters centered on it (see entryRef), a
+        // page that merely grows to include it scrolls below.
+        cancelTeleport()
+        pendingRef.current = { kind: "id", id }
+      }
+    },
+    [cancelTeleport, resolveIndex, teleportTo]
+  )
 
   const pendBottom = useCallback(() => {
+    cancelTeleport()
     pendingRef.current = { kind: "bottom" }
-  }, [])
+  }, [cancelTeleport])
 
   // Entry positions are computed against a transcript that is still settling:
   // the composer height is a CSS fallback until its layout effect publishes the
@@ -888,9 +991,11 @@ export function useChatVirtuoso({
     const index = indexById.get(pending.id)
     if (index != null) {
       pendingRef.current = null
-      virtuosoRef.current?.scrollToIndex({ index, align: "center" })
+      // Same decision as a direct jump: a page that grew to include the target
+      // can leave it just as far from the reader as a search hit does.
+      teleportTo(pending.id, index)
     }
-  }, [indexById])
+  }, [indexById, teleportTo])
 
   // Own message sent while scrolled up: glide home (at the bottom, follow
   // already owns the motion). Post-commit so the new row exists to target.
@@ -944,6 +1049,7 @@ export function useChatVirtuoso({
     scrolledUp: stateResetPending ? false : scrolledUp,
     stickyIndex: stateResetPending ? null : stickyIndex,
     scrollToBottom,
+    teleporting: teleport.hidden,
     scrollToMessage,
     pendBottom,
     reassertEntry,

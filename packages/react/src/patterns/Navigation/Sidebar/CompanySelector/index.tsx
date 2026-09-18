@@ -55,7 +55,7 @@ export function CompanySelector({
 
   if (companies.length + (additionalOptions?.length || 0) === 1) {
     return (
-      <div className="p-1.5" style={{ maxWidth: "168px" }}>
+      <div className="max-w-[168px] p-1.5">
         <SelectedCompanyLabel
           company={selectedCompany}
           withNotification={withNotification}
