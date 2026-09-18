@@ -1,6 +1,7 @@
 import {
   ComponentProps,
   HTMLInputTypeAttribute,
+  useEffect,
   useMemo,
   useState,
 } from "react"
@@ -42,21 +43,13 @@ export type InputInternalProps = Pick<
     | "variant"
     | "editing"
   > & {
-    /**
-     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
-     * masked like a password but with no lock icon and with password managers
-     * disabled. It never reaches the DOM (mapped to text/password internally).
-     */
+    /** Sensitive non-credential text, revealed only while focused. */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private"
     onPressEnter?: () => void
     onPressEscape?: () => void
   }
 
-/**
- * Attributes that ask password managers (1Password, LastPass, Bitwarden) and
- * browser autofill to ignore the field — used by `type="private"` so sensitive
- * non-credential data is never captured or suggested.
- */
+// Ask password managers and browser autofill to ignore private fields.
 const passwordManagerAvoidance = {
   autoComplete: "off",
   "data-1p-ignore": true,
@@ -73,12 +66,20 @@ const InputInternal = ({
 }: InputInternalProps) => {
   const [showPassword, setShowPassword] = useState(false)
 
-  // `password` and `private` are both masked; the eye toggle flips them to text.
-  const maskable = type === "password" || type === "private"
+  const [privateFocused, setPrivateFocused] = useState(false)
+
+  useEffect(() => {
+    if (props.variant === "inline" && !props.editing) {
+      setPrivateFocused(false)
+    }
+  }, [props.variant, props.editing])
 
   const localType = useMemo(() => {
-    return maskable ? (showPassword ? "text" : "password") : type
-  }, [showPassword, maskable, type])
+    if (type === "private") {
+      return privateFocused ? "text" : "password"
+    }
+    return type === "password" ? (showPassword ? "text" : "password") : type
+  }, [showPassword, privateFocused, type])
 
   const localIcon = useMemo(() => {
     // Only `password` forces the lock icon; `private` keeps the consumer's icon.
@@ -96,19 +97,7 @@ const InputInternal = ({
       }
     }
     if (type === "private") {
-      // Build the toggle's accessible name from the field label so screen-reader
-      // users can tell multiple private fields apart (e.g. "Show social security
-      // number"). The label feeds F0ButtonToggle's aria-label + title only — the
-      // toggle renders an icon, so there is no visible-text change.
-      return {
-        label: [
-          i18n.t("inputs.private.show", { label: props.label }),
-          i18n.t("inputs.private.hide", { label: props.label }),
-        ],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
+      return undefined
     }
     return props.buttonToggle
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,6 +108,16 @@ const InputInternal = ({
       {...props}
       {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
+      inlineText={type === "private" ? "••••••••" : undefined}
+      onFocus={() => {
+        if (type === "private") {
+          setPrivateFocused(true)
+        }
+      }}
+      onBlur={() => {
+        setPrivateFocused(false)
+        props.onBlur?.()
+      }}
       // Email addresses are case-insensitive, so normalise to lowercase as the
       // user types (lowercasing preserves length, so the caret doesn't jump).
       onChange={(value) =>
