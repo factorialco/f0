@@ -131,6 +131,17 @@ export const Private: Story = {
     disabled: false,
     placeholder: "Placeholder text here",
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText("Social security number", {
+      selector: "input",
+    })
+    await expect(input).toHaveAttribute("type", "password")
+    await userEvent.click(input)
+    await expect(input).toHaveAttribute("type", "text")
+    await userEvent.tab()
+    await expect(input).toHaveAttribute("type", "password")
+  },
 }
 
 export const Disabled: Story = {
