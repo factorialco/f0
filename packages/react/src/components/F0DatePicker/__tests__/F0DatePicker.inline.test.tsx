@@ -221,8 +221,7 @@ describe("F0DatePicker inline variant", () => {
 
       const input = screen.getByRole("textbox", { name: "Start date" })
       await waitFor(() => expect(document.activeElement).toBe(input))
-      // A real blur, not a dispatched event: what makes it a dismissal is where
-      // focus ends up.
+      // Move focus so the blur handler can inspect its destination.
       ;(input as HTMLInputElement).blur()
 
       await waitFor(() => expect(onDismiss).toHaveBeenCalledWith("blur"))

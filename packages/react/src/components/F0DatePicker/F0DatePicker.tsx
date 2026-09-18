@@ -42,8 +42,7 @@ function toSafeDatePickerRange(
       : (value.value?.from ?? undefined)
   )
 
-  // Normalize { value: undefined } to undefined so isSameDatePickerValue
-  // correctly detects "no change" on subsequent blur events after a clear.
+  // Normalize cleared values so blur does not emit another change.
   if (!range) {
     return undefined
   }
@@ -79,8 +78,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
     setLocalOpen(open)
   }, [open])
 
-  // Inline, the calendar is the editor: it is open exactly while the row says
-  // the field is being edited, and a dismissal is reported rather than applied.
+  // The parent controls the inline calendar through editing.
   const isOpen = inline ? editing : localOpen
 
   const i18n = useI18n()
@@ -118,12 +116,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
   const escapePressedRef = useRef(false)
   const closeReportedRef = useRef(false)
 
-  /**
-   * The popup dismisses itself from a capture-phase document listener, so the
-   * close and the key that caused it land in the same dispatch, in either
-   * order. The reason is settled once that dispatch is over, and one gesture
-   * ends the edit once.
-   */
+  /** Wait for capture listeners to finish before resolving one dismissal per gesture. */
   const reportDismiss = (reason: InlineDismissReason) => {
     if (reason === "escape") {
       escapePressedRef.current = true
@@ -141,8 +134,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
       scheduledRef.current = false
       escapePressedRef.current = false
       reasonRef.current = "popupClose"
-      // Escape leaves focus where it is; the others move it, and that move must
-      // not be reported a second time as a blur.
+      // Consume the blur caused by a non-Escape dismissal.
       closeReportedRef.current = resolved !== "escape"
       onDismiss?.(resolved)
     })
@@ -168,8 +160,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
     reportDismissRef.current = reportDismiss
   })
 
-  // Escape has to be caught on the document: once a day has been clicked, focus
-  // sits in the calendar and the input never sees the key.
+  // Calendar focus bypasses the input, so listen for Escape on document.
   useEffect(() => {
     if (!inline || !editing) {
       return
@@ -183,10 +174,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
     return () => document.removeEventListener("keydown", handleKeyDown, true)
   }, [inline, editing])
 
-  /**
-   * The click that closes the calendar also blurs the input, and that close is
-   * the reason; a blur is only its own reason when focus left on its own.
-   */
+  /** An outside click reports popupClose instead of a second blur. */
   const handleInputBlur = () => {
     if (!inline) {
       return
@@ -267,8 +255,7 @@ export function F0DatePicker(props: F0DatePickerProps) {
     />
   )
 
-  // At rest there is nothing to trigger: the popover trigger would put its
-  // `aria-haspopup` and `aria-expanded` on a piece of text the row owns.
+  // Static values must not receive popover trigger ARIA attributes.
   if (inline && !editing) {
     return dateInput
   }

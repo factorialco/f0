@@ -15,10 +15,7 @@ type InlineValueProps = {
   icon?: IconType
 }
 
-/**
- * The transparent border, the `px-3` and the icon's offsets repeat the editor's
- * chrome, so the first glyph sits at the same x in both modes.
- */
+/** Match the editor border, padding, and icon offsets to prevent text movement. */
 const InlineValue = ({
   label,
   hideLabel,
@@ -43,8 +40,8 @@ const InlineValue = ({
         <div
           data-slot="icon"
           className={cn(
-            "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
-            size === "md" && "left-3 top-[9px]"
+            "pointer-events-none absolute left-2 top-1.25 my-auto h-5 w-5 shrink-0",
+            size === "md" && "left-3 top-2.25"
           )}
         >
           <F0Icon icon={icon} color="default" />

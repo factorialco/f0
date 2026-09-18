@@ -28,10 +28,6 @@ type InlineStartDateProps = {
   onDismiss?: (reason: InlineDismissReason) => void
 }
 
-/**
- * The parent owns the mode: the story holds `editing`, the picker only reports
- * what the user did.
- */
 function InlineStartDate({
   label = "Start date",
   value: initialValue,
@@ -44,7 +40,7 @@ function InlineStartDate({
   const [editing, setEditing] = useState(initialEditing)
 
   return (
-    <div className="flex w-[320px] flex-col gap-2">
+    <div className="flex w-80 flex-col gap-2">
       <button
         type="button"
         data-testid="focus-sink"
@@ -60,7 +56,7 @@ function InlineStartDate({
       >
         {editing ? "Stop editing" : "Start editing"}
       </button>
-      <div data-testid="value-box" className="w-[320px]">
+      <div data-testid="value-box" className="w-80">
         <F0DatePicker
           variant="inline"
           label={label}
@@ -76,18 +72,12 @@ function InlineStartDate({
   )
 }
 
-/** Where the first glyph of the text is painted, padding included. */
 function textStartX(element: Element) {
   const { left } = element.getBoundingClientRect()
   return left + parseFloat(getComputedStyle(element).paddingLeft)
 }
 
-/**
- * The calendar fades its month in over the 150ms DayView declares, and the test
- * runner pauses CSS animations but not framer-motion. Polling for a settled
- * opacity passes under the runner and nowhere else, so wait the known duration
- * before the a11y pass samples colours mid-fade.
- */
+/** Wait for the 150ms month animation before axe measures contrast. */
 const MONTH_FADE_MS = 150
 const settleCalendar = () =>
   new Promise((resolve) => setTimeout(resolve, MONTH_FADE_MS + 100))
@@ -140,8 +130,7 @@ export const AtRest: Story = {
 }
 
 export const Empty: Story = {
-  // Not `args: { value: undefined }`: Storybook merges args by spreading, and a
-  // story that drops a value back to undefined reads as "unset" downstream.
+  // Use a separate render to avoid restoring the default value.
   render: (args) => <InlineStartDate {...args} value={undefined} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -173,11 +162,6 @@ export const WithVisibleLabel: Story = {
   },
 }
 
-/**
- * The date must not move when the row activates it: same first glyph, same
- * height. The calendar icon sits at the same offset in both modes, so the text
- * clears it by the same amount.
- */
 export const TextDoesNotMove: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -207,7 +191,6 @@ export const TextDoesNotMove: Story = {
   },
 }
 
-/** Both presentations fill whatever box the row declares. */
 export const FillsTheRowBox: Story = {
   render: ({ label }) => <FixedBox label={label} />,
   play: async ({ canvasElement, step }) => {
@@ -251,8 +234,7 @@ function FixedBox({ label = "Start date" }) {
       </button>
       <div
         data-testid="fixed-box"
-        // A ring, not a border: it marks the 40×320 box without taking any
-        // space out of it, so the measurement stays honest.
+        // A ring marks the box without changing its dimensions.
         className="h-10 w-80 ring-1 ring-f1-border"
       >
         <F0DatePicker
@@ -267,10 +249,6 @@ function FixedBox({ label = "Start date" }) {
   )
 }
 
-/**
- * Picking a day, Escape and an outside click are all reported; none of them
- * closes the calendar. The parent decides, or the row gets stuck.
- */
 export const ReportsDismissWithoutClosing: Story = {
   args: {
     editing: true,
@@ -318,7 +296,7 @@ export const ReportsDismissWithoutClosing: Story = {
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
-    <div className="flex w-[320px] flex-col gap-4">
+    <div className="flex w-80 flex-col gap-4">
       <div className="h-10">
         <F0DatePicker
           variant="inline"
