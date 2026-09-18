@@ -350,8 +350,10 @@ var absoluteSpacing = {
   0: "0px",
   0.5: "2px",
   1: "4px",
+  1.25: "5px",
   1.5: "6px",
   2: "8px",
+  2.25: "9px",
   2.5: "10px",
   3: "12px",
   3.5: "14px",
@@ -379,9 +381,13 @@ var absoluteSpacing = {
   56: "224px",
   60: "240px",
   64: "256px",
+  70: "280px",
   72: "288px",
+  75: "300px",
   80: "320px",
+  90: "360px",
   96: "384px",
+  100: "400px",
   140: "560px"
 };
 var relativeSpacing = {
@@ -389,8 +395,10 @@ var relativeSpacing = {
   0: "0px",
   0.5: "0.125rem",
   1: "0.25rem",
+  1.25: "0.3125rem",
   1.5: "0.375rem",
   2: "0.5rem",
+  2.25: "0.5625rem",
   2.5: "0.625rem",
   3: "0.75rem",
   3.5: "0.875rem",
@@ -418,9 +426,13 @@ var relativeSpacing = {
   56: "14rem",
   60: "15rem",
   64: "16rem",
+  70: "17.5rem",
   72: "18rem",
+  75: "18.75rem",
   80: "20rem",
+  90: "22.5rem",
   96: "24rem",
+  100: "25rem",
   140: "35rem"
 };
 var betweenSpacing = {
