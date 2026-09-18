@@ -1879,7 +1879,7 @@ const GuidedHome = () => {
   return (
     <>
       <Home />
-      {/* Under the shield (`z-[1249]`) on purpose: while the walkthrough is up
+      {/* Under the shield (`z-[1239]`) on purpose: while the walkthrough is up
           this is part of the page, dimmed and unpressable like everything else
           in it. */}
       <div className="fixed bottom-6 left-6">
