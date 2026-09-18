@@ -16,6 +16,41 @@ describe("F0InputField", () => {
     consoleErrorSpy.mockRestore()
   })
 
+  describe("inline display text", () => {
+    it.each([undefined, ""])(
+      "keeps placeholders for empty values (%s)",
+      (value) => {
+        render(
+          <F0InputField
+            variant="inline"
+            label="Amount"
+            value={value}
+            inlineText="Hidden"
+            placeholder="Add amount"
+          >
+            <input />
+          </F0InputField>
+        )
+        expect(screen.getByText("Add amount")).toBeInTheDocument()
+        expect(screen.queryByText("Hidden")).toBeNull()
+      }
+    )
+
+    it("uses display text for a zero value", () => {
+      render(
+        <F0InputField
+          variant="inline"
+          label="Amount"
+          value="0"
+          inlineText="0.00"
+        >
+          <input />
+        </F0InputField>
+      )
+      expect(screen.getByTitle("0.00")).toHaveTextContent("0.00")
+    })
+  })
+
   describe("Label validation", () => {
     it("should emit an error when label is empty string", () => {
       render(
