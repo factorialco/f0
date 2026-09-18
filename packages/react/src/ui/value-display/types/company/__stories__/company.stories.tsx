@@ -62,7 +62,17 @@ export const CompanyTypeWithLongName: Story = {
     docs: {
       description: {
         story:
-          "Inside a fixed-width column, a name wider than the cell truncates with an ellipsis and shows the full name in a tooltip on hover, instead of clipping mid-character.",
+          "By default a name wider than its column wraps onto as many lines as it needs, so the whole name stays readable.",
+      },
+      source: {
+        code: `
+render: (item) => ({
+    type: 'company',
+    value: {
+        name: item.companyName,
+        src: item.companyLogo,
+    }
+})`,
       },
     },
   },
@@ -95,13 +105,24 @@ export const CompanyTypeWithLines: Story = {
     docs: {
       description: {
         story:
-          "`lines` raises the cap: the name wraps up to two lines and only truncates past that. The avatar stays on the first line.",
+          "`lines` caps the name: it wraps up to two lines and truncates past that, with the full name in a tooltip on hover. The avatar stays on the first line.",
+      },
+      source: {
+        code: `
+render: (item) => ({
+    type: 'company',
+    value: {
+        name: item.companyName,
+        src: item.companyLogo,
+        lines: 2,
+    }
+})`,
       },
     },
   },
 }
 
-export const CompanyTypeWithFullName: Story = {
+export const CompanyTypeTruncatedToOneLine: Story = {
   args: {
     item: {
       ...mockItem,
@@ -114,7 +135,7 @@ export const CompanyTypeWithFullName: Story = {
         value: {
           name: item.companyName,
           src: item.companyLogo,
-          full: true,
+          lines: 1,
         },
       }),
     },
@@ -128,7 +149,18 @@ export const CompanyTypeWithFullName: Story = {
     docs: {
       description: {
         story:
-          "`full` removes the cap entirely: the name wraps as far as it needs and nothing is hidden, so there is no ellipsis and no tooltip to recover.",
+          "`lines: 1` keeps the name on a single line, truncating with an ellipsis and showing the full name in a tooltip on hover. Use it where every row has to be the same height.",
+      },
+      source: {
+        code: `
+render: (item) => ({
+    type: 'company',
+    value: {
+        name: item.companyName,
+        src: item.companyLogo,
+        lines: 1,
+    }
+})`,
       },
     },
   },

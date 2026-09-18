@@ -8,6 +8,20 @@ const defaultMeta: ValueDisplayRendererContext = {
   visualization: "table",
 }
 
+const LONG_NAME = "Factorial AI handles the paperwork, you handle the people."
+
+/** Makes the name measure wider than the cell it sits in. */
+const overflowTheCell = () => {
+  Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+    configurable: true,
+    value: 200,
+  })
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+    configurable: true,
+    value: 100,
+  })
+}
+
 describe("CompanyCell", () => {
   beforeEach(() => {
     class MockResizeObserver {
@@ -31,50 +45,6 @@ describe("CompanyCell", () => {
     expect(screen.getByText("Factorial")).toBeInTheDocument()
   })
 
-  it("truncates a name wider than the cell instead of clipping it mid-character", () => {
-    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-      configurable: true,
-      value: 200,
-    })
-    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-      configurable: true,
-      value: 100,
-    })
-
-    const args: CompanyCellValue = {
-      name: "Factorial AI handles the paperwork, you handle the people.",
-    }
-
-    render(CompanyCell(args, defaultMeta))
-
-    expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
-  })
-
-  it("shows a tooltip with the full name when it overflows", async () => {
-    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-      configurable: true,
-      value: 200,
-    })
-    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-      configurable: true,
-      value: 100,
-    })
-
-    const args: CompanyCellValue = {
-      name: "Factorial AI handles the paperwork, you handle the people.",
-    }
-
-    render(CompanyCell(args, defaultMeta))
-
-    await userEvent.hover(screen.getByTestId("one-ellipsis"))
-
-    expect(
-      await screen.findByRole("tooltip", {
-        name: "Factorial AI handles the paperwork, you handle the people.",
-      })
-    ).toBeInTheDocument()
-  })
-
   it("lets the name shrink instead of overflowing its fixed-width container", () => {
     const args: CompanyCellValue = { name: "Factorial" }
 
@@ -86,53 +56,10 @@ describe("CompanyCell", () => {
     )
   })
 
-  describe("line clamping", () => {
-    it("rejects asking for a line cap and no cap at once", () => {
-      // @ts-expect-error `lines` and `full` are mutually exclusive
-      const args: CompanyCellValue = { name: "Company", lines: 2, full: true }
-
-      expect(args).toBeDefined()
-    })
-
-    it("keeps the name on a single truncated line by default", () => {
-      const args: CompanyCellValue = {
-        name: "Factorial AI handles the paperwork, you handle the people.",
-      }
-
-      render(CompanyCell(args, defaultMeta))
-
-      expect(screen.getByTestId("one-ellipsis")).toHaveClass(
-        "whitespace-nowrap"
-      )
-    })
-
-    it("lets the name wrap up to the requested number of lines", () => {
-      const args: CompanyCellValue = {
-        name: "Factorial AI handles the paperwork, you handle the people.",
-        lines: 2,
-      }
-
-      render(CompanyCell(args, defaultMeta))
-
-      const name = screen.getByTestId("one-ellipsis")
-      expect(name).not.toHaveClass("whitespace-nowrap")
-      expect(name).toHaveStyle({ WebkitLineClamp: "2" })
-    })
-
-    it("does not truncate at all when full is set", () => {
-      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-        configurable: true,
-        value: 200,
-      })
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-        configurable: true,
-        value: 100,
-      })
-
-      const args: CompanyCellValue = {
-        name: "Factorial AI handles the paperwork, you handle the people.",
-        full: true,
-      }
+  describe("by default, with no line cap", () => {
+    it("wraps the name in full rather than truncating it", () => {
+      overflowTheCell()
+      const args: CompanyCellValue = { name: LONG_NAME }
 
       render(CompanyCell(args, defaultMeta))
 
@@ -141,20 +68,17 @@ describe("CompanyCell", () => {
       expect(name).not.toHaveClass("whitespace-nowrap")
     })
 
-    it("does not offer a tooltip when nothing is hidden", async () => {
-      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-        configurable: true,
-        value: 200,
-      })
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-        configurable: true,
-        value: 100,
-      })
+    it("breaks a name too long to fit on one line of its own", () => {
+      const args: CompanyCellValue = { name: LONG_NAME }
 
-      const args: CompanyCellValue = {
-        name: "Factorial AI handles the paperwork, you handle the people.",
-        full: true,
-      }
+      render(CompanyCell(args, defaultMeta))
+
+      expect(screen.getByTestId("one-ellipsis")).toHaveClass("break-words")
+    })
+
+    it("offers no tooltip, because nothing is hidden", async () => {
+      overflowTheCell()
+      const args: CompanyCellValue = { name: LONG_NAME }
 
       render(CompanyCell(args, defaultMeta))
 
@@ -163,11 +87,8 @@ describe("CompanyCell", () => {
       expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
     })
 
-    it("aligns the avatar with the first line when the name can wrap", () => {
-      const args: CompanyCellValue = {
-        name: "Factorial AI handles the paperwork, you handle the people.",
-        full: true,
-      }
+    it("aligns the avatar with the name's first line", () => {
+      const args: CompanyCellValue = { name: LONG_NAME }
 
       render(CompanyCell(args, defaultMeta))
 
@@ -175,9 +96,45 @@ describe("CompanyCell", () => {
       expect(row).toHaveClass("items-start")
       expect(row).not.toHaveClass("items-center")
     })
+  })
 
-    it("centers the avatar against a name that stays on one line", () => {
-      const args: CompanyCellValue = { name: "Company" }
+  describe("with a line cap", () => {
+    it("wraps the name up to the requested number of lines", () => {
+      const args: CompanyCellValue = { name: LONG_NAME, lines: 2 }
+
+      render(CompanyCell(args, defaultMeta))
+
+      const name = screen.getByTestId("one-ellipsis")
+      expect(name).not.toHaveClass("whitespace-nowrap")
+      expect(name).toHaveStyle({ WebkitLineClamp: "2" })
+    })
+
+    it("keeps the name on one truncated line when capped at one", () => {
+      overflowTheCell()
+      const args: CompanyCellValue = { name: LONG_NAME, lines: 1 }
+
+      render(CompanyCell(args, defaultMeta))
+
+      expect(screen.getByTestId("one-ellipsis")).toHaveClass(
+        "whitespace-nowrap"
+      )
+    })
+
+    it("shows a tooltip with the full name when a capped name overflows", async () => {
+      overflowTheCell()
+      const args: CompanyCellValue = { name: LONG_NAME, lines: 1 }
+
+      render(CompanyCell(args, defaultMeta))
+
+      await userEvent.hover(screen.getByTestId("one-ellipsis"))
+
+      expect(
+        await screen.findByRole("tooltip", { name: LONG_NAME })
+      ).toBeInTheDocument()
+    })
+
+    it("centers the avatar against a name capped to a single line", () => {
+      const args: CompanyCellValue = { name: LONG_NAME, lines: 1 }
 
       render(CompanyCell(args, defaultMeta))
 

@@ -15,8 +15,9 @@ interface CompanyValue {
   src?: string
 }
 
-export type CompanyCellValue = WithAvatarBadge<CompanyValue> &
-  ({ lines?: number; full?: never } | { lines?: never; full: true })
+export type CompanyCellValue = WithAvatarBadge<
+  CompanyValue & { lines?: number }
+>
 
 export const CompanyCell = (
   args: CompanyCellValue,

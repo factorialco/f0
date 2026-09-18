@@ -160,17 +160,18 @@ export function stripHtmlTags(html: string): string {
 }
 
 /**
- * Resolves the `lines`/`full` truncation knobs shared by the avatar cell types
- * Defaults to a single truncated line; `wraps` is what callers align on
+ * Resolves the `lines` cap shared by the avatar cell types
+ * Omitting it wraps the name in full; `wraps` is what callers align on
  */
-export function resolveNameClamp(args: { lines?: number; full?: true }): {
+export function resolveNameClamp(args: { lines?: number }): {
   lines: number
   full: boolean
   wraps: boolean
 } {
-  const full = args.full === true
-  // Ignored when `full` — OneEllipsis skips clamping entirely once disabled.
-  const lines = full ? 1 : (args.lines ?? 1)
+  const cap = args.lines
 
-  return { lines, full, wraps: full || lines > 1 }
+  // `lines` is ignored when uncapped — OneEllipsis skips clamping once disabled.
+  return cap === undefined
+    ? { lines: 1, full: true, wraps: true }
+    : { lines: cap, full: false, wraps: cap > 1 }
 }

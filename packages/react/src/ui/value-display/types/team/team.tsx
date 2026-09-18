@@ -15,8 +15,7 @@ interface TeamValue {
   src?: string
 }
 
-export type TeamCellValue = WithAvatarBadge<TeamValue> &
-  ({ lines?: number; full?: never } | { lines?: never; full: true })
+export type TeamCellValue = WithAvatarBadge<TeamValue & { lines?: number }>
 
 export const TeamCell = (
   args: TeamCellValue,

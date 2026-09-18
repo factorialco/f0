@@ -13,16 +13,8 @@ Renders a company avatar.
 type value = {
     name: string
     src?: string // the avatar image
-} & (
-    | {
-        lines?: number
-        full?: never
-      }
-    | {
-        lines?: never
-        full: true
-      }
-  )
+    lines?: number // cap the name at N lines; omit to wrap it in full
+}
 ```
 
 <Canvas
@@ -42,21 +34,17 @@ render: (item) => ({
 
 **Long name inside a fixed-width column**
 
-A name wider than its cell truncates with an ellipsis and shows the full name
-in a tooltip on hover, the same as the person type.
+By default the name wraps onto as many lines as it needs, so the whole name
+stays readable however narrow the column is.
 
 <Canvas of={CompanyStories.CompanyTypeWithLongName} />
 
-**Controlling how many lines the name takes**
+**Capping how many lines the name takes**
 
-By default the name stays on a single line and truncates with an ellipsis. Set
-`lines` to allow more lines before it truncates, or `full` to remove the cap so
-the name wraps as far as it needs. The two are mutually exclusive — a name
-cannot both stop at N lines and never stop.
-
-Note that `full` also removes the tooltip: it only exists to recover text the
-cell has hidden, and a name that wraps in full hides nothing.
+Set `lines` to cap it. The name wraps up to that many lines and truncates with
+an ellipsis past them, showing the full name in a tooltip on hover. `lines: 1`
+keeps it on a single line — use it where every row has to be the same height.
 
 <Canvas of={CompanyStories.CompanyTypeWithLines} />
 
-<Canvas of={CompanyStories.CompanyTypeWithFullName} />
+<Canvas of={CompanyStories.CompanyTypeTruncatedToOneLine} />
