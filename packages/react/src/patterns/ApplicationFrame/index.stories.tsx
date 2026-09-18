@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
   ComponentProps,
+  createContext,
+  useContext,
   useCallback,
   useEffect,
   useMemo,
@@ -11,9 +13,11 @@ import {
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
 
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { OneCalendar } from "@/components/OneCalendar"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -849,6 +853,119 @@ const HomePage = (): ReactNode => (
  * whose cards swallow each press in silence: the store records the open post
  * and nothing is mounted to show it.
  */
+/**
+ * Which module the rail is on. The navigation and the page it changes are
+ * sibling trees under the frame — the sidebar is a prop, the page is the
+ * children — so the one thing they both have to know lives above both.
+ */
+const RailModuleContext = createContext<{
+  module: string
+  setModule: (id: string) => void
+}>({ module: "home", setModule: () => {} })
+
+/** Wraps the frame so the rail and the page it changes share one value. */
+const RailModuleProvider = ({ children }: { children: ReactNode }) => {
+  const [module, setModule] = useState("home")
+  const value = useMemo(() => ({ module, setModule }), [module])
+  return (
+    <RailModuleContext.Provider value={value}>
+      {children}
+    </RailModuleContext.Provider>
+  )
+}
+
+/** Files, as the product has them: a folder tree is a page, not a nav panel. */
+const FILES = [
+  { name: "Employee handbook 2026.pdf", owner: "People Ops", at: "2 days ago" },
+  { name: "Org chart Q2.pdf", owner: "Jordan Avery", at: "5 days ago" },
+  { name: "Holiday calendar 2026.pdf", owner: "People Ops", at: "1 week ago" },
+  {
+    name: "Headcount plan vs actuals.xlsx",
+    owner: "Finance",
+    at: "1 week ago",
+  },
+  { name: "Q2 hiring funnel.pdf", owner: "Talent", at: "2 weeks ago" },
+  { name: "Remote work policy.pdf", owner: "People Ops", at: "3 weeks ago" },
+]
+
+const FilesPage = () => (
+  <Page
+    header={
+      <PageHeader module={{ id: "documents", name: "Files", href: "/files" }} />
+    }
+  >
+    <div className="flex flex-col px-6 pb-6">
+      {/* A header row and its rows, on the table's own rhythm — enough of a
+          document list to say what the module is, without a data collection's
+          machinery in a story about navigation. */}
+      <div className="flex items-center gap-4 border-0 border-b border-solid border-f1-border-secondary py-2 text-f1-foreground-secondary">
+        <span className="flex-1">Name</span>
+        <span className="w-40 shrink-0">Owner</span>
+        <span className="w-32 shrink-0">Modified</span>
+      </div>
+      {FILES.map((file) => (
+        <div
+          key={file.name}
+          className="flex items-center gap-4 border-0 border-b border-solid border-f1-border-secondary py-3"
+        >
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            <F0AvatarFile
+              file={{
+                name: file.name,
+                type: file.name.split(".").pop() ?? "pdf",
+              }}
+              size="sm"
+            />
+            <OneEllipsis className="text-f1-foreground">
+              {file.name}
+            </OneEllipsis>
+          </span>
+          <span className="w-40 shrink-0 text-f1-foreground-secondary">
+            {file.owner}
+          </span>
+          <span className="w-32 shrink-0 text-f1-foreground-secondary">
+            {file.at}
+          </span>
+        </div>
+      ))}
+    </div>
+  </Page>
+)
+
+const CalendarPage = () => (
+  <Page
+    header={
+      <PageHeader
+        module={{ id: "calendar", name: "Calendar", href: "/calendar" }}
+      />
+    }
+  >
+    <div className="flex flex-1 justify-center px-6 pb-6">
+      <div className="w-80">
+        <OneCalendar mode="single" view="month" />
+      </div>
+    </div>
+  </Page>
+)
+
+/**
+ * The Inbox's page is empty on purpose: the list is the panel, and the content
+ * side is whatever you picked from it. Until you pick, it says so.
+ */
+const InboxPage = () => (
+  <Page
+    header={
+      <PageHeader module={{ id: "inbox", name: "Inbox", href: "/inbox" }} />
+    }
+  >
+    <div className="flex flex-1 items-center justify-center p-6">
+      <span className="text-f1-foreground-secondary">
+        Select an item to read it
+      </span>
+    </div>
+  </Page>
+)
+
 const CommunityMain = ({
   children,
 }: {
@@ -859,6 +976,8 @@ const CommunityMain = ({
   // on screen, Chats is somewhere you go, and what you go to belongs in the
   // main area rather than in a panel beside the page you left behind.
   const { openSurface } = useMockChatApp()
+  const { module } = useContext(RailModuleContext)
+
   if (openSurface?.kind === "chat") {
     // In the app shell's sheet, like every other page. Rendered bare it
     // floated on the frame's own ground with no edge of its own — a
@@ -869,6 +988,9 @@ const CommunityMain = ({
       </Page>
     )
   }
+  if (module === "inbox") return <InboxPage />
+  if (module === "calendar") return <CalendarPage />
+  if (module === "files") return <FilesPage />
   return <MockCommunitySurface fallback={children ?? <HomePage />} />
 }
 
@@ -903,23 +1025,25 @@ export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            panelContentSide: "left",
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              layout="rail"
-              // State parity across reloads, like the panel content restore.
-              tabsPersistKey="rail-demo"
-            />
-          }
-        >
-          {/* Real-world main content: the home "daytime" page. */}
-          <CommunityMain />
-        </ApplicationFrame>
+        <RailModuleProvider>
+          <ApplicationFrame
+            ai={{
+              ...withMockChatSlots(args.ai),
+              panelContentSide: "left",
+            }}
+            aiPromotion={args.aiPromotion}
+            sidebar={
+              <ConversationsSidebar
+                layout="rail"
+                // State parity across reloads, like the panel content restore.
+                tabsPersistKey="rail-demo"
+              />
+            }
+          >
+            {/* The page follows the module the rail is on. */}
+            <CommunityMain />
+          </ApplicationFrame>
+        </RailModuleProvider>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
@@ -1710,6 +1834,7 @@ const ConversationsSidebarInner = ({
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
+  const { setModule } = useContext(RailModuleContext)
   const { toggleSidebar, sidebarState } = useSidebar()
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
@@ -1720,7 +1845,7 @@ const ConversationsSidebarInner = ({
     restoringPanelContentId,
     cancelPanelContentRestore,
   } = useAiChat()
-  const { openChatSurface } = useMockChatApp()
+  const { openChatSurface, closeSurface } = useMockChatApp()
 
   // Where a conversation opens depends on what the navigation is. With a
   // rail, Chats is a module you are IN, so the conversation is the page. With
@@ -1730,6 +1855,7 @@ const ConversationsSidebarInner = ({
   const onSelect = useCallback(
     (convId: string) => {
       if (isRail) {
+        lastChatId.current = convId
         openChatSurface(convId)
         setActiveChat(convId)
         return
@@ -1794,6 +1920,36 @@ const ConversationsSidebarInner = ({
     if (isRail) return
     setActiveChat(open && panelContent ? panelContent.id : null)
   }, [isRail, open, panelContent, setActiveChat])
+
+  // Every rail item is a destination, so the page follows the module. Chats
+  // lands you back in the conversation you were last in — a module you return
+  // to should be where you left it, not an empty room — and leaving Chats
+  // closes it, so Home is Home again rather than the transcript you were
+  // reading a moment ago.
+  //
+  // Keyed on the module CHANGING, not on the store: a post opened from inside
+  // a conversation moves the same surface, and an effect that re-ran on every
+  // store update would shove the transcript straight back over it.
+  const lastChatId = useRef<string | null>(null)
+  const groupsRef = useRef(groups)
+  groupsRef.current = groups
+  const shownModule = useRef<string | null>(null)
+  useEffect(() => {
+    if (!isRail || shownModule.current === tab) return
+    shownModule.current = tab
+    setModule(tab)
+    if (tab === "messages") {
+      const convId = lastChatId.current ?? groupsRef.current[0]?.chats[0]?.id
+      if (convId) {
+        lastChatId.current = convId
+        openChatSurface(convId)
+        setActiveChat(convId)
+      }
+      return
+    }
+    closeSurface()
+    setActiveChat(null)
+  }, [isRail, tab, setModule, openChatSurface, closeSurface, setActiveChat])
 
   const tabs = [
     // The rail names the modules the way the navigation does; the tab row
