@@ -602,3 +602,45 @@ export const WithNumberFilter: Story = {
     onChange: fn(),
   },
 }
+
+/**
+ * A way of filtering that is not one filter: the entry sits above the list, and
+ * picking it opens a pane of the consumer's own. What that pane stages is
+ * merged into the draft, so the apply button still commits everything at once.
+ */
+const QuickFilterPane = ({
+  stage,
+}: {
+  stage: (filters: Record<string, unknown>) => void
+}) => {
+  const [department, setDepartment] = useState<string>("")
+
+  return (
+    <div className="flex flex-col gap-2 p-1">
+      <Input
+        label="Whose work am I seeing?"
+        value={department}
+        placeholder="e.g. engineering"
+        onChange={(next) => {
+          setDepartment(next)
+          stage(next ? { department: [next] } : {})
+        }}
+      />
+      <p className="text-f1-foreground-secondary">
+        Staged, not applied — the apply button is still what commits it.
+      </p>
+    </div>
+  )
+}
+
+export const WithQuickFilter: Story = {
+  args: {
+    filters: filterDefinition,
+    value: {},
+    onChange: fn(),
+    quickFilter: {
+      label: "Ask for a list",
+      render: ({ stage }) => <QuickFilterPane stage={stage} />,
+    },
+  },
+}

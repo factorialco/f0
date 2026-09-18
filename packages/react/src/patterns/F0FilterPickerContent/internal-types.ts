@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
 
 /**
@@ -37,4 +39,18 @@ export interface FilterPickerInternalProps<
   onApply: () => void
   /** Callback when clear filters button is clicked */
   onClear?: () => void
+  /** An entry listed before the filters, with a pane of its own */
+  quickFilter?: {
+    label: string
+    icon?: IconType
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => ReactNode
+  }
+  /** Whether that entry is the selected one */
+  quickFilterSelected?: boolean
+  /** Callback when that entry is picked */
+  onQuickFilterSelect?: () => void
+  /** Writes into the draft the apply button commits */
+  onStageFilters?: (filters: Record<string, unknown>) => void
 }

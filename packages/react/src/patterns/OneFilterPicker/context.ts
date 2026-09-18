@@ -1,4 +1,5 @@
-import { createContext } from "react"
+import { createContext, type ReactNode } from "react"
+import type { IconType } from "@/components/F0Icon"
 import {
   FiltersDefinition,
   FiltersMode,
@@ -19,6 +20,15 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   emitPresetClick: (filters: FiltersState<Definition>) => void
   mode?: FiltersMode
   displayCounter?: boolean
+  /** An entry listed before the filters inside the panel, with its own pane */
+  quickFilter?: {
+    label: string
+    icon?: IconType
+    /** `stage` writes into the draft the apply button commits. */
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => ReactNode
+  }
   /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
   resultCount?: number
   /**

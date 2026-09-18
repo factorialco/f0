@@ -1,5 +1,6 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import type { IconType } from "@/components/F0Icon"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
@@ -31,6 +32,17 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   onChange: (value: FiltersState<Definition>) => void
   /** The children of the component */
   children?: React.ReactNode
+  /**
+   * An entry listed before the filters inside the panel, with a pane of its
+   * own. For a way of filtering that is not one filter.
+   */
+  quickFilter?: {
+    label: string
+    icon?: IconType
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => React.ReactNode
+  }
   /** The mode of the component */
   mode?: FiltersMode
   /** Callback fired when filters open state is changed */
@@ -218,6 +230,7 @@ const FiltersControls = () => {
     emitFilterChange,
     mode,
     displayCounter,
+    quickFilter,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -247,6 +260,7 @@ const FiltersControls = () => {
         hideLabel={!!presets || mode === "simple"}
         mode={mode}
         displayCounter={displayCounter}
+        quickFilter={quickFilter}
       />
       {presets?.length ? (
         <div className="flex items-center">
