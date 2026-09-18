@@ -12,7 +12,11 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
-import { datepickerSizes, DatePickerValue } from "../types"
+import {
+  datepickerSizes,
+  DatePickerValue,
+  type F0DatePickerFieldProps,
+} from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
@@ -95,10 +99,10 @@ const meta = {
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "stable"],
+  tags: ["stable", "!autodocs"],
   decorators: [
     (Story, { args, parameters }) => {
-      const width = parameters?.width || "300px"
+      const width = parameters?.width
       const [value, setValue] = useState<DatePickerValue | undefined>(
         args?.value as DatePickerValue
       )
@@ -106,7 +110,7 @@ const meta = {
       const [valueSimple, setValueSimple] = useState<string | undefined>()
 
       return (
-        <div style={{ width }}>
+        <div className="w-75" style={width ? { width } : undefined}>
           <Story
             args={{
               ...args,
@@ -128,7 +132,8 @@ const meta = {
 } satisfies Meta<typeof F0DatePicker>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// Use explicit props because StoryObj<typeof meta> collapses this union to never.
+type Story = StoryObj<F0DatePickerFieldProps>
 
 const today = mockDate
 const presets = [
@@ -395,12 +400,12 @@ export const Snapshot: Story = {
               {snapshotVariants.map((variant, index) => (
                 <div
                   key={`${size}-${index}`}
-                  className={variant.open ? "mb-[400px]" : ""}
+                  className={variant.open ? "mb-100" : ""}
                 >
                   <p className="mb-3 text-sm">
                     Variant: {JSON.stringify(variant)}
                   </p>
-                  <div style={{ width: "300px" }}>
+                  <div className="w-75">
                     <F0DatePicker size={size} {...variant} onChange={fn()} />
                   </div>
                 </div>
