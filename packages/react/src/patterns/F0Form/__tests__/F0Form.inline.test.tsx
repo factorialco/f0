@@ -90,6 +90,40 @@ describe("F0Form inline mode", () => {
     expect(input).toHaveValue("Ada Lovelace")
   })
 
+  it("masks private rows after blur and submits the actual edited value", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+    renderProfile({
+      schema: z.object({
+        account: f0FormField(z.string(), {
+          label: "Account number",
+          inputType: "private",
+        }),
+      }),
+      defaultValues: { account: "123456789" },
+      onSubmit,
+    })
+
+    expect(screen.queryByText("123456789")).toBeNull()
+    expect(screen.queryByTitle("123456789")).toBeNull()
+    await user.click(activator("Account number"))
+    const input = await screen.findByRole("textbox", { name: "Account number" })
+    expect(input).toHaveFocus()
+    expect(input).toHaveValue("123456789")
+    await user.clear(input)
+    await user.type(input, "987654321")
+    await user.tab()
+
+    await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
+    expect(screen.queryByText("987654321")).toBeNull()
+    expect(screen.queryByTitle("987654321")).toBeNull()
+    const [submit] = await screen.findAllByRole("button", { name: /submit/i })
+    await user.click(submit)
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith({ account: "987654321" })
+    )
+  })
+
   it("keeps the draft on Enter and shows the action bar", async () => {
     const user = userEvent.setup()
     renderProfile()

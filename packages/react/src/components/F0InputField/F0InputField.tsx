@@ -190,7 +190,6 @@ export type InputFieldProps<T> = {
   transparent?: boolean
   variant?: InputFieldVariant
   editing?: boolean
-  /** At-rest display text, including units when present. Defaults to value. */
   inlineText?: string
 }
 
@@ -397,7 +396,13 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           <InlineValue
             label={label}
             hideLabel={hideLabel}
-            text={inlineText ?? localValue ?? ""}
+            text={
+              localValue === undefined ||
+              localValue === null ||
+              localValue === ""
+                ? ""
+                : (inlineText ?? localValue)
+            }
             placeholder={placeholder}
             size={size}
             icon={icon}

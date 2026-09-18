@@ -72,6 +72,106 @@ describe("F0TextInput inline variant", () => {
     })
   })
 
+  describe("private values", () => {
+    it("masks resting text and its title", () => {
+      render(
+        <F0TextInput
+          variant="inline"
+          type="private"
+          label="SSN"
+          value="123-45-6789"
+        />
+      )
+
+      const display = screen.getByTestId("input-field-inline-value")
+      expect(display).toHaveTextContent("••••••••")
+      expect(screen.getByTitle("••••••••")).toBeInTheDocument()
+      expect(screen.queryByText("123-45-6789")).toBeNull()
+      expect(screen.queryByTitle("123-45-6789")).toBeNull()
+    })
+
+    it("masks uncontrolled edits without replacing the input value", () => {
+      const onChange = vi.fn()
+      const props = {
+        variant: "inline",
+        type: "private",
+        label: "SSN",
+        onChange,
+      } as const
+      const { rerender } = render(<F0TextInput {...props} editing />)
+      fireEvent.change(screen.getByRole("textbox", { name: "SSN" }), {
+        target: { value: "123-45-6789" },
+      })
+      expect(onChange).toHaveBeenCalledWith("123-45-6789")
+      rerender(<F0TextInput {...props} editing={false} />)
+      expect(screen.getByTitle("••••••••")).toBeInTheDocument()
+      expect(screen.queryByText("123-45-6789")).toBeNull()
+      rerender(<F0TextInput {...props} editing />)
+      expect(screen.getByRole("textbox", { name: "SSN" })).toHaveValue(
+        "123-45-6789"
+      )
+    })
+
+    it("keeps the placeholder for an empty private value", () => {
+      render(
+        <F0TextInput
+          variant="inline"
+          type="private"
+          label="SSN"
+          value=""
+          placeholder="Add SSN"
+        />
+      )
+      expect(screen.getByText("Add SSN")).toBeInTheDocument()
+    })
+
+    it("reveals on autofocus and masks on blur without leaving editing mode", () => {
+      const onBlur = vi.fn()
+      const onDismiss = vi.fn()
+      render(
+        <F0TextInput
+          variant="inline"
+          editing
+          type="private"
+          label="SSN"
+          value="123-45-6789"
+          onBlur={onBlur}
+          onDismiss={onDismiss}
+        />
+      )
+      const input = screen.getByLabelText("SSN", { selector: "input" })
+      expect(input).toHaveFocus()
+      expect(input).toHaveAttribute("type", "text")
+      fireEvent.blur(input)
+      expect(input).toHaveAttribute("type", "password")
+      expect(input).toHaveValue("123-45-6789")
+      expect(onBlur).toHaveBeenCalledTimes(1)
+      expect(onDismiss).toHaveBeenCalledWith("blur")
+      fireEvent.focus(input)
+      expect(input).toHaveAttribute("type", "text")
+    })
+
+    it("does not reveal an unfocused editor, including after remount", () => {
+      const props = {
+        variant: "inline",
+        type: "private",
+        label: "SSN",
+        value: "123-45-6789",
+        autoFocus: false,
+      } as const
+      const { rerender } = render(<F0TextInput {...props} editing />)
+      expect(
+        screen.getByLabelText("SSN", { selector: "input" })
+      ).toHaveAttribute("type", "password")
+      fireEvent.focus(screen.getByLabelText("SSN", { selector: "input" }))
+      rerender(<F0TextInput {...props} editing={false} />)
+      rerender(<F0TextInput {...props} editing />)
+      expect(
+        screen.getByLabelText("SSN", { selector: "input" })
+      ).toHaveAttribute("type", "password")
+    })
+  })
+
   describe("editing", () => {
     it("renders the input", () => {
       render(

@@ -153,7 +153,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no button and no hover background of its own; a chevron sits at the far edge of the value, hidden until the surrounding row is hovered or holds focus, and it is the row's only affordance for a select. The dropdown replaces the text only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
+          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no button and no hover background of its own; a chevron sits at the far edge of the value, hidden until the surrounding row is hovered or holds focus, and it is the row's only affordance for a select. The dropdown replaces the text only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Single selection calls `onChange` before `onDismiss`, so the owner can unmount the editor on commit without losing the selected value. Prop and option refreshes do not emit `onChange`. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
       },
     },
   },
@@ -515,4 +515,43 @@ function OpenInlineRoleSelect() {
       </div>
     </div>
   )
+}
+
+function UnmountingEditor({ onChange, onDismiss }: InlineRoleSelectProps) {
+  const [mounted, setMounted] = useState(true)
+  const [value, setValue] = useState<Role>("viewer")
+  return mounted ? (
+    <F0Select
+      variant="inline"
+      editing
+      label="Access level"
+      value={value}
+      options={roleOptions}
+      onChange={(nextValue) => {
+        setValue(nextValue)
+        onChange?.(nextValue)
+      }}
+      onDismiss={(reason) => {
+        onDismiss?.(reason)
+        setMounted(false)
+      }}
+    />
+  ) : (
+    <p role="status">Saved role: {value}</p>
+  )
+}
+
+export const CommitBeforeUnmount: Story = {
+  render: (args) => <UnmountingEditor {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const page = within(canvasElement.ownerDocument.body)
+    await userEvent.click(await page.findByRole("option", { name: /Editor/ }))
+    await expect(args.onChange).toHaveBeenCalledTimes(1)
+    await expect(args.onChange).toHaveBeenCalledWith("editor")
+    await expect(args.onDismiss).toHaveBeenCalledWith("commit")
+    await expect(within(canvasElement).getByRole("status")).toHaveTextContent(
+      "Saved role: editor"
+    )
+    await expect(page.queryByRole("listbox")).toBeNull()
+  },
 }

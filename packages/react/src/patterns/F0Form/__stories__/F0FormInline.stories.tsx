@@ -172,6 +172,51 @@ export const ActionBarAfterAnEdit: Story = {
   },
 }
 
+export const PrivateValue: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="inline-private-value"
+        inline
+        schema={z.object({
+          account: f0FormField(z.string(), {
+            label: "Account number",
+            inputType: "private",
+          }),
+        })}
+        defaultValues={{ account: "123456789" }}
+        onSubmit={submit}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("Mask the resting value and tooltip", async () => {
+      await expect(canvas.queryByText("123456789")).toBeNull()
+      await expect(canvas.queryByTitle("123456789")).toBeNull()
+    })
+    await step(
+      "Reveal on focus and remask the edited value on blur",
+      async () => {
+        await userEvent.click(
+          canvas.getByRole("button", { name: "Account number" })
+        )
+        const input = await canvas.findByRole("textbox", {
+          name: "Account number",
+        })
+        await expect(input).toHaveFocus()
+        await expect(input).toHaveValue("123456789")
+        await userEvent.clear(input)
+        await userEvent.type(input, "987654321")
+        await userEvent.tab()
+        await waitFor(() => expect(canvas.queryByRole("textbox")).toBeNull())
+        await expect(canvas.queryByText("987654321")).toBeNull()
+        await expect(canvas.queryByTitle("987654321")).toBeNull()
+      }
+    )
+  },
+}
+
 export const EscapeReverts: Story = {
   render: () => (
     <div className="w-160">
