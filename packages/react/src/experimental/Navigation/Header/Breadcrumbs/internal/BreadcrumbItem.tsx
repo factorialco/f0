@@ -62,7 +62,10 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
         className={cn(
           "flex items-center gap-2 px-1.5",
           isFirst && "pl-0",
-          isOnly && "text-2xl font-semibold"
+          // One step above `F0Text`'s heading rather than two: at 22px the
+          // page title was the largest thing on any screen, competing with the
+          // content it names.
+          isOnly && "text-xl font-semibold"
         )}
         transition={{ duration: 0.15 }}
       >
@@ -70,7 +73,7 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
           "module" in item &&
           item.module &&
           (isOnly || isFirst) && (
-            <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
+            <F0AvatarModule module={item.module} size={isOnly ? "sm" : "xs"} />
           )}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}

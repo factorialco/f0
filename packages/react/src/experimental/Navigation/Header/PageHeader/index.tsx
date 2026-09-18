@@ -128,7 +128,11 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-page py-4",
+        // 16px rather than the page's own 24: the header is chrome, and its
+        // first element is an avatar whose own shape carries the inset. At 24
+        // the title started a long way in from the sheet's edge while the rail
+        // beside it sits at 16.
+        "flex items-center justify-between px-4 py-4",
         embedded ? "h-12" : "h-16"
       )}
     >
