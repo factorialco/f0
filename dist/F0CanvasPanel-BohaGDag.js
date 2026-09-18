@@ -121569,11 +121569,14 @@ const re2 = Z(
         className: X(
           "flex items-center gap-2 px-1.5",
           r && "pl-0",
-          n && "text-2xl font-semibold"
+          // One step above `F0Text`'s heading rather than two: at 22px the
+          // page title was the largest thing on any screen, competing with the
+          // content it names.
+          n && "text-xl font-semibold"
         ),
         transition: { duration: 0.15 },
         children: [
-          !o && "module" in e && e.module && (n || r) && /* @__PURE__ */ i(md, { module: e.module, size: n ? "md" : "xs" }),
+          !o && "module" in e && e.module && (n || r) && /* @__PURE__ */ i(md, { module: e.module, size: n ? "sm" : "xs" }),
           /* @__PURE__ */ i("span", { className: "truncate", children: !o && "label" in e ? e.label : "" })
         ]
       }
