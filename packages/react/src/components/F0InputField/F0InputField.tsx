@@ -375,8 +375,6 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const hasAppend = append || appendTag || buttonToggle
 
-    // The inline variant at rest: the value as text, no input element, no
-    // chrome.
     if (inline && !editing) {
       return (
         <div

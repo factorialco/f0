@@ -469,7 +469,7 @@ describe("F0InputField", () => {
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
-      expect(wrapper).toHaveClass("h-[32px]")
+      expect(wrapper).toHaveClass("h-8")
     })
 
     it("should apply medium size classes", () => {
@@ -480,7 +480,7 @@ describe("F0InputField", () => {
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
-      expect(wrapper).toHaveClass("h-[40px]")
+      expect(wrapper).toHaveClass("h-10")
     })
 
     it("should handle canGrow prop", () => {
@@ -491,7 +491,7 @@ describe("F0InputField", () => {
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
-      expect(wrapper).toHaveClass("min-h-[40px]")
+      expect(wrapper).toHaveClass("min-h-10")
     })
   })
 

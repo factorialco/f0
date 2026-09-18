@@ -14,10 +14,6 @@ type InlineJobTitleProps = {
   onDismiss?: (reason: InlineDismissReason) => void
 }
 
-/**
- * The parent owns the mode: the story holds `editing`, the component only
- * reports what the user did.
- */
 function InlineJobTitle({
   label = "Job title",
   value: initialValue = "Head of design",
@@ -30,7 +26,7 @@ function InlineJobTitle({
   const [editing, setEditing] = useState(initialEditing)
 
   return (
-    <div className="flex w-[320px] flex-col gap-2">
+    <div className="flex w-80 flex-col gap-2">
       <button
         type="button"
         data-testid="toggle-editing"
@@ -39,8 +35,7 @@ function InlineJobTitle({
       >
         {editing ? "Stop editing" : "Start editing"}
       </button>
-      {/* Somewhere to send focus without changing the mode, so a blur can be
-          told apart from the parent closing the editor. */}
+      {/* Keep focus changes independent of the controlled edit mode. */}
       <button
         type="button"
         data-testid="focus-sink"
@@ -48,7 +43,7 @@ function InlineJobTitle({
       >
         Focus something else
       </button>
-      <div data-testid="value-box" className="w-[320px]">
+      <div data-testid="value-box" className="w-80">
         <F0TextInput
           variant="inline"
           label={label}
@@ -64,7 +59,6 @@ function InlineJobTitle({
   )
 }
 
-/** Where the first glyph of the text is painted, padding included. */
 function textStartX(element: Element) {
   const { left } = element.getBoundingClientRect()
   return left + parseFloat(getComputedStyle(element).paddingLeft)
@@ -141,10 +135,6 @@ export const WithVisibleLabel: Story = {
   },
 }
 
-/**
- * The value must not move when the row activates it: same first glyph, same
- * height.
- */
 export const TextDoesNotMove: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -173,7 +163,6 @@ export const TextDoesNotMove: Story = {
   },
 }
 
-/** Both presentations fill whatever box the row declares. */
 export const FillsTheRowBox: Story = {
   render: ({ label, value }) => <FixedBox label={label} value={value} />,
   play: async ({ canvasElement, step }) => {
@@ -215,8 +204,7 @@ function FixedBox({ label = "Job title", value = "Head of design" }) {
       </button>
       <div
         data-testid="fixed-box"
-        // A ring, not a border: it marks the 40×320 box without taking any
-        // space out of it, so the measurement stays honest.
+        // A ring marks the box without changing its dimensions.
         className="h-10 w-80 ring-1 ring-f1-border"
       >
         <F0TextInput
@@ -231,10 +219,6 @@ function FixedBox({ label = "Job title", value = "Head of design" }) {
   )
 }
 
-/**
- * Enter, Escape and blur are reported; none of them changes what is drawn.
- * The parent decides, or the row gets stuck.
- */
 export const ReportsDismissWithoutClosing: Story = {
   args: {
     editing: true,
@@ -268,7 +252,7 @@ export const ReportsDismissWithoutClosing: Story = {
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
-    <div className="flex w-[320px] flex-col gap-4">
+    <div className="flex w-80 flex-col gap-4">
       <div className="h-10">
         <F0TextInput
           variant="inline"

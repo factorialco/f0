@@ -13,10 +13,7 @@ type InlineValueProps = {
   size?: InputFieldSize
 }
 
-/**
- * The transparent border and the `px-3` repeat the editor's chrome, so the
- * first glyph sits at the same x in both modes.
- */
+/** Match the editor border and padding to prevent text movement. */
 const InlineValue = ({
   label,
   hideLabel,
