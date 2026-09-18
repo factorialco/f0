@@ -4,6 +4,67 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react"
 const LABEL_SEPARATOR = ", "
 
 /**
+ * Whether the element's own box cuts its text off.
+ *
+ * `scrollWidth > clientWidth` is the same question `OneEllipsis` asks to decide
+ * whether to draw an ellipsis, but asked here about the RENDERED node — so an
+ * avatar or icon sharing the row is already accounted for, which re-measuring
+ * the string on its own would miss.
+ *
+ * Both triggers matter and neither implies the other: the box can change width
+ * under the same text (a resizing column), and the text can change under the
+ * same box (a new selection). So the observer covers the first and `text` in
+ * the deps covers the second.
+ */
+export function useIsClipped(
+  ref: React.RefObject<HTMLElement | null>,
+  text: string
+): boolean {
+  const [clipped, setClipped] = useState(false)
+
+  useLayoutEffect(() => {
+    const element = ref.current
+    /**
+     * No element means no text is being rendered — an empty `text`, which is
+     * the only way this component leaves the label out. The two move together,
+     * so the effect re-runs the moment there is something to measure.
+     */
+    if (!element) {
+      setClipped(false)
+      return
+    }
+
+    const measure = () => setClipped(element.scrollWidth > element.clientWidth)
+    measure()
+
+    /**
+     * Re-measure after the next layout: text in a flex row that an ancestor
+     * width-constrains only on a later pass mounts at its natural width and
+     * shrinks afterwards, a transition the observer can miss — the same late
+     * shrink `OneEllipsis` guards against.
+     *
+     * The timer is not a duplicate of the frame. A page that is not producing
+     * frames — a background tab, a hidden panel — never runs the callback or
+     * delivers an observation, and the measurement would stay stuck at whatever
+     * mount happened to see. Timers keep running there, so this is the path
+     * that still answers.
+     */
+    const raf = requestAnimationFrame(measure)
+    const timeout = setTimeout(measure, 100)
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(timeout)
+      observer.disconnect()
+    }
+  }, [ref, text])
+
+  return clipped
+}
+
+/**
  * Measures the width of text using a hidden span element
  */
 function measureText(span: HTMLSpanElement, text: string): number {
@@ -84,3 +145,9 @@ export function useLabelsOverflow(labels: string[]): {
 
 /** Exported constant for use in components */
 export { LABEL_SEPARATOR }
+
+/** What an item is called outside its row: `selectedLabel` when it has one. */
+export const displayLabel = (item: {
+  label: string
+  selectedLabel?: string
+}): string => item.selectedLabel ?? item.label

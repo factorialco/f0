@@ -8,6 +8,11 @@ import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
 import { F0Chat } from "./F0Chat"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
+import {
+  MockChatAppProvider,
+  useConversationRuntime,
+} from "./mocks/MockChatApp"
+import { MockCommunitySurface } from "./mocks/MockCommunitySurface"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
 import { ChatUIProvider } from "./providers/ChatUIProvider"
@@ -390,7 +395,7 @@ const BurstConversation = (): ReactNode => {
   }
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat />
         </F0ChatProvider>
@@ -429,7 +434,7 @@ const FlakyNetworkConversation = (): ReactNode => {
   }
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat />
         </F0ChatProvider>
@@ -562,7 +567,7 @@ const StormConversation = ({
 
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <Profiler
           id="f0chat-storm"
           onRender={(_id, _phase, actualDuration) => {
@@ -794,7 +799,7 @@ const MembershipConversation = (): ReactNode => {
   })
   return (
     <Frame>
-      <div className="relative flex h-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <F0ChatProvider runtime={runtime}>
           <F0Chat headerActions={headerActions} />
         </F0ChatProvider>
@@ -1044,6 +1049,182 @@ const ColdStartVideoConversation = (): ReactNode => {
   )
 }
 
+/** A photo of an exact size, so the sizing rule can be seen rather than
+ * described: a white frame that is only whole when the photo is. */
+const sizedPhoto = (width: number, height: number, hue: number): string =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+      `<rect width="${width}" height="${height}" fill="hsl(${hue} 70% 62%)"/>` +
+      `<rect x="4" y="4" width="${width - 8}" height="${height - 8}" fill="none" stroke="white" stroke-width="6"/>` +
+      `<text x="50%" y="50%" fill="white" font-family="system-ui" font-size="${Math.max(12, Math.min(width, height) / 6)}" font-weight="700" text-anchor="middle" dominant-baseline="middle">${width}×${height}</text>` +
+      `</svg>`
+  )}`
+
+const SINGLE_PHOTO_CASES: { body: string; width: number; height: number }[] = [
+  {
+    body: "3:2 — its own proportions, the common case",
+    width: 1200,
+    height: 800,
+  },
+  {
+    body: "2:3 — narrowed by the height cap, still whole",
+    width: 800,
+    height: 1200,
+  },
+  {
+    body: "1:10 — letterboxed instead of cropped to a slice",
+    width: 200,
+    height: 2000,
+  },
+  { body: "5:1 — the same rule at the other end", width: 2000, height: 400 },
+  { body: "250×180 — small, so it stays small", width: 250, height: 180 },
+  {
+    body: "64×64 — centred in the floor box at its own size",
+    width: 64,
+    height: 64,
+  },
+]
+
+const SinglePhotoConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: SINGLE_PHOTO_CASES.map(({ body, width, height }, index) => ({
+      id: `single-photo-${index}`,
+      author: ana,
+      body,
+      createdAt: new Date().toISOString(),
+      isMine: false,
+      attachments: [
+        {
+          kind: "image" as const,
+          url: sizedPhoto(width, height, index * 47),
+          name: `${width}x${height}.svg`,
+          width,
+          height,
+        },
+      ],
+    })),
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+const LINK_PREVIEW_CASES: {
+  body: string
+  title: string
+  description?: string
+  image?: { width: number; height: number }
+}[] = [
+  {
+    body: "1200×630 — the Open Graph standard, uncropped",
+    title: "Dealing with flaky tests — Engineering Handbook",
+    description:
+      "How we detect, quarantine and fix flaky tests across the CI pipeline.",
+    image: { width: 1200, height: 630 },
+  },
+  {
+    body: "2000×400 — a wide strip is still an honest banner",
+    title: "Release timeline",
+    description: "Every deploy of the quarter on one line.",
+    image: { width: 2000, height: 400 },
+  },
+  {
+    body: "600×1400 — a phone screenshot reads as a thumbnail",
+    title: "Mobile CI run — full transcript",
+    description:
+      "Every step of a failing mobile pipeline, captured end to end.",
+    image: { width: 600, height: 1400 },
+  },
+  {
+    body: "512×512 — a square logo is not a banner either",
+    title: "Retry budget policy",
+    description: "How many retries a suite may spend before it fails.",
+    image: { width: 512, height: 512 },
+  },
+  {
+    body: "64×64 — a favicon-sized image is never blown up",
+    title: "Status page — incident history",
+    image: { width: 64, height: 64 },
+  },
+  {
+    body: "No og:image at all — texts only",
+    title: "Plain unfurl",
+    description: "Nothing to draw, so nothing is reserved.",
+  },
+]
+
+const LinkPreviewConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 0,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      ...LINK_PREVIEW_CASES.map(
+        ({ body, title, description, image }, index) => ({
+          id: `link-preview-${index}`,
+          author: ana,
+          body,
+          createdAt: new Date().toISOString(),
+          isMine: false,
+          linkPreviews: [
+            {
+              url: `https://handbook.example.com/case-${index}`,
+              title,
+              description,
+              imageUrl: image
+                ? sizedPhoto(image.width, image.height, index * 53)
+                : undefined,
+            },
+          ],
+        })
+      ),
+      {
+        id: "link-preview-stack",
+        author: ana,
+        body: "Two links stack as compact rows, whatever their images are",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        linkPreviews: [
+          {
+            url: "https://grafana.example.com/d/ci",
+            title: "CI pipeline health — Grafana",
+            description: "Build durations, flake rate and queue times.",
+            imageUrl: sizedPhoto(1200, 630, 12),
+          },
+          {
+            url: "https://status.example.com/incidents",
+            title: "Status page — incident history",
+            description: "Past incidents and current component status.",
+            imageUrl: sizedPhoto(600, 1400, 300),
+          },
+        ],
+      },
+    ],
+  })
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 const meta = {
   title: "F0Chat",
   component: F0Chat,
@@ -1231,9 +1412,11 @@ export const Snapshot: Story = {
       })
       await userEvent.type(composer, "12345678901")
       await userEvent.keyboard("{Enter}")
-      await expect(
-        messageLimit.getByText("Messages can be up to 10 characters")
-      ).toBeVisible()
+      await waitFor(() =>
+        expect(
+          messageLimit.getByText("Messages can be up to 10 characters")
+        ).toBeVisible()
+      )
     })
 
     await step("Render document snapshots", async () => {
@@ -1661,6 +1844,95 @@ export const WithDocumentAttachments: Story = {
   render: () => <DocumentConversation />,
 }
 
+/** The Open Graph image decides the card's shape: landscape and large enough
+ * spans the top at its own proportions, anything squarer, taller or smaller
+ * becomes a 64px thumbnail beside the text. Several links always stack as
+ * compact rows. The host sends no dimensions, so each image is measured once. */
+export const LinkPreviews: Story = {
+  name: "Link previews",
+  render: () => <LinkPreviewConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Give each og:image the shape that suits it", async () => {
+      // Only the rows the virtualizer has mounted — the expectation travels
+      // with the card's title.
+      const banner = ["1200×630", "2000×400"]
+      const thumb = ["600×1400", "512×512", "64×64"]
+      const cards = await canvas.findAllByTestId("chat-link-preview")
+
+      for (const card of cards) {
+        const label = card.textContent ?? ""
+        if (banner.some((size) => label.includes(size))) {
+          await expect(
+            within(card).getByTestId("chat-link-preview-banner")
+          ).toBeInTheDocument()
+        }
+        if (thumb.some((size) => label.includes(size))) {
+          await expect(
+            within(card).getByTestId("chat-link-preview-thumb")
+          ).toBeInTheDocument()
+        }
+      }
+    })
+  },
+}
+
+/** A photo on its own is the message, so it keeps its own proportions and is
+ * shown whole — within 128–384 wide and 128–512 tall. Ratios past what that box
+ * can hold letterbox rather than crop; photos smaller than the media width are
+ * never blown up. Two or more photos keep the mosaic (see the rich-media seed in
+ * Default). */
+export const SinglePhotoSizing: Story = {
+  name: "Single photo sizing",
+  render: () => <SinglePhotoConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Size each lone photo from its own dimensions", async () => {
+      // Only the rows the virtualizer has mounted, keyed by the photo's name —
+      // which is its intrinsic size, so the expectation travels with the row.
+      const expected: Record<string, { width: string; footprint?: string }> = {
+        "1200x800.svg": { width: "384px" },
+        "800x1200.svg": { width: "341px" },
+        "200x2000.svg": { width: "128px", footprint: "40%" },
+        "2000x400.svg": { width: "384px", footprint: "100%" },
+        "250x180.svg": { width: "250px" },
+        "64x64.svg": { width: "128px", footprint: "50%" },
+      }
+
+      const albums = await canvas.findAllByTestId("chat-image-album")
+      for (const album of albums) {
+        // By `alt`, not by role: the tile is a labelled <button>, and a button
+        // has presentational children in ARIA — the photo inside it is not in
+        // the accessibility tree at all, so `getByRole("img")` finds nothing.
+        // The blur underlay is `aria-hidden`, which is what excludes it here.
+        const photo = album.querySelector<HTMLImageElement>(
+          "img:not([aria-hidden])"
+        )
+        await expect(photo).not.toBeNull()
+        if (!photo) {
+          continue
+        }
+        const name = photo.getAttribute("alt") ?? ""
+        const spec = expected[name]
+        await expect(spec).toBeDefined()
+        await expect(album).toHaveStyle({ width: spec?.width })
+        // Letterboxed photos give up one side rather than being cropped; the
+        // rest fill their box.
+        //
+        // Measured, not read off the style: these are percentage widths, and a
+        // real browser reports them computed — in pixels — so comparing them
+        // as written can only ever fail. The ratio is what the rule is about.
+        const footprint = spec?.footprint ? parseFloat(spec.footprint) / 100 : 1
+        await expect(
+          photo.getBoundingClientRect().width / album.clientWidth
+        ).toBeCloseTo(footprint, 1)
+      }
+    })
+  },
+}
+
 /** Inline video attachments: each F0VideoPlayer stays wide, multiple videos
  * stack vertically, and the player itself provides playback, download and
  * fullscreen. */
@@ -1786,13 +2058,103 @@ export const StormFast: Story = {
 }
 
 /**
- * Stress test: the transcript is virtualized, so even a very large history stays
- * smooth (only the visible window is in the DOM). Scroll, jump-to-bottom and
- * load-older should all feel instant.
+ * Stress test: the transcript is virtualized, so even a very large history
+ * stays smooth. A distant jump-to-bottom fades, repositions near the live tail,
+ * and shows only the short final glide; nearby navigation remains continuous.
  */
 export const HugeConversation: Story = {
   name: "200k messages (virtualized)",
   render: () => <Conversation initialCount={200_000} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const viewport = canvasElement.querySelector<HTMLElement>(
+      "[data-chat-viewport]"
+    )
+    await expect(viewport).not.toBeNull()
+    if (!viewport) {
+      return
+    }
+    const transcript = viewport.parentElement
+    await expect(transcript).not.toBeNull()
+    if (!transcript) {
+      return
+    }
+
+    await step(
+      "Teleport near the tail before the short bottom glide",
+      async () => {
+        await waitFor(() =>
+          expect(viewport.scrollHeight).toBeGreaterThan(10_000)
+        )
+        // Let Virtuoso's entry measurements settle before imitating a reader
+        // moving two dozen viewports back through the loaded history.
+        await new Promise<void>((resolve) => setTimeout(resolve, 250))
+        for (let page = 0; page < 24; page += 1) {
+          viewport.dispatchEvent(
+            new WheelEvent("wheel", {
+              deltaY: -viewport.clientHeight,
+              bubbles: true,
+            })
+          )
+          viewport.scrollTop = Math.max(
+            0,
+            viewport.scrollTop - viewport.clientHeight
+          )
+          viewport.dispatchEvent(new Event("scroll", { bubbles: true }))
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          )
+        }
+        await waitFor(() =>
+          expect(
+            viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+          ).toBeGreaterThan(viewport.clientHeight * 2)
+        )
+
+        const jumpButton = await canvas.findByRole(
+          "button",
+          { name: "Scroll to bottom" },
+          { timeout: 2_000 }
+        )
+        await userEvent.click(jumpButton)
+
+        // The far part of the trip happens behind the fade.
+        await waitFor(() => expect(transcript).toHaveClass("opacity-0"), {
+          timeout: 2_000,
+        })
+
+        // The transcript comes back a short, measured distance above the tail
+        // and glides the rest: visible, moving, not yet at the bottom. This
+        // catches both a direct smooth scroll through the full history and a
+        // glide that finished behind the fade.
+        let glideScrollTop = 0
+        await waitFor(
+          () => {
+            const distanceFromBottom =
+              viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+            expect(transcript).toHaveClass("opacity-100")
+            expect(distanceFromBottom).toBeGreaterThan(64)
+            expect(distanceFromBottom).toBeLessThanOrEqual(
+              viewport.clientHeight + 64
+            )
+            glideScrollTop = viewport.scrollTop
+          },
+          { timeout: 2_000 }
+        )
+
+        await waitFor(
+          () => {
+            const distanceFromBottom =
+              viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+            expect(distanceFromBottom).toBeLessThanOrEqual(2)
+            expect(viewport.scrollTop).toBeGreaterThan(glideScrollTop)
+            expect(transcript).toHaveClass("opacity-100")
+          },
+          { timeout: 3_000 }
+        )
+      }
+    )
+  },
 }
 
 /** First open: a bubble skeleton instead of a spinner. On re-entry the adapter
@@ -1824,4 +2186,280 @@ export const FirstLoadSkeleton: Story = {
       </Frame>
     )
   },
+}
+
+/**
+ * The same first load in a COMMUNITY, where the transcript is a column of
+ * full-width posts rather than a conversation. The placeholder follows the
+ * channel, so what arrives is the shape that was already on screen — compare it
+ * with the bubble skeleton above.
+ */
+export const FirstLoadSkeletonCommunity: Story = {
+  name: "First load skeleton (community)",
+  render: () => {
+    const runtime: F0ChatRuntime = {
+      currentUserId: "me",
+      channel: {
+        id: "com-company-news",
+        type: "community",
+        title: "Company news",
+        avatar: { type: "emoji", emoji: "📣" },
+      },
+      status: "connecting",
+      messages: [],
+      typingUsers: [],
+      hasMoreOlder: false,
+      loadingOlder: false,
+      unreadCount: 0,
+      firstUnreadId: null,
+      sendMessage: () => {},
+      retryMessage: () => {},
+      loadOlder: () => {},
+      toggleReaction: () => {},
+      deleteMessage: () => {},
+      onInputActivity: () => {},
+    }
+    return (
+      <Frame>
+        <F0ChatProvider runtime={runtime}>
+          <F0Chat />
+        </F0ChatProvider>
+      </Frame>
+    )
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Community channels
+// ---------------------------------------------------------------------------
+
+/**
+ * One community from the shared mock store, beside the page its posts open
+ * into — the arrangement the product has, and the one that makes the feed
+ * usable: clicking a post replaces the PAGE, not the conversation.
+ *
+ * Without a host to open posts into, the cards would (correctly) not be
+ * clickable at all, so the story ships one.
+ */
+const CommunityConversation = ({ convId }: { convId: string }): ReactNode => (
+  <MockChatAppProvider>
+    <div className="flex h-[680px] w-full gap-4">
+      <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-solid border-f1-border-secondary">
+        <CommunityMain />
+      </div>
+      <div className="w-[420px] shrink-0">
+        <CommunityPanel convId={convId} />
+      </div>
+    </div>
+  </MockChatAppProvider>
+)
+
+/** The page beside the feed: the open post or composer, or a placeholder. */
+const CommunityMain = (): ReactNode => (
+  <MockCommunitySurface
+    fallback={
+      <div className="grid h-full place-items-center p-6 text-center text-f1-foreground-secondary">
+        Pick a post from the feed — it opens here, with the conversation still
+        open beside it.
+      </div>
+    }
+  />
+)
+
+const CommunityPanel = ({ convId }: { convId: string }): ReactNode => {
+  const runtime = useConversationRuntime(convId)
+  const { headerActions } = useDemoHeaderActions(runtime)
+  return (
+    <div className="flex h-full">
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat headerActions={headerActions} />
+      </F0ChatProvider>
+    </div>
+  )
+}
+
+/**
+ * A community: a channel whose items are POSTS. Full-width cards with a title,
+ * a formatted body, a cover, counters and reactions — no bubbles, no avatar
+ * gutter, no delivery footer.
+ *
+ * Three posts start unread, so the "New posts" divider sits above the first of
+ * them and the jump pill reads "3 new posts". Reading is the scroll itself:
+ * each post clears once it has been past the fold for a moment, so the count
+ * comes down one at a time rather than all at once at the bottom.
+ */
+export const Community: Story = {
+  name: "Community (read-only)",
+  render: () => <CommunityConversation convId="com-company-news" />,
+}
+
+/**
+ * The same surface for someone who may publish. The message composer is
+ * replaced by a bar that OPENS a post composer — a title, a rich text body and
+ * an explicit Publish. Enter never publishes: a post reaches the whole
+ * community, and the cost of sending one by accident is not a typo.
+ */
+export const CommunityCanPost: Story = {
+  name: "Community (can post)",
+  render: () => <CommunityConversation convId="com-barcelona-office" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the composer is a button, not a textarea", async () => {
+      const cta = await canvas.findByTestId("chat-post-composer")
+      await expect(cta).toBeVisible()
+      await userEvent.click(cta)
+    })
+    await step("publishing needs a title, and never a key", async () => {
+      const title = await within(document.body).findByRole("textbox", {
+        name: /title/i,
+      })
+      // Awaited: the field is in the DOM as soon as the dialog mounts, but the
+      // dialog is still playing its entrance and counts as not visible until
+      // it lands.
+      await waitFor(() => expect(title).toBeVisible())
+      await userEvent.type(title, "Hello everyone{Enter}")
+      // Enter did not submit: the dialog is still open with the draft in it.
+      await expect(title).toHaveValue("Hello everyone")
+    })
+  },
+}
+
+/**
+ * A reader without permission. The composer is not disabled — it is GONE, and
+ * its place says who *can* post. A disabled composer promises an affordance
+ * most readers will never have, and says nothing about who does.
+ */
+export const CommunityReadOnly: Story = {
+  name: "Community (who can post)",
+  render: () => <CommunityConversation convId="com-people-ops" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the notice takes the composer's place", async () => {
+      await expect(
+        await canvas.findByTestId("chat-read-only-notice")
+      ).toHaveTextContent(/only people ops can post here/i)
+      await expect(canvas.queryByTestId("chat-post-composer")).toBeNull()
+    })
+  },
+}
+
+/**
+ * Twelve unread posts: a two-figure badge, and the divider naming POSTS rather
+ * than messages. The divider is frozen for the whole visit — a post you are
+ * still reading must not slide above the line while you read it.
+ */
+export const CommunityUnreadPosts: Story = {
+  name: "Community with unread posts",
+  render: () => <CommunityConversation convId="com-people-ops" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the divider counts posts", async () => {
+      // The mock holds a community's feed back on purpose (it is a second
+      // query in production), so the wait has to clear the fixture's own delay
+      // rather than the library's default.
+      const viewport = await canvas.findByTestId(
+        "chat-message-viewport",
+        {},
+        { timeout: 5000 }
+      )
+
+      // Scrolled to, not merely awaited: the feed enters at the newest post and
+      // the divider sits twelve of them further up, outside what the
+      // virtualizer has mounted. What this story is about is the WORD the
+      // divider uses on a community, not where the feed lands.
+      await waitFor(
+        async () => {
+          viewport.scrollBy({ top: -viewport.clientHeight })
+          await expect(canvas.getByText("New posts")).toBeVisible()
+        },
+        { timeout: 10000 }
+      )
+    })
+  },
+}
+
+/** Every post read: no badge, no divider — and reaction-heavy posts, which is
+ * what a community mostly is once the news has been read. */
+export const CommunityAllRead: Story = {
+  name: "Community (all read)",
+  render: () => <CommunityConversation convId="com-kudos" />,
+}
+
+/**
+ * THE SHELF — a community's two lists, as chips under the header.
+ *
+ * Barcelona office opens with one post pinned and four scheduled, so both chips
+ * are there with their counts. What to exercise:
+ *
+ * - press a chip: a POPOVER opens over the feed, wider than the panel and
+ *   floating free of it. The header is still the channel, the composer is still
+ *   there, and the transcript keeps its scroll;
+ * - press the other chip: crossing is one press, on the chips themselves.
+ *   There are no tabs inside — the chips already are the switch;
+ * - the third chip is **Drafts**, and it is yours alone: two posts nobody else
+ *   can see, one of them with no title at all. A draft opens into the COMPOSER
+ *   (there is nothing to preview about something half-written) and its menu is
+ *   Publish / Delete — it has no moment to bring forward and nothing to cancel.
+ *   Save one from the composer's "Save as draft" and it lands here, newest
+ *   first;
+ * - rows carry two lines of the post and a thumbnail of its cover, so what you
+ *   are looking for is recognisable before you open it;
+ * - a pinned row opens the post's page; its ⋯ offers "Go to post", which takes
+ *   you to it IN the feed with a ring around it, and "Unpin post";
+ * - a scheduled row says when it goes out and tags the events, and opens a
+ *   PREVIEW — the page it will be, with no comments, no reactions and no
+ *   visits, because none of them have happened — with Publish now / Edit /
+ *   Cancel on a bar;
+ * - Escape and a press outside close it. There is no ✕: leaving a popover by
+ *   pressing away from it is what everyone already does.
+ */
+export const CommunityPinnedAndScheduled: Story = {
+  name: "Community (pinned + scheduled + drafts)",
+  render: () => <CommunityConversation convId="com-barcelona-office" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("both shelves announce themselves", async () => {
+      const shelf = await canvas.findByTestId("chat-community-shelf")
+      await expect(shelf).toHaveTextContent("Pinned 1")
+      await expect(shelf).toHaveTextContent("Scheduled 4")
+      await expect(shelf).toHaveTextContent("Drafts 2")
+    })
+  },
+}
+
+/**
+ * A pinned post in a channel you CANNOT post in — which is most of them, for
+ * most people.
+ *
+ * Pinning is moderation; reading what was pinned is not. Company news keeps two
+ * posts at the top and offers every reader the chip and the list, but the ⋯ on
+ * a row only offers "Go to post": there is no unpinning someone else's pin, and
+ * no Scheduled chip at all, because what has not been published is the
+ * publisher's business.
+ */
+export const CommunityPinnedReadOnly: Story = {
+  name: "Community (pinned, no permission)",
+  render: () => <CommunityConversation convId="com-company-news" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the pins are there, the queue is not", async () => {
+      const shelf = await canvas.findByTestId("chat-community-shelf")
+      await expect(shelf).toHaveTextContent("Pinned 2")
+      await expect(shelf).not.toHaveTextContent("Scheduled")
+    })
+  },
+}
+
+/**
+ * A COMUNICADO: the post a company needs everyone to have read.
+ *
+ * The security policy in Company news carries its documents, and asks to be
+ * acknowledged — open it from the feed and the bar at the bottom asks, then
+ * confirms with the moment it happened and never disappears again. Further down
+ * the same feed, the legal notice has comments and reactions switched off: a
+ * notice board, not a conversation.
+ */
+export const CommunityAnnouncements: Story = {
+  name: "Community (comunicados)",
+  render: () => <CommunityConversation convId="com-company-news" />,
 }

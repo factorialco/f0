@@ -14,6 +14,10 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
+import {
+  referenceLineRows,
+  referenceLineSeries,
+} from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -162,6 +166,7 @@ export function useLineChartOptions(
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
+    referenceLines,
     echartsOptions,
   }: F0DataChartLineProps,
   size: LineChartSize
@@ -188,7 +193,8 @@ export function useLineChartOptions(
 
     const echartsSeries = series.map((s, i) =>
       buildSeriesEntry({
-        series: // When forced off, also strip the per-series override so it doesn't
+        // When forced off, also strip the per-series override so it doesn't
+        series:
           // accidentally re-enable area on a single series in `buildSeriesEntry`.
           isMultiSeries ? { ...s, showArea: false } : s,
         index: i,
@@ -247,6 +253,9 @@ export function useLineChartOptions(
                 i18n.dataChart.tooltip.fromPrevious,
                 theme
               ),
+              // A line's tooltip fires on the axis, which owns the whole plot,
+              // so its marks never receive the pointer and must ride along here.
+              ...referenceLineRows(referenceLines, formatTooltipValue),
             ],
           },
           theme
@@ -256,20 +265,26 @@ export function useLineChartOptions(
       return renderValueTooltip(
         {
           title: category,
-          rows: points.map((point) => ({
-            marker: point.marker,
-            value: formatTooltipValue(Number(point.value)),
-            label: String(point.seriesName ?? ""),
-          })),
+          rows: [
+            ...points.map((point) => ({
+              marker: point.marker,
+              value: formatTooltipValue(Number(point.value)),
+              label: String(point.seriesName ?? ""),
+            })),
+            ...referenceLineRows(referenceLines, formatTooltipValue),
+          ],
         },
         theme
       )
     }
 
-    return buildBaseChartOptions({
+    const lineOptions = buildBaseChartOptions({
       categories,
       theme,
-      series: echartsSeries,
+      series: [
+        ...echartsSeries,
+        ...referenceLineSeries(referenceLines, theme, "y"),
+      ],
       legendData,
       isVertical: true,
       showGrid,
@@ -284,6 +299,8 @@ export function useLineChartOptions(
       containerHeight,
       boundaryGap: false,
     })
+
+    return lineOptions
   }, [
     categories,
     series,
@@ -296,6 +313,7 @@ export function useLineChartOptions(
     valueFormatter,
     tooltipValueFormatter,
     categoryFormatter,
+    referenceLines,
     echartsOptions,
     theme,
     i18n,

@@ -168,15 +168,24 @@ const buildSubGroups = <R extends RecordType>({
   fields: string[]
   groupByConfig: Record<string, GroupByFieldConfig>
   filters: FiltersState<FiltersDefinition>
-}): GroupRecord<R>[] => {
+}): { groups: GroupRecord<R>[]; own: R[] } => {
   const [field, ...remainingFields] = fields
   const config = groupByConfig[field]
+  const own: R[] = []
 
   const buckets = new Map<string, R[]>()
   for (const record of records) {
-    // Same normalization the top level applies, so an empty value lands in the
-    // same bucket at every depth.
-    const groupKey = String(getValueByPath(record, field) || undefined)
+    const value = getValueByPath(record, field)
+
+    // NO VALUE AT THIS LEVEL: the record belongs to the group above rather than
+    // to one of this level's. Bucketing it would name a group after the missing
+    // value and draw a heading with nothing to say — see `ownRecords`.
+    if (!value) {
+      own.push(record)
+      continue
+    }
+
+    const groupKey = String(value)
     const bucket = buckets.get(groupKey)
     if (bucket) {
       bucket.push(record)
@@ -185,24 +194,34 @@ const buildSubGroups = <R extends RecordType>({
     }
   }
 
-  return Array.from(buckets.entries()).map(([groupKey, groupRecords]) => {
-    const key = `${parentKey}${GROUP_KEY_SEPARATOR}${groupKey}`
-    return {
-      key,
-      label: config.label(groupKey as unknown, filters),
-      itemCount: groupRecords.length,
-      records: groupRecords,
-      ...(remainingFields.length > 0 && {
-        subGroups: buildSubGroups({
-          records: groupRecords,
-          parentKey: key,
-          fields: remainingFields,
-          groupByConfig,
-          filters,
+  const groups = Array.from(buckets.entries()).map(
+    ([groupKey, groupRecords]) => {
+      const key = `${parentKey}${GROUP_KEY_SEPARATOR}${groupKey}`
+      const nested =
+        remainingFields.length > 0
+          ? buildSubGroups({
+              records: groupRecords,
+              parentKey: key,
+              fields: remainingFields,
+              groupByConfig,
+              filters,
+            })
+          : undefined
+
+      return {
+        key,
+        label: config.label(groupKey as unknown, filters),
+        itemCount: groupRecords.length,
+        records: groupRecords,
+        ...(nested?.groups.length && {
+          subGroups: nested.groups,
+          ...(nested.own.length && { ownRecords: nested.own }),
         }),
-      }),
+      }
     }
-  })
+  )
+
+  return { groups, own }
 }
 
 /**
@@ -259,12 +278,33 @@ export type GroupRecord<RecordType> = {
    * before nesting existed.
    */
   subGroups?: GroupRecord<RecordType>[]
+  /**
+   * The records that belong to THIS group and to none of its `subGroups` —
+   * the ones with no value at the next level down.
+   *
+   * A tree whose branches differ in depth has these: a subproject with tasks
+   * under it becomes a sub-group, while one without stays a row of its parent.
+   * Without somewhere to put them they would bucket under the missing value
+   * and surface beneath a heading with no name.
+   *
+   * Only set when `subGroups` is, and only when some record lacks that value.
+   */
+  ownRecords?: RecordType[]
 }
 
 export type Data<R extends RecordType> = {
   records: WithGroupId<R>[]
   type: "grouped" | "flat"
   groups: GroupRecord<R>[]
+  /**
+   * The records with no value at the FIRST grouping level — they belong to no
+   * group at all, and read as plain rows above the ones that do.
+   *
+   * The counterpart of a group's `ownRecords` one level up: between them a list
+   * can be grouped without being uniformly grouped, which is what a real
+   * hierarchy looks like — some rows nested two deep, some one, some loose.
+   */
+  ungroupedRecords?: WithGroupId<R>[]
 }
 
 /**
@@ -488,18 +528,17 @@ export function useData<
 
   const deferredSearch = useDeferredValue(currentSearch)
 
-  // We need to use a ref to get the latest search value
-  // because the search value is updated asynchronously
-  // and we need to use the latest value in the callback functions
-  // like loadMore, setPage, etc.
-  const searchValue = useRef<string | undefined>(undefined)
-  useEffect(() => {
-    searchValue.current = !search?.enabled
-      ? undefined
-      : search?.sync
-        ? currentSearch
-        : deferredSearch || currentSearch
-  }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
+  /**
+   * Derived in render, not mirrored into a ref by an effect: the callbacks
+   * below list it as a dependency, and a ref is only updated after the render
+   * that read it, so a change with no render behind it (clearing the query on
+   * close) never refetched.
+   */
+  const effectiveSearch = !search?.enabled
+    ? undefined
+    : search?.sync
+      ? currentSearch
+      : deferredSearch || currentSearch
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items
@@ -639,7 +678,16 @@ export function useData<
      */
     if (isGrouped) {
       const data = decorateWithGroupId(rawData, groupingField, groupIdCacheRef)
-      const groupedData = groupBy(data, GROUP_ID_SYMBOL)
+      // A record with nothing at this level is not a group of its own: it is
+      // ungrouped, and says so by sitting above the groups rather than under a
+      // heading named after the value it is missing.
+      const ungroupedRecords = data.filter(
+        (record) => record[GROUP_ID_SYMBOL] === undefined
+      )
+      const groupedData = groupBy(
+        data.filter((record) => record[GROUP_ID_SYMBOL] !== undefined),
+        GROUP_ID_SYMBOL
+      )
       const groupConfig = groupByConfig[groupingField] as GroupByFieldConfig
 
       /**
@@ -654,6 +702,7 @@ export function useData<
       return {
         type: "grouped" as const,
         records: data,
+        ...(ungroupedRecords.length && { ungroupedRecords }),
         groups: Array.from(groupedData.entries()).map(
           ([groupKey, groupRecords]) => ({
             key: groupKey,
@@ -663,8 +712,12 @@ export function useData<
               mergedFilters
             ),
             records: groupRecords,
-            ...(subFields.length > 0 && {
-              subGroups: buildSubGroups({
+            ...(() => {
+              if (!subFields.length) {
+                return {}
+              }
+
+              const nested = buildSubGroups({
                 records: groupRecords,
                 parentKey: groupKey,
                 fields: subFields,
@@ -673,8 +726,19 @@ export function useData<
                   GroupByFieldConfig
                 >,
                 filters: mergedFilters,
-              }),
-            }),
+              })
+
+              // Every record lacking the next level means there is no nesting
+              // here at all — this group's rows are simply its own.
+              if (!nested.groups.length) {
+                return {}
+              }
+
+              return {
+                subGroups: nested.groups,
+                ...(nested.own.length && { ownRecords: nested.own }),
+              }
+            })(),
           })
         ),
       }
@@ -889,12 +953,11 @@ export function useData<
       fetchDataAndUpdate({
         filters: mergedFilters,
         currentPage: page,
-        search: searchValue.current,
+        search: effectiveSearch,
       })
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we want to oberver ref current
     [
-      searchValue.current,
+      effectiveSearch,
       fetchDataAndUpdate,
       mergedFilters,
       setIsLoading,
@@ -932,7 +995,7 @@ export function useData<
           filters: mergedFilters,
           appendMode: true,
           cursor: currentCursor,
-          search: searchValue.current,
+          search: effectiveSearch,
         })
       }
     },
@@ -942,7 +1005,7 @@ export function useData<
       isLoading,
       mergedFilters,
       paginationInfoRef.current,
-      searchValue.current,
+      effectiveSearch,
       isLoadingMore,
       setIsLoading,
       setIsLoadingMore,
@@ -971,7 +1034,7 @@ export function useData<
           filters: mergedFilters,
           sortings: currentSortings,
           grouping: currentGrouping,
-          search: searchValue.current,
+          search: effectiveSearch,
           paginationType: dataAdapter.paginationType,
         })
         const canReuseLoadedData =
@@ -1015,7 +1078,7 @@ export function useData<
         fetchDataAndUpdate({
           filters: mergedFilters,
           currentPage: initialPosition,
-          search: searchValue.current,
+          search: effectiveSearch,
           cursor: dataAdapter.paginationType === "infinite-scroll" ? "0" : null, // Pass "0" as initial cursor
         })
       }
@@ -1027,7 +1090,7 @@ export function useData<
       setIsLoading,
       enabled,
       dataAdapter.paginationType,
-      searchValue.current,
+      effectiveSearch,
       // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
       ...deps,
     ]

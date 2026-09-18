@@ -81,7 +81,10 @@ class MockIntersectionObserver implements IntersectionObserver {
 }
 window.IntersectionObserver = MockIntersectionObserver
 
-const renderEditableTable = (itemActions?: ItemActionsDefinition<Person>) => {
+const renderEditableTable = (
+  itemActions?: ItemActionsDefinition<Person>,
+  itemActionsOnHover?: boolean
+) => {
   return render(
     <EditableTableCollection<
       Person,
@@ -93,6 +96,7 @@ const renderEditableTable = (itemActions?: ItemActionsDefinition<Person>) => {
       GroupingDefinition<Person>
     >
       columns={testColumns}
+      itemActionsOnHover={itemActionsOnHover}
       source={createTestSource(testData, itemActions)}
       onSelectItems={vi.fn()}
       onLoadData={vi.fn()}
@@ -117,10 +121,47 @@ describe("EditableTable Item Actions", () => {
       expect(screen.getByText("John Doe")).toBeInTheDocument()
     })
 
-    // Editable table renders action buttons always visible (no hover needed)
     // Each row should have an "Edit" button
     const editButtons = screen.getAllByRole("button", { name: /edit/i })
     expect(editButtons.length).toBeGreaterThanOrEqual(2) // one per row
+  })
+
+  it("paints the row actions on every row by default", async () => {
+    const itemActions: ItemActionsDefinition<Person> = () => [
+      { label: "Edit", type: "primary", onClick: vi.fn() },
+    ]
+
+    renderEditableTable(itemActions)
+
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument()
+    })
+
+    const actions = screen
+      .getAllByRole("button", { name: /edit/i })[0]
+      .closest("aside")
+
+    expect(actions).not.toHaveClass("opacity-0")
+  })
+
+  // jsdom computes no Tailwind styles, so the assertion reaches the class the row's
+  // `group` hover drives rather than computed visibility.
+  it("reveals the row actions on hover when itemActionsOnHover is set", async () => {
+    const itemActions: ItemActionsDefinition<Person> = () => [
+      { label: "Edit", type: "primary", onClick: vi.fn() },
+    ]
+
+    renderEditableTable(itemActions, true)
+
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument()
+    })
+
+    const actions = screen
+      .getAllByRole("button", { name: /edit/i })[0]
+      .closest("aside")
+
+    expect(actions).toHaveClass("opacity-0", "group-hover:opacity-100")
   })
 
   it("calls onClick handler when an action button is clicked", async () => {

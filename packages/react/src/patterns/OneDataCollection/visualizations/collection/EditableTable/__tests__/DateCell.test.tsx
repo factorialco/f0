@@ -64,6 +64,72 @@ describe("DateCell", () => {
     expect(pickerProps.maxDate).toBe(maxDate)
   })
 
+  it("shows the calendar icon by default", () => {
+    render(<DateCell {...defaultProps} />)
+
+    const pickerProps = f0DatePickerMock.mock.calls.at(-1)?.[0] as {
+      showIcon?: boolean
+    }
+
+    expect(pickerProps.showIcon).toBe(true)
+  })
+
+  it("hides the calendar icon when dateConfig.showIcon is false", () => {
+    render(
+      <DateCell
+        {...defaultProps}
+        editableColumn={makeEditableColumn({
+          dateConfig: { showIcon: false },
+        })}
+      />
+    )
+
+    const pickerProps = f0DatePickerMock.mock.calls.at(-1)?.[0] as {
+      showIcon?: boolean
+    }
+
+    expect(pickerProps.showIcon).toBe(false)
+  })
+
+  it("forwards clearable from dateConfig to F0DatePicker", () => {
+    render(
+      <DateCell
+        {...defaultProps}
+        editableColumn={makeEditableColumn({
+          dateConfig: { clearable: true },
+        })}
+      />
+    )
+
+    const pickerProps = f0DatePickerMock.mock.calls.at(-1)?.[0] as {
+      clearable?: boolean
+    }
+
+    expect(pickerProps.clearable).toBe(true)
+  })
+
+  it("emits an empty value when the picker is cleared", () => {
+    const onChange = vi.fn()
+
+    render(
+      <DateCell
+        {...defaultProps}
+        value="2026-06-15"
+        onChange={onChange}
+        editableColumn={makeEditableColumn({
+          dateConfig: { clearable: true },
+        })}
+      />
+    )
+
+    const pickerProps = f0DatePickerMock.mock.calls.at(-1)?.[0] as {
+      onChange: (value: undefined) => void
+    }
+    pickerProps.onChange(undefined)
+
+    expect(onChange).toHaveBeenCalledWith("")
+  })
+
   it("resolves a per-row dateConfig function against the current item", () => {
     const startDate = "2026-06-15"
 

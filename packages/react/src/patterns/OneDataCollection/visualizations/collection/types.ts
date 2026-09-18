@@ -47,18 +47,22 @@ export type VisualizationFilterOverrides<
 }
 
 /**
- * Optional per-visualization label override for built-in visualization types.
+ * Optional per-visualization overrides for built-in visualization types.
  * When omitted, the localized built-in label from
- * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
+ * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") and the icon
+ * from the built-in registry are used.
  *
- * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
- * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
- * comes from the built-in registry for the visualization type.
+ * Lets consumers tailor the view switcher chip per instance, e.g. show "Org chart"
+ * instead of "Graph" for employees, or give an editable table the table icon
+ * rather than the built-in pencil.
  */
 export type VisualizationLabelOverrides = {
   /** Custom label shown in the view switcher chip and Settings selector.
    *  Defaults to the localized built-in label for this visualization type. */
   label?: string
+  /** Custom icon shown in the view switcher chip and Settings selector.
+   *  Defaults to the built-in icon for this visualization type. */
+  icon?: IconType
 }
 
 /**

@@ -3,6 +3,14 @@
  */
 export * from "../../patterns/ApplicationFrame"
 export { useSidebar } from "../../patterns/ApplicationFrame/FrameProvider"
+// The side panel, readable without the AI kit — this is what lets a product
+// drive the panel without an assistant being present.
+export { useSidePanel } from "../../patterns/ApplicationFrame/SidePanel/SidePanelProvider"
+export type {
+  SidePanelContent,
+  SidePanelLayout,
+  SidePanelViewDefinition,
+} from "../../patterns/ApplicationFrame/SidePanel/types"
 export * from "./Carousel"
 /**
  * @deprecated DaytimePage has moved to @/sds/Home/DaytimePage. Import from there instead.

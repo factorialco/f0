@@ -6,7 +6,15 @@
   // staging a file in there made `git commit` impossible, because the
   // pre-commit hook passes staged paths straight to oxlint.
   "ignorePatterns": [".scripts/**", ".oxlint-plugins/**"],
-  "plugins": ["react", "typescript", "vitest", "import", "unicorn", "oxc", "promise"],
+  "plugins": [
+    "react",
+    "typescript",
+    "vitest",
+    "import",
+    "unicorn",
+    "oxc",
+    "promise"
+  ],
   "categories": {
     "correctness": "error"
   },
@@ -308,15 +316,30 @@
     // information, so only the syntax-based rules are useful. `f0-react` wraps
     // its jsx-no-leaked-render to check JSX children only, not attributes.
     // Ternaries everywhere is the only leak-safe strategy without types.
-    "f0-react/jsx-no-leaked-render": ["error", { "validStrategies": ["ternary"] }],
+    "f0-react/jsx-no-leaked-render": [
+      "error",
+      { "validStrategies": ["ternary"] }
+    ],
     "react-js/no-deprecated": "error",
     "react-js/no-invalid-html-attribute": "error",
+    // Graduated from DEBT, where it sat at 25 hits. `allowAsProps` is what
+    // made it tractable: F0 passes components as props on purpose
+    // (`leftIcon`, `WidgetWrapper`), and over half those hits were that
+    // pattern rather than a bug. The rest are fixed. A component declared
+    // inside another is a new type on every render, so React remounts it and
+    // the subtree loses its state.
+    "react-js/no-unstable-nested-components": [
+      "error",
+      { "allowAsProps": true }
+    ],
 
     // RATCHET. On as warnings. `pnpm lint` hides warnings (`--quiet`);
     // `pnpm check:lint-debt` compares them per file against
     // .scripts/lint-debt.json, a baseline that may only shrink. Add a rule
     // here when it has too many hits to fix in one PR.
     "sonarjs/cognitive-complexity": "warn", // 187 at the default threshold of 15
+    "f0-styles/no-inline-styles": "warn", // see the src/ui override below
+    "f0-i18n/no-untranslated-copy": "warn", // 133; copy must come from useI18n()/t()
 
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.
@@ -341,7 +364,6 @@
     "import/named": "off", // nursery rule, false positives
     "import/export": "off", // nursery rule, false positives on export *
     "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
-    "react-js/no-unstable-nested-components": "off", // 25
     "react-js/jsx-no-constructed-context-values": "off", // 35
     "react-js/no-unused-prop-types": "off", // 34
     "react-js/no-object-type-as-default-prop": "off", // 59
@@ -382,6 +404,8 @@
   "jsPlugins": [
     "eslint-plugin-react-refresh",
     "./.oxlint-plugins/f0-security/index.js",
+    "./.oxlint-plugins/f0-styles/index.js",
+    "./.oxlint-plugins/f0-i18n/index.js",
     "./.oxlint-plugins/f0-react/index.js",
     "eslint-plugin-sonarjs",
     {
@@ -394,6 +418,35 @@
     }
   ],
   "overrides": [
+    {
+      // Strings here are not shipped product copy. Generated icon/flag glyphs,
+      // sample data and Storybook helpers never reach a user; component-status
+      // is the contributor-facing maturity dashboard; and the dictionary files
+      // ARE the translations.
+      "files": [
+        "src/component-status/**",
+        "src/icons/**",
+        "src/flags/**",
+        "src/mocks/**",
+        "src/testing/**",
+        "src/examples/**",
+        "src/lib/storybook-utils/**",
+        "src/lib/providers/i18n/**",
+        "**/*.factory.*",
+        "**/*.fixture.*",
+        "**/*.test-d.ts",
+        "**/__storybook__/**"
+      ],
+      "rules": { "f0-i18n/no-untranslated-copy": "off" }
+    },
+    {
+      // src/ui is third-party primitive wrappers (Radix, shadcn) — generated or
+      // re-synced from upstream and never re-exported publicly. Their styling is
+      // upstream's decision, and a shrink-only baseline over regenerated code
+      // fights every sync.
+      "files": ["src/ui/**"],
+      "rules": { "f0-styles/no-inline-styles": "off" }
+    },
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
       "rules": {
@@ -428,6 +481,7 @@
         "**/*.stories.*",
         "**/__stories__/**",
         "**/*.test.*",
+        "**/*.spec.*",
         "**/__tests__/**",
         "**/mocks/**",
         "**/__mocks__/**"
@@ -436,7 +490,9 @@
         "no-console": "off",
         "no-await-in-loop": "off", // stories and tests step through flows one await at a time
         "sonarjs/no-identical-functions": "off", // each story and test case reads on its own
-        "sonarjs/cognitive-complexity": "off" // fixture tables and story flows score on their size, splitting them makes them harder to read
+        "sonarjs/cognitive-complexity": "off", // fixture tables and story flows score on their size, splitting them makes them harder to read
+        "f0-styles/no-inline-styles": "off", // demo scaffolding, not shipped styling
+        "f0-i18n/no-untranslated-copy": "off" // fixture and demo copy is never translated
       }
     },
     {

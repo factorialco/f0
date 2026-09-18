@@ -1,7 +1,9 @@
 {
   "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
-  "total": 114,
+  "total": 475,
   "rules": {
+    "f0-i18n/no-untranslated-copy": 131,
+    "f0-styles/no-inline-styles": 230,
     "sonarjs/cognitive-complexity": 114
   },
   "files": {
@@ -9,22 +11,60 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/components/F0ActionBar/index.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/components/F0AudioPlayer/F0AudioPlayerCard.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/components/F0AudioPlayer/components/AudioScrubber.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
     "src/components/F0Button/internal.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/components/F0Card/CardInternal.tsx": {
+      "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0Card/components/CardMetadata.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/F0DurationInput/F0DurationInput.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/F0Icon/F0Icon.tsx": {
+      "f0-styles/no-inline-styles": 2
     },
     "src/components/F0InputField/F0InputField.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/components/F0Link/F0Link.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/F0NumberInput/components/Arrows.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
+    },
     "src/components/F0NumberInput/internal.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0PdfViewer/F0PdfViewer.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/F0PdfViewer/components/DocxViewer.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/F0PdfViewer/components/PdfLoadingState.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/F0PdfViewer/components/SheetViewer.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/F0PdfViewer/components/TextViewer.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/components/F0Select/F0Select.tsx": {
       "sonarjs/cognitive-complexity": 2
@@ -32,26 +72,143 @@
     "src/components/F0Select/components/SelectItem.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/components/F0Slider/F0Slider.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/components/F0Slider/F0SliderSkeleton.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/F0Slider/components/SliderTooltip.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/F0VideoPlayer/components/AudioDescriptionToggleIcons.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
+    },
+    "src/components/F0VideoPlayer/components/Seekbar.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/components/F0VideoPlayer/components/VolumeControl.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
     "src/components/F0VideoPlayer/internal.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/OneChip/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/RichText/F0NotesTextEditor/F0NotesTextEditor.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/RichText/F0RichTextEditor/F0RichTextEditor.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/RichText/F0RichTextEditor/components/FileList/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
     },
     "src/components/RichText/F0RichTextEditor/components/Footer/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 3,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/components/RichText/F0RichTextEditor/components/Head/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
+    },
     "src/components/RichText/internal/Enhance/EnhanceActivator.tsx": {
+      "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
     },
     "src/components/RichText/internal/Enhance/EnhanceMenu.tsx": {
+      "f0-i18n/no-untranslated-copy": 5,
+      "f0-styles/no-inline-styles": 3,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/components/RichText/internal/Extensions/Accessibility/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/RichText/internal/Extensions/Image/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/RichText/internal/Extensions/Mention/MentionList/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/RichText/internal/Extensions/Mention/MentionPopover/index.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/components/RichText/internal/Extensions/SlashCommand/AvailableCommands.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/components/RichText/internal/Extensions/SlashCommand/index.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/components/RichText/internal/Toolbar/LinkPopup/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2,
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/RichText/internal/Toolbar/ToolbarDropdown/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/RichText/internal/Toolbar/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 4
+    },
+    "src/components/avatars/F0AvatarList/F0AvatarList.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/dialog-alike/common/dialog-primitive/DialogContent.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/dialog-alike/common/dialog-primitive/DialogOverlay.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/components/tags/F0TagDot/F0TagDot.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/deprecated/EntitySelect/Content/MainContent/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/deprecated/EntitySelect/Content/index.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/deprecated/EntitySelect/HighLightText/index.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/deprecated/EntitySelect/Trigger/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/experimental/Actions/F0EmojiPicker/F0EmojiPicker.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/experimental/AiPromotionChat/OneIcon.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/experimental/AiPromotionChat/OneSwitch.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/AiPromotionChat/components/CustomButton.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/F0CardHorizontal/F0CardHorizontal.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/F0FormEditableTable/F0FormEditableTable.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/experimental/F0MeetingCard/F0MeetingCard.tsx": {
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/F0ProgressSeries/F0ProgressSeries.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/experimental/F0SegmentedBar/F0SegmentedBar.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/Forms/F0PhoneInput/F0PhoneInput.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
     },
     "src/experimental/Information/Headers/BaseHeader/index.tsx": {
       "sonarjs/cognitive-complexity": 1
@@ -59,46 +216,106 @@
     "src/experimental/Information/Headers/Metadata/MetadataValue.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/experimental/Lists/OnePersonListItem/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/experimental/Navigation/Carousel/DynamicCarousel/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2,
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/experimental/Navigation/Dropdown/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/experimental/Navigation/F0TableOfContent/Item/ItemDropDown.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/experimental/Navigation/F0TableOfContent/Item/PrimitiveItem.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/experimental/Navigation/F0TableOfContent/Item/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/experimental/Navigation/F0TableOfContent/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 2
     },
     "src/experimental/Navigation/F0TableOfContent/utils.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/experimental/Navigation/Header/Breadcrumbs/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/experimental/Navigation/Header/PageHeader/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/Header/PageNavigation/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
+    },
+    "src/experimental/Navigation/Header/ProductUpdates/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 1
     },
     "src/experimental/OneTable/TableCell/NestedCell/index.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/experimental/OneTable/TableCell/TreeConnector/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/experimental/OneTable/TableCell/index.tsx": {
+      "f0-styles/no-inline-styles": 3,
       "sonarjs/cognitive-complexity": 1
     },
     "src/experimental/OneTable/TableHead/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/OneTable/TableRow/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/Overlays/F0Coachmark/CoachmarkSpotlight.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/experimental/Overlays/F0CommandPalette/F0CommandPalette.tsx": {
       "sonarjs/cognitive-complexity": 2
     },
+    "src/experimental/Overlays/F0CommandPalette/components/CommandRowActions.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/experimental/Overlays/F0CommandPalette/components/CommandRowItem.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/experimental/Widgets/Content/CalendarEvent/index.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/experimental/Widgets/Content/CalendarEventList/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/Widgets/Content/Lists/WidgetSimpleList/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/experimental/Widgets/Content/ProgressBarDuo/index.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/experimental/Widgets/Layout/Dashboard/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/experimental/Widgets/Widget/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/hooks/datasource/itemNeighbors/useItemNeighbors.ts": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/hooks/datasource/useData.ts": {
+      "f0-i18n/no-untranslated-copy": 3,
       "sonarjs/cognitive-complexity": 1
     },
     "src/hooks/datasource/useDataSourceItemNavigation/useDataSourceItemNavigation.ts": {
@@ -107,29 +324,105 @@
     "src/hooks/datasource/useSelectable/useSelectable.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/hooks/toast/ToastProvider.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/icons/special/One.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/Charts/CategoryBarChart/CategoryBarTooltipContent.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/Charts/CategoryBarChart/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 2
+    },
     "src/kits/Charts/ComboChart/index.tsx": {
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/Charts/PieChart/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/Charts/RadarChart/index.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/kits/F0DataChart/components/BarChart/useBarChartOptions.ts": {
       "sonarjs/cognitive-complexity": 1
     },
-    "src/kits/ai/F0AiChat/components/layout/ChatWindow.tsx": {
-      "sonarjs/cognitive-complexity": 1
+    "src/kits/F0DataChart/skeletons.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/kits/ai/Banners/BaseBanner/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/kits/ai/Banners/F0AiBanner/AiBannerInternal.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/kits/ai/Banners/F0Callout/CalloutInternal.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/kits/ai/F0ActionItem/components/ChatSpinner.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/kits/ai/F0AiChat/components/markdownRenderers/components/Image.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/kits/ai/F0AiChatHeader/components/CreditsPopover.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/ai/F0AiChatHeader/components/EmployeeCreditsPopover.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/kits/ai/F0AiChatTextArea/F0AiChatTextArea.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/kits/ai/F0AiChatTextArea/components/MentionPopover.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/ai/F0AiChatTextArea/components/RecordingWaveform.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/ai/F0AiChatTextArea/components/WelcomeScreenSuggestionsRow.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/ai/F0AiChatUsageLimits/components/UsageRow.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/ai/F0AiMessagesContainer/F0AiMessagesContainer.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/kits/ai/F0AiMessagesContainer/components/FormCard.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/kits/ai/F0AiMessagesContainer/components/ReplyPopover.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/kits/ai/F0AiPong/F0AiPong.tsx": {
+      "f0-styles/no-inline-styles": 6,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiPong/components/PongBall.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/kits/ai/F0AuraVoiceAnimation/components/F0AuraVoiceAnimation.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/kits/ai/F0AuraVoiceAnimation/components/ReactShaderToy.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/kits/ai/F0OneIcon/F0OneIcon.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
+    "src/kits/ai/F0OneSwitch/F0OneSwitch.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/kits/surveys/SurveyAnsweringForm/SurveyAnsweringForm.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyAnsweringForm/components/skeletons/SurveyAnsweringFormLoadingSkeletons.tsx": {
+      "f0-styles/no-inline-styles": 4
     },
     "src/kits/surveys/SurveyAnsweringForm/hooks/useSurveyFormSchema.tsx": {
       "sonarjs/cognitive-complexity": 1
@@ -140,16 +433,47 @@
     "src/kits/surveys/SurveyFormBuilder/Form/useReorderHandler.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/kits/surveys/SurveyFormBuilder/QuestionTypes/BaseQuestion/ActionsMenu/useQuestionActions.ts": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/kits/surveys/SurveyFormBuilder/QuestionTypes/BaseQuestion/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/kits/surveys/SurveyFormBuilder/QuestionTypes/SelectQuestion/SelectOption/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/kits/surveys/SurveyFormBuilder/Section/Item/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/kits/surveys/SurveyFormBuilder/Section/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/kits/surveys/SurveyFormBuilder/lib.ts": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/layouts/Layout/groups/GroupMasonry/components/SortableBlock.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/lib/F0GridStack/components/grid-stack-provider.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/lib/VirtualList/index.tsx": {
+      "f0-styles/no-inline-styles": 3
+    },
     "src/lib/providers/datacollection/dataCollectionUrlParams.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/lib/skeleton.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/lib/storybook-utils/snapshotMatrix.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/lib/xray.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/ApplicationFrame/SidePanel/SidePanelWindow.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/ApplicationFrame/index.tsx": {
@@ -158,20 +482,45 @@
     "src/patterns/F0AnalyticsDashboard/components/ChartItem/ChartItem.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/patterns/F0AnalyticsDashboard/components/ChartItem/PointActionPopover.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/patterns/F0AnalyticsDashboard/components/DashboardGrid/DashboardGrid.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 4
+    },
     "src/patterns/F0AnalyticsDashboard/components/DashboardItem/DashboardItem.tsx": {
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0AnalyticsDashboard/components/FilterBar/FilterBarSkeleton.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
     },
     "src/patterns/F0AnalyticsDashboard/hooks/useCollectionDownloadActions.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/patterns/F0FilterPickerContent/F0FilterPickerContent.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/patterns/F0FilterPickerContent/internal.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/patterns/F0Form/F0AiFormRegistry.tsx": {
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/components/ActionBar.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
     },
     "src/patterns/F0Form/describeFormSchema.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/patterns/F0Form/fields/date/DateTimeFieldRenderer.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/patterns/F0Form/fields/entitiesList/EntitiesListFieldRenderer.tsx": {
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/fields/file/FileFieldRenderer.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
     },
     "src/patterns/F0Form/fields/utils.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -185,8 +534,15 @@
     "src/patterns/F0Form/zodErrorMap.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/patterns/F0Graph/components/F0GraphEdge/F0GraphEdge.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/patterns/F0Graph/components/F0GraphNode/F0GraphNode.tsx": {
+      "f0-styles/no-inline-styles": 9,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/components/F0GraphNode/F0GraphNodeStackedRow.tsx": {
+      "f0-styles/no-inline-styles": 4
     },
     "src/patterns/F0Graph/hooks/useExpandState.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -204,13 +560,18 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/F0Graph/internal/ReactFlowAdapters.tsx": {
+      "f0-styles/no-inline-styles": 5,
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/F0Map/F0Map.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/F0Map/components/internal/BaseMapMarker/BaseMapMarker.tsx": {
+      "f0-styles/no-inline-styles": 10,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Map/components/internal/F0MapCluster/F0MapCluster.tsx": {
+      "f0-styles/no-inline-styles": 3
     },
     "src/patterns/F0Map/hooks/useClusters.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -219,13 +580,33 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/Navigation/Sidebar/Chats/SidebarChatItem.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/Navigation/Sidebar/Icon/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
     },
     "src/patterns/Navigation/Sidebar/Sidebar.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/OneDataCollection/OneDatacollection.tsx": {
+      "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/Settings/Settings.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneDataCollection/components/CollectionActions/CollectionActions.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneDataCollection/components/Search/Search.tsx": {
+      "f0-styles/no-inline-styles": 4
+    },
+    "src/patterns/OneDataCollection/components/itemActions/ItemActionsDropdown/ItemActionsDropdown.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
     },
     "src/patterns/OneDataCollection/hooks/useExportAction.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -233,7 +614,17 @@
     "src/patterns/OneDataCollection/utils/csvExport.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/patterns/OneDataCollection/visualizations.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/Card/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/EditableTable/components/cells/NumberCell.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/patterns/OneDataCollection/visualizations/collection/Graph/useDataCollectionTreeData.ts": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/OneDataCollection/visualizations/collection/Table/Table.tsx": {
@@ -246,10 +637,25 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/patterns/OneDataCollection/visualizations/collection/Table/components/SortAndHideList/SortAndHideList.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/patterns/OneDateNavigator/components/DateNavigatorTrigger.tsx": {
+      "f0-i18n/no-untranslated-copy": 2,
+      "f0-styles/no-inline-styles": 1
+    },
     "src/patterns/OneFilterPicker/components/FiltersControls.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/DateFilter/DateFilter.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/InFilter/InFilter.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/InFilter/components/InFilterOptionRow.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/patterns/OneFilterPicker/filterTypes/InFilter/index.tsx": {
       "sonarjs/cognitive-complexity": 1
@@ -258,28 +664,75 @@
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/ClockIn/ClockInControls/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 2,
+      "f0-styles/no-inline-styles": 2,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/ClockIn/ClockInGraph/HorizontalBar.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/Home/Communities/Celebration/components/avatar.tsx": {
+      "f0-styles/no-inline-styles": 2
     },
     "src/sds/Home/Communities/Post/CommunityPost/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/DaytimePage/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/HomeListItem/index.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/NewHomeLayout/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 9,
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/SlotWidget/index.tsx": {
+      "f0-styles/no-inline-styles": 3,
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/Home/WidgetCatalog/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 3,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/sds/Home/WidgetContainer/SortableWidget.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/sds/Home/WidgetContainer/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 3,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/WidgetPreview/index.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/Home/WidgetUpdateDialog/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/sds/Home/home-motion.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/Home/slotRenderers.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/Profile/TasksList/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/sds/UpsellingKit/ProductCard/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/sds/UpsellingKit/ProductModal/components/CustomModal.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/sds/UpsellingKit/ProductWidget/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/UpsellingKit/ai/F0QuestionCard/F0QuestionCard.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
     },
     "src/sds/chat/F0Chat/components/ChatComposer.tsx": {
       "sonarjs/cognitive-complexity": 1
@@ -287,20 +740,61 @@
     "src/sds/chat/F0Chat/components/ChatComposerAttachmentPreview.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/sds/chat/F0Chat/components/ChatDocumentAttachmentCard.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/sds/chat/F0Chat/components/ChatDocxThumbnail.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatEmojiAutocomplete.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/sds/chat/F0Chat/components/ChatHeader.tsx": {
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatImageTile.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/sds/chat/F0Chat/components/ChatLinkPreview.tsx": {
+      "f0-styles/no-inline-styles": 2
+    },
+    "src/sds/chat/F0Chat/components/ChatLocationAttachment.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatMentionPopover.tsx": {
+      "f0-styles/no-inline-styles": 1
     },
     "src/sds/chat/F0Chat/components/ChatMessageActions.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/chat/F0Chat/components/ChatMessageAttachments.tsx": {
+      "f0-styles/no-inline-styles": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/chat/F0Chat/components/ChatMessageItem.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
     "src/sds/chat/F0Chat/components/ChatMessagesContainer.tsx": {
+      "f0-styles/no-inline-styles": 4,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatTypingBubble.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatViewportOverlays.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatVoiceAttachment.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/ClampText.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/EmojiPicker/CategoryBar.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
+    "src/sds/chat/F0Chat/components/EmojiPicker/EmojiGrid.tsx": {
+      "f0-styles/no-inline-styles": 4
     },
     "src/sds/chat/F0Chat/hooks/useChatVirtuoso.ts": {
       "sonarjs/cognitive-complexity": 1
@@ -308,13 +802,39 @@
     "src/sds/chat/F0Chat/utils/virtuoso-chat.ts": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/sds/social/Reactions/Picker/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/ui/Action/Action.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/ui/DatePickerPopup/DatePickerPopup.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/ui/DatePickerPopup/components/PresetList.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/ui/DatePickerPopup/presets.ts": {
+      "f0-i18n/no-untranslated-copy": 15
+    },
+    "src/ui/F0Wizard/components/WizardSteps.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/ui/GroupHeader/GroupHeader.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/ui/Kanban/components/KanbanLane.tsx": {
       "sonarjs/cognitive-complexity": 2
     },
     "src/ui/Lane/Lane.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
+    "src/ui/Lane/components/LaneHeader.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/ui/OnePagination/index.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
     },
     "src/ui/OnePreset/index.tsx": {
@@ -323,11 +843,27 @@
     "src/ui/Select/components/SelectContent.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/ui/Select/components/SelectItem.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
+    "src/ui/breadcrumb.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
+    },
     "src/ui/calendar.tsx": {
       "sonarjs/cognitive-complexity": 1
     },
+    "src/ui/carousel.tsx": {
+      "f0-i18n/no-untranslated-copy": 3
+    },
+    "src/ui/pagination.tsx": {
+      "f0-i18n/no-untranslated-copy": 2
+    },
     "src/ui/value-display/types/barSeries/barSeries.tsx": {
+      "f0-i18n/no-untranslated-copy": 1,
       "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/value-display/types/categoryBarChart/categoryBarChart.tsx": {
+      "f0-i18n/no-untranslated-copy": 1
     }
   }
 }

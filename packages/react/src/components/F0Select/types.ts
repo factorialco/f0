@@ -34,7 +34,18 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
     checked: boolean
   ) => void
   open?: boolean
+  /**
+   * Whether the list can be searched.
+   *
+   * With no filters the trigger itself is the search field: you type where the
+   * value shows. With filters, and for `variant="inline"`, `asList` and custom
+   * triggers, the search box stays in the dropdown's top row.
+   */
   showSearchBox?: boolean
+  /**
+   * Placeholder for the search field. When the trigger is the search field the
+   * select's own `placeholder` wins and this stands in.
+   */
   searchBoxPlaceholder?: string
   onSearchChange?: (value: string) => void
   searchValue?: string
@@ -46,6 +57,12 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
    */
   onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void
   searchEmptyMessage?: string
+  /**
+   * Rendered under the empty state, for the way out when the list has nothing
+   * to offer. `onCreate` draws its own action, so this is for the cases where
+   * the answer is not "create what you typed".
+   */
+  searchEmptyAction?: React.ReactNode
   actions?: Action[]
   /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
   onCreate?: (value: string) => Promise<void> | void
@@ -201,6 +218,14 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
      * @default false
      */
     showPreview?: boolean
+    /**
+     * Hides the trigger's dropdown arrow. For fields where the select is an
+     * implementation detail rather than the affordance: the value is a typed
+     * search result, not one of a few known options, and the arrow promises a
+     * list the user is not meant to browse.
+     * @default false
+     */
+    hideArrow?: boolean
   } & Pick<
     InputFieldProps<T>,
     | "required"
@@ -236,6 +261,8 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     children?: never
     className?: never
     asList?: never
+    hideArrow?: never
+    searchEmptyAction?: never
     showPreview?: never
     required?: never
     loading?: never
