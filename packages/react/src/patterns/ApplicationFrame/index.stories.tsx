@@ -11,7 +11,9 @@ import {
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
 
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
+import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -22,6 +24,7 @@ import {
   FoldersFilled,
   Home,
   HomeFilled,
+  Filter,
   Hub,
   HubFilled,
   Inbox,
@@ -33,6 +36,7 @@ import {
   Pencil,
   Search,
   Settings,
+  Sliders as SlidersIcon,
   Sliders,
   Comment,
 } from "@/icons/app"
@@ -66,8 +70,11 @@ import {
 import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { cn, focusRing } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -1184,6 +1191,203 @@ const MockChatPanel = ({
 }
 
 /**
+ * The Inbox panel: the list IS the module, so it lives in the second level
+ * and the content side is what you picked from it.
+ *
+ * Wider than a menu (420 rather than 240) because the rows carry a title, a
+ * subtitle and a face — at 240 every one of them truncates mid-sentence, and a
+ * queue you cannot read is a queue you cannot triage.
+ */
+const INBOX_PRESETS = [
+  { id: "all", label: "All", count: 10 },
+  { id: "requests", label: "Requests", count: 6 },
+  { id: "notifications", label: "Notifications", count: 4 },
+] as const
+
+type InboxItem = {
+  id: string
+  title: string
+  meta: string
+  seed: string
+  module: ComponentProps<typeof F0AvatarPerson>["badge"]
+  kind: "request" | "notification"
+}
+
+const INBOX_ITEMS: InboxItem[] = [
+  {
+    id: "time-off",
+    title: "Approve 12 time off requests",
+    meta: "All within policy · Jun–Jul · no team conflicts",
+    seed: "person01",
+    module: { type: "module", module: "timeoff" },
+    kind: "request",
+  },
+  {
+    id: "hire",
+    title: "Pick Lucia for Senior Designer",
+    meta: "Score 9.2 / 10 · within band · 14 interviews done",
+    seed: "person02",
+    module: { type: "module", module: "ats" },
+    kind: "request",
+  },
+  {
+    id: "renewals",
+    title: "Confirm 4 contract renewals",
+    meta: "All within standard policy and budget · already drafted",
+    seed: "person03",
+    module: { type: "module", module: "company_documents" },
+    kind: "request",
+  },
+  {
+    id: "promotion",
+    title: "Approve Marc's promotion to Senior",
+    meta: "2 yrs as Mid · 3 reviews at 4.5+/5 · committee agreed",
+    seed: "person04",
+    module: { type: "module", module: "performance" },
+    kind: "request",
+  },
+  {
+    id: "bonus",
+    title: "Send Q2 bonus list — €34,200 across 14 people",
+    meta: "Aligned with February formula · within €35k budget",
+    seed: "person05",
+    module: { type: "module", module: "payroll_bundle" },
+    kind: "request",
+  },
+  {
+    id: "workshop",
+    title: "Approve €890 design team workshop",
+    meta: "Within Q2 L&D budget · requested by Marta",
+    seed: "person06",
+    module: { type: "module", module: "company_trainings" },
+    kind: "request",
+  },
+  {
+    id: "taco",
+    title: "Taco Tuesday! 🌮",
+    meta: "Eleanor Pena · Company updates · 2 days ago",
+    seed: "person07",
+    module: { type: "module", module: "communities" },
+    kind: "notification",
+  },
+  {
+    id: "remote",
+    title: "Four weeks of work from anywhere, from January",
+    meta: "Marie Curie · Company updates · 1 day ago",
+    seed: "person08",
+    module: { type: "module", module: "communities" },
+    kind: "notification",
+  },
+  {
+    id: "engineering",
+    title: "Ada Lovelace posted in Engineering",
+    meta: "Ada Lovelace · Engineering · 3 days ago",
+    seed: "person09",
+    module: { type: "module", module: "communities" },
+    kind: "notification",
+  },
+  {
+    id: "portraits",
+    title: "Olga Steinepreis' self portraits unpack the pose",
+    meta: "René Galindo · Product Design · 5 days ago",
+    seed: "person10",
+    module: { type: "module", module: "communities" },
+    kind: "notification",
+  },
+]
+
+/** One row: what it is, what it is about, and who it came from. */
+const InboxRow = ({
+  item,
+  active,
+  onOpen,
+}: {
+  item: InboxItem
+  active: boolean
+  onOpen: () => void
+}) => (
+  <div
+    className={cn(
+      "group flex w-full items-start gap-2 rounded-md px-1.5 py-2",
+      active ? "bg-f1-background-secondary" : "hover:bg-f1-background-secondary"
+    )}
+  >
+    <span className="flex h-5 shrink-0 items-center">
+      <F0Checkbox hideLabel title={`Select ${item.title}`} />
+    </span>
+    <button
+      type="button"
+      onClick={onOpen}
+      className={cn(
+        "flex min-w-0 flex-1 items-start gap-2 text-left",
+        focusRing("focus-visible:ring-inset")
+      )}
+    >
+      <F0AvatarPerson
+        firstName={item.title}
+        lastName=""
+        size="sm"
+        badge={item.module}
+      />
+      <span className="flex min-w-0 flex-col">
+        <OneEllipsis className="font-medium text-f1-foreground">
+          {item.title}
+        </OneEllipsis>
+        <OneEllipsis className="text-f1-foreground-secondary">
+          {item.meta}
+        </OneEllipsis>
+      </span>
+    </button>
+  </div>
+)
+
+const InboxPanel = () => {
+  const [preset, setPreset] = useState<string>("all")
+  const [openItem, setOpenItem] = useState<string | null>(null)
+  const items = INBOX_ITEMS.filter((item) =>
+    preset === "all" ? true : `${item.kind}s` === preset
+  )
+
+  return (
+    <div className="flex flex-col gap-2 px-3 pb-3">
+      <SearchBar placeholder="Search..." onClick={() => {}} />
+      {/* Presets, not tabs: they filter one list rather than swapping it, and
+          the count is the reason you press one. */}
+      <div className="flex flex-row items-center gap-1 px-0.5">
+        {INBOX_PRESETS.map(({ id, label, count }) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={preset === id}
+            onClick={() => setPreset(id)}
+            className={cn(
+              "flex items-center gap-1 rounded-full px-2 py-1 font-medium",
+              preset === id
+                ? "bg-f1-background-secondary text-f1-foreground"
+                : "text-f1-foreground-secondary hover:bg-f1-background-secondary",
+              focusRing()
+            )}
+          >
+            {label}
+            <Counter value={count} size="sm" />
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-col">
+        {items.map((item) => (
+          <InboxRow
+            key={item.id}
+            item={item}
+            active={openItem === item.id}
+            onOpen={() => setOpenItem(item.id)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
  * Everything the navigation can reach, behind Tools.
  *
  * It used to be the Home panel, back when Home was the only module and its
@@ -1659,6 +1863,8 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
+    ) : tab === "inbox" ? (
+      <InboxPanel />
     ) : tab === "tools" ? (
       <Menu tree={toolsMenuTree} />
     ) : isRail ? undefined : ( // the rail had not changed anything. // the honest state: falling through to another module's list would say // Home, Calendar and Files have no second level yet. An empty panel is
@@ -1669,6 +1875,9 @@ const ConversationsSidebarInner = ({
     const { user, options } = SidebarFooterStories.Default.args
     return (
       <Sidebar
+        // The inbox list IS the module, and its rows do not fit in a menu's
+        // 240. Every other panel keeps the default.
+        panelWidth={tab === "inbox" ? 420 : undefined}
         rail={
           <SidebarRail
             company={{
@@ -1715,6 +1924,28 @@ const ConversationsSidebarInner = ({
           <>
             <SidebarPanelHeader
               title={tabs.find((t) => t.id === tab)?.label ?? ""}
+              actions={
+                tab === "inbox" ? (
+                  <>
+                    <F0Button
+                      variant="ghost"
+                      size="md"
+                      hideLabel
+                      icon={Filter}
+                      label="Filter inbox"
+                      onClick={() => {}}
+                    />
+                    <F0Button
+                      variant="ghost"
+                      size="md"
+                      hideLabel
+                      icon={SlidersIcon}
+                      label="Inbox display options"
+                      onClick={() => {}}
+                    />
+                  </>
+                ) : undefined
+              }
             />
             {/* Search sits with the catalog: it is the panel with something to
                 search. Home's own search is the page's, not the nav's. */}

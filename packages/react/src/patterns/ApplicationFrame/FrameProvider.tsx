@@ -1,4 +1,4 @@
-import { breakpoints } from "@factorialco/f0-core"
+import { breakpoints, sidebarWidths } from "@factorialco/f0-core"
 import React, {
   createContext,
   PointerEvent,
@@ -31,12 +31,19 @@ interface FrameContextType {
    */
   railWidth: number
   /**
+   * The section panel's width. A module whose panel IS its content — an inbox
+   * list, a month — needs more than the 240 a menu needs, and everything laid
+   * out against the navigation has to read the same number.
+   */
+  panelWidth: number
+  /**
    * Whether navigation is permanently on screen. What reads this is the
    * "Open main menu" button in the page surfaces: with a rail there is no
    * state without navigation, so the button has nothing to restore.
    */
   hasRail: boolean
   setRailWidth: (width: number) => void
+  setPanelWidth: (width: number) => void
 }
 
 const FrameContext = createContext<FrameContextType | undefined>(undefined)
@@ -52,8 +59,10 @@ export function useSidebar(): FrameContextType {
       toggleSidebar: () => {},
       setForceFloat: () => {},
       railWidth: 0,
+      panelWidth: sidebarWidths.panel,
       hasRail: false,
       setRailWidth: () => {},
+      setPanelWidth: () => {},
     }
   }
   return context
@@ -67,6 +76,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
   const [forceFloat, setForceFloat] = useState(false)
   const [railWidth, setRailWidth] = useState(0)
+  const [panelWidth, setPanelWidth] = useState(sidebarWidths.panel)
   const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
     useState(false)
 
@@ -153,8 +163,10 @@ export function FrameProvider({ children }: FrameProviderProps) {
         prevSidebarState,
         setForceFloat,
         railWidth,
+        panelWidth,
         hasRail: railWidth > 0,
         setRailWidth,
+        setPanelWidth,
       }}
     >
       <div onPointerMove={handlePointerMove} className="h-screen w-screen">

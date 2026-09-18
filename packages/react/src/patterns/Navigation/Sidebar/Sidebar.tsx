@@ -7,6 +7,7 @@ import {
   isValidElement,
   useEffect,
   useRef,
+  type CSSProperties,
 } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
 
@@ -55,6 +56,12 @@ interface SidebarProps {
    * thing that slides away. Omit it and the sidebar behaves exactly as before.
    */
   rail?: ReactNode
+  /**
+   * The panel's width in px. Defaults to the 240 a menu needs; a module whose
+   * panel IS its content — an inbox list, a month — passes its own, and the
+   * frame reserves that instead.
+   */
+  panelWidth?: number
 }
 
 function _Sidebar({
@@ -63,8 +70,10 @@ function _Sidebar({
   footer,
   onFooterDropdownClick,
   rail,
+  panelWidth = sidebarWidths.panel,
 }: SidebarProps) {
-  const { sidebarState, isSmallScreen, setRailWidth } = useSidebar()
+  const { sidebarState, isSmallScreen, setRailWidth, setPanelWidth } =
+    useSidebar()
   const shouldReduceMotion = useReducedMotion()
   // One width at every viewport: the rail is docked on a phone too, so a
   // breakpoint here would only be a second number to keep in step with the
@@ -79,6 +88,11 @@ function _Sidebar({
     setRailWidth(railWidth)
     return () => setRailWidth(0)
   }, [railWidth, setRailWidth])
+
+  useEffect(() => {
+    setPanelWidth(panelWidth)
+    return () => setPanelWidth(sidebarWidths.panel)
+  }, [panelWidth, setPanelWidth])
 
   // A collapsed panel must not be reachable by tab or by a screen reader. The
   // frame does this for the whole slot when there is no rail; with one, the
@@ -222,6 +236,7 @@ function _Sidebar({
         aria-label={i18n.navigation.sidebar.label}
         className={cn(panelClassName, "left-0 z-10")}
         animate={panelAnimate}
+        style={{ "--ds-sidebar-width": `${panelWidth}px` } as CSSProperties}
         transition={transition}
       >
         {panelContent}
@@ -245,6 +260,7 @@ function _Sidebar({
         ref={panelRef}
         className={cn(panelClassName, "z-0")}
         animate={panelAnimate}
+        style={{ "--ds-sidebar-width": `${panelWidth}px` } as CSSProperties}
         transition={transition}
       >
         {panelContent}

@@ -1,4 +1,4 @@
-import { breakpoints, motionTokens, sidebarWidths } from "@factorialco/f0-core"
+import { breakpoints, motionTokens } from "@factorialco/f0-core"
 import {
   AnimatePresence,
   LayoutGroup,
@@ -35,16 +35,6 @@ import {
   resolvePanelWidthTarget,
 } from "./layoutTransition"
 import { useWindowResizing } from "./useWindowResizing"
-
-/**
- * The room the locked sidebar panel takes out of the frame. Border box, so the
- * slot's own `pl-3` is inside it — matches `--ds-sidebar-width`.
- *
- * Named because two places need the same number: the slot itself, and the
- * predicted frame width published when the sidebar changes state (see
- * `useFrameWidthPublisher`).
- */
-const SIDEBAR_SLOT_WIDTH = sidebarWidths.panel
 
 /**
  * How long the fullscreen transition holds the frame in its "changing what the
@@ -208,6 +198,7 @@ function ApplicationFrameContent({
     isSmallScreen,
     setForceFloat,
     railWidth,
+    panelWidth,
   } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const {
@@ -392,7 +383,7 @@ function ApplicationFrameContent({
   // this one would tell the panel it has 56px more to grow into than it does,
   // and it would cross `splitMinFrame` early on a narrow window.
   const sidebarSlotWidth =
-    railWidth + (sidebarState === "locked" ? SIDEBAR_SLOT_WIDTH : 0)
+    railWidth + (sidebarState === "locked" ? panelWidth : 0)
   useEffect(() => {
     const row = mainAreaRef.current?.parentElement
     if (!row || !setFrameWidth) return
