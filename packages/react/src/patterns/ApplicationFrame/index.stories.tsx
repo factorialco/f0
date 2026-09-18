@@ -1469,12 +1469,14 @@ const toolsMenuTree: MenuCategory[] = [
  * because you never left it.
  */
 const ToolsFlyout = () => (
-  <div className="flex flex-col gap-1">
-    <SearchBar placeholder="Search..." onClick={() => {}} />
-    {/* The menu's groups carry the sidebar's own 12px gutter, which inside a
-        box that already has one reads as a 20px indent. The box's padding is
-        the only one there should be. */}
-    <div className="[&>div>div]:px-0">
+  <div className="flex min-h-0 flex-col gap-1">
+    {/* Outside the scroll: searching a list you have to scroll to see is the
+        one thing search is for. The sidebar's own gutter and bottom margin
+        come off — the box's padding is the only one there should be. */}
+    <div className="shrink-0 [&>div]:px-0 [&_button]:mb-0">
+      <SearchBar placeholder="Search..." onClick={() => {}} />
+    </div>
+    <div className="min-h-0 flex-1 overflow-y-auto [&>div>div]:px-0">
       <Menu tree={toolsMenuTree} />
     </div>
   </div>
@@ -1821,15 +1823,15 @@ const ConversationsSidebarInner = ({
             icon: Calendar,
             activeIcon: CalendarFilled,
           },
-          // The people you look up are a destination, not a tool you open:
-          // Directory takes the Organization row's place on the first level.
-          { id: "directory", label: "Directory", icon: BookOpen },
           {
             id: "files",
             label: "Files",
             icon: Folders,
             activeIcon: FoldersFilled,
           },
+          // The people you look up are a destination, not a tool you open:
+          // Directory takes the Organization row's place on the first level.
+          { id: "directory", label: "Directory", icon: BookOpen },
           { id: "tools", label: "Tools", icon: Hub, activeIcon: HubFilled },
         ]
       : []),
