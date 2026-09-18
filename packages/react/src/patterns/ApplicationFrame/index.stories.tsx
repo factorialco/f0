@@ -2000,6 +2000,9 @@ const ConversationsSidebarInner = ({
 
   if (isRail) {
     const { user, options } = SidebarFooterStories.Default.args
+    // Home is the one module that is only a page. Everything else has a
+    // list, a queue or a catalog to put beside it.
+    const hasPanel = tab !== "home"
     return (
       <Sidebar
         // The inbox list IS the module, and its rows do not fit in a menu's
@@ -2047,17 +2050,21 @@ const ConversationsSidebarInner = ({
             user={{ user, options }}
           />
         }
+        // Home has no second level yet, so it is given none: the header is
+        // what makes `Sidebar` render a panel at all.
         header={
-          <>
-            <SidebarPanelHeader
-              title={tabs.find((t) => t.id === tab)?.label ?? ""}
-            />
-            {/* Search sits with the catalog: it is the panel with something to
-                search. Home's own search is the page's, not the nav's. */}
-            {tab === "tools" && (
-              <SearchBar placeholder="Search..." onClick={() => {}} />
-            )}
-          </>
+          hasPanel ? (
+            <>
+              <SidebarPanelHeader
+                title={tabs.find((t) => t.id === tab)?.label ?? ""}
+              />
+              {/* Search sits with the catalog: it is the panel with something
+                  to search. Home's own search is the page's, not the nav's. */}
+              {tab === "tools" && (
+                <SearchBar placeholder="Search..." onClick={() => {}} />
+              )}
+            </>
+          ) : undefined
         }
         body={body}
       />

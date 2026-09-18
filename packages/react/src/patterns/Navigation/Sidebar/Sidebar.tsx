@@ -84,6 +84,10 @@ function _Sidebar({
   // breakpoint here would only be a second number to keep in step with the
   // token and the CSS variable.
   const railWidth = rail ? sidebarWidths.rail : 0
+  // A module whose second level has no content has no second level. The panel
+  // is not rendered empty and its width is not reserved: an empty 240px column
+  // between the rail and the content is a promise the module does not keep.
+  const hasPanel = Boolean(header || body || footer)
 
   // The frame receives the whole navigation as one opaque node, so it cannot
   // see whether there is a rail inside it — it is told. Everything the frame
@@ -95,9 +99,9 @@ function _Sidebar({
   }, [railWidth, setRailWidth])
 
   useEffect(() => {
-    setPanelWidth(panelWidth)
+    setPanelWidth(hasPanel ? panelWidth : 0)
     return () => setPanelWidth(sidebarWidths.panel)
-  }, [panelWidth, setPanelWidth])
+  }, [hasPanel, panelWidth, setPanelWidth])
 
   // A collapsed panel must not be reachable by tab or by a screen reader. The
   // frame does this for the whole slot when there is no rail; with one, the
@@ -268,16 +272,18 @@ function _Sidebar({
           a border here would sit OUTSIDE the rail's 48px and push the panel
           a pixel off the width the frame has reserved for the pair. */}
       <div className="relative z-10 h-full">{rail}</div>
-      <motion.div
-        initial={false}
-        ref={panelRef}
-        className={cn(panelClassName, "z-0")}
-        animate={panelAnimate}
-        style={{ "--ds-sidebar-width": `${panelWidth}px` } as CSSProperties}
-        transition={transition}
-      >
-        {panelContent}
-      </motion.div>
+      {hasPanel && (
+        <motion.div
+          initial={false}
+          ref={panelRef}
+          className={cn(panelClassName, "z-0")}
+          animate={panelAnimate}
+          style={{ "--ds-sidebar-width": `${panelWidth}px` } as CSSProperties}
+          transition={transition}
+        >
+          {panelContent}
+        </motion.div>
+      )}
     </aside>
   )
 }
