@@ -10160,6 +10160,15 @@ declare interface FrameContextType {
      * state without navigation, so the button has nothing to restore.
      */
     hasRail: boolean;
+    /**
+     * True for the one frame in which a module change commits. Changing section
+     * is not a movement to watch: the panel and the content are a different
+     * section's, not this one's on its way somewhere, so everything laid out
+     * against the navigation lands at once instead of easing into place.
+     */
+    isLayoutJumping: boolean;
+    /** Call before a module change to land the next layout without animation. */
+    jumpLayout: () => void;
     setRailWidth: (width: number) => void;
     setPanelWidth: (width: number) => void;
 }
