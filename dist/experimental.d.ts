@@ -812,12 +812,18 @@ declare const ANCHOR_ATTRIBUTE = "data-f0-coachmark";
  */
 export declare const ApplicationFrame: typeof _ApplicationFrame;
 
-declare function _ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, }: ApplicationFrameProps): JSX_2.Element;
+declare function _ApplicationFrame({ children, sidebar, topBar, banner, ai, aiPromotion, }: ApplicationFrameProps): JSX_2.Element;
 
 export declare interface ApplicationFrameProps {
     ai?: Omit<AiChatProviderProps, "children">;
     aiPromotion?: Omit<AiPromotionChatProviderProps, "children">;
     banner?: React.ReactNode;
+    /**
+     * A strip across the top of the content column, above the page's card and
+     * outside it: search, or anything else belonging to the window rather than
+     * to the page under it. Omit it and the card starts where it always did.
+     */
+    topBar?: React.ReactNode;
     sidebar: React.ReactNode;
     children: React.ReactNode;
 }
@@ -10157,6 +10163,16 @@ declare interface FrameContextType {
      */
     panelWidth: number;
     /**
+     * The strip the frame draws above the page, or 0 when it has none. The panel
+     * starts UNDER it rather than beside it: what the strip carries is the
+     * window's — a search that finds anything, not this page's rows — so a
+     * second level opening must not push it sideways.
+     *
+     * Registered by the frame, read by `Sidebar`, for the same reason
+     * `railWidth` goes the other way: neither can see inside the other.
+     */
+    topBarHeight: number;
+    /**
      * Whether navigation is permanently on screen. What reads this is the
      * "Open main menu" button in the page surfaces: with a rail there is no
      * state without navigation, so the button has nothing to restore.
@@ -10173,6 +10189,7 @@ declare interface FrameContextType {
     jumpLayout: () => void;
     setRailWidth: (width: number) => void;
     setPanelWidth: (width: number) => void;
+    setTopBarHeight: (height: number) => void;
 }
 
 /**
@@ -14323,7 +14340,7 @@ declare interface SidebarProps {
  * screen there is no state in which the app has no navigation, so nothing has
  * to put an "open main menu" button back into the content to compensate.
  */
-export declare function SidebarRail({ company, tabs, activeTab, onTabChange, persistKey, onActiveTabPress, flyouts, search, actions, user, }: SidebarRailProps): JSX_2.Element;
+export declare function SidebarRail({ company, tabs, activeTab, onTabChange, persistKey, onActiveTabPress, flyouts, actions, user, }: SidebarRailProps): JSX_2.Element;
 
 /** A shortcut pinned to the foot of the rail — marketplace, security, activity. */
 export declare type SidebarRailAction = {
@@ -14354,16 +14371,6 @@ export declare type SidebarRailProps = {
      * clicking it opens its flyout and leaves the active module alone.
      */
     flyouts?: Record<string, ReactNode>;
-    /**
-     * Search, under the workspace mark and above the modules.
-     *
-     * It sits there rather than in a panel because it is not a module's search
-     * — it is the app's, and the app is what the rail stands for. A panel's own
-     * search filters that panel; this one finds anything.
-     */
-    search?: Omit<SidebarRailAction, "id" | "icon"> & {
-        icon?: IconType;
-    };
     actions?: SidebarRailAction[];
     user?: Omit<SidebarUserMenuProps, "compact">;
 };
@@ -16804,9 +16811,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -16814,11 +16823,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
