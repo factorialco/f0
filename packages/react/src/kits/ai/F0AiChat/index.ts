@@ -10,6 +10,10 @@ export {
 // Types
 export type {
   AiChatComposerAction,
+  AiChatComposerActionItem,
+  AiChatComposerActionSeparator,
+  AiChatComposerActionSubmenu,
+  AiChatComposerActionToggle,
   AiChatCredits,
   AiChatCreditWarning,
   AiChatMode,

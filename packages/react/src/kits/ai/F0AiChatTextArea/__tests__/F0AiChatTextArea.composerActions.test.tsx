@@ -34,7 +34,9 @@ const actions: AiChatComposerAction[] = [
 ]
 
 const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(screen.getByRole("button", { name: /add to message/i }))
+  await user.click(
+    screen.getByRole("button", { name: /add to this conversation/i })
+  )
   return screen.findByRole("menu")
 }
 
@@ -52,7 +54,7 @@ describe("F0AiChatTextArea composerActions", () => {
       screen.getByRole("button", { name: /attach file/i })
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /add to message/i })
+      screen.queryByRole("button", { name: /add to this conversation/i })
     ).not.toBeInTheDocument()
   })
 
@@ -69,7 +71,7 @@ describe("F0AiChatTextArea composerActions", () => {
       screen.getByRole("button", { name: /attach file/i })
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /add to message/i })
+      screen.queryByRole("button", { name: /add to this conversation/i })
     ).not.toBeInTheDocument()
   })
 
@@ -87,7 +89,9 @@ describe("F0AiChatTextArea composerActions", () => {
       screen.queryByRole("button", { name: /attach file/i })
     ).not.toBeInTheDocument()
 
-    const trigger = screen.getByRole("button", { name: /add to message/i })
+    const trigger = screen.getByRole("button", {
+      name: /add to this conversation/i,
+    })
     expect(trigger).toHaveAttribute("aria-haspopup", "menu")
     expect(trigger).toHaveAttribute("aria-expanded", "false")
 
@@ -97,7 +101,7 @@ describe("F0AiChatTextArea composerActions", () => {
 
     const items = screen.getAllByRole("menuitem")
     expect(items.map((item) => item.textContent)).toEqual([
-      "Attach file",
+      "Add files or photos",
       "Connectors",
       "Saved prompts",
     ])
@@ -119,7 +123,9 @@ describe("F0AiChatTextArea composerActions", () => {
     const click = vi.spyOn(input!, "click")
 
     await openMenu(user)
-    await user.click(screen.getByRole("menuitem", { name: "Attach file" }))
+    await user.click(
+      screen.getByRole("menuitem", { name: "Add files or photos" })
+    )
 
     // The dropdown defers item callbacks to let its close animation settle.
     await waitFor(() => expect(click).toHaveBeenCalledTimes(1))
@@ -143,7 +149,9 @@ describe("F0AiChatTextArea composerActions", () => {
     )
 
     await openMenu(user)
-    await user.click(screen.getByRole("menuitem", { name: "Attach file" }))
+    await user.click(
+      screen.getByRole("menuitem", { name: "Add files or photos" })
+    )
 
     // The input is `display: none`, so userEvent's click-then-upload refuses it;
     // the picker is what the menu entry opens, and this is its result landing.
@@ -183,7 +191,7 @@ describe("F0AiChatTextArea composerActions", () => {
     await openMenu(user)
 
     expect(
-      screen.queryByRole("menuitem", { name: "Attach file" })
+      screen.queryByRole("menuitem", { name: "Add files or photos" })
     ).not.toBeInTheDocument()
     expect(screen.getAllByRole("menuitem")).toHaveLength(2)
   })
@@ -202,7 +210,7 @@ describe("F0AiChatTextArea composerActions", () => {
     await openMenu(user)
 
     expect(
-      screen.getByRole("menuitem", { name: "Attach file" })
+      screen.getByRole("menuitem", { name: "Add files or photos" })
     ).toHaveAttribute("aria-disabled", "true")
     expect(
       screen.getByRole("menuitem", { name: "Connectors" })
@@ -222,7 +230,9 @@ describe("F0AiChatTextArea composerActions", () => {
       />
     )
 
-    const trigger = screen.getByRole("button", { name: /add to message/i })
+    const trigger = screen.getByRole("button", {
+      name: /add to this conversation/i,
+    })
     trigger.focus()
     await user.keyboard("{Enter}")
 
@@ -261,6 +271,120 @@ describe("F0AiChatTextArea composerActions", () => {
     expect(item).toHaveTextContent("Needs the desktop app")
   })
 
+  it("opens a submenu and reaches what it holds", async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    render(
+      <F0AiChatTextArea
+        onSubmit={vi.fn()}
+        fileAttachments={fileAttachments}
+        composerActions={[
+          {
+            id: "connectors",
+            type: "submenu",
+            label: "Connectors",
+            icon: Link,
+            actions: [
+              { id: "manage", label: "Manage connectors", onClick },
+              { type: "separator" },
+              {
+                id: "slack",
+                type: "toggle",
+                label: "Slack",
+                tag: "New",
+                checked: false,
+                onCheckedChange: vi.fn(),
+              },
+            ],
+          },
+        ]}
+      />
+    )
+
+    await openMenu(user)
+
+    expect(
+      screen.getByRole("menuitem", { name: /Connectors/ })
+    ).toHaveAttribute("aria-haspopup", "menu")
+
+    // DRIVEN BY KEYBOARD, and not for coverage's sake: a submenu opens on hover
+    // intent, which Radix decides from the pointer's path across a grace area.
+    // jsdom reports every coordinate as 0, so a mouse click lands as "the
+    // pointer left the trigger" and the panel closes under the click. The
+    // keyboard path is the same select, with geometry taken out of it.
+    await user.keyboard("{ArrowDown}{ArrowDown}{ArrowRight}")
+
+    expect(
+      await screen.findByRole("menuitem", { name: "Manage connectors" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("menuitemcheckbox", { name: /Slack/ })
+    ).toHaveTextContent("New")
+
+    await user.keyboard("{Enter}")
+
+    await waitFor(() => expect(onClick).toHaveBeenCalledTimes(1))
+  })
+
+  it("shows a submenu's empty label instead of an empty panel", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0AiChatTextArea
+        onSubmit={vi.fn()}
+        fileAttachments={fileAttachments}
+        composerActions={[
+          {
+            id: "connectors",
+            type: "submenu",
+            label: "Connectors",
+            actions: [],
+            emptyLabel: "No connectors installed yet.",
+          },
+        ]}
+      />
+    )
+
+    await openMenu(user)
+    // Keyboard again — see the note in the test above.
+    await user.keyboard("{ArrowDown}{ArrowDown}{ArrowRight}")
+
+    expect(
+      await screen.findByText("No connectors installed yet.")
+    ).toBeInTheDocument()
+  })
+
+  // A toggle is SET, not chosen: it reports the new value and the menu stays up,
+  // so turning two connectors on is two clicks rather than two round trips.
+  it("reports a toggle's new value without closing the menu", async () => {
+    const user = userEvent.setup()
+    const onCheckedChange = vi.fn()
+    render(
+      <F0AiChatTextArea
+        onSubmit={vi.fn()}
+        fileAttachments={fileAttachments}
+        composerActions={[
+          {
+            id: "slack",
+            type: "toggle",
+            label: "Slack",
+            checked: false,
+            onCheckedChange,
+          },
+        ]}
+      />
+    )
+
+    await openMenu(user)
+
+    const toggle = screen.getByRole("menuitemcheckbox", { name: /Slack/ })
+    expect(toggle).toHaveAttribute("aria-checked", "false")
+
+    await user.click(toggle)
+
+    await waitFor(() => expect(onCheckedChange).toHaveBeenCalledWith(true))
+    expect(screen.getByRole("menu")).toBeInTheDocument()
+  })
+
   // The one disabled state that differs in KIND from the paperclip's: reaching
   // maxFiles no longer kills the trigger, but transcribing still does — nothing
   // in the composer is actionable while a transcript is landing.
@@ -277,7 +401,9 @@ describe("F0AiChatTextArea composerActions", () => {
       />
     )
 
-    const trigger = screen.getByRole("button", { name: /add to message/i })
+    const trigger = screen.getByRole("button", {
+      name: /add to this conversation/i,
+    })
     expect(trigger).toHaveAttribute("aria-disabled", "true")
 
     await user.click(trigger)

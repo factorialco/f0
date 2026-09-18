@@ -6,6 +6,7 @@ import {
   Calendar,
   ChartVerticalBars,
   File,
+  Hub,
   Marketplace,
   PalmTree,
   Pencil,
@@ -105,37 +106,86 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
   maxFiles: 3,
 }
 
-const COMPOSER_ACTIONS: AiChatComposerAction[] = [
-  {
-    id: "connectors",
-    label: "Connectors",
-    icon: Marketplace,
-    onClick: () => console.log("connectors clicked"),
-  },
-  {
-    id: "saved-prompts",
-    label: "Saved prompts",
-    icon: Pencil,
-    onClick: () => console.log("saved prompts clicked"),
-  },
+const CONNECTORS = [
+  { id: "slack", name: "Slack" },
+  { id: "notion", name: "Notion" },
 ]
 
-// The same actions carrying the type's remaining fields: a secondary line, and
-// an entry the host has switched off with the reason on hover.
-const COMPOSER_ACTIONS_FULL: AiChatComposerAction[] = [
-  {
-    id: "connectors",
-    label: "Connectors",
-    description: "Pull context from Drive, Notion or Slack",
-    icon: Marketplace,
-    onClick: () => console.log("connectors clicked"),
-  },
+/**
+ * The menu the Connectors prototype asks for: what a conversation can be GIVEN.
+ * Attaching a file is the composer's own entry and is not listed here; the
+ * host contributes the connectors, one step in, each a switch rather than a
+ * button — turning one on is a setting for this chat, not an action.
+ *
+ * `signedIn` drives the "New" tag: a connector the person has never signed in
+ * to is announced, not decorated.
+ */
+const useConnectorActions = (): AiChatComposerAction[] => {
+  const [enabled, setEnabled] = useState<string[]>([])
+  const [signedIn, setSignedIn] = useState<string[]>(["slack"])
+
+  return [
+    {
+      id: "connectors",
+      type: "submenu",
+      label: "Connectors",
+      icon: Hub,
+      emptyLabel: "No connectors installed yet.",
+      actions: [
+        {
+          id: "manage",
+          label: "Manage connectors",
+          icon: Hub,
+          onClick: () => console.log("manage connectors clicked"),
+        },
+        { type: "separator" },
+        ...CONNECTORS.map(
+          (connector): AiChatComposerAction => ({
+            id: connector.id,
+            type: "toggle",
+            label: connector.name,
+            avatar: { type: "company", name: connector.name },
+            tag: signedIn.includes(connector.id) ? undefined : "New",
+            checked: enabled.includes(connector.id),
+            onCheckedChange: (next) => {
+              setEnabled((current) =>
+                next
+                  ? [...current, connector.id]
+                  : current.filter((id) => id !== connector.id)
+              )
+              setSignedIn((current) =>
+                current.includes(connector.id)
+                  ? current
+                  : [...current, connector.id]
+              )
+            },
+          })
+        ),
+      ],
+    },
+  ]
+}
+
+/** The connectors story's own component, so the state above has somewhere to live. */
+const ConnectorsComposer = (props: WrapperProps) => (
+  <Wrapper {...props} composerActions={useConnectorActions()} />
+)
+
+// A flat menu, for the host that has no list to keep one step in: plain
+// entries, one of them switched off with the reason on hover.
+const COMPOSER_ACTIONS_FLAT: AiChatComposerAction[] = [
   {
     id: "saved-prompts",
     label: "Saved prompts",
     description: "Reuse a prompt from your library",
     icon: Pencil,
     onClick: () => console.log("saved prompts clicked"),
+  },
+  {
+    id: "marketplace",
+    label: "Browse the marketplace",
+    icon: Marketplace,
+    onClick: () => console.log("marketplace clicked"),
   },
   {
     id: "screenshot",
@@ -953,9 +1003,9 @@ export const WithToolbarStart: Story = {
 // a file is not lost in the trade — the composer contributes it as the first
 // entry, so a host adding "Connectors" never rewires the file picker.
 export const WithComposerActions: Story = {
+  render: (args) => <ConnectorsComposer {...args} />,
   args: {
     fileAttachments: FILE_UPLOAD_CONFIG,
-    composerActions: COMPOSER_ACTIONS,
   },
   play: async ({ canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
@@ -966,38 +1016,71 @@ export const WithComposerActions: Story = {
       ).not.toBeInTheDocument()
     })
 
-    await step("Attaching leads the menu, host actions follow", async () => {
+    await step("Attaching leads the menu, connectors follow", async () => {
       await userEvent.click(
-        page.getByRole("button", { name: "Add to message" })
+        page.getByRole("button", { name: "Add to this conversation" })
       )
 
       const items = await page.findAllByRole("menuitem")
       await expect(items.map((item) => item.textContent)).toEqual([
-        "Attach file",
+        "Add files or photos",
         "Connectors",
-        "Saved prompts",
       ])
+    })
+
+    await step("Connectors opens a menu of its own", async () => {
+      // Driven by keyboard: a submenu opens on hover intent, and asserting on
+      // where a synthetic pointer ended up makes the test about Radix's grace
+      // area rather than about this menu. Arrow keys are the same select.
+      await userEvent.keyboard("{ArrowDown}{ArrowDown}{ArrowRight}")
+
+      // `waitFor`, not a bare assertion: the panel animates in from
+      // `opacity: 0`, so a check that lands on the first frame reads it as
+      // invisible.
+      const manage = await page.findByRole("menuitem", {
+        name: "Manage connectors",
+      })
+      await waitFor(() => expect(manage).toBeVisible())
+
+      const slack = await page.findByRole("menuitemcheckbox", {
+        name: /Slack/,
+      })
+      await expect(slack).toHaveAttribute("aria-checked", "false")
+    })
+
+    await step("A connector is flipped, and the menu stays open", async () => {
+      await userEvent.keyboard("{ArrowDown}{ArrowDown}{Enter}")
+
+      await waitFor(async () =>
+        expect(
+          page.getByRole("menuitemcheckbox", { name: /Slack/ })
+        ).toHaveAttribute("aria-checked", "true")
+      )
+      // Still there: setting two connectors is two keystrokes, not two visits.
+      await expect(
+        page.getByRole("menuitemcheckbox", { name: /Notion/ })
+      ).toBeInTheDocument()
     })
   },
 }
 
 // No `fileAttachments`: the menu holds only the host's actions and no file
 // entry — how a composer that takes no uploads still offers "add context".
-// These actions also carry `description`, `disabled` and `disabledTooltip`.
+// Flat, because not every host has a list worth keeping one step in.
 export const WithComposerActionsWithoutAttachments: Story = {
   args: {
-    composerActions: COMPOSER_ACTIONS_FULL,
+    composerActions: COMPOSER_ACTIONS_FLAT,
   },
   play: async ({ canvasElement, step }) => {
     const page = within(canvasElement.closest("body")!)
 
     await step("The menu holds only the host's actions", async () => {
       await userEvent.click(
-        page.getByRole("button", { name: "Add to message" })
+        page.getByRole("button", { name: "Add to this conversation" })
       )
 
       await expect(
-        page.queryByRole("menuitem", { name: /Attach file/ })
+        page.queryByRole("menuitem", { name: /Add files or photos/ })
       ).not.toBeInTheDocument()
       await expect(await page.findAllByRole("menuitem")).toHaveLength(3)
     })
