@@ -1477,12 +1477,10 @@ const InboxPanel = () => {
 
   return (
     <div className="flex flex-col gap-2 pb-3">
-      {/* Edge to edge: the search is the head of the list, not a control
-          floating above it. `SearchBar` insets itself by 12 for a menu, which
-          is the wrong gutter for a panel that IS the list. */}
-      <div className="[&>div]:px-0">
-        <SearchBar placeholder="Search..." onClick={() => {}} />
-      </div>
+      {/* `SearchBar`'s own 12px gutter, the same one the Chats panel sits in:
+          two panels of the same navigation should not disagree about where
+          their search starts. */}
+      <SearchBar placeholder="Search..." onClick={() => {}} />
       <div className="flex flex-col px-1.5">
         {INBOX_ITEMS.map((item) => (
           <InboxRow
