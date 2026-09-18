@@ -9246,17 +9246,9 @@ export declare type F0CheckboxFieldProps = CheckboxBaseProps & {
 };
 
 export declare type F0CheckboxInlineProps = CheckboxBaseProps & {
-    /**
-     * `"inline"` is the detail-row presentation: the checkbox fills the row's
-     * box and carries no chrome of its own.
-     */
+    /** Fills the detail row without field chrome. */
     variant: "inline";
-    /**
-     * A checkbox has no separate editor — one click commits through
-     * `onCheckedChange` — so there is no edit mode to enter and nothing to
-     * dismiss. Both props exist as `never` so a field layer can hand every
-     * inline component the same prop bag.
-     */
+    /** Toggles commit directly through onCheckedChange and have no edit mode. */
     editing?: never;
     onDismiss?: never;
 };
@@ -21140,9 +21132,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -21150,11 +21144,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

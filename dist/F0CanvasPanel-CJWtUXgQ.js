@@ -113875,7 +113875,7 @@ function jG1({ metadata: e }) {
     a(n, { visualization: "card" })
   ] });
 }
-const y32 = "flex h-full min-h-[40px] w-full items-center border border-solid border-transparent px-3";
+const y32 = "flex h-full min-h-10 w-full items-center border border-solid border-transparent px-3";
 function b32(e) {
   const t = A.useRef({ value: e, previous: e });
   return A.useMemo(() => (t.current.value !== e && (t.current.previous = t.current.value, t.current.value = e), t.current.previous), [e]);
@@ -114076,8 +114076,7 @@ const c$ = A.forwardRef(
 c$.displayName = P32.displayName;
 function UG1({
   variant: e = "field",
-  // Typed `never`, stripped here so a stray prop from an untyped caller never
-  // reaches the DOM.
+  // Strip unsupported props from untyped callers before spreading to the DOM.
   editing: t,
   onDismiss: n,
   title: r,
@@ -126971,8 +126970,7 @@ const N42 = A.forwardRef(({ className: e, disabled: t, hideLabel: n, required: r
 N42.displayName = H$.displayName;
 function J23({
   variant: e = "field",
-  // Typed `never`, stripped here so a stray prop from an untyped caller never
-  // reaches the DOM.
+  // Strip unsupported props from untyped callers before spreading to the DOM.
   editing: t,
   onDismiss: n,
   title: r,
