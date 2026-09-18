@@ -100,6 +100,43 @@ export const BasicEditableTable: Story = {
 }
 
 /**
+ * `itemActionsOnHover` reveals the row-actions button only while its row is
+ * hovered or focused, instead of painting it on every row. Off by default, so
+ * existing tables keep showing their actions at all times.
+ *
+ * The actions cell keeps its width either way, so a row's content does not
+ * shift sideways as the pointer enters it. An open dropdown stays visible once
+ * the pointer leaves, and keyboard focus reveals the actions too.
+ */
+export const EditableTableWithItemActionsOnHover: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              itemActionsOnHover: true,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-item-actions-on-hover/v1"
+      />
+    )
+  },
+}
+
+/**
  * The view-switcher chip is presented as a plain table: `label` replaces the
  * built-in "Editable table" text and `icon` replaces the built-in pencil, so
  * the editing affordance is not advertised in the switcher. Both overrides are
