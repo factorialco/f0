@@ -158,3 +158,20 @@ import DOMPurify from "dompurify"
 export function stripHtmlTags(html: string): string {
   return DOMPurify.sanitize(html, { ALLOWED_TAGS: [] })
 }
+
+/**
+ * Resolves the `lines` cap shared by the avatar cell types
+ * Omitting it wraps the name in full; `wraps` is what callers align on
+ */
+export function resolveNameClamp(args: { lines?: number }): {
+  lines: number
+  full: boolean
+  wraps: boolean
+} {
+  const cap = args.lines
+
+  // `lines` is ignored when uncapped — OneEllipsis skips clamping once disabled.
+  return cap === undefined
+    ? { lines: 1, full: true, wraps: true }
+    : { lines: cap, full: false, wraps: cap > 1 }
+}

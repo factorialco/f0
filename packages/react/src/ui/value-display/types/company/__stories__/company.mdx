@@ -5,8 +5,7 @@ import * as CompanyStories from "./company.stories"
 
 ### company
 
-Renders a company avatar. It supports the same badge as the person type (check
-it for more details).
+Renders a company avatar.
 
 #### Value type
 
@@ -14,9 +13,8 @@ it for more details).
 type value = {
     name: string
     src?: string // the avatar image
-    badge?: AvatarBadge
+    lines?: number // cap the name at N lines; omit to wrap it in full
 }
-// Check PersonType for the AvatarBadge type
 ```
 
 <Canvas
@@ -33,3 +31,20 @@ render: (item) => ({
 `,
   }}
 />
+
+**Long name inside a fixed-width column**
+
+By default the name wraps onto as many lines as it needs, so the whole name
+stays readable however narrow the column is.
+
+<Canvas of={CompanyStories.CompanyTypeWithLongName} />
+
+**Capping how many lines the name takes**
+
+Set `lines` to cap it. The name wraps up to that many lines and truncates with
+an ellipsis past them, showing the full name in a tooltip on hover. `lines: 1`
+keeps it on a single line — use it where every row has to be the same height.
+
+<Canvas of={CompanyStories.CompanyTypeWithLines} />
+
+<Canvas of={CompanyStories.CompanyTypeTruncatedToOneLine} />
