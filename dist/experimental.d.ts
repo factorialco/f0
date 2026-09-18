@@ -14323,7 +14323,7 @@ declare interface SidebarProps {
  * screen there is no state in which the app has no navigation, so nothing has
  * to put an "open main menu" button back into the content to compensate.
  */
-export declare function SidebarRail({ company, tabs, activeTab, onTabChange, persistKey, onActiveTabPress, flyouts, actions, user, }: SidebarRailProps): JSX_2.Element;
+export declare function SidebarRail({ company, tabs, activeTab, onTabChange, persistKey, onActiveTabPress, flyouts, search, actions, user, }: SidebarRailProps): JSX_2.Element;
 
 /** A shortcut pinned to the foot of the rail — marketplace, security, activity. */
 export declare type SidebarRailAction = {
@@ -14354,6 +14354,16 @@ export declare type SidebarRailProps = {
      * clicking it opens its flyout and leaves the active module alone.
      */
     flyouts?: Record<string, ReactNode>;
+    /**
+     * Search, under the workspace mark and above the modules.
+     *
+     * It sits there rather than in a panel because it is not a module's search
+     * — it is the app's, and the app is what the rail stands for. A panel's own
+     * search filters that panel; this one finds anything.
+     */
+    search?: Omit<SidebarRailAction, "id" | "icon"> & {
+        icon?: IconType;
+    };
     actions?: SidebarRailAction[];
     user?: Omit<SidebarUserMenuProps, "compact">;
 };
