@@ -75,6 +75,7 @@ export { default as Delete } from "./Delete";
 export { default as Deny } from "./Deny";
 export { default as Descending } from "./Descending";
 export { default as Desktop } from "./Desktop";
+export { default as Directory } from "./Directory";
 export { default as DollarBill } from "./DollarBill";
 export { default as DollarReset } from "./DollarReset";
 export { default as DottedCircle } from "./DottedCircle";
