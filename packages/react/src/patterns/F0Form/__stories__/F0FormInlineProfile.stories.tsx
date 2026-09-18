@@ -332,20 +332,23 @@ export const AsAdmin: Story = {
       await waitForNoEditor(row)
     })
 
-    await step("A date row keeps its box and its inset", async () => {
+    await step("A date row keeps its box and gains its glyph", async () => {
       const row = rowFor(canvasElement, "Contract start date")
       const readHeight = boxOf(row)?.getBoundingClientRect().height
       const readX = textStartX(inset(row))
 
       await expect(readHeight).toBe(40)
+      await expect(boxOf(row)?.querySelector("svg")).toBeNull()
+      await expect(Math.round(readX)).toBe(
+        Math.round(textStartX(inset(rowFor(canvasElement, "Job title"))))
+      )
 
       await activate(row, "Contract start date")
       await waitForEditor(row)
 
       await expect(boxOf(row)?.getBoundingClientRect().height).toBe(readHeight)
-      await expect(
-        Math.abs(textStartX(inset(row)) - readX)
-      ).toBeLessThanOrEqual(1)
+      // Only the editor carries the calendar, so the date shifts one slot.
+      await expect(Math.round(textStartX(inset(row)) - readX)).toBe(24)
 
       await settleCalendar()
       await userEvent.keyboard("{Escape}")

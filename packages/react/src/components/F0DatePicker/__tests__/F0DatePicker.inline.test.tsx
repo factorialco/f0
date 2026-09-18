@@ -100,6 +100,14 @@ describe("F0DatePicker inline variant", () => {
 
       expect(screen.queryByRole("grid")).toBeNull()
     })
+
+    it("reads as plain text, with no calendar glyph", () => {
+      const { container } = render(
+        <F0DatePicker variant="inline" label="Start date" value={april10} />
+      )
+
+      expect(container.querySelector("svg")).toBeNull()
+    })
   })
 
   describe("editing", () => {
@@ -138,6 +146,37 @@ describe("F0DatePicker inline variant", () => {
       const input = screen.getByRole("textbox", { name: "Start date" })
       expect(await screen.findByRole("grid")).toBeInTheDocument()
       await waitFor(() => expect(document.activeElement).toBe(input))
+    })
+
+    it("keeps the calendar glyph in the editor", () => {
+      const { container } = render(
+        <F0DatePicker
+          variant="inline"
+          editing
+          label="Start date"
+          value={april10}
+        />
+      )
+
+      expect(container.querySelector('[data-slot="icon"] svg')).not.toBeNull()
+    })
+
+    it("draws the critical border and tint while the value is invalid", () => {
+      const { container } = render(
+        <F0DatePicker
+          variant="inline"
+          editing
+          error
+          label="Start date"
+          value={april10}
+        />
+      )
+
+      const wrapper = container.querySelector(
+        '[data-testid="input-field-wrapper"]'
+      )
+      expect(wrapper?.className).toContain("border-f1-border-critical-bold")
+      expect(wrapper?.className).toContain("bg-f1-background-critical")
     })
   })
 

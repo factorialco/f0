@@ -111,11 +111,14 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     // Use granularity placeholder as default if no placeholder provided
     const placeholder = inputProps.placeholder ?? granularity.placeholder()
 
+    // A detail row reads as plain text, so the glyph belongs to the editor only.
+    const withIcon = showIcon && !(variant === "inline" && !editing)
+
     return (
       <Input
         {...inputProps}
         placeholder={placeholder}
-        icon={showIcon ? getFieldInputIcon("date") : undefined}
+        icon={withIcon ? getFieldInputIcon("date") : undefined}
         ref={ref}
         onFocus={() => onOpenChange?.(true)}
         onClear={() => {

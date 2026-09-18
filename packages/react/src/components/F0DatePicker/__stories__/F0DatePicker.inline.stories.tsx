@@ -162,7 +162,11 @@ export const WithVisibleLabel: Story = {
   },
 }
 
-export const TextDoesNotMove: Story = {
+/**
+ * The at-rest row is plain text, so only the editor carries the glyph and the
+ * date moves right by its slot. The box height is what must not change.
+ */
+export const TextMovesByTheIconSlot: Story = {
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
     const box = canvas.getByTestId("value-box")
@@ -172,16 +176,26 @@ export const TextDoesNotMove: Story = {
 
     await step("the read presentation is the form's 40px box", async () => {
       await expect(readHeight).toBe(40)
+      await expect(box.querySelector("svg")).toBeNull()
     })
 
     await userEvent.click(canvas.getByTestId("toggle-editing"))
     const input = await canvas.findByRole("textbox", { name: "Start date" })
+    const icon = box.querySelector('[data-slot="icon"]') as HTMLElement
 
-    await step("the editor starts its text at the same x", async () => {
-      await expect(Math.abs(textStartX(input) - readX)).toBeLessThanOrEqual(1)
+    await step("the editor adds the glyph where the text was", async () => {
+      await expect(icon).toBeInTheDocument()
+      await expect(
+        Math.abs(icon.getBoundingClientRect().left - readX)
+      ).toBeLessThanOrEqual(1)
     })
 
-    await step("and is exactly as tall", async () => {
+    await step("and the date starts one icon slot further right", async () => {
+      // 24px: the 20px glyph plus the 4px gap the editor reserves for it.
+      await expect(Math.round(textStartX(input) - readX)).toBe(24)
+    })
+
+    await step("the box is exactly as tall in both modes", async () => {
       await expect(componentRoot(box).getBoundingClientRect().height).toBe(
         readHeight
       )
