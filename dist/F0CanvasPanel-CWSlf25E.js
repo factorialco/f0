@@ -47661,47 +47661,48 @@ function go({
   items: e,
   icon: t = nx,
   align: n = "start",
-  size: r,
-  children: a,
-  open: o,
-  onOpenChange: s,
-  label: l,
-  disabled: u,
-  container: c,
-  ...d
+  side: r,
+  size: a,
+  children: o,
+  open: s,
+  onOpenChange: l,
+  label: u,
+  disabled: c,
+  container: d,
+  ...f
 }) {
-  const f = D1(), [h, m] = v2(!1), v = o !== void 0 && s !== void 0, g = v ? o : h, y = v ? s : m;
+  const h = D1(), [m, v] = v2(!1), g = s !== void 0 && l !== void 0, y = g ? s : m, b = g ? l : v;
   H2(() => {
-    u && g && y(!1);
-  }, [u, g, y]);
-  const b = u ? !1 : g, L = (_) => {
-    y(_);
-  }, w = a ? t2.isValidElement(a) ? t2.cloneElement(
-    a,
+    c && y && b(!1);
+  }, [c, y, b]);
+  const L = c ? !1 : y, w = (M) => {
+    b(M);
+  }, _ = o ? t2.isValidElement(o) ? t2.cloneElement(
+    o,
     {
       // Consumer-supplied values always win.
-      disabled: a.props.disabled ?? u,
-      "aria-disabled": a.props["aria-disabled"] ?? (u ? !0 : void 0)
+      disabled: o.props.disabled ?? c,
+      "aria-disabled": o.props["aria-disabled"] ?? (c ? !0 : void 0)
     }
-  ) : a : /* @__PURE__ */ i(
+  ) : o : /* @__PURE__ */ i(
     h4,
     {
-      ...d,
-      hideLabel: !l,
+      ...f,
+      hideLabel: !u,
       icon: t,
-      size: r,
-      label: l ?? f.actions.toggleDropdownMenu,
+      size: a,
+      label: u ?? h.actions.toggleDropdownMenu,
       variant: "outline",
-      pressed: b,
-      compact: !l,
+      pressed: L,
+      compact: !u,
       noAutoTooltip: !0,
       noTitle: !0,
-      disabled: u
+      disabled: c
     }
   );
-  return /* @__PURE__ */ $(mP2, { open: b, onOpenChange: L, children: [
-    /* @__PURE__ */ i(pP2, { asChild: !0, disabled: u, children: w }),
-    /* @__PURE__ */ i(GU, { align: n, container: c, children: e.map((_, M) => BD2(_, M)) })
+  return /* @__PURE__ */ $(mP2, { open: L, onOpenChange: w, children: [
+    /* @__PURE__ */ i(pP2, { asChild: !0, disabled: c, children: _ }),
+    /* @__PURE__ */ i(GU, { align: n, side: r, container: d, children: e.map((M, P) => BD2(M, P)) })
   ] });
 }
 const zD2 = (e, t) => /* @__PURE__ */ i(
