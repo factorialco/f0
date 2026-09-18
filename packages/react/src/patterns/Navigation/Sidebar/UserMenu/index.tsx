@@ -3,6 +3,8 @@ import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
+import { PRESSABLE_CHIP } from "../pressable"
+
 export type SidebarUser = {
   firstName: string
   lastName: string
@@ -58,7 +60,12 @@ export function SidebarUserMenu({
         onClick={onDropdownClick}
       >
         {compact ? (
-          <span className="flex size-10 items-center justify-center rounded-lg transition-colors group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary">
+          <span
+            className={cn(
+              "flex size-10 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary",
+              PRESSABLE_CHIP
+            )}
+          >
             <F0AvatarPerson
               src={user.avatarUrl}
               firstName={user.firstName}

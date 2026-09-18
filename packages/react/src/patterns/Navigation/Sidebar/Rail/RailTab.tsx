@@ -5,20 +5,8 @@ import { Circle as CircleIcon } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { Badge } from "@/ui/IconBadge"
 
+import { PRESSABLE_CHIP } from "../pressable"
 import type { SidebarTab } from "../Tabs"
-
-/**
- * Press feedback for the rail's bespoke buttons: a 0.97 scale on the same
- * ease-out every pressable surface in the product uses, dropped entirely under
- * reduced motion.
- *
- * It goes on the CHIP, not on the button, and reads the button's `group`:
- * scaling the whole item drags the label in with it, and a word sliding a
- * pixel and a half toward its icon is the kind of movement you notice without
- * being able to say what moved. The chip is the thing being pressed.
- */
-export const PRESS =
-  "transition-[background-color,transform] duration-150 ease-out group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100"
 
 /**
  * Unread marker over the icon box's top-right. The same `Badge` the footer's
@@ -71,7 +59,7 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
         <span
           className={cn(
             "relative flex size-9 items-center justify-center rounded-lg",
-            PRESS,
+            PRESSABLE_CHIP,
             isActive
               ? "bg-f1-background-secondary text-f1-icon-bold"
               : "group-hover:bg-f1-background-secondary"

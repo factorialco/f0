@@ -10,7 +10,8 @@ import { CompanySelector, type CompanySelectorProps } from "../CompanySelector"
 import type { SidebarTab } from "../Tabs"
 import { usePersistedTab } from "../Tabs/usePersistedTab"
 import { SidebarUserMenu, type SidebarUserMenuProps } from "../UserMenu"
-import { PRESS, RailTab } from "./RailTab"
+import { PRESSABLE_CHIP } from "../pressable"
+import { RailTab } from "./RailTab"
 
 /** A shortcut pinned to the foot of the rail — marketplace, security, activity. */
 export type SidebarRailAction = {
@@ -54,7 +55,7 @@ const RailAction = ({ action }: { action: SidebarRailAction }) => (
     <span
       className={cn(
         "relative flex size-9 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary",
-        PRESS
+        PRESSABLE_CHIP
       )}
     >
       <F0Icon icon={action.icon} size="lg" color="default" />
