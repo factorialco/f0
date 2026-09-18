@@ -33802,9 +33802,9 @@ const kM = () => /* @__PURE__ */ h(
         rC,
         {
           side: "right",
-          align: "start",
+          align: "center",
           sideOffset: 8,
-          alignOffset: -8,
+          collisionPadding: 8,
           onOpenAutoFocus: ($) => {
             K.current && $.preventDefault();
           },
@@ -33812,7 +33812,7 @@ const kM = () => /* @__PURE__ */ h(
           onPointerLeave: ($) => {
             $.pointerType !== "touch" && L(!1, AF);
           },
-          className: "dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/75 p-1.5 shadow-xl backdrop-blur-xl",
+          className: "dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl backdrop-blur-2xl backdrop-saturate-150",
           children: U
         }
       )
@@ -36024,7 +36024,7 @@ const Td = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Nd = "w-[24rem] max-w-full", $P = "w-[32rem] max-w-full", eV = "gap-0.5", tV = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", iV = "bg-[hsl(222_31%_11%)]", nV = "bg-[hsl(220_39%_6%/0.72)]", gV = "bg-[hsl(220_39%_6%/0.6)]", aV = "bg-[hsl(220_39%_6%/0.55)]", oV = () => import("./LocationMap-Ca-Fix6c.js"), rV = Fr(oV), sV = 3 / 2, IV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, jU = ({
+}, Nd = "w-[24rem] max-w-full", $P = "w-[32rem] max-w-full", eV = "gap-0.5", tV = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", iV = "bg-[hsl(222_31%_11%)]", nV = "bg-[hsl(220_39%_6%/0.72)]", gV = "bg-[hsl(220_39%_6%/0.6)]", aV = "bg-[hsl(220_39%_6%/0.55)]", oV = () => import("./LocationMap-Bx2m8Oco.js"), rV = Fr(oV), sV = 3 / 2, IV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, jU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -44964,7 +44964,7 @@ const PE = 1e3, VE = ({
     }
   );
 }, LT = /* @__PURE__ */ new Set(), XT = Fr(
-  () => import("./ChatPostComposerDialog-DOKsfijw.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-Dkwhx-2i.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), qT = () => {
