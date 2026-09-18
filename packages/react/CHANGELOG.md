@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.6.0](https://github.com/factorialco/f0/compare/f0-react-v7.5.0...f0-react-v7.6.0) (2026-09-18)
+
+
+### Features
+
+* **F0Select:** search from the trigger when there are no filters ([#5422](https://github.com/factorialco/f0/issues/5422)) ([1e1a1f2](https://github.com/factorialco/f0/commit/1e1a1f26c09cfadd72cb5d5ebded1a83d83c024f))
+
 ## [7.5.0](https://github.com/factorialco/f0/compare/f0-react-v7.4.0...f0-react-v7.5.0) (2026-09-17)
 
 
