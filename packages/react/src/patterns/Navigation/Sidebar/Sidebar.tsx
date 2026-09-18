@@ -197,9 +197,13 @@ function _Sidebar({
 
   // The panel's chrome. Identical in both compositions; the rail only shifts
   // where its left edge starts and how far it has to travel to clear.
+  // Beside a rail the panel is docked or it is gone. It must not put on the
+  // floating card's chrome on the way out either: what leaves should be the
+  // panel you were using, not a card it turns into for 200ms.
+  const floats = rail ? sidebarState === "unlocked" : sidebarState !== "locked"
   const panelClassName = cn(
     "absolute bottom-0 top-0 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
-    sidebarState === "locked"
+    !floats
       ? cn(
           // Docked, the panel has no surface of its own — it is the floor,
           // like the rail, and the content's own card edge is what separates
@@ -222,10 +226,9 @@ function _Sidebar({
   )
   const seam = isSmallScreen ? 0 : 8
   const panelAnimate = {
-    top: sidebarState === "locked" ? 0 : isSmallScreen ? 0 : "8px",
-    borderRadius:
-      sidebarState === "locked" ? "0" : isSmallScreen ? "0" : "12px",
-    left: sidebarState === "locked" ? railWidth : railWidth + seam,
+    top: !floats ? 0 : isSmallScreen ? 0 : "8px",
+    borderRadius: !floats ? "0" : isSmallScreen ? "0" : "12px",
+    left: !floats ? railWidth : railWidth + seam,
     // Without a rail the panel leaves by sliding out past the left edge.
     //
     // With one it CANNOT: the rail is transparent, so a panel travelling

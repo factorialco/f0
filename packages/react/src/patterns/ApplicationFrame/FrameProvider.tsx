@@ -113,6 +113,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
     return storedState !== null ? !!storedState : true
   })
   const [visible, setVisible] = useState(false)
+  const hasRail = railWidth > 0
   const [prevSidebarState, setPrevSidebarState] = useState<SidebarState | null>(
     null
   )
@@ -138,6 +139,11 @@ export function FrameProvider({ children }: FrameProviderProps) {
     (e: PointerEvent<HTMLDivElement>) => {
       if (isSmallScreen) return
 
+      // With a rail there is nothing to peek: the panel is docked or it is
+      // gone, and a floating copy of it over the content is a third state
+      // nobody asked for. The rail is what stays behind when it goes.
+      if (hasRail) return
+
       if (e.clientX >= railWidth && e.clientX < railWidth + 32) {
         setVisible(true)
       }
@@ -146,10 +152,13 @@ export function FrameProvider({ children }: FrameProviderProps) {
         setVisible(false)
       }
     },
-    [isSmallScreen, setVisible, railWidth]
+    [isSmallScreen, hasRail, setVisible, railWidth]
   )
 
   const sidebarState: SidebarState = useMemo(() => {
+    // The panel never floats beside a rail. It takes room from the content or
+    // it gives the room back; it does not hover over it.
+    if (hasRail && !isSmallScreen) return locked ? "locked" : "hidden"
     if (isSmallScreen) {
       if (visible) return "unlocked"
       return "hidden"
@@ -157,7 +166,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
     if (!locked && !visible) return "hidden"
     if (!locked && visible) return "unlocked"
     return "locked"
-  }, [isSmallScreen, visible, locked])
+  }, [hasRail, isSmallScreen, visible, locked])
 
   useEffect(() => {
     setVisible(false)
@@ -188,7 +197,7 @@ export function FrameProvider({ children }: FrameProviderProps) {
         panelWidth,
         isLayoutJumping,
         jumpLayout,
-        hasRail: railWidth > 0,
+        hasRail,
         setRailWidth,
         setPanelWidth,
       }}
