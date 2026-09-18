@@ -1,4 +1,9 @@
 export { F0Chat, type F0ChatProps } from "./F0Chat"
+export {
+  F0ChatMediaPreview,
+  type F0ChatMediaFile,
+  type F0ChatMediaPreviewProps,
+} from "./components/F0ChatMediaPreview"
 export { F0ChatProvider, useF0Chat } from "./providers/F0ChatProvider"
 export type {
   F0ChatUser,

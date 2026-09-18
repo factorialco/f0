@@ -586,7 +586,7 @@ that need saying in the UI.
 - WHEN a compose target is set → THEN it replaces any other: a quote drops an edit in progress AND its draft text, attachments and mentions; an edit drops a pending quote.
 - WHEN the Edit action is re-picked on the message already open for editing → THEN F0 keeps what the viewer has typed instead of reloading the original body.
 - WHEN a compose target is set by any route → THEN F0 focuses the textarea within the same interaction and places the caret at the end of the draft, without scrolling the host page.
-- WHEN the conversation changes → THEN F0 drops the compose target AND the whole composer draft, so neither an edit nor a half-typed reply can be sent to the channel the viewer switched to.
+- WHEN the conversation changes → THEN F0 parks a plain draft and its attachments under the original channel and restores them on return. A reply or edit draft is discarded because its message target is no longer active.
 - WHEN the composer is removed while a target is set, as when a channel becomes read-only → THEN F0 drops the target with it, so a returning composer never shows a chip over an empty draft.
 - WHEN `:` starts a token in the composer → THEN F0 opens a caret-anchored emoji list and filters it by shortcode, alias, keyword, or name as the query grows.
 - WHEN the emoji autocomplete is open → THEN Arrow Up and Arrow Down move through its options, Enter or Tab inserts the active emoji, and Escape dismisses the current trigger without sending.
@@ -605,7 +605,9 @@ that need saying in the UI.
 - WHEN a video enters the composer → THEN F0 keeps the same compact height but renders a wider 16:9 preview so its media type is visually distinct.
 - WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
 - WHEN a composer attachment has no supported preview or its document exceeds the client-side preview limit → THEN F0 keeps the same compact square footprint with a file-type icon.
-- WHEN a pending composer attachment is removed or its upload fails → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
+- WHEN a pending composer attachment is removed → THEN F0 revokes its local object URL and does not restore it if the upload resolves later.
+- WHEN an attachment upload fails → THEN its local preview remains visible with Retry and Remove actions; sending stays blocked until it is retried or removed.
+- WHEN the clipboard contains text and a file → THEN both enter the same composer draft, with text inserted at the caret once.
 - WHEN several previews exceed the composer width → THEN F0 keeps them in one focusable horizontal strip instead of growing the composer through the transcript.
 - WHEN the transcript scrolls → THEN the composer remains floating above it with a subtle shadow and translucent backdrop blur, messages pass behind its surface, and a measured footer keeps the final message fully reachable.
 - WHEN the composer changes height because of text, reply or edit context, errors, or attachments → THEN the transcript footer and jump-to-bottom control follow its measured edge without shifting the visible messages.
@@ -731,3 +733,7 @@ When a message exceeds the configured character limit, submitting from the
 textarea keeps focus there, marks it invalid, associates it with the visible
 error, and announces the atomic alert. Correcting or replacing the draft
 removes the invalid state and alert.
+
+### Upload recovery
+
+Each attachment prepares independently, so a failed upload does not discard successful siblings. Voice notes use the same preparation and retry lifecycle. Their voice descriptor and duration remain attached to the file after an upload or send failure.

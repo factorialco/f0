@@ -3,6 +3,7 @@ import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
 import { ChatSurfaceProvider } from "../providers/ChatSurfaceProvider"
 import { type F0ChatComposableAttachment } from "../types"
@@ -34,10 +35,14 @@ const PreviewProgress = (): ReactNode => (
 const ChatComposerAttachmentPreviewContent = ({
   attachment,
   uploading,
+  error,
+  onRetry,
   onRemove,
 }: {
   attachment: F0ChatComposableAttachment
   uploading: boolean
+  error?: boolean
+  onRetry?: () => void
   onRemove: () => void
 }): ReactNode => {
   const i18n = useI18n()
@@ -56,6 +61,25 @@ const ChatComposerAttachmentPreviewContent = ({
     icon: Cross,
     onClick: onRemove,
   }
+  const retryControl =
+    error && onRetry ? (
+      <button
+        type="button"
+        onClick={(event) => {
+          const textarea = event.currentTarget
+            .closest('[data-testid="chat-composer-surface"]')
+            ?.querySelector("textarea")
+          onRetry()
+          textarea?.focus()
+        }}
+        aria-label={`${i18n.chat.retry}: ${attachment.name}`}
+        className={focusRing(
+          "absolute bottom-1 left-1 z-30 rounded bg-f1-background px-1 text-xs text-f1-foreground-critical"
+        )}
+      >
+        {i18n.chat.retry}
+      </button>
+    ) : null
 
   if (attachment.kind === "image") {
     return (
@@ -81,6 +105,7 @@ const ChatComposerAttachmentPreviewContent = ({
           />
         </div>
         {uploading ? <PreviewProgress /> : null}
+        {retryControl}
         <figcaption className="sr-only">{attachment.name}</figcaption>
       </figure>
     )
@@ -132,6 +157,7 @@ const ChatComposerAttachmentPreviewContent = ({
             />
           </div>
           {uploading ? <PreviewProgress /> : null}
+          {retryControl}
           <figcaption className="sr-only">{attachment.name}</figcaption>
         </figure>
       )
@@ -154,6 +180,7 @@ const ChatComposerAttachmentPreviewContent = ({
             compact
           />
           {uploading ? <PreviewProgress /> : null}
+          {retryControl}
         </div>
       )
     }
@@ -182,6 +209,7 @@ const ChatComposerAttachmentPreviewContent = ({
           />
         </div>
         {uploading ? <PreviewProgress /> : null}
+        {retryControl}
         <span className="sr-only">{attachment.name}</span>
       </div>
     )

@@ -1,0 +1,44 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0ChatMediaPreview.stories"
+
+<Meta of={Stories} />
+
+# F0ChatMediaPreview
+
+A controlled fullscreen viewer for chat images and PDFs. The host supplies the media URL and retains ownership of its lifetime. For authenticated files, resolve the original before opening the viewer and revoke any temporary object URL when its owning panel ends.
+
+## Anatomy
+
+The image viewer centers the original image, places download and close controls at the top, and shows previous and next controls when the list has more than one image. The PDF variant uses F0PdfViewer with its own toolbar. Both variants use a dialog named by the file.
+
+<Canvas of={Stories.Image} />
+
+<Controls of={Stories.Image} />
+
+## Guidelines
+
+Pass a stable image list and control `index` through `onIndexChange`. Keep `onClose` connected to the host's preview state. Supply `onDownload` when the original download requires authentication or differs from the preview URL.
+
+<Canvas of={Stories.Document} />
+
+### When not to use
+
+Use the attachment's download action for unsupported media types. Use an inline thumbnail or file chip when opening a fullscreen viewer would interrupt the conversation without adding detail.
+
+<DoDonts
+  do={{
+    description:
+      "Keep the original download separate from a temporary preview URL and release that URL with its owner.",
+  }}
+  dont={{
+    description:
+      "Keep a blob URL after the panel or conversation that created it has ended.",
+  }}
+/>
+
+<Canvas of={Stories.Snapshot} />
+
+## Accessibility
+
+The dialog title announces the current filename. Image controls have names, and left and right arrow keys move between images in a multi-image preview. Keep the invoking attachment reachable after closing so keyboard users can continue in the conversation.

@@ -26,34 +26,10 @@ import { WelcomeScreenCardsRow } from "./components/WelcomeScreenCardsRow"
 import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
+import { useAiComposerSubmission } from "./useAiComposerSubmission"
 import { type RecorderError, useAudioRecorder } from "./useAudioRecorder"
 import { useFileAttachments } from "./useFileAttachments"
 import { useMentions } from "./useMentions"
-
-/** Markdown syntax characters that would otherwise trigger formatting. */
-const MD_SPECIAL = /[\\`*_{}[\]()#+\-.!|~>]/g
-
-/**
- * Neutralize markdown / HTML metacharacters in user-typed text so `*hola*`,
- * `# title`, `> quote`, etc. render literally in the bubble. Preserves the
- * `<entity-ref>` tags that `transformMentions` inserts, so @mentions keep
- * their interactive rendering.
- */
-const escapeUserText = (s: string): string =>
-  s
-    .split(/(<entity-ref\b[^>]*>[\s\S]*?<\/entity-ref>)/g)
-    .map((part, i) => {
-      // Odd indices are entity-ref tags produced by transformMentions — leave
-      // them intact so the markdown renderer can turn them into chips.
-      if (i % 2 === 1) {
-        return part
-      }
-      return part
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(MD_SPECIAL, "\\$&")
-    })
-    .join("")
 
 /**
  * Headless chat composer.
@@ -65,6 +41,7 @@ const escapeUserText = (s: string): string =>
  * provide the wiring.
  */
 export const F0AiChatTextArea = ({
+  draftKey = "default",
   onSubmit,
   onStop,
   inProgress,
@@ -96,13 +73,29 @@ export const F0AiChatTextArea = ({
 }: F0AiChatTextAreaProps) => {
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
-  const [inputValue, setInputValue] = useState("")
-  const [cursorPosition, setCursorPosition] = useState(0)
-  const [isPreSending, setIsPreSending] = useState(false)
-  // Set when the user hits send while an attachment is still uploading: the
-  // submit is queued and fired once uploads finish (see effect below), so the
-  // message goes WITH the file instead of being dropped or sent without it.
-  const [pendingSubmit, setPendingSubmit] = useState(false)
+  const {
+    renderedScopeKey,
+    value: inputValue,
+    cursorPosition,
+    setValue: setInputValue,
+    setCursorPosition,
+    attachedFiles,
+    fileInputRef,
+    onUploadFiles,
+    acceptValue,
+    isAtMaxFiles,
+    maxFiles,
+    intakeFiles,
+    handleFileSelect,
+    handleRemoveFile,
+    retryFile,
+    transientError,
+    showTransientError,
+    paste,
+    submit,
+    isSubmitting: isPreSending,
+    isQueued: pendingSubmit,
+  } = useFileAttachments(fileAttachments, draftKey)
   const [hoveredSuggestion, setHoveredSuggestion] =
     useState<WelcomeScreenSuggestionItem | null>(null)
   // Whether focus is anywhere in the composer — what opens a collapsed bar, and
@@ -141,22 +134,8 @@ export const F0AiChatTextArea = ({
     [tracking, onSuggestionClick]
   )
 
-  const {
-    attachedFiles,
-    fileInputRef,
-    onUploadFiles,
-    acceptValue,
-    isAtMaxFiles,
-    maxFiles,
-    processFiles,
-    handleFileSelect,
-    handleRemoveFile,
-    clearFiles,
-    transientError,
-    showTransientError,
-  } = useFileAttachments(fileAttachments)
-
   const mentions = useMentions({
+    scopeKey: draftKey,
     inputValue,
     setInputValue,
     cursorPosition,
@@ -233,13 +212,13 @@ export const F0AiChatTextArea = ({
     if (!onProcessFilesRef) {
       return
     }
-    onProcessFilesRef((files) => {
-      void processFiles(files)
-    })
+    onProcessFilesRef((files, options) =>
+      options ? intakeFiles(files, options) : intakeFiles(files).catch(() => [])
+    )
     return () => {
       onProcessFilesRef(null)
     }
-  }, [onProcessFilesRef, processFiles])
+  }, [onProcessFilesRef, intakeFiles])
 
   // While recording, the placeholder becomes "Listening…" so the empty
   // textarea signals that dictation is live.
@@ -249,33 +228,26 @@ export const F0AiChatTextArea = ({
     : translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
-  const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
   const hasDataToSend = inputValue.trim().length > 0 || uploadedFiles.length > 0
 
-  // Fire a queued submit once all attachments finish uploading. If an upload
-  // failed, do NOT auto-send (the message would go without the file) — surface
-  // a transient banner so the user knows the click was acknowledged but the
-  // send was blocked, instead of silently swallowing the event.
-  useEffect(() => {
-    if (!pendingSubmit || isUploading) {
-      return
-    }
-    setPendingSubmit(false)
-    if (hasErrorFiles) {
-      showTransientError(translation.ai.fileUploadBlockedSubmit)
-      return
-    }
-    formRef.current?.requestSubmit()
-  }, [
-    pendingSubmit,
-    isUploading,
-    hasErrorFiles,
-    showTransientError,
-    translation.ai.fileUploadBlockedSubmit,
-  ])
+  const acceptSubmission = useAiComposerSubmission({
+    draftKey,
+    onSubmit,
+    onBeforeSubmit,
+    inProgress,
+    isClarifying,
+    pendingContext,
+    pendingQuote,
+    onPendingContextChange,
+    onPendingQuoteChange,
+    transformMentions: mentions.transformMentions,
+  })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (renderedScopeKey !== draftKey) {
+      return
+    }
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
     if (isClarifying) {
@@ -285,52 +257,8 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend && !isPreSending) {
-      // Attachment still uploading: queue the send instead of dropping it.
-      if (isUploading) {
-        setPendingSubmit(true)
-        textareaRef.current?.focus()
-        return
-      }
-      if (onBeforeSubmit) {
-        setIsPreSending(true)
-        try {
-          if ((await onBeforeSubmit()) === false) {
-            textareaRef.current?.focus()
-            return
-          }
-        } finally {
-          setIsPreSending(false)
-        }
-      }
-
-      const transformed = mentions.transformMentions(inputValue.trim())
-      // Escape markdown/HTML in the user's own text so `*hola*` stays literal
-      // and only features we control (@mentions) produce rich rendering.
-      const safeUserText = escapeUserText(transformed)
-
-      const files = uploadedFiles.flatMap((f) =>
-        f.uploadedFile ? [f.uploadedFile] : []
-      )
-
-      const consumedContext = pendingContext
-      const consumedQuote = pendingQuote
-      if (consumedContext) {
-        onPendingContextChange?.(null)
-      }
-      if (consumedQuote) {
-        onPendingQuoteChange?.(null)
-      }
-
-      await onSubmit({
-        text: safeUserText,
-        files,
-        context: consumedContext,
-        quote: consumedQuote,
-      })
-
-      setInputValue("")
-      clearFiles()
+    } else if (hasDataToSend) {
+      await submit(acceptSubmission)
     }
 
     textareaRef.current?.focus()
@@ -746,7 +674,9 @@ export const F0AiChatTextArea = ({
                     attachedFiles={attachedFiles}
                     isUploading={isUploading}
                     onRemove={handleRemoveFile}
+                    onRetry={retryFile}
                     removeLabel={translation.ai.removeFile}
+                    retryLabel={translation.chat.retry}
                   />
 
                   {/* THE TEXT BAND. A flex row only in the `inside` layout,
@@ -793,6 +723,7 @@ export const F0AiChatTextArea = ({
                         setCursorPosition(cursorPos)
                       }}
                       onKeyDown={handleKeyDown}
+                      onPaste={paste}
                       onCursorUpdate={updateCursorPosition}
                       onScroll={syncHighlightScroll}
                       highlightSegments={highlightSegments}
@@ -894,7 +825,7 @@ export const F0AiChatTextArea = ({
       ) : null}
 
       {footer && isWelcomeScreen && fullscreen ? (
-        <div className="w-full py-4 mx-auto flex max-w-content justify-center">
+        <div className="mx-auto flex w-full max-w-content justify-center py-4">
           {footer}
         </div>
       ) : null}
