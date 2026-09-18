@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
+import { withSkipAriaSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0VersionHistory } from ".."
 import { Version } from "../types"
 
@@ -45,7 +46,10 @@ const mockVersions: Version[] = [
 const meta: Meta<typeof F0VersionHistory> = {
   title: "VersionHistory",
   component: F0VersionHistory,
-  parameters: {
+  // Two fixtures above are `Date.now()`-relative, and a version button's
+  // accessible name is its formatted timestamp — so those names track today's
+  // date and the aria surface reports a rename every day.
+  parameters: withSkipAriaSnapshot({
     layout: "centered",
     docs: {
       description: {
@@ -53,7 +57,7 @@ const meta: Meta<typeof F0VersionHistory> = {
           "A component to display a timeline of document versions with authors and timestamps.",
       },
     },
-  },
+  }),
   argTypes: {
     title: {
       control: "text",

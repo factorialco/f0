@@ -5,7 +5,10 @@ import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
-import { withSkipA11y } from "@/lib/storybook-utils/parameters"
+import {
+  withSkipA11y,
+  withSkipAriaSnapshot,
+} from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
 import { Dashboard, DashboardWidget } from ".."
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
@@ -198,22 +201,28 @@ const meta = {
       )
     },
   ],
-  parameters: withSkipA11y({
-    layout: "fullscreen",
-    docs: {
-      description: {
-        component: [
-          "A dashboard component that is used to display and edit a grid of widgets. It provides a flexible and responsive layout for displaying widgets in a grid.",
-          "The dashboard component is a wrapper for the `GroupGrid` component.",
-        ]
-          .map((line) => `<p>${line}</p>`)
-          .join(""),
+  // The decorator mounts a widget whose id and title are `Math.random()`
+  // (see `handleAddWidget`), so every run renders a different
+  // `heading "Title 0.123…"`. Left in the aria surface that reads as a rename
+  // on every PR, whatever the diff touched.
+  parameters: withSkipAriaSnapshot(
+    withSkipA11y({
+      layout: "fullscreen",
+      docs: {
+        description: {
+          component: [
+            "A dashboard component that is used to display and edit a grid of widgets. It provides a flexible and responsive layout for displaying widgets in a grid.",
+            "The dashboard component is a wrapper for the `GroupGrid` component.",
+          ]
+            .map((line) => `<p>${line}</p>`)
+            .join(""),
+        },
+        story: {
+          height: "650px",
+        },
       },
-      story: {
-        height: "650px",
-      },
-    },
-  }),
+    })
+  ),
 } satisfies Meta<typeof Dashboard>
 
 export default meta
