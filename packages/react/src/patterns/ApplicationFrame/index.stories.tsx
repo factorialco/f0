@@ -1351,16 +1351,6 @@ const MockChatPanel = ({
  */
 const toolsMenuTree: MenuCategory[] = [
   {
-    id: "ai",
-    title: "AI",
-    isRoot: true,
-    isSortable: false,
-    items: [
-      { label: "Routines", icon: Icons.Sparkles, href: "/routines" },
-      { label: "AI Activity", icon: Icons.Ai, href: "/ai-activity" },
-    ],
-  },
-  {
     id: "company",
     title: "Company",
     isOpen: true,
@@ -1371,10 +1361,8 @@ const toolsMenuTree: MenuCategory[] = [
         icon: Icons.Organization,
         href: "/organization",
       },
-      { label: "Documents", icon: Icons.Folder, href: "/documents" },
       { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
       { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
-      { label: "Kudos", icon: Icons.Heart, href: "/kudos" },
     ],
   },
   {
@@ -1883,6 +1871,7 @@ const ConversationsSidebarInner = ({
               if (sidebarState !== "locked") toggleSidebar()
             }}
             persistKey={tabsPersistKey}
+            search={{ label: "Search", onClick: () => {} }}
             flyouts={{ tools: <ToolsFlyout /> }}
             actions={[
               {

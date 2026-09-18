@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useRef } from "react"
 
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { Circle as CircleIcon } from "@/icons/app"
+import { Circle as CircleIcon, Search as SearchIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { cn, focusRing } from "@/lib/utils"
@@ -43,6 +43,14 @@ export type SidebarRailProps = {
    * clicking it opens its flyout and leaves the active module alone.
    */
   flyouts?: Record<string, ReactNode>
+  /**
+   * Search, under the workspace mark and above the modules.
+   *
+   * It sits there rather than in a panel because it is not a module's search
+   * — it is the app's, and the app is what the rail stands for. A panel's own
+   * search filters that panel; this one finds anything.
+   */
+  search?: Omit<SidebarRailAction, "id" | "icon"> & { icon?: IconType }
   actions?: SidebarRailAction[]
   user?: Omit<SidebarUserMenuProps, "compact">
 }
@@ -94,6 +102,7 @@ export function SidebarRail({
   persistKey,
   onActiveTabPress,
   flyouts,
+  search,
   actions = [],
   user,
 }: SidebarRailProps) {
@@ -164,11 +173,17 @@ export function SidebarRail({
         <CompanySelector {...company} variant="compact" />
       </div>
 
+      {search && (
+        <div className="mt-2 flex w-full shrink-0 flex-col">
+          <RailAction action={{ id: "search", icon: SearchIcon, ...search }} />
+        </div>
+      )}
+
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.rail.label}
-        // 8px clear of the workspace mark: flush, the two read as one run of
-        // chips and the company becomes the item above Home.
+        // 8px clear of whatever is above it: flush, the chips read as one run
+        // and the workspace mark becomes the item above Home.
         className="mt-2 flex w-full flex-col"
       >
         {tabs.map((tab, index) => (
