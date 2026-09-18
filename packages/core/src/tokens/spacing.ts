@@ -46,9 +46,11 @@ export const absoluteSpacing: ThemeConfig["spacing"] = {
   56: "224px",
   60: "240px",
   64: "256px",
+  70: "280px",
   72: "288px",
   75: "300px",
   80: "320px",
+  90: "360px",
   96: "384px",
   100: "400px",
 }
@@ -89,9 +91,11 @@ export const relativeSpacing: ThemeConfig["spacing"] = {
   56: "14rem",
   60: "15rem",
   64: "16rem",
+  70: "17.5rem",
   72: "18rem",
   75: "18.75rem",
   80: "20rem",
+  90: "22.5rem",
   96: "24rem",
   100: "25rem",
 }

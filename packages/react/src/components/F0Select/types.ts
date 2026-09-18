@@ -1,6 +1,10 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
+import {
+  INPUTFIELD_SIZES,
+  InputFieldProps,
+  type InlineDismissReason,
+} from "@/components/F0InputField"
 import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import type {
@@ -26,6 +30,15 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
 
 export const selectVariants = ["field", "inline"] as const
 export type F0SelectVariant = (typeof selectVariants)[number]
+
+/** Select dismiss reasons exclude blur because opening the popup moves focus. */
+export const selectInlineDismissReasons = [
+  "popupClose",
+  "escape",
+  "commit",
+] as const satisfies readonly InlineDismissReason[]
+export type SelectInlineDismissReason =
+  (typeof selectInlineDismissReasons)[number]
 
 /** Props shared by the field and inline select variants. */
 type F0SelectPopupProps<T extends string, R = unknown> = {
@@ -192,6 +205,8 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
   F0SelectSelectionProps<T, R> & {
     /** Standard form-field presentation. This remains the default. */
     variant?: "field"
+    editing?: never
+    onDismiss?: never
     withApplySelection?: boolean
     applySelectionLabel?: string
     children?: React.ReactNode
@@ -237,12 +252,19 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
   R
 > &
   F0SelectSingleSelectionProps<T, R> &
-  Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
-    /**
-     * Compact borderless presentation for single-value controls embedded in rows.
-     * The required label is used as the accessible name and is not shown visually.
-     */
+  Pick<
+    InputFieldProps<T>,
+    "label" | "placeholder" | "disabled" | "hideLabel"
+  > & {
+    /** Single-value detail row. Shows text until editing; label supplies the accessible name. */
     variant: "inline"
+    /**
+     * Controlled dropdown visibility. Reports dismissal through onDismiss.
+     * @default false
+     */
+    editing?: boolean
+    /** What ended the edit. The value change still arrives through `onChange`. */
+    onDismiss?: (reason: SelectInlineDismissReason) => void
     size?: never
     disableSelectAll?: never
     withApplySelection?: never
@@ -255,7 +277,6 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     showPreview?: never
     required?: never
     loading?: never
-    hideLabel?: never
     labelIcon?: never
     icon?: never
     name?: never
