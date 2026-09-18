@@ -1049,7 +1049,9 @@ export const WithComposerActions: Story = {
     })
 
     await step("A connector is flipped, and the menu stays open", async () => {
-      await userEvent.keyboard("{ArrowDown}{ArrowDown}{Enter}")
+      // One step down from "Manage connectors", which `{ArrowRight}` focused —
+      // the separator is not a stop — so this is Slack.
+      await userEvent.keyboard("{ArrowDown}{Enter}")
 
       await waitFor(async () =>
         expect(
