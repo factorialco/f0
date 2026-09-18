@@ -33811,13 +33811,13 @@ function B9({
         "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.5rem)]"
       ),
       children: [
-        /* @__PURE__ */ h("div", { className: "flex h-[60px] w-full shrink-0 items-stretch justify-center pb-2", children: /* @__PURE__ */ h(AU, { ...a, variant: "compact" }) }),
+        /* @__PURE__ */ h("div", { className: "flex h-[60px] w-full shrink-0 items-stretch justify-center", children: /* @__PURE__ */ h(AU, { ...a, variant: "compact" }) }),
         /* @__PURE__ */ h(
           "div",
           {
             role: "group",
             "aria-label": S.navigation.sidebar.rail.label,
-            className: "flex w-full flex-col",
+            className: "mt-2 flex w-full flex-col",
             children: I.map((O, L) => /* @__PURE__ */ h(
               kM,
               {
@@ -35909,7 +35909,7 @@ const Td = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Nd = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-B0f8KpQ1.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
+}, Nd = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-DYHXcAls.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -44849,7 +44849,7 @@ const RE = 1e3, ME = ({
     }
   );
 }, JT = /* @__PURE__ */ new Set(), jT = Fr(
-  () => import("./ChatPostComposerDialog--aYbec0E.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-k2AogvcV.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), LT = () => {
