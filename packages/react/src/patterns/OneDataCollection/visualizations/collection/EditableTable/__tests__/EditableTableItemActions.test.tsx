@@ -183,6 +183,8 @@ describe("EditableTable Item Actions", () => {
       .closest("aside")?.parentElement
 
     expect(overlay).toHaveClass("opacity-0", "group-hover:opacity-100")
+    // A keyboard user never hovers, so the actions must surface on focus too.
+    expect(overlay).toHaveClass("focus-within:opacity-100")
   })
 
   it("calls onClick handler when an action button is clicked", async () => {
