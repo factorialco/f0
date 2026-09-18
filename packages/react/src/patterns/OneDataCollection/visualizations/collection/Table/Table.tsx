@@ -278,17 +278,6 @@ export const TableCollection = <
     loadMore
   )
 
-  useEffect(() => {
-    onLoadData({
-      totalItems: paginationInfo?.total || data.records.length,
-      filters: source.currentFilters,
-      search: source.currentSearch,
-      isInitialLoading,
-      data: data.records,
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps --  we don't want to re-run this effect when the filters change, just when the data changes
-  }, [paginationInfo?.total, data.records])
-
   const frozenColumnsLeft = stickyColumnIds.length
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
@@ -327,6 +316,42 @@ export const TableCollection = <
     getRenderedSelectableEntries: selectionRegistry.getEntries,
     renderedSelectableCount: selectionRegistry.ids.length,
   })
+
+  // True when every selectable row on the current page is in the selectedItems
+  // map. Checks membership per-ID so it is correct under both page-only and
+  // allPagesSelection modes — unlike comparing the cross-page selectedCount to
+  // data.records.length, which can produce false positives when selections from
+  // another page happen to equal the current page size.
+  const currentPageSelectableIds =
+    selectionRegistry.ids.length > 0
+      ? selectionRegistry.ids
+      : (data?.records ?? [])
+          // The registry is already free of them; this fallback is not.
+          .filter((record) => !source.selectionDisabled?.(record))
+          .map((record) => source.selectable?.(record))
+          .filter((id): id is SelectionId => id !== undefined)
+
+  // nested/tree tables: paginationInfo.total counts top-level rows, not selectable children
+  const selectableTotal = Math.max(
+    paginationInfo?.total ?? 0,
+    currentPageSelectableIds.length
+  )
+
+  // Reports `selectableTotal` alongside the paginated total so the action bar
+  // and the in-table banner agree: sending only the raw pagination total made a
+  // tree collection offer "Select all 10 items" then claim "All 2 items
+  // selected". Must stay above the `isInitialLoading` early return below.
+  useEffect(() => {
+    onLoadData({
+      totalItems: paginationInfo?.total || data.records.length,
+      selectableTotal,
+      filters: source.currentFilters,
+      search: source.currentSearch,
+      isInitialLoading,
+      data: data.records,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps --  we don't want to re-run this effect when the filters change, just when the data changes
+  }, [paginationInfo?.total, data.records, selectableTotal])
 
   // `handleSelectItemChange` is rebuilt whenever the consumer's `selectable`
   // changes identity, which for an inline definition is every render. Rows get a
@@ -457,31 +482,11 @@ export const TableCollection = <
   const hasSelection =
     allSelectedStatus.selectedCount > 0 || allSelectedStatus.checked
 
-  // True when every selectable row on the current page is in the selectedItems
-  // map. Checks membership per-ID so it is correct under both page-only and
-  // allPagesSelection modes — unlike comparing the cross-page selectedCount to
-  // data.records.length, which can produce false positives when selections from
-  // another page happen to equal the current page size.
-  const currentPageSelectableIds =
-    selectionRegistry.ids.length > 0
-      ? selectionRegistry.ids
-      : (data?.records ?? [])
-          // The registry is already free of them; this fallback is not.
-          .filter((record) => !source.selectionDisabled?.(record))
-          .map((record) => source.selectable?.(record))
-          .filter((id): id is SelectionId => id !== undefined)
-
   const selectAllDisabled = source.disableSelectAll ?? false
 
   const allPageRowsSelected =
     currentPageSelectableIds.length > 0 &&
     currentPageSelectableIds.every((id) => selectedItems.has(id))
-
-  // nested/tree tables: paginationInfo.total counts top-level rows, not selectable children
-  const selectableTotal = Math.max(
-    paginationInfo?.total ?? 0,
-    currentPageSelectableIds.length
-  )
 
   // True when the header checkbox should render as fully-checked: either the
   // Gmail-style "select across all pages" CTA is active, or every selectable

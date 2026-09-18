@@ -441,9 +441,9 @@ export const NumberInputInternal = forwardRef<
         loading={loading}
         readonly={readonly}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => {
+        onBlur={(event) => {
           setIsFocused(false)
-          onBlur?.()
+          onBlur?.(event)
           if (inline) {
             onDismiss?.("blur")
           }

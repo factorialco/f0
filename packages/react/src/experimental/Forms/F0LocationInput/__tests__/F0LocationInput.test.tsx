@@ -60,7 +60,9 @@ const searchAddress = async (
   query = "Colon"
 ) => {
   await openAddress(user)
-  await user.type(screen.getByRole("searchbox"), query)
+  // The trigger is the search field and opening left the caret in it, so the
+  // query goes to the keyboard rather than through a second click
+  await user.keyboard(query)
 }
 
 describe("F0LocationInput", () => {
@@ -181,25 +183,28 @@ describe("F0LocationInput", () => {
       await user.tab()
       expect(getAddressTrigger()).toHaveFocus()
 
-      // ArrowDown is the canonical gesture for a combobox, and it does nothing
-      // here: Radix puts it in the trigger's `onKeyDown`, and F0InputField does
-      // not forward that prop when it clones the inner button. Add
-      // `onKeyDown: props.onKeyDown` to the cloneElement in F0InputField.tsx and
-      // this expectation flips - which is the point of pinning it.
+      // The trigger is the search field, so ArrowDown opens the list from it
       await user.keyboard("{ArrowDown}")
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-
-      await user.keyboard("{Enter}")
       await waitFor(() =>
         expect(screen.getByRole("listbox")).toBeInTheDocument()
       )
       fireEvent.animationStart(screen.getByRole("listbox"))
 
-      await user.type(screen.getByRole("searchbox"), "Colon")
+      await user.keyboard("Colon")
       await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
 
+      // The caret never leaves the field: `aria-activedescendant` names the
+      // option the arrows move and Enter takes
+      expect(getAddressTrigger()).toHaveAttribute(
+        "aria-activedescendant",
+        screen.getAllByRole("option")[0].id
+      )
       await user.keyboard("{ArrowDown}")
-      expect(screen.getAllByRole("option")[0]).toHaveFocus()
+      expect(getAddressTrigger()).toHaveAttribute(
+        "aria-activedescendant",
+        screen.getAllByRole("option")[1].id
+      )
+      await user.keyboard("{ArrowUp}")
 
       await user.keyboard("{Enter}")
       await waitFor(() =>
@@ -336,7 +341,7 @@ describe("F0LocationInput", () => {
       await openAddress(user)
       expect(listText("Type an address to search")).toBeInTheDocument()
 
-      await user.type(screen.getByRole("searchbox"), "zzzz")
+      await user.keyboard("zzzz")
       await waitFor(() =>
         expect(listText("No addresses found")).toBeInTheDocument()
       )
@@ -402,6 +407,26 @@ describe("F0LocationInput", () => {
       )
     })
 
+    it("keeps quiet about manual entry when the fallback is off", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={vi.fn(async () => [])}
+          manualEntryFallback={false}
+        />
+      )
+
+      await searchAddress(user, "Calle Falsa 123")
+
+      await waitFor(() =>
+        expect(listText("No addresses found")).toBeInTheDocument()
+      )
+      expect(
+        screen.queryByRole("button", { name: "Enter it manually" })
+      ).not.toBeInTheDocument()
+    })
+
     it("does not scope the search to the country of the current value", async () => {
       const user = userEvent.setup()
       render(
@@ -453,9 +478,7 @@ describe("F0LocationInput", () => {
       )
       // The trigger is aria-hidden until the dropdown has finished closing
       await waitFor(() =>
-        expect(getAddressTrigger()).toHaveTextContent(
-          "Sagrada Família, Barcelona"
-        )
+        expect(getAddressTrigger()).toHaveValue("Sagrada Família, Barcelona")
       )
     })
 
@@ -594,7 +617,7 @@ describe("F0LocationInput", () => {
         />
       )
 
-      expect(getAddressTrigger()).toHaveTextContent(
+      expect(getAddressTrigger()).toHaveValue(
         "Carrer de Colón 12, 08001 Barcelona, Spain"
       )
     })
@@ -608,7 +631,7 @@ describe("F0LocationInput", () => {
         />
       )
 
-      expect(getAddressTrigger()).toHaveTextContent("Calle Falsa 123")
+      expect(getAddressTrigger()).toHaveValue("Calle Falsa 123")
     })
   })
 

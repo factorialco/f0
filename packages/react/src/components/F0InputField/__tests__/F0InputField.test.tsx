@@ -704,6 +704,41 @@ describe("F0InputField", () => {
     })
   })
 
+  describe("Value slot", () => {
+    it("draws the slot while the field has no text, and hides the placeholder", () => {
+      render(
+        <F0InputField
+          label="Owner"
+          placeholder="Search people"
+          value=""
+          valueSlot={<span>Ada Lovelace</span>}
+        >
+          <input />
+        </F0InputField>
+      )
+
+      expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
+      // The text sits in a truncating child; the opacity is on the container.
+      expect(
+        screen.getByText("Search people").closest('[data-slot="placeholder"]')
+      ).toHaveClass("opacity-0")
+    })
+
+    it("hides the slot as soon as there is text", () => {
+      render(
+        <F0InputField
+          label="Owner"
+          value="Ad"
+          valueSlot={<span>Ada Lovelace</span>}
+        >
+          <input />
+        </F0InputField>
+      )
+
+      expect(screen.queryByText("Ada Lovelace")).not.toBeInTheDocument()
+    })
+  })
+
   describe("Custom empty handling", () => {
     it("should use custom isEmpty function", () => {
       const customIsEmpty = vi.fn().mockReturnValue(false)

@@ -114,9 +114,9 @@ const InputInternal = ({
           setPrivateFocused(true)
         }
       }}
-      onBlur={() => {
+      onBlur={(event) => {
         setPrivateFocused(false)
-        props.onBlur?.()
+        props.onBlur?.(event)
       }}
       // Email addresses are case-insensitive, so normalise to lowercase as the
       // user types (lowercasing preserves length, so the caret doesn't jump).

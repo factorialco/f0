@@ -353,7 +353,7 @@ export const AIBlockView: FC<NodeViewProps> = ({
     <NodeViewWrapper contentEditable={false}>
       <div className="mb-3">
         {renderContent()}
-        <NodeViewContent style={{ display: "none" }} />
+        <NodeViewContent className="hidden" />
       </div>
     </NodeViewWrapper>
   )

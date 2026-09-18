@@ -12,6 +12,7 @@ import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRende
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import type { InitialFile } from "./file/types"
 import type { InlineEditing } from "./inline/useInlineField"
+import { LocationFieldRenderer } from "./location/LocationFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
 import { PhoneFieldRenderer } from "./phone/PhoneFieldRenderer"
@@ -214,6 +215,15 @@ export function renderFieldInput({
     case "phone":
       return (
         <PhoneFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
+    case "location":
+      return (
+        <LocationFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}

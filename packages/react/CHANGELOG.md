@@ -1,5 +1,40 @@
 # Changelog
 
+## [7.6.0](https://github.com/factorialco/f0/compare/f0-react-v7.5.0...f0-react-v7.6.0) (2026-09-18)
+
+
+### Features
+
+* **F0Select:** search from the trigger when there are no filters ([#5422](https://github.com/factorialco/f0/issues/5422)) ([1e1a1f2](https://github.com/factorialco/f0/commit/1e1a1f26c09cfadd72cb5d5ebded1a83d83c024f))
+
+## [7.5.0](https://github.com/factorialco/f0/compare/f0-react-v7.4.0...f0-react-v7.5.0) (2026-09-17)
+
+
+### Features
+
+* **storybook:** add aria surface regression check ([#5217](https://github.com/factorialco/f0/issues/5217)) ([a1b827b](https://github.com/factorialco/f0/commit/a1b827b02b1815b6ad763d73d5a45e5175e136cf))
+
+## [7.4.0](https://github.com/factorialco/f0/compare/f0-react-v7.3.0...f0-react-v7.4.0) (2026-09-17)
+
+
+### Features
+
+* **F0Form:** add the location field type ([#5428](https://github.com/factorialco/f0/issues/5428)) ([5e0a0e6](https://github.com/factorialco/f0/commit/5e0a0e6d780d1661f82215eb53b4ed790987cae7))
+
+## [7.3.0](https://github.com/factorialco/f0/compare/f0-react-v7.2.1...f0-react-v7.3.0) (2026-09-17)
+
+
+### Features
+
+* **react:** gate inline styles with a lint rule ([#5318](https://github.com/factorialco/f0/issues/5318)) ([d225cf0](https://github.com/factorialco/f0/commit/d225cf0398267170c36df8d8eb3e386c62d234dc))
+
+## [7.2.1](https://github.com/factorialco/f0/compare/f0-react-v7.2.0...f0-react-v7.2.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** report a selection-aware total ([#5532](https://github.com/factorialco/f0/issues/5532)) ([4287f1d](https://github.com/factorialco/f0/commit/4287f1d91da8823f57edabdf94ea63129b8b6c6a))
+
 ## [7.2.0](https://github.com/factorialco/f0/compare/f0-react-v7.1.1...f0-react-v7.2.0) (2026-09-16)
 
 

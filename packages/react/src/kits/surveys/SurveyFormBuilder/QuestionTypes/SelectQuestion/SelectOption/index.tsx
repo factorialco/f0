@@ -33,10 +33,6 @@ function RadioIndicator({
   )
 }
 
-const TEXT_AREA_STYLE: object = {
-  fieldSizing: "content",
-}
-
 export const SelectOption = ({
   index,
   option,
@@ -165,8 +161,7 @@ export const SelectOption = ({
             )}
             value={label}
             onChange={handleChangeLabel}
-            className="flex-1 resize-none font-medium text-f1-foreground placeholder:text-f1-foreground-tertiary"
-            style={TEXT_AREA_STYLE}
+            className="flex-1 [field-sizing:content] resize-none font-medium text-f1-foreground placeholder:text-f1-foreground-tertiary"
           />
         ) : (
           <p className="flex-1 font-medium">{label}</p>

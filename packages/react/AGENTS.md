@@ -211,7 +211,12 @@ Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
 - CVA from `"cva"` (not `"class-variance-authority"`) for multi-variant components
 - Design tokens use `f1-` prefix: `text-f1-foreground`, `bg-f1-background`, `border-f1-border`, etc.
 - `focusRing()` from `@/lib/utils` on all focusable elements
-- Inline `style` only for truly dynamic values (hex colors, percentages)
+- Inline `style` only for truly dynamic values (hex colors, percentages) — a
+  measured offset, a `${percentage}%` width, a colour that arrives as data. Take
+  the exception with an `oxlint-disable` comment naming the reason. Everything
+  else is a Tailwind class. Enforced by `f0-styles/no-inline-styles`, a RATCHET
+  rule: existing hits are baselined in `.scripts/lint-debt.json` and that count
+  may only shrink. `src/ui/` is out of scope (re-synced third-party wrappers).
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 
@@ -240,13 +245,10 @@ renderers) imports the same constant.
 - Translation keys: camelCase, domain-namespaced (`actions.save`), `one`/`other` sub-keys for plurals
 - Missing keys: log `console.warn` and return the key string
 - **Never hardcode user-visible copy.** A string literal is untranslatable by construction — no consumer dictionary can reach it, so every locale renders English. This includes defaults: `label = "Actions"` and `{ label: "Today" }` in a lookup table are the same bug as `<span>Save</span>`.
-- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). The check names the existing key when it finds one.
-- `pnpm check:untranslated-copy` enforces this, and blocks CI on copy a PR **adds**. Existing debt is baselined in `.scripts/untranslated-copy-debt.json`; the list may only shrink.
-  - `--report` — the full inventory across `src/`
-  - `--update` — rewrite the baseline (after translating something, to lock the win in)
-  - `--comment` — the PR-comment markdown CI posts
-  - Genuinely untranslatable literal (brand name, keyboard key)? Put `i18n-exempt` in a comment on that line.
-- On a failing PR the offending lines are annotated **inline on the Files tab** (`::error file=,line=`) and summarised in a PR comment that separates "already has a key, swap it" from "needs a new key" — no digging through CI logs.
+- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). Grep `i18n-provider-defaults.ts` for the English before adding a key, and reuse `actions.*`/`navigation.*` rather than a feature key from another domain.
+- `f0-i18n/no-untranslated-copy` (a local oxlint rule, see `.oxlint-plugins/`) enforces this. It runs in `pnpm lint`, the pre-commit hook and CI, and covers JSX text, attributes, object properties at any depth, and default values.
+- It is a RATCHET rule: on as a warning, with the existing debt baselined per file in `.scripts/lint-debt.json`, which may only shrink. `pnpm check:lint-debt` is what blocks a PR that adds one, and annotates the offending lines inline on the Files tab.
+- Genuinely untranslatable literal (a brand name, a keyboard key)? `// oxlint-disable-next-line f0-i18n/no-untranslated-copy -- reason`. It lands in the diff, so a reviewer sees the claim.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
 
@@ -274,6 +276,36 @@ the whole tree in CI.
 - Keyboard handling on custom interactive elements: `onKeyDown` for Enter/Space, `tabIndex={0}`, `role`
 - Delegate complex widgets (dialogs, selects, toggles) to Radix via `@/ui/`
 - Load the `a11y` skill for detailed WCAG patterns and decision trees
+
+### Accessible names are a public API
+
+Roles and accessible names are what consumers query — `getByRole("button", {
+name: "Clear" })` in unit tests, `cy.findByRole(...)` in Cypress. Changing one
+breaks them, and neither of the other checks notices: the public API check
+diffs `.d.ts` files (names are values, not types) and axe only asks whether a
+name *exists*, not whether it changed.
+
+The **aria surface** check covers this. Every story's role + accessible-name
+pairs are captured in the Storybook test-runner and diffed against the baseline
+from the latest `main` run, then reported as a PR comment. It is **advisory** —
+it never blocks a merge.
+
+- Treat a rename in that comment as a breaking change: it needs the same
+  deliberation as removing a prop.
+- Hardcoded `aria-label`s in component bodies are the usual source. i18n-ing one
+  changes the name in every non-English locale.
+- A story with nondeterministic content can opt out with
+  `parameters: { ariaSnapshot: { skip: true } }` rather than emit a diff on
+  every run.
+- **It only sees what a story actually renders.** F0InputField's clear button
+  is a live example: it mounts only once the field has a value, so renaming its
+  `aria-label` shows up in the one story with a filled input and nowhere else.
+  A conditional element with no story covering that state is invisible to this
+  check — which is one more reason to give new states their own story.
+
+```bash
+pnpm check:aria-surface --base <dir|file> --head <dir|file>
+```
 
 ## Code Quality
 

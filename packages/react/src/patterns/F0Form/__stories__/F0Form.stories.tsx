@@ -3,6 +3,10 @@ import { useState, useCallback, useId, useMemo, useRef } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
 import { F0Button } from "@/components/F0Button"
+import type {
+  F0LocationInputValue,
+  F0LocationSuggestion,
+} from "@/experimental/Forms/F0LocationInput"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -25,6 +29,52 @@ import type { RenderCustomFieldSelectConfig } from "../types"
 const DISABLED_STORY_SAMPLE_VALUE = "sample-value"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * Accent-insensitive match, so typing "Colon" finds "Colón" the way a real
+ * provider does
+ */
+const normalizeForSearch = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+
+/** In-memory "Places" provider for the location field, so no API key is needed */
+const mockPlaces: (F0LocationSuggestion & { value: F0LocationInputValue })[] = [
+  {
+    id: "es-1",
+    label: "Carrer de Colón, 12",
+    description: "Barcelona, Spain",
+    value: {
+      formatted: "Carrer de Colón, 12, 08002 Barcelona, Spain",
+      addressLine1: "Carrer de Colón, 12",
+      city: "Barcelona",
+      state: "Catalonia",
+      postalCode: "08002",
+      country: "es",
+      placeId: "es-1",
+      latitude: 41.3809,
+      longitude: 2.1785,
+    },
+  },
+  {
+    id: "es-2",
+    label: "Calle de Colón, 3",
+    description: "Valencia, Spain",
+    value: {
+      formatted: "Calle de Colón, 3, 46004 Valencia, Spain",
+      addressLine1: "Calle de Colón, 3",
+      city: "Valencia",
+      state: "Valencian Community",
+      postalCode: "46004",
+      country: "es",
+      placeId: "es-2",
+      latitude: 39.4699,
+      longitude: -0.3763,
+    },
+  },
+]
 
 const meta: Meta = {
   title: "Forms/F0Form",
@@ -1083,6 +1133,27 @@ export const AllFieldTypes: Story = {
         defaultCountry: "es",
         optional: true,
       }),
+      locationField: f0FormField.location({
+        label: "Location Field",
+        defaultCountry: "es",
+        searchPlaces: async (query, { country }) => {
+          await sleep(300)
+          const needle = normalizeForSearch(query)
+          return mockPlaces
+            .filter((place) => !country || place.value.country === country)
+            .filter((place) =>
+              normalizeForSearch(
+                `${place.label} ${place.description ?? ""}`
+              ).includes(needle)
+            )
+            .map(({ id, label, description }) => ({ id, label, description }))
+        },
+        resolvePlace: async (id) => {
+          await sleep(200)
+          return mockPlaces.find((place) => place.id === id)?.value
+        },
+        optional: true,
+      }),
       passwordField: f0FormField.text({
         label: "Password Field",
         placeholder: "Enter password",
@@ -1208,6 +1279,7 @@ export const AllFieldTypes: Story = {
         textField: "",
         emailField: "",
         phoneField: undefined,
+        locationField: undefined,
         passwordField: "",
         numberField: 0,
         durationField: 0,

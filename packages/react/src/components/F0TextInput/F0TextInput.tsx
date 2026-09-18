@@ -49,8 +49,8 @@ const _F0TextInput = forwardRef<HTMLInputElement, F0TextInputProps>(
           onDismiss?.("commit")
         }}
         onPressEscape={() => onDismiss?.("escape")}
-        onBlur={() => {
-          publicProps.onBlur?.()
+        onBlur={(event) => {
+          publicProps.onBlur?.(event)
           onDismiss?.("blur")
         }}
       />
