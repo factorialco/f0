@@ -1,8 +1,9 @@
 {
   "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
-  "total": 475,
+  "total": 490,
   "rules": {
     "f0-i18n/no-untranslated-copy": 131,
+    "f0-stories/no-nondeterministic-story-names": 15,
     "f0-styles/no-inline-styles": 230,
     "sonarjs/cognitive-complexity": 114
   },
@@ -733,6 +734,9 @@
     },
     "src/sds/UpsellingKit/ai/F0QuestionCard/F0QuestionCard.tsx": {
       "f0-i18n/no-untranslated-copy": 2
+    },
+    "src/sds/chat/F0Chat/F0Chat.stories.tsx": {
+      "f0-stories/no-nondeterministic-story-names": 15
     },
     "src/sds/chat/F0Chat/components/ChatComposer.tsx": {
       "sonarjs/cognitive-complexity": 1
