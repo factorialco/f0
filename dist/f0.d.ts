@@ -20816,10 +20816,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20827,11 +20828,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
