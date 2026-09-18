@@ -8,6 +8,7 @@ import {
   GroupingState,
   RecordType,
 } from "@/hooks/datasource"
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import {
   canSelectGrouping,
@@ -53,6 +54,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   showPreview = false,
 }: SelectTopActionsProps<R>) => {
   const i18n = useI18n()
+  const shouldReduceMotion = useReducedMotion()
 
   const [isFiltersOpenLocal, setIsFiltersOpenLocal] = useState(false)
 
@@ -107,10 +109,17 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
       <AnimatePresence>
         {filters && hasActiveFilters(currentFilters) ? (
           <motion.div
+            // Clipped while it opens and closes: without this the chips are
+            // painted outside the box whose height is still growing.
+            className="overflow-hidden"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+            transition={{
+              type: "spring",
+              duration: shouldReduceMotion ? 0 : 0.3,
+              bounce: 0,
+            }}
           >
             <ActiveFiltersChips
               filters={filters}

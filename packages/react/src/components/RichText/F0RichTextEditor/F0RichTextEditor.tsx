@@ -28,13 +28,17 @@ import {
   useEnhance,
 } from "@/components/RichText/internal/Enhance"
 import type { UseEnhanceReturn } from "@/components/RichText/internal/Enhance"
-import { EnhanceErrorBanner } from "@/components/RichText/internal/Error"
+import {
+  EnhanceErrorBanner,
+  enhanceErrorRevealTransition,
+} from "@/components/RichText/internal/Error"
 import { Cross } from "@/icons/app"
 import type { TranscribeFn } from "@/kits/ai/F0AiChat/types"
 import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
+import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { withSkeleton } from "@/lib/skeleton"
@@ -264,6 +268,7 @@ const F0RichTextEditorComponent = forwardRef<
   const editorId = useId()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const shouldReduceMotion = useReducedMotion()
   const containerRef = useRef<HTMLDivElement>(null)
   const editorContentContainerRef = useRef<HTMLDivElement>(null)
   const fullscreenToolbarRef = useRef<HTMLDivElement>(null)
@@ -600,8 +605,10 @@ const F0RichTextEditorComponent = forwardRef<
                 initial={{ height: 0, opacity: 0, y: -20 }}
                 animate={{ height: "auto", opacity: 1, y: 0 }}
                 exit={{ height: 0, opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="flex w-full items-center justify-center pt-2"
+                transition={enhanceErrorRevealTransition(shouldReduceMotion)}
+                // overflow-hidden: the banner keeps its padding while the
+                // height animates, so without clipping it spills out.
+                className="flex w-full items-center justify-center overflow-hidden pt-2"
               >
                 <EnhanceErrorBanner
                   error={enhance.error}

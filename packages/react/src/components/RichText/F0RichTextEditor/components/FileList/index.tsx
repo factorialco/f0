@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { F0FileItem } from "@/components/F0FileItem"
+import { useReducedMotion } from "@/lib/a11y"
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import {
   getAcceptFileTypeString,
@@ -23,6 +24,9 @@ const FileList = ({
   disabled,
   fileInputRef,
 }: FileListProps) => {
+  // Above the early return: it is a hook.
+  const shouldReduceMotion = useReducedMotion()
+
   if (!filesConfig) {
     return null
   }
@@ -59,10 +63,11 @@ const FileList = ({
         {files.length > 0 ? (
           <motion.div
             key="filelist-accordion"
+            className="overflow-hidden"
             initial={{ height: 0, opacity: 0, y: -20 }}
             animate={{ height: "auto", opacity: 1, y: 0 }}
             exit={{ height: 0, opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
           >
             <div className="scrollbar-macos flex w-full items-end gap-2 overflow-x-auto pt-2">
               {files.map((file, index) => (
