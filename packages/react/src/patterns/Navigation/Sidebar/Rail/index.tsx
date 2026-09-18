@@ -47,20 +47,22 @@ const RailAction = ({ action }: { action: SidebarRailAction }) => (
     title={action.label}
     onClick={action.onClick}
     className={cn(
-      "relative flex size-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-f1-background-secondary",
+      "group flex w-full cursor-pointer items-center justify-center",
       PRESS,
-      focusRing()
+      focusRing("focus-visible:ring-inset")
     )}
   >
-    <F0Icon icon={action.icon} size="lg" color="default" />
-    {action.hasUpdates && (
-      <span
-        aria-hidden="true"
-        className="absolute -right-1 -top-1 rounded-full bg-f1-background"
-      >
-        <Badge type="highlight" size="sm" icon={CircleIcon} />
-      </span>
-    )}
+    <span className="relative flex size-9 items-center justify-center rounded-lg transition-colors group-hover:bg-f1-background-secondary">
+      <F0Icon icon={action.icon} size="lg" color="default" />
+      {action.hasUpdates && (
+        <span
+          aria-hidden="true"
+          className="absolute -right-1 -top-1 rounded-full bg-f1-background"
+        >
+          <Badge type="highlight" size="sm" icon={CircleIcon} />
+        </span>
+      )}
+    </span>
   </button>
 )
 
@@ -147,7 +149,7 @@ export function SidebarRail({
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.rail.label}
-        className="flex w-full flex-col px-1.5"
+        className="flex w-full flex-col"
       >
         {tabs.map((tab, index) => (
           <RailTab
