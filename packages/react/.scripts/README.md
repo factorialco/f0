@@ -303,12 +303,10 @@ rm packages/react/.cache/cycle-dependencies-*.json
 
 ### Git Pre-commit Hook
 
-Add to `.git/hooks/pre-commit`:
-
-```bash
-#!/bin/bash
-pnpm exec tsx packages/react/.scripts/check-cycle-dependencies.ts --pre-commit
-```
+Already wired: the `cycle-dependencies` command in the root `lefthook.yml`
+runs `check-cycle-dependencies.ts --pre-commit` on every commit. See
+[docs/development/git-hooks.md](../docs/development/git-hooks.md) for the
+full hook setup.
 
 ### CI Pipeline (GitHub Actions)
 
