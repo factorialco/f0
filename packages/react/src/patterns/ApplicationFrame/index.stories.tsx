@@ -21,9 +21,9 @@ import { OneCalendar } from "@/components/OneCalendar"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
+  BookOpen,
   Calendar,
   CalendarFilled,
-  Directory,
   ChartVerticalBars,
   Folders,
   FoldersFilled,
@@ -1984,7 +1984,7 @@ const ConversationsSidebarInner = ({
           },
           // The people you look up are a destination, not a tool you open:
           // Directory takes the Organization row's place on the first level.
-          { id: "directory", label: "Directory", icon: Directory },
+          { id: "directory", label: "Directory", icon: BookOpen },
           {
             id: "files",
             label: "Files",
