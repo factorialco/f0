@@ -172,9 +172,15 @@ export const experimentalComponent = <T extends React.ComponentType<any>>(
     return MemoizedComponent as unknown as T
   }
 
-  // For regular components
+  // For regular components.
+  //
+  // Capitalized on purpose: this IS a component — React renders it, and it
+  // calls a hook. Named `wrappedFunction` it read as a plain helper, which is
+  // also how every hook linter read it, so the hook call inside looked like a
+  // rules-of-hooks violation. The memo branch above already names its
+  // equivalent `WrappedComponent`.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const wrappedFunction = ((...args: any[]): any => {
+  const WrappedFunctionComponent = ((...args: any[]): any => {
     const showExperimentalWarnings = useShowExperimentalWarnings()
     if (showExperimentalWarnings) {
       initReporting()
@@ -198,7 +204,7 @@ export const experimentalComponent = <T extends React.ComponentType<any>>(
 
   // Copy all static properties from the original component to preserve markers
   // like __isPageLayoutBlock and __isPageLayoutGroup
-  copyStaticProperties(component, wrappedFunction)
+  copyStaticProperties(component, WrappedFunctionComponent)
 
-  return wrappedFunction
+  return WrappedFunctionComponent
 }
