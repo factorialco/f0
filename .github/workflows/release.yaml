@@ -10,10 +10,13 @@ on:
 jobs:
   release-please:
     name: "Release library(s)"
-    # Prevents running on the release-please branch
-    if: |
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    # This job deliberately carries no condition. It used to guard against "the
+    # release-please branch", but the workflow only triggers on `push` to main
+    # and `workflow_dispatch`: there is never a pull request in context, so both
+    # clauses were unreachable and the job has always run unconditionally. Worse,
+    # a working version of that guard would be actively wrong here — this is the
+    # job that *creates* the release, so skipping it on release commits would
+    # stop releases altogether.
     runs-on: ubuntu-latest
     permissions:
       contents: write
