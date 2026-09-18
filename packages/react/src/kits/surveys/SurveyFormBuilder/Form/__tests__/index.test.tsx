@@ -374,6 +374,47 @@ describe("SurveyFormBuilder — custom action labels", () => {
     expect(screen.getAllByLabelText("New field").length).toBeGreaterThan(0)
     expect(screen.queryByLabelText("Add question")).not.toBeInTheDocument()
   })
+
+  it("overrides the question menu labels", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Q1")]}
+        onChange={vi.fn()}
+        labels={{
+          questionOptions: "Field options",
+          questionType: "Field type",
+          duplicateQuestion: "Duplicate field",
+          deleteQuestion: "Delete field",
+        }}
+      />
+    )
+
+    await user.click(screen.getAllByLabelText("Actions")[0])
+
+    expect(await screen.findByText("Field options")).toBeInTheDocument()
+    expect(screen.getByText("Field type")).toBeInTheDocument()
+    expect(screen.getByText("Duplicate field")).toBeInTheDocument()
+    expect(screen.getByText("Delete field")).toBeInTheDocument()
+    expect(screen.queryByText("Question options")).not.toBeInTheDocument()
+  })
+
+  it("falls back to the i18n defaults in the question menu", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Q1")]}
+        onChange={vi.fn()}
+      />
+    )
+
+    await user.click(screen.getAllByLabelText("Actions")[0])
+
+    expect(await screen.findByText("Question options")).toBeInTheDocument()
+    expect(screen.getByText("Delete question")).toBeInTheDocument()
+  })
 })
 
 describe("SurveyFormBuilder — description & answer placeholders", () => {
