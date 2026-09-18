@@ -561,7 +561,9 @@ describe("Select", () => {
       expect(trigger).toHaveClass("rounded")
       expect(trigger).not.toHaveClass("rounded-sm")
       expect(trigger).not.toHaveClass("rounded-md")
-      expect(trigger.className).toContain("border-0")
+      // A transparent border, not none: it buys the same 13px inset an
+      // F0InputField editor has, so text never shifts between row types.
+      expect(trigger.className).toContain("border-transparent")
       expect(trigger.className).toContain("bg-transparent")
       expect(trigger.className).toContain("shadow-none")
 

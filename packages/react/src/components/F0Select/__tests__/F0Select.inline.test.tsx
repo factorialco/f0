@@ -69,6 +69,24 @@ describe("F0Select inline variant", () => {
       expect(screen.queryByRole("button")).not.toBeInTheDocument()
     })
 
+    it("prints the selection in regular body text at the 13px inset", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      const value = inlineValue()
+      expect(value).toHaveClass("text-base")
+      expect(value).toHaveClass("font-normal")
+      expect(value).toHaveClass("px-3")
+      expect(value).toHaveClass("border-transparent")
+    })
+
     it("keeps the chevron at the trailing edge, away from the value", () => {
       render(
         <F0Select

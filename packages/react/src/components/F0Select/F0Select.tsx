@@ -141,14 +141,17 @@ const asListContainerVariants = cva({
   },
 })
 
-/** Keep the text inset identical in both modes. */
-const INLINE_SELECT_INSET = "px-3"
+/**
+ * Keep the text inset identical in both modes and equal to the 13px an
+ * `F0InputField` editor produces from `px-3` plus its 1px border.
+ */
+const INLINE_SELECT_INSET = "border border-solid border-transparent px-3"
 
-/** Match the body weight of adjacent inline inputs. */
-const INLINE_SELECT_TEXT = textVariants({ variant: "body" })
+/** Match the body size and weight of adjacent inline inputs. */
+const INLINE_SELECT_TEXT = cn(textVariants({ variant: "body" }), "font-normal")
 
 const inlineSelectTriggerClassName = cn(
-  "group flex h-full w-full max-w-full items-center justify-between gap-1 rounded border-0 bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  "group flex h-full w-full max-w-full items-center justify-between gap-1 rounded bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
   INLINE_SELECT_INSET,
   INLINE_SELECT_TEXT
 )

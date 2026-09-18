@@ -49,6 +49,19 @@ describe("F0InputField", () => {
       )
       expect(screen.getByTitle("0.00")).toHaveTextContent("0.00")
     })
+
+    it("prints the resting value in regular body text", () => {
+      render(
+        <F0InputField variant="inline" label="Job title" value="Analyst">
+          <input />
+        </F0InputField>
+      )
+
+      const text = screen.getByTitle("Analyst")
+      expect(text).toHaveClass("text-base")
+      expect(text).toHaveClass("font-normal")
+      expect(text).toHaveClass("text-f1-foreground")
+    })
   })
 
   describe("Label validation", () => {

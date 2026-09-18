@@ -12,6 +12,7 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CheckCircle, InfoCircleLine, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { textVariants } from "@/ui/Text/variants"
 import type { InlineFieldRowProps, RowAction } from "./types"
 
 const COPIED_MS = 1400
@@ -201,7 +202,14 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
         )}
       >
         <div className="flex min-w-0 grow shrink basis-35 items-center gap-1">
-          <span className="truncate text-f1-foreground-secondary">{label}</span>
+          <span
+            className={cn(
+              textVariants({ variant: "body" }),
+              "truncate font-normal text-f1-foreground-secondary"
+            )}
+          >
+            {label}
+          </span>
           {hint ? <Hint hint={hint} /> : null}
         </div>
 

@@ -1,5 +1,6 @@
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
+import { textVariants } from "@/ui/Text/variants"
 import {
   inputElementVariants,
   inputFieldVariants,
@@ -50,7 +51,8 @@ const InlineValue = ({
       <span
         title={display}
         className={cn(
-          "min-w-0 truncate px-3",
+          textVariants({ variant: "body" }),
+          "min-w-0 truncate px-3 font-normal",
           icon && "pl-8",
           icon && size === "md" && "pl-9",
           inputElementVariants({ size }),
