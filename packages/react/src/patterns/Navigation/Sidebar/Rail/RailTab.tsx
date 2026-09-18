@@ -187,7 +187,7 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
           // rather than an inverse background: it flips every token inside, so
           // the rows that come out of it are the ones the navigation already
           // ships rather than a second, hand-tinted set of them.
-          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl"
+          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl backdrop-blur-[4px]"
         >
           {flyout}
         </PopoverContent>
