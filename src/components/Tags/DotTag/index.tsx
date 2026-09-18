@@ -33,7 +33,9 @@ export const DotTag = ({ text, ...props }: DotTagProps) => {
       ? `hsl(${baseColors[props.color][50]})`
       : "customColor" in props && props.customColor
 
-  if (!backgroundColor) return null
+  if (!backgroundColor) {
+    return null
+  }
 
   return (
     <BaseTag

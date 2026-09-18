@@ -304,7 +304,9 @@ describe("F0Button", () => {
     render(<F0Button {...unsafeProps} />)
 
     const button = screen.getByRole("button")
-    expect(button.props.className).toBe("overflow-hidden")
+    // F0Button always applies its own size-based radius to the pressable; the
+    // user-supplied className is still stripped.
+    expect(button.props.className).toBe("overflow-hidden rounded")
   })
 
   it("ignores style passed via unsafe cast", () => {

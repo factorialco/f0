@@ -5,10 +5,7 @@ import { tv } from "tailwind-variants"
 
 import { applyIconInterop } from "../primitives/F0Icon"
 
-import {
-  type F0AvatarModuleProps,
-  type F0AvatarModuleSize,
-} from "./F0Avatar.types"
+import { type F0AvatarModuleProps } from "./F0Avatar.types"
 import { moduleIcons } from "./internal/module-icons"
 
 const moduleAvatarVariants = tv({

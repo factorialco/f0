@@ -30,7 +30,7 @@ export type F0TagAlertLevel = keyof typeof f0TagAlertLevelClasses;
 /**
  * Runtime list of alert levels.
  */
-export declare const F0_TAG_ALERT_LEVELS: ReadonlyArray<F0TagAlertLevel>;
+export declare const F0_TAG_ALERT_LEVELS: readonly F0TagAlertLevel[];
 /**
  * Allowed status variants.
  */
