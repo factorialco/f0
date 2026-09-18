@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+import consola from "consola"
 /**
  * perf-changed.ts
  *
@@ -6,6 +7,8 @@
  * and reduce them to the handful of facts worth a human's attention.
  *
  *   tsx .scripts/perf-changed.ts --compare-commit origin/main --out perf-report.json
+ *
+ * Full documentation: .scripts/perf-metrics.md
  *
  * The JSON it writes is the input to the 🚀 Performance agentic check, which
  * turns it into a PR comment. This script deliberately does NOT decide whether a
@@ -40,8 +43,6 @@
  */
 import { execFileSync } from "node:child_process"
 import { writeFileSync } from "node:fs"
-
-import consola from "consola"
 
 import {
   DEFAULT_SETTLE_MS,

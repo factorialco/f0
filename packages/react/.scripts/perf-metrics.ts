@@ -11,6 +11,9 @@
  *   pnpm perf-metrics F0Button --snapshot      # just its snapshot story
  *   pnpm perf-metrics F0Button --out perf.json
  *
+ * Full documentation, including what every metric means and which ones can be
+ * trusted between runs: .scripts/perf-metrics.md
+ *
  * This is a reporting tool. It has no thresholds, no baseline and no pass/fail
  * verdict — it does not gate anything in CI. Interpreting the numbers is the
  * caller's job, so read the `stability` note in the output before comparing two
@@ -45,10 +48,9 @@
  * silently reported as 0 if collection starts afterwards.
  */
 import { chromium, type Browser, type Page } from "@playwright/test"
+import consola from "consola"
 import { writeFileSync } from "node:fs"
 import { pathToFileURL } from "node:url"
-
-import consola from "consola"
 
 /** Addon id — namespaces every channel event the addon uses. */
 const ADDON_ID = "primer-performance-monitor"
