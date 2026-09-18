@@ -10,6 +10,53 @@ import {
 } from ".."
 import { Circle, Desktop } from "../../../icons/app"
 
+// At module scope so its identity is stable. Declared inside SelectWithHooks
+// it was a new component type on every render, so React remounted it and the
+// select lost what was being typed. It closes over nothing from the parent,
+// so this is a straight move.
+const RenderSelect = (
+  props: Omit<SelectProps, "value"> & {
+    children: React.ReactNode
+    value: string | string[] | undefined
+    onValueChange: (value: string | string[]) => void
+  }
+) => {
+  const { value: initialValue, defaultValue: _, multiple, ...rest } = props
+
+  if (multiple) {
+    const [value, setValue] = useState<string[] | undefined>(
+      initialValue as string[] | undefined
+    )
+    const handleChange = (value: string[]) => {
+      console.log("value", value)
+      setValue(value)
+      props.onValueChange(value)
+    }
+    return (
+      <Select {...rest} value={value} onValueChange={handleChange} multiple>
+        {props.children}
+      </Select>
+    )
+  }
+  const [value, setValue] = useState<string | undefined>(
+    props.value as string | undefined
+  )
+  const handleChange = (value: string) => {
+    console.log("value", value)
+    setValue(value)
+    props.onValueChange(value)
+  }
+
+  return (
+    <Select
+      {...rest}
+      value={value}
+      onValueChange={handleChange}
+      multiple={false}
+    />
+  )
+}
+
 const SelectWithHooks = ({
   options,
   placeholder,
@@ -20,49 +67,6 @@ const SelectWithHooks = ({
   const [localValue, setLocalValue] = useState<string | string[] | undefined>(
     value
   )
-
-  const RenderSelect = (
-    props: Omit<SelectProps, "value"> & {
-      children: React.ReactNode
-      value: string | string[] | undefined
-      onValueChange: (value: string | string[]) => void
-    }
-  ) => {
-    const { value: initialValue, defaultValue: _, multiple, ...rest } = props
-
-    if (multiple) {
-      const [value, setValue] = useState<string[] | undefined>(
-        initialValue as string[] | undefined
-      )
-      const handleChange = (value: string[]) => {
-        console.log("value", value)
-        setValue(value)
-        props.onValueChange(value)
-      }
-      return (
-        <Select {...rest} value={value} onValueChange={handleChange} multiple>
-          {props.children}
-        </Select>
-      )
-    }
-    const [value, setValue] = useState<string | undefined>(
-      props.value as string | undefined
-    )
-    const handleChange = (value: string) => {
-      console.log("value", value)
-      setValue(value)
-      props.onValueChange(value)
-    }
-
-    return (
-      <Select
-        {...rest}
-        value={value}
-        onValueChange={handleChange}
-        multiple={false}
-      />
-    )
-  }
 
   const items = useMemo(
     () =>

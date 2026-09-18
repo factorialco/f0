@@ -186,8 +186,12 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     disabled: isDisabled,
   }
 
+  // Built during render, but memoized on everything it closes over, so its
+  // identity only changes when those do — not on every pass. React Doctor's
+  // own rule reaches the same conclusion and leaves it alone.
   const Component = useMemo(
     () =>
+      // oxlint-disable-next-line react-js/no-unstable-nested-components
       forwardRef<HTMLAnchorElement>(function Component(props: LinkProps, ref) {
         if (isDisabled) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
