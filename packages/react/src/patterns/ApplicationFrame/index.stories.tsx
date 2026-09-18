@@ -1536,33 +1536,11 @@ const toolsMenuTree: MenuCategory[] = [
     ],
   },
   {
-    id: "personal",
-    title: "Personal",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      { label: "Profile", icon: Icons.Person, href: "/profile" },
-      {
-        label: "My time tracking",
-        icon: Icons.Clock,
-        href: "/my-time-tracking",
-      },
-      { label: "Time off", icon: Icons.PalmTree, href: "/time-off" },
-      { label: "My benefits", icon: Icons.Present, href: "/my-benefits" },
-      { label: "My documents", icon: Icons.Files, href: "/my-documents" },
-      { label: "My projects", icon: Icons.Kanban, href: "/my-projects" },
-      { label: "My spending", icon: Icons.CreditCard, href: "/my-spending" },
-      { label: "My training", icon: Icons.AcademicCap, href: "/my-training" },
-      { label: "Tasks", icon: Icons.Completed, href: "/tasks" },
-    ],
-  },
-  {
     id: "company",
     title: "Company",
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "Documents", icon: Icons.Folder, href: "/documents" },
       { label: "Policies", icon: Icons.Shield, href: "/policies" },
       { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
       { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
@@ -1575,6 +1553,7 @@ const toolsMenuTree: MenuCategory[] = [
     isSortable: true,
     items: [
       { label: "Time tracking", icon: Icons.Timer, href: "/time-tracking" },
+      { label: "Time off", icon: Icons.PalmTree, href: "/time-off" },
       { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
       { label: "Projects", icon: Icons.Kanban, href: "/projects" },
       { label: "Benefits", icon: Icons.HoldHeart, href: "/benefits" },
