@@ -29091,7 +29091,7 @@ const QY = zn(
         variants: FM,
         exit: "exit",
         transition: { duration: F ? 0 : 0.25, ease: "easeOut" },
-        className: "w-full cursor-grab touch-pan-y select-none active:cursor-grabbing",
+        className: "cursor-grab touch-pan-y select-none active:cursor-grabbing",
         children: w
       }
     );
@@ -29113,7 +29113,7 @@ const QY = zn(
     {
       role: "group",
       "aria-label": c ?? r.swipeDeck.label,
-      className: "relative flex w-full justify-center",
+      className: "relative flex w-full justify-center overflow-x-clip",
       children: [
         /* @__PURE__ */ h(
           rn,
@@ -38595,7 +38595,7 @@ const vE = /* @__PURE__ */ new Set(["blob:", "data:"]), bE = /* @__PURE__ */ new
     });
     y.observe(w), c.current = y;
   }, []), shouldMount: g };
-}, Ld = "w-[24rem] max-w-full", YE = "w-[32rem] max-w-full", HE = "gap-0.5", OE = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", JE = "bg-[hsl(222_31%_11%)]", jE = "bg-[hsl(220_39%_6%/0.72)]", LE = "bg-[hsl(220_39%_6%/0.6)]", XE = "bg-[hsl(220_39%_6%/0.55)]", qE = () => import("./LocationMap-DLUpkIEd.js"), $E = Rr(qE), eT = 3 / 2, tT = ({ latitude: g, longitude: s }) => `https://www.google.com/maps?q=${g},${s}`, nw = ({
+}, Ld = "w-[24rem] max-w-full", YE = "w-[32rem] max-w-full", HE = "gap-0.5", OE = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", JE = "bg-[hsl(222_31%_11%)]", jE = "bg-[hsl(220_39%_6%/0.72)]", LE = "bg-[hsl(220_39%_6%/0.6)]", XE = "bg-[hsl(220_39%_6%/0.55)]", qE = () => import("./LocationMap-BREK7nAG.js"), $E = Rr(qE), eT = 3 / 2, tT = ({ latitude: g, longitude: s }) => `https://www.google.com/maps?q=${g},${s}`, nw = ({
   location: g,
   cornerClass: s = "rounded-xl",
   surfaceClassName: c,
@@ -48244,7 +48244,7 @@ const P4 = 1e3, V4 = ({
     }
   );
 }, rK = /* @__PURE__ */ new Set(), sK = Rr(
-  () => import("./ChatPostComposerDialog-Dpqmj_tM.js").then((g) => ({
+  () => import("./ChatPostComposerDialog-CMZfTjoZ.js").then((g) => ({
     default: g.ChatPostComposerDialog
   }))
 ), IK = () => {
