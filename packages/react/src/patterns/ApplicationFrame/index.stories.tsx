@@ -24,6 +24,8 @@ import {
   HomeFilled,
   Hub,
   HubFilled,
+  Inbox,
+  InboxFilled,
   Lightbulb,
   LifeBuoy,
   MessagesFilled,
@@ -1606,7 +1608,7 @@ const ConversationsSidebarInner = ({
     },
     {
       id: "messages",
-      label: "Chat",
+      label: "Chats",
       icon: Comment,
       activeIcon: MessagesFilled,
       badge: unreadChatsCount || undefined,
@@ -1616,6 +1618,13 @@ const ConversationsSidebarInner = ({
     // a row inside another section's list.
     ...(isRail
       ? [
+          {
+            id: "inbox",
+            label: "Inbox",
+            icon: Inbox,
+            activeIcon: InboxFilled,
+            badge: 6,
+          },
           {
             id: "calendar",
             label: "Calendar",
