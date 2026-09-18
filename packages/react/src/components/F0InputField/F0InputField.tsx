@@ -190,6 +190,7 @@ export type InputFieldProps<T> = {
   transparent?: boolean
   variant?: InputFieldVariant
   editing?: boolean
+  /** At-rest display text, including units when present. Defaults to value. */
   inlineText?: string
 }
 
