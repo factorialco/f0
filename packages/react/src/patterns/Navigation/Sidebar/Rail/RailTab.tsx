@@ -18,7 +18,7 @@ import type { SidebarTab } from "../Tabs"
  * being able to say what moved. The chip is the thing being pressed.
  */
 export const PRESS =
-  "transition-[background-color,transform] duration-150 ease-out group-active:scale-[0.97] motion-reduce:transition-none motion-reduce:group-active:scale-100"
+  "transition-[background-color,transform] duration-150 ease-out group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100"
 
 /**
  * Unread marker over the icon box's top-right. The same `Badge` the footer's

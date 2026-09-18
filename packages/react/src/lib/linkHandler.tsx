@@ -19,16 +19,30 @@ export type LinkContextValue = {
 
 const LinkContext = createContext<LinkContextValue | undefined>(undefined)
 
+/**
+ * Each field falls back to the provider above it, so a nested provider can
+ * override ONE of them and leave the rest standing.
+ *
+ * Without that, a provider that exists only to publish a different
+ * `currentPath` — the chat mocks do exactly this — also sets `component` to
+ * `undefined`, and every `Link` beneath it quietly stops going through the
+ * app's router and becomes a plain `<a>`: one click and the SPA is gone.
+ */
 export const LinkProvider: React.FC<
   {
     children: ReactNode
   } & LinkContextValue
 > = ({ children, component, currentPath }) => {
-  return (
-    <LinkContext.Provider value={{ component, currentPath }}>
-      {children}
-    </LinkContext.Provider>
+  const parent = useContext(LinkContext)
+  const value = useMemo(
+    () => ({
+      component: component ?? parent?.component,
+      currentPath: currentPath ?? parent?.currentPath,
+    }),
+    [component, currentPath, parent?.component, parent?.currentPath]
   )
+
+  return <LinkContext.Provider value={value}>{children}</LinkContext.Provider>
 }
 
 export const useLinkContext = () => {
