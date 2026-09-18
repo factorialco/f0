@@ -11,7 +11,7 @@ describe("inline layout spacing tokens", () => {
         safelist: [],
         content: [
           {
-            raw: "p-1.25 p-2.25 p-70 p-75 p-90 p-100 w-1.25 w-2.25 w-70 w-75 w-90 w-100 p-140 w-140",
+            raw: "p-1.25 p-2.25 p-70 p-75 p-90 p-100 w-1.25 w-2.25 w-70 w-75 w-90 w-100 p-140 w-140 p-35 w-35",
             extension: "html",
           },
         ],
@@ -40,6 +40,8 @@ describe("inline layout spacing tokens", () => {
     expect(declarations.get(".w-75:width")).toBe("18.75rem")
     expect(declarations.get(".w-100:width")).toBe("25rem")
     expect(declarations.get(".p-140:padding")).toBe("560px")
+    expect(declarations.get(".p-35:padding")).toBe("140px")
+    expect(declarations.get(".w-35:width")).toBe("8.75rem")
     expect(declarations.get(".w-140:width")).toBe("35rem")
   })
 })

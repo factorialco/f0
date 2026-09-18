@@ -977,6 +977,11 @@ export const defaultTranslations = {
         other: "{{count}} issues",
       },
     },
+    inline: {
+      edit: "Edit {{label}}",
+      copy: "Copy {{label}}",
+      copied: "Copied {{label}}",
+    },
     file: {
       dropzone: "Drag and drop a file, or click to select",
       dropzoneActive: "Drop the file here",
