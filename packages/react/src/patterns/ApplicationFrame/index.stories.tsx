@@ -17,7 +17,6 @@ import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { OneCalendar } from "@/components/OneCalendar"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -934,18 +933,21 @@ const FilesPage = () => (
   </Page>
 )
 
-const CalendarPage = () => (
-  <Page
-    header={
-      <PageHeader
-        module={{ id: "calendar", name: "Calendar", href: "/calendar" }}
-      />
-    }
-  >
-    <div className="flex flex-1 justify-center px-6 pb-6">
-      <div className="w-80">
-        <OneCalendar mode="single" view="month" />
-      </div>
+/**
+ * A placeholder, not a calendar. `OneCalendar` is a date PICKER — a month grid
+ * you choose from — and dressing it up as the module's page would have this
+ * story making a claim about a screen nobody has designed yet.
+ */
+const PlaceholderPage = ({
+  module,
+  says,
+}: {
+  module: ComponentProps<typeof PageHeader>["module"]
+  says: string
+}) => (
+  <Page header={<PageHeader module={module} />}>
+    <div className="flex flex-1 items-center justify-center p-6">
+      <span className="text-f1-foreground-secondary">{says}</span>
     </div>
   </Page>
 )
@@ -991,7 +993,20 @@ const CommunityMain = ({
     )
   }
   if (module === "inbox") return <InboxPage />
-  if (module === "calendar") return <CalendarPage />
+  if (module === "calendar")
+    return (
+      <PlaceholderPage
+        module={{ id: "calendar", name: "Calendar", href: "/calendar" }}
+        says="Aquí va el calendar"
+      />
+    )
+  if (module === "directory")
+    return (
+      <PlaceholderPage
+        module={{ id: "employees", name: "Directory", href: "/directory" }}
+        says="Aquí va organizations"
+      />
+    )
   if (module === "files") return <FilesPage />
   return <MockCommunitySurface fallback={children ?? <HomePage />} />
 }
