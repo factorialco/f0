@@ -12,11 +12,6 @@ type CheckboxRowProps = {
   onCheckedChange?: (checked: boolean) => void
 }
 
-/**
- * The record layout the inline variant is built for: a label column and a value
- * column the checkbox fills, so a row someone can tick lines up with the
- * read-only ones around it.
- */
 function CheckboxRow({
   label = "Checkbox",
   checked: initialChecked = false,
@@ -27,7 +22,7 @@ function CheckboxRow({
   const [checked, setChecked] = useState(initialChecked)
 
   return (
-    <div className="flex w-[560px] items-center border-0 border-b border-solid border-f1-border-secondary py-1">
+    <div className="flex w-140 items-center border-0 border-b border-solid border-f1-border-secondary py-1">
       <span className="w-1/2 px-3 text-f1-foreground-secondary">{label}</span>
       <div data-testid="value-box" className="w-1/2">
         <F0Checkbox
@@ -68,7 +63,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Someone who may edit the record. The control is live at rest. */
 export const DetailRow: Story = {
   play: async ({ args, canvasElement, step }) => {
     const canvas = within(canvasElement)
@@ -79,7 +73,7 @@ export const DetailRow: Story = {
       () => {
         expect(control).toBeVisible()
         expect(control).not.toBeChecked()
-        // No text swap and no edit affordance: a toggle is already its editor.
+
         expect(canvas.queryByRole("button")).toBeNull()
         expect(canvas.queryByText("Yes")).toBeNull()
         expect(canvas.queryByText("No")).toBeNull()
@@ -95,16 +89,10 @@ export const DetailRow: Story = {
   },
 }
 
-/** The same row with the value already ticked. */
 export const DetailRowChecked: Story = {
   args: { checked: true },
 }
 
-/**
- * The read-only tier the field layer expresses as `disabled`. The control still
- * carries its name and its value, so a screen reader announces the record's
- * state rather than skipping the row.
- */
 export const DetailRowDisabled: Story = {
   args: { checked: true, disabled: true },
   play: async ({ canvasElement, step }) => {
@@ -118,16 +106,10 @@ export const DetailRowDisabled: Story = {
   },
 }
 
-/**
- * The row's own label column names the field, so consumers pass `hideLabel`.
- * Without it the checkbox keeps its visible label, which is what a standalone
- * use outside a row wants.
- */
 export const DetailRowWithVisibleLabel: Story = {
   args: { hideLabel: false },
 }
 
-/** The variant fills whatever box the row declares, in both axes. */
 export const FillsTheRowBox: Story = {
   render: () => <FixedBox />,
   play: async ({ canvasElement, step }) => {
@@ -150,8 +132,7 @@ export const FillsTheRowBox: Story = {
       const control = canvas
         .getByRole("checkbox", { name: "Checkbox" })
         .getBoundingClientRect()
-      // 1px of transparent border plus `px-3`, which is where F0InputField
-      // paints an inline value's first glyph.
+      // Match the input text inset: 1px border plus px-3.
       expect(control.left - expected.left).toBe(13)
     })
 
@@ -173,8 +154,7 @@ function FixedBox() {
   return (
     <div
       data-testid="fixed-box"
-      // A ring, not a border: it marks the 40×320 box without taking any space
-      // out of it, so the measurement stays honest.
+      // A ring marks the box without changing its dimensions.
       className="h-10 w-80 ring-1 ring-f1-border"
     >
       <F0Checkbox
