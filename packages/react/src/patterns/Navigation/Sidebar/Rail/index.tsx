@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { type ReactNode, useCallback, useRef } from "react"
 
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Circle as CircleIcon } from "@/icons/app"
@@ -37,6 +37,12 @@ export type SidebarRailProps = {
   persistKey?: string
   /** Pressing the module you are already in. Hosts use it to fold the panel. */
   onActiveTabPress?: () => void
+  /**
+   * Second levels shown beside the rail instead of in the panel, keyed by tab
+   * id. A tab listed here is a menu rather than a destination: hovering or
+   * clicking it opens its flyout and leaves the active module alone.
+   */
+  flyouts?: Record<string, ReactNode>
   actions?: SidebarRailAction[]
   user?: Omit<SidebarUserMenuProps, "compact">
 }
@@ -87,6 +93,7 @@ export function SidebarRail({
   onTabChange,
   persistKey,
   onActiveTabPress,
+  flyouts,
   actions = [],
   user,
 }: SidebarRailProps) {
@@ -175,6 +182,7 @@ export function SidebarRail({
             isFocusable={index === activeIndex}
             onSelect={() => handleSelect(tab.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
+            flyout={flyouts?.[tab.id]}
           />
         ))}
       </div>

@@ -1351,24 +1351,13 @@ const MockChatPanel = ({
  */
 const toolsMenuTree: MenuCategory[] = [
   {
-    id: "main",
-    title: "Main",
+    id: "ai",
+    title: "AI",
     isRoot: true,
     isSortable: false,
     items: [
-      // `data-test` is asserted by the Default story play test.
-      {
-        label: "Marketplace",
-        icon: Marketplace,
-        href: "/marketplace",
-        "data-test": "foo",
-      },
-      {
-        label: "Discover Factorial",
-        icon: Icons.Sparkles,
-        href: "/discover",
-        tag: "New",
-      },
+      { label: "Routines", icon: Icons.Sparkles, href: "/routines" },
+      { label: "AI Activity", icon: Icons.Ai, href: "/ai-activity" },
     ],
   },
   {
@@ -1377,9 +1366,15 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "Policies", icon: Icons.Shield, href: "/policies" },
+      {
+        label: "Organization",
+        icon: Icons.Organization,
+        href: "/organization",
+      },
+      { label: "Documents", icon: Icons.Folder, href: "/documents" },
       { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
       { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
+      { label: "Kudos", icon: Icons.Heart, href: "/kudos" },
     ],
   },
   {
@@ -1393,7 +1388,7 @@ const toolsMenuTree: MenuCategory[] = [
       { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
       { label: "Projects", icon: Icons.Kanban, href: "/projects" },
       { label: "Benefits", icon: Icons.HoldHeart, href: "/benefits" },
-      { label: "Compensation", icon: Icons.MoneyBag, href: "/compensation" },
+      { label: "Payroll", icon: Icons.MoneyBag, href: "/payroll" },
     ],
   },
   {
@@ -1402,6 +1397,11 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
+      {
+        label: "Talent analytics",
+        icon: Icons.ChartLine,
+        href: "/talent-analytics",
+      },
       { label: "Performance", icon: Icons.Target, href: "/performance" },
       { label: "Recruitment", icon: Icons.SearchPerson, href: "/recruitment" },
       { label: "Engagement", icon: Icons.Heart, href: "/engagement" },
@@ -1414,8 +1414,13 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "Device catalog", icon: Icons.Laptop, href: "/device-catalog" },
-      { label: "IT inventory", icon: Icons.HardDrive, href: "/it-inventory" },
+      {
+        label: "Device catalog",
+        icon: Icons.Marketplace,
+        href: "/device-catalog",
+      },
+      { label: "Inventory", icon: Icons.Computer, href: "/it-inventory" },
+      { label: "Platform IT", icon: Icons.UserProtected, href: "/it-platform" },
     ],
   },
   {
@@ -1424,11 +1429,15 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "Workspace", icon: Icons.Briefcase, href: "/finance" },
-      { label: "Sales", icon: Icons.ChartVerticalBars, href: "/sales" },
-      { label: "Spending", icon: Icons.CreditCard, href: "/spending" },
-      { label: "Treasury", icon: Icons.Bank, href: "/treasury" },
-      { label: "Accounting", icon: Icons.Calculator, href: "/accounting" },
+      { label: "Planning", icon: Icons.Proyector, href: "/finance/planning" },
+      { label: "Spending", icon: Icons.Wallet, href: "/finance/spending" },
+      { label: "Treasury", icon: Icons.Bank, href: "/finance/treasury" },
+      { label: "Sales", icon: Icons.Handshake, href: "/finance/sales" },
+      {
+        label: "Accounting",
+        icon: Icons.MoneyBag,
+        href: "/finance/accounting",
+      },
     ],
   },
   {
@@ -1437,18 +1446,34 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "AI reports", icon: Icons.Ai, href: "/ai-reports" },
-      { label: "Analytics", icon: Icons.ChartPie, href: "/analytics" },
       { label: "Billing", icon: Icons.Receipt, href: "/billing" },
       { label: "Workflows", icon: Icons.Split, href: "/workflows" },
+      // `data-test` is asserted by the Default story play test.
       {
-        label: "Trust channel",
-        icon: Icons.UserProtected,
-        href: "/trust-channel",
+        label: "Marketplace",
+        icon: Marketplace,
+        href: "/marketplace",
+        "data-test": "foo",
       },
     ],
   },
 ]
+
+/**
+ * The catalog, beside the rail instead of inside a panel.
+ *
+ * Tools is not a place you go: it is the list of everywhere else. So it gets a
+ * menu that floats over whatever you were reading and leaves when you do,
+ * rather than a column that pushes the page aside to show you a list you came
+ * to leave. The module you were in stays selected in the rail the whole time,
+ * because you never left it.
+ */
+const ToolsFlyout = () => (
+  <div className="flex flex-col gap-1">
+    <SearchBar placeholder="Search..." onClick={() => {}} />
+    <Menu tree={toolsMenuTree} />
+  </div>
+)
 
 /* -------------------------------------------------------------------------- *
  * "One" sidebar tab — AI chat history                                         *
@@ -1822,9 +1847,9 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
-    ) : tab === "tools" ? (
-      <Menu tree={toolsMenuTree} />
-    ) : isRail ? undefined : ( // contents for one screen. // module IS the content, and a column beside it would be a table of // Only Chats and Tools have a second level. The rest are pages: the
+    ) : isRail ? // module IS the content, and a column beside it would be a table of // Only Chats has a second level in a panel. The rest are pages: the
+    // contents for one screen. Tools is a menu, and menus fly out.
+    undefined : (
       <Menu tree={toolsMenuTree} />
     )
 
@@ -1834,7 +1859,7 @@ const ConversationsSidebarInner = ({
     // conversations, the queue, the catalog. Home, Calendar, Directory and
     // Files are pages — the module IS the content, and a column of links
     // beside it would be a table of contents for one page.
-    const hasPanel = ["messages", "tools"].includes(tab)
+    const hasPanel = tab === "messages"
     return (
       <Sidebar
         rail={
@@ -1853,6 +1878,7 @@ const ConversationsSidebarInner = ({
               if (sidebarState !== "locked") toggleSidebar()
             }}
             persistKey={tabsPersistKey}
+            flyouts={{ tools: <ToolsFlyout /> }}
             actions={[
               {
                 id: "notifications",
@@ -1885,11 +1911,6 @@ const ConversationsSidebarInner = ({
               <SidebarPanelHeader
                 title={tabs.find((t) => t.id === tab)?.label ?? ""}
               />
-              {/* Search sits with the catalog: it is the panel with something
-                  to search. Home's own search is the page's, not the nav's. */}
-              {tab === "tools" && (
-                <SearchBar placeholder="Search..." onClick={() => {}} />
-              )}
             </>
           ) : undefined
         }

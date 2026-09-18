@@ -603,7 +603,20 @@ function ApplicationFrameContent({
               // Above the navigation, so the content's own edge casts onto the
               // rail rather than the rail sitting on top of it. The floating
               // panel raises itself past this (z-30) when it has to.
-              className="relative z-20 min-w-0 flex-1"
+              //
+              // The page's shadow is drawn HERE, by a pseudo-element tracing
+              // the sheet's box, rather than by the page itself. `main` below
+              // scrolls, and a scroll container paints nothing outside its own
+              // box — so a shadow on the sheet was cut off flush against the
+              // navigation, the one edge it exists to show. This element does
+              // not scroll, so it can cast.
+              className={cn(
+                "relative z-20 min-w-0 flex-1",
+                "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:z-0 before:shadow before:content-[''] xs:before:inset-y-1 xs:before:rounded-xl",
+                !isAiChatOpen && !isAiPromotionChatOpen
+                  ? "before:right-0 xs:before:right-1"
+                  : "before:right-0"
+              )}
               // Both paddings animate together, so swapping the visible side
               // (split mode) slides the main content from one edge to the
               // other — covering the outgoing window and uncovering the
