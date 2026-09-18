@@ -144,6 +144,7 @@ export { default as Keyboard } from "./Keyboard";
 export { default as Laptop } from "./Laptop";
 export { default as LayersFront } from "./LayersFront";
 export { default as Less } from "./Less";
+export { default as LifeBuoy } from "./LifeBuoy";
 export { default as Lightbulb } from "./Lightbulb";
 export { default as Link } from "./Link";
 export { default as LinkRemove } from "./LinkRemove";
