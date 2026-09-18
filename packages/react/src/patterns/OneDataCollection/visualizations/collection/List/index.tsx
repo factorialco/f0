@@ -7,6 +7,7 @@ import {
   useSelectable,
 } from "@/hooks/datasource"
 import { useGroups } from "@/hooks/datasource/useGroups"
+import { useReducedMotion } from "@/lib/a11y"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
@@ -137,6 +138,8 @@ export const ListCollection = <
     defaultOpenGroups
   )
 
+  const shouldReduceMotion = useReducedMotion()
+
   const showInitialLoading = useDebounceBoolean({
     value: isInitialLoading,
     delay: 100,
@@ -219,8 +222,13 @@ export const ListCollection = <
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.1, ease: "easeInOut" }}
-                          className="mt-0.5"
+                          transition={{
+                            duration: shouldReduceMotion ? 0 : 0.1,
+                            ease: "easeInOut",
+                          }}
+                          // Clipped while the group opens and closes: rows are
+                          // otherwise drawn outside the box that is still growing.
+                          className="mt-0.5 overflow-hidden"
                         >
                           <ListGroup
                             key={`list-group-${group.key}`}

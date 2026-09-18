@@ -32,13 +32,17 @@ import type {
 } from "@/experimental/Information/utils"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Handle, Plus } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
 import type { enhanceConfig } from "../internal/Enhance/types"
-import { EnhanceErrorBanner } from "../internal/Error"
+import {
+  EnhanceErrorBanner,
+  enhanceErrorRevealTransition,
+} from "../internal/Error"
 import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
 import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
 import {
@@ -131,6 +135,7 @@ const F0NotesTextEditorComponent = forwardRef<
   ref
 ) {
   const translations = useI18n()
+  const shouldReduceMotion = useReducedMotion()
 
   const containerRef = useRef<HTMLDivElement>(null)
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
@@ -382,8 +387,10 @@ const F0NotesTextEditorComponent = forwardRef<
             initial={{ height: 0, opacity: 0, y: -20 }}
             animate={{ height: "auto", opacity: 1, y: 0 }}
             exit={{ height: 0, opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="mx-auto flex w-full max-w-[824px] items-center justify-center px-14 py-2"
+            transition={enhanceErrorRevealTransition(shouldReduceMotion)}
+            // overflow-hidden: the banner keeps its padding while the height
+            // animates, so without clipping it spills out of its own box.
+            className="mx-auto flex w-full max-w-[824px] items-center justify-center overflow-hidden px-14 py-2"
           >
             <EnhanceErrorBanner
               error={enhance.error}

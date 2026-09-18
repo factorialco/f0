@@ -2,6 +2,15 @@ import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
+/**
+ * The banner reveals intrinsic content, so its height animation is the right
+ * shape and stays. This only carries the reduced-motion branch, which both
+ * editors need and neither should spell out inline.
+ */
+export const enhanceErrorRevealTransition = (reducedMotion: boolean) => ({
+  duration: reducedMotion ? 0 : 0.3,
+})
+
 interface EnhanceErrorBannerProps {
   error: string
   onDismiss: () => void
