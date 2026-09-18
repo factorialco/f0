@@ -15,15 +15,21 @@ import { F0Button } from "@/components/F0Button"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
+  Calendar,
+  CalendarFilled,
   ChartVerticalBars,
+  Folders,
+  FoldersFilled,
   Home,
   HomeFilled,
+  Hub,
+  HubFilled,
   Lightbulb,
   MessagesFilled,
   New,
   Pencil,
   Search,
-  Shield,
+  Settings,
   Sliders,
   Comment,
 } from "@/icons/app"
@@ -1178,6 +1184,104 @@ const MockChatPanel = ({
  * Realistic "Main" menu mirroring the production Factorial sidebar (root nav +
  * Personal / Company / Operations / Talent / IT Management / Finance / More).
  */
+/** Calendar's own second level: what you are looking at, and whose. */
+const calendarMenuTree: MenuCategory[] = [
+  {
+    id: "views",
+    title: "Views",
+    isRoot: true,
+    isSortable: false,
+    items: [
+      { label: "Month", icon: Icons.Calendar, href: "/calendar" },
+      { label: "Week", icon: Icons.Calendar, href: "/calendar/week" },
+      { label: "Agenda", icon: Icons.Completed, href: "/calendar/agenda" },
+    ],
+  },
+  {
+    id: "calendars",
+    title: "Calendars",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Time off", icon: Icons.PalmTree, href: "/calendar/time-off" },
+      { label: "Shifts", icon: Icons.Schedule, href: "/calendar/shifts" },
+      {
+        label: "Company events",
+        icon: Icons.Megaphone,
+        href: "/calendar/events",
+      },
+    ],
+  },
+]
+
+/** Files: the two destinations, then the library itself. */
+const filesMenuTree: MenuCategory[] = [
+  {
+    id: "files-main",
+    title: "Files",
+    isRoot: true,
+    isSortable: false,
+    items: [
+      { label: "All files", icon: Icons.Folders, href: "/files" },
+      { label: "Policies", icon: Icons.Shield, href: "/files/policies" },
+    ],
+  },
+  {
+    id: "library",
+    title: "Library",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Contracts", icon: Icons.Folder, href: "/files/contracts" },
+      { label: "Payroll", icon: Icons.Folder, href: "/files/payroll" },
+      { label: "Onboarding", icon: Icons.Folder, href: "/files/onboarding" },
+      { label: "Headcount plan", icon: Icons.Files, href: "/files/headcount" },
+    ],
+  },
+]
+
+/** Tools: the module catalog, which is what the rail promotes out of. */
+const toolsMenuTree: MenuCategory[] = [
+  {
+    id: "tools-company",
+    title: "Company",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      {
+        label: "Organization",
+        icon: Icons.Organization,
+        href: "/organization",
+      },
+      { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
+      { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
+    ],
+  },
+  {
+    id: "tools-operations",
+    title: "Operations",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Time tracking", icon: Icons.Timer, href: "/time-tracking" },
+      { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
+      { label: "Projects", icon: Icons.Kanban, href: "/projects" },
+      { label: "Payroll", icon: Icons.MoneyBag, href: "/payroll" },
+    ],
+  },
+  {
+    id: "tools-talent",
+    title: "Talent",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Performance", icon: Icons.Graph, href: "/performance" },
+      { label: "Recruitment", icon: Icons.SearchPerson, href: "/recruitment" },
+      { label: "Training", icon: Icons.AcademicCap, href: "/training" },
+    ],
+  },
+]
+
 const homeMenuTree: MenuCategory[] = [
   {
     id: "main",
@@ -1199,7 +1303,6 @@ const homeMenuTree: MenuCategory[] = [
         badge: 6,
         "data-test": "foo",
       },
-      { label: "Calendar", icon: Icons.Calendar, href: "/calendar" },
       {
         label: "Discover Factorial",
         icon: Icons.Sparkles,
@@ -1584,9 +1687,9 @@ const ConversationsSidebarInner = ({
 
   const isRail = layout === "rail"
   const tabs = [
-    // The rail names the modules the way the navigation does ("Home", "Comms");
-    // the tab row names the panel's contents ("Menu", "Chat"), which is what a
-    // row above the body is describing.
+    // The rail names the modules the way the navigation does; the tab row
+    // names the panel's contents ("Menu"), which is what a row above the body
+    // is describing.
     {
       id: "home",
       label: isRail ? "Home" : "Menu",
@@ -1595,11 +1698,31 @@ const ConversationsSidebarInner = ({
     },
     {
       id: "messages",
-      label: isRail ? "Comms" : "Chat",
+      label: "Chat",
       icon: Comment,
       activeIcon: MessagesFilled,
       badge: unreadChatsCount || undefined,
     },
+    // First-level destinations of their own, out of the Home menu: with the
+    // rail always on screen, a section you visit daily has no business being
+    // a row inside another section's list.
+    ...(isRail
+      ? [
+          {
+            id: "calendar",
+            label: "Calendar",
+            icon: Calendar,
+            activeIcon: CalendarFilled,
+          },
+          {
+            id: "files",
+            label: "Files",
+            icon: Folders,
+            activeIcon: FoldersFilled,
+          },
+          { id: "tools", label: "Tools", icon: Hub, activeIcon: HubFilled },
+        ]
+      : []),
     // The AI chat is reached from the page header's One switch, never from a
     // navigation tab — so the rail never carries one.
     ...(withOneTab && !isRail
@@ -1619,6 +1742,12 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
+    ) : tab === "calendar" ? (
+      <Menu tree={calendarMenuTree} />
+    ) : tab === "files" ? (
+      <Menu tree={filesMenuTree} />
+    ) : tab === "tools" ? (
+      <Menu tree={toolsMenuTree} />
     ) : (
       <Menu tree={homeMenuTree} />
     )
@@ -1654,9 +1783,9 @@ const ConversationsSidebarInner = ({
                 onClick: () => {},
               },
               {
-                id: "security",
-                label: "Security",
-                icon: Shield,
+                id: "settings",
+                label: "Settings",
+                icon: Settings,
                 onClick: () => {},
               },
             ]}
