@@ -39,6 +39,7 @@ export type InputProps = Omit<
     | "transparent"
     | "variant"
     | "editing"
+    | "inlineText"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -80,6 +81,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       transparent,
       variant,
       editing,
+      inlineText,
       // Renamed rather than left in the spread: the prop is the HTML attribute
       // name, and React only recognises the camelCase spelling. Spread as-is it
       // still reaches the DOM, but as an unknown attribute React warns about.
@@ -139,6 +141,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         transparent={transparent}
         variant={variant}
         editing={editing}
+        inlineText={inlineText}
       >
         <input
           type={type}

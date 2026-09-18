@@ -190,6 +190,7 @@ export type InputFieldProps<T> = {
   transparent?: boolean
   variant?: InputFieldVariant
   editing?: boolean
+  inlineText?: string
 }
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -236,6 +237,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       transparent,
       variant = "field",
       editing = false,
+      inlineText,
       ...props
     }: InputFieldProps<string>,
     ref
@@ -394,7 +396,13 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           <InlineValue
             label={label}
             hideLabel={hideLabel}
-            text={localValue ?? ""}
+            text={
+              localValue === undefined ||
+              localValue === null ||
+              localValue === ""
+                ? ""
+                : (inlineText ?? localValue)
+            }
             placeholder={placeholder}
             size={size}
           />
