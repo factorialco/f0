@@ -15535,11 +15535,7 @@ declare type InputFieldVariant = (typeof inputFieldVariantNames)[number];
 declare const inputFieldVariantNames: readonly ["field", "inline"];
 
 declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly" | "variant" | "editing"> & {
-    /**
-     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
-     * masked like a password but with no lock icon and with password managers
-     * disabled. It never reaches the DOM (mapped to text/password internally).
-     */
+    /** Sensitive non-credential text, revealed only while focused. */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
     onPressEscape?: () => void;
