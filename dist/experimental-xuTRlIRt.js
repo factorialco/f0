@@ -481,9 +481,9 @@ function GD({ children: a }) {
   }), [L, te] = Ne(() => {
     const z = localStorage.getItem(U0);
     return z !== null ? !!z : !0;
-  }), [X, T] = Ne(!1), ie = Q > 0, [he, Ce] = Ne(
+  }), [X, T] = Ne(!1), ie = Q > 0, [he, Ae] = Ne(
     null
-  ), ce = Je(
+  ), de = Je(
     ({ isInvokedByUser: z } = {
       isInvokedByUser: !0
     }) => {
@@ -501,7 +501,7 @@ function GD({ children: a }) {
   }, [I]), Xe(() => {
     K && localStorage.setItem(U0, L ? "1" : "");
   }, [L, K]), Xe(() => () => {
-    Ce(me);
+    Ae(me);
   }, [me]), /* @__PURE__ */ h(
     l1.Provider,
     {
@@ -509,7 +509,7 @@ function GD({ children: a }) {
         isSmallScreen: O,
         isLastToggleInvokedByUser: K,
         sidebarState: me,
-        toggleSidebar: ce,
+        toggleSidebar: de,
         prevSidebarState: he,
         setForceFloat: B,
         railWidth: Q,
@@ -658,13 +658,13 @@ const Q0 = Ot.create(ii), w0 = {
                       onClick: S
                     }
                   ),
-                  j.length > 1 && /* @__PURE__ */ h(ai, { children: /* @__PURE__ */ h("div", { className: "pb-1", children: te.map((he, Ce) => /* @__PURE__ */ h(
+                  j.length > 1 && /* @__PURE__ */ h(ai, { children: /* @__PURE__ */ h("div", { className: "pb-1", children: te.map((he, Ae) => /* @__PURE__ */ h(
                     ZD,
                     {
                       ...he,
                       onClick: S
                     },
-                    Ce
+                    Ae
                   )) }) })
                 ] }),
                 K === "error" && /* @__PURE__ */ h("div", { className: "p-2 pt-0", children: /* @__PURE__ */ h(
@@ -973,7 +973,7 @@ function KK({
       module: a.id
     },
     ...f
-  ], X = I && Object.keys(I).length !== 0, T = Q && f.length > 0, ie = !Q && B.length > 0, he = !Q && !!U?.isVisible, Ce = te[te.length - 1], ce = "navigation" in window ? window.navigation : null, se = Q && (ce ? !!ce.canGoBack : window.history.length > 1);
+  ], X = I && Object.keys(I).length !== 0, T = Q && f.length > 0, ie = !Q && B.length > 0, he = !Q && !!U?.isVisible, Ae = te[te.length - 1], de = "navigation" in window ? window.navigation : null, se = Q && (de ? !!de.canGoBack : window.history.length > 1);
   return /* @__PURE__ */ $(
     "div",
     {
@@ -1019,7 +1019,7 @@ function KK({
                     onClick: () => window.history.back()
                   }
                 ) }),
-                se || T ? /* @__PURE__ */ h("div", { className: "text-lg font-semibold text-f1-foreground", children: "loading" in Ce ? /* @__PURE__ */ h(Bt, { className: "h-4 w-24" }) : Ce.label }) : /* @__PURE__ */ h(
+                se || T ? /* @__PURE__ */ h("div", { className: "text-lg font-semibold text-f1-foreground", children: "loading" in Ae ? /* @__PURE__ */ h(Bt, { className: "h-4 w-24" }) : Ae.label }) : /* @__PURE__ */ h(
                   SD,
                   {
                     breadcrumbs: te,
@@ -1910,8 +1910,8 @@ const OK = Cg(
     }), {
       leadLabel: ie,
       timeLabel: he,
-      durationLabel: Ce,
-      countdownLabel: ce,
+      durationLabel: Ae,
+      countdownLabel: de,
       attendeesLabel: se
     } = VS({
       state: I,
@@ -1925,15 +1925,15 @@ const OK = Cg(
       // No footer band in compact, so the countdown has to ride along the
       // headline as text. The clock time is dropped while the meeting runs —
       // "started 4 mins ago" is the useful fact then, not when it began.
-      ce ?? ie,
+      de ?? ie,
       I === "inProgress" ? void 0 : he,
       ee
-    ].filter(Boolean) : [ie, he, Ce, ee].filter(Boolean), ve = yS(I) && !!Z, Qe = Z?.disabled ?? !FS({
+    ].filter(Boolean) : [ie, he, Ae, ee].filter(Boolean), ve = yS(I) && !!Z, Qe = Z?.disabled ?? !FS({
       state: I,
       startsAt: B,
       now: X,
       windowMinutes: Z?.windowMinutes
-    }), De = QS({ state: I, hasCountdown: !!ce }) && // In compact the state travels with the headline: the countdown became
+    }), De = QS({ state: I, hasCountdown: !!de }) && // In compact the state travels with the headline: the countdown became
     // text above, and an in-progress row without a title already says so.
     !(O && (I === "scheduled" || ue)), ye = ve || !!j?.length, ke = /* @__PURE__ */ $(ai, { children: [
       ge && /* @__PURE__ */ h(
@@ -1959,7 +1959,7 @@ const OK = Cg(
         maxAvatars: G,
         size: O ? "xs" : "sm"
       }
-    ), Ge = I === "finished" && K && /* @__PURE__ */ h(PS, { summary: K }), $e = De && /* @__PURE__ */ h(MS, { state: I, countdownLabel: ce }), ht = ye && /* @__PURE__ */ $(ai, { children: [
+    ), Ge = I === "finished" && K && /* @__PURE__ */ h(PS, { summary: K }), $e = De && /* @__PURE__ */ h(MS, { state: I, countdownLabel: de }), ht = ye && /* @__PURE__ */ $(ai, { children: [
       j?.map((Ct) => /* @__PURE__ */ h(
         mi,
         {
@@ -2067,36 +2067,36 @@ const GS = ({ compact: a = !1 }) => /* @__PURE__ */ h(
   onClose: S,
   ...V
 }) => {
-  const G = L_(), K = a.findIndex((Pe) => Pe.id === I), Z = K < 0, j = Z ? 0 : K, O = a[j], L = a.length, te = k?.total ?? L, X = k?.hasMore ?? !1, T = k?.isLoading ?? !1, ie = Q && !X, he = Z ? void 0 : ie ? a[(j - 1 + L) % L]?.id : a[j - 1]?.id, Ce = Z ? void 0 : ie ? a[(j + 1) % L]?.id : a[j + 1]?.id, ce = Je(() => {
+  const G = L_(), K = a.findIndex((Pe) => Pe.id === I), Z = K < 0, j = Z ? 0 : K, O = a[j], L = a.length, te = k?.total ?? L, X = k?.hasMore ?? !1, T = k?.isLoading ?? !1, ie = Q && !X, he = Z ? void 0 : ie ? a[(j - 1 + L) % L]?.id : a[j - 1]?.id, Ae = Z ? void 0 : ie ? a[(j + 1) % L]?.id : a[j + 1]?.id, de = Je(() => {
     he && f(he);
   }, [he, f]), [se, me] = Ne(!1), z = Re(-1), ee = Je(() => {
     !k || T || z.current !== L && (z.current = L, k.onLoadMore());
   }, [k, T, L]), ge = Je(() => {
-    if (Ce) {
-      f(Ce);
+    if (Ae) {
+      f(Ae);
       return;
     }
     Z || !X || !k || (me(!0), ee());
-  }, [Ce, f, Z, X, k, ee]), ue = Re(T);
+  }, [Ae, f, Z, X, k, ee]), ue = Re(T);
   Xe(() => {
     const Pe = ue.current && !T;
     if (ue.current = T, !!se) {
-      if (Ce) {
-        me(!1), f(Ce);
+      if (Ae) {
+        me(!1), f(Ae);
         return;
       }
       Pe && me(!1);
     }
-  }, [se, Ce, T, f]), Xe(() => {
-    !r || Z || Ce || !X || ee();
-  }, [r, Z, Ce, X, ee]), Xe(() => {
+  }, [se, Ae, T, f]), Xe(() => {
+    !r || Z || Ae || !X || ee();
+  }, [r, Z, Ae, X, ee]), Xe(() => {
     if (!r) return;
     const Pe = (Ge) => {
       const $e = Ge.target;
-      $e?.tagName === "INPUT" || $e?.tagName === "TEXTAREA" || $e?.isContentEditable || (Ge.key === "ArrowLeft" && ce(), Ge.key === "ArrowRight" && ge());
+      $e?.tagName === "INPUT" || $e?.tagName === "TEXTAREA" || $e?.isContentEditable || (Ge.key === "ArrowLeft" && de(), Ge.key === "ArrowRight" && ge());
     };
     return document.addEventListener("keydown", Pe), () => document.removeEventListener("keydown", Pe);
-  }, [r, ce, ge]);
+  }, [r, de, ge]);
   const we = kt(
     () => ({
       // BOTH ARROWS ALWAYS, disabled at the ends rather than removed: an arrow
@@ -2112,7 +2112,7 @@ const GS = ({ compact: a = !1 }) => /* @__PURE__ */ h(
           hideLabel: !0,
           className: S0,
           disabled: !he,
-          onClick: ce
+          onClick: de
         }
       ),
       next: /* @__PURE__ */ h(
@@ -2125,7 +2125,7 @@ const GS = ({ compact: a = !1 }) => /* @__PURE__ */ h(
           hideLabel: !0,
           className: S0,
           loading: se,
-          disabled: !Ce && !(X && !T),
+          disabled: !Ae && !(X && !T),
           onClick: ge
         }
       )
@@ -2134,11 +2134,11 @@ const GS = ({ compact: a = !1 }) => /* @__PURE__ */ h(
       B?.previous,
       B?.next,
       he,
-      Ce,
+      Ae,
       X,
       T,
       se,
-      ce,
+      de,
       ge
     ]
   ), ve = X && k?.total === void 0, Qe = B?.position ?? ((Pe, Ge) => `${Pe} of ${Ge}${ve ? "+" : ""}`), De = {
@@ -2344,10 +2344,10 @@ function ZS() {
           var n = new ie(9);
           return ie != Float32Array && (n[1] = 0, n[2] = 0, n[3] = 0, n[5] = 0, n[6] = 0, n[7] = 0), n[0] = 1, n[4] = 1, n[8] = 1, n;
         }
-        function Ce(n) {
+        function Ae(n) {
           return n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1, n;
         }
-        function ce() {
+        function de() {
           var n = new ie(3);
           return ie != Float32Array && (n[0] = 0, n[1] = 0, n[2] = 0), n;
         }
@@ -2414,7 +2414,7 @@ function ZS() {
           var i = new ie(2);
           return i[0] = n, i[1] = e, i;
         }
-        ce(), ue = new ie(4), ie != Float32Array && (ue[0] = 0, ue[1] = 0, ue[2] = 0, ue[3] = 0), ce(), me(1, 0, 0), me(0, 1, 0), Qe(), Qe(), he(), ye();
+        de(), ue = new ie(4), ie != Float32Array && (ue[0] = 0, ue[1] = 0, ue[2] = 0, ue[3] = 0), de(), me(1, 0, 0), me(0, 1, 0), Qe(), Qe(), he(), ye();
         const Pe = 8192;
         function Ge(n, e, i) {
           return e * (Pe / (n.tileSize * Math.pow(2, i - n.tileID.overscaledZ)));
@@ -2854,8 +2854,8 @@ function ZS() {
                   if (q === "  " || q === "  /" || q === ",," || q === ",,,") {
                     const ae = [p, D, E].join(""), re = ae === "%%%" ? 100 : ae === "" ? 255 : 0;
                     if (re) {
-                      const Ae = [Ko(+F / re, 0, 1), Ko(+y / re, 0, 1), Ko(+P / re, 0, 1), H ? hl(+H, ne) : 1];
-                      if (dC(Ae)) return Ae;
+                      const Ce = [Ko(+F / re, 0, 1), Ko(+y / re, 0, 1), Ko(+P / re, 0, 1), H ? hl(+H, ne) : 1];
+                      if (dC(Ce)) return Ce;
                     }
                   }
                   return;
@@ -2867,8 +2867,8 @@ function ZS() {
                 if (E === "  " || E === "  /" || E === ",," || E === ",,,") {
                   const Y = [+u, Ko(+p, 0, 100), Ko(+y, 0, 100), _ ? hl(+_, P) : 1];
                   if (dC(Y)) return (function([H, ne, q, ae]) {
-                    function re(Ae) {
-                      const xe = (Ae + H / 30) % 12, Se = ne * Math.min(q, 1 - q);
+                    function re(Ce) {
+                      const xe = (Ce + H / 30) % 12, Se = ne * Math.min(q, 1 - q);
                       return q - Se * Math.max(-1, Math.min(xe - 3, 9 - xe, 1));
                     }
                     return H = ul(H), ne /= 100, q /= 100, [re(0), re(8), re(4), ae];
@@ -2912,8 +2912,8 @@ function ZS() {
                   let q = p - A;
                   p > A && q > 180 ? q -= 360 : p < A && A - p > 180 && (q += 360), _ = A + o * q;
                 }
-                const [E, Y, H, ne] = (function([q, ae, re, Ae]) {
-                  return q = isNaN(q) ? 0 : q * Sr, AC([re, Math.cos(q) * ae, Math.sin(q) * ae, Ae]);
+                const [E, Y, H, ne] = (function([q, ae, re, Ce]) {
+                  return q = isNaN(q) ? 0 : q * Sr, AC([re, Math.cos(q) * ae, Math.sin(q) * ae, Ce]);
                 })([_, P ?? Na(c, v, o), Na(u, y, o), Na(F, D, o)]);
                 return new ui(E, Y, H, ne, !1);
               }
@@ -6490,13 +6490,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           _refreshViews() {
             this.uint8 = new Uint8Array(this.arrayBuffer), this.int16 = new Int16Array(this.arrayBuffer), this.uint16 = new Uint16Array(this.arrayBuffer), this.uint32 = new Uint32Array(this.arrayBuffer), this.float32 = new Float32Array(this.arrayBuffer);
           }
-          emplaceBack(e, i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q, ae, re, Ae, xe, Se, Ze, Ee, He, Oe) {
+          emplaceBack(e, i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q, ae, re, Ce, xe, Se, Ze, Ee, He, Oe) {
             const We = this.length;
-            return this.resize(We + 1), this.emplace(We, e, i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q, ae, re, Ae, xe, Se, Ze, Ee, He, Oe);
+            return this.resize(We + 1), this.emplace(We, e, i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q, ae, re, Ce, xe, Se, Ze, Ee, He, Oe);
           }
-          emplace(e, i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q, ae, re, Ae, xe, Se, Ze, Ee, He, Oe, We) {
+          emplace(e, i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q, ae, re, Ce, xe, Se, Ze, Ee, He, Oe, We) {
             const Te = 32 * e, It = 16 * e;
-            return this.int16[Te + 0] = i, this.int16[Te + 1] = o, this.int16[Te + 2] = s, this.int16[Te + 3] = A, this.int16[Te + 4] = c, this.int16[Te + 5] = u, this.int16[Te + 6] = F, this.int16[Te + 7] = p, this.uint16[Te + 8] = v, this.uint16[Te + 9] = y, this.uint16[Te + 10] = D, this.uint16[Te + 11] = _, this.uint16[Te + 12] = P, this.uint16[Te + 13] = E, this.uint16[Te + 14] = Y, this.uint16[Te + 15] = H, this.uint16[Te + 16] = ne, this.uint16[Te + 17] = q, this.uint16[Te + 18] = ae, this.uint16[Te + 19] = re, this.uint16[Te + 20] = Ae, this.uint16[Te + 21] = xe, this.uint16[Te + 22] = Se, this.uint32[It + 12] = Ze, this.float32[It + 13] = Ee, this.float32[It + 14] = He, this.uint16[Te + 30] = Oe, this.uint16[Te + 31] = We, e;
+            return this.int16[Te + 0] = i, this.int16[Te + 1] = o, this.int16[Te + 2] = s, this.int16[Te + 3] = A, this.int16[Te + 4] = c, this.int16[Te + 5] = u, this.int16[Te + 6] = F, this.int16[Te + 7] = p, this.uint16[Te + 8] = v, this.uint16[Te + 9] = y, this.uint16[Te + 10] = D, this.uint16[Te + 11] = _, this.uint16[Te + 12] = P, this.uint16[Te + 13] = E, this.uint16[Te + 14] = Y, this.uint16[Te + 15] = H, this.uint16[Te + 16] = ne, this.uint16[Te + 17] = q, this.uint16[Te + 18] = ae, this.uint16[Te + 19] = re, this.uint16[Te + 20] = Ce, this.uint16[Te + 21] = xe, this.uint16[Te + 22] = Se, this.uint32[It + 12] = Ze, this.float32[It + 13] = Ee, this.float32[It + 14] = He, this.uint16[Te + 30] = Oe, this.uint16[Te + 31] = We, e;
           }
         }
         iA.prototype.bytesPerElement = 64, wt("StructArrayLayout8i15ui1ul2f2ui64", iA);
@@ -6852,7 +6852,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
         }
         class Be extends as {
         }
-        class de extends Ua {
+        class ce extends Ua {
         }
         class be extends dI {
         }
@@ -7333,7 +7333,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
         }
         function Ac(n, e, i) {
           const o = { color: { source: as, composite: g }, number: { source: fI, composite: as } }, s = (function(A) {
-            return { "line-pattern": { source: de, composite: de }, "fill-pattern": { source: de, composite: de }, "fill-extrusion-pattern": { source: de, composite: de }, "line-dasharray": { source: be, composite: be } }[A];
+            return { "line-pattern": { source: ce, composite: ce }, "fill-pattern": { source: ce, composite: ce }, "fill-extrusion-pattern": { source: ce, composite: ce }, "line-dasharray": { source: be, composite: be } }[A];
           })(n);
           return s?.[i] || o[e][i];
         }
@@ -7914,7 +7914,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 for (P = 0; H; ) {
                   P++;
                   let q = H, ae = 0;
-                  for (let Ae = 0; Ae < E && (ae++, q = q.nextZ, q); Ae++) ;
+                  for (let Ce = 0; Ce < E && (ae++, q = q.nextZ, q); Ce++) ;
                   let re = E;
                   for (; ae > 0 || re > 0 && q; ) ae !== 0 && (re === 0 || !q || H.z <= q.z) ? (Y = H, H = H.nextZ, ae--) : (Y = q, q = q.nextZ, re--), ne ? ne.nextZ = Y : _ = Y, Y.prevZ = ne, ne = Y;
                   H = q;
@@ -8155,8 +8155,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 continue;
               }
               !H && ae > 0 && c.push(this._vertexToIndex(F + P * ae, p + E * ae));
-              const Ae = F + P * Math.max(ae, 0), xe = F + P * Math.min(re, 1);
-              Y || this._generateIntraEdgeVertices(c, F, p, v, y, Ae, xe), !H && re < 1 && c.push(this._vertexToIndex(F + P * re, p + E * re)), (H || y >= s && y <= A) && c.push(o[(u + 1) % 3]), !H && (y <= s || y >= A) && this._generateInterEdgeVertices(c, F, p, v, y, D, _, xe, s, A);
+              const Ce = F + P * Math.max(ae, 0), xe = F + P * Math.min(re, 1);
+              Y || this._generateIntraEdgeVertices(c, F, p, v, y, Ce, xe), !H && re < 1 && c.push(this._vertexToIndex(F + P * re, p + E * re)), (H || y >= s && y <= A) && c.push(o[(u + 1) % 3]), !H && (y <= s || y >= A) && this._generateInterEdgeVertices(c, F, p, v, y, D, _, xe, s, A);
             }
             return c;
           }
@@ -8174,9 +8174,9 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           _generateInterEdgeVertices(e, i, o, s, A, c, u, F, p, v) {
             const y = A - o, D = c - s, _ = u - A, P = (p - A) / _, E = (v - A) / _, Y = Math.min(P, E), H = Math.max(P, E), ne = s + D * Y;
             let q = Math.floor(Math.min(ne, F) / this._granularityCellSize) + 1, ae = Math.ceil(Math.max(ne, F) / this._granularityCellSize) - 1, re = F < ne;
-            const Ae = _ === 0;
-            if (Ae && (u === p || u === v)) return;
-            if (Ae || Y >= 1 || H <= 0) {
+            const Ce = _ === 0;
+            if (Ce && (u === p || u === v)) return;
+            if (Ce || Y >= 1 || H <= 0) {
               const Se = o - u, Ze = c + (i - c) * Math.min((p - u) / Se, (v - u) / Se);
               q = Math.floor(Math.min(Ze, F) / this._granularityCellSize) + 1, ae = Math.ceil(Math.max(Ze, F) / this._granularityCellSize) - 1, re = F < Ze;
             }
@@ -8237,10 +8237,10 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 const E = [];
                 if (!P || P.next === P.prev) return E;
                 let Y, H, ne;
-                if (D && (P = (function(q, ae, re, Ae) {
+                if (D && (P = (function(q, ae, re, Ce) {
                   const xe = [];
                   for (let Se = 0, Ze = ae.length; Se < Ze; Se++) {
-                    const Ee = sp(q, ae[Se] * Ae, Se < Ze - 1 ? ae[Se + 1] * Ae : q.length, Ae, !1);
+                    const Ee = sp(q, ae[Se] * Ce, Se < Ze - 1 ? ae[Se + 1] * Ce : q.length, Ce, !1);
                     Ee === Ee.next && (Ee.steiner = !0), xe.push(nv(Ee));
                   }
                   xe.sort(ev);
@@ -8250,8 +8250,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   Y = p[0], H = p[1];
                   let q = Y, ae = H;
                   for (let re = y; re < _; re += y) {
-                    const Ae = p[re], xe = p[re + 1];
-                    Ae < Y && (Y = Ae), xe < H && (H = xe), Ae > q && (q = Ae), xe > ae && (ae = xe);
+                    const Ce = p[re], xe = p[re + 1];
+                    Ce < Y && (Y = Ce), xe < H && (H = xe), Ce > q && (q = Ce), xe > ae && (ae = xe);
                   }
                   ne = Math.max(q - Y, ae - H), ne = ne !== 0 ? 32767 / ne : 0;
                 }
@@ -8289,10 +8289,10 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           for (let v = 0; v < p; v++) {
             const y = n[v], D = v < F - 1 ? n[v + 1] : n[0], _ = y.x, P = y.y, E = D.x, Y = D.y, H = _ !== E, ne = P !== Y;
             if (!H && !ne) continue;
-            const q = E - _, ae = Y - P, re = Math.abs(q), Ae = Math.abs(ae);
+            const q = E - _, ae = Y - P, re = Math.abs(q), Ce = Math.abs(ae);
             let xe = _, Se = P;
             for (; ; ) {
-              const Ee = q > 0 ? (Math.floor(xe / c) + 1) * c : (Math.ceil(xe / c) - 1) * c, He = ae > 0 ? (Math.floor(Se / c) + 1) * c : (Math.ceil(Se / c) - 1) * c, Oe = Math.abs(xe - Ee), We = Math.abs(Se - He), Te = Math.abs(xe - E), It = Math.abs(Se - Y), Ft = H ? Oe / re : Number.POSITIVE_INFINITY, ft = ne ? We / Ae : Number.POSITIVE_INFINITY;
+              const Ee = q > 0 ? (Math.floor(xe / c) + 1) * c : (Math.ceil(xe / c) - 1) * c, He = ae > 0 ? (Math.floor(Se / c) + 1) * c : (Math.ceil(Se / c) - 1) * c, Oe = Math.abs(xe - Ee), We = Math.abs(Se - He), Te = Math.abs(xe - E), It = Math.abs(Se - Y), Ft = H ? Oe / re : Number.POSITIVE_INFINITY, ft = ne ? We / Ce : Number.POSITIVE_INFINITY;
               if ((Te <= Oe || !H) && (It <= We || !ne)) break;
               if (Ft < ft && H || !ne) {
                 xe = Ee, Se += ae * Ft;
@@ -8351,11 +8351,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
           } else (function(y, D, _, P, E, Y) {
             const H = [];
-            for (let Ae = 0; Ae < P.length / 2; Ae++) H.push(-1);
+            for (let Ce = 0; Ce < P.length / 2; Ce++) H.push(-1);
             const ne = { count: 0 };
             let q = 0, ae = y.getOrCreateLatestSegment(D, _), re = ae.vertexLength;
-            for (let Ae = 2; Ae < E.length; Ae += 3) {
-              const xe = E[Ae - 2], Se = E[Ae - 1], Ze = E[Ae];
+            for (let Ce = 2; Ce < E.length; Ce += 3) {
+              const xe = E[Ce - 2], Se = E[Ce - 1], Ze = E[Ce];
               let Ee = H[xe] < q, He = H[Se] < q, Oe = H[Ze] < q;
               ae.vertexLength + ((Ee ? 1 : 0) + (He ? 1 : 0) + (Oe ? 1 : 0)) > Ut.MAX_VERTEX_ARRAY_LENGTH && (ae = y.createNewSegment(D, _), q = ne.count, Ee = !0, He = !0, Oe = !0, re = 0);
               const We = dA(H, P, Y, ne, xe, Ee, ae), Te = dA(H, P, Y, ne, Se, He, ae), It = dA(H, P, Y, ne, Ze, Oe, ae);
@@ -8363,11 +8363,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
           })(e, i, o, s, A, n), v && (function(y, D, _, P, E, Y) {
             const H = [];
-            for (let Ae = 0; Ae < P.length / 2; Ae++) H.push(-1);
+            for (let Ce = 0; Ce < P.length / 2; Ce++) H.push(-1);
             const ne = { count: 0 };
             let q = 0, ae = y.getOrCreateLatestSegment(D, _), re = ae.vertexLength;
-            for (const Ae of E) for (let xe = 1; xe < Ae.length; xe += 2) {
-              const Se = Ae[xe - 1], Ze = Ae[xe];
+            for (const Ce of E) for (let xe = 1; xe < Ce.length; xe += 2) {
+              const Se = Ce[xe - 1], Ze = Ce[xe];
               let Ee = H[Se] < q, He = H[Ze] < q;
               ae.vertexLength + ((Ee ? 1 : 0) + (He ? 1 : 0)) > Ut.MAX_VERTEX_ARRAY_LENGTH && (ae = y.createNewSegment(D, _), q = ne.count, Ee = !0, He = !0, re = 0);
               const Oe = dA(H, P, Y, ne, Se, Ee, ae), We = dA(H, P, Y, ne, Ze, He, ae);
@@ -8703,11 +8703,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               }
               return E;
             })(F, u), D = (function(_, P, E, Y) {
-              const H = [], ne = [], q = Y[8] * P, ae = Y[9] * P, re = Y[10] * P, Ae = Y[11] * P, xe = Y[8] * E, Se = Y[9] * E, Ze = Y[10] * E, Ee = Y[11] * E;
+              const H = [], ne = [], q = Y[8] * P, ae = Y[9] * P, re = Y[10] * P, Ce = Y[11] * P, xe = Y[8] * E, Se = Y[9] * E, Ze = Y[10] * E, Ee = Y[11] * E;
               for (const He of _) {
                 const Oe = [], We = [];
                 for (const Te of He) {
-                  const It = Te.x, Ft = Te.y, ft = Y[0] * It + Y[4] * Ft + Y[12], dt = Y[1] * It + Y[5] * Ft + Y[13], Xt = Y[2] * It + Y[6] * Ft + Y[14], ki = Y[3] * It + Y[7] * Ft + Y[15], Di = Xt + re, Ei = ki + Ae, sg = ft + xe, cn = dt + Se, Mn = Xt + Ze, Zn = ki + Ee, nn = new S((ft + q) / Ei, (dt + ae) / Ei);
+                  const It = Te.x, Ft = Te.y, ft = Y[0] * It + Y[4] * Ft + Y[12], dt = Y[1] * It + Y[5] * Ft + Y[13], Xt = Y[2] * It + Y[6] * Ft + Y[14], ki = Y[3] * It + Y[7] * Ft + Y[15], Di = Xt + re, Ei = ki + Ce, sg = ft + xe, cn = dt + Se, Mn = Xt + Ze, Zn = ki + Ee, nn = new S((ft + q) / Ei, (dt + ae) / Ei);
                   nn.z = Di / Ei, Oe.push(nn);
                   const Xn = new S(sg / Zn, cn / Zn);
                   Xn.z = Mn / Zn, We.push(Xn);
@@ -8722,8 +8722,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               for (let H = 0; H < P.length; H++) {
                 const ne = P[H], q = _[H];
                 for (let ae = 0; ae < ne.length - 1; ae++) {
-                  const re = ne[ae], Ae = [re, ne[ae + 1], q[ae + 1], q[ae], re];
-                  FI(E, Ae) && (Y = Math.min(Y, Fp(E, Ae)));
+                  const re = ne[ae], Ce = [re, ne[ae + 1], q[ae + 1], q[ae], re];
+                  FI(E, Ce) && (Y = Math.min(Y, Fp(E, Ce)));
                 }
               }
               return Y !== 1 / 0 && Y;
@@ -9083,9 +9083,9 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           const F = s === fg.X ? _v : kv;
           let p, v, y = n.start;
           for (let Y = 0; Y < n.points.length - 3; Y += 3) {
-            const H = n.points[Y], ne = n.points[Y + 1], q = n.points[Y + 2], ae = n.points[Y + 3], re = n.points[Y + 4], Ae = s === fg.X ? H : ne, xe = s === fg.X ? ae : re;
+            const H = n.points[Y], ne = n.points[Y + 1], q = n.points[Y + 2], ae = n.points[Y + 3], re = n.points[Y + 4], Ce = s === fg.X ? H : ne, xe = s === fg.X ? ae : re;
             let Se = !1;
-            c && (p = Math.sqrt(Math.pow(H - ae, 2) + Math.pow(ne - re, 2))), Ae < i ? xe > i && (v = F(u, H, ne, ae, re, i), c && (u.start = y + p * v)) : Ae > o ? xe < o && (v = F(u, H, ne, ae, re, o), c && (u.start = y + p * v)) : kI(u.points, H, ne, q), xe < i && Ae >= i && (v = F(u, H, ne, ae, re, i), Se = !0), xe > o && Ae <= o && (v = F(u, H, ne, ae, re, o), Se = !0), !A && Se && (c && (u.end = y + p * v), e.push(u), u = kp(n)), c && (y += p);
+            c && (p = Math.sqrt(Math.pow(H - ae, 2) + Math.pow(ne - re, 2))), Ce < i ? xe > i && (v = F(u, H, ne, ae, re, i), c && (u.start = y + p * v)) : Ce > o ? xe < o && (v = F(u, H, ne, ae, re, o), c && (u.start = y + p * v)) : kI(u.points, H, ne, q), xe < i && Ce >= i && (v = F(u, H, ne, ae, re, i), Se = !0), xe > o && Ce <= o && (v = F(u, H, ne, ae, re, o), Se = !0), !A && Se && (c && (u.end = y + p * v), e.push(u), u = kp(n)), c && (y += p);
           }
           let D = n.points.length - 3;
           const _ = n.points[D], P = n.points[D + 1], E = s === fg.X ? _ : P;
@@ -9318,8 +9318,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               if (Y > E && Y >= c) {
                 let H, ne = D * E, q = _ * E, ae = -1;
                 const re = (y / v << 5) + (i + 1) + this.points.length;
-                for (const Ae of P) {
-                  const xe = Ae * v;
+                for (const Ce of P) {
+                  const xe = Ce * v;
                   if (F[xe + 2] <= i) continue;
                   F[xe + 2] = i;
                   const Se = F[xe + 5];
@@ -9511,8 +9511,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               v > 1 && console.time("clipping");
               const P = 0.5 * p.buffer / p.extent, E = 0.5 - P, Y = 0.5 + P, H = 1 + P;
               let ne = null, q = null, ae = null, re = null;
-              const Ae = bo(e, y, o - P, o + Y, fg.X, _.minX, _.maxX, p), xe = bo(e, y, o + E, o + H, fg.X, _.minX, _.maxX, p);
-              Ae && (ne = bo(Ae, y, s - P, s + Y, fg.Y, _.minY, _.maxY, p), q = bo(Ae, y, s + E, s + H, fg.Y, _.minY, _.maxY, p)), xe && (ae = bo(xe, y, s - P, s + Y, fg.Y, _.minY, _.maxY, p), re = bo(xe, y, s + E, s + H, fg.Y, _.minY, _.maxY, p)), v > 1 && console.timeEnd("clipping"), F.push(ne || [], i + 1, 2 * o, 2 * s), F.push(q || [], i + 1, 2 * o, 2 * s + 1), F.push(ae || [], i + 1, 2 * o + 1, 2 * s), F.push(re || [], i + 1, 2 * o + 1, 2 * s + 1);
+              const Ce = bo(e, y, o - P, o + Y, fg.X, _.minX, _.maxX, p), xe = bo(e, y, o + E, o + H, fg.X, _.minX, _.maxX, p);
+              Ce && (ne = bo(Ce, y, s - P, s + Y, fg.Y, _.minY, _.maxY, p), q = bo(Ce, y, s + E, s + H, fg.Y, _.minY, _.maxY, p)), xe && (ae = bo(xe, y, s - P, s + Y, fg.Y, _.minY, _.maxY, p), re = bo(xe, y, s + E, s + H, fg.Y, _.minY, _.maxY, p)), v > 1 && console.timeEnd("clipping"), F.push(ne || [], i + 1, 2 * o, 2 * s), F.push(q || [], i + 1, 2 * o, 2 * s + 1), F.push(ae || [], i + 1, 2 * o + 1, 2 * s), F.push(re || [], i + 1, 2 * o + 1, 2 * s + 1);
             }
           }
           invalidateTiles(e) {
@@ -9614,7 +9614,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               ne && (H = ne), P && (E = P), P = e[q], ne = Y ? Y.sub(P)._unit()._perp() : H, H || (H = ne);
               let ae = H.add(ne);
               ae.x === 0 && ae.y === 0 || ae._unit();
-              const re = H.x * ne.x + H.y * ne.y, Ae = ae.x * ne.x + ae.y * ne.y, xe = Ae !== 0 ? 1 / Ae : 1 / 0, Se = 2 * Math.sqrt(2 - 2 * Ae), Ze = Ae < zv && E && Y, Ee = H.x * ne.y - H.y * ne.x > 0;
+              const re = H.x * ne.x + H.y * ne.y, Ce = ae.x * ne.x + ae.y * ne.y, xe = Ce !== 0 ? 1 / Ce : 1 / 0, Se = 2 * Math.sqrt(2 - 2 * Ce), Ze = Ce < zv && E && Y, Ee = H.x * ne.y - H.y * ne.x > 0;
               if (Ze && q > y) {
                 const We = P.dist(E);
                 if (We > 2 * D) {
@@ -9741,8 +9741,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               for (const _ of v) {
                 const P = Pw(_), E = [];
                 for (let Y = 0; Y < P.length; Y++) {
-                  const H = P[Y], ne = P[Y - 1], q = P[Y + 1], ae = Y === 0 ? new S(0, 0) : H.sub(ne)._unit()._perp(), re = Y === P.length - 1 ? new S(0, 0) : q.sub(H)._unit()._perp(), Ae = ae._add(re)._unit(), xe = Ae.x * re.x + Ae.y * re.y;
-                  xe !== 0 && Ae._mult(1 / xe), E.push(Ae._mult(y)._add(H));
+                  const H = P[Y], ne = P[Y - 1], q = P[Y + 1], ae = Y === 0 ? new S(0, 0) : H.sub(ne)._unit()._perp(), re = Y === P.length - 1 ? new S(0, 0) : q.sub(H)._unit()._perp(), Ce = ae._add(re)._unit(), xe = Ce.x * re.x + Ce.y * re.y;
+                  xe !== 0 && Ce._mult(1 / xe), E.push(Ce._mult(y)._add(H));
                 }
                 D.push(E);
               }
@@ -10324,16 +10324,16 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           const { processBidirectionalText: ne, processStyledBidirectionalText: q } = ya;
           if (ne && E.sections.length === 1) {
             Y = [], H = H.map(((xe) => E.toCodeUnitIndex(xe)));
-            const Ae = ne(E.toString(), H);
-            for (const xe of Ae) {
+            const Ce = ne(E.toString(), H);
+            for (const xe of Ce) {
               const Se = [...xe].map((() => 0));
               Y.push(new xI(xe, E.sections, Se));
             }
           } else if (q) {
             Y = [], H = H.map(((Ze) => E.toCodeUnitIndex(Ze)));
-            let Ae = 0;
+            let Ce = 0;
             const xe = [];
-            for (const Ze of E.text) xe.push(...Array(Ze.length).fill(E.sectionIndex[Ae])), Ae++;
+            for (const Ze of E.text) xe.push(...Array(Ze.length).fill(E.sectionIndex[Ce])), Ce++;
             const Se = q(E.text, xe, H);
             for (const Ze of Se) {
               const Ee = [];
@@ -10341,21 +10341,21 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               for (const Oe of Ze[0]) Ee.push(Ze[1][He.length]), He += Oe;
               Y.push(new xI(Ze[0], E.sections, Ee));
             }
-          } else Y = (function(Ae, xe) {
+          } else Y = (function(Ce, xe) {
             const Se = [];
             let Ze = 0;
-            for (const Ee of xe) Se.push(Ae.substring(Ze, Ee)), Ze = Ee;
-            return Ze < Ae.length() && Se.push(Ae.substring(Ze, Ae.length())), Se;
+            for (const Ee of xe) Se.push(Ce.substring(Ze, Ee)), Ze = Ee;
+            return Ze < Ce.length() && Se.push(Ce.substring(Ze, Ce.length())), Se;
           })(E, H);
           const ae = [], re = { positionedLines: ae, text: E.toString(), top: v[1], bottom: v[1], left: v[0], right: v[0], writingMode: y, iconsInText: !1, verticalizable: !1 };
-          return (function(Ae, xe, Se, Ze, Ee, He, Oe, We, Te, It, Ft, ft) {
+          return (function(Ce, xe, Se, Ze, Ee, He, Oe, We, Te, It, Ft, ft) {
             let dt = 0, Xt = 0, ki = 0, Di = 0;
             const Ei = We === "right" ? 1 : We === "left" ? 0 : 0.5, sg = Tn / ft;
             let cn = 0;
             for (const nn of Ee) {
               nn.trim();
               const Xn = nn.getMaxScale(), mg = { positionedGlyphs: [], lineOffset: 0 };
-              Ae.positionedLines[cn] = mg;
+              Ce.positionedLines[cn] = mg;
               const pg = mg.positionedGlyphs;
               let Gg = 0;
               if (!nn.length()) {
@@ -10371,11 +10371,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   if (xo = fb(In, kn, dn, Ig, xe, Se), !xo) continue;
                   Wn.fontStack = In.fontStack;
                 } else {
-                  if (Ae.iconsInText = !0, In.scale *= sg, xo = hb(In, dn, Xn, Ig, Ze), !xo) continue;
+                  if (Ce.iconsInText = !0, In.scale *= sg, xo = hb(In, dn, Xn, Ig, Ze), !xo) continue;
                   Gg = Math.max(Gg, xo.imageOffset), Wn.imageName = In.imageName;
                 }
                 const { rect: _a, metrics: wA, baselineOffset: fr } = xo;
-                Wn.y += fr, Wn.scale = In.scale, Wn.metrics = wA, Wn.rect = _a, pg.push(Wn), dn ? (Ae.verticalizable = !0, dt += ("imageName" in In ? wA.advance : Tn) * In.scale + It) : dt += wA.advance * In.scale + It, Eg++;
+                Wn.y += fr, Wn.scale = In.scale, Wn.metrics = wA, Wn.rect = _a, pg.push(Wn), dn ? (Ce.verticalizable = !0, dt += ("imageName" in In ? wA.advance : Tn) * In.scale + It) : dt += wA.advance * In.scale + It, Eg++;
               }
               pg.length !== 0 && (ki = Math.max(dt - It, ki), mb(pg, 0, pg.length - 1, Ei)), dt = 0, mg.lineOffset = Math.max(Gg, (Xn - 1) * Tn);
               const la = He * Xn + Gg;
@@ -10387,9 +10387,9 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               let kn = 0;
               kn = Ig !== Eg ? -la * pg - -17 : -pg * Kn * Eg + 0.5 * Eg;
               for (const dn of nn) for (const Wn of dn.positionedGlyphs) Wn.x += In, Wn.y += kn;
-            })(Ae.positionedLines, Ei, Mn, Zn, ki, Di, He, Xt, Ee.length), Ae.top += -Zn * Xt, Ae.bottom = Ae.top + Xt, Ae.left += -Mn * ki, Ae.right = Ae.left + ki;
-          })(re, e, i, o, Y, c, u, F, y, p, D, P), !(function(Ae) {
-            for (const xe of Ae) if (xe.positionedGlyphs.length !== 0) return !1;
+            })(Ce.positionedLines, Ei, Mn, Zn, ki, Di, He, Xt, Ee.length), Ce.top += -Zn * Xt, Ce.bottom = Ce.top + Xt, Ce.left += -Mn * ki, Ce.right = Ce.left + ki;
+          })(re, e, i, o, Y, c, u, F, y, p, D, P), !(function(Ce) {
+            for (const xe of Ce) if (xe.positionedGlyphs.length !== 0) return !1;
             return !0;
           })(ae) && re;
         }
@@ -10586,21 +10586,21 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             if (this.features = [], !v && !y) return;
             const _ = i.iconDependencies, P = i.glyphDependencies, E = i.availableImages, Y = new Oi(this.zoom);
             for (const { feature: H, id: ne, index: q, sourceLayerIndex: ae } of e) {
-              const re = A._featureFilter.needGeometry, Ae = qa(H, re);
-              if (!A._featureFilter.filter(Y, Ae, o)) continue;
+              const re = A._featureFilter.needGeometry, Ce = qa(H, re);
+              if (!A._featureFilter.filter(Y, Ce, o)) continue;
               let xe, Se;
-              if (re || (Ae.geometry = Xa(H)), v) {
-                const Ee = A.getValueAndResolveTokens("text-field", Ae, o, E), He = Qg.factory(Ee);
-                this.hasRTLText || (this.hasRTLText = Fb(He)), (!this.hasRTLText || ya.getRTLTextPluginStatus() === "unavailable" || this.hasRTLText && ya.isParsed()) && (xe = qv(He, A, Ae));
+              if (re || (Ce.geometry = Xa(H)), v) {
+                const Ee = A.getValueAndResolveTokens("text-field", Ce, o, E), He = Qg.factory(Ee);
+                this.hasRTLText || (this.hasRTLText = Fb(He)), (!this.hasRTLText || ya.getRTLTextPluginStatus() === "unavailable" || this.hasRTLText && ya.isParsed()) && (xe = qv(He, A, Ce));
               }
               if (y) {
-                const Ee = A.getValueAndResolveTokens("icon-image", Ae, o, E);
+                const Ee = A.getValueAndResolveTokens("icon-image", Ce, o, E);
                 Se = Ee instanceof Dg ? Ee : Dg.fromString(Ee);
               }
               if (!xe && !Se) continue;
-              const Ze = this.sortFeaturesByKey ? D.evaluate(Ae, {}, o) : void 0;
-              if (this.features.push({ id: ne, text: xe, icon: Se, index: q, sourceLayerIndex: ae, geometry: Ae.geometry, properties: H.properties, type: uA.types[H.type], sortKey: Ze }), Se && (_[Se.name] = !0), xe) {
-                const Ee = u.evaluate(Ae, {}, o).join(","), He = c.get("text-rotation-alignment") !== "viewport" && c.get("symbol-placement") !== "point";
+              const Ze = this.sortFeaturesByKey ? D.evaluate(Ce, {}, o) : void 0;
+              if (this.features.push({ id: ne, text: xe, icon: Se, index: q, sourceLayerIndex: ae, geometry: Ce.geometry, properties: H.properties, type: uA.types[H.type], sortKey: Ze }), Se && (_[Se.name] = !0), xe) {
+                const Ee = u.evaluate(Ce, {}, o).join(","), He = c.get("text-rotation-alignment") !== "viewport" && c.get("symbol-placement") !== "point";
                 this.allowVerticalPlacement = (s = this.writingModes) === null || s === void 0 ? void 0 : s.includes(U.ax.vertical);
                 for (const Oe of xe.sections) if (Oe.image) _[Oe.image.name] = !0;
                 else {
@@ -10612,7 +10612,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             c.get("symbol-placement") === "line" && (this.features = (function(H) {
               const ne = {}, q = {}, ae = [];
               let re = 0;
-              function Ae(Ee) {
+              function Ce(Ee) {
                 ae.push(H[Ee]), re++;
               }
               function xe(Ee, He, Oe) {
@@ -10630,14 +10630,14 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               for (let Ee = 0; Ee < H.length; Ee++) {
                 const He = H[Ee], Oe = He.geometry, We = He.text ? He.text.toString() : null;
                 if (!We) {
-                  Ae(Ee);
+                  Ce(Ee);
                   continue;
                 }
                 const Te = Ze(We, Oe), It = Ze(We, Oe, !0);
                 if (Te in q && It in ne && q[Te] !== ne[It]) {
                   const Ft = Se(Te, It, Oe), ft = xe(Te, It, ae[Ft].geometry);
                   delete ne[Te], delete q[It], q[Ze(We, ae[ft].geometry, !0)] = ft, ae[Ft].geometry = null;
-                } else Te in q ? xe(Te, It, Oe) : It in ne ? Se(Te, It, Oe) : (Ae(Ee), ne[Te] = re - 1, q[It] = re - 1);
+                } else Te in q ? xe(Te, It, Oe) : It in ne ? Se(Te, It, Oe) : (Ce(Ee), ne[Te] = re - 1, q[It] = re - 1);
               }
               return ae.filter(((Ee) => Ee.geometry));
             })(this.features)), this.sortFeaturesByKey && this.features.sort(((H, ne) => H.sortKey - ne.sortKey));
@@ -10677,8 +10677,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           addSymbols(e, i, o, s, A, c, u, F, p, v, y, D) {
             const _ = e.indexArray, P = e.layoutVertexArray, E = e.segments.prepareSegment(4 * i.length, P, _, this.canOverlap ? c.sortKey : void 0), Y = this.glyphOffsetArray.length, H = E.vertexLength, ne = this.allowVerticalPlacement && u === U.ax.vertical ? Math.PI / 2 : 0, q = c.text && c.text.sections;
             for (let ae = 0; ae < i.length; ae++) {
-              const { tl: re, tr: Ae, bl: xe, br: Se, tex: Ze, pixelOffsetTL: Ee, pixelOffsetBR: He, minFontScaleX: Oe, minFontScaleY: We, glyphOffset: Te, isSDF: It, sectionIndex: Ft } = i[ae], ft = E.vertexLength, dt = Te[1];
-              bc(P, F.x, F.y, re.x, dt + re.y, Ze.x, Ze.y, o, It, Ee.x, Ee.y, Oe, We), bc(P, F.x, F.y, Ae.x, dt + Ae.y, Ze.x + Ze.w, Ze.y, o, It, He.x, Ee.y, Oe, We), bc(P, F.x, F.y, xe.x, dt + xe.y, Ze.x, Ze.y + Ze.h, o, It, Ee.x, He.y, Oe, We), bc(P, F.x, F.y, Se.x, dt + Se.y, Ze.x + Ze.w, Ze.y + Ze.h, o, It, He.x, He.y, Oe, We), of(e.dynamicLayoutVertexArray, F, ne), _.emplaceBack(ft, ft + 2, ft + 1), _.emplaceBack(ft + 1, ft + 2, ft + 3), E.vertexLength += 4, E.primitiveLength += 2, this.glyphOffsetArray.emplaceBack(Te[0]), ae !== i.length - 1 && Ft === i[ae + 1].sectionIndex || e.programConfigurations.populatePaintArrays(P.length, c, c.index, { imagePositions: {}, canonical: D, formattedSection: q?.[Ft] });
+              const { tl: re, tr: Ce, bl: xe, br: Se, tex: Ze, pixelOffsetTL: Ee, pixelOffsetBR: He, minFontScaleX: Oe, minFontScaleY: We, glyphOffset: Te, isSDF: It, sectionIndex: Ft } = i[ae], ft = E.vertexLength, dt = Te[1];
+              bc(P, F.x, F.y, re.x, dt + re.y, Ze.x, Ze.y, o, It, Ee.x, Ee.y, Oe, We), bc(P, F.x, F.y, Ce.x, dt + Ce.y, Ze.x + Ze.w, Ze.y, o, It, He.x, Ee.y, Oe, We), bc(P, F.x, F.y, xe.x, dt + xe.y, Ze.x, Ze.y + Ze.h, o, It, Ee.x, He.y, Oe, We), bc(P, F.x, F.y, Se.x, dt + Se.y, Ze.x + Ze.w, Ze.y + Ze.h, o, It, He.x, He.y, Oe, We), of(e.dynamicLayoutVertexArray, F, ne), _.emplaceBack(ft, ft + 2, ft + 1), _.emplaceBack(ft + 1, ft + 2, ft + 3), E.vertexLength += 4, E.primitiveLength += 2, this.glyphOffsetArray.emplaceBack(Te[0]), ae !== i.length - 1 && Ft === i[ae + 1].sectionIndex || e.programConfigurations.populatePaintArrays(P.length, c, c.index, { imagePositions: {}, canonical: D, formattedSection: q?.[Ft] });
             }
             e.placedSymbolArray.emplaceBack(F.x, F.y, Y, this.glyphOffsetArray.length - Y, H, p, v, F.segment, o ? o[0] : 0, o ? o[1] : 0, s[0], s[1], u, 0, !1, 0, y);
           }
@@ -11456,12 +11456,12 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
         function Sb(n, e, i, o, s, A, c, u, F) {
           const { maxBits: p, exceptionBitWidth: v, bytePosIn: y } = (function(Y, H, ne, q, ae, re) {
             if (ne + 1 > H) throw new Error(`FastPFOR decode: exception header underflow at block=${re} (need 1 byte for maxBits, bytePos=${ne}, byteSize=${H})`);
-            const Ae = Y[ne++];
-            if (Ae < q || Ae > 32) throw new Error(`FastPFOR decode: invalid maxBits=${Ae} at block=${re} (bitWidth=${q}, expected ${q}..32)`);
-            const xe = Ae - q | 0;
-            if (xe < 1 || xe > 32) throw new Error(`FastPFOR decode: invalid exceptionBitWidth=${xe} at block=${re} (bitWidth=${q}, maxBits=${Ae})`);
+            const Ce = Y[ne++];
+            if (Ce < q || Ce > 32) throw new Error(`FastPFOR decode: invalid maxBits=${Ce} at block=${re} (bitWidth=${q}, expected ${q}..32)`);
+            const xe = Ce - q | 0;
+            if (xe < 1 || xe > 32) throw new Error(`FastPFOR decode: invalid exceptionBitWidth=${xe} at block=${re} (bitWidth=${q}, maxBits=${Ce})`);
             if (ne + ae > H) throw new Error(`FastPFOR decode: exception positions underflow at block=${re} (need=${ae}, have=${H - ne})`);
-            return { maxBits: Ae, exceptionBitWidth: xe, bytePosIn: ne };
+            return { maxBits: Ce, exceptionBitWidth: xe, bytePosIn: ne };
           })(s, A, c, i, o, F);
           if (c = y, v === 1) {
             const Y = 1 << i;
@@ -11487,42 +11487,42 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           if (_ >= n.length) throw new Error(`FastPFOR decode: invalid byteSize=${v} (metaInts=${y}, pageStart=${c}, packedEnd=${p}, byteContainerStart=${D}) causes bitmapPos=${_} out of bounds (encoded.length=${n.length})`);
           const P = (function(H, ne, q, ae) {
             ae.byteContainer.length < q && (ae.byteContainer = new Uint8Array(2 * q), ae.byteContainerI32 = void 0);
-            const re = ae.byteContainer, Ae = q >>> 2;
-            if (3 & re.byteOffset) for (let Se = 0; Se < Ae; Se = Se + 1 | 0) {
+            const re = ae.byteContainer, Ce = q >>> 2;
+            if (3 & re.byteOffset) for (let Se = 0; Se < Ce; Se = Se + 1 | 0) {
               const Ze = 0 | H[ne + Se | 0], Ee = Se << 2;
               re[Ee] = 255 & Ze, re[Ee + 1 | 0] = Ze >>> 8 & 255, re[Ee + 2 | 0] = Ze >>> 16 & 255, re[Ee + 3 | 0] = Ze >>> 24 & 255;
             }
             else {
               let Se = ae.byteContainerI32;
-              (!Se || Se.buffer !== re.buffer || Se.byteOffset !== re.byteOffset || Se.length < Ae) && (Se = ae.byteContainerI32 = new Int32Array(re.buffer, re.byteOffset, re.byteLength >>> 2)), Se.set(H.subarray(ne, ne + Ae));
+              (!Se || Se.buffer !== re.buffer || Se.byteOffset !== re.byteOffset || Se.length < Ce) && (Se = ae.byteContainerI32 = new Int32Array(re.buffer, re.byteOffset, re.byteLength >>> 2)), Se.set(H.subarray(ne, ne + Ce));
             }
             const xe = 3 & q;
             if (xe > 0) {
-              const Se = 0 | H[ne + Ae | 0], Ze = Ae << 2;
+              const Se = 0 | H[ne + Ce | 0], Ze = Ce << 2;
               for (let Ee = 0; Ee < xe; Ee = Ee + 1 | 0) re[Ze + Ee | 0] = Se >>> (Ee << 3) & 255;
             }
             return re;
           })(n, D, v, A), E = v, Y = (function(H, ne, q) {
             const ae = 0 | H[ne++], re = q.dataToBePacked;
-            for (let Ae = 2; Ae <= 32; Ae = Ae + 1 | 0) {
-              if (!(ae >>> Ae - 1 & 1)) continue;
-              if (ne >= H.length) throw new Error(`FastPFOR decode: truncated exception stream header (bitWidth=${Ae}, streamWordIndex=${ne}, needWords=1, availableWords=${H.length - ne}, encodedWords=${H.length})`);
-              const xe = H[ne++] >>> 0, Se = mf(xe + 31, 32), Ze = xe * Ae + 31 >>> 5;
-              if (ne + Ze > H.length) throw new Error(`FastPFOR decode: truncated exception stream (bitWidth=${Ae}, size=${xe}, streamWordIndex=${ne}, needWords=${Ze}, availableWords=${H.length - ne}, encodedWords=${H.length})`);
-              let Ee = re[Ae];
-              (!Ee || Ee.length < Se) && (Ee = re[Ae] = new Uint32Array(Se));
+            for (let Ce = 2; Ce <= 32; Ce = Ce + 1 | 0) {
+              if (!(ae >>> Ce - 1 & 1)) continue;
+              if (ne >= H.length) throw new Error(`FastPFOR decode: truncated exception stream header (bitWidth=${Ce}, streamWordIndex=${ne}, needWords=1, availableWords=${H.length - ne}, encodedWords=${H.length})`);
+              const xe = H[ne++] >>> 0, Se = mf(xe + 31, 32), Ze = xe * Ce + 31 >>> 5;
+              if (ne + Ze > H.length) throw new Error(`FastPFOR decode: truncated exception stream (bitWidth=${Ce}, size=${xe}, streamWordIndex=${ne}, needWords=${Ze}, availableWords=${H.length - ne}, encodedWords=${H.length})`);
+              let Ee = re[Ce];
+              (!Ee || Ee.length < Se) && (Ee = re[Ce] = new Uint32Array(Se));
               let He = 0;
-              for (; He < xe; He = He + 32 | 0) Mb(H, ne, Ee, He, Ae), ne = ne + Ae | 0;
-              ne = ne - ((He - xe | 0) * Ae >>> 5) | 0, q.exceptionSizes[Ae] = xe;
+              for (; He < xe; He = He + 32 | 0) Mb(H, ne, Ee, He, Ce), ne = ne + Ce | 0;
+              ne = ne - ((He - xe | 0) * Ce >>> 5) | 0, q.exceptionSizes[Ce] = xe;
             }
             return ne;
           })(n, _, A);
-          return A.dataPointers.fill(0), (function(H, ne, q, ae, re, Ae, xe, Se, Ze, Ee) {
+          return A.dataPointers.fill(0), (function(H, ne, q, ae, re, Ce, xe, Se, Ze, Ee) {
             let He = 0 | q, Oe = 0;
             for (let We = 0; We < xe; We = We + 1 | 0) {
               const Te = Db(Se, Ze, Oe, We);
               Oe = Te.bytePosIn;
-              const It = Te.bitWidth, Ft = Te.exceptionCount, ft = Ae + We * ko | 0;
+              const It = Te.bitWidth, Ft = Te.exceptionCount, ft = Ce + We * ko | 0;
               switch (It) {
                 case 0:
                   re.fill(0, ft, ft + ko);
@@ -11586,32 +11586,32 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             case 9:
               return void (function(p, v, y, D) {
                 let _ = D;
-                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ae = p[v + 8] >>> 0;
-                y[_++] = P >>> 0 & 511, y[_++] = P >>> 9 & 511, y[_++] = P >>> 18 & 511, y[_++] = 511 & (P >>> 27 | (15 & E) << 5), y[_++] = E >>> 4 & 511, y[_++] = E >>> 13 & 511, y[_++] = E >>> 22 & 511, y[_++] = 511 & (E >>> 31 | (255 & Y) << 1), y[_++] = Y >>> 8 & 511, y[_++] = Y >>> 17 & 511, y[_++] = 511 & (Y >>> 26 | (7 & H) << 6), y[_++] = H >>> 3 & 511, y[_++] = H >>> 12 & 511, y[_++] = H >>> 21 & 511, y[_++] = 511 & (H >>> 30 | (127 & ne) << 2), y[_++] = ne >>> 7 & 511, y[_++] = ne >>> 16 & 511, y[_++] = 511 & (ne >>> 25 | (3 & q) << 7), y[_++] = q >>> 2 & 511, y[_++] = q >>> 11 & 511, y[_++] = q >>> 20 & 511, y[_++] = 511 & (q >>> 29 | (63 & ae) << 3), y[_++] = ae >>> 6 & 511, y[_++] = ae >>> 15 & 511, y[_++] = 511 & (ae >>> 24 | (1 & re) << 8), y[_++] = re >>> 1 & 511, y[_++] = re >>> 10 & 511, y[_++] = re >>> 19 & 511, y[_++] = 511 & (re >>> 28 | (31 & Ae) << 4), y[_++] = Ae >>> 5 & 511, y[_++] = Ae >>> 14 & 511, y[_] = Ae >>> 23 & 511;
+                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ce = p[v + 8] >>> 0;
+                y[_++] = P >>> 0 & 511, y[_++] = P >>> 9 & 511, y[_++] = P >>> 18 & 511, y[_++] = 511 & (P >>> 27 | (15 & E) << 5), y[_++] = E >>> 4 & 511, y[_++] = E >>> 13 & 511, y[_++] = E >>> 22 & 511, y[_++] = 511 & (E >>> 31 | (255 & Y) << 1), y[_++] = Y >>> 8 & 511, y[_++] = Y >>> 17 & 511, y[_++] = 511 & (Y >>> 26 | (7 & H) << 6), y[_++] = H >>> 3 & 511, y[_++] = H >>> 12 & 511, y[_++] = H >>> 21 & 511, y[_++] = 511 & (H >>> 30 | (127 & ne) << 2), y[_++] = ne >>> 7 & 511, y[_++] = ne >>> 16 & 511, y[_++] = 511 & (ne >>> 25 | (3 & q) << 7), y[_++] = q >>> 2 & 511, y[_++] = q >>> 11 & 511, y[_++] = q >>> 20 & 511, y[_++] = 511 & (q >>> 29 | (63 & ae) << 3), y[_++] = ae >>> 6 & 511, y[_++] = ae >>> 15 & 511, y[_++] = 511 & (ae >>> 24 | (1 & re) << 8), y[_++] = re >>> 1 & 511, y[_++] = re >>> 10 & 511, y[_++] = re >>> 19 & 511, y[_++] = 511 & (re >>> 28 | (31 & Ce) << 4), y[_++] = Ce >>> 5 & 511, y[_++] = Ce >>> 14 & 511, y[_] = Ce >>> 23 & 511;
               })(n, e, i, o);
             case 10:
               return void (function(p, v, y, D) {
                 let _ = D;
-                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ae = p[v + 8] >>> 0, xe = p[v + 9] >>> 0;
-                y[_++] = P >>> 0 & 1023, y[_++] = P >>> 10 & 1023, y[_++] = P >>> 20 & 1023, y[_++] = 1023 & (P >>> 30 | (255 & E) << 2), y[_++] = E >>> 8 & 1023, y[_++] = E >>> 18 & 1023, y[_++] = 1023 & (E >>> 28 | (63 & Y) << 4), y[_++] = Y >>> 6 & 1023, y[_++] = Y >>> 16 & 1023, y[_++] = 1023 & (Y >>> 26 | (15 & H) << 6), y[_++] = H >>> 4 & 1023, y[_++] = H >>> 14 & 1023, y[_++] = 1023 & (H >>> 24 | (3 & ne) << 8), y[_++] = ne >>> 2 & 1023, y[_++] = ne >>> 12 & 1023, y[_++] = ne >>> 22 & 1023, y[_++] = q >>> 0 & 1023, y[_++] = q >>> 10 & 1023, y[_++] = q >>> 20 & 1023, y[_++] = 1023 & (q >>> 30 | (255 & ae) << 2), y[_++] = ae >>> 8 & 1023, y[_++] = ae >>> 18 & 1023, y[_++] = 1023 & (ae >>> 28 | (63 & re) << 4), y[_++] = re >>> 6 & 1023, y[_++] = re >>> 16 & 1023, y[_++] = 1023 & (re >>> 26 | (15 & Ae) << 6), y[_++] = Ae >>> 4 & 1023, y[_++] = Ae >>> 14 & 1023, y[_++] = 1023 & (Ae >>> 24 | (3 & xe) << 8), y[_++] = xe >>> 2 & 1023, y[_++] = xe >>> 12 & 1023, y[_] = xe >>> 22 & 1023;
+                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ce = p[v + 8] >>> 0, xe = p[v + 9] >>> 0;
+                y[_++] = P >>> 0 & 1023, y[_++] = P >>> 10 & 1023, y[_++] = P >>> 20 & 1023, y[_++] = 1023 & (P >>> 30 | (255 & E) << 2), y[_++] = E >>> 8 & 1023, y[_++] = E >>> 18 & 1023, y[_++] = 1023 & (E >>> 28 | (63 & Y) << 4), y[_++] = Y >>> 6 & 1023, y[_++] = Y >>> 16 & 1023, y[_++] = 1023 & (Y >>> 26 | (15 & H) << 6), y[_++] = H >>> 4 & 1023, y[_++] = H >>> 14 & 1023, y[_++] = 1023 & (H >>> 24 | (3 & ne) << 8), y[_++] = ne >>> 2 & 1023, y[_++] = ne >>> 12 & 1023, y[_++] = ne >>> 22 & 1023, y[_++] = q >>> 0 & 1023, y[_++] = q >>> 10 & 1023, y[_++] = q >>> 20 & 1023, y[_++] = 1023 & (q >>> 30 | (255 & ae) << 2), y[_++] = ae >>> 8 & 1023, y[_++] = ae >>> 18 & 1023, y[_++] = 1023 & (ae >>> 28 | (63 & re) << 4), y[_++] = re >>> 6 & 1023, y[_++] = re >>> 16 & 1023, y[_++] = 1023 & (re >>> 26 | (15 & Ce) << 6), y[_++] = Ce >>> 4 & 1023, y[_++] = Ce >>> 14 & 1023, y[_++] = 1023 & (Ce >>> 24 | (3 & xe) << 8), y[_++] = xe >>> 2 & 1023, y[_++] = xe >>> 12 & 1023, y[_] = xe >>> 22 & 1023;
               })(n, e, i, o);
             case 11:
               return void (function(p, v, y, D) {
                 let _ = D;
-                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ae = p[v + 8] >>> 0, xe = p[v + 9] >>> 0, Se = p[v + 10] >>> 0;
-                y[_++] = P >>> 0 & 2047, y[_++] = P >>> 11 & 2047, y[_++] = 2047 & (P >>> 22 | (1 & E) << 10), y[_++] = E >>> 1 & 2047, y[_++] = E >>> 12 & 2047, y[_++] = 2047 & (E >>> 23 | (3 & Y) << 9), y[_++] = Y >>> 2 & 2047, y[_++] = Y >>> 13 & 2047, y[_++] = 2047 & (Y >>> 24 | (7 & H) << 8), y[_++] = H >>> 3 & 2047, y[_++] = H >>> 14 & 2047, y[_++] = 2047 & (H >>> 25 | (15 & ne) << 7), y[_++] = ne >>> 4 & 2047, y[_++] = ne >>> 15 & 2047, y[_++] = 2047 & (ne >>> 26 | (31 & q) << 6), y[_++] = q >>> 5 & 2047, y[_++] = q >>> 16 & 2047, y[_++] = 2047 & (q >>> 27 | (63 & ae) << 5), y[_++] = ae >>> 6 & 2047, y[_++] = ae >>> 17 & 2047, y[_++] = 2047 & (ae >>> 28 | (127 & re) << 4), y[_++] = re >>> 7 & 2047, y[_++] = re >>> 18 & 2047, y[_++] = 2047 & (re >>> 29 | (255 & Ae) << 3), y[_++] = Ae >>> 8 & 2047, y[_++] = Ae >>> 19 & 2047, y[_++] = 2047 & (Ae >>> 30 | (511 & xe) << 2), y[_++] = xe >>> 9 & 2047, y[_++] = xe >>> 20 & 2047, y[_++] = 2047 & (xe >>> 31 | (1023 & Se) << 1), y[_++] = Se >>> 10 & 2047, y[_] = Se >>> 21 & 2047;
+                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ce = p[v + 8] >>> 0, xe = p[v + 9] >>> 0, Se = p[v + 10] >>> 0;
+                y[_++] = P >>> 0 & 2047, y[_++] = P >>> 11 & 2047, y[_++] = 2047 & (P >>> 22 | (1 & E) << 10), y[_++] = E >>> 1 & 2047, y[_++] = E >>> 12 & 2047, y[_++] = 2047 & (E >>> 23 | (3 & Y) << 9), y[_++] = Y >>> 2 & 2047, y[_++] = Y >>> 13 & 2047, y[_++] = 2047 & (Y >>> 24 | (7 & H) << 8), y[_++] = H >>> 3 & 2047, y[_++] = H >>> 14 & 2047, y[_++] = 2047 & (H >>> 25 | (15 & ne) << 7), y[_++] = ne >>> 4 & 2047, y[_++] = ne >>> 15 & 2047, y[_++] = 2047 & (ne >>> 26 | (31 & q) << 6), y[_++] = q >>> 5 & 2047, y[_++] = q >>> 16 & 2047, y[_++] = 2047 & (q >>> 27 | (63 & ae) << 5), y[_++] = ae >>> 6 & 2047, y[_++] = ae >>> 17 & 2047, y[_++] = 2047 & (ae >>> 28 | (127 & re) << 4), y[_++] = re >>> 7 & 2047, y[_++] = re >>> 18 & 2047, y[_++] = 2047 & (re >>> 29 | (255 & Ce) << 3), y[_++] = Ce >>> 8 & 2047, y[_++] = Ce >>> 19 & 2047, y[_++] = 2047 & (Ce >>> 30 | (511 & xe) << 2), y[_++] = xe >>> 9 & 2047, y[_++] = xe >>> 20 & 2047, y[_++] = 2047 & (xe >>> 31 | (1023 & Se) << 1), y[_++] = Se >>> 10 & 2047, y[_] = Se >>> 21 & 2047;
               })(n, e, i, o);
             case 12:
               return void (function(p, v, y, D) {
                 let _ = D;
-                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ae = p[v + 8] >>> 0, xe = p[v + 9] >>> 0, Se = p[v + 10] >>> 0, Ze = p[v + 11] >>> 0;
-                y[_++] = P >>> 0 & 4095, y[_++] = P >>> 12 & 4095, y[_++] = 4095 & (P >>> 24 | (15 & E) << 8), y[_++] = E >>> 4 & 4095, y[_++] = E >>> 16 & 4095, y[_++] = 4095 & (E >>> 28 | (255 & Y) << 4), y[_++] = Y >>> 8 & 4095, y[_++] = Y >>> 20 & 4095, y[_++] = H >>> 0 & 4095, y[_++] = H >>> 12 & 4095, y[_++] = 4095 & (H >>> 24 | (15 & ne) << 8), y[_++] = ne >>> 4 & 4095, y[_++] = ne >>> 16 & 4095, y[_++] = 4095 & (ne >>> 28 | (255 & q) << 4), y[_++] = q >>> 8 & 4095, y[_++] = q >>> 20 & 4095, y[_++] = ae >>> 0 & 4095, y[_++] = ae >>> 12 & 4095, y[_++] = 4095 & (ae >>> 24 | (15 & re) << 8), y[_++] = re >>> 4 & 4095, y[_++] = re >>> 16 & 4095, y[_++] = 4095 & (re >>> 28 | (255 & Ae) << 4), y[_++] = Ae >>> 8 & 4095, y[_++] = Ae >>> 20 & 4095, y[_++] = xe >>> 0 & 4095, y[_++] = xe >>> 12 & 4095, y[_++] = 4095 & (xe >>> 24 | (15 & Se) << 8), y[_++] = Se >>> 4 & 4095, y[_++] = Se >>> 16 & 4095, y[_++] = 4095 & (Se >>> 28 | (255 & Ze) << 4), y[_++] = Ze >>> 8 & 4095, y[_] = Ze >>> 20 & 4095;
+                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ce = p[v + 8] >>> 0, xe = p[v + 9] >>> 0, Se = p[v + 10] >>> 0, Ze = p[v + 11] >>> 0;
+                y[_++] = P >>> 0 & 4095, y[_++] = P >>> 12 & 4095, y[_++] = 4095 & (P >>> 24 | (15 & E) << 8), y[_++] = E >>> 4 & 4095, y[_++] = E >>> 16 & 4095, y[_++] = 4095 & (E >>> 28 | (255 & Y) << 4), y[_++] = Y >>> 8 & 4095, y[_++] = Y >>> 20 & 4095, y[_++] = H >>> 0 & 4095, y[_++] = H >>> 12 & 4095, y[_++] = 4095 & (H >>> 24 | (15 & ne) << 8), y[_++] = ne >>> 4 & 4095, y[_++] = ne >>> 16 & 4095, y[_++] = 4095 & (ne >>> 28 | (255 & q) << 4), y[_++] = q >>> 8 & 4095, y[_++] = q >>> 20 & 4095, y[_++] = ae >>> 0 & 4095, y[_++] = ae >>> 12 & 4095, y[_++] = 4095 & (ae >>> 24 | (15 & re) << 8), y[_++] = re >>> 4 & 4095, y[_++] = re >>> 16 & 4095, y[_++] = 4095 & (re >>> 28 | (255 & Ce) << 4), y[_++] = Ce >>> 8 & 4095, y[_++] = Ce >>> 20 & 4095, y[_++] = xe >>> 0 & 4095, y[_++] = xe >>> 12 & 4095, y[_++] = 4095 & (xe >>> 24 | (15 & Se) << 8), y[_++] = Se >>> 4 & 4095, y[_++] = Se >>> 16 & 4095, y[_++] = 4095 & (Se >>> 28 | (255 & Ze) << 4), y[_++] = Ze >>> 8 & 4095, y[_] = Ze >>> 20 & 4095;
               })(n, e, i, o);
             case 16:
               return void (function(p, v, y, D) {
                 let _ = D;
-                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ae = p[v + 8] >>> 0, xe = p[v + 9] >>> 0, Se = p[v + 10] >>> 0, Ze = p[v + 11] >>> 0, Ee = p[v + 12] >>> 0, He = p[v + 13] >>> 0, Oe = p[v + 14] >>> 0, We = p[v + 15] >>> 0;
-                y[_++] = P >>> 0 & 65535, y[_++] = P >>> 16 & 65535, y[_++] = E >>> 0 & 65535, y[_++] = E >>> 16 & 65535, y[_++] = Y >>> 0 & 65535, y[_++] = Y >>> 16 & 65535, y[_++] = H >>> 0 & 65535, y[_++] = H >>> 16 & 65535, y[_++] = ne >>> 0 & 65535, y[_++] = ne >>> 16 & 65535, y[_++] = q >>> 0 & 65535, y[_++] = q >>> 16 & 65535, y[_++] = ae >>> 0 & 65535, y[_++] = ae >>> 16 & 65535, y[_++] = re >>> 0 & 65535, y[_++] = re >>> 16 & 65535, y[_++] = Ae >>> 0 & 65535, y[_++] = Ae >>> 16 & 65535, y[_++] = xe >>> 0 & 65535, y[_++] = xe >>> 16 & 65535, y[_++] = Se >>> 0 & 65535, y[_++] = Se >>> 16 & 65535, y[_++] = Ze >>> 0 & 65535, y[_++] = Ze >>> 16 & 65535, y[_++] = Ee >>> 0 & 65535, y[_++] = Ee >>> 16 & 65535, y[_++] = He >>> 0 & 65535, y[_++] = He >>> 16 & 65535, y[_++] = Oe >>> 0 & 65535, y[_++] = Oe >>> 16 & 65535, y[_++] = We >>> 0 & 65535, y[_] = We >>> 16 & 65535;
+                const P = p[v] >>> 0, E = p[v + 1] >>> 0, Y = p[v + 2] >>> 0, H = p[v + 3] >>> 0, ne = p[v + 4] >>> 0, q = p[v + 5] >>> 0, ae = p[v + 6] >>> 0, re = p[v + 7] >>> 0, Ce = p[v + 8] >>> 0, xe = p[v + 9] >>> 0, Se = p[v + 10] >>> 0, Ze = p[v + 11] >>> 0, Ee = p[v + 12] >>> 0, He = p[v + 13] >>> 0, Oe = p[v + 14] >>> 0, We = p[v + 15] >>> 0;
+                y[_++] = P >>> 0 & 65535, y[_++] = P >>> 16 & 65535, y[_++] = E >>> 0 & 65535, y[_++] = E >>> 16 & 65535, y[_++] = Y >>> 0 & 65535, y[_++] = Y >>> 16 & 65535, y[_++] = H >>> 0 & 65535, y[_++] = H >>> 16 & 65535, y[_++] = ne >>> 0 & 65535, y[_++] = ne >>> 16 & 65535, y[_++] = q >>> 0 & 65535, y[_++] = q >>> 16 & 65535, y[_++] = ae >>> 0 & 65535, y[_++] = ae >>> 16 & 65535, y[_++] = re >>> 0 & 65535, y[_++] = re >>> 16 & 65535, y[_++] = Ce >>> 0 & 65535, y[_++] = Ce >>> 16 & 65535, y[_++] = xe >>> 0 & 65535, y[_++] = xe >>> 16 & 65535, y[_++] = Se >>> 0 & 65535, y[_++] = Se >>> 16 & 65535, y[_++] = Ze >>> 0 & 65535, y[_++] = Ze >>> 16 & 65535, y[_++] = Ee >>> 0 & 65535, y[_++] = Ee >>> 16 & 65535, y[_++] = He >>> 0 & 65535, y[_++] = He >>> 16 & 65535, y[_++] = Oe >>> 0 & 65535, y[_++] = Oe >>> 16 & 65535, y[_++] = We >>> 0 & 65535, y[_] = We >>> 16 & 65535;
               })(n, e, i, o);
             case 32:
               for (let p = 0; p < 32; p = p + 1 | 0) i[o + p | 0] = 0 | n[e + p | 0];
@@ -11964,7 +11964,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   })(D, P);
                   (function(H, ne, q, ae) {
                     if (ne < 0 || q < 0 || ne + q > H.length) throw new RangeError(`decodeBigEndianInt32sInto: out of bounds (offset=${ne}, byteLength=${q}, bytes.length=${H.length})`);
-                    const re = Math.floor(q / 4), Ae = q % 4 != 0, xe = Ae ? re + 1 : re;
+                    const re = Math.floor(q / 4), Ce = q % 4 != 0, xe = Ce ? re + 1 : re;
                     if (ae.length < xe) throw new RangeError(`decodeBigEndianInt32sInto: out.length=${ae.length} < ${xe}`);
                     if (re > 0) {
                       const Se = H.byteOffset + ne;
@@ -11977,7 +11977,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                         for (let Ee = 0; Ee < re; Ee++) ae[Ee] = 0 | _b(Ze[Ee]);
                       }
                     }
-                    if (Ae) {
+                    if (Ce) {
                       const Se = ne + 4 * re, Ze = q - 4 * re;
                       let Ee = 0;
                       for (let He = 0; He < Ze; He++) Ee |= H[Se + He] << 24 - 8 * He;
@@ -11986,11 +11986,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   })(F, _, v, E);
                   const Y = (function(H, ne, q) {
                     let ae = 0, re = 0;
-                    const Ae = new Uint32Array(ne), xe = q ?? hB();
+                    const Ce = new Uint32Array(ne), xe = q ?? hB();
                     if (H.length > 0) {
                       const Se = 0 | H[ae];
                       if (ae = ae + 1 | 0, 255 & Se) throw new Error(`FastPFOR decode: invalid alignedLength=${Se} (expected multiple of 256)`);
-                      if (re + Se > Ae.length) throw new Error(`FastPFOR decode: output buffer too small (outPos=${re}, alignedLength=${Se}, out.length=${Ae.length})`);
+                      if (re + Se > Ce.length) throw new Error(`FastPFOR decode: output buffer too small (outPos=${re}, alignedLength=${Se}, out.length=${Ce.length})`);
                       ae = (function(Ze, Ee, He, Oe, We, Te) {
                         const It = Oe + mf(We, ko);
                         let Ft = Oe, ft = He;
@@ -11999,7 +11999,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                           ft = Rb(Ze, Ee, ft, Ft, dt, Te), Ft = Ft + dt | 0;
                         }
                         return ft;
-                      })(H, Ae, ae, re, Se, xe), re = re + Se | 0;
+                      })(H, Ce, ae, re, Se, xe), re = re + Se | 0;
                     }
                     return (function(Se, Ze, Ee, He, Oe, We) {
                       if (We === 0) return Ze;
@@ -12014,7 +12014,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                         else if (Di += 7, Di > 28) throw new Error(`FastPFOR VByte: unterminated value (expected MSB=1 terminator within 5 bytes; shift=${Di}, partial=${ki}, decoded=${dt - ft}/${We}, inPos=${It}, inEnd=${Ft})`);
                       }
                       if (dt !== Xt) throw new Error(`FastPFOR VByte: truncated stream (decoded=${dt - ft}, expected=${We}, consumedWords=${It - Ze}/${Ee}, vbyteStart=${Ze}, vbyteEnd=${Ft})`);
-                    })(H, ae, H.length - ae | 0, Ae, re, ne - re | 0), Ae;
+                    })(H, ae, H.length - ae | 0, Ce, re, ne - re | 0), Ce;
                   })(E.subarray(0, P), p, D.decoderWorkspace);
                   return y.add(v), Y;
                 })(s, A, c, u, (function(F = 16) {
@@ -12214,12 +12214,12 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                     A++;
                     const ae = new Array(q);
                     if (E) for (let re = 0; re < q; re++) {
-                      const Ae = H[u++], xe = H[u++];
-                      ae[re] = new S(Ae, xe);
+                      const Ce = H[u++], xe = H[u++];
+                      ae[re] = new S(Ce, xe);
                     }
                     else for (let re = 0; re < q; re++) {
-                      const Ae = 2 * P[F++];
-                      ae[re] = new S(H[Ae], H[Ae + 1]);
+                      const Ce = 2 * P[F++];
+                      ae[re] = new S(H[Ce], H[Ce + 1]);
                     }
                     i[c++] = ae.map(((re) => [re])), o += q, s += q;
                   }
@@ -12235,13 +12235,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                     const q = D[o] - D[o - 1];
                     o++;
                     const ae = new Array(q - 1);
-                    let re, Ae = _[s] - _[s - 1];
+                    let re, Ce = _[s] - _[s - 1];
                     if (s++, E) {
-                      re = NI(H, u, Ae, !0), u += 2 * Ae;
-                      for (let xe = 0; xe < ae.length; xe++) Ae = _[s] - _[s - 1], s++, ae[xe] = NI(H, u, Ae, !0), u += 2 * Ae;
+                      re = NI(H, u, Ce, !0), u += 2 * Ce;
+                      for (let xe = 0; xe < ae.length; xe++) Ce = _[s] - _[s - 1], s++, ae[xe] = NI(H, u, Ce, !0), u += 2 * Ce;
                     } else {
-                      re = TI(e.vertexBufferType, H, P, F, Ae, !0, p), F += Ae;
-                      for (let xe = 0; xe < ae.length; xe++) Ae = _[s] - _[s - 1], s++, ae[xe] = TI(e.vertexBufferType, H, P, F, Ae, !0, p), F += Ae;
+                      re = TI(e.vertexBufferType, H, P, F, Ce, !0, p), F += Ce;
+                      for (let xe = 0; xe < ae.length; xe++) Ce = _[s] - _[s - 1], s++, ae[xe] = TI(e.vertexBufferType, H, P, F, Ce, !0, p), F += Ce;
                     }
                     i[c++] = [re].concat(ae), y && A++;
                   }
@@ -12252,11 +12252,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                     A++;
                     const ae = new Array(q);
                     for (let re = 0; re < q; re++) {
-                      let Ae;
-                      if (Y ? (Ae = _[s] - _[s - 1], s++) : Ae = D[o] - D[o - 1], o++, E) ae[re] = NI(H, u, Ae, !1), u += 2 * Ae;
+                      let Ce;
+                      if (Y ? (Ce = _[s] - _[s - 1], s++) : Ce = D[o] - D[o - 1], o++, E) ae[re] = NI(H, u, Ce, !1), u += 2 * Ce;
                       else {
-                        const xe = TI(e.vertexBufferType, H, P, F, Ae, !1, p);
-                        ae[re] = xe, F += Ae;
+                        const xe = TI(e.vertexBufferType, H, P, F, Ce, !1, p);
+                        ae[re] = xe, F += Ce;
                       }
                     }
                     i[c++] = ae;
@@ -12268,10 +12268,10 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                     A++;
                     const ae = new Array(q);
                     for (let re = 0; re < q; re++) {
-                      const Ae = D[o] - D[o - 1];
+                      const Ce = D[o] - D[o - 1];
                       let xe;
                       o++;
-                      const Se = new Array(Ae - 1), Ze = _[s] - _[s - 1];
+                      const Se = new Array(Ce - 1), Ze = _[s] - _[s - 1];
                       s++, E ? (xe = NI(H, u, Ze, !0), u += 2 * Ze) : (xe = TI(e.vertexBufferType, H, P, F, Ze, !0, p), F += Ze);
                       for (let Ee = 0; Ee < Se.length; Ee++) {
                         const He = _[s] - _[s - 1];
@@ -12432,7 +12432,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           let c, u, F, p;
           if (Dc(A, o, n, i) === tn.CONST) {
             const ne = Qf(n, i, A);
-            let q, ae, re, Ae;
+            let q, ae, re, Ce;
             for (let xe = 0; xe < e - 1; xe++) {
               const Se = _g(n, i);
               switch (Se.physicalStreamType) {
@@ -12448,7 +12448,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                       re = dr(n, i, Se);
                       break;
                     case Yg.TRIANGLES:
-                      Ae = dr(n, i, Se);
+                      Ce = dr(n, i, Se);
                   }
                   break;
                 case og.OFFSET:
@@ -12464,7 +12464,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   va.VERTEX === Se.logicalStreamType.dictionaryType ? u = Uf(n, i, Se) : (F = { numBits: Se.numBits, coordinateShift: Se.coordinateShift }, u = Hg(n, i, Se));
               }
             }
-            return p ? q !== void 0 || ae !== void 0 ? RB(o, ne, Ae, p, u, { geometryOffsets: q, partOffsets: ae, ringOffsets: re }) : RB(o, ne, Ae, p, u) : F === void 0 ? (function(xe, Se, Ze, Ee, He) {
+            return p ? q !== void 0 || ae !== void 0 ? RB(o, ne, Ce, p, u, { geometryOffsets: q, partOffsets: ae, ringOffsets: re }) : RB(o, ne, Ce, p, u) : F === void 0 ? (function(xe, Se, Ze, Ee, He) {
               return new xB(xe, Se, cr.VEC_2, Ze, Ee, He);
             })(o, ne, { geometryOffsets: q, partOffsets: ae, ringOffsets: re }, c, u) : (function(xe, Se, Ze, Ee, He, Oe) {
               return new xB(xe, Se, cr.MORTON, Ze, Ee, He, Oe);
@@ -12504,35 +12504,35 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
           }
           return y ? (E = vf(v, y, 2), D && _ ? (Y = PB(v, E, D, !1), H = (function(ne, q, ae, re) {
-            const Ae = new Uint32Array(ae[ae.length - 1] + 1);
+            const Ce = new Uint32Array(ae[ae.length - 1] + 1);
             let xe = 0;
-            Ae[0] = xe;
+            Ce[0] = xe;
             let Se = 1, Ze = 1, Ee = 0;
             for (let He = 0; He < ne.length; He++) {
               const Oe = ne[He], We = q[He + 1] - q[He];
               if (Oe !== 0 && Oe !== 3) for (let Te = 0; Te < We; Te++) {
                 const It = ae[Se] - ae[Se - 1];
                 Se++;
-                for (let Ft = 0; Ft < It; Ft++) xe = Ae[Ze++] = xe + re[Ee++];
+                for (let Ft = 0; Ft < It; Ft++) xe = Ce[Ze++] = xe + re[Ee++];
               }
-              else for (let Te = 0; Te < We; Te++) Ae[Ze++] = ++xe, Se++;
+              else for (let Te = 0; Te < We; Te++) Ce[Ze++] = ++xe, Se++;
             }
-            return Ae;
+            return Ce;
           })(v, E, Y, _)) : D && (Y = (function(ne, q, ae) {
             const re = new Uint32Array(q[q.length - 1] + 1);
-            let Ae = 0;
-            re[0] = Ae;
+            let Ce = 0;
+            re[0] = Ce;
             let xe = 1, Se = 0;
             for (let Ze = 0; Ze < ne.length; Ze++) {
               const Ee = ne[Ze], He = q[Ze + 1] - q[Ze];
-              if (Ee === 4 || Ee === 1) for (let Oe = 0; Oe < He; Oe++) Ae = re[xe++] = Ae + ae[Se++];
-              else for (let Oe = 0; Oe < He; Oe++) re[xe++] = ++Ae;
+              if (Ee === 4 || Ee === 1) for (let Oe = 0; Oe < He; Oe++) Ce = re[xe++] = Ce + ae[Se++];
+              else for (let Oe = 0; Oe < He; Oe++) re[xe++] = ++Ce;
             }
             return re;
           })(v, E, D))) : D && _ ? (Y = vf(v, D, 1), H = PB(v, Y, _, !0)) : D && (Y = vf(v, D, 0)), p && !Y ? MB(v, P, p, u) : p ? MB(v, P, p, u, { geometryOffsets: E, partOffsets: Y, ringOffsets: H }) : F === void 0 ? (function(ne, q, ae, re) {
             return new DB(cr.VEC_2, ne, q, ae, re);
-          })(v, { geometryOffsets: E, partOffsets: Y, ringOffsets: H }, c, u) : (function(ne, q, ae, re, Ae) {
-            return new DB(cr.MORTON, ne, q, ae, re, Ae);
+          })(v, { geometryOffsets: E, partOffsets: Y, ringOffsets: H }, c, u) : (function(ne, q, ae, re, Ce) {
+            return new DB(cr.MORTON, ne, q, ae, re, Ce);
           })(v, { geometryOffsets: E, partOffsets: Y, ringOffsets: H }, c, u, F);
         }
         function vf(n, e, i) {
@@ -12689,17 +12689,17 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                     const xe = yB(P, E, q);
                     return new df(Y.name, xe[0], xe[1], q.numRleValues);
                   }
-                  const Ae = re ? (function(xe, Se, Ze) {
+                  const Ce = re ? (function(xe, Se, Ze) {
                     const Ee = EI(xe, Se, Ze);
                     return Ee.length === 1 ? Ki(Ee[0]) : (function(He) {
                       return Ki(He[1]);
                     })(Ee);
                   })(P, E, q) : Qf(P, E, q);
-                  return new uf(Y.name, Ae, ne, re);
+                  return new uf(Y.name, Ce, ne, re);
                 })(u, F, y, v, _);
               case 9:
                 return (function(P, E, Y, H, ne) {
-                  let q = null, ae = null, re = null, Ae = null, xe = null, Se = ne ?? null, Ze = null, Ee = null;
+                  let q = null, ae = null, re = null, Ce = null, xe = null, Se = ne ?? null, Ze = null, Ee = null;
                   for (let He = 0; He < H; He++) {
                     const Oe = _g(E, Y);
                     switch (Oe.physicalStreamType) {
@@ -12713,7 +12713,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                         break;
                       case og.LENGTH: {
                         const We = dr(E, Y, Oe);
-                        Yg.DICTIONARY === Oe.logicalStreamType.lengthType ? q = We : Yg.SYMBOL === Oe.logicalStreamType.lengthType ? Ae = We : Ze = We;
+                        Yg.DICTIONARY === Oe.logicalStreamType.lengthType ? q = We : Yg.SYMBOL === Oe.logicalStreamType.lengthType ? Ce = We : Ze = We;
                         break;
                       }
                       case og.DATA: {
@@ -12727,7 +12727,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   }
                   return (function(He, Oe, We, Te, It, Ft, ft) {
                     return Oe ? new EB(He, We, Te, It, Ft, Oe, ft) : null;
-                  })(P, xe, ae, q, re, Ae, Se) ?? (function(He, Oe, We, Te, It) {
+                  })(P, xe, ae, q, re, Ce, Se) ?? (function(He, Oe, We, Te, It) {
                     return Oe ? It ? new ZI(He, We, Te, Oe, It) : new ZI(He, We, Te, Oe) : null;
                   })(P, re, ae, q, Se) ?? (function(He, Oe, We, Te, It) {
                     if (!Oe || !We) return null;
@@ -12743,7 +12743,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 })(y.name, u, F, y.nullable ? c - 1 : c, D);
               case 0:
                 return (function(P, E, Y, H, ne) {
-                  const q = _g(P, E), ae = q.numValues, re = E.get(), Ae = UA(ne) ? ne : void 0, xe = yA(P, ae, q.byteLength, E, Ae);
+                  const q = _g(P, E), ae = q.numValues, re = E.get(), Ce = UA(ne) ? ne : void 0, xe = yA(P, ae, q.byteLength, E, Ce);
                   E.set(re + q.byteLength);
                   const Se = new ba(xe, ae);
                   return new Nb(Y.name, Se, ne);
@@ -12807,27 +12807,27 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                     const xe = UB(P, E, q);
                     return new bB(Y.name, xe[0], xe[1], q.numRleValues);
                   }
-                  const Ae = re ? (function(xe, Se, Ze) {
+                  const Ce = re ? (function(xe, Se, Ze) {
                     const Ee = PI(xe, Se, Ze.numValues);
                     return Ee.length === 1 ? bg(Ee[0]) : (function(He) {
                       return bg(He[1]);
                     })(Ee);
                   })(P, E, q) : wB(P, E, q);
-                  return new VB(Y.name, Ae, H, re);
+                  return new VB(Y.name, Ce, H, re);
                 })(u, F, y, _, v);
               case 7:
                 return (function(P, E, Y, H) {
-                  const ne = _g(P, E), q = UA(H) ? H : void 0, ae = (function(re, Ae, xe, Se) {
-                    const Ze = Ae.get(), Ee = Ze + xe * Float32Array.BYTES_PER_ELEMENT, He = new Uint8Array(re.subarray(Ze, Ee)).buffer, Oe = new Float32Array(He);
-                    return Ae.set(Ee), Se ? GI(Oe, Se, 0) : Oe;
+                  const ne = _g(P, E), q = UA(H) ? H : void 0, ae = (function(re, Ce, xe, Se) {
+                    const Ze = Ce.get(), Ee = Ze + xe * Float32Array.BYTES_PER_ELEMENT, He = new Uint8Array(re.subarray(Ze, Ee)).buffer, Oe = new Float32Array(He);
+                    return Ce.set(Ee), Se ? GI(Oe, Se, 0) : Oe;
                   })(P, E, ne.numValues, q);
                   return new Zb(Y.name, ae, H);
                 })(u, F, y, _);
               case 8:
                 return (function(P, E, Y, H) {
-                  const ne = _g(P, E), q = UA(H) ? H : void 0, ae = (function(re, Ae, xe, Se) {
-                    const Ze = Ae.get(), Ee = Ze + xe * Float64Array.BYTES_PER_ELEMENT, He = new Uint8Array(re.subarray(Ze, Ee)).buffer, Oe = new Float64Array(He);
-                    return Ae.set(Ee), Se ? GI(Oe, Se, 0) : Oe;
+                  const ne = _g(P, E), q = UA(H) ? H : void 0, ae = (function(re, Ce, xe, Se) {
+                    const Ze = Ce.get(), Ee = Ze + xe * Float64Array.BYTES_PER_ELEMENT, He = new Uint8Array(re.subarray(Ze, Ee)).buffer, Oe = new Float64Array(He);
+                    return Ce.set(Ee), Se ? GI(Oe, Se, 0) : Oe;
                   })(P, E, ne.numValues, q);
                   return new cf(Y.name, ae, H);
                 })(u, F, y, _);
@@ -12853,8 +12853,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               if (q === 0) continue;
               const ae = ne.name ? `${F.name}${ne.name}` : F.name;
               if (q !== 2 || ne.type !== "scalarField" || ne.scalarField.physicalType !== 9) throw new Error("Currently only optional string fields are implemented for a struct.");
-              const re = _g(c, u), Ae = yA(c, re.numValues, re.byteLength, u), xe = _g(c, u), Se = Hg(c, u, xe, 0, xe.decompressedCount !== p ? new ba(Ae, re.numValues) : void 0);
-              Y[H++] = _ ? new EB(ae, Se, v, y, D, _, new ba(Ae, re.numValues)) : new ZI(ae, Se, v, y, new ba(Ae, re.numValues));
+              const re = _g(c, u), Ce = yA(c, re.numValues, re.byteLength, u), xe = _g(c, u), Se = Hg(c, u, xe, 0, xe.decompressedCount !== p ? new ba(Ce, re.numValues) : void 0);
+              Y[H++] = _ ? new EB(ae, Se, v, y, D, _, new ba(Ce, re.numValues)) : new ZI(ae, Se, v, y, new ba(Ce, re.numValues));
             }
             return Y;
           })(n, e, i, s);
@@ -13048,8 +13048,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                           const ae = q.length / 4 * 4;
                           let re = 1;
                           if (ae >= 4) for (; re < ae - 4; re += 4) {
-                            const Ae = q[re + 1], xe = q[re + 2], Se = q[re + 3];
-                            q[re] = VI(q[re]) + q[re - 1], q[re + 1] = VI(Ae) + q[re], q[re + 2] = VI(xe) + q[re + 1], q[re + 3] = VI(Se) + q[re + 2];
+                            const Ce = q[re + 1], xe = q[re + 2], Se = q[re + 3];
+                            q[re] = VI(q[re]) + q[re - 1], q[re + 1] = VI(Ce) + q[re], q[re + 2] = VI(xe) + q[re + 1], q[re + 3] = VI(Se) + q[re + 2];
                           }
                           for (; re !== q.length; ++re) q[re] = VI(q[re]) + q[re - 1];
                         })(H), H;
@@ -13143,21 +13143,21 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                       const xe = _g(o, c), Se = c.get(), Ze = yA(o, xe.numValues, xe.byteLength, c);
                       c.set(Se + xe.byteLength), re = new ba(Ze, xe.numValues);
                     }
-                    const Ae = _g(o, c);
-                    H = re ? re.size() : Ae.decompressedCount, P = jb(o, q, c, ae, Ae, re ?? H, A);
+                    const Ce = _g(o, c);
+                    H = re ? re.size() : Ce.decompressedCount, P = jb(o, q, c, ae, Ce, re ?? H, A);
                   } else if (Yb(q)) {
                     const re = hg(o, c, 1)[0];
                     if (H === 0) {
-                      const Ae = c.get();
-                      H = _g(o, c).decompressedCount, c.set(Ae);
+                      const Ce = c.get();
+                      H = _g(o, c).decompressedCount, c.set(Ce);
                     }
                     E = Tb(o, re, c, H);
                   } else {
                     const re = zb(q) ? hg(o, c, 1)[0] : 1;
                     if (re === 0) continue;
-                    const Ae = Wb(o, c, q, re, H);
-                    if (Ae) if (Array.isArray(Ae)) for (const xe of Ae) Y.push(xe);
-                    else Y.push(Ae);
+                    const Ce = Wb(o, c, q, re, H);
+                    if (Ce) if (Array.isArray(Ce)) for (const xe of Ce) Y.push(xe);
+                    else Y.push(Ce);
                   }
                 }
                 const ne = new bb(_.name, E, P, Y, D);
@@ -13252,9 +13252,9 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           }
           query(e, i, o, s) {
             this.loadVTLayers();
-            const A = e.params, c = Pe / e.tileSize / e.scale, u = zr(A.filter, A.globalState), F = e.queryGeometry, p = e.queryPadding * c, v = As.fromPoints(F), y = this.grid.query(v.minX - p, v.minY - p, v.maxX + p, v.maxY + p), D = As.fromPoints(e.cameraQueryGeometry).expandBy(p), _ = this.grid3D.query(D.minX, D.minY, D.maxX, D.maxY, ((Y, H, ne, q) => (function(ae, re, Ae, xe, Se) {
-              for (const Ee of ae) if (re <= Ee.x && Ae <= Ee.y && xe >= Ee.x && Se >= Ee.y) return !0;
-              const Ze = [new S(re, Ae), new S(re, Se), new S(xe, Se), new S(xe, Ae)];
+            const A = e.params, c = Pe / e.tileSize / e.scale, u = zr(A.filter, A.globalState), F = e.queryGeometry, p = e.queryPadding * c, v = As.fromPoints(F), y = this.grid.query(v.minX - p, v.minY - p, v.maxX + p, v.maxY + p), D = As.fromPoints(e.cameraQueryGeometry).expandBy(p), _ = this.grid3D.query(D.minX, D.minY, D.maxX, D.maxY, ((Y, H, ne, q) => (function(ae, re, Ce, xe, Se) {
+              for (const Ee of ae) if (re <= Ee.x && Ce <= Ee.y && xe >= Ee.x && Se >= Ee.y) return !0;
+              const Ze = [new S(re, Ce), new S(re, Se), new S(xe, Se), new S(xe, Ce)];
               if (ae.length > 2) {
                 for (const Ee of Ze) if (yI(ae, Ee)) return !0;
               }
@@ -13295,8 +13295,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               if (!ae) continue;
               const re = new dB(P, this.z, this.x, this.y, E);
               re.layer = q;
-              let Ae = e[Y];
-              Ae === void 0 && (Ae = e[Y] = []), Ae.push({ featureIndex: s, feature: re, intersectionZ: ae });
+              let Ce = e[Y];
+              Ce === void 0 && (Ce = e[Y] = []), Ce.push({ featureIndex: s, feature: re, intersectionZ: ae });
             }
           }
           lookupSymbolFeatures(e, i, o, s, A, c, u, F) {
@@ -13446,8 +13446,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               D += i;
               const q = (D - y) / H, ae = Sg.number(E.x, Y.x, q), re = Sg.number(E.y, Y.y, q);
               if (ae >= 0 && ae < F && re >= 0 && re < F && D - p >= 0 && D + p <= v) {
-                const Ae = new ur(ae, re, ne, P);
-                Ae._round(), o && !LB(n, Ae, A, o, s) || _.push(Ae);
+                const Ce = new ur(ae, re, ne, P);
+                Ce._round(), o && !LB(n, Ce, A, o, s) || _.push(Ce);
               }
             }
             y += H;
@@ -13458,19 +13458,19 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           const s = [], A = n.image, c = A.pixelRatio, u = A.paddedRect.w - 2, F = A.paddedRect.h - 2;
           let p = { x1: n.left, y1: n.top, x2: n.right, y2: n.bottom };
           const v = A.stretchX || [[0, u]], y = A.stretchY || [[0, F]], D = (Te, It) => Te + It[1] - It[0], _ = v.reduce(D, 0), P = y.reduce(D, 0), E = u - _, Y = F - P;
-          let H = 0, ne = _, q = 0, ae = P, re = 0, Ae = E, xe = 0, Se = Y;
+          let H = 0, ne = _, q = 0, ae = P, re = 0, Ce = E, xe = 0, Se = Y;
           if (A.content && o) {
             const Te = A.content, It = Te[2] - Te[0], Ft = Te[3] - Te[1];
-            (A.textFitWidth || A.textFitHeight) && (p = Xp(n)), H = Sc(v, 0, Te[0]), q = Sc(y, 0, Te[1]), ne = Sc(v, Te[0], Te[2]), ae = Sc(y, Te[1], Te[3]), re = Te[0] - H, xe = Te[1] - q, Ae = It - ne, Se = Ft - ae;
+            (A.textFitWidth || A.textFitHeight) && (p = Xp(n)), H = Sc(v, 0, Te[0]), q = Sc(y, 0, Te[1]), ne = Sc(v, Te[0], Te[2]), ae = Sc(y, Te[1], Te[3]), re = Te[0] - H, xe = Te[1] - q, Ce = It - ne, Se = Ft - ae;
           }
           const Ze = p.x1, Ee = p.y1, He = p.x2 - Ze, Oe = p.y2 - Ee, We = (Te, It, Ft, ft) => {
-            const dt = Rc(Te.stretch - H, ne, He, Ze), Xt = Mc(Te.fixed - re, Ae, Te.stretch, _), ki = Rc(It.stretch - q, ae, Oe, Ee), Di = Mc(It.fixed - xe, Se, It.stretch, P), Ei = Rc(Ft.stretch - H, ne, He, Ze), sg = Mc(Ft.fixed - re, Ae, Ft.stretch, _), cn = Rc(ft.stretch - q, ae, Oe, Ee), Mn = Mc(ft.fixed - xe, Se, ft.stretch, P), Zn = new S(dt, ki), nn = new S(Ei, ki), Xn = new S(Ei, cn), mg = new S(dt, cn), pg = new S(Xt / c, Di / c), Gg = new S(sg / c, Mn / c), Ig = e * Math.PI / 180;
+            const dt = Rc(Te.stretch - H, ne, He, Ze), Xt = Mc(Te.fixed - re, Ce, Te.stretch, _), ki = Rc(It.stretch - q, ae, Oe, Ee), Di = Mc(It.fixed - xe, Se, It.stretch, P), Ei = Rc(Ft.stretch - H, ne, He, Ze), sg = Mc(Ft.fixed - re, Ce, Ft.stretch, _), cn = Rc(ft.stretch - q, ae, Oe, Ee), Mn = Mc(ft.fixed - xe, Se, ft.stretch, P), Zn = new S(dt, ki), nn = new S(Ei, ki), Xn = new S(Ei, cn), mg = new S(dt, cn), pg = new S(Xt / c, Di / c), Gg = new S(sg / c, Mn / c), Ig = e * Math.PI / 180;
             if (Ig) {
               const Kn = Math.sin(Ig), In = Math.cos(Ig), kn = [In, -Kn, Kn, In];
               Zn._matMult(kn), nn._matMult(kn), mg._matMult(kn), Xn._matMult(kn);
             }
             const Eg = Te.stretch + Te.fixed, la = It.stretch + It.fixed;
-            return { tl: Zn, tr: nn, bl: mg, br: Xn, tex: { x: A.paddedRect.x + 1 + Eg, y: A.paddedRect.y + 1 + la, w: Ft.stretch + Ft.fixed - Eg, h: ft.stretch + ft.fixed - la }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: pg, pixelOffsetBR: Gg, minFontScaleX: Ae / c / He, minFontScaleY: Se / c / Oe, isSDF: i };
+            return { tl: Zn, tr: nn, bl: mg, br: Xn, tex: { x: A.paddedRect.x + 1 + Eg, y: A.paddedRect.y + 1 + la, w: Ft.stretch + Ft.fixed - Eg, h: ft.stretch + ft.fixed - la }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: pg, pixelOffsetBR: Gg, minFontScaleX: Ce / c / He, minFontScaleY: Se / c / Oe, isSDF: i };
           };
           if (o && (A.stretchX || A.stretchY)) {
             const Te = i0(v, E, _), It = i0(y, Y, P);
@@ -13568,8 +13568,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             let _ = 0, P = 0, E = 0;
             const Y = D[0];
             for (let H = 0, ne = Y.length, q = ne - 1; H < ne; q = H++) {
-              const ae = Y[H], re = Y[q], Ae = ae.x * re.y - re.x * ae.y;
-              P += (ae.x + re.x) * Ae, E += (ae.y + re.y) * Ae, _ += 3 * Ae;
+              const ae = Y[H], re = Y[q], Ce = ae.x * re.y - re.x * ae.y;
+              P += (ae.x + re.x) * Ce, E += (ae.y + re.y) * Ce, _ += 3 * Ce;
             }
             return new KI(P / _, E / _, 0, D);
           })(n);
@@ -13698,7 +13698,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
         function c_(n, e, i, o, s, A, c, u, F, p, v, y) {
           let D = A.textMaxSize.evaluate(e, {});
           D === void 0 && (D = c);
-          const _ = n.layers[0].layout, P = _.get("icon-offset").evaluate(e, {}, v), E = o0(i.horizontal), Y = c / 24, H = n.tilePixelRatio * Y, ne = n.tilePixelRatio * D / 24, q = n.tilePixelRatio * u, ae = n.tilePixelRatio * _.get("symbol-spacing"), re = _.get("text-padding") * n.tilePixelRatio, Ae = (function(Ft, ft, dt, Xt = 1) {
+          const _ = n.layers[0].layout, P = _.get("icon-offset").evaluate(e, {}, v), E = o0(i.horizontal), Y = c / 24, H = n.tilePixelRatio * Y, ne = n.tilePixelRatio * D / 24, q = n.tilePixelRatio * u, ae = n.tilePixelRatio * _.get("symbol-spacing"), re = _.get("text-padding") * n.tilePixelRatio, Ce = (function(Ft, ft, dt, Xt = 1) {
             const ki = Ft.get("icon-padding").evaluate(ft, {}, dt), Di = ki?.values;
             return [Di[0] * Xt, Di[1] * Xt, Di[2] * Xt, Di[3] * Xt];
           })(_, e, v, n.tilePixelRatio), xe = _.get("text-max-angle") / 180 * Math.PI, Se = _.get("text-rotation-alignment") !== "viewport" && _.get("symbol-placement") !== "point", Ze = _.get("icon-rotation-alignment") === "map" && _.get("symbol-placement") !== "point", Ee = _.get("symbol-placement"), He = ae / 2, Oe = _.get("icon-text-fit");
@@ -13748,7 +13748,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 return [ds, Bg.length];
               })(dt.textAnchorOffsets, U_);
               dt.symbolInstances.emplaceBack(Xt.x, Xt.y, Do.right >= 0 ? Do.right : -1, Do.center >= 0 ? Do.center : -1, Do.left >= 0 ? Do.left : -1, Do.vertical || -1, Rf, Mf, A0, u_, f_, h_, m_, p_, B_, F_, y_, nn, I0, C0, r0, s0, c0, 0, pg, ka, Q_, w_);
-            })(n, ft, Ft, i, o, s, We, n.layers[0], n.collisionBoxArray, e.index, e.sourceLayerIndex, n.index, H, [re, re, re, re], Se, F, q, Ae, Ze, P, e, A, p, v, c);
+            })(n, ft, Ft, i, o, s, We, n.layers[0], n.collisionBoxArray, e.index, e.sourceLayerIndex, n.index, H, [re, re, re, re], Se, F, q, Ce, Ze, P, e, A, p, v, c);
           };
           if (Ee === "line") for (const Ft of OB(e.geometry, 0, 0, Pe, Pe)) {
             const ft = Cs(Ft, Te), dt = I_(ft, ae, xe, i.vertical || E, o, 24, ne, n.overscaling, Pe);
@@ -13770,19 +13770,19 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           else if (e.type === "Point") for (const Ft of e.geometry) for (const ft of Ft) It([ft], new ur(ft.x, ft.y, 0));
         }
         function a0(n, e, i, o, s, A, c, u, F, p, v, y, D, _, P) {
-          const E = (function(ne, q, ae, re, Ae, xe, Se, Ze) {
+          const E = (function(ne, q, ae, re, Ce, xe, Se, Ze) {
             const Ee = re.layout.get("text-rotate").evaluate(xe, {}) * Math.PI / 180, He = [];
             for (const Oe of q.positionedLines) for (const We of Oe.positionedGlyphs) {
               if (!We.rect) continue;
               const Te = We.rect || {};
               let It = 4, Ft = !0, ft = 1, dt = 0;
-              const Xt = (Ae || Ze) && We.vertical, ki = We.metrics.advance * We.scale / 2;
+              const Xt = (Ce || Ze) && We.vertical, ki = We.metrics.advance * We.scale / 2;
               if (Ze && q.verticalizable && (dt = Oe.lineOffset / 2 - (We.imageName ? -(Tn - We.metrics.width * We.scale) / 2 : (We.scale - 1) * Tn)), We.imageName) {
                 const Kn = Se[We.imageName];
                 Ft = Kn.sdf, ft = Kn.pixelRatio, It = 1 / ft;
               }
-              const Di = Ae ? [We.x + ki, We.y] : [0, 0];
-              let Ei = Ae ? [0, 0] : [We.x + ki + ae[0], We.y + ae[1] - dt], sg = [0, 0];
+              const Di = Ce ? [We.x + ki, We.y] : [0, 0];
+              let Ei = Ce ? [0, 0] : [We.x + ki + ae[0], We.y + ae[1] - dt], sg = [0, 0];
               Xt && (sg = Ei, Ei = [0, 0]);
               const cn = We.metrics.isDoubleResolution ? 2 : 1, Mn = (We.metrics.left - It) * We.scale - ki + Ei[0], Zn = (-We.metrics.top - It) * We.scale + Ei[1], nn = Mn + Te.w / cn * We.scale / ft, Xn = Zn + Te.h / cn * We.scale / ft, mg = new S(Mn, Zn), pg = new S(nn, Zn), Gg = new S(Mn, Xn), Ig = new S(nn, Xn);
               if (Xt) {
@@ -13902,8 +13902,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           var o = i[0], s = i[1], A = i[2];
           return n[0] = e[0] * o, n[1] = e[1] * o, n[2] = e[2] * o, n[3] = e[3] * o, n[4] = e[4] * s, n[5] = e[5] * s, n[6] = e[6] * s, n[7] = e[7] * s, n[8] = e[8] * A, n[9] = e[9] * A, n[10] = e[10] * A, n[11] = e[11] * A, n[12] = e[12], n[13] = e[13], n[14] = e[14], n[15] = e[15], n;
         }, U.T = Su, U.U = function(n, e, i) {
-          var o = e[0], s = e[1], A = e[2], c = e[3], u = e[4], F = e[5], p = e[6], v = e[7], y = e[8], D = e[9], _ = e[10], P = e[11], E = e[12], Y = e[13], H = e[14], ne = e[15], q = i[0], ae = i[1], re = i[2], Ae = i[3];
-          return n[0] = q * o + ae * u + re * y + Ae * E, n[1] = q * s + ae * F + re * D + Ae * Y, n[2] = q * A + ae * p + re * _ + Ae * H, n[3] = q * c + ae * v + re * P + Ae * ne, n[4] = (q = i[4]) * o + (ae = i[5]) * u + (re = i[6]) * y + (Ae = i[7]) * E, n[5] = q * s + ae * F + re * D + Ae * Y, n[6] = q * A + ae * p + re * _ + Ae * H, n[7] = q * c + ae * v + re * P + Ae * ne, n[8] = (q = i[8]) * o + (ae = i[9]) * u + (re = i[10]) * y + (Ae = i[11]) * E, n[9] = q * s + ae * F + re * D + Ae * Y, n[10] = q * A + ae * p + re * _ + Ae * H, n[11] = q * c + ae * v + re * P + Ae * ne, n[12] = (q = i[12]) * o + (ae = i[13]) * u + (re = i[14]) * y + (Ae = i[15]) * E, n[13] = q * s + ae * F + re * D + Ae * Y, n[14] = q * A + ae * p + re * _ + Ae * H, n[15] = q * c + ae * v + re * P + Ae * ne, n;
+          var o = e[0], s = e[1], A = e[2], c = e[3], u = e[4], F = e[5], p = e[6], v = e[7], y = e[8], D = e[9], _ = e[10], P = e[11], E = e[12], Y = e[13], H = e[14], ne = e[15], q = i[0], ae = i[1], re = i[2], Ce = i[3];
+          return n[0] = q * o + ae * u + re * y + Ce * E, n[1] = q * s + ae * F + re * D + Ce * Y, n[2] = q * A + ae * p + re * _ + Ce * H, n[3] = q * c + ae * v + re * P + Ce * ne, n[4] = (q = i[4]) * o + (ae = i[5]) * u + (re = i[6]) * y + (Ce = i[7]) * E, n[5] = q * s + ae * F + re * D + Ce * Y, n[6] = q * A + ae * p + re * _ + Ce * H, n[7] = q * c + ae * v + re * P + Ce * ne, n[8] = (q = i[8]) * o + (ae = i[9]) * u + (re = i[10]) * y + (Ce = i[11]) * E, n[9] = q * s + ae * F + re * D + Ce * Y, n[10] = q * A + ae * p + re * _ + Ce * H, n[11] = q * c + ae * v + re * P + Ce * ne, n[12] = (q = i[12]) * o + (ae = i[13]) * u + (re = i[14]) * y + (Ce = i[15]) * E, n[13] = q * s + ae * F + re * D + Ce * Y, n[14] = q * A + ae * p + re * _ + Ce * H, n[15] = q * c + ae * v + re * P + Ce * ne, n;
         }, U.V = function(n, e) {
           const i = {};
           for (const o of e) o in n && (i[o] = n[o]);
@@ -13960,7 +13960,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           return e;
         }, U.al = it, U.am = 85.051129, U.an = St, U.ao = function(n) {
           return Math.pow(2, n);
-        }, U.ap = Ce, U.aq = sB, U.ar = function(n) {
+        }, U.ap = Ae, U.aq = sB, U.ar = function(n) {
           return Math.log(n) / Math.LN2;
         }, U.as = function(n) {
           var e = n[0], i = n[1];
@@ -14205,14 +14205,14 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           var o = Math.sin(i), s = Math.cos(i), A = e[4], c = e[5], u = e[6], F = e[7], p = e[8], v = e[9], y = e[10], D = e[11];
           return e !== n && (n[0] = e[0], n[1] = e[1], n[2] = e[2], n[3] = e[3], n[12] = e[12], n[13] = e[13], n[14] = e[14], n[15] = e[15]), n[4] = A * s + p * o, n[5] = c * s + v * o, n[6] = u * s + y * o, n[7] = F * s + D * o, n[8] = p * s - A * o, n[9] = v * s - c * o, n[10] = y * s - u * o, n[11] = D * s - F * o, n;
         }, U.bg = function(n, e) {
-          var i = e[0], o = e[1], s = e[2], A = e[3], c = e[4], u = e[5], F = e[6], p = e[7], v = e[8], y = e[9], D = e[10], _ = e[11], P = e[12], E = e[13], Y = e[14], H = e[15], ne = i * u - o * c, q = i * F - s * c, ae = i * p - A * c, re = o * F - s * u, Ae = o * p - A * u, xe = s * p - A * F, Se = v * E - y * P, Ze = v * Y - D * P, Ee = v * H - _ * P, He = y * Y - D * E, Oe = y * H - _ * E, We = D * H - _ * Y, Te = ne * We - q * Oe + ae * He + re * Ee - Ae * Ze + xe * Se;
-          return Te ? (n[0] = (u * We - F * Oe + p * He) * (Te = 1 / Te), n[1] = (s * Oe - o * We - A * He) * Te, n[2] = (E * xe - Y * Ae + H * re) * Te, n[3] = (D * Ae - y * xe - _ * re) * Te, n[4] = (F * Ee - c * We - p * Ze) * Te, n[5] = (i * We - s * Ee + A * Ze) * Te, n[6] = (Y * ae - P * xe - H * q) * Te, n[7] = (v * xe - D * ae + _ * q) * Te, n[8] = (c * Oe - u * Ee + p * Se) * Te, n[9] = (o * Ee - i * Oe - A * Se) * Te, n[10] = (P * Ae - E * ae + H * ne) * Te, n[11] = (y * ae - v * Ae - _ * ne) * Te, n[12] = (u * Ze - c * He - F * Se) * Te, n[13] = (i * He - o * Ze + s * Se) * Te, n[14] = (E * q - P * re - Y * ne) * Te, n[15] = (v * re - y * q + D * ne) * Te, n) : null;
+          var i = e[0], o = e[1], s = e[2], A = e[3], c = e[4], u = e[5], F = e[6], p = e[7], v = e[8], y = e[9], D = e[10], _ = e[11], P = e[12], E = e[13], Y = e[14], H = e[15], ne = i * u - o * c, q = i * F - s * c, ae = i * p - A * c, re = o * F - s * u, Ce = o * p - A * u, xe = s * p - A * F, Se = v * E - y * P, Ze = v * Y - D * P, Ee = v * H - _ * P, He = y * Y - D * E, Oe = y * H - _ * E, We = D * H - _ * Y, Te = ne * We - q * Oe + ae * He + re * Ee - Ce * Ze + xe * Se;
+          return Te ? (n[0] = (u * We - F * Oe + p * He) * (Te = 1 / Te), n[1] = (s * Oe - o * We - A * He) * Te, n[2] = (E * xe - Y * Ce + H * re) * Te, n[3] = (D * Ce - y * xe - _ * re) * Te, n[4] = (F * Ee - c * We - p * Ze) * Te, n[5] = (i * We - s * Ee + A * Ze) * Te, n[6] = (Y * ae - P * xe - H * q) * Te, n[7] = (v * xe - D * ae + _ * q) * Te, n[8] = (c * Oe - u * Ee + p * Se) * Te, n[9] = (o * Ee - i * Oe - A * Se) * Te, n[10] = (P * Ce - E * ae + H * ne) * Te, n[11] = (y * ae - v * Ce - _ * ne) * Te, n[12] = (u * Ze - c * He - F * Se) * Te, n[13] = (i * He - o * Ze + s * Se) * Te, n[14] = (E * q - P * re - Y * ne) * Te, n[15] = (v * re - y * q + D * ne) * Te, n) : null;
         }, U.bh = function() {
           const n = new Float32Array(16);
-          return Ce(n), n;
+          return Ae(n), n;
         }, U.bi = function() {
           const n = new Float64Array(16);
-          return Ce(n), n;
+          return Ae(n), n;
         }, U.bj = function() {
           return new Float64Array(16);
         }, U.bk = function(n, e, i) {
@@ -14226,8 +14226,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           var i, o, s, A, c, u, F, p, v, y, D, _, P, E, Y, H, ne, q;
           y = (s = (o = n)[0]) * (F = s + s), D = (A = o[1]) * F, P = (c = o[2]) * F, E = c * (p = A + A), H = (u = o[3]) * F, ne = u * p, q = u * (v = c + c), (i = e)[0] = 1 - (_ = A * p) - (Y = c * v), i[3] = D - q, i[6] = P + ne, i[1] = D + q, i[4] = 1 - y - Y, i[7] = E - H, i[2] = P - ne, i[5] = E + H, i[8] = 1 - y - _;
           const ae = ni(-Math.asin(it(e[2], -1, 1)));
-          let re, Ae;
-          return Math.hypot(e[5], e[8]) < 1e-3 ? (re = 0, Ae = -ni(Math.atan2(e[3], e[4]))) : (re = ni(e[5] === 0 && e[8] === 0 ? 0 : Math.atan2(e[5], e[8])), Ae = ni(e[1] === 0 && e[0] === 0 ? 0 : Math.atan2(e[1], e[0]))), { roll: re, pitch: ae + 90, bearing: Ae };
+          let re, Ce;
+          return Math.hypot(e[5], e[8]) < 1e-3 ? (re = 0, Ce = -ni(Math.atan2(e[3], e[4]))) : (re = ni(e[5] === 0 && e[8] === 0 ? 0 : Math.atan2(e[5], e[8])), Ce = ni(e[1] === 0 && e[0] === 0 ? 0 : Math.atan2(e[1], e[0]))), { roll: re, pitch: ae + 90, bearing: Ce };
         }, U.bn = function(n, e) {
           return n.roll == e.roll && n.pitch == e.pitch && n.bearing == e.bearing;
         }, U.bo = ui, U.bp = Qa, U.bq = vI, U.br = cA, U.bs = wI, U.bt = Ct, U.bu = st, U.bv = cg, U.bw = function(n, e, i, o, s) {
@@ -14338,14 +14338,14 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const D = s.get("text-font").evaluate(y, {}, n.canonical).join(","), _ = v.evaluate(y, {}, n.canonical), P = c.layoutTextSize.evaluate(y, {}, n.canonical), E = c.layoutIconSize.evaluate(y, {}, n.canonical), Y = { horizontal: {}, vertical: void 0 }, H = y.text;
             let ne, q = [0, 0];
             if (H) {
-              const Ae = H.toString(), xe = s.get("text-letter-spacing").evaluate(y, {}, n.canonical) * Tn, Se = rI(Ae) ? xe : 0, Ze = s.get("text-anchor").evaluate(y, {}, n.canonical), Ee = g0(o, y, n.canonical);
+              const Ce = H.toString(), xe = s.get("text-letter-spacing").evaluate(y, {}, n.canonical) * Tn, Se = rI(Ce) ? xe : 0, Ze = s.get("text-anchor").evaluate(y, {}, n.canonical), Ee = g0(o, y, n.canonical);
               if (!Ee) {
                 const Te = s.get("text-radial-offset").evaluate(y, {}, n.canonical);
                 q = Te ? n0(Ze, [Te * Tn, Df]) : s.get("text-offset").evaluate(y, {}, n.canonical).map(((It) => It * Tn));
               }
               let He = F ? "center" : s.get("text-justify").evaluate(y, {}, n.canonical);
               const Oe = s.get("symbol-placement") === "point" ? s.get("text-max-width").evaluate(y, {}, n.canonical) * Tn : 1 / 0, We = () => {
-                n.bucket.allowVerticalPlacement && zC(Ae) && (Y.vertical = vc(H, n.glyphMap, n.glyphPositions, n.imagePositions, D, Oe, u, Ze, "left", Se, q, U.ax.vertical, !0, P, _));
+                n.bucket.allowVerticalPlacement && zC(Ce) && (Y.vertical = vc(H, n.glyphMap, n.glyphPositions, n.imagePositions, D, Oe, u, Ze, "left", Se, q, U.ax.vertical, !0, P, _));
               };
               if (!F && Ee) {
                 const Te = /* @__PURE__ */ new Set();
@@ -14361,13 +14361,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               } else {
                 He === "auto" && (He = Sf(Ze));
                 const Te = vc(H, n.glyphMap, n.glyphPositions, n.imagePositions, D, Oe, u, Ze, He, Se, q, U.ax.horizontal, !1, P, _);
-                Te && (Y.horizontal[He] = Te), We(), zC(Ae) && F && p && (Y.vertical = vc(H, n.glyphMap, n.glyphPositions, n.imagePositions, D, Oe, u, Ze, He, Se, q, U.ax.vertical, !1, P, _));
+                Te && (Y.horizontal[He] = Te), We(), zC(Ce) && F && p && (Y.vertical = vc(H, n.glyphMap, n.glyphPositions, n.imagePositions, D, Oe, u, Ze, He, Se, q, U.ax.vertical, !1, P, _));
               }
             }
             let ae = !1;
             if (!((e = y.icon) === null || e === void 0) && e.name) {
-              const Ae = n.imageMap[y.icon.name];
-              Ae && (ne = pb(n.imagePositions[y.icon.name], s.get("icon-offset").evaluate(y, {}, n.canonical), s.get("icon-anchor").evaluate(y, {}, n.canonical)), ae = !!Ae.sdf, n.bucket.sdfIcons === void 0 ? n.bucket.sdfIcons = ae : n.bucket.sdfIcons !== ae && Mt("Style sheet warning: Cannot mix SDF and non-SDF icons in one buffer"), (Ae.pixelRatio !== n.bucket.pixelRatio || s.get("icon-rotate").constantOr(1) !== 0) && (n.bucket.iconsNeedLinear = !0));
+              const Ce = n.imageMap[y.icon.name];
+              Ce && (ne = pb(n.imagePositions[y.icon.name], s.get("icon-offset").evaluate(y, {}, n.canonical), s.get("icon-anchor").evaluate(y, {}, n.canonical)), ae = !!Ce.sdf, n.bucket.sdfIcons === void 0 ? n.bucket.sdfIcons = ae : n.bucket.sdfIcons !== ae && Mt("Style sheet warning: Cannot mix SDF and non-SDF icons in one buffer"), (Ce.pixelRatio !== n.bucket.pixelRatio || s.get("icon-rotate").constantOr(1) !== 0) && (n.bucket.iconsNeedLinear = !0));
             }
             const re = o0(Y.horizontal) || Y.vertical;
             (i = n.bucket).iconsInText || (i.iconsInText = !!re && re.iconsInText), (re || ne) && c_(n.bucket, y, Y, ne, n.imageMap, c, P, E, q, ae, n.canonical, n.subdivisionGranularity);
@@ -14432,8 +14432,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
         }, U.cj = function(n, e) {
           return n[0] === e[0] && n[1] === e[1] && n[2] === e[2] && n[3] === e[3] && n[4] === e[4] && n[5] === e[5] && n[6] === e[6] && n[7] === e[7] && n[8] === e[8] && n[9] === e[9] && n[10] === e[10] && n[11] === e[11] && n[12] === e[12] && n[13] === e[13] && n[14] === e[14] && n[15] === e[15];
         }, U.ck = function(n, e) {
-          var i = n[0], o = n[1], s = n[2], A = n[3], c = n[4], u = n[5], F = n[6], p = n[7], v = n[8], y = n[9], D = n[10], _ = n[11], P = n[12], E = n[13], Y = n[14], H = n[15], ne = e[0], q = e[1], ae = e[2], re = e[3], Ae = e[4], xe = e[5], Se = e[6], Ze = e[7], Ee = e[8], He = e[9], Oe = e[10], We = e[11], Te = e[12], It = e[13], Ft = e[14], ft = e[15];
-          return Math.abs(i - ne) <= T * Math.max(1, Math.abs(i), Math.abs(ne)) && Math.abs(o - q) <= T * Math.max(1, Math.abs(o), Math.abs(q)) && Math.abs(s - ae) <= T * Math.max(1, Math.abs(s), Math.abs(ae)) && Math.abs(A - re) <= T * Math.max(1, Math.abs(A), Math.abs(re)) && Math.abs(c - Ae) <= T * Math.max(1, Math.abs(c), Math.abs(Ae)) && Math.abs(u - xe) <= T * Math.max(1, Math.abs(u), Math.abs(xe)) && Math.abs(F - Se) <= T * Math.max(1, Math.abs(F), Math.abs(Se)) && Math.abs(p - Ze) <= T * Math.max(1, Math.abs(p), Math.abs(Ze)) && Math.abs(v - Ee) <= T * Math.max(1, Math.abs(v), Math.abs(Ee)) && Math.abs(y - He) <= T * Math.max(1, Math.abs(y), Math.abs(He)) && Math.abs(D - Oe) <= T * Math.max(1, Math.abs(D), Math.abs(Oe)) && Math.abs(_ - We) <= T * Math.max(1, Math.abs(_), Math.abs(We)) && Math.abs(P - Te) <= T * Math.max(1, Math.abs(P), Math.abs(Te)) && Math.abs(E - It) <= T * Math.max(1, Math.abs(E), Math.abs(It)) && Math.abs(Y - Ft) <= T * Math.max(1, Math.abs(Y), Math.abs(Ft)) && Math.abs(H - ft) <= T * Math.max(1, Math.abs(H), Math.abs(ft));
+          var i = n[0], o = n[1], s = n[2], A = n[3], c = n[4], u = n[5], F = n[6], p = n[7], v = n[8], y = n[9], D = n[10], _ = n[11], P = n[12], E = n[13], Y = n[14], H = n[15], ne = e[0], q = e[1], ae = e[2], re = e[3], Ce = e[4], xe = e[5], Se = e[6], Ze = e[7], Ee = e[8], He = e[9], Oe = e[10], We = e[11], Te = e[12], It = e[13], Ft = e[14], ft = e[15];
+          return Math.abs(i - ne) <= T * Math.max(1, Math.abs(i), Math.abs(ne)) && Math.abs(o - q) <= T * Math.max(1, Math.abs(o), Math.abs(q)) && Math.abs(s - ae) <= T * Math.max(1, Math.abs(s), Math.abs(ae)) && Math.abs(A - re) <= T * Math.max(1, Math.abs(A), Math.abs(re)) && Math.abs(c - Ce) <= T * Math.max(1, Math.abs(c), Math.abs(Ce)) && Math.abs(u - xe) <= T * Math.max(1, Math.abs(u), Math.abs(xe)) && Math.abs(F - Se) <= T * Math.max(1, Math.abs(F), Math.abs(Se)) && Math.abs(p - Ze) <= T * Math.max(1, Math.abs(p), Math.abs(Ze)) && Math.abs(v - Ee) <= T * Math.max(1, Math.abs(v), Math.abs(Ee)) && Math.abs(y - He) <= T * Math.max(1, Math.abs(y), Math.abs(He)) && Math.abs(D - Oe) <= T * Math.max(1, Math.abs(D), Math.abs(Oe)) && Math.abs(_ - We) <= T * Math.max(1, Math.abs(_), Math.abs(We)) && Math.abs(P - Te) <= T * Math.max(1, Math.abs(P), Math.abs(Te)) && Math.abs(E - It) <= T * Math.max(1, Math.abs(E), Math.abs(It)) && Math.abs(Y - Ft) <= T * Math.max(1, Math.abs(Y), Math.abs(Ft)) && Math.abs(H - ft) <= T * Math.max(1, Math.abs(H), Math.abs(ft));
         }, U.cl = function(n, e) {
           return n[0] = e[0], n[1] = e[1], n[2] = e[2], n[3] = e[3], n[4] = e[4], n[5] = e[5], n[6] = e[6], n[7] = e[7], n[8] = e[8], n[9] = e[9], n[10] = e[10], n[11] = e[11], n[12] = e[12], n[13] = e[13], n[14] = e[14], n[15] = e[15], n;
         }, U.cm = (n) => n.type === "circle", U.cn = (n) => n.type === "heatmap", U.co = (n) => n.type === "line", U.cp = (n) => n.type === "fill", U.cq = (n) => n.type === "fill-extrusion", U.cr = (n) => n.type === "hillshade", U.cs = (n) => n.type === "color-relief", U.ct = (n) => n.type === "background", U.cu = (n) => n.type === "custom", U.cv = Yt, U.cw = function(n, e, i) {
@@ -14866,7 +14866,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           }
         }
         class he {
-          constructor(z, ee, ge, ue = Ce) {
+          constructor(z, ee, ge, ue = Ae) {
             this.actor = z, this.layerIndex = ee, this.availableImages = ge, this.tileState = new K(), this._createGeoJSONIndex = ue;
           }
           loadVectorTile(z) {
@@ -14958,7 +14958,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               var ge;
               if (z.request && (z.data = (yield U.k(z.request, ee)).data), z.data) return z.data = this._filterGeoJSON(z.data, z.filter), void (this._geoJSONIndex = this._createGeoJSONIndex(z.data, z));
               if (z.dataDiff) return (ge = this._geoJSONIndex) !== null && ge !== void 0 || (this._geoJSONIndex = this._createGeoJSONIndex({ type: "FeatureCollection", features: [] }, z)), void this._geoJSONIndex.updateData(z.dataDiff, this._getFilterPredicate(z.filter));
-              if (z.updateCluster && this._geoJSONIndex.updateClusterOptions(z.geojsonVtOptions.cluster, ce(z)), this._geoJSONIndex == null) throw new Error(`Input data given to '${z.source}' is not a valid GeoJSON object.`);
+              if (z.updateCluster && this._geoJSONIndex.updateClusterOptions(z.geojsonVtOptions.cluster, de(z)), this._geoJSONIndex == null) throw new Error(`Input data given to '${z.source}' is not a valid GeoJSON object.`);
             }));
           }
           _filterGeoJSON(z, ee) {
@@ -14988,11 +14988,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             return this._geoJSONIndex.getClusterLeaves(z.clusterId, z.limit, z.offset);
           }
         }
-        function Ce(me, z) {
-          const ee = U.e(z.geojsonVtOptions || {}, { updateable: !0, clusterOptions: ce(z) });
+        function Ae(me, z) {
+          const ee = U.e(z.geojsonVtOptions || {}, { updateable: !0, clusterOptions: de(z) });
           return new U.d0(me, ee);
         }
-        function ce({ geojsonVtOptions: me, clusterProperties: z }) {
+        function de({ geojsonVtOptions: me, clusterProperties: z }) {
           if (!z || !me.clusterOptions) return me.clusterOptions;
           const ee = {}, ge = {}, ue = { accumulated: null, zoom: 0 }, we = { properties: null }, ve = Object.keys(z);
           for (const Qe of ve) {
@@ -15270,7 +15270,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           }
           return t;
         }
-        function Ce(d, t, g) {
+        function Ae(d, t, g) {
           try {
             const C = new URL(d);
             return C.pathname += `${t}${g}`, C.toString();
@@ -15278,7 +15278,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             throw new Error(`Invalid sprite URL "${d}", must be absolute. Modify style specification directly or use TransformStyleFunction to correct the issue dynamically`);
           }
         }
-        function ce(d) {
+        function de(d) {
           const { userImage: t } = d;
           return !(!t?.render || !t.render() || (d.data.replace(new Uint8Array(t.data.buffer)), 0));
         }
@@ -15399,7 +15399,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               if (this.callbackDispatchedThisFrame[g]) continue;
               this.callbackDispatchedThisFrame[g] = !0;
               const C = this.getImage(g);
-              C || r.w(`Image with ID: "${g}" was not found`), ce(C) && this.updateImage(g, C);
+              C || r.w(`Image with ID: "${g}" was not found`), de(C) && this.updateImage(g, C);
             }
           }
           cloneImages() {
@@ -15553,10 +15553,10 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               }
             }
             ee(pe, 0, 0, M, N, M, this.f, this.v, this.z), ee(le, fe, fe, x, R, M, this.f, this.v, this.z);
-            const de = 255 / this.radius, be = 255 * (1 - this.cutoff);
+            const ce = 255 / this.radius, be = 255 * (1 - this.cutoff);
             for (let Ue = 0; Ue < W; Ue++) {
               const Ve = Math.sqrt(pe[Ue]) - Math.sqrt(le[Ue]);
-              J[Ue] = Math.round(be - de * Ve);
+              J[Ue] = Math.round(be - ce * Ve);
             }
             return oe;
           }
@@ -15796,7 +15796,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 le[pe] || (le[pe] = {});
                 const Be = le[pe];
                 J[pe] || (J[pe] = []);
-                for (const de of _e) Be[de.featureIndex] || (Be[de.featureIndex] = !0, J[pe].push(de));
+                for (const ce of _e) Be[ce.featureIndex] || (Be[ce.featureIndex] = !0, J[pe].push(ce));
               }
             }
             return J;
@@ -16896,12 +16896,12 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
         function Wt(d, t) {
           const g = d.getCameraFrustum(), C = d.getClippingPlane(), l = d.screenPointToMercatorCoordinate(d.getCameraPoint()), m = r.a7.fromLngLat(d.center, d.elevation);
           l.z = m.z + Math.cos(d.pitchInRadians) * d.cameraToCenterDistance / d.worldSize;
-          const w = d.getCoveringTilesDetailsProvider(), b = w.allowVariableZoom(d, t), x = Dt(d, t), R = t.minzoom || 0, M = t.maxzoom !== void 0 ? t.maxzoom : d.maxZoom, N = Math.min(Math.max(0, x), M), W = Math.pow(2, N), J = [W * l.x, W * l.y, 0], oe = [W * m.x, W * m.y, 0], Ie = Math.hypot(m.x - l.x, m.y - l.y), fe = Math.abs(m.z - l.z), le = Math.hypot(Ie, fe), pe = (de) => ({ zoom: 0, x: 0, y: 0, wrap: de, fullyVisible: !1 }), _e = [], Be = [];
-          if (d.renderWorldCopies && w.allowWorldCopies()) for (let de = 1; de <= 3; de++) _e.push(pe(-de)), _e.push(pe(de));
+          const w = d.getCoveringTilesDetailsProvider(), b = w.allowVariableZoom(d, t), x = Dt(d, t), R = t.minzoom || 0, M = t.maxzoom !== void 0 ? t.maxzoom : d.maxZoom, N = Math.min(Math.max(0, x), M), W = Math.pow(2, N), J = [W * l.x, W * l.y, 0], oe = [W * m.x, W * m.y, 0], Ie = Math.hypot(m.x - l.x, m.y - l.y), fe = Math.abs(m.z - l.z), le = Math.hypot(Ie, fe), pe = (ce) => ({ zoom: 0, x: 0, y: 0, wrap: ce, fullyVisible: !1 }), _e = [], Be = [];
+          if (d.renderWorldCopies && w.allowWorldCopies()) for (let ce = 1; ce <= 3; ce++) _e.push(pe(-ce)), _e.push(pe(ce));
           for (_e.push(pe(0)); _e.length > 0; ) {
-            const de = _e.pop(), be = de.x, Ue = de.y;
-            let Ve = de.fullyVisible;
-            const ze = { x: be, y: Ue, z: de.zoom }, Ye = w.getTileBoundingVolume(ze, de.wrap, d.elevation, t);
+            const ce = _e.pop(), be = ce.x, Ue = ce.y;
+            let Ve = ce.fullyVisible;
+            const ze = { x: be, y: Ue, z: ce.zoom }, Ye = w.getTileBoundingVolume(ze, ce.wrap, d.elevation, t);
             if (!Ve) {
               const pt = Me(g, Ye, C);
               if (pt === 0) continue;
@@ -16911,13 +16911,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             let tt = x;
             b && (tt = (t.calculateTileZoom || at)(d.zoom + r.ar(d.tileSize / t.tileSize), gt, fe, le, d.fov)), tt = (t.roundZoom ? Math.round : Math.floor)(tt), tt = Math.max(0, tt);
             const Pt = Math.min(tt, M);
-            if (de.wrap = w.getWrap(m, ze, de.wrap), de.zoom >= Pt) {
-              if (de.zoom < R) continue;
-              const pt = N - de.zoom, qe = J[0] - 0.5 - (be << pt), Ut = J[1] - 0.5 - (Ue << pt), Zt = t.reparseOverscaled ? Math.max(de.zoom, tt) : de.zoom;
-              Be.push({ tileID: new r.a3(de.zoom === M ? Zt : de.zoom, de.wrap, de.zoom, be, Ue), distanceSq: r.as([oe[0] - 0.5 - be, oe[1] - 0.5 - Ue]), tileDistanceToCamera: Math.sqrt(qe * qe + Ut * Ut) });
-            } else for (let pt = 0; pt < 4; pt++) _e.push({ zoom: de.zoom + 1, x: (be << 1) + pt % 2, y: (Ue << 1) + (pt >> 1), wrap: de.wrap, fullyVisible: Ve });
+            if (ce.wrap = w.getWrap(m, ze, ce.wrap), ce.zoom >= Pt) {
+              if (ce.zoom < R) continue;
+              const pt = N - ce.zoom, qe = J[0] - 0.5 - (be << pt), Ut = J[1] - 0.5 - (Ue << pt), Zt = t.reparseOverscaled ? Math.max(ce.zoom, tt) : ce.zoom;
+              Be.push({ tileID: new r.a3(ce.zoom === M ? Zt : ce.zoom, ce.wrap, ce.zoom, be, Ue), distanceSq: r.as([oe[0] - 0.5 - be, oe[1] - 0.5 - Ue]), tileDistanceToCamera: Math.sqrt(qe * qe + Ut * Ut) });
+            } else for (let pt = 0; pt < 4; pt++) _e.push({ zoom: ce.zoom + 1, x: (be << 1) + pt % 2, y: (Ue << 1) + (pt >> 1), wrap: ce.wrap, fullyVisible: Ve });
           }
-          return Be.sort(((de, be) => de.distanceSq - be.distanceSq)).map(((de) => de.tileID));
+          return Be.sort(((ce, be) => ce.distanceSq - be.distanceSq)).map(((ce) => ce.tileID));
         }
         const ei = r.a8.fromPoints([new r.P(0, 0), new r.P(r.a6, r.a6)]);
         function mn(d) {
@@ -17275,8 +17275,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               for (const pe of Ie) {
                 const _e = W.map(((Be) => pe.getTilePoint(new r.a7(Be.x, Be.y))));
                 if (_e.expandBy(le), _e.intersects(ei)) {
-                  const Be = R.map(((be) => pe.getTilePoint(be))), de = M.map(((be) => pe.getTilePoint(be)));
-                  l.push({ tile: oe, tileID: w ? pe : pe.unwrapTo(0), queryGeometry: Be, cameraQueryGeometry: de, scale: fe });
+                  const Be = R.map(((be) => pe.getTilePoint(be))), ce = M.map(((be) => pe.getTilePoint(be)));
+                  l.push({ tile: oe, tileID: w ? pe : pe.unwrapTo(0), queryGeometry: Be, cameraQueryGeometry: ce, scale: fe });
                 }
               }
             }
@@ -17417,8 +17417,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 R.circle[fe] = !0;
                 const le = 3 * fe, pe = this.circleKeys[fe];
                 if (this._circleAndRectCollide(Ie[le], Ie[le + 1], Ie[le + 2], t, g, C, l) && (!x || x(pe)) && (!M || !ci(N, pe.overlapMode))) {
-                  const _e = Ie[le], Be = Ie[le + 1], de = Ie[le + 2];
-                  if (w.push({ key: pe, x1: _e - de, y1: Be - de, x2: _e + de, y2: Be + de }), M) return !0;
+                  const _e = Ie[le], Be = Ie[le + 1], ce = Ie[le + 2];
+                  if (w.push({ key: pe, x1: _e - ce, y1: Be - ce, x2: _e + ce, y2: Be + ce }), M) return !0;
                 }
               }
             }
@@ -17522,8 +17522,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           fe.clear();
           const le = d.lineVertexArray, pe = g ? d.text.placedSymbolArray : d.icon.placedSymbolArray, _e = t.transform.width / t.transform.height;
           let Be = !1;
-          for (let de = 0; de < pe.length; de++) {
-            const be = pe.get(de);
+          for (let ce = 0; ce < pe.length; ce++) {
+            const be = pe.get(ce);
             if (be.hidden || be.writingMode === r.ax.vertical && !Be) {
               ro(be.numGlyphs, fe);
               continue;
@@ -17556,19 +17556,19 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             if (!pe) return { notEnoughRoom: !0 };
             const _e = Rs(pe.first.point.x, pe.first.point.y, t, g), Be = Rs(pe.last.point.x, pe.last.point.y, t, g);
             if (w && !m) {
-              const de = kr(C.writingMode, _e, Be, R);
-              if (de) return de;
+              const ce = kr(C.writingMode, _e, Be, R);
+              if (ce) return ce;
             }
             oe = [pe.first];
-            for (let de = C.glyphStartIndex + 1; de < Ie - 1; de++) {
-              const be = Lg(N * b.getoffsetX(de), W, J, m, C.segment, fe, le, t, M);
+            for (let ce = C.glyphStartIndex + 1; ce < Ie - 1; ce++) {
+              const be = Lg(N * b.getoffsetX(ce), W, J, m, C.segment, fe, le, t, M);
               if (!be) return { notEnoughRoom: !0 };
               oe.push(be);
             }
             oe.push(pe.last);
           } else {
             if (w && !m) {
-              const fe = Gi(t.tileAnchorPoint.x, t.tileAnchorPoint.y, t).point, le = C.lineStartIndex + C.segment + 1, pe = new r.P(t.lineVertexArray.getx(le), t.lineVertexArray.gety(le)), _e = Gi(pe.x, pe.y, t), Be = _e.signedDistanceFromCamera > 0 ? _e.point : xr(t.tileAnchorPoint, pe, fe, 1, t), de = Rs(fe.x, fe.y, t, g), be = Rs(Be.x, Be.y, t, g), Ue = kr(C.writingMode, de, be, R);
+              const fe = Gi(t.tileAnchorPoint.x, t.tileAnchorPoint.y, t).point, le = C.lineStartIndex + C.segment + 1, pe = new r.P(t.lineVertexArray.getx(le), t.lineVertexArray.gety(le)), _e = Gi(pe.x, pe.y, t), Be = _e.signedDistanceFromCamera > 0 ? _e.point : xr(t.tileAnchorPoint, pe, fe, 1, t), ce = Rs(fe.x, fe.y, t, g), be = Rs(Be.x, Be.y, t, g), Ue = kr(C.writingMode, ce, be, R);
               if (Ue) return Ue;
             }
             const Ie = Lg(N * b.getoffsetX(C.glyphStartIndex), W, J, m, C.segment, C.lineStartIndex, C.lineStartIndex + C.lineLength, t, M);
@@ -17622,22 +17622,22 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
           let W, J = M > 0 ? m + l : m + l + 1;
           b.projectionCache.cachedAnchorPoint ? W = b.projectionCache.cachedAnchorPoint : (W = Gi(b.tileAnchorPoint.x, b.tileAnchorPoint.y, b).point, b.projectionCache.cachedAnchorPoint = W);
           let oe, Ie, fe = W, le = W, pe = 0, _e = 0;
-          const Be = Math.abs(R), de = [];
+          const Be = Math.abs(R), ce = [];
           let be;
           for (; pe + _e <= Be; ) {
             if (J += M, J < m || J >= w) return null;
             pe += _e, le = fe, Ie = oe;
             const ze = { absOffsetX: Be, direction: M, distanceFromAnchor: pe, previousVertex: le };
-            if (fe = Jn(J, b, ze), g === 0) de.push(le), be = fe.sub(le);
+            if (fe = Jn(J, b, ze), g === 0) ce.push(le), be = fe.sub(le);
             else {
               let Ye;
               const gt = fe.sub(le);
-              Ye = gt.mag() === 0 ? Dr(Jn(J + M, b, ze).sub(fe), g, M) : Dr(gt, g, M), Ie || (Ie = le.add(Ye)), oe = oo(J, Ye, fe, m, w, Ie, g, b, ze), de.push(Ie), be = oe.sub(Ie);
+              Ye = gt.mag() === 0 ? Dr(Jn(J + M, b, ze).sub(fe), g, M) : Dr(gt, g, M), Ie || (Ie = le.add(Ye)), oe = oo(J, Ye, fe, m, w, Ie, g, b, ze), ce.push(Ie), be = oe.sub(Ie);
             }
             _e = be.mag();
           }
           const Ue = be._mult((Be - pe) / _e)._add(Ie || le), Ve = N + Math.atan2(fe.y - le.y, fe.x - le.x);
-          return de.push(Ue), { point: Ue, angle: x ? Ve : 0, path: de };
+          return ce.push(Ue), { point: Ue, angle: x ? Ve : 0, path: ce };
         }
         const Al = new Float32Array([-1 / 0, -1 / 0, 0, -1 / 0, -1 / 0, 0, -1 / 0, -1 / 0, 0, -1 / 0, -1 / 0, 0]);
         function ro(d, t) {
@@ -17664,12 +17664,12 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               Ie = { allPointsOccluded: !1, box: [be + t.x1 * oe, Ue + t.y1 * oe, be + t.x2 * oe, Ue + t.y2 * oe] };
             }
             const [fe, le, pe, _e] = Ie.box, Be = w ? Ie.allPointsOccluded : J.isOccluded;
-            let de = Be;
-            return de || (de = J.perspectiveRatio < this.perspectiveRatioCutoff), de || (de = !this.isInsideGrid(fe, le, pe, _e)), de || g !== "always" && this.grid.hitTest(fe, le, pe, _e, g, R) ? { box: [fe, le, pe, _e], placeable: !1, offscreen: !1, occluded: Be } : { box: [fe, le, pe, _e], placeable: !0, offscreen: this.isOffscreen(fe, le, pe, _e), occluded: Be };
+            let ce = Be;
+            return ce || (ce = J.perspectiveRatio < this.perspectiveRatioCutoff), ce || (ce = !this.isInsideGrid(fe, le, pe, _e)), ce || g !== "always" && this.grid.hitTest(fe, le, pe, _e, g, R) ? { box: [fe, le, pe, _e], placeable: !1, offscreen: !1, occluded: Be } : { box: [fe, le, pe, _e], placeable: !0, offscreen: this.isOffscreen(fe, le, pe, _e), occluded: Be };
           }
           placeCollisionCircles(t, g, C, l, m, w, b, x, R, M, N, W, J, oe) {
             const Ie = [], fe = new r.P(g.anchorX, g.anchorY), le = this.getPerspectiveRatio(fe.x, fe.y, w, oe), pe = (R ? m * this.transform.getPitchedTextCorrection(g.anchorX, g.anchorY, w) / le : m * le) / r.aJ, _e = { getElevation: oe, pitchedLabelPlaneMatrix: b, lineVertexArray: C, pitchWithMap: R, projectionCache: { projections: {}, offsets: {}, cachedAnchorPoint: void 0, anyProjectionOccluded: !1 }, transform: this.transform, tileAnchorPoint: fe, unwrappedTileID: w, width: this.transform.width, height: this.transform.height, translation: J }, Be = To(pe, l, g.lineOffsetX * pe, g.lineOffsetY * pe, !1, g, !1, _e);
-            let de = !1, be = !1, Ue = !0;
+            let ce = !1, be = !1, Ue = !0;
             if (Be) {
               const Ve = 0.5 * N * le + W, ze = new r.P(-100, -100), Ye = new r.P(this.screenRightBoundary, this.screenBottomBoundary), gt = new jt(), tt = Be.first, Pt = Be.last;
               let pt = [];
@@ -17694,11 +17694,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   const Zi = Fn / Math.max(Vi - 1, 1), Qn = gt.lerp(Zi), bn = Qn.x + An, ng = Qn.y + An;
                   Ie.push(bn, ng, Ve, 0);
                   const ln = bn - Ve, ug = ng - Ve, jn = bn + Ve, En = ng + Ve;
-                  if (Ue && (Ue = this.isOffscreen(ln, ug, jn, En)), be || (be = this.isInsideGrid(ln, ug, jn, En)), t !== "always" && this.grid.hitTestCircle(bn, ng, Ve, t, M) && (de = !0, !x)) return { circles: [], offscreen: !1, collisionDetected: de };
+                  if (Ue && (Ue = this.isOffscreen(ln, ug, jn, En)), be || (be = this.isInsideGrid(ln, ug, jn, En)), t !== "always" && this.grid.hitTestCircle(bn, ng, Ve, t, M) && (ce = !0, !x)) return { circles: [], offscreen: !1, collisionDetected: ce };
                 }
               }
             }
-            return { circles: !x && de || !be || le < this.perspectiveRatioCutoff ? [] : Ie, offscreen: Ue, collisionDetected: de };
+            return { circles: !x && ce || !be || le < this.perspectiveRatioCutoff ? [] : Ie, offscreen: Ue, collisionDetected: ce };
           }
           projectPathToScreenSpace(t, g) {
             const C = (function(l, m) {
@@ -17778,7 +17778,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
             let pe = x.x, _e = x.y, Be = g;
             m && (pe = fe, _e = le, Be = Math.pow(2, -(this.transform.zoom - C.overscaledZ)), Be *= this.transform.getPitchedTextCorrection(fe, le, l), M || (Be *= r.al(0.5 + x.signedDistanceFromCamera / this.transform.cameraToCenterDistance * 0.5, 0, 4))), M && (pe += W * M.x * Be + oe * M.y * Be, _e += J * M.x * Be + Ie * M.y * Be);
-            const de = t.x1 * Be, be = t.x2 * Be, Ue = (de + be) / 2, Ve = t.y1 * Be, ze = t.y2 * Be, Ye = (Ve + ze) / 2, gt = [{ offsetX: de, offsetY: Ve }, { offsetX: Ue, offsetY: Ve }, { offsetX: be, offsetY: Ve }, { offsetX: be, offsetY: Ye }, { offsetX: be, offsetY: ze }, { offsetX: Ue, offsetY: ze }, { offsetX: de, offsetY: ze }, { offsetX: de, offsetY: Ye }];
+            const ce = t.x1 * Be, be = t.x2 * Be, Ue = (ce + be) / 2, Ve = t.y1 * Be, ze = t.y2 * Be, Ye = (Ve + ze) / 2, gt = [{ offsetX: ce, offsetY: Ve }, { offsetX: Ue, offsetY: Ve }, { offsetX: be, offsetY: Ve }, { offsetX: be, offsetY: Ye }, { offsetX: be, offsetY: ze }, { offsetX: Ue, offsetY: ze }, { offsetX: ce, offsetY: ze }, { offsetX: ce, offsetY: Ye }];
             let tt = [];
             for (const { offsetX: pt, offsetY: qe } of gt) tt.push(new r.P(pe + W * pt + oe * qe, _e + J * pt + Ie * qe));
             let Pt = !1;
@@ -17847,22 +17847,22 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             this.retainedQueryData[m.bucketInstanceId] = new ul(m.bucketInstanceId, w, m.sourceLayerIndex, m.index, C.tileID);
             const pe = { bucket: m, layout: x, translationText: Ie, translationIcon: fe, unwrappedTileID: W, pitchedLabelPlaneMatrix: le, scale: M, textPixelRatio: N, holdingForFade: C.holdingForSymbolFade(), collisionBoxArray: b, partiallyEvaluatedTextSize: r.aw(m.textSizeData, this.transform.zoom), collisionGroup: this.collisionGroups.get(m.sourceID) };
             if (l) for (const _e of m.sortKeyRanges) {
-              const { sortKey: Be, symbolInstanceStart: de, symbolInstanceEnd: be } = _e;
-              t.push({ sortKey: Be, symbolInstanceStart: de, symbolInstanceEnd: be, parameters: pe });
+              const { sortKey: Be, symbolInstanceStart: ce, symbolInstanceEnd: be } = _e;
+              t.push({ sortKey: Be, symbolInstanceStart: ce, symbolInstanceEnd: be, parameters: pe });
             }
             else t.push({ symbolInstanceStart: 0, symbolInstanceEnd: m.symbolInstances.length, parameters: pe });
           }
           attemptAnchorPlacement(t, g, C, l, m, w, b, x, R, M, N, W, J, oe, Ie, fe, le, pe, _e, Be) {
-            var de, be, Ue;
+            var ce, be, Ue;
             const Ve = r.aM[t.textAnchor], ze = [t.textOffset0, t.textOffset1], Ye = Ps(Ve, C, l, ze, m), gt = this.collisionIndex.placeCollisionBox(g, W, x, R, M, b, w, fe, N.predicate, _e, Ye, Be);
             if ((!pe || this.collisionIndex.placeCollisionBox(pe, W, x, R, M, b, w, le, N.predicate, _e, Ye, Be).placeable) && gt.placeable) {
               let tt;
-              if (!((de = this.prevPlacement) === null || de === void 0) && de.variableOffsets[J.crossTileID] && (!((Ue = (be = this.prevPlacement) === null || be === void 0 ? void 0 : be.placements[J.crossTileID]) === null || Ue === void 0) && Ue.text) && (tt = this.prevPlacement.variableOffsets[J.crossTileID].anchor), J.crossTileID === 0) throw new Error("symbolInstance.crossTileID can't be 0");
+              if (!((ce = this.prevPlacement) === null || ce === void 0) && ce.variableOffsets[J.crossTileID] && (!((Ue = (be = this.prevPlacement) === null || be === void 0 ? void 0 : be.placements[J.crossTileID]) === null || Ue === void 0) && Ue.text) && (tt = this.prevPlacement.variableOffsets[J.crossTileID].anchor), J.crossTileID === 0) throw new Error("symbolInstance.crossTileID can't be 0");
               return this.variableOffsets[J.crossTileID] = { textOffset: ze, width: C, height: l, anchor: Ve, textBoxScale: m, prevAnchor: tt }, this.markUsedJustification(oe, Ve, J, Ie), oe.allowVerticalPlacement && (this.markUsedOrientation(oe, Ie, J), this.placedOrientations[J.crossTileID] = Ie), { shift: Ye, placedGlyphBoxes: gt };
             }
           }
           placeLayerBucketPart(t, g, C) {
-            const { bucket: l, layout: m, translationText: w, translationIcon: b, unwrappedTileID: x, pitchedLabelPlaneMatrix: R, textPixelRatio: M, holdingForFade: N, collisionBoxArray: W, partiallyEvaluatedTextSize: J, collisionGroup: oe } = t.parameters, Ie = m.get("text-optional"), fe = m.get("icon-optional"), le = r.aN(m, "text-overlap", "text-allow-overlap"), pe = le === "always", _e = r.aN(m, "icon-overlap", "icon-allow-overlap"), Be = _e === "always", de = m.get("text-rotation-alignment") === "map", be = m.get("text-pitch-alignment") === "map", Ue = m.get("icon-text-fit") !== "none", Ve = m.get("symbol-z-order") === "viewport-y", ze = pe && (Be || !l.hasIconData() || fe), Ye = Be && (pe || !l.hasTextData() || Ie);
+            const { bucket: l, layout: m, translationText: w, translationIcon: b, unwrappedTileID: x, pitchedLabelPlaneMatrix: R, textPixelRatio: M, holdingForFade: N, collisionBoxArray: W, partiallyEvaluatedTextSize: J, collisionGroup: oe } = t.parameters, Ie = m.get("text-optional"), fe = m.get("icon-optional"), le = r.aN(m, "text-overlap", "text-allow-overlap"), pe = le === "always", _e = r.aN(m, "icon-overlap", "icon-allow-overlap"), Be = _e === "always", ce = m.get("text-rotation-alignment") === "map", be = m.get("text-pitch-alignment") === "map", Ue = m.get("icon-text-fit") !== "none", Ve = m.get("symbol-z-order") === "viewport-y", ze = pe && (Be || !l.hasIconData() || fe), Ye = Be && (pe || !l.hasTextData() || Ie);
             !l.collisionArrays && W && l.deserializeCollisionBoxes(W);
             const gt = this.retainedQueryData[l.bucketInstanceId].tileID, tt = this._getTerrainElevationFunc(gt), Pt = this.transform.getFastPathSimpleProjectionMatrix(gt), pt = (qe, Ut, Zt) => {
               var Vi, Fn;
@@ -17886,7 +17886,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 }, Pg = qe.textAnchorOffsetStartIndex, Wg = qe.textAnchorOffsetEndIndex;
                 if (Wg === Pg) {
                   const rn = ($i, _n) => {
-                    const sn = this.collisionIndex.placeCollisionBox($i, le, M, gt, x, be, de, w, oe.predicate, tt, void 0, Pt);
+                    const sn = this.collisionIndex.placeCollisionBox($i, le, M, gt, x, be, ce, w, oe.predicate, tt, void 0, Pt);
                     return sn?.placeable && (this.markUsedOrientation(l, _n, qe), this.placedOrientations[qe.crossTileID] = _n), sn;
                   };
                   Aa((() => rn(ag, r.ax.horizontal)), (() => {
@@ -17903,12 +17903,12 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                       for (let rA = Pg; rA < Wg; rA++) {
                         const BI = l.textAnchorOffsets.get(rA);
                         if (rn && BI.textAnchor !== rn) continue;
-                        const FI = this.attemptAnchorPlacement(BI, sn, wa, gA, Ac, de, be, M, gt, x, oe, qa, qe, l, pI, w, b, aA, tt);
+                        const FI = this.attemptAnchorPlacement(BI, sn, wa, gA, Ac, ce, be, M, gt, x, oe, qa, qe, l, pI, w, b, aA, tt);
                         if (FI && (La = FI.placedGlyphBoxes, La?.placeable)) return Zi = !0, ng = FI.shift, La;
                       }
                       rn ? rn = null : qa = le;
                     }
-                    return C && !La && (La = { box: this.collisionIndex.placeCollisionBox(ag, "always", M, gt, x, be, de, w, oe.predicate, tt, void 0, Pt).box, offscreen: !1, placeable: !1, occluded: !1 }), La;
+                    return C && !La && (La = { box: this.collisionIndex.placeCollisionBox(ag, "always", M, gt, x, be, ce, w, oe.predicate, tt, void 0, Pt).box, offscreen: !1, placeable: !1, occluded: !1 }), La;
                   };
                   Aa((() => $i(ag, Ut.iconBox, r.ax.horizontal)), (() => {
                     const sn = Ut.verticalTextBox;
@@ -17926,7 +17926,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 En = this.collisionIndex.placeCollisionCircles(le, Ca, l.lineVertexArray, l.glyphOffsetArray, Aa, x, R, C, be, oe.predicate, qe.collisionCircleDiameter, Pg, w, tt), En.circles.length && En.collisionDetected && !C && r.w("Collisions detected, but collision boxes are not shown"), Zi = pe || En.circles.length > 0 && !En.collisionDetected, bn && (bn = En.offscreen);
               }
               if (Ut.iconFeatureIndex && (Ja = Ut.iconFeatureIndex), Ut.iconBox) {
-                const Ca = (Aa) => this.collisionIndex.placeCollisionBox(Aa, _e, M, gt, x, be, de, b, oe.predicate, tt, Ue && ng ? ng : void 0, Pt);
+                const Ca = (Aa) => this.collisionIndex.placeCollisionBox(Aa, _e, M, gt, x, be, ce, b, oe.predicate, tt, Ue && ng ? ng : void 0, Pt);
                 ug && ug.placeable && Ut.verticalIconBox ? (gg = Ca(Ut.verticalIconBox), Qn = gg.placeable) : (gg = Ca(Ut.iconBox), Qn = gg.placeable), bn && (bn = gg.offscreen);
               }
               const Qa = Ie || qe.numHorizontalGlyphVertices === 0 && qe.numVerticalGlyphVertices === 0, ja = fe || qe.numIconVertices === 0;
@@ -18006,9 +18006,9 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               le.hasVisibleVertices || (le.hasVisibleVertices = _e !== Mr);
             }, fe = this.collisionBoxArrays.get(t.bucketInstanceId);
             for (let le = 0; le < t.symbolInstances.length; le++) {
-              const pe = t.symbolInstances.get(le), { numHorizontalGlyphVertices: _e, numVerticalGlyphVertices: Be, crossTileID: de } = pe;
-              let be = this.opacities[de];
-              C[de] ? be = b : be || (be = oe, this.opacities[de] = be), C[de] = !0;
+              const pe = t.symbolInstances.get(le), { numHorizontalGlyphVertices: _e, numVerticalGlyphVertices: Be, crossTileID: ce } = pe;
+              let be = this.opacities[ce];
+              C[ce] ? be = b : be || (be = oe, this.opacities[ce] = be), C[ce] = !0;
               const Ue = pe.numIconVertices > 0, Ve = this.placedOrientations[pe.crossTileID], ze = Ve === r.ax.vertical, Ye = Ve === r.ax.horizontal || Ve === r.ax.horizontalOnly;
               if (_e > 0 || Be > 0) {
                 const tt = dC(be.text);
@@ -18033,7 +18033,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   if (tt.textBox || tt.verticalTextBox) {
                     let pt = !0;
                     if (M) {
-                      const qe = this.variableOffsets[de];
+                      const qe = this.variableOffsets[ce];
                       qe ? (Pt = Ps(qe.anchor, qe.width, qe.height, qe.textOffset, qe.textBoxScale), N && Pt._rotate(W ? -this.transform.bearingInRadians : this.transform.bearingInRadians)) : pt = !1;
                     }
                     if (tt.textBox || tt.verticalTextBox) {
@@ -19384,7 +19384,7 @@ uniform ${M} ${N} u_${W};
           }
           recalculateZoomAndCenter(t) {
             if (this.elevation - t == 0) return;
-            const g = 1 / this.worldSize, C = r.aq(1, this.center.lat) * this.worldSize, l = r.a7.fromLngLat(this.center, this.elevation), m = l.x / g, w = l.y / g, b = l.z / g, x = this.pitch, R = this.bearing, { x: M, y: N, z: W } = xn(x, R), J = this.cameraToCenterDistance, oe = m + J * -M, Ie = w + J * -N, fe = b + J * W, { distanceToCenter: le, clampedElevation: pe } = this._distanceToCenterFromAltElevationPitch(fe / C, t, x), _e = le * C, Be = new r.a7((oe + M * _e) * g, (Ie + N * _e) * g, 0).toLngLat(), de = r.aq(1, Be.lat), be = r.ar(this.height / 2 / Math.tan(this.fovInRadians / 2) / le / de / this.tileSize);
+            const g = 1 / this.worldSize, C = r.aq(1, this.center.lat) * this.worldSize, l = r.a7.fromLngLat(this.center, this.elevation), m = l.x / g, w = l.y / g, b = l.z / g, x = this.pitch, R = this.bearing, { x: M, y: N, z: W } = xn(x, R), J = this.cameraToCenterDistance, oe = m + J * -M, Ie = w + J * -N, fe = b + J * W, { distanceToCenter: le, clampedElevation: pe } = this._distanceToCenterFromAltElevationPitch(fe / C, t, x), _e = le * C, Be = new r.a7((oe + M * _e) * g, (Ie + N * _e) * g, 0).toLngLat(), ce = r.aq(1, Be.lat), be = r.ar(this.height / 2 / Math.tan(this.fovInRadians / 2) / le / ce / this.tileSize);
             this._elevation = pe, this._center = Be, this.setZoom(be);
           }
           _distanceToCenterFromAltElevationPitch(t, g, C) {
@@ -19488,7 +19488,7 @@ uniform ${M} ${N} u_${W};
                 const Ve = r.b6(W[Ue + fe], Be[Ue], oe);
                 pe = Ve !== null && Ve >= 0 ? Math.max(pe, Ve) : Math.max(pe, _e[Ue]);
               }
-              const de = (function(Ue, Ve) {
+              const ce = (function(Ue, Ve) {
                 const ze = r.b0([], Ue[Ve[0]], Ue[Ve[1]]), Ye = r.b0([], Ue[Ve[2]], Ue[Ve[1]]), gt = [0, 0, 0, 0];
                 return r.b1(gt, r.b2([], ze, Ye)), gt[3] = -r.b3(gt, Ue[Ve[0]]), gt;
               })(W, J), be = (function(Ue, Ve) {
@@ -19498,9 +19498,9 @@ uniform ${M} ${N} u_${W};
                   return r.b9(Ve, qe);
                 }
                 return null;
-              })(oe, de);
+              })(oe, ce);
               if (be !== null) {
-                const Ue = be / r.b3(Be[0], de);
+                const Ue = be / r.b3(Be[0], ce);
                 pe = Math.min(pe, Ue);
               }
               for (let Ue = 0; Ue < 4; Ue++) {
@@ -19738,10 +19738,10 @@ uniform ${M} ${N} u_${W};
               }
               if (m) {
                 const Be = (R + M) / 2;
-                let de = Ie;
-                this._helper._renderWorldCopies && (de = r.X(Ie, Be - w / 2, Be + w / 2));
+                let ce = Ie;
+                this._helper._renderWorldCopies && (ce = r.X(Ie, Be - w / 2, Be + w / 2));
                 const be = J / 2;
-                de - be < R && (le = R + be), de + be > M && (le = M - be);
+                ce - be < R && (le = R + be), ce + be > M && (le = M - be);
               }
               if (le !== void 0 || pe !== void 0) {
                 const Be = new r.P(le ?? Ie, pe ?? fe);
@@ -19952,7 +19952,7 @@ uniform ${M} ${N} u_${W};
         function hC(d, t, g, C, l) {
           const m = l.padding, w = xi(l.worldSize, g.getNorthWest()), b = xi(l.worldSize, g.getNorthEast()), x = xi(l.worldSize, g.getSouthEast()), R = xi(l.worldSize, g.getSouthWest()), M = r.an(-C), N = w.rotate(M), W = b.rotate(M), J = x.rotate(M), oe = R.rotate(M), Ie = new r.P(Math.max(N.x, W.x, oe.x, J.x), Math.max(N.y, W.y, oe.y, J.y)), fe = new r.P(Math.min(N.x, W.x, oe.x, J.x), Math.min(N.y, W.y, oe.y, J.y)), le = Ie.sub(fe), pe = (l.width - (m.left + m.right + t.left + t.right)) / le.x, _e = (l.height - (m.top + m.bottom + t.top + t.bottom)) / le.y;
           if (_e < 0 || pe < 0) return void ma();
-          const Be = Math.min(r.ar(l.scale * Math.min(pe, _e)), d.maxZoom), de = r.P.convert(d.offset), be = new r.P((t.left - t.right) / 2, (t.top - t.bottom) / 2).rotate(r.an(C)), Ue = de.add(be).mult(l.scale / r.ao(Be));
+          const Be = Math.min(r.ar(l.scale * Math.min(pe, _e)), d.maxZoom), ce = r.P.convert(d.offset), be = new r.P((t.left - t.right) / 2, (t.top - t.bottom) / 2).rotate(r.an(C)), Ue = ce.add(be).mult(l.scale / r.ao(Be));
           return { center: qi(l.worldSize, w.add(x).div(2).sub(Ue)), zoom: Be, bearing: C };
         }
         class Co {
@@ -19986,7 +19986,7 @@ uniform ${M} ${N} u_${W};
             return R = oe !== C, { easeFunc: (pe) => {
               if (R && t.setZoom(r.H.number(C, oe, pe)), r.bn(m, w) || ml({ startEulerAngles: m, endEulerAngles: w, tr: t, k: pe, useSlerp: m.roll != w.roll }), x && (t.interpolatePadding(l, g.padding, pe), N = t.centerPoint.add(g.offsetAsPoint)), g.around) t.setLocationAtPoint(g.around, g.aroundPoint);
               else {
-                const _e = r.ao(t.zoom - C), Be = oe > C ? Math.min(2, le) : Math.max(0.5, le), de = Math.pow(Be, 1 - pe), be = qi(t.worldSize, Ie.add(fe.mult(pe * de)).mult(_e));
+                const _e = r.ao(t.zoom - C), Be = oe > C ? Math.min(2, le) : Math.max(0.5, le), ce = Math.pow(Be, 1 - pe), be = qi(t.worldSize, Ie.add(fe.mult(pe * ce)).mult(_e));
                 t.setLocationAtPoint(t.renderWorldCopies ? be.wrap() : be, N);
               }
             }, isZooming: R, elevationCenter: J };
@@ -20093,16 +20093,16 @@ uniform ${M} ${N} u_${W};
           const oe = J || t === "32bit", Ie = new Int16Array(2 * N);
           let fe = 0;
           for (let _e = x; _e <= M; _e++) for (let Be = b; Be <= R; Be++) {
-            let de = Be / g * r.a6;
-            Be === -1 && (de = -Ao), Be === g + 1 && (de = r.a6 + Ao);
+            let ce = Be / g * r.a6;
+            Be === -1 && (ce = -Ao), Be === g + 1 && (ce = r.a6 + Ao);
             let be = _e / g * r.a6;
-            _e === -1 && (be = d.extendToNorthPole ? r.bq : -Ao), _e === g + 1 && (be = d.extendToSouthPole ? r.br : r.a6 + Ao), Ie[fe++] = de, Ie[fe++] = be;
+            _e === -1 && (be = d.extendToNorthPole ? r.bq : -Ao), _e === g + 1 && (be = d.extendToSouthPole ? r.br : r.a6 + Ao), Ie[fe++] = ce, Ie[fe++] = be;
           }
           const le = oe ? new Uint32Array(W) : new Uint16Array(W);
           let pe = 0;
           for (let _e = 0; _e < l; _e++) for (let Be = 0; Be < C; Be++) {
-            const de = Be + 1 + _e * m, be = Be + (_e + 1) * m, Ue = Be + 1 + (_e + 1) * m;
-            le[pe++] = Be + _e * m, le[pe++] = be, le[pe++] = de, le[pe++] = de, le[pe++] = be, le[pe++] = Ue;
+            const ce = Be + 1 + _e * m, be = Be + (_e + 1) * m, Ue = Be + 1 + (_e + 1) * m;
+            le[pe++] = Be + _e * m, le[pe++] = be, le[pe++] = ce, le[pe++] = ce, le[pe++] = be, le[pe++] = Ue;
           }
           return { vertices: Ie.buffer.slice(0), indices: le.buffer.slice(0), uses32bitIndices: oe };
         }
@@ -20433,8 +20433,8 @@ uniform ${M} ${N} u_${W};
               r.b1(fe, fe);
               const le = r.b2([], R[0], R[3]);
               r.b1(le, le), M.push(r.aZ([], J, x)), t.y >= (1 << t.z) / 2 && M.push(r.aZ([], Un(r.a6 / 2, 0, t.x, t.y, t.z), x)), t.y < (1 << t.z) / 2 && M.push(r.aZ([], Un(r.a6 / 2, r.a6, t.x, t.y, t.z), x));
-              const pe = Zs(J, M), _e = Zs(Ie, M), Be = [-J[0], -J[1], -J[2], pe.max], de = [J[0], J[1], J[2], -pe.min], be = [-Ie[0], -Ie[1], -Ie[2], _e.max], Ue = [Ie[0], Ie[1], Ie[2], -_e.min], Ve = [...fe, 0], ze = [...le, 0], Ye = [];
-              return t.y === 0 ? Ye.push(r.bC(ze, Ve, Be), r.bC(ze, Ve, de)) : Ye.push(r.bC(be, Ve, Be), r.bC(be, Ve, de), r.bC(be, ze, Be), r.bC(be, ze, de)), t.y === (1 << t.z) - 1 ? Ye.push(r.bC(ze, Ve, Be), r.bC(ze, Ve, de)) : Ye.push(r.bC(Ue, Ve, Be), r.bC(Ue, Ve, de), r.bC(Ue, ze, Be), r.bC(Ue, ze, de)), new jo(Ye, [Be, de, be, Ue, Ve, ze], N, W);
+              const pe = Zs(J, M), _e = Zs(Ie, M), Be = [-J[0], -J[1], -J[2], pe.max], ce = [J[0], J[1], J[2], -pe.min], be = [-Ie[0], -Ie[1], -Ie[2], _e.max], Ue = [Ie[0], Ie[1], Ie[2], -_e.min], Ve = [...fe, 0], ze = [...le, 0], Ye = [];
+              return t.y === 0 ? Ye.push(r.bC(ze, Ve, Be), r.bC(ze, Ve, ce)) : Ye.push(r.bC(be, Ve, Be), r.bC(be, Ve, ce), r.bC(be, ze, Be), r.bC(be, ze, ce)), t.y === (1 << t.z) - 1 ? Ye.push(r.bC(ze, Ve, Be), r.bC(ze, Ve, ce)) : Ye.push(r.bC(Ue, Ve, Be), r.bC(Ue, Ve, ce), r.bC(Ue, ze, Be), r.bC(Ue, ze, ce)), new jo(Ye, [Be, ce, be, Ue, Ve, ze], N, W);
             }
           }
         }
@@ -20788,16 +20788,16 @@ uniform ${M} ${N} u_${W};
             const oe = r.bL(J[1], J[2], w[1], w[2]), Ie = r.bz();
             r.bH(Ie, l, m, -W);
             const fe = r.bL(Ie[1], Ie[2], w[1], w[2]), le = 0.5 * Math.PI, pe = oe >= -le && oe <= le, _e = fe >= -le && fe <= le;
-            let Be, de;
+            let Be, ce;
             if (pe && _e) {
               const ze = this.center.lng * Math.PI / 180, Ye = this.center.lat * Math.PI / 180;
-              r.bM(N, ze) + r.bM(oe, Ye) < r.bM(W, ze) + r.bM(fe, Ye) ? (Be = N, de = oe) : (Be = W, de = fe);
-            } else if (pe) Be = N, de = oe;
+              r.bM(N, ze) + r.bM(oe, Ye) < r.bM(W, ze) + r.bM(fe, Ye) ? (Be = N, ce = oe) : (Be = W, ce = fe);
+            } else if (pe) Be = N, ce = oe;
             else {
               if (!_e) return;
-              Be = W, de = fe;
+              Be = W, ce = fe;
             }
-            const be = Be / Math.PI * 180, Ue = de / Math.PI * 180, Ve = this.center.lat;
+            const be = Be / Math.PI * 180, Ue = ce / Math.PI * 180, Ve = this.center.lat;
             this.setCenter(new r.W(be, r.al(Ue, -90, 90))), this.setZoom(this.zoom + Rn(Ve, this.center.lat));
           }
           locationToScreenPoint(t, g) {
@@ -21228,9 +21228,9 @@ uniform ${M} ${N} u_${W};
             if (w === 0) return;
             const b = r.bJ(g.center.lng, l.lng), x = b / (Math.abs(b / 180) + 1), R = r.bJ(g.center.lat, l.lat), M = g.getRayDirectionFromPixel(C), N = g.cameraPosition, W = -1 * r.b3(N, M), J = r.bz();
             r.a_(J, N, [M[0] * W, M[1] * W, M[2] * W]);
-            const oe = r.b5(J) - 1, Ie = Math.exp(0.5 * -Math.max(oe - 0.3, 0)), fe = Sg(g.worldSize, g.center.lat) / Math.min(g.width, g.height), le = r.bw(fe, 0.9, 0.5, 1, 0.25), pe = (1 - r.ao(-w)) * Math.min(Ie, le), _e = g.center.lat, Be = g.zoom, de = new r.W(g.center.lng + x * pe, r.al(g.center.lat + R * pe, -r.am, r.am));
+            const oe = r.b5(J) - 1, Ie = Math.exp(0.5 * -Math.max(oe - 0.3, 0)), fe = Sg(g.worldSize, g.center.lat) / Math.min(g.width, g.height), le = r.bw(fe, 0.9, 0.5, 1, 0.25), pe = (1 - r.ao(-w)) * Math.min(Ie, le), _e = g.center.lat, Be = g.zoom, ce = new r.W(g.center.lng + x * pe, r.al(g.center.lat + R * pe, -r.am, r.am));
             g.setLocationAtPoint(l, C);
-            const be = g.center, Ue = r.bw(Math.abs(b), 45, 85, 0, 1), Ve = r.bw(fe, 0.75, 0.35, 0, 1), ze = Math.pow(Math.max(Ue, Ve), 0.25), Ye = r.bJ(be.lng, de.lng), gt = r.bJ(be.lat, de.lat);
+            const be = g.center, Ue = r.bw(Math.abs(b), 45, 85, 0, 1), Ve = r.bw(fe, 0.75, 0.35, 0, 1), ze = Math.pow(Math.max(Ue, Ve), 0.25), Ye = r.bJ(be.lng, ce.lng), gt = r.bJ(be.lat, ce.lat);
             g.setCenter(new r.W(be.lng + Ye * ze, be.lat + gt * ze).wrap()), g.setZoom(Be + Rn(_e, g.center.lat));
           }
           handleMapControlsPan(t, g, C) {
@@ -21241,9 +21241,9 @@ uniform ${M} ${N} u_${W};
           cameraForBoxAndBearing(t, g, C, l, m) {
             const w = hC(t, g, C, l, m), b = g.left / m.width * 2 - 1, x = (m.width - g.right) / m.width * 2 - 1, R = g.top / m.height * -2 + 1, M = (m.height - g.bottom) / m.height * -2 + 1, N = r.bJ(C.getWest(), C.getEast()) < 0, W = N ? C.getEast() : C.getWest(), J = N ? C.getWest() : C.getEast(), oe = Math.max(C.getNorth(), C.getSouth()), Ie = Math.min(C.getNorth(), C.getSouth()), fe = W + 0.5 * r.bJ(W, J), le = oe + 0.5 * r.bJ(oe, Ie), pe = m.clone();
             pe.setCenter(w.center), pe.setBearing(w.bearing), pe.setPitch(0), pe.setRoll(0), pe.setZoom(w.zoom);
-            const _e = pe.modelViewProjectionMatrix, Be = [Gn(C.getNorthWest()), Gn(C.getNorthEast()), Gn(C.getSouthWest()), Gn(C.getSouthEast()), Gn(new r.W(J, le)), Gn(new r.W(W, le)), Gn(new r.W(fe, oe)), Gn(new r.W(fe, Ie))], de = Gn(w.center);
+            const _e = pe.modelViewProjectionMatrix, Be = [Gn(C.getNorthWest()), Gn(C.getNorthEast()), Gn(C.getSouthWest()), Gn(C.getSouthEast()), Gn(new r.W(J, le)), Gn(new r.W(W, le)), Gn(new r.W(fe, oe)), Gn(new r.W(fe, Ie))], ce = Gn(w.center);
             let be = Number.POSITIVE_INFINITY;
-            for (const Ue of Be) b < 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, de, _e, "x", b))), x > 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, de, _e, "x", x))), R > 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, de, _e, "y", R))), M < 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, de, _e, "y", M)));
+            for (const Ue of Be) b < 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, ce, _e, "x", b))), x > 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, ce, _e, "x", x))), R > 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, ce, _e, "y", R))), M < 0 && (be = Rg.getLesserNonNegativeNonNull(be, Rg.solveVectorScale(Ue, ce, _e, "y", M)));
             if (Number.isFinite(be) && be !== 0) return w.zoom = Math.min(pe.zoom + r.ar(be), t.maxZoom), w;
             ma();
           }
@@ -21262,11 +21262,11 @@ uniform ${M} ${N} u_${W};
             J.setCenter(W), J.setZoom(x ? +g.zoom : C + Rn(l.lat, N.lat)), J.setBearing(g.bearing);
             const oe = new r.P(r.al(t.centerPoint.x + g.offsetAsPoint.x, 0, t.width), r.al(t.centerPoint.y + g.offsetAsPoint.y, 0, t.height));
             J.setLocationAtPoint(W, oe);
-            const Ie = (g.offset && g.offsetAsPoint.mag()) > 0 ? J.center : W, fe = x ? +g.zoom : C + Rn(l.lat, Ie.lat), le = C + Rn(l.lat, 0), pe = fe + Rn(Ie.lat, 0), _e = r.bJ(l.lng, Ie.lng), Be = r.bJ(l.lat, Ie.lat), de = r.ao(pe - le);
+            const Ie = (g.offset && g.offsetAsPoint.mag()) > 0 ? J.center : W, fe = x ? +g.zoom : C + Rn(l.lat, Ie.lat), le = C + Rn(l.lat, 0), pe = fe + Rn(Ie.lat, 0), _e = r.bJ(l.lng, Ie.lng), Be = r.bJ(l.lat, Ie.lat), ce = r.ao(pe - le);
             return M = fe !== C, { easeFunc: (be) => {
               if (r.bn(w, b) || ml({ startEulerAngles: w, endEulerAngles: b, tr: t, k: be, useSlerp: w.roll != b.roll }), R && t.interpolatePadding(m, g.padding, be), g.around) r.w("Easing around a point is not supported under globe projection."), t.setLocationAtPoint(g.around, g.aroundPoint);
               else {
-                const Ue = pe > le ? Math.min(2, de) : Math.max(0.5, de), Ve = Math.pow(Ue, 1 - be), ze = yl(l, _e, Be, be * Ve);
+                const Ue = pe > le ? Math.min(2, ce) : Math.max(0.5, ce), Ve = Math.pow(Ue, 1 - be), ze = yl(l, _e, Be, be * Ve);
                 t.setCenter(ze.wrap());
               }
               if (M) {
@@ -21282,22 +21282,22 @@ uniform ${M} ${N} u_${W};
             M.setLocationAtPoint(x, N);
             const W = M.center;
             Ka(t, W);
-            const J = (function(Be, de, be) {
-              const Ue = Gn(de), Ve = Gn(be), ze = r.b3(Ue, Ve), Ye = Math.acos(ze), gt = Fl(Be);
+            const J = (function(Be, ce, be) {
+              const Ue = Gn(ce), Ve = Gn(be), ze = r.b3(Ue, Ve), Ye = Math.acos(ze), gt = Fl(Be);
               return Ye / (2 * Math.PI) * gt;
             })(t, l, W), oe = m + Rn(l.lat, 0), Ie = R + Rn(W.lat, 0), fe = r.ao(Ie - oe);
             let le;
             if (typeof g.minZoom == "number") {
-              const Be = +g.minZoom + Rn(W.lat, 0), de = Math.min(Be, oe, Ie) + Rn(0, W.lat), be = t.applyConstrain(W, de).zoom + Rn(W.lat, 0);
+              const Be = +g.minZoom + Rn(W.lat, 0), ce = Math.min(Be, oe, Ie) + Rn(0, W.lat), be = t.applyConstrain(W, ce).zoom + Rn(W.lat, 0);
               le = r.ao(be - oe);
             }
             const pe = r.bJ(l.lng, W.lng), _e = r.bJ(l.lat, W.lat);
-            return { easeFunc: (Be, de, be, Ue) => {
+            return { easeFunc: (Be, ce, be, Ue) => {
               const Ve = yl(l, pe, _e, be);
               b && t.interpolatePadding(w, g.padding, Be);
               const ze = Be === 1 ? W : Ve;
               t.setCenter(ze.wrap());
-              const Ye = oe + r.ar(de);
+              const Ye = oe + r.ar(ce);
               t.setZoom(Be === 1 ? R : Ye + Rn(0, ze.lat));
             }, scaleOfZoom: fe, targetCenter: W, scaleOfMinZoom: le, pixelPathLength: J };
           }
@@ -21449,9 +21449,9 @@ uniform ${M} ${N} u_${W};
               return r._(this, void 0, void 0, (function* () {
                 const M = he(w), N = x > 1 ? "@2x" : "", W = {}, J = {};
                 for (const { id: oe, url: Ie } of M) {
-                  const fe = yield b.transformRequest(Ce(Ie, N, ".json"), "SpriteJSON");
+                  const fe = yield b.transformRequest(Ae(Ie, N, ".json"), "SpriteJSON");
                   W[oe] = r.k(fe, R);
-                  const le = yield b.transformRequest(Ce(Ie, N, ".png"), "SpriteImage");
+                  const le = yield b.transformRequest(Ae(Ie, N, ".png"), "SpriteImage");
                   J[oe] = X.getImage(le, R);
                 }
                 return yield Promise.all([...Object.values(W), ...Object.values(J)]), (function(oe, Ie) {
@@ -21461,8 +21461,8 @@ uniform ${M} ${N} u_${W};
                       fe[le] = {};
                       const pe = j.getImageCanvasContext((yield Ie[le]).data), _e = (yield oe[le]).data;
                       for (const Be in _e) {
-                        const { width: de, height: be, x: Ue, y: Ve, sdf: ze, pixelRatio: Ye, stretchX: gt, stretchY: tt, content: Pt, textFitWidth: pt, textFitHeight: qe } = _e[Be];
-                        fe[le][Be] = { data: null, pixelRatio: Ye, sdf: ze, stretchX: gt, stretchY: tt, content: Pt, textFitWidth: pt, textFitHeight: qe, spriteData: { width: de, height: be, x: Ue, y: Ve, context: pe } };
+                        const { width: ce, height: be, x: Ue, y: Ve, sdf: ze, pixelRatio: Ye, stretchX: gt, stretchY: tt, content: Pt, textFitWidth: pt, textFitHeight: qe } = _e[Be];
+                        fe[le][Be] = { data: null, pixelRatio: Ye, sdf: ze, stretchX: gt, stretchY: tt, content: Pt, textFitWidth: pt, textFitHeight: qe, spriteData: { width: ce, height: be, x: Ue, y: Ve, context: pe } };
                       }
                     }
                     return fe;
@@ -21872,9 +21872,9 @@ uniform ${M} ${N} u_${W};
               pe.sort(At);
               for (const _e of pe) {
                 const Be = _e.featureIndex.lookupSymbolFeatures(le[_e.bucketInstanceId], M, _e.bucketIndex, _e.sourceLayerIndex, { filterSpec: J.filter, globalState: J.globalState }, J.layers, J.availableImages, R);
-                for (const de in Be) {
-                  fe[de] || (fe[de] = []);
-                  const be = Be[de];
+                for (const ce in Be) {
+                  fe[ce] || (fe[ce] = []);
+                  const be = Be[ce];
                   be.sort(((Ue, Ve) => {
                     const ze = _e.featureSortOrder;
                     if (ze) {
@@ -21883,11 +21883,11 @@ uniform ${M} ${N} u_${W};
                     }
                     return Ve.featureIndex - Ue.featureIndex;
                   }));
-                  for (const Ue of be) fe[de].push(Ue);
+                  for (const Ue of be) fe[ce].push(Ue);
                 }
               }
-              return (function(_e, Be, de) {
-                for (const be in _e) for (const Ue of _e[be]) ut(Ue, de[Be[be].source]);
+              return (function(_e, Be, ce) {
+                for (const be in _e) for (const Ue of _e[be]) ut(Ue, ce[Be[be].source]);
                 return _e;
               })(fe, R, N);
             })(this._layers, w, this.tileManagers, t, x, this.placement.collisionIndex, this.placement.retainedQueryData)), this._flattenAndSortRenderedFeatures(m);
@@ -22121,17 +22121,17 @@ uniform ${M} ${N} u_${W};
             for (const Ye of pe) _e.includes(Ye) || _e.push(Ye);
             const Be = C ? C.defines() : [];
             Xg(M) && Be.unshift("#version 300 es"), m && Be.push("#define OVERDRAW_INSPECTOR;"), w && Be.push("#define TERRAIN3D;"), x && Be.push(x), R && Be.push(...R);
-            let de = Be.concat(an.prelude.fragmentSource, b.fragmentSource, g.fragmentSource).join(`
+            let ce = Be.concat(an.prelude.fragmentSource, b.fragmentSource, g.fragmentSource).join(`
 `), be = Be.concat(an.prelude.vertexSource, b.vertexSource, g.vertexSource).join(`
 `);
-            Xg(M) || (de = (function(Ye) {
+            Xg(M) || (ce = (function(Ye) {
               return Ye.replace(/\bin\s/g, "varying ").replace("out highp vec4 fragColor;", "").replace(/fragColor/g, "gl_FragColor").replace(/texture\(/g, "texture2D(");
-            })(de), be = (function(Ye) {
+            })(ce), be = (function(Ye) {
               return Ye.replace(/\bin\s/g, "attribute ").replace(/\bout\s/g, "varying ").replace(/texture\(/g, "texture2D(");
             })(be));
             const Ue = M.createShader(M.FRAGMENT_SHADER);
             if (M.isContextLost()) return void (this.failedToCreate = !0);
-            if (M.shaderSource(Ue, de), M.compileShader(Ue), !M.getShaderParameter(Ue, M.COMPILE_STATUS)) throw new Error(`Could not compile fragment shader: ${M.getShaderInfoLog(Ue)}`);
+            if (M.shaderSource(Ue, ce), M.compileShader(Ue), !M.getShaderParameter(Ue, M.COMPILE_STATUS)) throw new Error(`Could not compile fragment shader: ${M.getShaderInfoLog(Ue)}`);
             M.attachShader(this.program, Ue);
             const Ve = M.createShader(M.VERTEX_SHADER);
             if (M.isContextLost()) return void (this.failedToCreate = !0);
@@ -22150,10 +22150,10 @@ uniform ${M} ${N} u_${W};
           }
           draw(t, g, C, l, m, w, b, x, R, M, N, W, J, oe, Ie, fe, le, pe, _e) {
             var Be;
-            const de = t.gl;
+            const ce = t.gl;
             if (this.failedToCreate) return;
             if (t.program.set(this.program), t.setDepthMode(C), t.setStencilMode(l), t.setColorMode(m), t.setCullFace(w), x) {
-              t.activeTexture.set(de.TEXTURE2), de.bindTexture(de.TEXTURE_2D, x.depthTexture), t.activeTexture.set(de.TEXTURE3), de.bindTexture(de.TEXTURE_2D, x.texture);
+              t.activeTexture.set(ce.TEXTURE2), ce.bindTexture(ce.TEXTURE_2D, x.depthTexture), t.activeTexture.set(ce.TEXTURE3), ce.bindTexture(ce.TEXTURE_2D, x.texture);
               for (const Ue in this.terrainUniforms) this.terrainUniforms[Ue].set(x[Ue]);
             }
             if (R) for (const Ue in R) this.projectionUniforms[nu[Ue]].set(R[Ue]);
@@ -22161,16 +22161,16 @@ uniform ${M} ${N} u_${W};
             fe && fe.setUniforms(t, this.binderUniforms, oe, { zoom: Ie });
             let be = 0;
             switch (g) {
-              case de.LINES:
+              case ce.LINES:
                 be = 2;
                 break;
-              case de.TRIANGLES:
+              case ce.TRIANGLES:
                 be = 3;
                 break;
-              case de.LINE_STRIP:
+              case ce.LINE_STRIP:
                 be = 1;
             }
-            for (const Ue of J.get()) Ue.vaos || (Ue.vaos = {}), (Be = Ue.vaos)[M] || (Be[M] = new iu()), Ue.vaos[M].bind(t, this, N, fe ? fe.getPaintVertexBuffers() : [], W, Ue.vertexOffset, le, pe, _e), de.drawElements(g, Ue.primitiveLength * be, de.UNSIGNED_SHORT, Ue.primitiveOffset * be * 2);
+            for (const Ue of J.get()) Ue.vaos || (Ue.vaos = {}), (Be = Ue.vaos)[M] || (Be[M] = new iu()), Ue.vaos[M].bind(t, this, N, fe ? fe.getPaintVertexBuffers() : [], W, Ue.vertexOffset, le, pe, _e), ce.drawElements(g, Ue.primitiveLength * be, ce.UNSIGNED_SHORT, Ue.primitiveOffset * be * 2);
           }
         }
         function yC(d, t, g) {
@@ -22739,25 +22739,25 @@ uniform ${M} ${N} u_${W};
           for (const _e of C) {
             const Be = t.getTile(_e).getBucket(g);
             if (!Be) continue;
-            const de = l ? Be.textCollisionBox : Be.iconCollisionBox, be = Be.collisionCircleArray;
-            be.length > 0 && (N.push({ circleArray: be, circleOffset: J, coord: _e }), W += be.length / 4, J = W), de && M.draw(b, R.LINES, Ai.disabled, vi.disabled, d.colorModeForRenderPass(), wi.disabled, _l(d.transform), (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(_e), x.getProjectionData({ overscaledTileID: _e, applyGlobeMatrix: !0, applyTerrainMatrix: !0 }), g.id, de.layoutVertexBuffer, de.indexBuffer, de.segments, null, d.transform.zoom, null, null, de.collisionVertexBuffer);
+            const ce = l ? Be.textCollisionBox : Be.iconCollisionBox, be = Be.collisionCircleArray;
+            be.length > 0 && (N.push({ circleArray: be, circleOffset: J, coord: _e }), W += be.length / 4, J = W), ce && M.draw(b, R.LINES, Ai.disabled, vi.disabled, d.colorModeForRenderPass(), wi.disabled, _l(d.transform), (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(_e), x.getProjectionData({ overscaledTileID: _e, applyGlobeMatrix: !0, applyTerrainMatrix: !0 }), g.id, ce.layoutVertexBuffer, ce.indexBuffer, ce.segments, null, d.transform.zoom, null, null, ce.collisionVertexBuffer);
           }
           if (!l || !N.length) return;
           const oe = d.useProgram("collisionCircle"), Ie = new r.ca();
           Ie.resize(4 * W), Ie._trim();
           let fe = 0;
           for (const _e of N) for (let Be = 0; Be < _e.circleArray.length / 4; Be++) {
-            const de = 4 * Be, be = _e.circleArray[de + 0], Ue = _e.circleArray[de + 1], Ve = _e.circleArray[de + 2], ze = _e.circleArray[de + 3];
+            const ce = 4 * Be, be = _e.circleArray[ce + 0], Ue = _e.circleArray[ce + 1], Ve = _e.circleArray[ce + 2], ze = _e.circleArray[ce + 3];
             Ie.emplace(fe++, be, Ue, Ve, ze, 0), Ie.emplace(fe++, be, Ue, Ve, ze, 1), Ie.emplace(fe++, be, Ue, Ve, ze, 2), Ie.emplace(fe++, be, Ue, Ve, ze, 3);
           }
           (!Bo || Bo.length < 2 * W) && (Bo = (function(_e) {
-            const Be = 2 * _e, de = new r.cc();
-            de.resize(Be), de._trim();
+            const Be = 2 * _e, ce = new r.cc();
+            ce.resize(Be), ce._trim();
             for (let be = 0; be < Be; be++) {
               const Ue = 6 * be;
-              de.uint16[Ue + 0] = 4 * be + 0, de.uint16[Ue + 1] = 4 * be + 1, de.uint16[Ue + 2] = 4 * be + 2, de.uint16[Ue + 3] = 4 * be + 2, de.uint16[Ue + 4] = 4 * be + 3, de.uint16[Ue + 5] = 4 * be + 0;
+              ce.uint16[Ue + 0] = 4 * be + 0, ce.uint16[Ue + 1] = 4 * be + 1, ce.uint16[Ue + 2] = 4 * be + 2, ce.uint16[Ue + 3] = 4 * be + 2, ce.uint16[Ue + 4] = 4 * be + 3, ce.uint16[Ue + 5] = 4 * be + 0;
             }
-            return de;
+            return ce;
           })(W));
           const le = b.createIndexBuffer(Bo, !0), pe = b.createVertexBuffer(Ie, r.cb.members, !0);
           for (const _e of N) {
@@ -22791,10 +22791,10 @@ uniform ${M} ${N} u_${W};
           for (let fe = 0; fe < W.length; fe++) {
             const le = W.get(fe), pe = le.hidden || !le.crossTileID || d.allowVerticalPlacement && !le.placedOrientation ? null : C[le.crossTileID];
             if (pe) {
-              const _e = new r.P(le.anchorX, le.anchorY), Be = { getElevation: N, width: l.width, height: l.height, pitchedLabelPlaneMatrix: m, pitchWithMap: g, transform: l, tileAnchorPoint: _e, translation: R, unwrappedTileID: M }, de = g ? Zo(_e.x, _e.y, Be) : Gi(_e.x, _e.y, Be), be = br(l.cameraToCenterDistance, de.signedDistanceFromCamera);
+              const _e = new r.P(le.anchorX, le.anchorY), Be = { getElevation: N, width: l.width, height: l.height, pitchedLabelPlaneMatrix: m, pitchWithMap: g, transform: l, tileAnchorPoint: _e, translation: R, unwrappedTileID: M }, ce = g ? Zo(_e.x, _e.y, Be) : Gi(_e.x, _e.y, Be), be = br(l.cameraToCenterDistance, ce.signedDistanceFromCamera);
               let Ue = r.ay(d.textSizeData, b, le) * be / r.aJ;
               g && (Ue *= d.tilePixelRatio / w);
-              const { width: Ve, height: ze, anchor: Ye, textOffset: gt, textBoxScale: tt } = pe, Pt = MC(Ye, Ve, ze, gt, tt, Ue), pt = l.getPitchedTextCorrection(_e.x + R[0], _e.y + R[1], M), qe = uu(de.point, Be, t, Pt, -l.bearingInRadians, pt), Ut = d.allowVerticalPlacement && le.placedOrientation === r.ax.vertical ? Math.PI / 2 : 0;
+              const { width: Ve, height: ze, anchor: Ye, textOffset: gt, textBoxScale: tt } = pe, Pt = MC(Ye, Ve, ze, gt, tt, Ue), pt = l.getPitchedTextCorrection(_e.x + R[0], _e.y + R[1], M), qe = uu(ce.point, Be, t, Pt, -l.bearingInRadians, pt), Ut = d.allowVerticalPlacement && le.placedOrientation === r.ax.vertical ? Math.PI / 2 : 0;
               for (let Zt = 0; Zt < le.numGlyphs; Zt++) r.aD(J, qe, Ut);
               x && le.associatedIconIndex >= 0 && (Ie[le.associatedIconIndex] = { shiftedAnchor: qe, angle: Ut });
             } else ro(le.numGlyphs, J);
@@ -22820,7 +22820,7 @@ uniform ${M} ${N} u_${W};
         }
         function PC(d, t, g, C, l, m, w, b, x, R, M, N, W) {
           var J, oe;
-          const Ie = d.context, fe = Ie.gl, le = d.transform, pe = b === "map", _e = x === "map", Be = b !== "viewport" && g.layout.get("symbol-placement") !== "point", de = pe && !_e && !Be, be = !g.layout.get("symbol-sort-key").isConstant();
+          const Ie = d.context, fe = Ie.gl, le = d.transform, pe = b === "map", _e = x === "map", Be = b !== "viewport" && g.layout.get("symbol-placement") !== "point", ce = pe && !_e && !Be, be = !g.layout.get("symbol-sort-key").isConstant();
           let Ue = !1;
           const Ve = d.getDepthModeForSublayer(0, Ai.ReadOnly), ze = g._unevaluatedLayout.hasValue("text-variable-anchor") || g._unevaluatedLayout.hasValue("text-variable-anchor-offset"), Ye = [], gt = le.getCircleRadiusCorrection();
           for (const pt of C) {
@@ -22844,7 +22844,7 @@ uniform ${M} ${N} u_${W};
             }
             const Pg = l && ze || Aa, Wg = Be || Pg ? nr : _e ? ag : d.transform.clipSpaceToPixelsMatrix, rn = Fn && g.paint.get(l ? "text-halo-width" : "icon-halo-width").constantOr(1) !== 0;
             let $i;
-            $i = Fn ? Ut.iconsInText ? kC(Zi.kind, ng, de, _e, Be, Pg, d, Wg, Qa, ja, ug, Ha, gt) : _C(Zi.kind, ng, de, _e, Be, Pg, d, Wg, Qa, ja, l, ug, rn, gt) : Hs(Zi.kind, ng, de, _e, Be, Pg, d, Wg, Qa, ja, l, ug, gt);
+            $i = Fn ? Ut.iconsInText ? kC(Zi.kind, ng, ce, _e, Be, Pg, d, Wg, Qa, ja, ug, Ha, gt) : _C(Zi.kind, ng, ce, _e, Be, Pg, d, Wg, Qa, ja, l, ug, rn, gt) : Hs(Zi.kind, ng, ce, _e, Be, Pg, d, Wg, Qa, ja, l, ug, gt);
             const _n = { program: bn, buffers: Zt, uniformValues: $i, projectionData: mI, atlasTexture: jn, atlasTextureIcon: Oa, atlasInterpolation: En, atlasInterpolationIcon: gg, isSDF: Fn, hasHalo: rn };
             if (be && Ut.canOverlap) {
               Ue = !0;
@@ -22937,7 +22937,7 @@ uniform ${M} ${N} u_${W};
           var x;
           const R = d.context.gl, M = "fill-pattern", N = g.paint.get(M), W = N?.constantOr(1), J = g.getCrossfadeParameters();
           let oe, Ie, fe, le, pe;
-          const _e = d.transform, Be = g.paint.get("fill-translate"), de = g.paint.get("fill-translate-anchor");
+          const _e = d.transform, Be = g.paint.get("fill-translate"), ce = g.paint.get("fill-translate-anchor");
           w ? (Ie = W && !g.getPaintProperty("fill-outline-color") ? "fillOutlinePattern" : "fillOutline", oe = R.LINES) : (Ie = W ? "fillPattern" : "fill", oe = R.TRIANGLES);
           const be = N.constantOr(null);
           for (const Ue of C) {
@@ -22947,7 +22947,7 @@ uniform ${M} ${N} u_${W};
             if (!ze) continue;
             const Ye = ze.programConfigurations.get(g.id), gt = d.useProgram(Ie, Ye), tt = (x = d.style.map.terrain) === null || x === void 0 ? void 0 : x.getTerrainData(Ue);
             W && (d.context.activeTexture.set(R.TEXTURE0), Ve.imageAtlasTexture.bind(R.LINEAR, R.CLAMP_TO_EDGE), Ye.updatePaintBuffers(J)), vg(Ye, M, be, Ve, g);
-            const Pt = _e.getProjectionData({ overscaledTileID: Ue, applyGlobeMatrix: !b, applyTerrainMatrix: !0 }), pt = r.aL(_e, Ve, Be, de);
+            const Pt = _e.getProjectionData({ overscaledTileID: Ue, applyGlobeMatrix: !b, applyTerrainMatrix: !0 }), pt = r.aL(_e, Ve, Be, ce);
             if (w) {
               le = ze.indexBuffer2, pe = ze.segments2;
               const Ut = [R.drawingBufferWidth, R.drawingBufferHeight];
@@ -22963,12 +22963,12 @@ uniform ${M} ${N} u_${W};
           for (const pe of C) {
             const _e = t.getTile(pe), Be = _e.getBucket(g);
             if (!Be) continue;
-            const de = (x = d.style.map.terrain) === null || x === void 0 ? void 0 : x.getTerrainData(pe), be = Be.programConfigurations.get(g.id), Ue = d.useProgram(J ? "fillExtrusionPattern" : "fillExtrusion", be);
+            const ce = (x = d.style.map.terrain) === null || x === void 0 ? void 0 : x.getTerrainData(pe), be = Be.programConfigurations.get(g.id), Ue = d.useProgram(J ? "fillExtrusionPattern" : "fillExtrusion", be);
             J && (d.context.activeTexture.set(M.TEXTURE0), _e.imageAtlasTexture.bind(M.LINEAR, M.CLAMP_TO_EDGE), be.updatePaintBuffers(oe));
             const Ve = le.getProjectionData({ overscaledTileID: pe, applyGlobeMatrix: !b, applyTerrainMatrix: !0 });
             vg(be, N, fe, _e, g);
             const ze = r.aL(le, _e, g.paint.get("fill-extrusion-translate"), g.paint.get("fill-extrusion-translate-anchor")), Ye = g.paint.get("fill-extrusion-vertical-gradient"), gt = J ? Ql(d, Ye, Ie, ze, pe, oe, _e) : Ul(d, Ye, Ie, ze);
-            Ue.draw(R, R.gl.TRIANGLES, l, m, w, wi.backCCW, gt, de, Ve, g.id, Be.layoutVertexBuffer, Be.indexBuffer, Be.segments, g.paint, d.transform.zoom, be, d.style.map.terrain && Be.centroidVertexBuffer);
+            Ue.draw(R, R.gl.TRIANGLES, l, m, w, wi.backCCW, gt, ce, Ve, g.id, Be.layoutVertexBuffer, Be.indexBuffer, Be.segments, g.paint, d.transform.zoom, be, d.style.map.terrain && Be.centroidVertexBuffer);
           }
         }
         function oI(d, t, g, C, l, m, w, b, x) {
@@ -22977,10 +22977,10 @@ uniform ${M} ${N} u_${W};
           for (const le of C) {
             const pe = t.getTile(le), _e = pe.fbo;
             if (!_e) continue;
-            const Be = M.getMeshFromTileID(N, le.canonical, b, !0, "raster"), de = (R = d.style.map.terrain) === null || R === void 0 ? void 0 : R.getTerrainData(le);
+            const Be = M.getMeshFromTileID(N, le.canonical, b, !0, "raster"), ce = (R = d.style.map.terrain) === null || R === void 0 ? void 0 : R.getTerrainData(le);
             N.activeTexture.set(J.TEXTURE0), J.bindTexture(J.TEXTURE_2D, _e.colorAttachment.get());
             const be = W.getProjectionData({ overscaledTileID: le, aligned: fe, applyGlobeMatrix: !x, applyTerrainMatrix: !0 });
-            Ie.draw(N, J.TRIANGLES, m, l[le.overscaledZ], w, wi.backCCW, au(d, pe, g), de, be, g.id, Be.vertexBuffer, Be.indexBuffer, Be.segments);
+            Ie.draw(N, J.TRIANGLES, m, l[le.overscaledZ], w, wi.backCCW, au(d, pe, g), ce, be, g.id, Be.vertexBuffer, Be.indexBuffer, Be.segments);
           }
         }
         let Wa = 0;
@@ -22989,14 +22989,14 @@ uniform ${M} ${N} u_${W};
           const M = d.style.projection, N = d.context, W = d.transform, J = N.gl, oe = d.useProgram("colorRelief"), Ie = !d.options.moving, fe = g.paint.get("resampling") === "nearest" ? J.NEAREST : J.LINEAR;
           let le = !0, pe = 0;
           for (const _e of C) {
-            const Be = t.getTile(_e), de = Be.dem;
+            const Be = t.getTile(_e), ce = Be.dem;
             if (le) {
               Wa || (Wa = J.getParameter(J.MAX_TEXTURE_SIZE));
-              const gt = Wa, { elevationTexture: tt, colorTexture: Pt } = g.getColorRampTextures(N, gt, de.getUnpackVector());
+              const gt = Wa, { elevationTexture: tt, colorTexture: Pt } = g.getColorRampTextures(N, gt, ce.getUnpackVector());
               N.activeTexture.set(J.TEXTURE1), tt.bind(J.NEAREST, J.CLAMP_TO_EDGE), N.activeTexture.set(J.TEXTURE4), Pt.bind(J.LINEAR, J.CLAMP_TO_EDGE), le = !1, pe = tt.size[0];
             }
-            if (!de?.data) continue;
-            const be = de.stride, Ue = de.getPixels();
+            if (!ce?.data) continue;
+            const be = ce.stride, Ue = ce.getPixels();
             if (N.activeTexture.set(J.TEXTURE0), N.pixelStoreUnpackPremultiplyAlpha.set(!1), Be.demTexture || (Be.demTexture = d.getTileTexture(be)), Be.demTexture) {
               const gt = Be.demTexture;
               gt.update(Ue, { premultiply: !1 }), gt.bind(fe, J.CLAMP_TO_EDGE);
@@ -23008,11 +23008,11 @@ uniform ${M} ${N} u_${W};
         const yo = [new r.P(0, 0), new r.P(r.a6, 0), new r.P(r.a6, r.a6), new r.P(0, r.a6)];
         function ar(d, t, g, C, l, m, w, b, x = !1, R = !1) {
           var M;
-          const N = C[C.length - 1].overscaledZ, W = d.context, J = W.gl, oe = d.useProgram("raster"), Ie = d.transform, fe = d.style.projection, le = d.colorModeForRenderPass(), pe = !d.options.moving, _e = g.paint.get("raster-opacity"), Be = g.paint.get("resampling") === "nearest" || g.paint.get("raster-resampling") === "nearest" ? J.NEAREST : J.LINEAR, de = g.paint.get("raster-fade-duration"), be = !!d.style.map.terrain;
+          const N = C[C.length - 1].overscaledZ, W = d.context, J = W.gl, oe = d.useProgram("raster"), Ie = d.transform, fe = d.style.projection, le = d.colorModeForRenderPass(), pe = !d.options.moving, _e = g.paint.get("raster-opacity"), Be = g.paint.get("resampling") === "nearest" || g.paint.get("raster-resampling") === "nearest" ? J.NEAREST : J.LINEAR, ce = g.paint.get("raster-fade-duration"), be = !!d.style.map.terrain;
           for (const Ue of C) {
             const Ve = d.getDepthModeForSublayer(Ue.overscaledZ - N, _e === 1 ? Ai.ReadWrite : Ai.ReadOnly, J.LESS), ze = t.getTile(Ue);
             W.activeTexture.set(J.TEXTURE0), ze.texture.bind(Be, J.CLAMP_TO_EDGE, J.LINEAR_MIPMAP_NEAREST), W.activeTexture.set(J.TEXTURE1);
-            const { parentTile: Ye, parentScaleBy: gt, parentTopLeft: tt, fadeValues: Pt } = zl(ze, t, de, be);
+            const { parentTile: Ye, parentScaleBy: gt, parentTopLeft: tt, fadeValues: Pt } = zl(ze, t, ce, be);
             ze.fadeOpacity = Pt.tileOpacity, Ye ? (Ye.fadeOpacity = Pt.parentTileOpacity, Ye.texture.bind(Be, J.CLAMP_TO_EDGE, J.LINEAR_MIPMAP_NEAREST)) : ze.texture.bind(Be, J.CLAMP_TO_EDGE, J.LINEAR_MIPMAP_NEAREST), ze.texture.useMipmap && W.extTextureFilterAnisotropic && d.transform.pitch > d.options.anisotropicFilterPitch && J.texParameterf(J.TEXTURE_2D, W.extTextureFilterAnisotropic.TEXTURE_MAX_ANISOTROPY_EXT, W.extTextureFilterAnisotropicMax);
             const pt = (M = d.style.map.terrain) === null || M === void 0 ? void 0 : M.getTerrainData(Ue), qe = Ie.getProjectionData({ overscaledTileID: Ue, aligned: pe, applyGlobeMatrix: !R, applyTerrainMatrix: !0 }), Ut = vC(tt, gt, Pt.fadeMix, g, b), Zt = fe.getMeshFromTileID(W, Ue.canonical, m, w, "raster");
             oe.draw(W, J.TRIANGLES, Ve, l ? l[Ue.overscaledZ] : vi.disabled, le, x ? wi.frontCCW : wi.backCCW, Ut, pt, qe, g.id, Zt.vertexBuffer, Zt.indexBuffer, Zt.segments);
@@ -23058,8 +23058,8 @@ uniform ${M} ${N} u_${W};
           let fe = g.canonical.toString();
           g.overscaledZ !== g.canonical.z && (fe += ` => ${g.overscaledZ}`), (function(pe, _e) {
             pe.initDebugOverlayCanvas();
-            const Be = pe.debugOverlayCanvas, de = pe.context.gl, be = pe.debugOverlayCanvas.getContext("2d");
-            be.clearRect(0, 0, Be.width, Be.height), be.shadowColor = "white", be.shadowBlur = 2, be.lineWidth = 1.5, be.strokeStyle = "white", be.textBaseline = "top", be.font = "bold 36px Open Sans, sans-serif", be.fillText(_e, 5, 5), be.strokeText(_e, 5, 5), pe.debugOverlayTexture.update(Be), pe.debugOverlayTexture.bind(de.LINEAR, de.CLAMP_TO_EDGE);
+            const Be = pe.debugOverlayCanvas, ce = pe.context.gl, be = pe.debugOverlayCanvas.getContext("2d");
+            be.clearRect(0, 0, Be.width, Be.height), be.shadowColor = "white", be.shadowBlur = 2, be.lineWidth = 1.5, be.strokeStyle = "white", be.textBaseline = "top", be.font = "bold 36px Open Sans, sans-serif", be.fillText(_e, 5, 5), be.strokeText(_e, 5, 5), pe.debugOverlayTexture.update(Be), pe.debugOverlayTexture.bind(ce.LINEAR, ce.CLAMP_TO_EDGE);
           })(d, `${fe} ${J}kB`);
           const le = d.transform.getProjectionData({ overscaledTileID: g, applyGlobeMatrix: !0, applyTerrainMatrix: !0 });
           w.draw(l, m.TRIANGLES, b, x, Hi.alphaBlended, wi.disabled, UC(r.bo.transparent, Ie), null, le, M, d.debugBuffer, d.quadTriangleIndexBuffer, d.debugSegments), w.draw(l, m.LINE_STRIP, b, x, R, wi.disabled, UC(r.bo.red), N, le, M, d.debugBuffer, d.tileBorderIndexBuffer, d.debugSegments);
@@ -23088,14 +23088,14 @@ uniform ${M} ${N} u_${W};
           const { isRenderingToTexture: w } = m, b = vi.disabled, x = d.colorModeForRenderPass();
           (g._unevaluatedLayout.hasValue("text-variable-anchor") || g._unevaluatedLayout.hasValue("text-variable-anchor-offset")) && (function(R, M, N, W, J, oe, Ie, fe, le) {
             var pe;
-            const _e = M.transform, Be = M.style.map.terrain, de = J === "map", be = oe === "map";
+            const _e = M.transform, Be = M.style.map.terrain, ce = J === "map", be = oe === "map";
             for (const Ue of R) {
               const Ve = W.getTile(Ue), ze = Ve.getBucket(N);
               if (!(!((pe = ze?.text) === null || pe === void 0) && pe.segments.get().length)) continue;
-              const Ye = r.aw(ze.textSizeData, _e.zoom), gt = r.aK(Ve, 1, M.transform.zoom), tt = Sn(de, M.transform, gt), Pt = N.layout.get("icon-text-fit") !== "none" && ze.hasIconData();
+              const Ye = r.aw(ze.textSizeData, _e.zoom), gt = r.aK(Ve, 1, M.transform.zoom), tt = Sn(ce, M.transform, gt), Pt = N.layout.get("icon-text-fit") !== "none" && ze.hasIconData();
               if (Ye) {
                 const pt = Math.pow(2, _e.zoom - Ve.tileID.overscaledZ), qe = Be ? (Ut, Zt) => Be.getElevation(Ue, Ut, Zt) : null;
-                zr(ze, de, be, le, _e, tt, pt, Ye, Pt, r.aL(_e, Ve, Ie, fe), Ue.toUnwrapped(), qe);
+                zr(ze, ce, be, le, _e, tt, pt, Ye, Pt, r.aL(_e, Ve, Ie, fe), Ue.toUnwrapped(), qe);
               }
             }
           })(C, d, g, t, g.layout.get("text-rotation-alignment"), g.layout.get("text-pitch-alignment"), g.paint.get("text-translate"), g.paint.get("text-translate-anchor"), l), g.paint.get("icon-opacity").constantOr(1) !== 0 && PC(d, t, g, C, !1, g.paint.get("icon-translate"), g.paint.get("icon-translate-anchor"), g.layout.get("icon-rotation-alignment"), g.layout.get("icon-pitch-alignment"), g.layout.get("icon-keep-upright"), b, x, w), g.paint.get("text-opacity").constantOr(1) !== 0 && PC(d, t, g, C, !0, g.paint.get("text-translate"), g.paint.get("text-translate-anchor"), g.layout.get("text-rotation-alignment"), g.layout.get("text-pitch-alignment"), g.layout.get("text-keep-upright"), b, x, w), t.map.showCollisionBoxes && (ir(d, t, g, C, !0), ir(d, t, g, C, !1));
@@ -23106,18 +23106,18 @@ uniform ${M} ${N} u_${W};
           if (b.constantOr(1) === 0 && (x.constantOr(1) === 0 || R.constantOr(1) === 0)) return;
           const N = d.context, W = N.gl, J = d.transform, oe = d.getDepthModeForSublayer(0, Ai.ReadOnly), Ie = vi.disabled, fe = d.colorModeForRenderPass(), le = [], pe = J.getCircleRadiusCorrection();
           for (const _e of C) {
-            const Be = t.getTile(_e), de = Be.getBucket(g);
-            if (!de) continue;
-            const be = g.paint.get("circle-translate"), Ue = g.paint.get("circle-translate-anchor"), Ve = r.aL(J, Be, be, Ue), ze = de.programConfigurations.get(g.id), Ye = d.useProgram("circle", ze), gt = de.layoutVertexBuffer, tt = de.indexBuffer, Pt = (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(_e), pt = { programConfiguration: ze, program: Ye, layoutVertexBuffer: gt, indexBuffer: tt, uniformValues: bl(d, Be, g, Ve, pe), terrainData: Pt, projectionData: J.getProjectionData({ overscaledTileID: _e, applyGlobeMatrix: !w, applyTerrainMatrix: !0 }) };
+            const Be = t.getTile(_e), ce = Be.getBucket(g);
+            if (!ce) continue;
+            const be = g.paint.get("circle-translate"), Ue = g.paint.get("circle-translate-anchor"), Ve = r.aL(J, Be, be, Ue), ze = ce.programConfigurations.get(g.id), Ye = d.useProgram("circle", ze), gt = ce.layoutVertexBuffer, tt = ce.indexBuffer, Pt = (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(_e), pt = { programConfiguration: ze, program: Ye, layoutVertexBuffer: gt, indexBuffer: tt, uniformValues: bl(d, Be, g, Ve, pe), terrainData: Pt, projectionData: J.getProjectionData({ overscaledTileID: _e, applyGlobeMatrix: !w, applyTerrainMatrix: !0 }) };
             if (M) {
-              const qe = de.segments.get();
+              const qe = ce.segments.get();
               for (const Ut of qe) le.push({ segments: new r.aV([Ut]), sortKey: Ut.sortKey, state: pt });
-            } else le.push({ segments: de.segments, sortKey: 0, state: pt });
+            } else le.push({ segments: ce.segments, sortKey: 0, state: pt });
           }
           M && le.sort(((_e, Be) => _e.sortKey - Be.sortKey));
           for (const _e of le) {
-            const { programConfiguration: Be, program: de, layoutVertexBuffer: be, indexBuffer: Ue, uniformValues: Ve, terrainData: ze, projectionData: Ye } = _e.state;
-            de.draw(N, W.TRIANGLES, oe, Ie, fe, wi.backCCW, Ve, ze, Ye, g.id, be, Ue, _e.segments, g.paint, d.transform.zoom, Be);
+            const { programConfiguration: Be, program: ce, layoutVertexBuffer: be, indexBuffer: Ue, uniformValues: Ve, terrainData: ze, projectionData: Ye } = _e.state;
+            ce.draw(N, W.TRIANGLES, oe, Ie, fe, wi.backCCW, Ve, ze, Ye, g.id, be, Ue, _e.segments, g.paint, d.transform.zoom, Be);
           }
         }, heatmap: function(d, t, g, C, l) {
           if (g.paint.get("heatmap-opacity") === 0) return;
@@ -23133,15 +23133,15 @@ uniform ${M} ${N} u_${W};
             (function(le, pe, _e) {
               const Be = le.gl;
               le.activeTexture.set(Be.TEXTURE1), le.viewport.set([0, 0, pe.width / 4, pe.height / 4]);
-              let de = _e.heatmapFbos.get(r.cd);
-              de ? (Be.bindTexture(Be.TEXTURE_2D, de.colorAttachment.get()), le.bindFramebuffer.set(de.framebuffer)) : (de = GC(le, pe.width / 4, pe.height / 4), _e.heatmapFbos.set(r.cd, de));
+              let ce = _e.heatmapFbos.get(r.cd);
+              ce ? (Be.bindTexture(Be.TEXTURE_2D, ce.colorAttachment.get()), le.bindFramebuffer.set(ce.framebuffer)) : (ce = GC(le, pe.width / 4, pe.height / 4), _e.heatmapFbos.set(r.cd, ce));
             })(W, x, M), W.clear({ color: r.bo.transparent });
             for (const le of N) {
               if (R.hasRenderableParent(le)) continue;
               const pe = R.getTile(le), _e = pe.getBucket(M);
               if (!_e) continue;
-              const Be = _e.programConfigurations.get(M.id), de = x.useProgram("heatmap", Be), be = oe.getProjectionData({ overscaledTileID: le, applyGlobeMatrix: !0, applyTerrainMatrix: !1 }), Ue = oe.getCircleRadiusCorrection();
-              de.draw(W, J.TRIANGLES, Ai.disabled, Ie, fe, wi.backCCW, QC(pe, oe.zoom, M.paint.get("heatmap-intensity"), Ue), null, be, M.id, _e.layoutVertexBuffer, _e.indexBuffer, _e.segments, M.paint, oe.zoom, Be);
+              const Be = _e.programConfigurations.get(M.id), ce = x.useProgram("heatmap", Be), be = oe.getProjectionData({ overscaledTileID: le, applyGlobeMatrix: !0, applyTerrainMatrix: !1 }), Ue = oe.getCircleRadiusCorrection();
+              ce.draw(W, J.TRIANGLES, Ai.disabled, Ie, fe, wi.backCCW, QC(pe, oe.zoom, M.paint.get("heatmap-intensity"), Ue), null, be, M.id, _e.layoutVertexBuffer, _e.indexBuffer, _e.segments, M.paint, oe.zoom, Be);
             }
             W.viewport.set([0, 0, x.width, x.height]);
           })(d, t, g, C) : d.renderPass === "translucent" && (function(x, R) {
@@ -23159,13 +23159,13 @@ uniform ${M} ${N} u_${W};
           let le;
           le = oe ? "linePattern" : W && Ie ? "lineGradientSDF" : W ? "lineSDF" : Ie ? "lineGradient" : "line";
           const pe = d.context, _e = pe.gl, Be = d.transform;
-          let de = !0;
+          let ce = !0;
           for (const be of C) {
             const Ue = t.getTile(be);
             if (oe && !Ue.patternsLoaded()) continue;
             const Ve = Ue.getBucket(g);
             if (!Ve) continue;
-            const ze = Ve.programConfigurations.get(g.id), Ye = d.context.program.get(), gt = d.useProgram(le, ze), tt = de || gt.program !== Ye, Pt = (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(be), pt = J.constantOr(null), qe = N?.constantOr(null);
+            const ze = Ve.programConfigurations.get(g.id), Ye = d.context.program.get(), gt = d.useProgram(le, ze), tt = ce || gt.program !== Ye, Pt = (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(be), pt = J.constantOr(null), qe = N?.constantOr(null);
             if (pt && Ue.imageAtlas) {
               const Zi = Ue.imageAtlas, Qn = Zi.patternPositions[pt.to.toString()], bn = Zi.patternPositions[pt.from.toString()];
               Qn && bn && ze.setConstantPatternPositions(Qn, bn);
@@ -23177,7 +23177,7 @@ uniform ${M} ${N} u_${W};
             let Vi;
             oe ? (Vi = xl(d, Ue, g, Zt, fe), hu(pe, _e, Ue, ze, fe)) : W && Ie ? (Vi = Dl(d, Ue, g, Zt, fe, Ve.lineClipsArray.length), Fo(d, t, pe, _e, g, Ve, be, ze, fe)) : W ? (Vi = wC(d, Ue, g, Zt, fe), Wl(d, pe, _e, ze, tt, fe)) : Ie ? (Vi = kl(d, Ue, g, Zt, Ve.lineClipsArray.length), Bn(d, t, pe, _e, g, Ve, be)) : Vi = Er(d, Ue, g, Zt);
             const Fn = d.stencilModeForClipping(be);
-            gt.draw(pe, _e.TRIANGLES, R, Fn, M, wi.disabled, Vi, Pt, Ut, g.id, Ve.layoutVertexBuffer, Ve.indexBuffer, Ve.segments, g.paint, d.transform.zoom, ze, Ve.layoutVertexBuffer2), de = !1;
+            gt.draw(pe, _e.TRIANGLES, R, Fn, M, wi.disabled, Vi, Pt, Ut, g.id, Ve.layoutVertexBuffer, Ve.indexBuffer, Ve.segments, g.paint, d.transform.zoom, ze, Ve.layoutVertexBuffer2), ce = !1;
           }
         }, fill: function(d, t, g, C, l) {
           const m = g.paint.get("fill-color"), w = g.paint.get("fill-opacity");
@@ -23209,20 +23209,20 @@ uniform ${M} ${N} u_${W};
           if (d.renderPass === "offscreen") (function(M, N, W, J, oe, Ie, fe) {
             const le = M.context, pe = le.gl, _e = J.paint.get("resampling") === "nearest" ? pe.NEAREST : pe.LINEAR;
             for (const Be of W) {
-              const de = N.getTile(Be), be = de.dem;
-              if (!be?.data || !de.needsHillshadePrepare) continue;
+              const ce = N.getTile(Be), be = ce.dem;
+              if (!be?.data || !ce.needsHillshadePrepare) continue;
               const Ue = be.dim, Ve = be.stride, ze = be.getPixels();
-              if (le.activeTexture.set(pe.TEXTURE1), le.pixelStoreUnpackPremultiplyAlpha.set(!1), de.demTexture || (de.demTexture = M.getTileTexture(Ve)), de.demTexture) {
-                const gt = de.demTexture;
+              if (le.activeTexture.set(pe.TEXTURE1), le.pixelStoreUnpackPremultiplyAlpha.set(!1), ce.demTexture || (ce.demTexture = M.getTileTexture(Ve)), ce.demTexture) {
+                const gt = ce.demTexture;
                 gt.update(ze, { premultiply: !1 }), gt.bind(pe.NEAREST, pe.CLAMP_TO_EDGE);
-              } else de.demTexture = new r.T(le, ze, pe.RGBA, { premultiply: !1 }), de.demTexture.bind(pe.NEAREST, pe.CLAMP_TO_EDGE);
+              } else ce.demTexture = new r.T(le, ze, pe.RGBA, { premultiply: !1 }), ce.demTexture.bind(pe.NEAREST, pe.CLAMP_TO_EDGE);
               le.activeTexture.set(pe.TEXTURE0);
-              let Ye = de.fbo;
+              let Ye = ce.fbo;
               if (!Ye) {
                 const gt = new r.T(le, { width: Ue, height: Ue, data: null }, pe.RGBA);
-                gt.bind(_e, pe.CLAMP_TO_EDGE), Ye = de.fbo = le.createFramebuffer(Ue, Ue, !0, !1), Ye.colorAttachment.set(gt.texture);
+                gt.bind(_e, pe.CLAMP_TO_EDGE), Ye = ce.fbo = le.createFramebuffer(Ue, Ue, !0, !1), Ye.colorAttachment.set(gt.texture);
               }
-              le.bindFramebuffer.set(Ye.framebuffer), le.viewport.set([0, 0, Ue, Ue]), M.useProgram("hillshadePrepare").draw(le, pe.TRIANGLES, oe, Ie, fe, wi.disabled, Ys(de.tileID, be), null, null, J.id, M.rasterBoundsBuffer, M.quadTriangleIndexBuffer, M.rasterBoundsSegments), de.needsHillshadePrepare = !1;
+              le.bindFramebuffer.set(Ye.framebuffer), le.viewport.set([0, 0, Ue, Ue]), M.useProgram("hillshadePrepare").draw(le, pe.TRIANGLES, oe, Ie, fe, wi.disabled, Ys(ce.tileID, be), null, null, J.id, M.rasterBoundsBuffer, M.quadTriangleIndexBuffer, M.rasterBoundsSegments), ce.needsHillshadePrepare = !1;
             }
           })(d, t, C, g, x, vi.disabled, R), w.viewport.set([0, 0, d.width, d.height]);
           else if (d.renderPass === "translucent") if (b) {
@@ -23263,9 +23263,9 @@ uniform ${M} ${N} u_${W};
           if (d.renderPass !== Ie) return;
           const fe = vi.disabled, le = d.getDepthModeForSublayer(0, Ie === "opaque" ? Ai.ReadWrite : Ai.ReadOnly), pe = d.colorModeForRenderPass(), _e = d.useProgram(oe ? "backgroundPattern" : "background"), Be = C || Wt(W, { tileSize: J, terrain: d.style.map.terrain });
           oe && (R.activeTexture.set(M.TEXTURE0), d.imageManager.bind(d.context));
-          const de = g.getCrossfadeParameters();
+          const ce = g.getCrossfadeParameters();
           for (const be of Be) {
-            const Ue = W.getProjectionData({ overscaledTileID: be, applyGlobeMatrix: !x, applyTerrainMatrix: !0 }), Ve = oe ? xC(b, d, oe, { tileID: be, tileSize: J }, de) : ho(b, w), ze = (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(be), Ye = N.getMeshFromTileID(R, be.canonical, !1, !0, "raster");
+            const Ue = W.getProjectionData({ overscaledTileID: be, applyGlobeMatrix: !x, applyTerrainMatrix: !0 }), Ve = oe ? xC(b, d, oe, { tileID: be, tileSize: J }, ce) : ho(b, w), ze = (m = d.style.map.terrain) === null || m === void 0 ? void 0 : m.getTerrainData(be), Ye = N.getMeshFromTileID(R, be.canonical, !1, !0, "raster");
             _e.draw(R, M.TRIANGLES, le, fe, pe, wi.backCCW, Ve, ze, Ue, g.id, Ye.vertexBuffer, Ye.indexBuffer, Ye.segments);
           }
         }, sky: function(d, t) {
@@ -23461,11 +23461,11 @@ ${b.shaderPreludeCode.vertexSource}`, define: b.shaderDefine }, defaultProjectio
             if (N.isRenderingGlobe && this.drawFunctions.atmosphere(this, this.style.sky, this.style.light), this.options.showTileBoundaries) {
               const J = (function(oe, Ie) {
                 let fe = null;
-                const le = Object.values(oe._layers).flatMap(((de) => de.source && !de.isHidden(Ie) ? [oe.tileManagers[de.source]] : [])), pe = le.filter(((de) => de.getSource().type === "vector")), _e = le.filter(((de) => de.getSource().type !== "vector")), Be = (de) => {
-                  (!fe || fe.getSource().maxzoom < de.getSource().maxzoom) && (fe = de);
+                const le = Object.values(oe._layers).flatMap(((ce) => ce.source && !ce.isHidden(Ie) ? [oe.tileManagers[ce.source]] : [])), pe = le.filter(((ce) => ce.getSource().type === "vector")), _e = le.filter(((ce) => ce.getSource().type !== "vector")), Be = (ce) => {
+                  (!fe || fe.getSource().maxzoom < ce.getSource().maxzoom) && (fe = ce);
                 };
-                for (const de of pe) Be(de);
-                if (!fe) for (const de of _e) Be(de);
+                for (const ce of pe) Be(ce);
+                if (!fe) for (const ce of _e) Be(ce);
                 return fe;
               })(this.style, this.transform.zoom);
               J && this.drawFunctions.debug(this, J, J.getVisibleCoordinates());
@@ -24645,29 +24645,29 @@ ${b.shaderPreludeCode.vertexSource}`, define: b.shaderDefine }, defaultProjectio
             this._add("tapDragZoom", x);
             const R = g.touchPitch = new ya(g);
             this._add("touchPitch", R), t.interactive && t.touchPitch && g.touchPitch.enable(t.touchPitch);
-            const M = () => g.project(g.getCenter()), N = (function({ enable: Be, clickTolerance: de, aroundCenter: be = !0, minPixelCenterThreshold: Ue = 100, rotateDegreesPerPixelMoved: Ve = 0.8 }, ze) {
+            const M = () => g.project(g.getCenter()), N = (function({ enable: Be, clickTolerance: ce, aroundCenter: be = !0, minPixelCenterThreshold: Ue = 100, rotateDegreesPerPixelMoved: Ve = 0.8 }, ze) {
               const Ye = new Uo({ checkCorrectEvent: (gt) => gt.button === 0 && gt.ctrlKey || gt.button === 2 && !gt.ctrlKey });
-              return new Fa({ clickTolerance: de, move: (gt, tt) => {
+              return new Fa({ clickTolerance: ce, move: (gt, tt) => {
                 const Pt = ze();
                 if (be && Math.abs(Pt.y - gt.y) > Ue) return { bearingDelta: r.cx(new r.P(gt.x, tt.y), tt, Pt) };
                 let pt = (tt.x - gt.x) * Ve;
                 return be && tt.y < Pt.y && (pt = -pt), { bearingDelta: pt };
               }, moveStateManager: Ye, enable: Be, assignEvents: rI });
-            })(t, M), W = (function({ enable: Be, clickTolerance: de, pitchDegreesPerPixelMoved: be = -0.5 }) {
+            })(t, M), W = (function({ enable: Be, clickTolerance: ce, pitchDegreesPerPixelMoved: be = -0.5 }) {
               const Ue = new Uo({ checkCorrectEvent: (Ve) => Ve.button === 0 && Ve.ctrlKey || Ve.button === 2 });
-              return new Fa({ clickTolerance: de, move: (Ve, ze) => ({ pitchDelta: (ze.y - Ve.y) * be }), moveStateManager: Ue, enable: Be, assignEvents: rI });
-            })(t), J = (function({ enable: Be, clickTolerance: de, rollDegreesPerPixelMoved: be = 0.3 }, Ue) {
+              return new Fa({ clickTolerance: ce, move: (Ve, ze) => ({ pitchDelta: (ze.y - Ve.y) * be }), moveStateManager: Ue, enable: Be, assignEvents: rI });
+            })(t), J = (function({ enable: Be, clickTolerance: ce, rollDegreesPerPixelMoved: be = 0.3 }, Ue) {
               const Ve = new Uo({ checkCorrectEvent: (ze) => ze.button === 2 && ze.ctrlKey });
-              return new Fa({ clickTolerance: de, move: (ze, Ye) => {
+              return new Fa({ clickTolerance: ce, move: (ze, Ye) => {
                 const gt = Ue();
                 let tt = (Ye.x - ze.x) * be;
                 return Ye.y < gt.y && (tt = -tt), { rollDelta: tt };
               }, moveStateManager: Ve, enable: Be, assignEvents: rI });
             })(t, M);
             g.dragRotate = new is(t, N, W, J), this._add("mouseRotate", N, ["mousePitch"]), this._add("mousePitch", W, ["mouseRotate", "mouseRoll"]), this._add("mouseRoll", J, ["mousePitch"]), t.interactive && t.dragRotate && g.dragRotate.enable();
-            const oe = (function({ enable: Be, clickTolerance: de }) {
+            const oe = (function({ enable: Be, clickTolerance: ce }) {
               const be = new Uo({ checkCorrectEvent: (Ue) => Ue.button === 0 && !Ue.ctrlKey });
-              return new Fa({ clickTolerance: de, move: (Ue, Ve) => ({ around: Ve, panDelta: Ve.sub(Ue) }), activateOnStart: !0, moveStateManager: be, enable: Be, assignEvents: rI });
+              return new Fa({ clickTolerance: ce, move: (Ue, Ve) => ({ around: Ve, panDelta: Ve.sub(Ue) }), activateOnStart: !0, moveStateManager: be, enable: Be, assignEvents: rI });
             })(t), Ie = new nc(t, g);
             g.dragPan = new ta(C, oe, Ie), this._add("mousePan", oe), this._add("touchPan", Ie, ["touchZoom", "touchRotate"]), t.interactive && t.dragPan && g.dragPan.enable(t.dragPan);
             const fe = new ac(), le = new gc();
@@ -24997,7 +24997,7 @@ ${b.shaderPreludeCode.vertexSource}`, define: b.shaderDefine }, defaultProjectio
             const le = Math.max(C.width, C.height), pe = le / Ie.scaleOfZoom, _e = Ie.pixelPathLength;
             typeof Ie.scaleOfMinZoom == "number" && (fe = Math.sqrt(le / Ie.scaleOfMinZoom / _e * 2));
             const Be = fe * fe;
-            function de(tt) {
+            function ce(tt) {
               const Pt = (pe * pe - le * le + (tt ? -1 : 1) * Be * Be * _e * _e) / (2 * (tt ? pe : le) * Be * _e);
               return Math.log(Math.sqrt(Pt * Pt + 1) - Pt);
             }
@@ -25007,13 +25007,13 @@ ${b.shaderPreludeCode.vertexSource}`, define: b.shaderDefine }, defaultProjectio
             function Ue(tt) {
               return (Math.exp(tt) + Math.exp(-tt)) / 2;
             }
-            const Ve = de(!1);
+            const Ve = ce(!1);
             let ze = function(tt) {
               return Ue(Ve) / Ue(Ve + fe * tt);
             }, Ye = function(tt) {
               return le * ((Ue(Ve) * (be(Pt = Ve + fe * tt) / Ue(Pt)) - be(Ve)) / Be) / _e;
               var Pt;
-            }, gt = (de(!0) - Ve) / fe;
+            }, gt = (ce(!0) - Ve) / fe;
             if (Math.abs(_e) < 2e-6 || !isFinite(gt)) {
               if (Math.abs(le - pe) < 1e-6) return this.easeTo(t, g);
               const tt = pe < le ? -1 : 1;
@@ -25329,9 +25329,9 @@ ${b.shaderPreludeCode.vertexSource}`, define: b.shaderDefine }, defaultProjectio
             for (let Ue = 0; Ue <= M; Ue++) x.emplaceBack(Ue * N, fe, le);
             for (let Ue = 0; Ue <= M; Ue++) x.emplaceBack(Ue * N, pe, _e);
             for (let Ue = 0; Ue < M; Ue++) R.emplaceBack(Ie + Ue, oe + Ue, oe + Ue + 1), R.emplaceBack(Ie + Ue, oe + Ue + 1, Ie + Ue + 1), R.emplaceBack(0 + Ue, J + Ue + 1, J + Ue), R.emplaceBack(0 + Ue, 0 + Ue + 1, J + Ue + 1);
-            const Be = x.length, de = Be + 2 * (M + 1);
+            const Be = x.length, ce = Be + 2 * (M + 1);
             for (const Ue of [0, 1]) for (let Ve = 0; Ve <= M; Ve++) for (const ze of [0, 1]) x.emplaceBack(Ue * r.a6, Ve * N, ze);
-            for (let Ue = 0; Ue < 2 * M; Ue += 2) R.emplaceBack(Be + Ue, Be + Ue + 1, Be + Ue + 3), R.emplaceBack(Be + Ue, Be + Ue + 3, Be + Ue + 2), R.emplaceBack(de + Ue, de + Ue + 3, de + Ue + 1), R.emplaceBack(de + Ue, de + Ue + 2, de + Ue + 3);
+            for (let Ue = 0; Ue < 2 * M; Ue += 2) R.emplaceBack(Be + Ue, Be + Ue + 1, Be + Ue + 3), R.emplaceBack(Be + Ue, Be + Ue + 3, Be + Ue + 2), R.emplaceBack(ce + Ue, ce + Ue + 3, ce + Ue + 1), R.emplaceBack(ce + Ue, ce + Ue + 2, ce + Ue + 3);
             const be = new Yi(b.createVertexBuffer(x, Qu.members), b.createIndexBuffer(R), r.aV.simpleSegment(0, 0, x.length, R.length));
             return this._meshCache[w] = be, be;
           }
@@ -27009,51 +27009,51 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
     }
     let r = 0;
     const S = () => {
-      const G = I.map((ce) => a.project(ce.coordinates)), K = I.length, Z = B * B, j = Q * Q, O = (ce, se) => {
-        const me = G[ce].x - G[se].x, z = G[ce].y - G[se].y;
+      const G = I.map((de) => a.project(de.coordinates)), K = I.length, Z = B * B, j = Q * Q, O = (de, se) => {
+        const me = G[de].x - G[se].x, z = G[de].y - G[se].y;
         return me * me + z * z;
-      }, L = Array.from({ length: K }, (ce, se) => se), te = (ce) => {
-        for (; L[ce] !== ce; ) ce = L[ce] = L[L[ce]];
-        return ce;
-      }, X = (ce, se) => {
-        const me = te(ce), z = te(se);
+      }, L = Array.from({ length: K }, (de, se) => se), te = (de) => {
+        for (; L[de] !== de; ) de = L[de] = L[L[de]];
+        return de;
+      }, X = (de, se) => {
+        const me = te(de), z = te(se);
         me !== z && (L[me] = z);
       }, T = new Array(K).fill(!1);
-      for (let ce = 0; ce < K; ce++)
-        for (let se = ce + 1; se < K; se++)
-          O(ce, se) <= Z && (T[ce] = T[se] = !0, X(ce, se));
-      for (let ce = 0; ce < K; ce++)
-        for (let se = ce + 1; se < K; se++)
-          (T[ce] || T[se]) && O(ce, se) <= j && X(ce, se);
+      for (let de = 0; de < K; de++)
+        for (let se = de + 1; se < K; se++)
+          O(de, se) <= Z && (T[de] = T[se] = !0, X(de, se));
+      for (let de = 0; de < K; de++)
+        for (let se = de + 1; se < K; se++)
+          (T[de] || T[se]) && O(de, se) <= j && X(de, se);
       const ie = /* @__PURE__ */ new Map();
-      for (let ce = 0; ce < K; ce++) {
-        const se = te(ce), me = ie.get(se);
-        me ? me.push(ce) : ie.set(se, [ce]);
+      for (let de = 0; de < K; de++) {
+        const se = te(de), me = ie.get(se);
+        me ? me.push(de) : ie.set(se, [de]);
       }
-      const he = [], Ce = [];
-      for (const ce of ie.values()) {
-        if (ce.length === 1) {
-          Ce.push(I[ce[0]]);
+      const he = [], Ae = [];
+      for (const de of ie.values()) {
+        if (de.length === 1) {
+          Ae.push(I[de[0]]);
           continue;
         }
         let se = 0, me = 0, z = 1 / 0, ee = 1 / 0, ge = -1 / 0, ue = -1 / 0;
-        for (const ve of ce) {
+        for (const ve of de) {
           const [Qe, De] = I[ve].coordinates;
           se += Qe, me += De, z = Math.min(z, Qe), ge = Math.max(ge, Qe), ee = Math.min(ee, De), ue = Math.max(ue, De);
         }
-        const we = ce.length;
+        const we = de.length;
         he.push({
-          id: `cluster:${ce.map((ve) => I[ve].id).sort().join(",")}`,
+          id: `cluster:${de.map((ve) => I[ve].id).sort().join(",")}`,
           coordinates: [se / we, me / we],
           count: we,
-          pointIds: ce.map((ve) => I[ve].id),
+          pointIds: de.map((ve) => I[ve].id),
           bounds: [
             [z, ee],
             [ge, ue]
           ]
         });
       }
-      U((ce) => ce.clusters.length === he.length && ce.singles.length === Ce.length && ce.clusters.every((me, z) => me.id === he[z].id) && ce.singles.every((me, z) => me === Ce[z]) ? ce : { clusters: he, singles: Ce });
+      U((de) => de.clusters.length === he.length && de.singles.length === Ae.length && de.clusters.every((me, z) => me.id === he[z].id) && de.singles.every((me, z) => me === Ae[z]) ? de : { clusters: he, singles: Ae });
     }, V = () => {
       cancelAnimationFrame(r), r = requestAnimationFrame(S);
     };
@@ -27173,7 +27173,7 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
       presentational: K = !1,
       dataTestId: Z,
       className: j
-    } = I, O = I.variant ?? "color", L = jc[Q ? "xl" : B], te = !!V, X = O === "color" || O === "icon" || O === "letter", T = O === "person" && "firstName" in I ? I.firstName + I.lastName : (O === "team" || O === "company") && "name" in I ? I.name : null, ie = X ? I.color ?? "radical" : T ? O === "person" && "src" in I && I.src ? "grey" : zh(T) ?? "grey" : "neutral", he = Kx(), Ce = Q ? 32 : { xs: 12, sm: 16, md: 20, lg: 24 }[L.icon], ce = { xs: 20, sm: 24, md: 32, lg: 40 }, se = jc[B].avatar, me = Q ? ce[L.avatar] / ce[se] : 1, z = (At) => /* @__PURE__ */ h(
+    } = I, O = I.variant ?? "color", L = jc[Q ? "xl" : B], te = !!V, X = O === "color" || O === "icon" || O === "letter", T = O === "person" && "firstName" in I ? I.firstName + I.lastName : (O === "team" || O === "company") && "name" in I ? I.name : null, ie = X ? I.color ?? "radical" : T ? O === "person" && "src" in I && I.src ? "grey" : zh(T) ?? "grey" : "neutral", he = Kx(), Ae = Q ? 32 : { xs: 12, sm: 16, md: 20, lg: 24 }[L.icon], de = { xs: 20, sm: 24, md: 32, lg: 40 }, se = jc[B].avatar, me = Q ? de[L.avatar] / de[se] : 1, z = (At) => /* @__PURE__ */ h(
       "span",
       {
         className: "flex shrink-0 items-center justify-center transition-transform duration-200 ease-out",
@@ -27187,8 +27187,8 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
         size: L.icon,
         color: "#ffffff",
         style: {
-          width: Ce,
-          height: Ce,
+          width: Ae,
+          height: Ae,
           transition: "width 200ms ease-out, height 200ms ease-out"
         }
       }
@@ -27202,7 +27202,7 @@ const C2 = (a, I, f, B = 12, Q = 164) => {
           className: "font-semibold leading-none",
           style: {
             color: Da,
-            fontSize: Math.round(Ce * 0.78),
+            fontSize: Math.round(Ae * 0.78),
             transition: "font-size 200ms ease-out"
           },
           children: I.letter.charAt(0).toUpperCase()
@@ -27440,19 +27440,19 @@ const P1 = (a, I) => (!_A && typeof document < "u" && (_A = document.createEleme
       }, O = (S * f2) ** 2;
       for (let T = 0; T < K; T++)
         for (let ie = T + 1; ie < K; ie++) {
-          const he = G[T].x - G[ie].x, Ce = G[T].y - G[ie].y;
-          if (he * he + Ce * Ce <= O) {
-            const ce = j(T), se = j(ie);
-            ce !== se && (Z[ce] = se);
+          const he = G[T].x - G[ie].x, Ae = G[T].y - G[ie].y;
+          if (he * he + Ae * Ae <= O) {
+            const de = j(T), se = j(ie);
+            de !== se && (Z[de] = se);
           }
         }
       const L = {}, te = [];
       for (let T = 0; T < K; T++) {
         const ie = I[T];
         if (!ie.label) continue;
-        const he = G[T], Ce = "right", ce = [Ce, ...u2.filter((me) => me !== Ce)];
+        const he = G[T], Ae = "right", de = [Ae, ...u2.filter((me) => me !== Ae)];
         let se = null;
-        for (const me of ce) {
+        for (const me of de) {
           const z = h2(me, he.x, he.y, ie, f), ee = V.some((ue) => Id(z, ue)), ge = te.some((ue) => Id(z, ue));
           if (!ee && !ge) {
             se = me, te.push(z);
@@ -27468,7 +27468,7 @@ const P1 = (a, I) => (!_A && typeof document < "u" && (_A = document.createEleme
         I[T].label && X.has(j(T)) && (L[I[T].id] = null);
       Q((T) => {
         const ie = Object.keys(L);
-        return ie.length === Object.keys(T).length && ie.every((Ce) => T[Ce] === L[Ce]) ? T : L;
+        return ie.length === Object.keys(T).length && ie.every((Ae) => T[Ae] === L[Ae]) ? T : L;
       });
     }, r = () => {
       cancelAnimationFrame(k), k = requestAnimationFrame(U);
@@ -27573,9 +27573,9 @@ const G1 = V1, G0 = 4, E0 = 3, U2 = 1.3, Q2 = 1.08, T0 = "cubic-bezier(0.16, 1, 
       0,
       I <= G0 ? G0 : E0
     ), Z = Math.max(0, I - K.length), j = Z > 0, O = Z > 99 ? "+99" : `+${Z}`, L = K.length + (j ? 1 : 0), te = N0[L] ?? N0[4], X = V ? U2 : 1, T = V ? Q2 : 1, ie = (he) => {
-      const [Ce, ce] = te[he] ?? [0, 0];
+      const [Ae, de] = te[he] ?? [0, 0];
       return {
-        transform: `translate(${Ce * X}px, ${ce * X}px) scale(${T})`,
+        transform: `translate(${Ae * X}px, ${de * X}px) scale(${T})`,
         transition: `transform 240ms ${T0}`
       };
     };
@@ -27605,17 +27605,17 @@ const G1 = V1, G0 = 4, E0 = 3, U2 = 1.3, Q2 = 1.08, T0 = "cubic-bezier(0.16, 1, 
               style: { left: -Ec / 2, top: -Ec / 2, width: Ec, height: Ec }
             }
           ),
-          K.map((he, Ce) => /* @__PURE__ */ h(
+          K.map((he, Ae) => /* @__PURE__ */ h(
             "span",
             {
               className: "absolute left-0 top-0 flex leading-none",
-              style: { zIndex: Ce, ...ie(Ce) },
+              style: { zIndex: Ae, ...ie(Ae) },
               children: /* @__PURE__ */ h(G1, { ...he, showLabel: !1 })
             },
-            Ce
+            Ae
           )),
           j && (() => {
-            const [he, Ce] = te[K.length] ?? [0, 0];
+            const [he, Ae] = te[K.length] ?? [0, 0];
             return /* @__PURE__ */ $(
               "span",
               {
@@ -27628,7 +27628,7 @@ const G1 = V1, G0 = 4, E0 = 3, U2 = 1.3, Q2 = 1.08, T0 = "cubic-bezier(0.16, 1, 
                 style: {
                   zIndex: E0,
                   backgroundColor: "hsl(var(--white-90))",
-                  transform: `translate(${he * X}px, ${Ce * X}px) translate(-50%, -50%) scale(${T})`,
+                  transform: `translate(${he * X}px, ${Ae * X}px) translate(-50%, -50%) scale(${T})`,
                   transition: `transform 240ms ${T0}`
                 },
                 children: [
@@ -28056,8 +28056,8 @@ const K2 = ({
   controlLabels: T,
   showCurrentLocation: ie = !1,
   fullScreen: he = !1,
-  projection: Ce = "mercator",
-  loading: ce = !1,
+  projection: Ae = "mercator",
+  loading: de = !1,
   ariaLabel: se,
   dataTestId: me,
   className: z
@@ -28080,8 +28080,8 @@ const K2 = ({
   nt.current = f;
   const je = Re(B);
   je.current = B;
-  const Qt = Re(Ce);
-  Qt.current = Ce;
+  const Qt = Re(Ae);
+  Qt.current = Ae;
   const Mt = Re(At);
   Mt.current = At;
   const Nt = G ?? K === void 0, Gt = Re(!1);
@@ -28139,7 +28139,7 @@ const K2 = ({
   St.current = Rt;
   const ni = Re(null), vt = Re(K ?? H0);
   Xe(() => {
-    if (ce) return;
+    if (de) return;
     const Et = ue.current;
     if (!Et) return;
     ni.current = St.current;
@@ -28185,7 +28185,7 @@ const K2 = ({
     return $t.on("click", Jt), () => {
       we.current = null, Qe(null), $t.remove();
     };
-  }, [ce, j, O, L, te, Nt]), Xe(() => {
+  }, [de, j, O, L, te, Nt]), Xe(() => {
     const Et = we.current;
     !Et || ni.current === Rt || (ni.current = Rt, Et.setStyle(Rt), Et.once(
       "style.load",
@@ -28195,16 +28195,16 @@ const K2 = ({
     const Et = we.current;
     if (Et)
       try {
-        Et.setProjection({ type: Ce });
+        Et.setProjection({ type: Ae });
       } catch {
       }
-  }, [Ce]), Xe(() => {
+  }, [Ae]), Xe(() => {
     if (!V) return;
     const Et = we.current, si = ut.current.find(($t) => $t.id === V);
     Et && si && Tf(Et, si, !$e);
   }, [V, $e]);
   const ri = f.length > 0 || B.length > 0;
-  return /* @__PURE__ */ h(oC, { dataTestId: me, children: ce ? /* @__PURE__ */ h(K2, { className: z }) : /* @__PURE__ */ $(
+  return /* @__PURE__ */ h(oC, { dataTestId: me, children: de ? /* @__PURE__ */ h(K2, { className: z }) : /* @__PURE__ */ $(
     "div",
     {
       ref: st,
@@ -28688,15 +28688,15 @@ const O2 = ({
         hiddenAvatar: te
       }
     );
-  const ie = (ce) => {
-    if (ce.key === " ")
-      ce.preventDefault(), S(!I);
-    else if (ce.key === "Enter" && O)
+  const ie = (de) => {
+    if (de.key === " ")
+      de.preventDefault(), S(!I);
+    else if (de.key === "Enter" && O)
       S(!I);
-    else if (ce.key === "Enter") {
+    else if (de.key === "Enter") {
       if (L) return;
       !Q || k ? U(B) : Q && r(B);
-    } else ce.key === "ArrowDown" ? Pd(ce.currentTarget, V) : ce.key === "ArrowUp" && Vd(ce.currentTarget, G);
+    } else de.key === "ArrowDown" ? Pd(de.currentTarget, V) : de.key === "ArrowUp" && Vd(de.currentTarget, G);
   }, he = () => {
     if (X)
       S(!I), T(!1);
@@ -28706,7 +28706,7 @@ const O2 = ({
     }
   };
   if (!B.subItems?.length) return null;
-  const Ce = Q || k;
+  const Ae = Q || k;
   return /* @__PURE__ */ $(ai, { children: [
     /* @__PURE__ */ $("div", { className: "flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1", children: [
       /* @__PURE__ */ h(
@@ -28752,13 +28752,13 @@ const O2 = ({
             /* @__PURE__ */ h(
               _y,
               {
-                checked: Ce,
+                checked: Ae,
                 disabled: L,
                 onClick: he,
                 onKeyDown: ie,
                 indeterminate: k,
-                onPointerDown: (ce) => {
-                  ce.stopPropagation(), T(!1);
+                onPointerDown: (de) => {
+                  de.stopPropagation(), T(!1);
                 },
                 "data-avatarname-navigator-element": "true",
                 className: Fe("ml-auto", O ? "opacity-0" : "")
@@ -28937,8 +28937,8 @@ const O0 = ({
   notFoundTitle: T,
   notFoundSubtitle: ie,
   className: he,
-  actions: Ce,
-  onCreate: ce,
+  actions: Ae,
+  onCreate: de,
   onCreateLabel: se,
   singleSelector: me = !1,
   loading: z = !1,
@@ -28989,17 +28989,17 @@ const O0 = ({
     [a, De]
   ), ke = Je(
     (it) => {
-      if (it.index === 0 && ce)
+      if (it.index === 0 && de)
         return /* @__PURE__ */ h(
           O0,
           {
             label: se ?? "",
-            onCreate: () => ce?.(Q),
+            onCreate: () => de?.(Q),
             goToFirst: ve,
             goToLast: Qe
           }
         );
-      const Ke = ce ? it.index - 1 : it.index, Le = I[Ke], { selected: At, partialSelected: ut } = ye(Le);
+      const Ke = de ? it.index - 1 : it.index, Le = I[Ke], { selected: At, partialSelected: ut } = ye(Le);
       return /* @__PURE__ */ h(
         Lc,
         {
@@ -29023,7 +29023,7 @@ const O0 = ({
       );
     },
     [
-      ce,
+      de,
       se,
       ee,
       I,
@@ -29077,17 +29077,17 @@ const O0 = ({
     }
   })), [a, I, Z]), Ge = Je(
     (it) => {
-      if (it.index === 0 && ce)
+      if (it.index === 0 && de)
         return /* @__PURE__ */ h(
           O0,
           {
             label: se ?? "",
-            onCreate: () => ce?.(Q),
+            onCreate: () => de?.(Q),
             goToFirst: ve,
             goToLast: Qe
           }
         );
-      const Ke = ce ? it.index - 1 : it.index, Le = Pe[Ke].parent, At = Pe[Ke].subItem;
+      const Ke = de ? it.index - 1 : it.index, Le = Pe[Ke].parent, At = Pe[Ke].subItem;
       if (!Le) {
         const nt = {
           id: At.subId,
@@ -29181,7 +29181,7 @@ const O0 = ({
       S,
       r,
       ge,
-      ce,
+      de,
       se
     ]
   ), [$e, ht] = kt(() => {
@@ -29208,7 +29208,7 @@ const O0 = ({
     }
     const Le = it > 0 && Ke === it, At = Ke > 0;
     return [Le, At];
-  }, [I, De, a]), Ct = Pe.length, st = !me && (te || X), Yt = Ce && Ce.length > 0, Rt = !z && (!me && st || Yt);
+  }, [I, De, a]), Ct = Pe.length, st = !me && (te || X), Yt = Ae && Ae.length > 0, Rt = !z && (!me && st || Yt);
   return /* @__PURE__ */ $(
     "div",
     {
@@ -29276,14 +29276,14 @@ const O0 = ({
                   ]
                 }
               ),
-              !z && (!!we || ce) && /* @__PURE__ */ h("div", { className: "h-full", children: a ? /* @__PURE__ */ h(
+              !z && (!!we || de) && /* @__PURE__ */ h("div", { className: "h-full", children: a ? /* @__PURE__ */ h(
                 fh,
                 {
                   height: Nf,
-                  itemCount: Ct + (ce ? 1 : 0),
+                  itemCount: Ct + (de ? 1 : 0),
                   itemSize: (it) => {
-                    if (it === 0 && ce) return Zf;
-                    const Ke = ce ? it - 1 : it;
+                    if (it === 0 && de) return Zf;
+                    const Ke = de ? it - 1 : it;
                     return Pe[Ke]?.parent === null ? L2 : Zf;
                   },
                   renderer: Ge,
@@ -29293,7 +29293,7 @@ const O0 = ({
                 fh,
                 {
                   height: Nf,
-                  itemCount: I.length + (ce ? 1 : 0),
+                  itemCount: I.length + (de ? 1 : 0),
                   itemSize: Zf,
                   renderer: ke,
                   ref: ue
@@ -29314,7 +29314,7 @@ const O0 = ({
             selectAllLabel: te,
             clearLabel: X,
             disabled: ee,
-            actions: Ce
+            actions: Ae
           }
         )
       ]
@@ -29518,7 +29518,7 @@ const O0 = ({
       (me) => me.subItems && me.subItems.length > 0
     ),
     [f]
-  ), Ce = kt(() => he ? f.flatMap(
+  ), Ae = kt(() => he ? f.flatMap(
     (me) => (me.subItems ?? []).map((z) => ({
       parent: me,
       subItem: z
@@ -29531,7 +29531,7 @@ const O0 = ({
       subAvatar: me.avatar,
       subDeactivated: me.deactivated
     }
-  })), [he, f]), ce = Ce.length === 0 ? void 0 : Ce.length === 1 ? Ce[0].subItem.subName : Ce.length + " " + I, se = Ce.length === 1 ? Ce[0].subItem.subName : void 0;
+  })), [he, f]), de = Ae.length === 0 ? void 0 : Ae.length === 1 ? Ae[0].subItem.subName : Ae.length + " " + I, se = Ae.length === 1 ? Ae[0].subItem.subName : void 0;
   return /* @__PURE__ */ h(
     Ak,
     {
@@ -29541,14 +29541,14 @@ const O0 = ({
       labelIcon: U,
       "aria-expanded": !1,
       "aria-controls": "listbox",
-      icon: r && !ce ? r : void 0,
+      icon: r && !de ? r : void 0,
       error: S,
       status: V,
       hint: G,
       hideLabel: Z,
       maxLength: j,
       clearable: !1,
-      value: ce,
+      value: de,
       disabled: B,
       loading: O,
       required: L,
@@ -29558,8 +29558,8 @@ const O0 = ({
         type: "person",
         firstName: se,
         lastName: "",
-        src: Ce[0].subItem.subAvatar,
-        deactivated: Ce[0].subItem.subDeactivated
+        src: Ae[0].subItem.subAvatar,
+        deactivated: Ae[0].subItem.subDeactivated
       },
       append: X ?? /* @__PURE__ */ h(ai, { children: /* @__PURE__ */ h(lk, { open: ie, disabled: B, size: T }) }),
       children: /* @__PURE__ */ h(
@@ -29569,15 +29569,15 @@ const O0 = ({
           className: Fe(
             "my-auto flex items-center pr-1",
             a && "text-f1-foreground-secondary",
-            ce && "text-f1-foreground",
-            Ce.length === 1 && !Q || r && !ce ? "pl-8" : "pl-2"
+            de && "text-f1-foreground",
+            Ae.length === 1 && !Q || r && !de ? "pl-8" : "pl-2"
           ),
           children: /* @__PURE__ */ h(
             Yn,
             {
               tag: "span",
-              className: Ce.length === 1 && Ce[0].subItem.subDeactivated ? "text-f1-foreground-disabled" : void 0,
-              children: Ce.length === 0 ? a ?? "" : Ce.length === 1 ? Ce[0].subItem.subName : `${Ce.length} ${I}`
+              className: Ae.length === 1 && Ae[0].subItem.subDeactivated ? "text-f1-foreground-disabled" : void 0,
+              children: Ae.length === 0 ? a ?? "" : Ae.length === 1 ? Ae[0].subItem.subName : `${Ae.length} ${I}`
             }
           )
         }
@@ -29772,7 +29772,7 @@ const O0 = ({
   }
   const he = (z) => {
     r(z), V(z);
-  }, Ce = (z, ee) => {
+  }, Ae = (z, ee) => {
     a.onItemExpandedChange(z.id, ee), k(
       Q.map(
         (ge) => ge.id === z.id ? { ...ge, expanded: !z.expanded } : ge
@@ -29818,16 +29818,16 @@ const O0 = ({
     G,
     k
   ]);
-  const ce = Re(null), [se, me] = Ne(0);
+  const de = Re(null), [se, me] = Ne(0);
   return yg(() => {
     const z = () => {
-      ce.current && me(ce.current.offsetWidth);
+      de.current && me(de.current.offsetWidth);
     };
     return z(), window.addEventListener("resize", z), () => window.removeEventListener("resize", z);
   }, []), a.alwaysOpen ? /* @__PURE__ */ h(
     "div",
     {
-      ref: ce,
+      ref: de,
       className: Fe(
         "scrollbar-macos relative overflow-hidden rounded-xl border-[1px] border-solid border-f1-border-secondary bg-transparent p-0",
         a.width ? "w-fit" : "w-full"
@@ -29849,7 +29849,7 @@ const O0 = ({
           selectedEntities: a.selectedEntities ?? [],
           search: U,
           onSearch: he,
-          onToggleExpand: Ce,
+          onToggleExpand: Ae,
           searchPlaceholder: a.searchPlaceholder,
           selectAllLabel: a.selectAllLabel,
           clearLabel: a.clearLabel,
@@ -29924,7 +29924,7 @@ const O0 = ({
             selectedEntities: a.selectedEntities ?? [],
             search: U,
             onSearch: he,
-            onToggleExpand: Ce,
+            onToggleExpand: Ae,
             searchPlaceholder: a.searchPlaceholder,
             selectAllLabel: a.selectAllLabel,
             clearLabel: a.clearLabel,
@@ -30349,24 +30349,24 @@ function pR({
   const X = () => {
     if (!Q || O.current || (K?.length ?? 0) >= I)
       return;
-    const Ce = Q(), ce = L.current;
-    O.current = Ce, Ce.then((se) => {
-      L.current === ce && Z(se);
+    const Ae = Q(), de = L.current;
+    O.current = Ae, Ae.then((se) => {
+      L.current === de && Z(se);
     }).catch(() => {
     }).finally(() => {
-      O.current === Ce && (O.current = null);
+      O.current === Ae && (O.current = null);
     });
-  }, T = (Ce, ce) => {
-    Ce.stopPropagation(), G(V + (r ? -1 : 1)), S(!r), k?.(ce), r || te(ce, j);
-  }, ie = K?.map((Ce) => Ce.name).join(", ") || "", he = /* @__PURE__ */ h(
+  }, T = (Ae, de) => {
+    Ae.stopPropagation(), G(V + (r ? -1 : 1)), S(!r), k?.(de), r || te(de, j);
+  }, ie = K?.map((Ae) => Ae.name).join(", ") || "", he = /* @__PURE__ */ h(
     ks,
     {
       ref: j,
       variant: "outline",
       size: "md",
       compact: !0,
-      onClick: (Ce) => {
-        T(Ce, a);
+      onClick: (Ae) => {
+        T(Ae, a);
       },
       className: Fe(
         "flex items-center gap-1 px-0.5 font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
@@ -30681,10 +30681,10 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
   hideTitle: T = !1,
   hideGroup: ie = !1,
   pinned: he = !1,
-  pinnedLabel: Ce,
-  relativeDate: ce = !1
+  pinnedLabel: Ae,
+  relativeDate: de = !1
 }) => {
-  const se = vs(), me = vs(), z = Eo(), ee = Re(null), [ge, ue] = Ne(null), [we, ve] = Ne(!1), Qe = [V.views, V.comments].filter(Boolean).join(" · "), De = te && ge?.id === a && ge.description === k, ye = !De && !X, ke = ce ? yk(B, z) : xy(B, { locale: z }), Pe = !!U, Ge = U ? () => U(a) : void 0, $e = (st) => {
+  const se = vs(), me = vs(), z = Eo(), ee = Re(null), [ge, ue] = Ne(null), [we, ve] = Ne(!1), Qe = [V.views, V.comments].filter(Boolean).join(" · "), De = te && ge?.id === a && ge.description === k, ye = !De && !X, ke = de ? yk(B, z) : xy(B, { locale: z }), Pe = !!U, Ge = U ? () => U(a) : void 0, $e = (st) => {
     st.stopPropagation();
   }, ht = I ? `${I.firstName} ${I.lastName}` : void 0, Ct = (st) => {
     st.preventDefault(), st.stopPropagation(), k && ue({ id: a, description: k });
@@ -30790,8 +30790,8 @@ const yR = () => /* @__PURE__ */ $("div", { className: "flex flex-col justify-ar
                 {
                   icon: bd,
                   size: "xs",
-                  "aria-label": Ce,
-                  role: Ce ? "img" : void 0
+                  "aria-label": Ae,
+                  role: Ae ? "img" : void 0
                 }
               )
             ] })
@@ -31417,14 +31417,14 @@ function qR({
     effectiveChatWidth: T,
     chatWidthBounds: ie,
     panelOverlays: he,
-    setFrameWidth: Ce,
-    resizable: ce,
+    setFrameWidth: Ae,
+    resizable: de,
     panelSide: se,
     panelContent: me,
     panelContentSide: z,
     restoringPanelContentId: ee,
     isResizing: ge
-  } = Oh(), ue = O === "fullscreen", we = O === "canvas", { open: ve } = Md(), Qe = ce ? T ?? Pf : Math.min(Pf, ie?.max ?? Pf), ye = L?.coversChat === !0 ? 0 : Qe, ke = se === "left", Pe = z !== se, Ge = !!(me || ee), $e = Re(Ge);
+  } = Oh(), ue = O === "fullscreen", we = O === "canvas", { open: ve } = Md(), Qe = de ? T ?? Pf : Math.min(Pf, ie?.max ?? Pf), ye = L?.coversChat === !0 ? 0 : Qe, ke = se === "left", Pe = z !== se, Ge = !!(me || ee), $e = Re(Ge);
   Xe(() => {
     $e.current = Ge;
   });
@@ -31457,11 +31457,11 @@ function qR({
   ), Ri = Re(null), Qi = V + (k === "locked" ? G : 0);
   Xe(() => {
     const _t = Ri.current?.parentElement;
-    if (!_t || !Ce) return;
+    if (!_t || !Ae) return;
     let Jt = 0;
     const pi = () => {
       const { width: xi } = _t.getBoundingClientRect();
-      xi <= 0 || Ce(xi - Qi);
+      xi <= 0 || Ae(xi - Qi);
     }, Xi = () => {
       cancelAnimationFrame(Jt), Jt = requestAnimationFrame(pi);
     };
@@ -31470,7 +31470,7 @@ function qR({
     return Mi.observe(_t), window.addEventListener("resize", Xi), () => {
       cancelAnimationFrame(Jt), Mi.disconnect(), window.removeEventListener("resize", Xi);
     };
-  }, [Ce, Qi]);
+  }, [Ae, Qi]);
   const _i = zR(), gi = Re(null);
   Xe(() => {
     const _t = gi.current;
@@ -32609,7 +32609,7 @@ const CM = Hn(IM), IU = ({
     }
     const X = O.ownerDocument.createElement("div"), T = O.ownerDocument.createElement("div");
     X.dataset.sidebarUnreadPortal = "above", T.dataset.sidebarUnreadPortal = "below", X.style.display = "contents", T.style.display = "contents", te.insertBefore(X, L), te.insertBefore(T, L.nextSibling), Q({ above: X, below: T });
-    let ie = null, he = null, Ce = null, ce = !1, se = "";
+    let ie = null, he = null, Ae = null, de = !1, se = "";
     const me = () => {
       if (O.querySelector(
         "[data-sidebar-tab-panel-searching='true']"
@@ -32691,13 +32691,13 @@ const CM = Hn(IM), IU = ({
         });
       }), we.size === 0 && ve();
     }, ee = () => {
-      !ce || he !== null || (he = requestAnimationFrame(() => {
+      !de || he !== null || (he = requestAnimationFrame(() => {
         he = null, z();
       }));
     };
-    Ce = requestAnimationFrame(() => {
-      Ce = requestAnimationFrame(() => {
-        Ce = null, ce = !0, z();
+    Ae = requestAnimationFrame(() => {
+      Ae = requestAnimationFrame(() => {
+        Ae = null, de = !0, z();
       });
     });
     const ge = new MutationObserver(ee);
@@ -32710,7 +32710,7 @@ const CM = Hn(IM), IU = ({
       childList: !0,
       subtree: !0
     }), () => {
-      X.remove(), T.remove(), V(), ie?.disconnect(), ge.disconnect(), he !== null && cancelAnimationFrame(he), Ce !== null && cancelAnimationFrame(Ce);
+      X.remove(), T.remove(), V(), ie?.disconnect(), ge.disconnect(), he !== null && cancelAnimationFrame(he), Ae !== null && cancelAnimationFrame(Ae);
     };
   }, [V, a, Z]);
   const j = Je(
@@ -33283,13 +33283,13 @@ const yM = ({
   onReorderFinish: r,
   isSortable: S = !0
 }) => {
-  const V = xt(), { isDragging: G, setIsDragging: K, draggedItemId: Z, setDraggedItemId: j } = cm(), { isActive: O } = Vh(), L = O(a.href, { exact: a.exactMatch }), te = Re(!1), [X, T] = Ne(!1), ie = Q === 0, he = Q === k - 1, Ce = k === 1, ce = kt(() => {
+  const V = xt(), { isDragging: G, setIsDragging: K, draggedItemId: Z, setDraggedItemId: j } = cm(), { isActive: O } = Vh(), L = O(a.href, { exact: a.exactMatch }), te = Re(!1), [X, T] = Ne(!1), ie = Q === 0, he = Q === k - 1, Ae = k === 1, de = kt(() => {
     const ue = [];
-    return !Ce && !ie && ue.push({
+    return !Ae && !ie && ue.push({
       label: V.actions.moveUp,
       onClick: () => U?.(Q, Q - 1),
       icon: Pk
-    }), !Ce && !he && ue.push({
+    }), !Ae && !he && ue.push({
       label: V.actions.moveDown,
       onClick: () => U?.(Q, Q + 1),
       icon: Vk
@@ -33299,7 +33299,7 @@ const yM = ({
       icon: ad,
       critical: !0
     }), ue;
-  }, [Ce, ie, he, V, U, Q, B, a]), se = () => {
+  }, [Ae, ie, he, V, U, Q, B, a]), se = () => {
     K(!0), T(!1), j(a.href || null), te.current = !0;
   }, me = () => {
     K(!1), j(null), r(), setTimeout(() => {
@@ -33365,13 +33365,13 @@ const yM = ({
           {
             open: X,
             onOpenChange: T,
-            items: ce,
+            items: de,
             children: /* @__PURE__ */ h("div", { className: "flex items-center justify-center", role: "list", children: /* @__PURE__ */ h(ii, { icon: gd, size: "sm" }) })
           }
         )
       }
     )
-  ] }), [a, L, X, z, ce, I]);
+  ] }), [a, L, X, z, de, I]);
   return S ? /* @__PURE__ */ h(
     n1,
     {
@@ -33524,17 +33524,17 @@ function wM({
       X(Qe), r?.(Qe);
     },
     [te, r]
-  ), Ce = Je(
+  ), Ae = Je(
     (ve, Qe) => {
       if (Qe < 0 || Qe >= te.length) return;
       const De = [...te], [ye] = De.splice(ve, 1);
       De.splice(Qe, 0, ye), X(De), r?.(De);
     },
     [te, r]
-  ), [ce, se] = Ne(!1), me = Re(null);
+  ), [de, se] = Ne(!1), me = Re(null);
   Xe(() => {
-    I.length > 0 && !ce && (f([...I]), se(!0));
-  }, [I, f, ce]), Xe(() => {
+    I.length > 0 && !de && (f([...I]), se(!0));
+  }, [I, f, de]), Xe(() => {
     const ve = () => {
       me.current !== null && window.clearTimeout(me.current), me.current = window.setTimeout(() => {
         B.current && I.length > 0 && S();
@@ -33561,7 +33561,7 @@ function wM({
         onRemove: he,
         index: Qe,
         total: te.length,
-        onMove: Ce,
+        onMove: Ae,
         onReorderFinish: () => {
           r?.(te);
         }
@@ -33573,7 +33573,7 @@ function wM({
       te,
       ee,
       he,
-      Ce,
+      Ae,
       r,
       V
     ]
@@ -33919,14 +33919,14 @@ function xM({
     setRailWidth: S,
     setPanelWidth: V,
     isLayoutJumping: G
-  } = yr(), K = Pn(), Z = Q ? SA.rail : 0;
-  Xe(() => (S(Z), () => S(0)), [Z, S]), Xe(() => (V(k), () => V(SA.panel)), [k, V]);
-  const j = Re(null);
+  } = yr(), K = Pn(), Z = Q ? SA.rail : 0, j = !!(a || I || f);
+  Xe(() => (S(Z), () => S(0)), [Z, S]), Xe(() => (V(j ? k : 0), () => V(SA.panel)), [j, k, V]);
+  const O = Re(null);
   Xe(() => {
-    const ee = j.current;
-    ee && (U === "hidden" ? ee.setAttribute("inert", "") : ee.removeAttribute("inert"));
+    const ge = O.current;
+    ge && (U === "hidden" ? ge.setAttribute("inert", "") : ge.removeAttribute("inert"));
   }, [U, Q]);
-  const [O, L] = Ch({ threshold: 1 }), [te, X] = Ch({ threshold: 1 }), T = xt(), ie = G ? (
+  const [L, te] = Ch({ threshold: 1 }), [X, T] = Ch({ threshold: 1 }), ie = xt(), he = G ? (
     // A module change is not a movement to watch: the panel that arrives
     // belongs to a different section, it is not this one on its way
     // somewhere. It lands.
@@ -33941,14 +33941,14 @@ function xM({
     default: {
       duration: K ? 0 : Mo.duration.base
     }
-  }, Ce = /* @__PURE__ */ $(ai, { children: [
+  }, de = /* @__PURE__ */ $(ai, { children: [
     /* @__PURE__ */ h("header", { className: "flex-shrink-0", children: a }),
     I && /* @__PURE__ */ $("nav", { className: "relative flex-grow overflow-y-hidden", children: [
       /* @__PURE__ */ $(Ud, { className: "h-full", children: [
         /* @__PURE__ */ h(
           "div",
           {
-            ref: O,
+            ref: L,
             className: "h-px",
             "aria-hidden": "true"
           },
@@ -33958,7 +33958,7 @@ function xM({
         /* @__PURE__ */ h(
           "div",
           {
-            ref: te,
+            ref: X,
             className: "h-px",
             "aria-hidden": "true"
           },
@@ -33966,8 +33966,8 @@ function xM({
         )
       ] }),
       /* @__PURE__ */ $(Cn, { children: [
-        !L && /* @__PURE__ */ h(CF, { position: "top" }, "shadow-scroll-top"),
-        !X && /* @__PURE__ */ h(CF, { position: "bottom" }, "shadow-scroll-bottom")
+        !te && /* @__PURE__ */ h(CF, { position: "top" }, "shadow-scroll-top"),
+        !T && /* @__PURE__ */ h(CF, { position: "bottom" }, "shadow-scroll-bottom")
       ] })
     ] }),
     /* @__PURE__ */ h("footer", { className: "flex-shrink-0", children: f ? tm(f) && B ? $y(
@@ -33976,9 +33976,9 @@ function xM({
         onDropdownClick: B
       }
     ) : f : null })
-  ] }), ce = Q ? U === "unlocked" : U !== "locked", se = Fe(
+  ] }), se = Q ? U === "unlocked" : U !== "locked", me = Fe(
     "absolute bottom-0 top-0 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
-    ce ? Fe(
+    se ? Fe(
       "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
       r ? "h-full border-y-transparent border-l-transparent bg-f1-background/90" : "h-[calc(100%-16px)] bg-f1-background/60"
     ) : Fe(
@@ -33994,10 +33994,10 @@ function xM({
       // reserved.
       Q && "border-0 border-l border-solid border-f1-border-secondary"
     )
-  ), z = {
-    top: ce ? r ? 0 : "8px" : 0,
-    borderRadius: ce ? r ? "0" : "12px" : "0",
-    left: ce ? Z + (r ? 0 : 8) : Z,
+  ), ee = {
+    top: se ? r ? 0 : "8px" : 0,
+    borderRadius: se ? r ? "0" : "12px" : "0",
+    left: se ? Z + (r ? 0 : 8) : Z,
     // Without a rail the panel leaves by sliding out past the left edge.
     //
     // With one it CANNOT: the rail is transparent, so a panel travelling
@@ -34011,20 +34011,20 @@ function xM({
   return Q ? /* @__PURE__ */ $(
     "aside",
     {
-      "aria-label": T.navigation.sidebar.label,
+      "aria-label": ie.navigation.sidebar.label,
       className: "absolute bottom-0 left-0 top-0 z-10 flex h-full",
       children: [
         /* @__PURE__ */ h("div", { className: "relative z-10 h-full", children: Q }),
-        /* @__PURE__ */ h(
+        j && /* @__PURE__ */ h(
           Ot.div,
           {
             initial: !1,
-            ref: j,
-            className: Fe(se, "z-0"),
-            animate: z,
+            ref: O,
+            className: Fe(me, "z-0"),
+            animate: ee,
             style: { "--ds-sidebar-width": `${k}px` },
-            transition: ie,
-            children: Ce
+            transition: he,
+            children: de
           }
         )
       ]
@@ -34033,12 +34033,12 @@ function xM({
     Ot.aside,
     {
       initial: !1,
-      "aria-label": T.navigation.sidebar.label,
-      className: Fe(se, "left-0 z-10"),
-      animate: z,
+      "aria-label": ie.navigation.sidebar.label,
+      className: Fe(me, "left-0 z-10"),
+      animate: ee,
       style: { "--ds-sidebar-width": `${k}px` },
-      transition: ie,
-      children: Ce
+      transition: he,
+      children: de
     }
   );
 }
@@ -34369,16 +34369,16 @@ function Q9(a) {
   ie.current = L;
   const he = Re(O);
   he.current = O;
-  const Ce = Re(null), ce = K === void 0 ? null : JSON.stringify(K), se = Re(K);
+  const Ae = Re(null), de = K === void 0 ? null : JSON.stringify(K), se = Re(K);
   se.current = K;
   const me = Re(null), z = () => {
     const nt = se.current;
     nt !== void 0 && (me.current = JSON.stringify(nt), ie.current.setCurrentFilters(nt));
   };
   Xe(() => {
-    if (!V || Ce.current === f) return;
+    if (!V || Ae.current === f) return;
     if (!G) {
-      Ce.current = f, z(), X({ key: f, applied: null, settled: !1 });
+      Ae.current = f, z(), X({ key: f, applied: null, settled: !1 });
       return;
     }
     let nt = !1;
@@ -34395,13 +34395,13 @@ function Q9(a) {
         ));
       } catch {
       }
-      nt || (Ce.current = f, z(), X({ key: f, applied: Qt, settled: !1 }));
+      nt || (Ae.current = f, z(), X({ key: f, applied: Qt, settled: !1 }));
     })(), () => {
       nt = !0;
     };
   }, [f, V, G]), Xe(() => {
-    !T || ce === null || me.current !== ce && z();
-  }, [T, ce]), Xe(() => {
+    !T || de === null || me.current !== de && z();
+  }, [T, de]), Xe(() => {
     if (!(!V || !G))
       return Kk(f, async () => {
         try {
@@ -34606,13 +34606,13 @@ const hU = Vn(null), dm = Vn(null), Ti = () => {
       loadReactionUsers: (X, T, ie) => {
         const he = B.current;
         if (!he.loadReactionUsers) return Promise.resolve([]);
-        const Ce = `${he.channel.id}\0${X}\0${T}\0`, ce = `${Ce}${ie}`, se = r.current.get(ce);
+        const Ae = `${he.channel.id}\0${X}\0${T}\0`, de = `${Ae}${ie}`, se = r.current.get(de);
         if (se) return se;
         for (const z of r.current.keys())
-          z.startsWith(Ce) && r.current.delete(z);
+          z.startsWith(Ae) && r.current.delete(z);
         const me = he.loadReactionUsers(X, T);
-        return r.current.set(ce, me), me.catch(() => {
-          r.current.get(ce) === me && r.current.delete(ce);
+        return r.current.set(de, me), me.catch(() => {
+          r.current.get(de) === me && r.current.delete(de);
         }), me;
       },
       retryMessage: (X) => {
@@ -34813,7 +34813,7 @@ function HM({
   searchMembers: k,
   everyoneLabel: U
 }) {
-  const r = On(), [S, V] = Ne(!1), [G, K] = Ne(""), [Z, j] = Ne([]), [O, L] = Ne(!1), [te, X] = Ne(0), [T, ie] = Ne([]), he = Re(-1), Ce = Re(null), ce = Re(0), se = Re(-1), me = Je(
+  const r = On(), [S, V] = Ne(!1), [G, K] = Ne(""), [Z, j] = Ne([]), [O, L] = Ne(!1), [te, X] = Ne(0), [T, ie] = Ne([]), he = Re(-1), Ae = Re(null), de = Re(0), se = Re(-1), me = Je(
     (ke) => !!U && (ke.length === 0 || U.toLowerCase().startsWith(ke.toLowerCase())),
     [U]
   ), z = kt(() => {
@@ -34833,18 +34833,18 @@ function HM({
       return;
     }
     if (ke.atIndex === se.current) return;
-    he.current = ke.atIndex, K(ke.query), V(!0), X(0), L(!0), Ce.current && clearTimeout(Ce.current);
-    const Pe = ++ce.current;
-    return Ce.current = setTimeout(() => {
+    he.current = ke.atIndex, K(ke.query), V(!0), X(0), L(!0), Ae.current && clearTimeout(Ae.current);
+    const Pe = ++de.current;
+    return Ae.current = setTimeout(() => {
       k(ke.query).then((Ge) => {
-        Pe === ce.current && (j(Ge), X(0), Ge.length === 0 && !me(ke.query) && ke.query.length > 0 && (se.current = ke.atIndex, V(!1)));
+        Pe === de.current && (j(Ge), X(0), Ge.length === 0 && !me(ke.query) && ke.query.length > 0 && (se.current = ke.atIndex, V(!1)));
       }).catch(() => {
-        Pe === ce.current && (j([]), V(!1));
+        Pe === de.current && (j([]), V(!1));
       }).finally(() => {
-        Pe === ce.current && L(!1);
+        Pe === de.current && L(!1);
       });
     }, YM), () => {
-      Ce.current && clearTimeout(Ce.current);
+      Ae.current && clearTimeout(Ae.current);
     };
   }, [
     a,
@@ -35246,7 +35246,7 @@ function hP({
   }, [L?.colonIndex, L?.query]);
   const ie = Je(() => {
     K(L?.colonIndex ?? null), V(0);
-  }, [L?.colonIndex]), he = Je(() => j(!1), []), Ce = Je(() => j(!0), []), ce = Je(
+  }, [L?.colonIndex]), he = Je(() => j(!1), []), Ae = Je(() => j(!0), []), de = Je(
     (ee) => {
       if (!L) return;
       const ge = a.slice(0, L.colonIndex), ue = a.slice(f), we = /^\s/.test(ue), ve = ge + ee.native + (we ? "" : " ") + ue, Qe = ge.length + ee.native.length + (we ? 0 : 1);
@@ -35282,7 +35282,7 @@ function hP({
         case "Tab": {
           if (ee.key === "Tab" && ee.shiftKey) return !1;
           const ge = te[T] ?? te[0];
-          return ge ? (ee.preventDefault(), ce(ge), !0) : !1;
+          return ge ? (ee.preventDefault(), de(ge), !0) : !1;
         }
         default:
           return !1;
@@ -35292,7 +35292,7 @@ function hP({
       X,
       te,
       T,
-      ce,
+      de,
       ie,
       Q
     ]
@@ -35315,10 +35315,10 @@ function hP({
     listboxId: r,
     activeDescendantId: X && z ? bU(r, z.id) : void 0,
     handleKeyDown: se,
-    selectCandidate: ce,
+    selectCandidate: de,
     setSelectedIndex: V,
     handleFocus: he,
-    handleBlur: Ce,
+    handleBlur: Ae,
     close: ie
   };
 }
@@ -35433,7 +35433,7 @@ const v9 = [
   O.current = r;
   const L = Re(k?.canSend);
   L.current = k?.canSend;
-  const te = Re(null), [X, T] = Ne(null), [ie, he] = Ne(null), [Ce, ce] = Ne(!1), [se, me] = Ne(""), [z, ee] = Ne([]), [ge, ue] = Ne(-1), [we, ve] = Ne(!1), Qe = Re(I);
+  const te = Re(null), [X, T] = Ne(null), [ie, he] = Ne(null), [Ae, de] = Ne(!1), [se, me] = Ne(""), [z, ee] = Ne([]), [ge, ue] = Ne(-1), [we, ve] = Ne(!1), Qe = Re(I);
   Qe.current = I;
   const De = Re(f);
   De.current = f;
@@ -35518,7 +35518,7 @@ const v9 = [
     [Nt]
   );
   Xe(() => {
-    if (!Ce) return;
+    if (!Ae) return;
     const mt = se.trim();
     if (mt === "") {
       ee([]), ue(-1), ve(!1), G(null);
@@ -35543,11 +35543,11 @@ const v9 = [
       }
     }, QP);
     return () => clearTimeout(Jt);
-  }, [se, Ce, qt]);
+  }, [se, Ae, qt]);
   const bi = Je(() => {
-    ce(!0), U.onSearchOpened();
+    de(!0), U.onSearchOpened();
   }, [U]), Ri = Je(() => {
-    Ge.current++, ce(!1), me(""), ee([]), ue(-1), ve(!1), G(null);
+    Ge.current++, de(!1), me(""), ee([]), ue(-1), ve(!1), G(null);
   }, []), Qi = Je(() => {
     const mt = ke.current;
     mt.length !== 0 && (U.onSearchResultNavigated({ direction: "next" }), qt((Pe.current + 1) % mt.length, mt));
@@ -35587,7 +35587,7 @@ const v9 = [
     [ie, Ke, Le]
   ), Fi = kt(
     () => ({
-      searchOpen: Ce,
+      searchOpen: Ae,
       openSearch: bi,
       closeSearch: Ri,
       searchQuery: se,
@@ -35599,7 +35599,7 @@ const v9 = [
       goToPrevMatch: _i
     }),
     [
-      Ce,
+      Ae,
       bi,
       Ri,
       se,
@@ -35939,7 +35939,7 @@ const Nd = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Zd = "w-[24rem] max-w-full", LP = "w-[32rem] max-w-full", XP = "gap-0.5", qP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", $P = "bg-[hsl(222_31%_11%)]", eV = "bg-[hsl(220_39%_6%/0.72)]", tV = "bg-[hsl(220_39%_6%/0.6)]", iV = "bg-[hsl(220_39%_6%/0.55)]", nV = () => import("./LocationMap-BijLOfFB.js"), gV = Fr(nV), aV = 3 / 2, oV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
+}, Zd = "w-[24rem] max-w-full", LP = "w-[32rem] max-w-full", XP = "gap-0.5", qP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", $P = "bg-[hsl(222_31%_11%)]", eV = "bg-[hsl(220_39%_6%/0.72)]", tV = "bg-[hsl(220_39%_6%/0.6)]", iV = "bg-[hsl(220_39%_6%/0.55)]", nV = () => import("./LocationMap-ZcnZdwSx.js"), gV = Fr(nV), aV = 3 / 2, oV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -36096,32 +36096,32 @@ const IV = (a) => {
     a.url,
     a.durationSeconds
   ]), T = Je(() => {
-    const Ce = (V + 1) % xA.length;
-    G(Ce), r.setPlaybackRate(xA[Ce]), j === "transcript" && Z.onVoicePlaybackRateChanged({ rate: xA[Ce] });
+    const Ae = (V + 1) % xA.length;
+    G(Ae), r.setPlaybackRate(xA[Ae]), j === "transcript" && Z.onVoicePlaybackRateChanged({ rate: xA[Ae] });
   }, [r, V, Z, j]), ie = Je(
-    (Ce) => {
-      const ce = K.current;
-      if (!ce || L <= 0) return;
-      const se = ce.getBoundingClientRect(), me = Math.min(
+    (Ae) => {
+      const de = K.current;
+      if (!de || L <= 0) return;
+      const se = de.getBoundingClientRect(), me = Math.min(
         1,
-        Math.max(0, (Ce.clientX - se.left) / se.width)
+        Math.max(0, (Ae.clientX - se.left) / se.width)
       );
       r.seek(me * L);
     },
     [r, L]
   ), he = Je(
-    (Ce) => {
+    (Ae) => {
       if (L <= 0) return;
-      const ce = Math.max(1, L / ud);
+      const de = Math.max(1, L / ud);
       let se;
-      switch (Ce.key) {
+      switch (Ae.key) {
         case "ArrowLeft":
         case "ArrowDown":
-          se = r.currentTime - ce;
+          se = r.currentTime - de;
           break;
         case "ArrowRight":
         case "ArrowUp":
-          se = r.currentTime + ce;
+          se = r.currentTime + de;
           break;
         case "Home":
           se = 0;
@@ -36132,7 +36132,7 @@ const IV = (a) => {
         default:
           return;
       }
-      Ce.preventDefault(), r.seek(Math.min(L, Math.max(0, se)));
+      Ae.preventDefault(), r.seek(Math.min(L, Math.max(0, se)));
     },
     [L, r]
   );
@@ -36184,17 +36184,17 @@ const IV = (a) => {
             "aria-valuemax": Math.round(L),
             "aria-valuenow": Math.round(r.currentTime),
             "data-testid": "chat-voice-waveform",
-            children: S.map((Ce, ce) => /* @__PURE__ */ h(
+            children: S.map((Ae, de) => /* @__PURE__ */ h(
               "span",
               {
                 className: Fe(
                   "w-0.5 min-w-px shrink rounded-full transition-colors",
                   // Played part reads darker, WhatsApp-style.
-                  ce / S.length <= te && te > 0 ? "bg-f1-foreground" : "bg-f1-foreground-tertiary"
+                  de / S.length <= te && te > 0 ? "bg-f1-foreground" : "bg-f1-foreground-tertiary"
                 ),
-                style: { height: `${Math.round(Ce * 100)}%` }
+                style: { height: `${Math.round(Ae * 100)}%` }
               },
-              ce
+              de
             ))
           }
         ),
@@ -37519,7 +37519,7 @@ const JV = {
         $n.ERROR
       );
     });
-    const Ce = ga(k);
+    const Ae = ga(k);
     Lt(
       ct(
         k,
@@ -37581,7 +37581,7 @@ const JV = {
       ),
       f
     );
-    const ce = ga(
+    const de = ga(
       ct(
         U,
         yi(X, L),
@@ -37629,7 +37629,7 @@ const JV = {
       ),
       X
     ), {
-      beforeUnshiftWith: Ce,
+      beforeUnshiftWith: Ae,
       // input
       data: O,
       defaultItemSize: G,
@@ -37642,7 +37642,7 @@ const JV = {
       itemSize: j,
       listRefresh: he,
       shiftWith: U,
-      shiftWithOffset: ce,
+      shiftWithOffset: de,
       sizeRanges: f,
       // output
       sizes: X,
@@ -37738,14 +37738,14 @@ const rl = Ni(
         yi(a, k, Q),
         Tt(
           ([
-            [he, Ce, ce, se, me, z, ee, ge],
+            [he, Ae, de, se, me, z, ee, ge],
             ue,
             we,
             ve
           ]) => {
-            const Qe = lQ(he), { align: De, behavior: ye, offset: ke } = Qe, Pe = se - 1, Ge = CQ(Qe, Ce, Pe);
-            let $e = JA(Ge, Ce.offsetTree, ue) + z;
-            De === "end" ? ($e += we + Pa(Ce.sizeTree, Ge)[1] - ce + ve, Ge === Pe && ($e += ee)) : De === "center" ? $e += (we + Pa(Ce.sizeTree, Ge)[1] - ce + ve) / 2 : $e -= me, ke !== void 0 && ke !== 0 && ($e += ke);
+            const Qe = lQ(he), { align: De, behavior: ye, offset: ke } = Qe, Pe = se - 1, Ge = CQ(Qe, Ae, Pe);
+            let $e = JA(Ge, Ae.offsetTree, ue) + z;
+            De === "end" ? ($e += we + Pa(Ae.sizeTree, Ge)[1] - de + ve, Ge === Pe && ($e += ee)) : De === "center" ? $e += (we + Pa(Ae.sizeTree, Ge)[1] - de + ve) / 2 : $e -= me, ke !== void 0 && ke !== 0 && ($e += ke);
             const ht = (Ct) => {
               ie(), Ct ? (ge("retrying to scroll to", { location: he }, $n.DEBUG), hi(j, he)) : (hi(O, !0), ge("list did not change, scroll successful", {}, $n.DEBUG));
             };
@@ -37880,11 +37880,11 @@ const jA = "up", GA = "down", qV = "none", $V = {
   const O = ga(
     ct(
       zn(B, Ii(k), Ii(I), Ii(a), Ii(G)),
-      to((T, [{ scrollHeight: ie, scrollTop: he }, Ce, ce, se, me]) => {
-        const z = he + Ce - ie > -me, ee = {
+      to((T, [{ scrollHeight: ie, scrollTop: he }, Ae, de, se, me]) => {
+        const z = he + Ae - ie > -me, ee = {
           scrollHeight: ie,
           scrollTop: he,
-          viewportHeight: Ce
+          viewportHeight: Ae
         };
         if (z) {
           let ue, we;
@@ -37896,7 +37896,7 @@ const jA = "up", GA = "down", qV = "none", $V = {
           };
         }
         let ge;
-        return ee.scrollHeight > T.state.scrollHeight ? ge = "SIZE_INCREASED" : Ce < T.state.viewportHeight ? ge = "VIEWPORT_HEIGHT_DECREASING" : he < T.state.scrollTop ? ge = "SCROLLING_UPWARDS" : ge = "NOT_FULLY_SCROLLED_TO_LAST_ITEM_BOTTOM", {
+        return ee.scrollHeight > T.state.scrollHeight ? ge = "SIZE_INCREASED" : Ae < T.state.viewportHeight ? ge = "VIEWPORT_HEIGHT_DECREASING" : he < T.state.scrollTop ? ge = "SCROLLING_UPWARDS" : ge = "NOT_FULLY_SCROLLED_TO_LAST_ITEM_BOTTOM", {
           atBottom: !1,
           notAtBottomBecause: ge,
           state: ee
@@ -37908,10 +37908,10 @@ const jA = "up", GA = "down", qV = "none", $V = {
     ct(
       B,
       to(
-        (T, { scrollHeight: ie, scrollTop: he, viewportHeight: Ce }) => {
+        (T, { scrollHeight: ie, scrollTop: he, viewportHeight: Ae }) => {
           if (!cQ(T.scrollHeight, ie)) {
-            const ce = ie - (he + Ce) < 1;
-            return T.scrollTop !== he && ce ? {
+            const de = ie - (he + Ae) < 1;
+            return T.scrollTop !== he && de ? {
               changed: !0,
               jump: T.scrollTop - he,
               scrollHeight: ie,
@@ -38023,12 +38023,12 @@ const xm = Ni(
             T,
             ie
           ]) => {
-            const he = G - T, Ce = te + X, ce = Math.max(Z - he, 0);
+            const he = G - T, Ae = te + X, de = Math.max(Z - he, 0);
             let se = _F;
             const me = xF(ie, LA), z = xF(ie, XA);
-            return j -= T, j += Z + X, O += Z + X, O -= T, j > G + Ce - me && (se = jA), O < G - ce + K + z && (se = GA), se !== _F ? [
+            return j -= T, j += Z + X, O += Z + X, O -= T, j > G + Ae - me && (se = jA), O < G - de + K + z && (se = GA), se !== _F ? [
               Math.max(he - Z - kF(L, LA, se) - me, 0),
-              he - ce - X + K + kF(L, XA, se) + z
+              he - de - X + K + kF(L, XA, se) + z
             ] : null;
           }
         ),
@@ -38295,7 +38295,7 @@ const Ds = Ni(
         fn(OA),
         Tt(([se]) => se)
       )
-    ), Ce = ga(
+    ), Ae = ga(
       ct(
         ie,
         Ro(200),
@@ -38303,7 +38303,7 @@ const Ds = Ni(
         Tt(({ items: se }) => se[0].index),
         fn()
       )
-    ), ce = ga(
+    ), de = ga(
       ct(
         ie,
         Ci(({ items: se }) => se.length > 0),
@@ -38328,8 +38328,8 @@ const Ds = Ni(
       itemsRendered: X,
       listState: ie,
       minOverscanItemCount: T,
-      rangeChanged: ce,
-      startReached: Ce,
+      rangeChanged: de,
+      startReached: Ae,
       topItemsIndexes: L,
       ...Z
     };
@@ -38395,14 +38395,14 @@ const Ds = Ni(
         yi(I, S, f, k, Q, B, r),
         yi(a),
         Tt(([[K, Z, j, O, L, te, X, T], ie]) => {
-          const { calculateViewLocation: he = nG, done: Ce, ...ce } = K, se = CQ(K, Z, O - 1), me = JA(se, Z.offsetTree, ie) + L + te, z = me + Pa(Z.sizeTree, se)[1], ee = T + te, ge = T + j - X, ue = he({
+          const { calculateViewLocation: he = nG, done: Ae, ...de } = K, se = CQ(K, Z, O - 1), me = JA(se, Z.offsetTree, ie) + L + te, z = me + Pa(Z.sizeTree, se)[1], ee = T + te, ge = T + j - X, ue = he({
             itemBottom: z,
             itemTop: me,
-            locationParams: ce,
+            locationParams: de,
             viewportBottom: ge,
             viewportTop: ee
           });
-          return ue === null ? Ce?.() : Ce && Ra(
+          return ue === null ? Ae?.() : Ae && Ra(
             ct(
               U,
               Ci((we) => !we),
@@ -38410,7 +38410,7 @@ const Ds = Ni(
               // but if scrollingInProgress is true, we skip the initial publish.
               bs(yn(U) ? 1 : 2)
             ),
-            Ce
+            Ae
           ), ue;
         }),
         Ci((K) => K !== null)
@@ -38440,10 +38440,10 @@ const gG = (a, I) => typeof a == "function" ? RF(a(I)) : I && RF(a), aG = Ni(
   ]) => {
     const O = yt(!1), L = Si();
     let te = null;
-    function X(Ce) {
+    function X(Ae) {
       hi(U, {
         align: "end",
-        behavior: Ce,
+        behavior: Ae,
         index: "LAST"
       });
     }
@@ -38451,51 +38451,51 @@ const gG = (a, I) => typeof a == "function" ? RF(a(I)) : I && RF(a), aG = Ni(
       ct(
         zn(ct(Ii(I), bs(1)), S),
         yi(Ii(O), k, r, K),
-        Tt(([[Ce, ce], se, me, z, ee]) => {
-          let ge = ce && z, ue = "auto";
-          return ge && (ue = gG(se, me || ee), ge = ge && ue !== !1), { followOutputBehavior: ue, shouldFollow: ge, totalCount: Ce };
+        Tt(([[Ae, de], se, me, z, ee]) => {
+          let ge = de && z, ue = "auto";
+          return ge && (ue = gG(se, me || ee), ge = ge && ue !== !1), { followOutputBehavior: ue, shouldFollow: ge, totalCount: Ae };
         }),
-        Ci(({ shouldFollow: Ce }) => Ce)
+        Ci(({ shouldFollow: Ae }) => Ae)
       ),
-      ({ followOutputBehavior: Ce, totalCount: ce }) => {
+      ({ followOutputBehavior: Ae, totalCount: de }) => {
         te !== null && (te(), te = null), yn(f) === void 0 ? te = Ra(a, () => {
-          yn(G)("following output to ", { totalCount: ce }, $n.DEBUG), X(Ce), te = null;
+          yn(G)("following output to ", { totalCount: de }, $n.DEBUG), X(Ae), te = null;
         }) : requestAnimationFrame(() => {
-          yn(G)("following output to ", { totalCount: ce }, $n.DEBUG), X(Ce);
+          yn(G)("following output to ", { totalCount: de }, $n.DEBUG), X(Ae);
         });
       }
     );
-    function T(Ce) {
-      const ce = Ra(Q, (se) => {
-        Ce && !se.atBottom && se.notAtBottomBecause === "SIZE_INCREASED" && te === null && (yn(G)("scrolling to bottom due to increased size", {}, $n.DEBUG), X("auto"));
+    function T(Ae) {
+      const de = Ra(Q, (se) => {
+        Ae && !se.atBottom && se.notAtBottomBecause === "SIZE_INCREASED" && te === null && (yn(G)("scrolling to bottom due to increased size", {}, $n.DEBUG), X("auto"));
       });
-      setTimeout(ce, 100);
+      setTimeout(de, 100);
     }
     Ji(
       ct(
         zn(Ii(O), I, V),
-        Ci(([Ce, , ce]) => Ce !== !1 && ce),
+        Ci(([Ae, , de]) => Ae !== !1 && de),
         to(
-          ({ value: Ce }, [, ce]) => ({ refreshed: Ce === ce, value: ce }),
+          ({ value: Ae }, [, de]) => ({ refreshed: Ae === de, value: de }),
           { refreshed: !1, value: 0 }
         ),
-        Ci(({ refreshed: Ce }) => Ce),
+        Ci(({ refreshed: Ae }) => Ae),
         yi(O, I)
       ),
-      ([, Ce]) => {
-        yn(r) && T(Ce !== !1);
+      ([, Ae]) => {
+        yn(r) && T(Ae !== !1);
       }
     ), Ji(L, () => {
       T(yn(O) !== !1);
-    }), Ji(zn(Ii(O), Q), ([Ce, ce]) => {
-      Ce !== !1 && !ce.atBottom && ce.notAtBottomBecause === "VIEWPORT_HEIGHT_DECREASING" && X("auto");
+    }), Ji(zn(Ii(O), Q), ([Ae, de]) => {
+      Ae !== !1 && !de.atBottom && de.notAtBottomBecause === "VIEWPORT_HEIGHT_DECREASING" && X("auto");
     });
     const ie = yt(null), he = Si();
     return Lt(
       Qh(
         ct(
           Ii(B),
-          Tt((Ce) => Ce?.length ?? 0)
+          Tt((Ae) => Ae?.length ?? 0)
         ),
         ct(Ii(I))
       ),
@@ -38504,15 +38504,15 @@ const gG = (a, I) => typeof a == "function" ? RF(a(I)) : I && RF(a), aG = Ni(
       ct(
         zn(ct(he, bs(1)), S),
         yi(Ii(ie), r, K, Z),
-        Tt(([[Ce, ce], se, me, z, ee]) => ce && me && se?.({ context: ee, totalCount: Ce, scrollingInProgress: z })),
-        Ci((Ce) => !!Ce),
+        Tt(([[Ae, de], se, me, z, ee]) => de && me && se?.({ context: ee, totalCount: Ae, scrollingInProgress: z })),
+        Ci((Ae) => !!Ae),
         Ro(0)
       ),
-      (Ce) => {
+      (Ae) => {
         te !== null && (te(), te = null), yn(f) === void 0 ? te = Ra(a, () => {
-          yn(G)("scrolling into view", {}), hi(j, Ce), te = null;
+          yn(G)("scrolling into view", {}), hi(j, Ae), te = null;
         }) : requestAnimationFrame(() => {
-          yn(G)("scrolling into view", {}), hi(j, Ce);
+          yn(G)("scrolling into view", {}), hi(j, Ae);
         });
       }
     ), { autoscrollToBottom: L, followOutput: O, scrollIntoViewOnChange: ie };
@@ -38698,10 +38698,10 @@ const AG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
         S,
         yi(U),
         to(
-          ([, X, T, ie], [{ bottom: he, items: Ce, offsetBottom: ce, totalCount: se }, me]) => {
-            const z = he + ce;
+          ([, X, T, ie], [{ bottom: he, items: Ae, offsetBottom: de, totalCount: se }, me]) => {
+            const z = he + de;
             let ee = 0;
-            return T === se && X.length > 0 && Ce.length > 0 && (Ce[0].originalIndex === 0 && X[0].originalIndex === 0 || (ee = z - ie, ee !== 0 && (ee += me))), [ee, Ce, se, z];
+            return T === se && X.length > 0 && Ae.length > 0 && (Ae[0].originalIndex === 0 && X[0].originalIndex === 0 || (ee = z - ie, ee !== 0 && (ee += me))), [ee, Ae, se, z];
           },
           [0, [], 0, 0]
         ),
@@ -38734,19 +38734,19 @@ const AG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
       ct(
         V,
         yi(Z, G),
-        Tt(([X, { groupIndices: T, lastSize: ie, sizeTree: he }, Ce]) => {
-          function ce(ge) {
-            return ge * (ie + Ce);
+        Tt(([X, { groupIndices: T, lastSize: ie, sizeTree: he }, Ae]) => {
+          function de(ge) {
+            return ge * (ie + Ae);
           }
           if (T.length === 0)
-            return ce(X);
+            return de(X);
           let se = 0;
           const me = HA(he, 0);
           let z = 0, ee = 0;
           for (; z < X; ) {
             z++, se += me;
             let ge = T.length === ee + 1 ? 1 / 0 : T[ee + 1] - T[ee] - 1;
-            z + ge > X && (se -= me, ge = X - z + 1), z += ge, se += ce(ge), ee++;
+            z + ge > X && (se -= me, ge = X - z + 1), z += ge, se += de(ge), ee++;
           }
           return se;
         })
@@ -38823,8 +38823,8 @@ const AG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
     T,
     ie,
     he,
-    { scrollToIndex: Ce },
-    ce,
+    { scrollToIndex: Ae },
+    de,
     { topItemCount: se },
     { groupCounts: me },
     z
@@ -38858,7 +38858,7 @@ const AG = pQ(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
       itemSize: S,
       listState: ee,
       minOverscanItemCount: ge,
-      scrollToIndex: Ce,
+      scrollToIndex: Ae,
       // output
       statefulTotalCount: K,
       trackItemSizes: j,
@@ -38924,18 +38924,18 @@ function FQ(a, I, f) {
   const K = Kt.forwardRef(function(te, X) {
     const { children: T, ...ie } = te, [he] = Kt.useState(() => Wd(DV(a), (se) => {
       S(se, ie);
-    })), [Ce] = Kt.useState(yF(G, he));
+    })), [Ae] = Kt.useState(yF(G, he));
     Zc(() => {
       for (const se of U)
-        se in ie && Ji(Ce[se], ie[se]);
+        se in ie && Ji(Ae[se], ie[se]);
       return () => {
-        Object.values(Ce).map(Qm);
+        Object.values(Ae).map(Qm);
       };
-    }, [ie, Ce, he]), Zc(() => {
+    }, [ie, Ae, he]), Zc(() => {
       S(he, ie);
     }), Kt.useImperativeHandle(X, FF(V(he)));
-    const ce = f;
-    return /* @__PURE__ */ h(r.Provider, { value: he, children: f === void 0 ? T : /* @__PURE__ */ h(ce, { ...dG([...B, ...Q, ...U], ie), children: T }) });
+    const de = f;
+    return /* @__PURE__ */ h(r.Provider, { value: he, children: f === void 0 ? T : /* @__PURE__ */ h(de, { ...dG([...B, ...Q, ...U], ie), children: T }) });
   }), Z = (te) => {
     const X = Kt.useContext(r);
     return Kt.useCallback(
@@ -39094,7 +39094,7 @@ const fG = /* @__PURE__ */ Ni(() => {
   Pm("deviation", (ve) => {
     X !== ve && T(ve);
   });
-  const ie = di("EmptyPlaceholder"), he = di("ScrollSeekPlaceholder") ?? mG, Ce = di("ListComponent"), ce = di("ItemComponent"), se = di("GroupComponent"), me = di("computeItemKey"), z = di("isSeeking"), ee = di("groupIndices").length > 0, ge = di("alignToBottom"), ue = di("initialItemFinalLocationReached"), we = a ? {} : {
+  const ie = di("EmptyPlaceholder"), he = di("ScrollSeekPlaceholder") ?? mG, Ae = di("ListComponent"), de = di("ItemComponent"), se = di("GroupComponent"), me = di("computeItemKey"), z = di("isSeeking"), ee = di("groupIndices").length > 0, ge = di("alignToBottom"), ue = di("initialItemFinalLocationReached"), we = a ? {} : {
     boxSizing: "border-box",
     ...L ? {
       display: "inline-block",
@@ -39111,9 +39111,9 @@ const fG = /* @__PURE__ */ Ni(() => {
     ...ue ? {} : { visibility: "hidden" }
   };
   return !a && I.totalCount === 0 && ie !== null && ie !== void 0 ? /* @__PURE__ */ h(ie, { ...kg(ie, V) }) : /* @__PURE__ */ h(
-    Ce,
+    Ae,
     {
-      ...kg(Ce, V),
+      ...kg(Ae, V),
       "data-testid": a ? "virtuoso-top-item-list" : "virtuoso-item-list",
       ref: te,
       style: we,
@@ -39141,10 +39141,10 @@ const fG = /* @__PURE__ */ Ni(() => {
           },
           G(ve.index, V)
         ) : /* @__PURE__ */ Oc(
-          ce,
+          de,
           {
-            ...kg(ce, V),
-            ...QG(ce, ve.data),
+            ...kg(de, V),
+            ...QG(de, ve.data),
             "data-index": Qe,
             "data-item-group-index": ve.groupIndex,
             "data-item-index": ve.index,
@@ -39439,9 +39439,9 @@ const TG = /* @__PURE__ */ Ni(
     j,
     { didMount: O, propsReady: L },
     { customScrollParent: te, useWindowScroll: X, windowScrollContainerState: T, windowScrollTo: ie, windowViewportRect: he },
-    Ce
+    Ae
   ]) => {
-    const ce = yt(0), se = yt(0), me = yt(VF), z = yt({ height: 0, width: 0 }), ee = yt({ height: 0, width: 0 }), ge = Si(), ue = Si(), we = yt(0), ve = yt(null), Qe = yt({ column: 0, row: 0 }), De = Si(), ye = Si(), ke = yt(!1), Pe = yt(0), Ge = yt(!0), $e = yt(!1), ht = yt(!1);
+    const de = yt(0), se = yt(0), me = yt(VF), z = yt({ height: 0, width: 0 }), ee = yt({ height: 0, width: 0 }), ge = Si(), ue = Si(), we = yt(0), ve = yt(null), Qe = yt({ column: 0, row: 0 }), De = Si(), ye = Si(), ke = yt(!1), Pe = yt(0), Ge = yt(!0), $e = yt(!1), ht = yt(!1);
     Ji(
       ct(
         O,
@@ -39510,7 +39510,7 @@ const TG = /* @__PURE__ */ Ni(
     ), Lt(
       ct(
         zn(
-          Ii(ce),
+          Ii(de),
           B,
           Ii(Qe, EG),
           Ii(ee, Kc),
@@ -39557,7 +39557,7 @@ const TG = /* @__PURE__ */ Ni(
         Ci((Ke) => Ke !== null),
         Tt((Ke) => Ke.length)
       ),
-      ce
+      de
     ), Lt(
       ct(
         zn(z, ee, me, Qe),
@@ -39581,7 +39581,7 @@ const TG = /* @__PURE__ */ Ni(
     );
     const st = ga(
       ct(
-        zn(me, ce),
+        zn(me, de),
         Ci(([{ items: Ke }]) => Ke.length > 0),
         yi(Ct),
         Ci(([[Ke, Le], At]) => {
@@ -39614,7 +39614,7 @@ const TG = /* @__PURE__ */ Ni(
     Lt(Rt, j.scrollSeekRangeChanged), Lt(
       ct(
         ge,
-        yi(z, ee, ce, Qe),
+        yi(z, ee, de, Qe),
         Tt(([Ke, Le, At, ut, nt]) => {
           const je = lQ(Ke), { align: Qt, behavior: Mt, offset: Nt } = je;
           let Gt = je.index;
@@ -39658,7 +39658,7 @@ const TG = /* @__PURE__ */ Ni(
       scrollToIndex: ge,
       scrollTop: V,
       smoothScrollTargetReached: G,
-      totalCount: ce,
+      totalCount: de,
       useWindowScroll: X,
       viewportDimensions: z,
       windowScrollContainerState: T,
@@ -39677,7 +39677,7 @@ const TG = /* @__PURE__ */ Ni(
       startReached: Yt,
       stateChanged: De,
       stateRestoreInProgress: ke,
-      ...Ce
+      ...Ae
     };
   },
   hn(xm, Tg, Il, mQ, vr, Dm, wr)
@@ -39734,8 +39734,8 @@ const NG = /* @__PURE__ */ Ni(() => {
         U(T);
         const ie = X.firstChild;
         if (ie !== null) {
-          const { height: he, width: Ce } = ie.getBoundingClientRect();
-          K({ height: he, width: Ce });
+          const { height: he, width: Ae } = ie.getBoundingClientRect();
+          K({ height: he, width: Ae });
         }
         Z({
           column: ZF("column-gap", getComputedStyle(X).columnGap, j),
@@ -40074,13 +40074,13 @@ const KF = 9, WF = zA, zF = () => /* @__PURE__ */ h("div", { className: "h-2" })
   Xe(() => {
     B && G.current?.focus();
   }, [B]);
-  const { frequent: T, recordUse: ie } = i3(), he = vU(Q), Ce = k.chat.emojiPicker.categories, ce = kt(
+  const { frequent: T, recordUse: ie } = i3(), he = vU(Q), Ae = k.chat.emojiPicker.categories, de = kt(
     () => $M.map((ye) => ({
       id: ye.id,
-      label: Ce[ye.id],
+      label: Ae[ye.id],
       emojis: ye.emojis.filter((ke) => ke.version <= X)
     })).filter((ye) => ye.emojis.length > 0),
-    [Ce, X]
+    [Ae, X]
   ), se = kt(() => {
     const ye = T.filter((ke) => ke.version <= X);
     return ye.length > 0 ? [
@@ -40089,13 +40089,13 @@ const KF = 9, WF = zA, zF = () => /* @__PURE__ */ h("div", { className: "h-2" })
         label: k.chat.emojiPicker.frequentlyUsed,
         emojis: ye
       },
-      ...ce
-    ] : ce;
+      ...de
+    ] : de;
   }, [
     T,
     X,
     k.chat.emojiPicker.frequentlyUsed,
-    ce
+    de
   ]), me = K.trim().length > 0, z = kt(() => {
     if (!me) return se;
     const ye = UU(K, { maxVersion: X, localizedTerms: he });
@@ -40654,15 +40654,15 @@ const I3 = {
     searchMembers: G,
     currentUserId: K,
     capabilities: Z
-  } = Jg(), j = !!k && Ga("canUpload", V.type, Z), { target: O } = bP(), { clearComposeTarget: L, registerComposerHandle: te } = Td(), X = xP(), { registerFileDropHandler: T } = TU(), ie = On(), { reducedMotion: he } = Va(), [Ce, ce] = Ne(""), [se, me] = Ne(0), [z, ee] = Ne([]), [ge, ue] = Ne(!1), we = Re(null), ve = Re(null), Qe = Re(null), De = Re(null), ye = Re(/* @__PURE__ */ new Set()), ke = hP({
-    inputValue: Ce,
-    setInputValue: ce,
+  } = Jg(), j = !!k && Ga("canUpload", V.type, Z), { target: O } = bP(), { clearComposeTarget: L, registerComposerHandle: te } = Td(), X = xP(), { registerFileDropHandler: T } = TU(), ie = On(), { reducedMotion: he } = Va(), [Ae, de] = Ne(""), [se, me] = Ne(0), [z, ee] = Ne([]), [ge, ue] = Ne(!1), we = Re(null), ve = Re(null), Qe = Re(null), De = Re(null), ye = Re(/* @__PURE__ */ new Set()), ke = hP({
+    inputValue: Ae,
+    setInputValue: de,
     cursorPosition: se,
     setCursorPosition: me,
     textareaRef: we
   }), Ge = HM({
-    inputValue: Ce,
-    setInputValue: ce,
+    inputValue: Ae,
+    setInputValue: de,
     cursorPosition: se,
     textareaRef: we,
     enabled: !!G && !ke.isOpen,
@@ -40673,13 +40673,13 @@ const I3 = {
     ke.isOpen && Ge.dismissCurrentTrigger();
   }, [ke.isOpen, Ge.dismissCurrentTrigger]);
   const Le = kt(
-    () => JM(Ce, Ge.mentions, {
+    () => JM(Ae, Ge.mentions, {
       cursorPosition: se,
       inlineCompletion: ke.isOpen ? null : Ge.inlineCompletion,
       currentUserId: K
     }),
     [
-      Ce,
+      Ae,
       Ge.mentions,
       se,
       Ge.inlineCompletion,
@@ -40711,11 +40711,11 @@ const I3 = {
   Xe(() => {
     qt.current = z.length;
   }, [z]);
-  const bi = Re(""), Ri = Re(Ce);
-  Ri.current = Ce;
+  const bi = Re(""), Ri = Re(Ae);
+  Ri.current = Ae;
   const Qi = Je((ot) => {
     const jt = bi.current, ci = jt ? `${jt} ${ot}` : ot;
-    ce(ci), me(ci.length);
+    de(ci), me(ci.length);
   }, []), _i = {
     "permission-denied": a.chat.micPermissionDenied,
     "device-error": a.chat.micError,
@@ -40754,12 +40754,12 @@ const I3 = {
     onAudio: gi ? (ot, jt) => {
       ni(ot, jt);
     } : void 0
-  }), ri = vt.status === "transcribing", Et = vt.status === "recording", si = (gi || !!U) && vt.isSupported, $t = (Ce.trim().length > 0 || z.length > 0) && !ri && !je && !et, Fi = Ce === "" && z.length === 0 && O.kind === "none" && !ge && !Et && !ri && !et, [mt, _t] = Ne(0), Jt = Re($t);
+  }), ri = vt.status === "transcribing", Et = vt.status === "recording", si = (gi || !!U) && vt.isSupported, $t = (Ae.trim().length > 0 || z.length > 0) && !ri && !je && !et, Fi = Ae === "" && z.length === 0 && O.kind === "none" && !ge && !Et && !ri && !et, [mt, _t] = Ne(0), Jt = Re($t);
   Jt.current !== $t && (Jt.current = $t, $t && _t((ot) => ot + 1));
   const pi = Je(
     (ot, jt) => {
       const ci = fP(ot, jt), rt = ci?.value ?? ot, bt = ci?.cursorPosition ?? jt;
-      ce(rt), me(bt), B(), ci && requestAnimationFrame(() => {
+      de(rt), me(bt), B(), ci && requestAnimationFrame(() => {
         we.current?.setSelectionRange(
           bt,
           bt
@@ -40882,7 +40882,7 @@ const I3 = {
     },
     [j, xi]
   ), vn = O.kind === "edit", xn = O.kind === "edit" ? O.message : null, Me = O.kind === "reply" ? O.message : null, zi = Je(() => {
-    Ge.close(), Ge.seedMentions([]), ce(""), me(0), Wi(z), ee([]);
+    Ge.close(), Ge.seedMentions([]), de(""), me(0), Wi(z), ee([]);
   }, [
     Ge.close,
     Ge.seedMentions,
@@ -40890,7 +40890,7 @@ const I3 = {
     z
   ]), Dn = Je(
     (ot) => {
-      ce(ot.body), me(ot.body.length), ee((jt) => (Wi(jt), (ot.attachments ?? []).filter((ci) => ci.kind !== "card").map((ci) => ({
+      de(ot.body), me(ot.body.length), ee((jt) => (Wi(jt), (ot.attachments ?? []).filter((ci) => ci.kind !== "card").map((ci) => ({
         id: `att-${ut.current++}`,
         status: "ready",
         attachment: ci
@@ -40946,7 +40946,7 @@ const I3 = {
     ), { mentions: jt, mentionedEveryone: ci } = Ge.getMentions();
     if (xn && f) {
       f(xn.id, {
-        body: Ce.trim(),
+        body: Ae.trim(),
         attachments: ot.length > 0 ? ot : void 0,
         mentions: jt.length > 0 ? jt : void 0,
         mentionedEveryone: ci || void 0
@@ -40954,12 +40954,12 @@ const I3 = {
       return;
     }
     I({
-      body: Ce.trim(),
+      body: Ae.trim(),
       attachments: ot.length > 0 ? ot : void 0,
       replyToId: Me?.id,
       mentions: jt.length > 0 ? jt : void 0,
       mentionedEveryone: ci || void 0
-    }), Ge.close(), ce(""), me(0), ee([]), L();
+    }), Ge.close(), de(""), me(0), ee([]), L();
   }, [
     z,
     $t,
@@ -40968,13 +40968,13 @@ const I3 = {
     I,
     L,
     Q,
-    Ce,
+    Ae,
     xn,
     f
   ]), mn = Je(
     (ot) => {
       const jt = we.current, ci = jt?.selectionStart ?? jt?.value.length ?? 0, rt = jt?.selectionEnd ?? jt?.value.length ?? 0, bt = ci + ot.length;
-      ce((zt) => zt.slice(0, ci) + ot + zt.slice(rt)), me(bt), $e(), B(), ie.onEmojiInserted({ emoji: ot, source: "picker" }), requestAnimationFrame(() => {
+      de((zt) => zt.slice(0, ci) + ot + zt.slice(rt)), me(bt), $e(), B(), ie.onEmojiInserted({ emoji: ot, source: "picker" }), requestAnimationFrame(() => {
         const zt = we.current;
         zt && (zt.focus(), zt.setSelectionRange(bt, bt));
       });
@@ -41185,7 +41185,7 @@ const I3 = {
           {
             textareaRef: we,
             highlightRef: ve,
-            value: Ce,
+            value: Ae,
             placeholder: Et ? a.chat.listening : aa,
             accessibleLabel: aa,
             onChange: pi,
@@ -42004,8 +42004,8 @@ function UE({
   canPrefetchRef: Z,
   onSeenRowIndex: j
 }) {
-  const O = Re(null), L = Re(null), te = Re([]), X = Re(null), T = Re(null), ie = Re(!1), he = Re(!1), Ce = Re(null);
-  if (Ce.current === null || Ce.current.messages !== B || Ce.current.rows !== a || Ce.current.hasMoreNewer !== r) {
+  const O = Re(null), L = Re(null), te = Re([]), X = Re(null), T = Re(null), ie = Re(!1), he = Re(!1), Ae = Re(null);
+  if (Ae.current === null || Ae.current.messages !== B || Ae.current.rows !== a || Ae.current.hasMoreNewer !== r) {
     const at = {
       messages: B,
       rowCount: a.length,
@@ -42013,20 +42013,20 @@ function UE({
       hasMoreNewer: r
     };
     let Dt;
-    if (Ce.current === null)
+    if (Ae.current === null)
       Dt = R3(at);
     else {
-      const Wt = M3(Ce.current.state, at);
+      const Wt = M3(Ae.current.state, at);
       Dt = Wt.state, Wt.change !== "none" && (he.current = !1), Wt.ownGlide && (ie.current = !0);
     }
-    Ce.current = { messages: B, rows: a, hasMoreNewer: r, state: Dt };
+    Ae.current = { messages: B, rows: a, hasMoreNewer: r, state: Dt };
   }
-  const ce = `${G}:${Ce.current.state.epoch}`, se = Ce.current.state.firstItemIndex, me = Re(se);
+  const de = `${G}:${Ae.current.state.epoch}`, se = Ae.current.state.firstItemIndex, me = Re(se);
   me.current = se;
   const z = Re(
     null
   );
-  if (z.current?.key !== ce) {
+  if (z.current?.key !== de) {
     let at;
     const Dt = T.current;
     if (Dt?.kind === "bottom")
@@ -42039,14 +42039,14 @@ function UE({
         hasMoreNewer: r
       });
     }
-    z.current = { key: ce, location: at };
+    z.current = { key: de, location: at };
   }
   const ee = z.current.location, ge = ee.index === "LAST", [ue, we] = Ne(ge), [ve, Qe] = Ne(!0), [De, ye] = Ne(!1), [ke, Pe] = Ne(!1), [Ge, $e] = Ne(null), ht = Re(ge), Ct = Re(
     ge ? 0 : Number.POSITIVE_INFINITY
-  ), st = Re(!1), Yt = Re(null), Rt = Re(null), it = Rt.current !== ce;
+  ), st = Re(!1), Yt = Re(null), Rt = Re(null), it = Rt.current !== de;
   yg(() => {
-    Rt.current !== ce && (Rt.current = ce, ht.current = ge, Ct.current = ge ? 0 : Number.POSITIVE_INFINITY, st.current = !1, we(ge), Qe(!0), ye(!1), Pe(!1), $e(null));
-  }, [ge, ce]);
+    Rt.current !== de && (Rt.current = de, ht.current = ge, Ct.current = ge ? 0 : Number.POSITIVE_INFINITY, st.current = !1, we(ge), Qe(!0), ye(!1), Pe(!1), $e(null));
+  }, [ge, de]);
   const Ke = Re(null), Le = Je(() => {
     const at = Ke.current, Dt = O.current;
     if (!at || !Dt) return;
@@ -42268,7 +42268,7 @@ function UE({
     []
   ), {
     virtuosoRef: O,
-    listKey: ce,
+    listKey: de,
     firstItemIndex: se,
     initialLocation: ee,
     followOutput: bi,
@@ -42340,8 +42340,8 @@ const pd = /* @__PURE__ */ new Set(), LF = () => {
             const he = {
               width: T.clientWidth,
               height: T.clientHeight
-            }, Ce = U.current;
-            he.width === Ce.width && he.height === Ce.height || (U.current = he, V.current += 1, L());
+            }, Ae = U.current;
+            he.width === Ae.width && he.height === Ae.height || (U.current = he, V.current += 1, L());
           });
           ie.observe(T), r.current = ie;
         }
@@ -43054,7 +43054,7 @@ const SE = 1e3, RE = ({
     capabilities: K,
     hasEditMessage: !!S,
     editWindowMs: V
-  }, he = YQ(ie), Ce = HQ(ie), ce = zQ(ie), se = WQ(ie), me = JQ(ie), z = OQ(ie), ee = (De) => {
+  }, he = YQ(ie), Ae = HQ(ie), de = zQ(ie), se = WQ(ie), me = JQ(ie), z = OQ(ie), ee = (De) => {
     B(De), De || X("menu");
   }, ge = (De, ye) => {
     LQ(L, a, De, ye), k(a.id, De), ee(!1);
@@ -43156,7 +43156,7 @@ const SE = 1e3, RE = ({
             ] }),
             /* @__PURE__ */ h("div", { className: "h-px bg-f1-border-secondary" })
           ] }),
-          (se || Ce || ce) && /* @__PURE__ */ $("div", { className: "flex flex-col gap-0 p-1", children: [
+          (se || Ae || de) && /* @__PURE__ */ $("div", { className: "flex flex-col gap-0 p-1", children: [
             se && /* @__PURE__ */ h(
               hs,
               {
@@ -43175,7 +43175,7 @@ const SE = 1e3, RE = ({
                 )
               }
             ),
-            Ce && /* @__PURE__ */ h(
+            Ae && /* @__PURE__ */ h(
               hs,
               {
                 icon: rx,
@@ -43185,7 +43185,7 @@ const SE = 1e3, RE = ({
                 })
               }
             ),
-            ce && /* @__PURE__ */ h(
+            de && /* @__PURE__ */ h(
               hs,
               {
                 icon: sx,
@@ -43200,7 +43200,7 @@ const SE = 1e3, RE = ({
             )
           ] }),
           (me || z) && /* @__PURE__ */ $(ai, { children: [
-            (he || se || Ce || ce) && /* @__PURE__ */ h("div", { className: "h-px bg-f1-border-secondary" }),
+            (he || se || Ae || de) && /* @__PURE__ */ h("div", { className: "h-px bg-f1-border-secondary" }),
             /* @__PURE__ */ $("div", { className: "flex flex-col gap-0 p-1", children: [
               me && /* @__PURE__ */ h(
                 hs,
@@ -43511,11 +43511,11 @@ const SE = 1e3, RE = ({
     locations: O,
     voices: L,
     cards: te
-  } = UP(S), X = Z.length + j.length, T = a.body.trim().length > 0 || a.replyTo || a.deleted ? null : X > 0 || L.length > 0 || te.length > 0 ? "below" : O.length > 0 ? "location" : K.length > 0 ? "video" : G.length > 0 ? "image" : null, ie = a.body.trim().length > 0 || !!a.replyTo, he = te.length > 0, Ce = K.length > 0 || X > 0 || L.length > 0 || he || ie || !B, ce = ps({
+  } = UP(S), X = Z.length + j.length, T = a.body.trim().length > 0 || a.replyTo || a.deleted ? null : X > 0 || L.length > 0 || te.length > 0 ? "below" : O.length > 0 ? "location" : K.length > 0 ? "video" : G.length > 0 ? "image" : null, ie = a.body.trim().length > 0 || !!a.replyTo, he = te.length > 0, Ae = K.length > 0 || X > 0 || L.length > 0 || he || ie || !B, de = ps({
     isMine: I,
     hasAvatar: Q,
     isFirstOfRun: f,
-    isLastOfRun: O.length === 0 && !Ce
+    isLastOfRun: O.length === 0 && !Ae
   }), se = O.length > 0 || L.length > 0 || X > 0 || he || ie || !B, me = (Qe) => ps({
     isMine: I,
     hasAvatar: Q,
@@ -43560,7 +43560,7 @@ const SE = 1e3, RE = ({
               "grid grid-cols-2 overflow-hidden border border-solid border-f1-border-secondary",
               Zd,
               XP,
-              ce
+              de
             ),
             "data-testid": "chat-image-album",
             children: iT(G).map((Qe, De, ye) => {
@@ -43682,16 +43682,16 @@ const SE = 1e3, RE = ({
   const X = () => {
     if (!Q || O.current || (K?.length ?? 0) >= I)
       return;
-    const Ce = Q(), ce = L.current;
-    O.current = Ce, Ce.then((se) => {
-      L.current === ce && Z(se);
+    const Ae = Q(), de = L.current;
+    O.current = Ae, Ae.then((se) => {
+      L.current === de && Z(se);
     }).catch(() => {
     }).finally(() => {
-      O.current === Ce && (O.current = null);
+      O.current === Ae && (O.current = null);
     });
-  }, T = (Ce) => {
-    Ce.stopPropagation(), G(V + (r ? -1 : 1)), S(!r), k?.(a), r || te(a, j);
-  }, ie = K?.map((Ce) => Ce.name).join(", ") || "", he = /* @__PURE__ */ h(
+  }, T = (Ae) => {
+    Ae.stopPropagation(), G(V + (r ? -1 : 1)), S(!r), k?.(a), r || te(a, j);
+  }, ie = K?.map((Ae) => Ae.name).join(", ") || "", he = /* @__PURE__ */ h(
     ks,
     {
       ref: j,
@@ -43841,15 +43841,15 @@ const SE = 1e3, RE = ({
     L.current && (L.current = !1, O.current?.querySelector("button")?.focus());
   }, [Z]);
   const { highlightedId: ie } = EU(), { startReply: he } = Td(), {
-    currentUserId: Ce,
-    channelType: ce,
+    currentUserId: Ae,
+    channelType: de,
     capabilities: se,
     editMessage: me,
     editWindowMs: z
   } = rC(), ee = ME({
     message: a,
     isMine: I,
-    channelType: ce,
+    channelType: de,
     capabilities: se,
     hasEditMessage: !!me,
     editWindowMs: z
@@ -43939,7 +43939,7 @@ const SE = 1e3, RE = ({
                               message: a,
                               isMine: I,
                               author: f,
-                              currentUserId: Ce,
+                              currentUserId: Ae,
                               isFirstOfRun: k && !Qe,
                               isLastOfRun: U,
                               hasAvatar: r
@@ -44662,15 +44662,15 @@ const SE = 1e3, RE = ({
     firstUnreadId: K,
     markRead: Z,
     capabilities: j
-  } = Jg(), { reducedMotion: O } = Va(), L = I.type === "group", te = I.type === "community", X = Ga("canSend", I.type, j), { registerScrollToMessage: T } = mm(), [ie, he] = Ne(!1), [Ce] = Ne(K), ce = Re(void 0), { rows: se, indexById: me } = kt(() => {
+  } = Jg(), { reducedMotion: O } = Va(), L = I.type === "group", te = I.type === "community", X = Ga("canSend", I.type, j), { registerScrollToMessage: T } = mm(), [ie, he] = Ne(!1), [Ae] = Ne(K), de = Re(void 0), { rows: se, indexById: me } = kt(() => {
     const ei = xE(a, {
-      dividerId: Ce,
-      previousRows: ce.current,
+      dividerId: Ae,
+      previousRows: de.current,
       // A feed has no days — see the option's own note.
       daySeparators: !te
     });
-    return ce.current = ei.rowCache, ei;
-  }, [a, Ce, te]), z = Re(/* @__PURE__ */ new Map()), ee = Re(null), ge = a[a.length - 1]?.id ?? null;
+    return de.current = ei.rowCache, ei;
+  }, [a, Ae, te]), z = Re(/* @__PURE__ */ new Map()), ee = Re(null), ge = a[a.length - 1]?.id ?? null;
   if (ee.current !== ge) {
     const ei = DE(a, ee.current);
     ei.length > 0 && (z.current.clear(), ei.forEach((mn, Ag) => z.current.set(mn, Ag))), ee.current = ge;
@@ -44879,7 +44879,7 @@ const SE = 1e3, RE = ({
     }
   );
 }, OT = /* @__PURE__ */ new Set(), JT = Fr(
-  () => import("./ChatPostComposerDialog-Bi8abZFX.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-DlUZ82Zb.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), jT = () => {
@@ -46825,7 +46825,7 @@ function aw({
         // consumer's endpoint would fill in — search in, one page out — so the
         // dropdown pages and searches the same way either side of the wire.
         fetchData: ({ search: O, pagination: L }) => {
-          const te = O?.trim().toLowerCase(), X = te ? S.filter((Ce) => Ce.haystack.includes(te)) : S, T = L.perPage ?? gy, ie = Number(
+          const te = O?.trim().toLowerCase(), X = te ? S.filter((Ae) => Ae.haystack.includes(te)) : S, T = L.perPage ?? gy, ie = Number(
             ("cursor" in L ? L.cursor : null) ?? 0
           ), he = ie + T;
           return {
@@ -47078,8 +47078,8 @@ function O9({
   projectSelectorElement: T,
   locationSelectorElement: ie,
   projects: he,
-  projectId: Ce,
-  onChangeProjectId: ce,
+  projectId: Ae,
+  onChangeProjectId: de,
   projectSelectorDisabled: se = !1,
   projectRequired: me = !0,
   locationRequired: z = !0,
@@ -47147,8 +47147,8 @@ function O9({
     o4,
     {
       projects: he,
-      projectId: Ce,
-      onChangeProjectId: ce,
+      projectId: Ae,
+      onChangeProjectId: de,
       label: B.selectProject,
       searchPlaceholder: B.searchProject,
       required: me,
@@ -47629,13 +47629,13 @@ function R4({
               "truncate",
               T.length === 1 && T[0].critical ? "text-f1-foreground-critical" : "text-f1-foreground-secondary"
             ),
-            children: T.map((ce, se) => /* @__PURE__ */ $(Fg, { children: [
+            children: T.map((de, se) => /* @__PURE__ */ $(Fg, { children: [
               se > 0 ? /* @__PURE__ */ h("span", { className: "text-f1-foreground-secondary", children: " · " }) : null,
               /* @__PURE__ */ h(
                 "span",
                 {
-                  className: ce.critical ? "text-f1-foreground-critical" : "text-f1-foreground-secondary",
-                  children: ce.text
+                  className: de.critical ? "text-f1-foreground-critical" : "text-f1-foreground-secondary",
+                  children: de.text
                 }
               )
             ] }, se))
@@ -47660,7 +47660,7 @@ function R4({
     // With a menu up the pointer is off the row entirely, but the row is still
     // the thing being acted on — so it stays lit under its own open menu.
     L && "bg-f1-background-tertiary"
-  ), Ce = K ? /* @__PURE__ */ h(
+  ), Ae = K ? /* @__PURE__ */ h(
     Go,
     {
       href: K,
@@ -47670,34 +47670,34 @@ function R4({
     }
   ) : /* @__PURE__ */ h("div", { className: he, children: ie });
   return j ? /* @__PURE__ */ $("div", { className: "group relative", children: [
-    Ce,
-    /* @__PURE__ */ h("div", { className: Fe(x4, L && D4), children: V?.map((ce) => {
+    Ae,
+    /* @__PURE__ */ h("div", { className: Fe(x4, L && D4), children: V?.map((de) => {
       const se = /* @__PURE__ */ h(
         mi,
         {
-          icon: ce.icon,
-          label: ce.label,
-          hideLabel: !!ce.icon && !ce.showLabel,
-          variant: ce.critical ? "critical" : "outline",
+          icon: de.icon,
+          label: de.label,
+          hideLabel: !!de.icon && !de.showLabel,
+          variant: de.critical ? "critical" : "outline",
           size: O ? "md" : "sm",
-          onClick: ce.onClick
+          onClick: de.onClick
         }
       );
-      return ce.items ? /* @__PURE__ */ h(
+      return de.items ? /* @__PURE__ */ h(
         Ph,
         {
-          items: ce.items,
+          items: de.items,
           align: "end",
-          open: L === ce.label,
+          open: L === de.label,
           onOpenChange: (me) => te(
-            (z) => me ? ce.label : z === ce.label ? null : z
+            (z) => me ? de.label : z === de.label ? null : z
           ),
           children: se
         },
-        ce.label
-      ) : /* @__PURE__ */ h(Fg, { children: se }, ce.label);
+        de.label
+      ) : /* @__PURE__ */ h(Fg, { children: se }, de.label);
     }) })
-  ] }) : Ce;
+  ] }) : Ae;
 }
 const M4 = (a) => a == null ? void 0 : typeof a == "function" ? { render: a } : a, j9 = [
   "viridian",
@@ -48015,15 +48015,15 @@ function Ym({
   isDragging: te,
   ctx: X = {}
 }) {
-  const T = xt(), ie = Pn(), [he, Ce] = Ne(!1), ce = Re(!1);
+  const T = xt(), ie = Pn(), [he, Ae] = Ne(!1), de = Re(!1);
   Xe(() => {
-    if (!ce.current) {
-      ce.current = !0;
+    if (!de.current) {
+      de.current = !0;
       return;
     }
     if (ie) return;
-    Ce(!0);
-    const ye = setTimeout(() => Ce(!1), gh);
+    Ae(!0);
+    const ye = setTimeout(() => Ae(!1), gh);
     return () => clearTimeout(ye);
   }, [O, ie]);
   const [se, me] = Ne(void 0), z = r ? se ?? r.value ?? r.options[0]?.value : void 0, ee = r?.options.find(
@@ -48390,21 +48390,21 @@ function UZ({
   yg(() => {
     if (!K || !U || !G) return;
     const he = () => {
-      const ce = U.getBoundingClientRect().top - G.getBoundingClientRect().top + G.scrollTop;
-      O((se) => Math.abs(se - ce) < 1 ? se : ce);
+      const de = U.getBoundingClientRect().top - G.getBoundingClientRect().top + G.scrollTop;
+      O((se) => Math.abs(se - de) < 1 ? se : de);
     };
     if (he(), typeof ResizeObserver != "function") return;
-    const Ce = new ResizeObserver(he);
-    return Ce.observe(G), U.parentElement && Ce.observe(U.parentElement), () => Ce.disconnect();
+    const Ae = new ResizeObserver(he);
+    return Ae.observe(G), U.parentElement && Ae.observe(U.parentElement), () => Ae.disconnect();
   }, [K, U, G]);
   const L = K && G != null && I >= (k?.threshold ?? mZ), te = Re(B);
   te.current = B;
   const X = B.join(","), T = Je(
     (he) => {
-      const Ce = new Set(Qx(he));
-      for (const ce of te.current)
-        ce >= 0 && ce < he.count && Ce.add(ce);
-      return [...Ce].sort((ce, se) => ce - se);
+      const Ae = new Set(Qx(he));
+      for (const de of te.current)
+        de >= 0 && de < he.count && Ae.add(de);
+      return [...Ae].sort((de, se) => de - se);
     },
     [X]
   ), ie = by({
@@ -48423,9 +48423,9 @@ function UZ({
     window: L ? {
       // `start` is measured from the SCROLL REGION's top and the cards are
       // placed inside the list, so the offset to the list comes back off it.
-      placements: ie.getVirtualItems().map(({ index: he, start: Ce }) => ({
+      placements: ie.getVirtualItems().map(({ index: he, start: Ae }) => ({
         index: he,
-        start: Ce - j
+        start: Ae - j
       })),
       totalSize: ie.getTotalSize()
     } : null
@@ -48562,8 +48562,8 @@ function dy({
   rebuildWidget: T,
   renderWidgetPreview: ie,
   paramsPreviewWidth: he,
-  removeLabel: Ce,
-  editParamsLabel: ce,
+  removeLabel: Ae,
+  editParamsLabel: de,
   ctx: se = {},
   className: me,
   style: z
@@ -48619,11 +48619,11 @@ function dy({
       icon: Xy,
       onClick: () => $e(et.id)
     }), et.paramsSchema && X && St.push({
-      label: ce ?? ee.widgets.editParams,
+      label: de ?? ee.widgets.editParams,
       icon: wx,
       onClick: () => ke(et.id)
     }), ge && !et.locked && V && (St.length > 0 && St.push({ type: "separator" }), St.push({
-      label: Ce ?? ee.widgets.removeWidget,
+      label: Ae ?? ee.widgets.removeWidget,
       icon: ad,
       critical: !0,
       onClick: () => V(et.id)
@@ -49111,8 +49111,8 @@ const VZ = ({
     period: T = "morning",
     asideWidth: ie = 396,
     mainWidth: he = TZ,
-    bleed: Ce = 24,
-    stackedPinsAfter: ce = 2,
+    bleed: Ae = 24,
+    stackedPinsAfter: de = 2,
     ctx: se = {},
     className: me,
     oneSwitchTooltip: z,
@@ -49148,9 +49148,9 @@ const VZ = ({
       pinned: vt ? Q.filter((Me) => Me.locked) : [],
       rest: vt ? Q.filter((Me) => !Me.locked) : []
     }, si = nm.toArray(I), Fi = (vt ? [
-      ...si.slice(0, ce),
+      ...si.slice(0, de),
       ...Et.pinned.map((Me) => /* @__PURE__ */ h(Fg, { children: Nt(Me) }, Me.id)),
-      ...si.slice(ce)
+      ...si.slice(de)
     ] : si).map((Me, zi) => /* @__PURE__ */ h(
       Cy,
       {
@@ -49222,10 +49222,10 @@ const VZ = ({
       //
       // Only in the column. The floating panel is positioned from `top`, and a
       // margin there would take it off its glyph.
-      marginTop: -Ce,
-      marginBottom: -Ce,
-      paddingTop: Ce,
-      paddingBottom: Ce,
+      marginTop: -Ae,
+      marginBottom: -Ae,
+      paddingTop: Ae,
+      paddingBottom: Ae,
       ..._t.mode === "retracting" ? { pointerEvents: "none" } : null,
       ...qt.style
     }, qi = () => {
@@ -49284,7 +49284,7 @@ const VZ = ({
           // resolves to auto, and without a cap the layout would grow with its
           // content and the columns would never scroll. The window (less our
           // gutter) is the most it can usefully be.
-          maxHeight: `calc(100svh - ${2 * Ce}px)`,
+          maxHeight: `calc(100svh - ${2 * Ae}px)`,
           // The column template lives HERE rather than in a class: it is the
           // same property Tailwind's `grid-cols-*` sets, so as a utility it
           // lost the specificity contest and the rail silently fell out of its
@@ -49305,7 +49305,7 @@ const VZ = ({
               "aria-hidden": !0,
               "data-page-surface": !0,
               className: "pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page",
-              style: { top: -Ce, bottom: -Ce, left: -Ce, right: -Ce },
+              style: { top: -Ae, bottom: -Ae, left: -Ae, right: -Ae },
               children: /* @__PURE__ */ h(EZ, { period: T })
             }
           ),
@@ -49377,14 +49377,14 @@ const VZ = ({
                 // a handover between two presentations of the same rail should do.
                 gridColumn: 1,
                 gridRow: 2,
-                marginTop: -Ce,
-                marginBottom: -Ce,
-                paddingTop: Ce,
-                paddingBottom: Ce,
-                marginLeft: -Ce,
-                paddingLeft: Ce,
-                marginRight: ri ? -sh : -Ce,
-                paddingRight: ri ? sh : Ce,
+                marginTop: -Ae,
+                marginBottom: -Ae,
+                paddingTop: Ae,
+                paddingBottom: Ae,
+                marginLeft: -Ae,
+                paddingLeft: Ae,
+                marginRight: ri ? -sh : -Ae,
+                paddingRight: ri ? sh : Ae,
                 ...Gt.style
               },
               children: /* @__PURE__ */ h(
@@ -49639,8 +49639,8 @@ function tW({
   rebuildPreview: S,
   title: V = "Add widget"
 }) {
-  const G = xt(), { position: K, width: Z, bodyClassName: j, asideClassName: O } = ww(), [L, te] = Ne(""), [X, T] = Ne(null), [ie, he] = Ne("pick"), [Ce, ce] = Ne(!1), se = (Ct) => {
-    ce(!0), he(Ct);
+  const G = xt(), { position: K, width: Z, bodyClassName: j, asideClassName: O } = ww(), [L, te] = Ne(""), [X, T] = Ne(null), [ie, he] = Ne("pick"), [Ae, de] = Ne(!1), se = (Ct) => {
+    de(!0), he(Ct);
   }, [me, z] = Ne(null), { formRef: ee, getValues: ge, trigger: ue } = o1(), we = L.trim().toLowerCase(), ve = U ?? (k ? hy[k] : hy.right), Qe = kt(() => {
     const Ct = k ? f.filter((Le) => !Le.areas || Le.areas.includes(k)) : f, st = we ? Ct.filter((Le) => Le.title.toLowerCase().includes(we)) : Ct, Yt = st.filter((Le) => Le.recommended), Rt = st.filter((Le) => !Le.recommended), it = new Set((Q ?? []).map((Le) => Le.id)), Ke = Rt.filter((Le) => !Le.group || !it.has(Le.group));
     return [
@@ -49663,7 +49663,7 @@ function tW({
     ];
   }, [f, Q, we, k, G]), De = Qe.flatMap((Ct) => Ct.items), ye = De.find((Ct) => Ct.id === X) ?? De[0] ?? null, ke = ye ? LZ(ye) : void 0, Pe = ke !== void 0 && !(ye?.addWithDefaults && K4(ke, my(ye))), Ge = ie === "configure" && Pe, $e = ye && me?.id === ye.id ? me.params : ye ? my(ye) : {}, ht = Ge && ye && S ? S(ye, $e) : ye?.preview;
   return Xe(() => {
-    a && (he("pick"), ce(!1), z(null));
+    a && (he("pick"), de(!1), z(null));
   }, [a]), Xe(() => {
     ie === "configure" && !Pe && he("pick");
   }, [ie, Pe]), /* @__PURE__ */ h(
@@ -49701,7 +49701,7 @@ function tW({
             className: Fe(
               "flex min-h-0 flex-col gap-2",
               O,
-              Ce && Fe(
+              Ae && Fe(
                 "duration-300 ease-out animate-in fade-in motion-reduce:animate-none",
                 Ge ? "slide-in-from-right-4" : "slide-in-from-left-4"
               )
