@@ -1,8 +1,9 @@
-import { useCallback, useRef } from "react"
+import { type ReactNode, useCallback, useRef } from "react"
 
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Circle as CircleIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { cn, focusRing } from "@/lib/utils"
 import { Badge } from "@/ui/IconBadge"
 
@@ -10,6 +11,7 @@ import { CompanySelector, type CompanySelectorProps } from "../CompanySelector"
 import type { SidebarTab } from "../Tabs"
 import { usePersistedTab } from "../Tabs/usePersistedTab"
 import { SidebarUserMenu, type SidebarUserMenuProps } from "../UserMenu"
+import { PRESSABLE_CHIP } from "../pressable"
 import { RailTab } from "./RailTab"
 
 /** A shortcut pinned to the foot of the rail — marketplace, security, activity. */
@@ -35,6 +37,12 @@ export type SidebarRailProps = {
   persistKey?: string
   /** Pressing the module you are already in. Hosts use it to fold the panel. */
   onActiveTabPress?: () => void
+  /**
+   * Second levels shown beside the rail instead of in the panel, keyed by tab
+   * id. A tab listed here is a menu rather than a destination: hovering or
+   * clicking it opens its flyout and leaves the active module alone.
+   */
+  flyouts?: Record<string, ReactNode>
   actions?: SidebarRailAction[]
   user?: Omit<SidebarUserMenuProps, "compact">
 }
@@ -47,19 +55,26 @@ const RailAction = ({ action }: { action: SidebarRailAction }) => (
     title={action.label}
     onClick={action.onClick}
     className={cn(
-      "relative flex size-8 cursor-pointer items-center justify-center rounded-[10px] transition-colors hover:bg-f1-background-secondary",
-      focusRing()
+      "group flex w-full cursor-pointer items-center justify-center",
+      focusRing("focus-visible:ring-inset")
     )}
   >
-    <F0Icon icon={action.icon} size="md" color="default" />
-    {action.hasUpdates && (
-      <span
-        aria-hidden="true"
-        className="absolute -right-1 -top-1 rounded-full bg-f1-background"
-      >
-        <Badge type="highlight" size="sm" icon={CircleIcon} />
-      </span>
-    )}
+    <span
+      className={cn(
+        "relative flex size-9 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary",
+        PRESSABLE_CHIP
+      )}
+    >
+      <F0Icon icon={action.icon} size="lg" color="default" />
+      {action.hasUpdates && (
+        <span
+          aria-hidden="true"
+          className="absolute -right-1 -top-1 rounded-full bg-f1-background"
+        >
+          <Badge type="highlight" size="sm" icon={CircleIcon} />
+        </span>
+      )}
+    </span>
   </button>
 )
 
@@ -78,10 +93,12 @@ export function SidebarRail({
   onTabChange,
   persistKey,
   onActiveTabPress,
+  flyouts,
   actions = [],
   user,
 }: SidebarRailProps) {
   const i18n = useI18n()
+  const { jumpLayout } = useSidebar()
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   usePersistedTab(persistKey, tabs, activeTab, onTabChange)
@@ -97,9 +114,12 @@ export function SidebarRail({
         onActiveTabPress?.()
         return
       }
+      // Flagged BEFORE the change, so the panel and the content that come out
+      // of it are laid out with animation already off.
+      jumpLayout()
       onTabChange(id)
     },
-    [activeTab, onActiveTabPress, onTabChange]
+    [activeTab, jumpLayout, onActiveTabPress, onTabChange]
   )
 
   // Roving arrow keys down the column. The group keeps a single tab stop, so
@@ -125,27 +145,32 @@ export function SidebarRail({
       data-testid="sidebar-rail"
       className={cn(
         "flex h-full w-[var(--ds-sidebar-rail-width)] shrink-0 flex-col items-center overflow-y-auto",
-        // No surface of its own: the navigation sits on whatever the app
-        // paints behind it, so it reads as the floor the content is raised
-        // off rather than as a second card beside it. The seam is drawn on
-        // the rail itself so the 1px lands INSIDE the 48px the frame reserves
-        // (border-box) rather than widening the pair.
-        "border-0 border-r border-solid border-f1-border-secondary",
+        // No surface of its own, and no seam: the navigation sits on whatever
+        // the app paints behind it, so it reads as the floor the content is
+        // raised off rather than as a second card beside it. The hairline
+        // between the two levels is the PANEL's left edge — it separates the
+        // rail from the panel, so it has to leave when the panel does, and a
+        // border here would outlive it and hang off a rail with nothing
+        // beside it.
         // The rail runs edge to edge, so it owns the notch and the home
         // indicator: without this the account avatar sits under the latter.
-        "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
+        "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.75rem)]"
       )}
     >
-      {/* 60px, the same height as the panel's title bar beside it, so the logo
-          and the section title sit on one line. */}
-      <div className="flex h-[60px] shrink-0 items-center justify-center">
+      {/* 48px: 12 less than the panel's title bar beside it. The mark is a
+          40px chip in a row of its own, and the extra 12 only pushed the whole
+          rail down from the top of the window. Full width: the selector takes
+          the whole row as its target. */}
+      <div className="flex h-12 w-full shrink-0 items-stretch justify-center">
         <CompanySelector {...company} variant="compact" />
       </div>
 
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.rail.label}
-        className="flex w-full flex-col gap-2 px-1.5"
+        // 8px clear of whatever is above it: flush, the chips read as one run
+        // and the workspace mark becomes the item above Home.
+        className="mt-2 flex w-full flex-col"
       >
         {tabs.map((tab, index) => (
           <RailTab
@@ -158,17 +183,18 @@ export function SidebarRail({
             isFocusable={index === activeIndex}
             onSelect={() => handleSelect(tab.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
+            flyout={flyouts?.[tab.id]}
           />
         ))}
       </div>
 
       {(actions.length > 0 || user) && (
-        <div className="mt-auto flex shrink-0 flex-col items-center gap-0.5 pb-3 pt-2">
+        <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-1 pb-3 pt-2">
           {actions.map((action) => (
             <RailAction key={action.id} action={action} />
           ))}
           {user && (
-            <span className="pt-1.5">
+            <span className="w-full pt-1.5">
               <SidebarUserMenu {...user} compact />
             </span>
           )}

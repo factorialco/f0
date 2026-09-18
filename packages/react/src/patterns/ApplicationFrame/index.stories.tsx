@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
   ComponentProps,
+  createContext,
+  useContext,
   useCallback,
   useEffect,
   useMemo,
@@ -11,17 +13,34 @@ import {
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
 
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Button } from "@/components/F0Button"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import One from "@/icons/ai/One"
 import {
+  Bell,
+  BookOpen,
+  Calendar,
+  CalendarFilled,
   ChartVerticalBars,
+  Folders,
+  FoldersFilled,
   Home,
+  HomeFilled,
+  Hub,
+  HubFilled,
+  Inbox,
+  InboxFilled,
   Lightbulb,
+  LifeBuoy,
+  MessagesFilled,
   New,
   Pencil,
   Search,
-  Shield,
+  Settings,
   Sliders,
   Comment,
 } from "@/icons/app"
@@ -55,6 +74,7 @@ import {
 import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Page } from "@/patterns/Navigation/Page"
@@ -92,6 +112,7 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { MockCommunitySurface } from "@/sds/chat/F0Chat/mocks/MockCommunitySurface"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
@@ -833,12 +854,537 @@ const HomePage = (): ReactNode => (
  * whose cards swallow each press in silence: the store records the open post
  * and nothing is mounted to show it.
  */
+/**
+ * Which module the rail is on. The navigation and the page it changes are
+ * sibling trees under the frame — the sidebar is a prop, the page is the
+ * children — so the one thing they both have to know lives above both.
+ */
+const RailModuleContext = createContext<{
+  module: string
+  setModule: (id: string) => void
+}>({ module: "home", setModule: () => {} })
+
+/** Wraps the frame so the rail and the page it changes share one value. */
+const RailModuleProvider = ({ children }: { children: ReactNode }) => {
+  const [module, setModule] = useState("home")
+  const value = useMemo(() => ({ module, setModule }), [module])
+  return (
+    <RailModuleContext.Provider value={value}>
+      {children}
+    </RailModuleContext.Provider>
+  )
+}
+
+/** Files, as the product has them: a folder tree is a page, not a nav panel. */
+const FILES = [
+  { name: "Employee handbook 2026.pdf", owner: "People Ops", at: "2 days ago" },
+  { name: "Org chart Q2.pdf", owner: "Jordan Avery", at: "5 days ago" },
+  { name: "Holiday calendar 2026.pdf", owner: "People Ops", at: "1 week ago" },
+  {
+    name: "Headcount plan vs actuals.xlsx",
+    owner: "Finance",
+    at: "1 week ago",
+  },
+  { name: "Q2 hiring funnel.pdf", owner: "Talent", at: "2 weeks ago" },
+  { name: "Remote work policy.pdf", owner: "People Ops", at: "3 weeks ago" },
+]
+
+const FilesPage = () => (
+  <Page
+    header={
+      <PageHeader module={{ id: "documents", name: "Files", href: "/files" }} />
+    }
+  >
+    <div className="flex flex-col px-6 pb-6">
+      {/* A header row and its rows, on the table's own rhythm — enough of a
+          document list to say what the module is, without a data collection's
+          machinery in a story about navigation. */}
+      <div className="flex items-center gap-4 border-0 border-b border-solid border-f1-border-secondary py-2 text-f1-foreground-secondary">
+        <span className="flex-1">Name</span>
+        <span className="w-40 shrink-0">Owner</span>
+        <span className="w-32 shrink-0">Modified</span>
+      </div>
+      {FILES.map((file) => (
+        <div
+          key={file.name}
+          className="flex items-center gap-4 border-0 border-b border-solid border-f1-border-secondary py-3"
+        >
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            <F0AvatarFile
+              file={{
+                name: file.name,
+                type: file.name.split(".").pop() ?? "pdf",
+              }}
+              size="sm"
+            />
+            <OneEllipsis className="text-f1-foreground">
+              {file.name}
+            </OneEllipsis>
+          </span>
+          <span className="w-40 shrink-0 text-f1-foreground-secondary">
+            {file.owner}
+          </span>
+          <span className="w-32 shrink-0 text-f1-foreground-secondary">
+            {file.at}
+          </span>
+        </div>
+      ))}
+    </div>
+  </Page>
+)
+
+/* -------------------------------------------------------------------------- *
+ * Directory — the monolith's Organization screen, on dummy data              *
+ *                                                                            *
+ * The real one is `EmployeeCollectionPage`: a resource header with the        *
+ * organization's tabs over a full-height employees table, with the list's     *
+ * own search, filters and column chrome. Everything under it here is fake —   *
+ * no query, no permissions, no policies — but the shape is the shape.         *
+ * -------------------------------------------------------------------------- */
+
+type DirectoryPerson = {
+  id: string
+  firstName: string
+  lastName: string
+  jobTitle: string
+  team: string
+  workplace: string
+  hiredAt: Date
+  access: "Active" | "Invited" | "Not invited"
+  contract: "Ongoing" | "Upcoming" | "Ended"
+}
+
+const DIRECTORY_TEAMS = [
+  "Design",
+  "Engineering",
+  "Finance",
+  "People Ops",
+  "Sales",
+  "Talent",
+]
+
+const DIRECTORY_WORKPLACES = ["Barcelona", "Lisbon", "Remote", "São Paulo"]
+
+const DIRECTORY_ACCESS_STATES = ["Active", "Invited", "Not invited"]
+
+const DIRECTORY_PEOPLE: DirectoryPerson[] = [
+  {
+    id: "1",
+    firstName: "Jordan",
+    lastName: "Avery",
+    jobTitle: "Product Design Lead",
+    team: "Design",
+    workplace: "Barcelona",
+    hiredAt: new Date("2021-03-01"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "2",
+    firstName: "Amaia",
+    lastName: "Bengoetxea",
+    jobTitle: "Staff Engineer",
+    team: "Engineering",
+    workplace: "Barcelona",
+    hiredAt: new Date("2019-09-16"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "3",
+    firstName: "Tomás",
+    lastName: "Ferreira",
+    jobTitle: "Backend Engineer",
+    team: "Engineering",
+    workplace: "Lisbon",
+    hiredAt: new Date("2022-01-10"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "4",
+    firstName: "Nadia",
+    lastName: "Rahman",
+    jobTitle: "People Partner",
+    team: "People Ops",
+    workplace: "Remote",
+    hiredAt: new Date("2020-06-02"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "5",
+    firstName: "Luca",
+    lastName: "Moretti",
+    jobTitle: "Financial Controller",
+    team: "Finance",
+    workplace: "Barcelona",
+    hiredAt: new Date("2023-02-13"),
+    access: "Invited",
+    contract: "Ongoing",
+  },
+  {
+    id: "6",
+    firstName: "Priya",
+    lastName: "Nair",
+    jobTitle: "Design Systems Engineer",
+    team: "Design",
+    workplace: "Remote",
+    hiredAt: new Date("2023-08-21"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "7",
+    firstName: "Beatriz",
+    lastName: "Salgado",
+    jobTitle: "Account Executive",
+    team: "Sales",
+    workplace: "São Paulo",
+    hiredAt: new Date("2024-04-08"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "8",
+    firstName: "Oskar",
+    lastName: "Lindqvist",
+    jobTitle: "Technical Recruiter",
+    team: "Talent",
+    workplace: "Remote",
+    hiredAt: new Date("2024-09-02"),
+    access: "Invited",
+    contract: "Ongoing",
+  },
+  {
+    id: "9",
+    firstName: "Chiara",
+    lastName: "Rossi",
+    jobTitle: "Payroll Specialist",
+    team: "People Ops",
+    workplace: "Lisbon",
+    hiredAt: new Date("2022-11-07"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "10",
+    firstName: "Idris",
+    lastName: "Okonkwo",
+    jobTitle: "Data Engineer",
+    team: "Engineering",
+    workplace: "Remote",
+    hiredAt: new Date("2025-01-13"),
+    access: "Not invited",
+    contract: "Upcoming",
+  },
+  {
+    id: "11",
+    firstName: "Marta",
+    lastName: "Quintana",
+    jobTitle: "Head of Finance",
+    team: "Finance",
+    workplace: "Barcelona",
+    hiredAt: new Date("2018-05-21"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "12",
+    firstName: "Sven",
+    lastName: "Aaltonen",
+    jobTitle: "Sales Manager",
+    team: "Sales",
+    workplace: "Remote",
+    hiredAt: new Date("2021-10-04"),
+    access: "Active",
+    contract: "Ended",
+  },
+  {
+    id: "13",
+    firstName: "Leila",
+    lastName: "Haddad",
+    jobTitle: "Brand Designer",
+    team: "Design",
+    workplace: "Lisbon",
+    hiredAt: new Date("2024-02-26"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+  {
+    id: "14",
+    firstName: "Gabriel",
+    lastName: "Costa",
+    jobTitle: "Talent Partner",
+    team: "Talent",
+    workplace: "São Paulo",
+    hiredAt: new Date("2023-05-15"),
+    access: "Active",
+    contract: "Ongoing",
+  },
+]
+
+const directoryFilters = {
+  team: {
+    type: "in",
+    label: "Team",
+    options: {
+      options: DIRECTORY_TEAMS.map((value) => ({ value, label: value })),
+    },
+  },
+  workplace: {
+    type: "in",
+    label: "Workplace",
+    options: {
+      options: DIRECTORY_WORKPLACES.map((value) => ({ value, label: value })),
+    },
+  },
+  access: {
+    type: "in",
+    label: "Status",
+    options: {
+      options: DIRECTORY_ACCESS_STATES.map((value) => ({
+        value,
+        label: value,
+      })),
+    },
+  },
+} as const
+
+const directorySortings = {
+  firstName: { label: "First name" },
+  lastName: { label: "Last name" },
+  hiredAt: { label: "Hired" },
+} as const
+
+/** The contract column's traffic light, the way the real list colours it. */
+const CONTRACT_STATUS = {
+  Ongoing: "positive",
+  Upcoming: "info",
+  Ended: "neutral",
+} as const
+
+/**
+ * The organization's tabs. Only Employees has a screen here: the rest are the
+ * real header's, kept so the page is the page rather than a bare table.
+ */
+const DirectoryTabs = () => (
+  <Tabs
+    activeTabId="employees"
+    tabs={[
+      { id: "employees", label: "Employees", index: true },
+      { id: "activity", label: "Activity" },
+      { id: "teams", label: "Teams" },
+      { id: "workplaces", label: "Workplaces" },
+      { id: "org-chart", label: "Org chart" },
+      { id: "job-catalog", label: "Job catalog" },
+    ]}
+  />
+)
+
+const DirectoryCollection = () => {
+  const source = useDataCollectionSource({
+    filters: directoryFilters,
+    sortings: directorySortings,
+    search: { enabled: true, sync: true },
+    primaryActions: () => ({ label: "Add employee", icon: Icons.Add }),
+    itemUrl: (person: DirectoryPerson) => `/directory/${person.id}`,
+    selectable: (person: DirectoryPerson) => person.id,
+    dataAdapter: {
+      fetchData: ({ filters, search }) => ({
+        records: DIRECTORY_PEOPLE.filter((person) => {
+          const q = typeof search === "string" ? search.toLowerCase() : ""
+          const matchesSearch =
+            !q ||
+            `${person.firstName} ${person.lastName} ${person.jobTitle}`
+              .toLowerCase()
+              .includes(q)
+          const inList = (values: unknown, value: string) =>
+            !Array.isArray(values) ||
+            values.length === 0 ||
+            values.includes(value)
+          return (
+            matchesSearch &&
+            inList(filters.team, person.team) &&
+            inList(filters.workplace, person.workplace) &&
+            inList(filters.access, person.access)
+          )
+        }),
+      }),
+    },
+  })
+
+  return (
+    <OneDataCollection
+      source={source}
+      fullHeight
+      visualizations={[
+        {
+          type: "table",
+          options: {
+            frozenColumns: 1,
+            allowColumnHiding: true,
+            allowColumnReordering: true,
+            columns: [
+              {
+                id: "employee",
+                label: "Employee",
+                width: 240,
+                sorting: "firstName",
+                render: (person) => ({
+                  type: "person",
+                  value: {
+                    firstName: person.firstName,
+                    lastName: person.lastName,
+                  },
+                }),
+              },
+              {
+                id: "job",
+                label: "Job",
+                render: (person) => person.jobTitle,
+              },
+              {
+                id: "team",
+                label: "Team",
+                render: (person) => ({
+                  type: "team",
+                  value: { name: person.team },
+                }),
+              },
+              {
+                id: "workplace",
+                label: "Workplace",
+                render: (person) => person.workplace,
+              },
+              {
+                id: "hired",
+                label: "Hired",
+                sorting: "hiredAt",
+                render: (person) => ({
+                  type: "date",
+                  value: { date: person.hiredAt },
+                }),
+              },
+              {
+                id: "access",
+                label: "Access",
+                render: (person) => ({
+                  type: "tag",
+                  value: { label: person.access },
+                }),
+              },
+              {
+                id: "contract",
+                label: "Contract status",
+                render: (person) => ({
+                  type: "status",
+                  value: {
+                    status: CONTRACT_STATUS[person.contract],
+                    label: person.contract,
+                  },
+                }),
+              },
+            ],
+          },
+        },
+      ]}
+    />
+  )
+}
+
+const DirectoryPage = () => (
+  <Page
+    header={
+      <PageHeader
+        module={{ id: "employees", name: "Directory", href: "/directory" }}
+      />
+    }
+  >
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* The tab row's hairline is drawn edge to edge inside the nav, so the
+          gutter goes on the list rather than around it — padding out here
+          would pull the line short of the page on both sides. 16px, the
+          header's own `px-page`, so the first tab starts under the title. */}
+      <div className="pt-1 [&_ul]:px-4">
+        <DirectoryTabs />
+      </div>
+      <div className="mt-5 flex min-h-0 flex-1 flex-col">
+        <DirectoryCollection />
+      </div>
+    </div>
+  </Page>
+)
+
+/**
+ * A placeholder, not a calendar. `OneCalendar` is a date PICKER — a month grid
+ * you choose from — and dressing it up as the module's page would have this
+ * story making a claim about a screen nobody has designed yet.
+ */
+const PlaceholderPage = ({
+  module,
+  says,
+}: {
+  module: ComponentProps<typeof PageHeader>["module"]
+  says: string
+}) => (
+  <Page header={<PageHeader module={module} />}>
+    <div className="flex flex-1 items-center justify-center p-6">
+      <span className="text-f1-foreground-secondary">{says}</span>
+    </div>
+  </Page>
+)
+
+/**
+ * The Inbox's page is empty on purpose: the list is the panel, and the content
+ * side is whatever you picked from it. Until you pick, it says so.
+ */
+const InboxPage = () => (
+  <Page
+    header={
+      <PageHeader module={{ id: "inbox", name: "Inbox", href: "/inbox" }} />
+    }
+  >
+    <div className="flex flex-1 items-center justify-center p-6">
+      <span className="text-f1-foreground-secondary">Aquí va la inbox</span>
+    </div>
+  </Page>
+)
+
 const CommunityMain = ({
   children,
 }: {
   /** The page when no post is open. Defaults to the home page. */
   children?: ReactNode
-}): ReactNode => <MockCommunitySurface fallback={children ?? <HomePage />} />
+}): ReactNode => {
+  // A conversation opened from the rail is the PAGE: with the modules always
+  // on screen, Chats is somewhere you go, and what you go to belongs in the
+  // main area rather than in a panel beside the page you left behind.
+  const { openSurface } = useMockChatApp()
+  const { module } = useContext(RailModuleContext)
+
+  if (openSurface?.kind === "chat") {
+    // In the app shell's sheet, like every other page. Rendered bare it
+    // floated on the frame's own ground with no edge of its own — a
+    // transcript is content, and content lives on the card.
+    return (
+      <Page>
+        <MockChatPanel convId={openSurface.convId} />
+      </Page>
+    )
+  }
+  if (module === "inbox") return <InboxPage />
+  if (module === "calendar")
+    return (
+      <PlaceholderPage
+        module={{ id: "calendar", name: "Calendar", href: "/calendar" }}
+        says="Aquí va el calendar"
+      />
+    )
+  if (module === "directory") return <DirectoryPage />
+  if (module === "files") return <FilesPage />
+  return <MockCommunitySurface fallback={children ?? <HomePage />} />
+}
 
 /**
  * The frame as it ships: a permanent module rail beside the section panel.
@@ -871,23 +1417,25 @@ export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            panelContentSide: "left",
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              layout="rail"
-              // State parity across reloads, like the panel content restore.
-              tabsPersistKey="rail-demo"
-            />
-          }
-        >
-          {/* Real-world main content: the home "daytime" page. */}
-          <CommunityMain />
-        </ApplicationFrame>
+        <RailModuleProvider>
+          <ApplicationFrame
+            ai={{
+              ...withMockChatSlots(args.ai),
+              panelContentSide: "left",
+            }}
+            aiPromotion={args.aiPromotion}
+            sidebar={
+              <ConversationsSidebar
+                layout="rail"
+                // State parity across reloads, like the panel content restore.
+                tabsPersistKey="rail-demo"
+              />
+            }
+          >
+            {/* The page follows the module the rail is on. */}
+            <CommunityMain />
+          </ApplicationFrame>
+        </RailModuleProvider>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
@@ -1173,60 +1721,15 @@ const MockChatPanel = ({
 }
 
 /**
- * Realistic "Main" menu mirroring the production Factorial sidebar (root nav +
- * Personal / Company / Operations / Talent / IT Management / Finance / More).
+ * Everything the navigation can reach, behind Tools.
+ *
+ * It used to be the Home panel, back when Home was the only module and its
+ * second level had to carry the whole product. With a rail, a module's panel
+ * is that module's own contents — so the catalog is a destination like any
+ * other, and the modules with a place on the rail are the ones you do not
+ * have to come here for.
  */
-const homeMenuTree: MenuCategory[] = [
-  {
-    id: "main",
-    title: "Main",
-    isRoot: true,
-    isSortable: false,
-    items: [
-      { label: "Dashboard", icon: Icons.Hub, href: "/", exactMatch: true },
-      {
-        label: "Communications",
-        icon: Icons.Megaphone,
-        href: "/communications",
-      },
-      // `data-test` is asserted by the Default story play test.
-      {
-        label: "Inbox",
-        icon: Icons.Inbox,
-        href: "/inbox",
-        badge: 6,
-        "data-test": "foo",
-      },
-      { label: "Calendar", icon: Icons.Calendar, href: "/calendar" },
-      {
-        label: "Discover Factorial",
-        icon: Icons.Sparkles,
-        href: "/discover",
-        tag: "New",
-      },
-    ],
-  },
-  {
-    id: "personal",
-    title: "Personal",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      { label: "Profile", icon: Icons.Person, href: "/profile" },
-      {
-        label: "My time tracking",
-        icon: Icons.Clock,
-        href: "/my-time-tracking",
-      },
-      { label: "Time off", icon: Icons.PalmTree, href: "/time-off" },
-      { label: "My benefits", icon: Icons.Present, href: "/my-benefits" },
-      { label: "My documents", icon: Icons.Files, href: "/my-documents" },
-      { label: "My projects", icon: Icons.Kanban, href: "/my-projects" },
-      { label: "My spending", icon: Icons.CreditCard, href: "/my-spending" },
-      { label: "My training", icon: Icons.AcademicCap, href: "/my-training" },
-      { label: "Tasks", icon: Icons.Completed, href: "/tasks" },
-    ],
-  },
+const toolsMenuTree: MenuCategory[] = [
   {
     id: "company",
     title: "Company",
@@ -1238,8 +1741,6 @@ const homeMenuTree: MenuCategory[] = [
         icon: Icons.Organization,
         href: "/organization",
       },
-      { label: "Documents", icon: Icons.Folder, href: "/documents" },
-      { label: "Policies", icon: Icons.Shield, href: "/policies" },
       { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
       { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
     ],
@@ -1251,10 +1752,11 @@ const homeMenuTree: MenuCategory[] = [
     isSortable: true,
     items: [
       { label: "Time tracking", icon: Icons.Timer, href: "/time-tracking" },
+      { label: "Time off", icon: Icons.PalmTree, href: "/time-off" },
       { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
       { label: "Projects", icon: Icons.Kanban, href: "/projects" },
       { label: "Benefits", icon: Icons.HoldHeart, href: "/benefits" },
-      { label: "Compensation", icon: Icons.MoneyBag, href: "/compensation" },
+      { label: "Payroll", icon: Icons.MoneyBag, href: "/payroll" },
     ],
   },
   {
@@ -1280,8 +1782,13 @@ const homeMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "Device catalog", icon: Icons.Laptop, href: "/device-catalog" },
-      { label: "IT inventory", icon: Icons.HardDrive, href: "/it-inventory" },
+      {
+        label: "Device catalog",
+        icon: Icons.Marketplace,
+        href: "/device-catalog",
+      },
+      { label: "Inventory", icon: Icons.Computer, href: "/it-inventory" },
+      { label: "Platform IT", icon: Icons.UserProtected, href: "/it-platform" },
     ],
   },
   {
@@ -1290,11 +1797,15 @@ const homeMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "Workspace", icon: Icons.Briefcase, href: "/finance" },
-      { label: "Sales", icon: Icons.ChartVerticalBars, href: "/sales" },
-      { label: "Spending", icon: Icons.CreditCard, href: "/spending" },
-      { label: "Treasury", icon: Icons.Bank, href: "/treasury" },
-      { label: "Accounting", icon: Icons.Calculator, href: "/accounting" },
+      { label: "Planning", icon: Icons.Proyector, href: "/finance/planning" },
+      { label: "Spending", icon: Icons.Wallet, href: "/finance/spending" },
+      { label: "Treasury", icon: Icons.Bank, href: "/finance/treasury" },
+      { label: "Sales", icon: Icons.Handshake, href: "/finance/sales" },
+      {
+        label: "Accounting",
+        icon: Icons.MoneyBag,
+        href: "/finance/accounting",
+      },
     ],
   },
   {
@@ -1303,19 +1814,41 @@ const homeMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      { label: "AI reports", icon: Icons.Ai, href: "/ai-reports" },
-      { label: "Analytics", icon: Icons.ChartPie, href: "/analytics" },
       { label: "Billing", icon: Icons.Receipt, href: "/billing" },
       { label: "Workflows", icon: Icons.Split, href: "/workflows" },
+      // `data-test` is asserted by the Default story play test.
       {
-        label: "Trust channel",
-        icon: Icons.UserProtected,
-        href: "/trust-channel",
+        label: "Marketplace",
+        icon: Marketplace,
+        href: "/marketplace",
+        "data-test": "foo",
       },
-      { label: "Settings", icon: Icons.Settings, href: "/settings" },
     ],
   },
 ]
+
+/**
+ * The catalog, beside the rail instead of inside a panel.
+ *
+ * Tools is not a place you go: it is the list of everywhere else. So it gets a
+ * menu that floats over whatever you were reading and leaves when you do,
+ * rather than a column that pushes the page aside to show you a list you came
+ * to leave. The module you were in stays selected in the rail the whole time,
+ * because you never left it.
+ */
+const ToolsFlyout = () => (
+  <div className="flex min-h-0 flex-col gap-1">
+    {/* Outside the scroll: searching a list you have to scroll to see is the
+        one thing search is for. The sidebar's own gutter and bottom margin
+        come off — the box's padding is the only one there should be. */}
+    <div className="shrink-0 [&>div]:px-0 [&_button]:mb-0">
+      <SearchBar placeholder="Search..." onClick={() => {}} />
+    </div>
+    <div className="min-h-0 flex-1 overflow-y-auto [&>div>div]:px-0">
+      <Menu tree={toolsMenuTree} />
+    </div>
+  </div>
+)
 
 /* -------------------------------------------------------------------------- *
  * "One" sidebar tab — AI chat history                                         *
@@ -1506,6 +2039,7 @@ const ConversationsSidebarInner = ({
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
+  const { setModule } = useContext(RailModuleContext)
   const { toggleSidebar, sidebarState } = useSidebar()
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
@@ -1516,10 +2050,21 @@ const ConversationsSidebarInner = ({
     restoringPanelContentId,
     cancelPanelContentRestore,
   } = useAiChat()
+  const { openChatSurface, closeSurface } = useMockChatApp()
 
-  // Clicking a conversation mounts it in the side panel (one at a time).
+  // Where a conversation opens depends on what the navigation is. With a
+  // rail, Chats is a module you are IN, so the conversation is the page. With
+  // the tab row, the sidebar is the whole navigation and the conversation
+  // docks beside whatever you were doing.
+  const isRail = layout === "rail"
   const onSelect = useCallback(
     (convId: string) => {
+      if (isRail) {
+        lastChatId.current = convId
+        openChatSurface(convId)
+        setActiveChat(convId)
+        return
+      }
       setPanelContent({
         id: convId,
         content: (
@@ -1527,7 +2072,7 @@ const ConversationsSidebarInner = ({
         ),
       })
     },
-    [receiptPreview, setPanelContent]
+    [isRail, openChatSurface, receiptPreview, setActiveChat, setPanelContent]
   )
 
   // Demo convenience: open a conversation straight away (e.g. the mentions story
@@ -1577,21 +2122,87 @@ const ConversationsSidebarInner = ({
   // panel. Opening the AI chat (panelContent cleared) or closing the panel
   // deselects it — the sidebar selection follows the panel, not the last click.
   useEffect(() => {
+    if (isRail) return
     setActiveChat(open && panelContent ? panelContent.id : null)
-  }, [open, panelContent, setActiveChat])
+  }, [isRail, open, panelContent, setActiveChat])
 
-  const isRail = layout === "rail"
+  // Every rail item is a destination, so the page follows the module. Chats
+  // lands you back in the conversation you were last in — a module you return
+  // to should be where you left it, not an empty room — and leaving Chats
+  // closes it, so Home is Home again rather than the transcript you were
+  // reading a moment ago.
+  //
+  // Keyed on the module CHANGING, not on the store: a post opened from inside
+  // a conversation moves the same surface, and an effect that re-ran on every
+  // store update would shove the transcript straight back over it.
+  const lastChatId = useRef<string | null>(null)
+  const groupsRef = useRef(groups)
+  groupsRef.current = groups
+  const shownModule = useRef<string | null>(null)
+  useEffect(() => {
+    if (!isRail || shownModule.current === tab) return
+    shownModule.current = tab
+    setModule(tab)
+    if (tab === "messages") {
+      const convId = lastChatId.current ?? groupsRef.current[0]?.chats[0]?.id
+      if (convId) {
+        lastChatId.current = convId
+        openChatSurface(convId)
+        setActiveChat(convId)
+      }
+      return
+    }
+    closeSurface()
+    setActiveChat(null)
+  }, [isRail, tab, setModule, openChatSurface, closeSurface, setActiveChat])
+
   const tabs = [
-    // The rail names the modules the way the navigation does ("Home", "Comms");
-    // the tab row names the panel's contents ("Menu", "Chat"), which is what a
-    // row above the body is describing.
-    { id: "home", label: isRail ? "Home" : "Menu", icon: Home },
+    // The rail names the modules the way the navigation does; the tab row
+    // names the panel's contents ("Menu"), which is what a row above the body
+    // is describing.
+    {
+      id: "home",
+      label: isRail ? "Home" : "Menu",
+      icon: Home,
+      activeIcon: HomeFilled,
+    },
     {
       id: "messages",
-      label: isRail ? "Comms" : "Chat",
+      label: "Chats",
       icon: Comment,
+      activeIcon: MessagesFilled,
       badge: unreadChatsCount || undefined,
     },
+    // First-level destinations of their own, out of the Home menu: with the
+    // rail always on screen, a section you visit daily has no business being
+    // a row inside another section's list.
+    ...(isRail
+      ? [
+          {
+            id: "inbox",
+            label: "Inbox",
+            icon: Inbox,
+            activeIcon: InboxFilled,
+            badge: 6,
+          },
+          {
+            id: "calendar",
+            label: "Calendar",
+            icon: Calendar,
+            activeIcon: CalendarFilled,
+          },
+          {
+            id: "files",
+            label: "Files",
+            icon: Folders,
+            activeIcon: FoldersFilled,
+          },
+          // The people you look up are a destination, not a tool you open:
+          // Directory takes the Organization row's place on the first level.
+          { id: "directory", label: "Directory", icon: BookOpen },
+          { id: "tools", label: "Tools", icon: Hub, activeIcon: HubFilled },
+        ]
+      : []),
     // The AI chat is reached from the page header's One switch, never from a
     // navigation tab — so the rail never carries one.
     ...(withOneTab && !isRail
@@ -1611,12 +2222,17 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
-    ) : (
-      <Menu tree={homeMenuTree} />
+    ) : isRail ? undefined : ( // contents for one screen. Tools is a menu, and menus fly out. // module IS the content, and a column beside it would be a table of // Only Chats has a second level in a panel. The rest are pages: the
+      <Menu tree={toolsMenuTree} />
     )
 
   if (isRail) {
     const { user, options } = SidebarFooterStories.Default.args
+    // A panel is for a module whose second level is a list you pick from: the
+    // conversations, the queue, the catalog. Home, Calendar, Directory and
+    // Files are pages — the module IS the content, and a column of links
+    // beside it would be a table of contents for one page.
+    const hasPanel = tab === "messages"
     return (
       <Sidebar
         rail={
@@ -1634,36 +2250,42 @@ const ConversationsSidebarInner = ({
               // section and opening the panel are the same intention.
               if (sidebarState !== "locked") toggleSidebar()
             }}
-            // Pressing the module you are already in folds the panel away, so
-            // the rail doubles as the collapse control.
-            onActiveTabPress={() => toggleSidebar()}
             persistKey={tabsPersistKey}
+            flyouts={{ tools: <ToolsFlyout /> }}
             actions={[
               {
-                id: "marketplace",
-                label: "Marketplace",
-                icon: Marketplace,
+                id: "notifications",
+                label: "Notifications",
+                icon: Bell,
+                hasUpdates: true,
                 onClick: () => {},
               },
               {
-                id: "security",
-                label: "Security",
-                icon: Shield,
+                id: "help",
+                label: "Help",
+                icon: LifeBuoy,
+                onClick: () => {},
+              },
+              {
+                id: "settings",
+                label: "Settings",
+                icon: Settings,
                 onClick: () => {},
               },
             ]}
             user={{ user, options }}
           />
         }
+        // Home has no second level yet, so it is given none: the header is
+        // what makes `Sidebar` render a panel at all.
         header={
-          <>
-            <SidebarPanelHeader
-              title={tabs.find((t) => t.id === tab)?.label ?? ""}
-            />
-            {tab === "home" && (
-              <SearchBar placeholder="Search..." onClick={() => {}} />
-            )}
-          </>
+          hasPanel ? (
+            <>
+              <SidebarPanelHeader
+                title={tabs.find((t) => t.id === tab)?.label ?? ""}
+              />
+            </>
+          ) : undefined
         }
         body={body}
       />
@@ -1688,7 +2310,9 @@ const ConversationsSidebarInner = ({
           {/* Search lives with the tabs in the (fixed) header so it stays put
               while the body scrolls. Only the Home tab uses it. */}
           {tab === "home" && (
-            <SearchBar placeholder="Search..." onClick={() => {}} />
+            <div className="px-3 pb-3">
+              <SearchBar placeholder="Search..." onClick={() => {}} />
+            </div>
           )}
         </>
       }

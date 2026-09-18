@@ -52,6 +52,8 @@ export type DropdownInternalProps = {
   size?: F0ButtonProps["size"]
   children?: React.ReactNode
   align?: "start" | "end" | "center"
+  /** Edge the menu opens from. @default "bottom" */
+  side?: "top" | "right" | "bottom" | "left"
   open?: boolean
   onOpenChange?: (open: boolean) => void
   label?: string
@@ -171,6 +173,7 @@ export function DropdownInternal({
   items,
   icon = EllipsisHorizontal,
   align = "start",
+  side,
   size,
   children,
   open: controlledOpen,
@@ -244,7 +247,7 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} container={container}>
+      <DropdownMenuContent align={align} side={side} container={container}>
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>

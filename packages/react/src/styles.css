@@ -12,7 +12,7 @@
   --ds-sidebar-width: 240px;
   /* The module rail. Mirrors `sidebarWidths.rail` in @factorialco/f0-core —
      the frame reads the number, the sidebar's own layout reads this. */
-  --ds-sidebar-rail-width: 48px;
+  --ds-sidebar-rail-width: 68px;
 }
 
 /* Chat-scoped font stack: inserts the metric-adjusted "Inter Fallback" (see

@@ -3,6 +3,8 @@ import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
+import { PRESSABLE_CHIP_TRIGGER } from "../pressable"
+
 export type SidebarUser = {
   firstName: string
   lastName: string
@@ -36,7 +38,15 @@ export function SidebarUserMenu({
   const fullName = `${user.firstName} ${user.lastName}`
 
   return (
-    <Dropdown items={options}>
+    // On the rail the menu opens beside the avatar, its foot on the avatar's:
+    // below it there is nothing but the window edge, and a menu that grows
+    // upward from the bottom-left corner of the screen reads as belonging to
+    // the viewport rather than to the button that opened it.
+    <Dropdown
+      items={options}
+      side={compact ? "right" : undefined}
+      align={compact ? "end" : undefined}
+    >
       <button
         type="button"
         // With the name hidden, it has to reach assistive tech some other way.
@@ -47,23 +57,40 @@ export function SidebarUserMenu({
         aria-label={compact ? fullName : undefined}
         title={compact ? fullName : undefined}
         className={cn(
-          "flex items-center font-medium transition-colors",
+          "group flex items-center font-medium transition-colors",
           compact
-            ? // The avatar itself is the control, on the rail's round shape.
-              "shrink-0 cursor-pointer justify-center rounded-full"
+            ? // The whole rail row is the target; the chip inside it is what
+              // lights up, matching the company selector at the other end.
+              "w-full cursor-pointer justify-center"
             : "w-full max-w-full gap-1.5 rounded p-1.5 hover:bg-f1-background-secondary data-[state=open]:bg-f1-background-secondary",
           focusRing("focus-visible:ring-inset")
         )}
         onClick={onDropdownClick}
       >
-        <F0AvatarPerson
-          src={user.avatarUrl}
-          firstName={user.firstName}
-          lastName={user.lastName}
-          size={compact ? "sm" : "xs"}
-        />
-        {!compact && (
-          <OneEllipsis className="text-f1-foreground">{fullName}</OneEllipsis>
+        {compact ? (
+          <span
+            className={cn(
+              "flex size-10 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary",
+              PRESSABLE_CHIP_TRIGGER
+            )}
+          >
+            <F0AvatarPerson
+              src={user.avatarUrl}
+              firstName={user.firstName}
+              lastName={user.lastName}
+              size="sm"
+            />
+          </span>
+        ) : (
+          <>
+            <F0AvatarPerson
+              src={user.avatarUrl}
+              firstName={user.firstName}
+              lastName={user.lastName}
+              size="xs"
+            />
+            <OneEllipsis className="text-f1-foreground">{fullName}</OneEllipsis>
+          </>
         )}
       </button>
     </Dropdown>

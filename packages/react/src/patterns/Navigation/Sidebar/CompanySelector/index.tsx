@@ -11,6 +11,8 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
+import { PRESSABLE_CHIP_TRIGGER } from "../pressable"
+
 interface Company {
   id: string
   name: string
@@ -71,6 +73,7 @@ export function CompanySelector({
       <CompanyAvatar
         company={selectedCompany}
         withNotification={withNotification}
+        size="md"
       />
     ) : (
       <div className="p-1.5" style={{ maxWidth: "168px" }}>
@@ -83,7 +86,7 @@ export function CompanySelector({
   }
 
   return (
-    <div className={isCompact ? "shrink-0" : "min-w-0 flex-1"}>
+    <div className={isCompact ? "w-full shrink-0" : "min-w-0 flex-1"}>
       <Selector
         companies={companies}
         selected={selectedCompany}
@@ -95,6 +98,7 @@ export function CompanySelector({
           <CompanyAvatar
             company={selectedCompany}
             withNotification={withNotification}
+            size="md"
           />
         ) : (
           <SelectedCompanyLabel
@@ -164,13 +168,15 @@ const Selector = ({
     >
       <div
         className={cn(
-          "group flex flex-nowrap items-center justify-center text-f1-foreground transition-colors hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover",
+          "group flex flex-nowrap items-center justify-center text-f1-foreground transition-colors",
           compact
-            ? // The logo IS the control — hovering the avatar itself, with no
-              // box around it, is what the rail's identity mark looks like.
-              "shrink-0 cursor-pointer rounded-md"
-            : "w-fit max-w-full gap-1 rounded p-1.5",
-          focusRing()
+            ? // The whole header row is the target — the rail is 68px wide and
+              // a 24px logo is a small thing to aim at. What lights up is the
+              // chip inside it, a size bigger than a module's so the identity
+              // mark is not read as one more destination.
+              "h-full w-full cursor-pointer"
+            : "w-fit max-w-full gap-1 rounded p-1.5 hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover",
+          focusRing(compact ? "focus-visible:ring-inset" : undefined)
         )}
         data-testid="company-selector-button"
         tabIndex={0}
@@ -178,7 +184,18 @@ const Selector = ({
         aria-label={compact ? selected?.name : undefined}
         title={selected?.name}
       >
-        {children}
+        {compact ? (
+          <span
+            className={cn(
+              "flex size-10 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary",
+              PRESSABLE_CHIP_TRIGGER
+            )}
+          >
+            {children}
+          </span>
+        ) : (
+          children
+        )}
         {/* The chevron is what tells you the name is a control. With no name
             there is nothing for it to qualify, and at 32px it only crowds the
             logo — the rail's affordance is the hover state and the tooltip. */}

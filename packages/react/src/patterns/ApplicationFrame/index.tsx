@@ -1,4 +1,4 @@
-import { breakpoints, motionTokens, sidebarWidths } from "@factorialco/f0-core"
+import { breakpoints, motionTokens } from "@factorialco/f0-core"
 import {
   AnimatePresence,
   LayoutGroup,
@@ -37,16 +37,6 @@ import {
 import { useWindowResizing } from "./useWindowResizing"
 
 /**
- * The room the locked sidebar panel takes out of the frame. Border box, so the
- * slot's own `pl-3` is inside it — matches `--ds-sidebar-width`.
- *
- * Named because two places need the same number: the slot itself, and the
- * predicted frame width published when the sidebar changes state (see
- * `useFrameWidthPublisher`).
- */
-const SIDEBAR_SLOT_WIDTH = sidebarWidths.panel
-
-/**
  * How long the fullscreen transition holds the frame in its "changing what the
  * panel is" state. Derived from the transition itself, so the flag and the
  * animation can never drift apart.
@@ -60,6 +50,12 @@ export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
   aiPromotion?: Omit<AiPromotionChatProviderProps, "children">
   banner?: React.ReactNode
+  /**
+   * A strip across the top of the content column, above the page's card and
+   * outside it: search, or anything else belonging to the window rather than
+   * to the page under it. Omit it and the card starts where it always did.
+   */
+  topBar?: React.ReactNode
   sidebar: React.ReactNode
   children: React.ReactNode
 }
@@ -67,6 +63,7 @@ export interface ApplicationFrameProps {
 function _ApplicationFrame({
   children,
   sidebar,
+  topBar,
   banner,
   ai,
   aiPromotion,
@@ -77,6 +74,7 @@ function _ApplicationFrame({
         ai={ai}
         aiPromotion={aiPromotion}
         sidebar={sidebar}
+        topBar={topBar}
         banner={banner}
       >
         {children}
@@ -91,6 +89,7 @@ function _ApplicationFrame({
 function ApplicationFrameWithProvider({
   children,
   sidebar,
+  topBar,
   banner,
   ai,
   aiPromotion,
@@ -112,6 +111,7 @@ function ApplicationFrameWithProvider({
         ai={ai}
         aiPromotion={aiPromotion}
         sidebar={sidebar}
+        topBar={topBar}
         banner={banner}
       >
         {children}
@@ -195,11 +195,18 @@ function useAutoCloseSidebar(
  *   z-30  Sidebar (unlocked/floating)
  *   z-0   Chat (normal)
  */
+/**
+ * The strip above the page: 8 clear of the window, the search box's own 32,
+ * and 2 down to the card's edge.
+ */
+const TOP_BAR_HEIGHT = 42
+
 function ApplicationFrameContent({
   ai,
   aiPromotion,
   children,
   sidebar,
+  topBar,
   banner,
 }: ApplicationFrameProps) {
   const {
@@ -208,6 +215,10 @@ function ApplicationFrameContent({
     isSmallScreen,
     setForceFloat,
     railWidth,
+    panelWidth,
+    setTopBarHeight,
+    isLayoutJumping,
+    hasRail,
   } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const {
@@ -392,7 +403,11 @@ function ApplicationFrameContent({
   // this one would tell the panel it has 56px more to grow into than it does,
   // and it would cross `splitMinFrame` early on a narrow window.
   const sidebarSlotWidth =
-    railWidth + (sidebarState === "locked" ? SIDEBAR_SLOT_WIDTH : 0)
+    railWidth + (sidebarState === "locked" ? panelWidth : 0)
+
+  useEffect(() => {
+    setTopBarHeight(topBar ? TOP_BAR_HEIGHT : 0)
+  }, [topBar, setTopBarHeight])
   useEffect(() => {
     const row = mainAreaRef.current?.parentElement
     if (!row || !setFrameWidth) return
@@ -454,7 +469,10 @@ function ApplicationFrameContent({
   // The layout is following an input rather than playing a move: a handle drag
   // or a window resize. Everything laid out against the panel's edge reads this
   // so they travel together instead of each easing on its own schedule.
-  const isLayoutTracking = Boolean(isResizing) || isWindowResizing
+  // A module change lands instantly, for the same reason a drag does: neither
+  // is a movement anybody is watching.
+  const isLayoutTracking =
+    Boolean(isResizing) || isWindowResizing || isLayoutJumping
   const layoutTransition = resolveLayoutTransition(
     isLayoutTracking,
     shouldReduceMotion
@@ -583,7 +601,12 @@ function ApplicationFrameContent({
             <motion.div
               className={cn(
                 "shrink-0",
-                sidebarState !== "locked" ? "z-30" : "z-0",
+                // The slot is raised over the content only for a panel that
+                // FLOATS. With a rail it never does, so a collapsing panel
+                // fading out on top of the page it is uncovering — its rows
+                // legible over the content for the length of the fade — is
+                // not a trade for anything.
+                sidebarState !== "locked" && !hasRail ? "z-30" : "z-0",
                 // Dropped when collapsed: with `box-sizing: border-box` a
                 // padding would hold the slot open at 12px instead of 0.
                 sidebarState === "locked" && "pl-3"
@@ -599,7 +622,31 @@ function ApplicationFrameContent({
             {/* Main area */}
             <motion.div
               ref={mainAreaRef}
-              className="relative min-w-0 flex-1"
+              // Above the navigation, so the content's own edge casts onto the
+              // rail rather than the rail sitting on top of it. The floating
+              // panel raises itself past this (z-30) when it has to.
+              //
+              // The page's shadow is drawn HERE, by a pseudo-element tracing
+              // the sheet's box, rather than by the page itself. `main` below
+              // scrolls, and a scroll container paints nothing outside its own
+              // box — so a shadow on the sheet was cut off flush against the
+              // navigation, the one edge it exists to show. This element does
+              // not scroll, so it can cast.
+              className={cn(
+                "relative z-20 flex min-w-0 flex-1 flex-col",
+                // The shadow traces the CARD, so with a strip above it starts
+                // below the strip rather than behind it.
+                "after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:z-0 after:shadow after:content-[''] xs:after:bottom-1 xs:after:rounded-xl",
+                topBar
+                  ? // The strip's own height: 8 above the search box, its 32,
+                    // and 2 below — so the card's edge starts where the strip
+                    // ends rather than under it.
+                    "after:top-[42px]"
+                  : "after:top-0 xs:after:top-1",
+                !isAiChatOpen && !isAiPromotionChatOpen
+                  ? "after:right-0 xs:after:right-1"
+                  : "after:right-0"
+              )}
               // Both paddings animate together, so swapping the visible side
               // (split mode) slides the main content from one edge to the
               // other — covering the outgoing window and uncovering the
@@ -617,6 +664,23 @@ function ApplicationFrameContent({
                 paddingLeft: contentTransition,
               }}
             >
+              {topBar ? (
+                // Outside the card and above it, on the frame's own ground —
+                // it belongs to the window, not to the page under it.
+                //
+                // Pulled back over the room the panel takes, so it starts at
+                // the rail's edge and stays there: a second level opening is
+                // not a reason for the window's own search to move. The panel
+                // gets out of its way by starting below it (`topBarHeight`),
+                // which is the whole point of the offset.
+                <motion.div
+                  className="relative z-10 flex shrink-0 items-center pb-0.5 pr-4 pt-2"
+                  animate={{ marginLeft: railWidth - sidebarSlotWidth }}
+                  transition={{ marginLeft: contentTransition }}
+                >
+                  {topBar}
+                </motion.div>
+              ) : null}
               {/* Main content */}
               {/* Deliberately NOT layout-animated. It carried a `layoutId`
                   with no counterpart anywhere in the tree — shared-element

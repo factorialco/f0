@@ -48,7 +48,9 @@ const Header = ({
         onChange={setSelected}
         isLoading={loading}
       />
-      <SearchBar {...SearchBarStories.Default.args} />
+      <div className="px-3 pb-3">
+        <SearchBar {...SearchBarStories.Default.args} />
+      </div>
     </>
   )
 }
@@ -279,7 +281,11 @@ const RailSidebarInner = () => {
           <SidebarPanelHeader
             title={tabs.find((t) => t.id === tab)?.label ?? ""}
           />
-          {tab === "home" && <SearchBar {...SearchBarStories.Default.args} />}
+          {tab === "home" && (
+            <div className="px-3 pb-3">
+              <SearchBar {...SearchBarStories.Default.args} />
+            </div>
+          )}
         </>
       }
       body={

@@ -5,11 +5,16 @@ import { action } from "storybook/actions"
 
 import {
   Calendar,
+  CalendarFilled,
   Comment,
   Home,
+  HomeFilled,
   Hub,
+  HubFilled,
   Inbox,
+  InboxFilled,
   Marketplace,
+  MessagesFilled,
   Shield,
 } from "@/icons/app"
 
@@ -23,6 +28,15 @@ const user = {
   user: SidebarFooterStories.Default.args.user,
   options: SidebarFooterStories.Default.args.options,
 }
+
+/** The five modules, each with the solid glyph it wears while active. */
+const railTabs = [
+  { id: "home", label: "Home", icon: Home, activeIcon: HomeFilled },
+  { id: "comms", label: "Comms", icon: Comment, activeIcon: MessagesFilled },
+  { id: "inbox", label: "Inbox", icon: Inbox, activeIcon: InboxFilled },
+  { id: "cal", label: "Cal", icon: Calendar, activeIcon: CalendarFilled },
+  { id: "hub", label: "Hub", icon: Hub, activeIcon: HubFilled },
+]
 
 const actions = [
   {
@@ -73,13 +87,7 @@ const meta = {
     company: { companies, selected: "1", onChange: action("Company changed") },
     activeTab: "home",
     onTabChange: action("Tab changed"),
-    tabs: [
-      { id: "home", label: "Home", icon: Home },
-      { id: "comms", label: "Comms", icon: Comment },
-      { id: "inbox", label: "Inbox", icon: Inbox },
-      { id: "cal", label: "Cal", icon: Calendar },
-      { id: "hub", label: "Hub", icon: Hub },
-    ],
+    tabs: railTabs,
     actions,
     user,
   },
@@ -93,13 +101,13 @@ export const Default: Story = {}
 /** Unread markers sit over the icon box, not beside the label. */
 export const WithBadges: Story = {
   args: {
-    tabs: [
-      { id: "home", label: "Home", icon: Home },
-      { id: "comms", label: "Comms", icon: Comment, badge: 4 },
-      { id: "inbox", label: "Inbox", icon: Inbox, badge: 12 },
-      { id: "cal", label: "Cal", icon: Calendar },
-      { id: "hub", label: "Hub", icon: Hub },
-    ],
+    tabs: railTabs.map((tab) =>
+      tab.id === "comms"
+        ? { ...tab, badge: 4 }
+        : tab.id === "inbox"
+          ? { ...tab, badge: 12 }
+          : tab
+    ),
   },
 }
 

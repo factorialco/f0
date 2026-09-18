@@ -386,10 +386,11 @@ const { Default, EverythingChannel, AnnouncementChannel, Snapshot } =
   composeStories(stories)
 
 const openBarcelonaFromSidebar = async () => {
-  // The conversations tab, whichever navigation the story wears: the rail
-  // names the module ("Comms"), the tab row names the panel ("Chat").
+  // The conversations tab. Both navigations name it the same now, but the
+  // regex stays: this test is about reaching a community, not about what the
+  // module is called this quarter.
   await userEvent.click(
-    await screen.findByRole("button", { name: /^(chat|comms)$/i })
+    await screen.findByRole("button", { name: /^chats?$/i })
   )
   await userEvent.click(
     await screen.findByRole("button", { name: /barcelona office/i })

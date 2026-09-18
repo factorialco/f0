@@ -7,6 +7,7 @@ import {
   isValidElement,
   useEffect,
   useRef,
+  type CSSProperties,
 } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
 
@@ -55,6 +56,12 @@ interface SidebarProps {
    * thing that slides away. Omit it and the sidebar behaves exactly as before.
    */
   rail?: ReactNode
+  /**
+   * The panel's width in px. Defaults to the 240 a menu needs; a module whose
+   * panel IS its content — an inbox list, a month — passes its own, and the
+   * frame reserves that instead.
+   */
+  panelWidth?: number
 }
 
 function _Sidebar({
@@ -63,13 +70,25 @@ function _Sidebar({
   footer,
   onFooterDropdownClick,
   rail,
+  panelWidth = sidebarWidths.panel,
 }: SidebarProps) {
-  const { sidebarState, isSmallScreen, setRailWidth } = useSidebar()
+  const {
+    sidebarState,
+    isSmallScreen,
+    setRailWidth,
+    setPanelWidth,
+    topBarHeight,
+    isLayoutJumping,
+  } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   // One width at every viewport: the rail is docked on a phone too, so a
   // breakpoint here would only be a second number to keep in step with the
   // token and the CSS variable.
   const railWidth = rail ? sidebarWidths.rail : 0
+  // A module whose second level has no content has no second level. The panel
+  // is not rendered empty and its width is not reserved: an empty 240px column
+  // between the rail and the content is a promise the module does not keep.
+  const hasPanel = Boolean(header || body || footer)
 
   // The frame receives the whole navigation as one opaque node, so it cannot
   // see whether there is a rail inside it — it is told. Everything the frame
@@ -79,6 +98,11 @@ function _Sidebar({
     setRailWidth(railWidth)
     return () => setRailWidth(0)
   }, [railWidth, setRailWidth])
+
+  useEffect(() => {
+    setPanelWidth(hasPanel ? panelWidth : 0)
+    return () => setPanelWidth(sidebarWidths.panel)
+  }, [hasPanel, panelWidth, setPanelWidth])
 
   // A collapsed panel must not be reachable by tab or by a screen reader. The
   // frame does this for the whole slot when there is no rail; with one, the
@@ -110,17 +134,22 @@ function _Sidebar({
   // against; and the room this nav leaves behind is animated by the frame on
   // `outSwift`, so a different curve here means the slot and its occupant
   // travel apart.
-  const transition = {
-    x: {
-      ease: motionTokens.ease.outSwift,
-      duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
-    },
-    top: { duration: shouldReduceMotion ? 0 : 0.1 },
-    left: { duration: shouldReduceMotion ? 0 : 0.1 },
-    default: {
-      duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
-    },
-  }
+  const transition = isLayoutJumping
+    ? // A module change is not a movement to watch: the panel that arrives
+      // belongs to a different section, it is not this one on its way
+      // somewhere. It lands.
+      { duration: 0 }
+    : {
+        x: {
+          ease: motionTokens.ease.outSwift,
+          duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
+        },
+        top: { duration: shouldReduceMotion ? 0 : 0.1 },
+        left: { duration: shouldReduceMotion ? 0 : 0.1 },
+        default: {
+          duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
+        },
+      }
 
   const renderFooter = () => {
     if (!footer) return null
@@ -173,14 +202,24 @@ function _Sidebar({
 
   // The panel's chrome. Identical in both compositions; the rail only shifts
   // where its left edge starts and how far it has to travel to clear.
+  // Beside a rail the panel is docked or it is gone. It must not put on the
+  // floating card's chrome on the way out either: what leaves should be the
+  // panel you were using, not a card it turns into for 200ms.
+  const floats = rail ? sidebarState === "unlocked" : sidebarState !== "locked"
   const panelClassName = cn(
     "absolute bottom-0 top-0 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
-    sidebarState === "locked"
-      ? // Docked, the panel has no surface and no seam of its own — it is the
-        // floor, like the rail, and the content's own card edge is what
-        // separates the two. A border here would land flush against that edge
-        // and read as a doubled line.
-        "h-full"
+    !floats
+      ? cn(
+          // Docked, the panel has no surface of its own — it is the floor,
+          // like the rail, and the content's own card edge is what separates
+          // it from the content. A border on THAT side would land flush
+          // against the card's edge and read as a doubled line.
+          //
+          // Height from its own insets rather than `h-full`: under a top bar
+          // the panel starts below the strip, and a full-height box would
+          // hang that far off the bottom of the window.
+          "h-auto"
+        )
       : cn(
           "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
           isSmallScreen
@@ -190,10 +229,9 @@ function _Sidebar({
   )
   const seam = isSmallScreen ? 0 : 8
   const panelAnimate = {
-    top: sidebarState === "locked" ? 0 : isSmallScreen ? 0 : "8px",
-    borderRadius:
-      sidebarState === "locked" ? "0" : isSmallScreen ? "0" : "12px",
-    left: sidebarState === "locked" ? railWidth : railWidth + seam,
+    top: !floats ? topBarHeight : isSmallScreen ? 0 : "8px",
+    borderRadius: !floats ? "0" : isSmallScreen ? "0" : "12px",
+    left: !floats ? railWidth : railWidth + seam,
     // Without a rail the panel leaves by sliding out past the left edge.
     //
     // With one it CANNOT: the rail is transparent, so a panel travelling
@@ -214,6 +252,7 @@ function _Sidebar({
         aria-label={i18n.navigation.sidebar.label}
         className={cn(panelClassName, "left-0 z-10")}
         animate={panelAnimate}
+        style={{ "--ds-sidebar-width": `${panelWidth}px` } as CSSProperties}
         transition={transition}
       >
         {panelContent}
@@ -227,20 +266,47 @@ function _Sidebar({
       className="absolute bottom-0 left-0 top-0 z-10 flex h-full"
     >
       {/* Above the panel in the stack, so a panel on its way out slides behind
-          the rail rather than across it. The rail itself never moves. Its
-          surface and its seam belong to `SidebarRail`, not to this wrapper:
-          a border here would sit OUTSIDE the rail's 48px and push the panel
-          a pixel off the width the frame has reserved for the pair. */}
-      <div className="relative z-10 h-full">{rail}</div>
-      <motion.div
-        initial={false}
-        ref={panelRef}
-        className={cn(panelClassName, "z-0")}
-        animate={panelAnimate}
-        transition={transition}
+          the rail rather than across it. The rail itself never moves.
+          
+          The seam between the two levels is drawn HERE, on the rail's right
+          edge, because the rail is what is always on screen: a line owned by
+          the panel is a line that has to be re-derived every time the panel
+          arrives. It still only exists while there IS a second level — a
+          hairline hanging off a rail with nothing beside it separates nothing
+          — so it fades with the panel rather than switching off under it.
+
+          A masked pseudo-element rather than a border, for two reasons: a
+          border would sit outside the rail's reserved width and push the
+          panel a pixel off the room the frame gave the pair, and the mask is
+          what lets the line end before the rail does — nothing for the first
+          6px, fully drawn by 24, and the same in reverse at the foot. A
+          hairline running the full height reads as a frame around the rail;
+          one that dissolves into the ground reads as a seam between two
+          things standing on it, which is what these are. */}
+      <div
+        className={cn(
+          "relative z-10 h-full",
+          "after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-f1-border-secondary after:transition-opacity after:content-['']",
+          "after:[mask-image:linear-gradient(to_bottom,transparent_0,transparent_6px,#000_24px,#000_calc(100%-24px),transparent_calc(100%-6px),transparent_100%)]",
+          hasPanel && sidebarState !== "hidden"
+            ? "after:opacity-100"
+            : "after:opacity-0"
+        )}
       >
-        {panelContent}
-      </motion.div>
+        {rail}
+      </div>
+      {hasPanel && (
+        <motion.div
+          initial={false}
+          ref={panelRef}
+          className={cn(panelClassName, "z-0")}
+          animate={panelAnimate}
+          style={{ "--ds-sidebar-width": `${panelWidth}px` } as CSSProperties}
+          transition={transition}
+        >
+          {panelContent}
+        </motion.div>
+      )}
     </aside>
   )
 }

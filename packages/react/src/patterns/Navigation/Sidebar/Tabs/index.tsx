@@ -30,6 +30,13 @@ export type SidebarTab = {
   id: string
   label: string
   icon: IconType
+  /**
+   * Solid counterpart drawn while the tab is active. Only the rail uses it:
+   * with the modules always on screen the active one has to be legible at a
+   * glance, and a filled glyph says it before the chip behind it does. Falls
+   * back to `icon`.
+   */
+  activeIcon?: IconType
   /** Unread counter shown next to the tab. */
   badge?: number
   /**
