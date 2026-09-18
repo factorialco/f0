@@ -158,8 +158,7 @@ describe("F0TextInput inline variant", () => {
         { key: "Enter" }
       )
 
-      // `fireEvent` returns false once something called `preventDefault`, which
-      // is what stops a browser's implicit submission.
+      // fireEvent returns false when preventDefault blocks implicit submission.
       expect(submitted).toBe(false)
     })
 

@@ -423,10 +423,7 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    */
   styling?: F0FormStylingConfig
   /**
-   * Renders the form as detail rows: every value reads as plain text and
-   * becomes its own editor when activated, saved through the action bar like
-   * any other change. Form-wide — either every field reads as a row or none
-   * does. Per-row behaviour comes from the field's `editable` and `copyable`.
+   * Render editable detail rows using the existing save action bar.
    * @default false
    */
   inline?: boolean

@@ -102,7 +102,7 @@ const meta = {
   tags: ["stable", "!autodocs"],
   decorators: [
     (Story, { args, parameters }) => {
-      const width = parameters?.width || "300px"
+      const width = parameters?.width
       const [value, setValue] = useState<DatePickerValue | undefined>(
         args?.value as DatePickerValue
       )
@@ -110,7 +110,7 @@ const meta = {
       const [valueSimple, setValueSimple] = useState<string | undefined>()
 
       return (
-        <div style={{ width }}>
+        <div className="w-75" style={width ? { width } : undefined}>
           <Story
             args={{
               ...args,
@@ -132,9 +132,7 @@ const meta = {
 } satisfies Meta<typeof F0DatePicker>
 
 export default meta
-// The component's props are a discriminated union (`variant="inline"` adds
-// `editing` and `onDismiss`), which collapses `StoryObj<typeof meta>` args to
-// `never`. These stories all exercise the default field variant.
+// Use explicit props because StoryObj<typeof meta> collapses this union to never.
 type Story = StoryObj<F0DatePickerFieldProps>
 
 const today = mockDate
@@ -360,10 +358,7 @@ export const WithClearable: Story = {
   },
 }
 
-/**
- * March 2026 spans six week rows with a Monday week start — the tallest a
- * calendar gets, and the case a height cap cuts first.
- */
+/** March 2026 needs six week rows with a Monday week start. */
 const sixWeekMonth = new Date(2026, 2, 10)
 
 export const KeepsTheCalendarWhole: Story = {
@@ -388,7 +383,7 @@ export const KeepsTheCalendarWhole: Story = {
     },
   },
   render: (args) => (
-    <div className="h-[300px] overflow-auto rounded-md border border-solid border-f1-border-secondary p-4">
+    <div className="h-75 overflow-auto rounded-md border border-solid border-f1-border-secondary p-4">
       <F0DatePicker {...args} />
     </div>
   ),
@@ -402,13 +397,10 @@ export const KeepsTheCalendarWhole: Story = {
       )
     })
 
-    // The month transition is framer-motion's, which keeps running under the
-    // runner; polling for opacity settles here and never in a browser, so wait
-    // the known duration out instead.
+    // The runner does not pause the month animation.
     await new Promise((resolve) => setTimeout(resolve, 300))
 
-    // The transition leaves the month it animated from mounted beside the one
-    // it landed on; the first grid is the one being read.
+    // The outgoing month remains mounted during the transition.
     const grid = screen.getAllByRole("grid")[0]
     const popup = grid.closest("[data-radix-popper-content-wrapper]")
       ?.firstElementChild as HTMLElement
@@ -475,12 +467,12 @@ export const Snapshot: Story = {
               {snapshotVariants.map((variant, index) => (
                 <div
                   key={`${size}-${index}`}
-                  className={variant.open ? "mb-[400px]" : ""}
+                  className={variant.open ? "mb-100" : ""}
                 >
                   <p className="mb-3 text-sm">
                     Variant: {JSON.stringify(variant)}
                   </p>
-                  <div style={{ width: "300px" }}>
+                  <div className="w-75">
                     <F0DatePicker size={size} {...variant} onChange={fn()} />
                   </div>
                 </div>

@@ -9,10 +9,7 @@ import type { F0CheckboxField } from "./types"
 interface CheckboxFieldRendererProps {
   field: ResolvedField<F0CheckboxField>
   formField: ControllerRenderProps
-  /**
-   * Set by the inline (detail-row) path. A checkbox is its own editor, so only
-   * the presentation changes: `editing` and `onDismiss` never apply.
-   */
+  /** Changes toggle presentation only; toggles have no edit mode. */
   inline?: InlineEditing
 }
 

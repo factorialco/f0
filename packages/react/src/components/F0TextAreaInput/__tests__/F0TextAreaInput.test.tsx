@@ -63,14 +63,7 @@ describe("F0TextAreaInput", () => {
   })
 })
 
-/**
- * `textarea` has no inline (detail-row) presentation, so the form never hands
- * this component the inline prop bag. Both prop lists are `Pick`s, and a name
- * added to either would let `variant="inline"` through `ui/textarea.tsx`'s
- * trailing spread into `F0InputField` and swap the box for read-as-text. The
- * type system can express that rule but nothing in this repo typechecks a test
- * file, so it is checked against the source.
- */
+/** Source-check the inline prop boundary because test files are excluded from tsc. */
 describe("F0TextAreaInput inline boundary", () => {
   const SRC = join(dirname(fileURLToPath(import.meta.url)), "../../..")
 

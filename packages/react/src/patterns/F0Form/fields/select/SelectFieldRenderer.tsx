@@ -13,15 +13,11 @@ interface SelectFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
-  /** Set by the inline (detail-row) path; absent everywhere else. */
+
   inline?: InlineEditing
 }
 
-/**
- * The inline select is single-value only and refuses `error`, `status`,
- * `loading`, `name` and `size`, so it gets its own prop bag rather than the
- * shared one below.
- */
+/** Inline selects have a separate prop contract from standard fields. */
 function InlineSelect({
   field,
   formField,

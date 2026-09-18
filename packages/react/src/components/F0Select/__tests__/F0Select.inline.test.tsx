@@ -85,8 +85,7 @@ describe("F0Select inline variant", () => {
 
       const [text, chevron] = Array.from(value.children)
       expect(text).toContainElement(screen.getByText("Viewer"))
-      // The value takes the slack and truncates; the chevron never shrinks,
-      // so it stays pinned to the far edge however long the label is.
+
       expect(text?.className).toContain("flex-1")
       expect(text?.className).toContain("min-w-0")
       expect(chevron?.className).toContain("shrink-0")
@@ -109,7 +108,7 @@ describe("F0Select inline variant", () => {
       expect(chevron?.className).toContain("opacity-0")
       expect(chevron?.className).toContain("group-hover:opacity-100")
       expect(chevron?.className).toContain("group-focus-within:opacity-100")
-      // A screen that cannot hover has no way to reveal it, so it is shown.
+
       expect(chevron?.className).toContain("[@media(hover:none)]:opacity-100")
     })
 
@@ -274,7 +273,7 @@ describe("F0Select inline variant", () => {
       const [text, chevron] = Array.from(trigger.children)
       expect(text?.className).toContain("flex-1")
       expect(chevron?.className).toContain("shrink-0")
-      // Open is the one state where it is unconditionally out.
+
       expect(chevron?.className).not.toContain("opacity-0")
     })
   })

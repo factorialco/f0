@@ -213,17 +213,12 @@ export interface F0BaseConfig {
    */
   customFieldName?: string
   /**
-   * Inline mode only. When false the value reads but never becomes an editor:
-   * the row offers no activator and a toggle is drawn disabled.
-   *
-   * Resolve per-viewer permissions here when you build the schema:
-   * `editable: access === "edit"`.
+   * Allow editing in inline mode. Resolve viewer permissions when building the schema.
    * @default true
    */
   editable?: boolean
   /**
-   * Inline mode only. Adds a copy action to the row, writing the field's value
-   * as plain text.
+   * Add a plain-text copy action in inline mode.
    * @default false
    */
   copyable?: boolean

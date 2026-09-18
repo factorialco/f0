@@ -1326,8 +1326,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
 
-  // Inline mode ignores switch grouping and row grouping: a run of fields is
-  // one card of detail rows, and a section keeps its header above its own card.
+  // Inline mode flattens grouped fields into one card per section.
   const inlineItems = useMemo(() => {
     if (!inline) {
       return []
@@ -1432,11 +1431,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           )
         : null}
 
-      {/* Render definition items with switch grouping */}
       {inline
         ? null
         : groupedItems.map((groupedItem, index) => {
-            // Apply field gap margin to non-section items (sections have their own margin)
             const fieldGapClass =
               index !== 0 && groupedItem.type !== "section" ? "mt-4" : ""
 

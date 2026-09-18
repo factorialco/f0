@@ -299,10 +299,7 @@ export function DatePickerPopup({
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent
         ref={contentRef}
-        // A calendar is a fixed grid: six week rows or none. Capping it at the
-        // space Radix found on the chosen side hides the last weeks behind a
-        // scrollbar, so the cap and the scroll both go and the popup keeps its
-        // own height wherever it lands.
+        // Let the calendar show all six week rows without an internal scrollbar.
         className="w-full max-h-none overflow-visible"
         align="start"
         collisionPadding={8}

@@ -12,11 +12,7 @@ const value = {
   granularity: "day" as const,
 }
 
-/**
- * A picker mounted with a value used to paint F0InputField's placeholder over
- * it until an effect ran. The markup of the very first render is what axe
- * samples, so assert on that and not on the settled DOM.
- */
+/** Check initial markup to catch the placeholder flash before effects run. */
 describe("F0DatePicker first frame", () => {
   it("renders the formatted value in the initial markup", () => {
     const markup = renderToStaticMarkup(

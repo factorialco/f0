@@ -147,14 +147,12 @@ export interface F0BaseField {
    */
   customFieldName?: string
   /**
-   * Inline mode only. When false the value reads but never becomes an editor:
-   * the row offers no activator and a toggle is drawn disabled.
+   * Allow editing in inline mode.
    * @default true
    */
   editable?: boolean
   /**
-   * Inline mode only. Adds a copy action to the row, writing the field's value
-   * as plain text.
+   * Add a plain-text copy action in inline mode.
    * @default false
    */
   copyable?: boolean

@@ -39,10 +39,7 @@ export interface RenderFieldInputOptions {
   initialFiles?: InitialFile[]
   /** Whether the form is loading async defaultValues */
   isFormLoading?: boolean
-  /**
-   * Set only by the inline (detail-row) path, and only for a field type that
-   * has an inline presentation. Any other type ignores it and renders as usual.
-   */
+  /** Present only for supported inline fields. */
   inline?: InlineEditing
 }
 

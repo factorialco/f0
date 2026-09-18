@@ -190,11 +190,7 @@ export type InputFieldProps<T> = {
   transparent?: boolean
   variant?: InputFieldVariant
   editing?: boolean
-  /**
-   * What the inline variant prints at rest, when the value alone is not what
-   * the editor shows: F0NumberInput appends its `units` to the formatted
-   * number. Defaults to the value.
-   */
+  /** At-rest display text, including units when present. Defaults to value. */
   inlineText?: string
 }
 
@@ -382,8 +378,6 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     const hasAppend = append || appendTag || buttonToggle
 
-    // The inline variant at rest: the value as text, no input element, no
-    // chrome.
     if (inline && !editing) {
       return (
         <div

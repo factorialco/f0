@@ -9,10 +9,7 @@ import type { F0SwitchField } from "./types"
 interface SwitchFieldRendererProps {
   field: ResolvedField<F0SwitchField>
   formField: ControllerRenderProps
-  /**
-   * Set by the inline (detail-row) path. A switch is its own editor, so only
-   * the presentation changes: `editing` and `onDismiss` never apply.
-   */
+  /** Changes toggle presentation only; toggles have no edit mode. */
   inline?: InlineEditing
 }
 

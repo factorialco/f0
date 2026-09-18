@@ -171,8 +171,7 @@ describe("F0DatePicker inline variant", () => {
         />
       )
 
-      // `fireEvent` returns false once something called `preventDefault`, which
-      // is what stops a browser's implicit submission.
+      // fireEvent returns false when preventDefault blocks implicit submission.
       expect(
         fireEvent.keyDown(screen.getByRole("textbox", { name: "Start date" }), {
           key: "Enter",
@@ -240,8 +239,7 @@ describe("F0DatePicker inline variant", () => {
 
       const input = screen.getByRole("textbox", { name: "Start date" })
       await waitFor(() => expect(document.activeElement).toBe(input))
-      // A real blur, not a dispatched event: what makes it a dismissal is where
-      // focus ends up.
+      // Move focus so the blur handler can inspect its destination.
       ;(input as HTMLInputElement).blur()
 
       await waitFor(() => expect(onDismiss).toHaveBeenCalledWith("blur"))

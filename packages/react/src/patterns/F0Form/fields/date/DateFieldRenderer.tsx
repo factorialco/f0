@@ -12,7 +12,7 @@ interface DateFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
-  /** Set by the inline (detail-row) path; absent everywhere else. */
+
   inline?: InlineEditing
 }
 
@@ -85,9 +85,7 @@ export function DateFieldRenderer({
     }
   }
 
-  // Inline the calendar never reports `onOpenChange` — `editing` is the open
-  // state and the close arrives as a dismissal — so validation hangs off that
-  // instead, with the same deferral.
+  // Inline calendars report dismissal instead of onOpenChange; validate there.
   const handleInlineDismiss = (
     reason: Parameters<InlineEditing["onDismiss"]>[0]
   ) => {
@@ -113,8 +111,7 @@ export function DateFieldRenderer({
     loading,
   }
 
-  // Two branches, not a spread: the props are a discriminated union, and a
-  // conditional spread widens `variant` back to `"inline" | undefined`.
+  // Separate branches preserve the discriminated prop union.
   if (inline) {
     return (
       <F0DatePicker

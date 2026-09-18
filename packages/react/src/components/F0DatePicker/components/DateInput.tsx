@@ -125,8 +125,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            // Inline, Enter parses what was typed and nothing else. Left alone
-            // it is also a form's implicit submission.
+            // Prevent Enter from submitting the surrounding form.
             if (variant === "inline") {
               e.preventDefault()
             }

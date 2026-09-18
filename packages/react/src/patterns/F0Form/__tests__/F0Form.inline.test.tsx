@@ -42,17 +42,13 @@ function renderProfile(props: Record<string, unknown> = {}) {
   )
 }
 
-/**
- * jsdom has no clipboard, and spreading `navigator` to add one drops every
- * prototype getter on it. Define the one property instead.
- */
+/** Define clipboard without replacing navigator prototype getters. */
 const stubClipboard = (writeText: () => Promise<void>) =>
   Object.defineProperty(navigator, "clipboard", {
     value: { writeText },
     configurable: true,
   })
 
-/** The row's activator, which is also what focus comes back to. */
 function activator(label: string) {
   return screen.getByRole("button", { name: label })
 }
@@ -105,7 +101,7 @@ describe("F0Form inline mode", () => {
 
     await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
     expect(screen.getByText("Grace Hopper")).toBeInTheDocument()
-    // The floating bar only appears once the form is dirty.
+
     await waitFor(() =>
       expect(
         screen.getByText("You have changes pending to be saved")
@@ -221,7 +217,7 @@ describe("F0Form inline mode", () => {
   it("leaves a select row's affordance to its own chevron", () => {
     renderProfile()
     expect(screen.queryByRole("button", { name: "Edit Team" })).toBeNull()
-    // The row is still the activator; only the pencil is gone.
+
     expect(activator("Team")).toBeInTheDocument()
   })
 
@@ -283,8 +279,7 @@ describe("F0Form inline mode", () => {
     await user.click(activator("Full name"))
     await screen.findByRole("textbox")
 
-    // Remounting the box remounts the component inside it, and a component
-    // that keeps state across the edit loses it before it can report a change.
+    // Keep the value mounted so pending changes survive mode transitions.
     expect(valueBox()).toBe(before)
   })
 
@@ -435,9 +430,7 @@ describe("F0Form inline mode", () => {
 
     const bio = screen.getByRole("textbox", { name: "Bio" })
 
-    // `variant="inline"` at rest renders the value as text and no input at all,
-    // so a live textarea holding the value is the proof none of the inline prop
-    // bag reached it.
+    // A live textarea proves inline props did not reach the input wrapper.
     expect(bio.tagName).toBe("TEXTAREA")
     expect(bio).toHaveValue("Mathematician")
     expect(bio).not.toHaveAttribute("variant")
@@ -473,8 +466,7 @@ describe("F0Form inline mode", () => {
 
     expect(screen.queryByText("Social security number")).toBeNull()
     expect(rows).toHaveLength(1)
-    // The hidden field keeps its Controller mounted and so stays in the card as
-    // a `<span>`; the divider rule counts rows, which are `div`s.
+    // Hidden controllers render spans; dividers count visible div rows.
     expect(rows[0].className).toContain("last-of-type:border-b-0")
     expect(rows[0].className).not.toContain("last:border-b-0")
   })

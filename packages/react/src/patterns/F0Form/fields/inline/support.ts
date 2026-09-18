@@ -1,10 +1,6 @@
 import type { F0Field } from "../types"
 
-/**
- * The field types that have an inline presentation. Everything else still
- * renders, as its standard field inside the row, because one unsupported field
- * must not take the whole form out of inline mode.
- */
+/** Unsupported fields fall back to their standard presentation. */
 const INLINE_SUPPORTED_TYPES = [
   "text",
   "number",
@@ -16,7 +12,6 @@ const INLINE_SUPPORTED_TYPES = [
 
 export type InlineSupportedType = (typeof INLINE_SUPPORTED_TYPES)[number]
 
-/** Toggles are their own editor: one click commits and there is no edit mode. */
 export function isInlineToggle(field: F0Field): boolean {
   return field.type === "switch" || field.type === "checkbox"
 }
@@ -25,7 +20,7 @@ export function isInlineSupported(field: F0Field): boolean {
   if (!(INLINE_SUPPORTED_TYPES as readonly string[]).includes(field.type)) {
     return false
   }
-  // The inline select is single-value only, so a multi-select falls back.
+
   return !(field.type === "select" && field.multiple === true)
 }
 
@@ -46,7 +41,7 @@ export function warnUnsupportedInlineField(field: F0Field): void {
   )
 }
 
-/** Test seam: the warning is once per process, which would leak between tests. */
+/** Reset process-wide warnings between tests. */
 export function resetInlineWarnings(): void {
   warned.clear()
 }

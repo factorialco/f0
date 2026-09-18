@@ -7,7 +7,6 @@ import {
   InlineFieldRowList,
 } from "@/patterns/F0Form/fields/inline"
 
-/** What layer 2 will hand down: a node, already rendered. */
 const readValue = (text: string) => (
   <span className="flex items-center truncate px-3 font-medium text-f1-foreground">
     {text}
@@ -32,7 +31,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[560px]">
+      <div className="w-140">
         <InlineFieldRowList>
           <Story />
         </InlineFieldRowList>
@@ -92,10 +91,6 @@ export const WithActions: Story = {
   },
 }
 
-/**
- * The reason the value was refused, under the box. The row grows downwards, so
- * the value keeps its own width and the box its 40px.
- */
 export const WithMessage: Story = {
   args: {
     label: "Email",
@@ -145,11 +140,6 @@ export const RowList: Story = {
   ),
 }
 
-/**
- * The row declares the box and holds it at 40px whichever mode it is in, and
- * the activator never wraps the action strip — a button inside a
- * `role="button"` is axe's `nested-interactive`.
- */
 function BothModes() {
   const [editing, setEditing] = useState(false)
 

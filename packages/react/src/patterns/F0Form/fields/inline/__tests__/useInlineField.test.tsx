@@ -2,11 +2,7 @@ import { act, renderHook } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { useInlineField } from "../useInlineField"
 
-/**
- * The focus restore waits a frame. Awaited outside `act` on purpose: an async
- * `act` here leaves React's act queue open and the next `renderHook` in the
- * file never flushes its effects, so `result.current` reads back as null.
- */
+/** Await outside act to avoid leaving its queue open for the next renderHook. */
 function flushFrame() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 }

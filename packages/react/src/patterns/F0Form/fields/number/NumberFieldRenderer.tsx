@@ -12,7 +12,7 @@ interface NumberFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
-  /** Set by the inline (detail-row) path; absent everywhere else. */
+
   inline?: InlineEditing
 }
 
@@ -49,8 +49,7 @@ export function NumberFieldRenderer({
     clearable: field.clearable,
   }
 
-  // Two branches, not a spread: the props are a discriminated union, and a
-  // conditional spread widens `variant` back to `"inline" | undefined`.
+  // Separate branches preserve the discriminated prop union.
   if (inline) {
     return (
       <F0NumberInput

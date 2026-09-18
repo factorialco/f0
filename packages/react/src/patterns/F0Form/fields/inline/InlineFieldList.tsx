@@ -3,11 +3,7 @@ import type { FormDefinitionItem } from "../../types"
 import type { F0Field } from "../types"
 import { InlineFieldRowList } from "./InlineFieldRow"
 
-/**
- * Inline mode has one layout: a stacked list of rows in a bordered card. Row
- * groupings (`row`) and the switch group's own card both collapse into it —
- * a detail row is already the pairing they were arranging.
- */
+/** Flatten grouped fields into detail rows. */
 export function flattenInlineFields(items: FormDefinitionItem[]): F0Field[] {
   return items.flatMap((item) => {
     if (item.type === "field") {
@@ -20,10 +16,7 @@ export function flattenInlineFields(items: FormDefinitionItem[]): F0Field[] {
   })
 }
 
-/**
- * The rows are direct children of the card, which is what lets each one drop
- * its divider when it is last. Nothing wraps them.
- */
+/** Direct children let rows hide the final divider. */
 export function InlineFieldList({
   fields,
   renderField,

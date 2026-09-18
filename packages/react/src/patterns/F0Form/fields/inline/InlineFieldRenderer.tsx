@@ -25,16 +25,11 @@ export interface InlineFieldRendererProps {
   isRequired?: boolean
   values: Record<string, unknown>
   isFormLoading?: boolean
-  /** Puts a field's value back to what it was when the edit started. */
+
   restoreValue: (value: unknown) => void
 }
 
-/**
- * Layer 2 of the inline mode: it owns the field's read/edit mode, decides which
- * component draws which field type, and hands `InlineFieldRow` a finished list
- * of actions. The row never learns what a field is; the components never learn
- * what a mode is.
- */
+/** Owns edit mode and builds the row value and actions. */
 export function InlineFieldRenderer({
   field,
   formField,
@@ -50,8 +45,7 @@ export function InlineFieldRenderer({
   const supported = isInlineSupported(field)
   const toggle = isInlineToggle(field)
   const isSelect = supported && field.type === "select"
-  // A select opens a list and a date opens a calendar; neither puts a caret
-  // anywhere, so neither may promise one.
+
   const opensPopup = isSelect || (supported && field.type === "date")
   const editable = field.editable ?? true
 
@@ -59,8 +53,6 @@ export function InlineFieldRenderer({
     warnUnsupportedInlineField(field)
   }
 
-  // A toggle commits on click, so it is never in an edit mode; an unsupported
-  // field has no inline presentation to enter. Both stay in reading forever.
   const activatable = supported && !toggle && editable
 
   const readValue = useCallback(() => formField.value, [formField.value])
@@ -81,10 +73,7 @@ export function InlineFieldRenderer({
 
   const input = renderFieldInput({
     field:
-      // The read-only tier of a toggle is the disabled control: there is no
-      // read presentation to fall back to. A select reads as text either way,
-      // but its chevron is an offer to open a list, so a row that cannot be
-      // activated must not draw one.
+      // Disable read-only toggles and hide read-only select affordances.
       !editable && (toggle || isSelect) ? { ...field, disabled: true } : field,
     formField,
     fieldState,
@@ -96,16 +85,13 @@ export function InlineFieldRenderer({
     inline: supported ? { editing, onDismiss } : undefined,
   })
 
-  // The same text `FormMessage` would print for this error, resolved here
-  // because the row takes a node and knows nothing about validation.
+  // Resolve validation copy before passing it to the presentation-only row.
   const message = fieldState.error
     ? (fieldState.error.message ??
       (isRequired ? forms.validation.required : forms.validation.invalidType))
     : undefined
 
-  // A select already carries its own affordance: the chevron the inline
-  // variant reveals at the trailing edge of the value. A pencil beside it
-  // would be a second icon for the same click.
+  // The select already provides a chevron.
   const actions: RowAction[] =
     activate && !isSelect
       ? [

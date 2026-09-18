@@ -12,7 +12,6 @@ const submit = async () => ({ success: true }) as const
 
 const actionBar = { type: "action-bar" as const, discardable: true }
 
-/** One row per supported type, which is the shape a profile form has. */
 const everyTypeSchema = z.object({
   fullName: f0FormField(z.string(), { label: "Full name" }),
   salary: f0FormField(z.number(), {
@@ -51,10 +50,9 @@ const meta: Meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Every supported type at rest: the whole card reads as text. */
 export const EveryTypeReading: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-every-type"
         inline
@@ -70,8 +68,7 @@ export const EveryTypeReading: Story = {
 
     await step("Print every value as text", async () => {
       await expect(canvas.getByText("Ada Lovelace")).toBeVisible()
-      // The select resolves its options through a data source, so the first
-      // paint is still the loading placeholder.
+
       await expect(await canvas.findByText("Design")).toBeVisible()
       await expect(canvas.getByText("10 Apr 2026")).toBeVisible()
       await expect(canvas.queryByRole("textbox")).toBeNull()
@@ -101,13 +98,10 @@ export const EveryTypeReading: Story = {
   },
 }
 
-/**
- * Activating a text row. The hover reveal makes the strip unclickable until
- * something focuses the row, so the activator is reached with Tab.
- */
+/** Tab reveals the action strip before activation. */
 export const EditingATextRow: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-editing-text"
         inline
@@ -137,10 +131,9 @@ export const EditingATextRow: Story = {
   },
 }
 
-/** Enter keeps the draft, and the form becomes dirty so the bar appears. */
 export const ActionBarAfterAnEdit: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-action-bar"
         inline
@@ -167,10 +160,7 @@ export const ActionBarAfterAnEdit: Story = {
     await step("Keep the draft and float the bar", async () => {
       await waitFor(() => expect(canvas.queryByRole("textbox")).toBeNull())
       await expect(canvas.getByText("Grace Hopper")).toBeVisible()
-      // The bar renders outside the canvas, so query the document. Asserted
-      // present rather than visible: it fades itself in with framer-motion,
-      // which the test runner does not pause, so its opacity is whatever the
-      // animation is on when the assertion runs.
+      // The action bar is portaled and may still be fading in.
       await waitFor(() =>
         expect(
           within(document.body).getByText(
@@ -182,10 +172,9 @@ export const ActionBarAfterAnEdit: Story = {
   },
 }
 
-/** Escape puts the field back to the value it had when the edit started. */
 export const EscapeReverts: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-escape"
         inline
@@ -219,10 +208,9 @@ export const EscapeReverts: Story = {
   },
 }
 
-/** `editable: false` leaves the value inert: no activator, no edit action. */
 export const NotEditable: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-not-editable"
         inline
@@ -262,10 +250,9 @@ export const NotEditable: Story = {
   },
 }
 
-/** `copyable` appends the copy action, after the activate one. */
 export const Copyable: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-copyable"
         inline
@@ -300,13 +287,9 @@ export const Copyable: Story = {
   },
 }
 
-/**
- * A type with no inline presentation keeps its standard field inside the row,
- * so one textarea does not take a whole profile out of inline mode.
- */
 export const UnsupportedTypeFallsBack: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-unsupported"
         inline
@@ -341,14 +324,10 @@ export const UnsupportedTypeFallsBack: Story = {
   },
 }
 
-/**
- * A field `renderIf` hides keeps its Controller mounted, so it stays in the
- * card as a hidden `<span>`. The divider rule counts rows, not children, or the
- * last visible row would keep a border running to nothing.
- */
+/** Hidden fields keep a span mounted; only visible rows should get dividers. */
 export const HiddenLastRowLeavesNoDivider: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-hidden-last"
         inline
@@ -391,10 +370,9 @@ export const HiddenLastRowLeavesNoDivider: Story = {
   },
 }
 
-/** Sections keep their headers; each one gets its own card of rows. */
 export const WithSections: Story = {
   render: () => (
-    <div className="w-[640px]">
+    <div className="w-160">
       <F0Form
         name="inline-sections"
         inline

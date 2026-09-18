@@ -258,8 +258,7 @@ export const NumberInputInternal = forwardRef<
   }, [hint, min, max])
 
   const inline = variant === "inline"
-  // At rest the row reads the same string the editor shows, units included, so
-  // no glyph moves when the row is activated.
+
   const inlineText =
     fieldValue && units ? `${fieldValue} ${units}` : (fieldValue ?? "")
 
@@ -421,8 +420,7 @@ export const NumberInputInternal = forwardRef<
           inline
             ? (event) => {
                 if (event.key === "Enter") {
-                  // Inline, Enter ends the row's edit and nothing else. Left
-                  // alone it is also a form's implicit submission.
+                  // Prevent Enter from submitting the surrounding form.
                   event.preventDefault()
                   onDismiss?.("commit")
                 }

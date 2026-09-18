@@ -25,10 +25,7 @@ interface F0FormContextValue {
    * Submit configuration for the form.
    */
   submitConfig?: F0FormSubmitConfig
-  /**
-   * Whether the form renders as detail rows: every value reads as text and
-   * becomes its own editor when activated. Form-wide, never per field.
-   */
+  /** Render the whole form as editable detail rows. */
   inline?: boolean
 }
 

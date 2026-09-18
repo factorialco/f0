@@ -3,20 +3,12 @@ import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
 import { f0FormField, F0Form } from ".."
 
-/**
- * Who is looking at the profile. The viewer does not change while a profile is
- * mounted, so it is resolved when the schema is built rather than watched.
- */
+/** Resolve viewer permissions when building the schema. */
 type Viewer = "self" | "manager" | "admin"
 
-/** What that viewer may do with one field. */
 type Access = "hidden" | "read" | "edit"
 
-/**
- * The prototype's access map, one row per field. `hidden` becomes `renderIf`
- * and `edit` becomes `editable`, which is the whole of what a viewer changes:
- * the three stories below render the same component from the same builder.
- */
+/** Map access tiers to renderIf and editable. */
 const ACCESS: Record<string, Record<Viewer, Access>> = {
   manager: { self: "read", manager: "read", admin: "edit" },
   legalEntity: { self: "hidden", manager: "read", admin: "edit" },
@@ -107,11 +99,6 @@ const DEFAULTS = {
   expirationDate: new Date(2030, 4, 22),
 } as const
 
-/**
- * One builder, three viewers. Every field resolves its own access tier and
- * turns it into the two properties the inline mode reads: `renderIf` decides
- * whether the row exists at all, `editable` whether it can be activated.
- */
 function buildProfileSchema(viewer: Viewer) {
   const access = (id: string) => ACCESS[id][viewer]
   const tier = (id: string) => ({
@@ -221,7 +208,7 @@ function buildProfileSchema(viewer: Viewer) {
 }
 
 const Profile = ({ viewer }: { viewer: Viewer }) => (
-  <div className="w-[720px]">
+  <div className="w-180">
     <F0Form
       name={`employee-profile-${viewer}`}
       inline
@@ -234,7 +221,6 @@ const Profile = ({ viewer }: { viewer: Viewer }) => (
   </div>
 )
 
-/** The row whose label column reads exactly this. */
 function rowFor(canvasElement: HTMLElement, label: string) {
   const row = Array.from(
     canvasElement.querySelectorAll<HTMLElement>(
@@ -250,11 +236,7 @@ function rowFor(canvasElement: HTMLElement, label: string) {
 const boxOf = (row: HTMLElement) =>
   row.querySelector<HTMLElement>('[data-slot="inline-field-row-value"]')
 
-/**
- * Where the first glyph is painted. The read text carries its inset inside its
- * own rect; an input carries the same inset as `padding-left`, so both have to
- * be asked for it or the comparison reports a jump that is not there.
- */
+/** Include input padding when comparing first-glyph positions. */
 function textStartX(element: Element) {
   const { left } = element.getBoundingClientRect()
   return left + parseFloat(getComputedStyle(element).paddingLeft)
@@ -262,7 +244,6 @@ function textStartX(element: Element) {
 
 const EDITOR = "input, [role='combobox']"
 
-/** The element carrying the inset, whichever mode the row is in. */
 function inset(row: HTMLElement) {
   const element = row.querySelector(
     `[data-testid='input-field-inline-value'] > span, [data-testid='select-inline-value'], ${EDITOR}`
@@ -273,10 +254,7 @@ function inset(row: HTMLElement) {
   return element
 }
 
-/**
- * An open dropdown puts its trigger under `aria-hidden`, so an accessible query
- * cannot see the editor it just opened. Ask the DOM.
- */
+/** The open popup aria-hides its trigger, so query the DOM directly. */
 const editorOf = (row: HTMLElement) => row.querySelector(EDITOR)
 
 const waitForEditor = (row: HTMLElement) =>
@@ -285,11 +263,7 @@ const waitForEditor = (row: HTMLElement) =>
 const waitForNoEditor = (row: HTMLElement) =>
   waitFor(() => expect(editorOf(row)).toBeNull())
 
-/**
- * The action strip is `pointer-events: none` until something focuses or hovers
- * the row, which is exactly what it should be and exactly what a click cannot
- * get through. Tab to the activator and press Enter instead.
- */
+/** Tab reveals actions that cannot receive pointer events while hidden. */
 async function activate(row: HTMLElement, label: string) {
   const activator = within(row).getByRole("button", { name: label })
   activator.focus()
@@ -317,11 +291,6 @@ const meta: Meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/**
- * The HR admin edits every row. The play function pins the promise the pattern
- * makes: activating a row moves nothing — same box height, same first glyph —
- * for a text row, a select row and a date row.
- */
 export const AsAdmin: Story = {
   render: () => <Profile viewer="admin" />,
   play: async ({ canvasElement, step }) => {
@@ -358,8 +327,7 @@ export const AsAdmin: Story = {
         Math.abs(textStartX(inset(row)) - readX)
       ).toBeLessThanOrEqual(1)
 
-      // An open Radix popup puts `pointer-events: none` on the body, so a
-      // userEvent click never lands. Dismiss it the way Radix listens.
+      // Radix blocks body pointer events; dispatch pointerdown to dismiss.
       fireEvent.pointerDown(document.body)
       await waitForNoEditor(row)
     })
@@ -387,12 +355,6 @@ export const AsAdmin: Story = {
   },
 }
 
-/**
- * The employee's own view. Half the rows read without an activator and two are
- * not there at all, from the same schema builder — and the rows they can edit
- * behave: Enter keeps the draft and raises the bar, Escape puts the old value
- * back.
- */
 export const AsSelf: Story = {
   render: () => <Profile viewer="self" />,
   play: async ({ canvasElement, step }) => {
@@ -432,10 +394,7 @@ export const AsSelf: Story = {
 
       await waitFor(() => expect(within(row).queryByRole("textbox")).toBeNull())
       await expect(within(row).getByText("Augusta")).toBeVisible()
-      // The bar renders outside the canvas. Asserted present rather than
-      // visible: it fades itself in with framer-motion, which the test runner
-      // does not pause, so its opacity is whatever the animation is on when
-      // the assertion runs — measured at 0 for over a second in a browser.
+      // The action bar is portaled and may still be fading in.
       await waitFor(() =>
         expect(
           within(document.body).getByText(
@@ -464,11 +423,6 @@ export const AsSelf: Story = {
   },
 }
 
-/**
- * The manager sees the work rows and the everyday personal ones, and edits only
- * the preferred name. Nothing about the component changed between this story
- * and the two above.
- */
 export const AsManager: Story = {
   render: () => <Profile viewer="manager" />,
   play: async ({ canvasElement, step }) => {

@@ -10,11 +10,6 @@ import {
 import { InlineFieldRow } from "../InlineFieldRow"
 import type { InlineFieldRowProps } from "../types"
 
-/**
- * The row is meant to work with a node and a list of callbacks and nothing
- * else. Every test builds it that way, so anything field-shaped leaking into
- * the props would show up here as a compile error.
- */
 const renderRow = (props: Partial<InlineFieldRowProps> = {}) =>
   render(
     <InlineFieldRow
@@ -26,11 +21,7 @@ const renderRow = (props: Partial<InlineFieldRowProps> = {}) =>
     />
   )
 
-/**
- * jsdom has no clipboard, and spreading `navigator` to add one drops every
- * prototype getter on it — `userAgent` included, which the platform provider
- * reads on mount. Define the one property instead.
- */
+/** Define clipboard without replacing navigator prototype getters. */
 const stubClipboard = (writeText: () => Promise<void>) =>
   Object.defineProperty(navigator, "clipboard", {
     value: { writeText },
@@ -176,9 +167,7 @@ describe("InlineFieldRow", () => {
       />
     )
 
-    // Swapping the wrapper's element instead of its attributes remounts
-    // everything below it, and a value that keeps state across the edit loses
-    // it before it can report the change.
+    // Keep the value mounted so pending changes survive mode transitions.
     expect(screen.getByText("Hello")).toBe(before)
   })
 
@@ -244,7 +233,7 @@ describe("InlineFieldRow", () => {
     )
 
     await screen.findByRole("button", { name: "Copied Job title" })
-    // Still pinned well after a frame, and gone once the hold expires.
+
     await new Promise((resolve) => setTimeout(resolve, 900))
     expect(
       screen.getByRole("button", { name: "Copied Job title" })
@@ -298,8 +287,7 @@ describe("InlineFieldRow", () => {
 
     expect(slot).toHaveTextContent("Enter a valid email address")
     expect(slot?.className).toContain("text-f1-foreground-critical")
-    // Under the box, not beside it: the message follows it in document order
-    // inside the same value column.
+
     expect(
       box.compareDocumentPosition(slot as Node) &
         Node.DOCUMENT_POSITION_FOLLOWING
