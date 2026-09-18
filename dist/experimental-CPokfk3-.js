@@ -33705,7 +33705,7 @@ const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motio
               ]
             }
           ),
-          /* @__PURE__ */ h("span", { className: "w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary", children: I.label })
+          /* @__PURE__ */ h("span", { className: "line-clamp-3 w-full hyphens-auto px-0.5 text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary", children: I.label })
         ]
       }
     );
@@ -35876,7 +35876,7 @@ const Ed = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Td = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-uXVEnYX2.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
+}, Td = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-D8iUoYxy.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -44816,7 +44816,7 @@ const RE = 1e3, ME = ({
     }
   );
 }, JT = /* @__PURE__ */ new Set(), jT = Fr(
-  () => import("./ChatPostComposerDialog-AteJiL-N.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-x26KqRQL.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), LT = () => {
