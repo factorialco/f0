@@ -1,3 +1,4 @@
+import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 import type {
@@ -252,6 +253,75 @@ export type AiChatFileAttachmentConfig = {
    */
   maxFiles?: number
 }
+
+/** What every composer-menu entry shows, whatever choosing it does. */
+type AiChatComposerActionBase = {
+  /**
+   * Host-side bookkeeping — a key for the host's own list, and what it reads
+   * back in analytics. The composer neither renders it nor keys the menu by it.
+   */
+  id: string
+  label: string
+  icon?: IconType
+  /** A partner's logo, where an f0 icon would be wrong — a connector's mark. */
+  avatar?: AvatarVariant
+  /** Short trailing tag beside the label, e.g. "New". Not a sentence. */
+  tag?: string
+  /** Secondary line under the label. */
+  description?: string
+  disabled?: boolean
+  /**
+   * Shown on hover while `disabled` — say why the action is unavailable.
+   * HOVER-ONLY: a disabled menu entry is not focusable, so this text never
+   * reaches the keyboard or a screen reader. Never put anything here that the
+   * label alone doesn't already imply.
+   */
+  disabledTooltip?: string
+}
+
+/** An entry that DOES something and closes the menu. */
+export type AiChatComposerActionItem = AiChatComposerActionBase & {
+  type?: "action"
+  onClick: () => void
+}
+
+/**
+ * An entry that opens a menu of its own beside this one. Use it to keep a long
+ * or stateful list one step in — the connectors this chat can reach — instead
+ * of unrolling it where the file picker lives.
+ */
+export type AiChatComposerActionSubmenu = AiChatComposerActionBase & {
+  type: "submenu"
+  actions: AiChatComposerAction[]
+  /** Shown inside the submenu while `actions` is empty, so it never opens bare. */
+  emptyLabel?: string
+}
+
+/**
+ * An entry you flip rather than press: it carries a switch and the menu STAYS
+ * OPEN, so several can be set in one visit. The host owns `checked` — the
+ * composer renders what it is told and reports back through `onCheckedChange`.
+ */
+export type AiChatComposerActionToggle = AiChatComposerActionBase & {
+  type: "toggle"
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}
+
+/** A rule between groups of entries. Carries no label and nothing to press. */
+export type AiChatComposerActionSeparator = { type: "separator" }
+
+/**
+ * An entry in the composer's attachment menu — see `composerActions` on
+ * `F0AiChatTextArea`. Attaching a file is NOT one of these: the composer
+ * contributes that entry itself from `fileAttachments`, so a host adding
+ * "Connectors" doesn't have to rewire the file picker to keep it.
+ */
+export type AiChatComposerAction =
+  | AiChatComposerActionItem
+  | AiChatComposerActionSubmenu
+  | AiChatComposerActionToggle
+  | AiChatComposerActionSeparator
 
 export type TranscribeOptions = {
   /**

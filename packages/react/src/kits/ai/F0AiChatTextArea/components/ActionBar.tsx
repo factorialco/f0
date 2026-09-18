@@ -1,9 +1,11 @@
 import { type ReactNode, type RefObject } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { Check, Cross, Paperclip } from "@/icons/app"
+import { Check, Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import type { AiChatComposerAction } from "../../F0AiChat/types"
 import { type RecorderStatus } from "../useAudioRecorder"
+import { AttachmentControl } from "./AttachmentControl"
 import { DictationButton } from "./DictationButton"
 import { RecordingWaveform } from "./RecordingWaveform"
 import { SubmitButton } from "./SubmitButton"
@@ -11,6 +13,8 @@ import { SubmitButton } from "./SubmitButton"
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
   toolbarStart?: ReactNode
+  /** Non-empty turns the paperclip into a `+` menu. See `composerActions` on the public props. */
+  composerActions?: AiChatComposerAction[]
   /**
    * Content for the middle of the row, between the attachment/host controls and
    * the dictation/send pair. Takes the row's slack (`flex-1`) and is expected to
@@ -41,6 +45,7 @@ interface ActionBarProps {
 export const ActionBar = ({
   onUploadFiles,
   toolbarStart,
+  composerActions,
   center,
   isAtMaxFiles,
   maxFiles,
@@ -99,7 +104,10 @@ export const ActionBar = ({
     // `justify-between`, which would strand a lone send button on the left the
     // moment the row has nothing else in it.
     <div className="flex shrink-0 items-center gap-2 p-3">
-      {onUploadFiles || toolbarStart ? (
+      {/* Whether the start cell has anything to hold. Which SHAPE the attachment
+          control takes — paperclip or `+` menu — is AttachmentControl's call,
+          not this file's, so the rule lives in one place. */}
+      {onUploadFiles || toolbarStart || composerActions?.length ? (
         <div
           className={cn(
             "flex items-center gap-2",
@@ -109,34 +117,16 @@ export const ActionBar = ({
             center ? "shrink-0" : "min-w-0"
           )}
         >
-          {onUploadFiles ? (
-            <>
-              <ButtonInternal
-                label={translation.ai.attachFile}
-                hideLabel
-                type="button"
-                icon={Paperclip}
-                variant="outline"
-                size="md"
-                disabled={isAtMaxFiles || recordingStatus === "transcribing"}
-                onClick={(e) => {
-                  e.preventDefault()
-                  fileInputRef.current?.click()
-                }}
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                // Native picker only honors a binary "single vs multiple"
-                // selection — no per-N cap. We still validate the count in JS.
-                multiple={maxFiles !== 1}
-                disabled={isAtMaxFiles}
-                accept={acceptValue}
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-            </>
-          ) : null}
+          <AttachmentControl
+            onUploadFiles={onUploadFiles}
+            composerActions={composerActions}
+            isAtMaxFiles={isAtMaxFiles}
+            maxFiles={maxFiles}
+            acceptValue={acceptValue}
+            fileInputRef={fileInputRef}
+            handleFileSelect={handleFileSelect}
+            recordingStatus={recordingStatus}
+          />
           {toolbarStart ? (
             // Host controls keep their own focus instead of bubbling to the
             // form's click handler, which intentionally focuses the textarea.

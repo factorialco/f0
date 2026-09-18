@@ -502,6 +502,8 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
     attachFile: "Attach file",
+    addToConversation: "Add to this conversation",
+    addFilesOrPhotos: "Add files or photos",
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",

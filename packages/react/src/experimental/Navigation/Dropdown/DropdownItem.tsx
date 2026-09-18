@@ -1,9 +1,14 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { cn } from "@/lib/utils"
-import { DropdownItemObject } from "./internal"
+import { DropdownItemVisuals } from "./internal"
 
-export const DropdownItemContent = ({ item }: { item: DropdownItemObject }) => (
+export const DropdownItemContent = ({
+  item,
+}: {
+  item: DropdownItemVisuals
+}) => (
   <>
     {item.avatar ? <F0Avatar avatar={item.avatar} size="xs" /> : null}
     {item.icon ? (
@@ -13,8 +18,13 @@ export const DropdownItemContent = ({ item }: { item: DropdownItemObject }) => (
         className={cn("text-f1-icon", item.critical && "text-f1-icon-critical")}
       />
     ) : null}
-    <div className="flex flex-col items-start">
-      {item.label}
+    {/* `flex-1` so whatever the ROW puts after this — a switch, a chevron —
+        sits at its end instead of hugging the label. */}
+    <div className="flex min-w-0 flex-1 flex-col items-start">
+      <div className="flex w-full items-center gap-1.5">
+        <span className="truncate">{item.label}</span>
+        {item.tag ? <F0TagRaw text={item.tag} /> : null}
+      </div>
       {item.description ? (
         <div
           className={cn(

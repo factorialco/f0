@@ -13,10 +13,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  dropdownMenuItemClassName,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuToggleItem,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
+import { Switch } from "@/ui/switch"
 import { NavigationItem } from "../utils"
 import { DropdownItemContent } from "./DropdownItem"
 
@@ -26,21 +33,62 @@ export type DropdownItem =
   | DropdownItemObject
   | DropdownItemSeparator
   | DropdownItemLabel
+  | DropdownItemSubmenu
+  | DropdownItemSwitch
 
-export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
-  type?: "item"
-  onClick?: () => void
+/** What any row shows, whatever it does when you choose it. */
+export type DropdownItemVisuals = {
+  label: string
   icon?: IconType
   description?: string
-  critical?: boolean
   avatar?: AvatarVariant
+  /** Short trailing tag beside the label, e.g. "New". Not a sentence. */
+  tag?: string
+  critical?: boolean
+}
+
+export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> &
+  Omit<DropdownItemVisuals, "label"> & {
+    type?: "item"
+    onClick?: () => void
+    disabled?: boolean
+    /**
+     * Tooltip shown on hover while the item is `disabled` — use it to explain why
+     * the action is unavailable. Ignored when the item is not disabled. The
+     * tooltip trigger re-enables pointer events, so it works despite the disabled
+     * item's `pointer-events: none`.
+     */
+    disabledTooltip?: string
+  }
+
+/**
+ * A row that opens a menu of its own beside this one, rather than doing
+ * something. Use it to keep a long list one step in — the connectors a chat can
+ * reach, say — instead of unrolling it into the parent menu.
+ */
+export type DropdownItemSubmenu = DropdownItemVisuals & {
+  type: "submenu"
+  items: DropdownItem[]
   disabled?: boolean
   /**
-   * Tooltip shown on hover while the item is `disabled` — use it to explain why
-   * the action is unavailable. Ignored when the item is not disabled. The
-   * tooltip trigger re-enables pointer events, so it works despite the disabled
-   * item's `pointer-events: none`.
+   * Shown INSIDE the submenu when `items` is empty, so choosing it never opens
+   * an empty panel. Without it an empty submenu renders nothing.
    */
+  emptyLabel?: string
+}
+
+/**
+ * A row you flip rather than press: it carries a switch, and choosing it keeps
+ * the menu open so several can be set in a row. The item itself is what the
+ * keyboard and the accessibility tree see (`aria-checked`); the switch is drawn
+ * for the eye only.
+ */
+export type DropdownItemSwitch = DropdownItemVisuals & {
+  type: "switch"
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  disabled?: boolean
+  /** Tooltip shown on hover while `disabled`, as on `DropdownItemObject`. */
   disabledTooltip?: string
 }
 
@@ -72,16 +120,42 @@ export type DropdownInternalProps = {
   container?: HTMLElement | null
 } & DataAttributes
 
+/**
+ * A disabled item sets `pointer-events: none`, so it emits NO hover events —
+ * the tooltip must hang off a wrapper span that keeps pointer events and that
+ * the hover passes THROUGH to (same approach as F0FormEditableTable). Only a
+ * disabled item with a tooltip gets the wrapper; every other item renders bare.
+ */
+const withDisabledTooltip = (
+  row: React.ReactNode,
+  {
+    disabled,
+    disabledTooltip,
+  }: { disabled?: boolean; disabledTooltip?: string }
+) =>
+  disabled && disabledTooltip ? (
+    <TooltipWrapper tooltip={disabledTooltip}>
+      <span className="block w-full cursor-not-allowed">{row}</span>
+    </TooltipWrapper>
+  ) : (
+    row
+  )
+
 const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
   const {
     label: _label,
     icon: _icon,
     avatar: _avatar,
     description: _description,
+    // Held back from `props`: it is drawn by `DropdownItemContent`, and would
+    // otherwise land on the DOM node as an unknown attribute.
+    tag: _tag,
     disabledTooltip,
     href,
     critical,
     disabled,
+    // Radix's, not the DOM's — see `onSelect` below.
+    onClick,
     ...props
   } = item
 
@@ -95,6 +169,12 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
       asChild
       className={cn(itemClass, "cursor-pointer")}
       disabled={disabled}
+      // THE ACTION HANGS OFF RADIX'S `onSelect`, not the child's DOM `onClick`.
+      // Selecting closes the menu, and one level in — an item inside a submenu —
+      // the node is already detached by the time the browser's `click` would
+      // bubble, so React never sees it and the handler silently never ran.
+      // `onSelect` fires before the close, for pointer and keyboard alike.
+      onSelect={() => onClick?.()}
     >
       {href ? (
         <Link
@@ -115,27 +195,88 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     </DropdownMenuItem>
   )
 
-  // A disabled item sets `pointer-events: none`, so it emits NO hover events —
-  // the tooltip must hang off a wrapper span that keeps pointer events and that
-  // the hover passes THROUGH to (same approach as F0FormEditableTable). Only a
-  // disabled item with a tooltip gets the wrapper; every other item renders bare.
-  if (disabled && disabledTooltip) {
-    return (
-      <TooltipWrapper tooltip={disabledTooltip}>
-        <span className="block w-full cursor-not-allowed">{menuItem}</span>
-      </TooltipWrapper>
-    )
-  }
-
-  return menuItem
+  return withDisabledTooltip(menuItem, { disabled, disabledTooltip })
 }
+
+const DropdownSwitchItem = ({ item }: { item: DropdownItemSwitch }) => {
+  const row = (
+    <DropdownMenuToggleItem
+      className={cn(
+        "flex w-full items-center gap-1.5",
+        item.critical && "text-f1-foreground-critical"
+      )}
+      checked={item.checked}
+      onCheckedChange={item.onCheckedChange}
+      disabled={item.disabled}
+    >
+      <DropdownItemContent item={item} />
+      {/* DECORATION. The row above is the control: it owns `aria-checked`, the
+          focus and the keyboard. A second real switch here would be a button
+          inside a menuitemcheckbox — two things to reach for one state. */}
+      <Switch
+        checked={item.checked}
+        tabIndex={-1}
+        aria-hidden
+        className="pointer-events-none shrink-0"
+      />
+    </DropdownMenuToggleItem>
+  )
+
+  return withDisabledTooltip(row, item)
+}
+
+const DropdownSubmenu = ({
+  item,
+  container,
+}: {
+  item: DropdownItemSubmenu
+  container?: HTMLElement | null
+}) => (
+  <DropdownMenuSub>
+    <DropdownMenuSubTrigger
+      // The submenu trigger is a row like any other — the primitive's own
+      // styling is narrower and lighter than `DropdownMenuItem`'s, and a menu
+      // whose rows change size halfway down reads as two menus.
+      className={cn(
+        dropdownMenuItemClassName,
+        "w-full gap-1.5",
+        item.critical && "text-f1-foreground-critical"
+      )}
+      disabled={item.disabled}
+    >
+      <DropdownItemContent item={item} />
+    </DropdownMenuSubTrigger>
+    <DropdownMenuPortal container={container ?? undefined}>
+      <DropdownMenuSubContent className="border-solid border-f1-border-secondary p-1">
+        {item.items.length === 0 && item.emptyLabel ? (
+          <DropdownMenuLabel className="text-xs font-medium leading-4 text-f1-foreground-secondary">
+            {item.emptyLabel}
+          </DropdownMenuLabel>
+        ) : (
+          item.items.map((child, index) =>
+            renderDropdownItem(child, index, container)
+          )
+        )}
+      </DropdownMenuSubContent>
+    </DropdownMenuPortal>
+  </DropdownMenuSub>
+)
 
 function renderDropdownItem(
   item: DropdownItem,
-  index: number
+  index: number,
+  container?: HTMLElement | null
 ): React.ReactNode {
   if (item.type === "separator") {
     return <DropdownMenuSeparator key={index} />
+  }
+
+  if (item.type === "submenu") {
+    return <DropdownSubmenu key={index} item={item} container={container} />
+  }
+
+  if (item.type === "switch") {
+    return <DropdownSwitchItem key={index} item={item} />
   }
 
   if (item.type === "label") {
@@ -245,7 +386,7 @@ export function DropdownInternal({
         {trigger}
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} container={container}>
-        {items.map((item, index) => renderDropdownItem(item, index))}
+        {items.map((item, index) => renderDropdownItem(item, index, container))}
       </DropdownMenuContent>
     </DropdownMenu>
   )

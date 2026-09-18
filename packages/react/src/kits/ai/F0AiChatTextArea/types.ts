@@ -1,5 +1,6 @@
 import type { ReactNode, RefObject } from "react"
 import type {
+  AiChatComposerAction,
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
@@ -92,6 +93,26 @@ export type F0AiChatTextAreaProps = {
 
   /** File attachment configuration. When omitted, attachments are disabled. */
   fileAttachments?: AiChatFileAttachmentConfig
+
+  /**
+   * Extra actions offered where the attachment control sits.
+   *
+   * Omitted or empty — the default — leaves the paperclip exactly as it is: one
+   * button that opens the file picker. With at least one action the paperclip
+   * becomes a `+` that opens a menu, and attaching a file becomes the FIRST
+   * entry in it rather than disappearing. The composer contributes that entry
+   * from `fileAttachments`, so a host adding "Connectors" doesn't have to
+   * rewire the file picker to keep it.
+   *
+   * Without `fileAttachments` the menu holds only these actions and no file
+   * entry, which is how a host offers "add context" on a composer that takes
+   * no uploads.
+   *
+   * Reaching `maxFiles` disables the file entry alone — the host's actions have
+   * nothing to do with the file count and stay live. Transcribing disables the
+   * whole trigger, as it does the paperclip today.
+   */
+  composerActions?: AiChatComposerAction[]
 
   /**
    * Host-owned compact controls rendered after the attachment action in the
