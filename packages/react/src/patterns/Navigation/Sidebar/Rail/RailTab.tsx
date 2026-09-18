@@ -8,6 +8,14 @@ import { Badge } from "@/ui/IconBadge"
 import type { SidebarTab } from "../Tabs"
 
 /**
+ * Press feedback for the rail's bespoke buttons: a 0.97 scale on the same
+ * ease-out every pressable surface in the product uses, dropped entirely under
+ * reduced motion.
+ */
+export const PRESS =
+  "transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+
+/**
  * Unread marker over the icon box's top-right. The same `Badge` the footer's
  * bell uses, inside a halo the colour of the rail so it reads as a sticker on
  * the icon rather than a dot floating beside it.
@@ -52,6 +60,7 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
         onKeyDown={onKeyDown}
         className={cn(
           "group flex w-full cursor-pointer flex-col items-center gap-1 rounded-[10px] py-2",
+          PRESS,
           focusRing()
         )}
       >

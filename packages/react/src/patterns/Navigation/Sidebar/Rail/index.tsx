@@ -10,7 +10,7 @@ import { CompanySelector, type CompanySelectorProps } from "../CompanySelector"
 import type { SidebarTab } from "../Tabs"
 import { usePersistedTab } from "../Tabs/usePersistedTab"
 import { SidebarUserMenu, type SidebarUserMenuProps } from "../UserMenu"
-import { RailTab } from "./RailTab"
+import { PRESS, RailTab } from "./RailTab"
 
 /** A shortcut pinned to the foot of the rail — marketplace, security, activity. */
 export type SidebarRailAction = {
@@ -47,11 +47,12 @@ const RailAction = ({ action }: { action: SidebarRailAction }) => (
     title={action.label}
     onClick={action.onClick}
     className={cn(
-      "relative flex size-8 cursor-pointer items-center justify-center rounded-[10px] transition-colors hover:bg-f1-background-secondary",
+      "relative flex size-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-f1-background-secondary",
+      PRESS,
       focusRing()
     )}
   >
-    <F0Icon icon={action.icon} size="md" color="default" />
+    <F0Icon icon={action.icon} size="lg" color="default" />
     {action.hasUpdates && (
       <span
         aria-hidden="true"
@@ -133,7 +134,7 @@ export function SidebarRail({
         "border-0 border-r border-solid border-f1-border-secondary",
         // The rail runs edge to edge, so it owns the notch and the home
         // indicator: without this the account avatar sits under the latter.
-        "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
+        "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.5rem)]"
       )}
     >
       {/* 60px, the same height as the panel's title bar beside it, so the logo
@@ -146,7 +147,7 @@ export function SidebarRail({
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.rail.label}
-        className="flex w-full flex-col gap-2 px-1.5"
+        className="flex w-full flex-col px-1.5"
       >
         {tabs.map((tab, index) => (
           <RailTab
@@ -164,7 +165,7 @@ export function SidebarRail({
       </div>
 
       {(actions.length > 0 || user) && (
-        <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-0.5 pb-3 pt-2">
+        <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-1 pb-3 pt-2">
           {actions.map((action) => (
             <RailAction key={action.id} action={action} />
           ))}
