@@ -176,11 +176,19 @@ function _Sidebar({
   const panelClassName = cn(
     "absolute bottom-0 top-0 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
     sidebarState === "locked"
-      ? // Docked, the panel has no surface and no seam of its own — it is the
-        // floor, like the rail, and the content's own card edge is what
-        // separates the two. A border here would land flush against that edge
-        // and read as a doubled line.
-        "h-full"
+      ? cn(
+          // Docked, the panel has no surface of its own — it is the floor,
+          // like the rail, and the content's own card edge is what separates
+          // it from the content. A border on THAT side would land flush
+          // against the card's edge and read as a doubled line.
+          "h-full",
+          // The hairline between the two levels of the navigation. It is the
+          // panel's, not the rail's: it exists to separate the pair, so it
+          // leaves when the panel leaves. Inside the panel's own width
+          // (border-box), so the 1px does not push it off the room the frame
+          // reserved.
+          rail && "border-0 border-l border-solid border-f1-border-secondary"
+        )
       : cn(
           "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
           isSmallScreen

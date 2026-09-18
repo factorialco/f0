@@ -48,11 +48,15 @@ const RailAction = ({ action }: { action: SidebarRailAction }) => (
     onClick={action.onClick}
     className={cn(
       "group flex w-full cursor-pointer items-center justify-center",
-      PRESS,
       focusRing("focus-visible:ring-inset")
     )}
   >
-    <span className="relative flex size-9 items-center justify-center rounded-lg transition-colors group-hover:bg-f1-background-secondary">
+    <span
+      className={cn(
+        "relative flex size-9 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary",
+        PRESS
+      )}
+    >
       <F0Icon icon={action.icon} size="lg" color="default" />
       {action.hasUpdates && (
         <span
@@ -128,12 +132,13 @@ export function SidebarRail({
       data-testid="sidebar-rail"
       className={cn(
         "flex h-full w-[var(--ds-sidebar-rail-width)] shrink-0 flex-col items-center overflow-y-auto",
-        // No surface of its own: the navigation sits on whatever the app
-        // paints behind it, so it reads as the floor the content is raised
-        // off rather than as a second card beside it. The seam is drawn on
-        // the rail itself so the 1px lands INSIDE the 48px the frame reserves
-        // (border-box) rather than widening the pair.
-        "border-0 border-r border-solid border-f1-border-secondary",
+        // No surface of its own, and no seam: the navigation sits on whatever
+        // the app paints behind it, so it reads as the floor the content is
+        // raised off rather than as a second card beside it. The hairline
+        // between the two levels is the PANEL's left edge — it separates the
+        // rail from the panel, so it has to leave when the panel does, and a
+        // border here would outlive it and hang off a rail with nothing
+        // beside it.
         // The rail runs edge to edge, so it owns the notch and the home
         // indicator: without this the account avatar sits under the latter.
         "pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+0.5rem)]"

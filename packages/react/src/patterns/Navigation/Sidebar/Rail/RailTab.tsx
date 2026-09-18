@@ -11,9 +11,14 @@ import type { SidebarTab } from "../Tabs"
  * Press feedback for the rail's bespoke buttons: a 0.97 scale on the same
  * ease-out every pressable surface in the product uses, dropped entirely under
  * reduced motion.
+ *
+ * It goes on the CHIP, not on the button, and reads the button's `group`:
+ * scaling the whole item drags the label in with it, and a word sliding a
+ * pixel and a half toward its icon is the kind of movement you notice without
+ * being able to say what moved. The chip is the thing being pressed.
  */
 export const PRESS =
-  "transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+  "transition-[background-color,transform] duration-150 ease-out group-active:scale-[0.97] motion-reduce:transition-none motion-reduce:group-active:scale-100"
 
 /**
  * Unread marker over the icon box's top-right. The same `Badge` the footer's
@@ -60,13 +65,13 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
         onKeyDown={onKeyDown}
         className={cn(
           "group flex w-full cursor-pointer flex-col items-center gap-1 rounded-[10px] py-2",
-          PRESS,
           focusRing()
         )}
       >
         <span
           className={cn(
-            "relative flex size-9 items-center justify-center rounded-lg transition-colors",
+            "relative flex size-9 items-center justify-center rounded-lg",
+            PRESS,
             isActive
               ? "bg-f1-background-secondary text-f1-icon-bold"
               : "group-hover:bg-f1-background-secondary"
