@@ -58,7 +58,10 @@ to authenticate with external services.
 - **quality**: Runs the linter and prettier
 - **tests**: Runs the unit tests
 - **storybook-tests**: Runs storybook tests
-- **chromatic**: Publish the storybook to chromatic
+- **chromatic**: Publish the storybook to chromatic and run visual tests.
+  Runs with TurboSnap (`onlyChanged`), so a build only snapshots the
+  stories its branch actually affects. Skipped for draft PRs, `published/**`
+  and release-please branches — snapshots are the billed unit
 - **deploy**: Build and deploy storybook to github pages
 - **release**: Updates package version, create a release if is necessary using
   `release-please`

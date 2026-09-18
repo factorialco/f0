@@ -1,12 +1,25 @@
 name: "Chromatic"
 on:
-  pull_request:
   push:
     branches:
       - main
+  # The default type set is opened/synchronize/reopened. `ready_for_review` is
+  # added because draft PRs no longer build (see the job's `if:`) — without it,
+  # flipping a PR out of draft would produce no build until the next push.
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 env:
   PUBLIC_BUILD: true
+  # On `pull_request` GitHub builds an ephemeral merge commit that never enters
+  # the repository's history. Left alone, Chromatic records the build against
+  # that commit: it picks a baseline from main that is not actually an ancestor
+  # of the branch, and TurboSnap — which diffs the recorded commit against the
+  # baseline's — sees every change made on main since the branch point and gives
+  # up on narrowing the build. These pin the build to the real PR head instead.
+  CHROMATIC_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+  CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  CHROMATIC_SLUG: ${{ github.repository }}
 
 # `github.sha`, not `github.ref`, for the push side: on main every commit shares
 # `refs/heads/main`, so a single group covered them all and the release-please
@@ -25,11 +38,31 @@ jobs:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
   chromatic:
     needs: detect-changes
-    # Prevents running on the release-please branch
+    # Every clause here exists to keep a build off Chromatic's meter. Snapshots
+    # are the billed unit, so a build nobody will look at costs exactly as much
+    # as one that catches a regression.
+    #
+    # The two release-please clauses were both dead on arrival and cost 118
+    # builds in the two months before this was written — more than any human
+    # branch. The branch is `release-please--branches--main`, never `--master`,
+    # and the label is `autorelease: pending`/`autorelease: tagged`, so
+    # `contains()` over the label array — which matches whole elements, not
+    # substrings — never fired either; joining the labels into one string first
+    # is what makes the prefix match work. A release PR only moves version
+    # numbers and the changelog; it has no visual surface to test.
+    #
+    # `published/**` branches are machine copies of a branch that already has
+    # its own build ("Published branch \"feat/...\""), so snapshotting them pays
+    # twice for one diff; drafts are still being shaped and nobody reviews their
+    # changes. Note that `github.head_ref` is empty on `push`, so the two
+    # `startsWith` guards are inert there and only ever narrow pull requests.
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      github.event.pull_request.draft != true &&
+      !startsWith(github.head_ref, 'release-please--') &&
+      !startsWith(github.head_ref, 'published/') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     permissions: write-all
     name: "[⚛️ REACT] Run Chromatic"
     runs-on: ubuntu-latest
@@ -37,6 +70,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Counterpart to the CHROMATIC_* variables above: check out the commit
+          # they name so the tree Chromatic snapshots is the one it records.
+          # Pinning the *sha* rather than the branch ref matters — a run can sit
+          # in the queue while the author pushes again, and checking out the ref
+          # would then snapshot a tree that CHROMATIC_SHA's commit never
+          # contained, quietly baselining pixels nobody reviewed.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: ./.github/actions/setup-node-pnpm
 
       - name: Build Core
@@ -45,12 +85,50 @@ jobs:
 
       - name: Run Chromatic
         id: chromatic
-        uses: chromaui/action@v13
+        # v13 shipped a CLI old enough that it reported "Storybook 10.3.3; no
+        # supported addons found" and could not see @chromatic-com/storybook —
+        # the addon TurboSnap leans on to emit preview-stats.json under Vite.
+        uses: chromaui/action@v18
         with:
-          workingDir: /packages/react
+          # Was "/packages/react". The leading slash made this an absolute path;
+          # it happened to resolve, but it is not what the input means.
+          workingDir: packages/react
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           autoAcceptChanges: "main"
           exitOnceUploaded: true
+          zip: true
+
+          # TurboSnap. This lived in chromatic.config.json at the repository
+          # root, where the CLI never looked: it resolves that file relative to
+          # `workingDir`. The flag was therefore off for every build since it was
+          # added, and each one captured the full story set instead of the
+          # handful the branch touched. Keeping it here, next to the other
+          # inputs, means a silent regression of that kind is visible in review.
+          onlyChanged: true
+
+          # git reports changed paths from the repository root; preview-stats
+          # records them relative to the Storybook project. Without this,
+          # TurboSnap cannot line the two up and falls back to a full rebuild.
+          storybookBaseDir: packages/react
+
+          # Files that reach the rendered output without passing through Vite's
+          # module graph, so TurboSnap cannot trace a story back to them.
+          # @factorialco/f0-core is the important one: react consumes it as a
+          # built workspace package, so edits to its source look unrelated to
+          # every story while changing tokens, icons and base CSS underneath all
+          # of them. A change to any of these forces a full rebuild.
+          externals: |
+            packages/core/**
+            packages/react/tailwind.config.ts
+            packages/react/postcss.config.js
+            packages/react/public/**
+            packages/react/.storybook/static/**
+
+          # Prints "these files changed → these story files are affected". The
+          # failure this PR fixes was invisible precisely because a build that
+          # snapshots everything looks identical in the log to one that does not;
+          # this makes the next regression legible. Drop it if the logs get noisy.
+          traceChanged: true
 
       - name: Publish Storybook Link in the comments
         if: github.event_name == 'pull_request'
