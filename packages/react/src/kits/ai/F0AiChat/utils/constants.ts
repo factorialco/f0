@@ -1,3 +1,10 @@
-export const MIN_CHAT_WIDTH = 300
-export const MAX_CHAT_WIDTH = 712
-export const DEFAULT_CHAT_WIDTH = 360
+/**
+ * Moved to `@/patterns/ApplicationFrame/SidePanel` once the panel stopped
+ * belonging to the AI chat. Re-exported so the kit's own imports (and anything
+ * pointing at this path) keep working.
+ */
+export {
+  DEFAULT_CHAT_WIDTH,
+  MAX_CHAT_WIDTH,
+  MIN_CHAT_WIDTH,
+} from "@/patterns/ApplicationFrame/SidePanel/constants"

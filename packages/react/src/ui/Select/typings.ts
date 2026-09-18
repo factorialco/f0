@@ -8,4 +8,6 @@ export type VirtualItem = {
   key: string
   item: ReactNode
   type?: VirtualItemType
+  /** A disabled option is drawn but cannot be taken. */
+  disabled?: boolean
 }

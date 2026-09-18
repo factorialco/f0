@@ -49,7 +49,7 @@ describe("F0Card Component", () => {
     render(
       <F0Card
         title="Avatar Card"
-        avatar={{ type: "person", firstName: "Daniel", lastName: "Moreno" }}
+        avatar={{ type: "person", firstName: "Jordan", lastName: "Avery" }}
       />
     )
 

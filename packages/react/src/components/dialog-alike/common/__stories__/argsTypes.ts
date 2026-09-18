@@ -53,6 +53,11 @@ export const getDialogAlikeArgTypes = ({
       control: "boolean",
       table: { defaultValue: { summary: "false" } },
     },
+    dismissable: {
+      description: `Renders a dismiss (X) control in the ${componentName}'s top-right corner, so it does not have to spend a button on "Cancel". Only the notification variant needs it — the default variant's header already carries one.`,
+      control: "boolean",
+      table: { defaultValue: { summary: "false" } },
+    },
     otherActions: {
       description: "Other actions to display in the header",
       control: "object",

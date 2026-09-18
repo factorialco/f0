@@ -434,9 +434,19 @@ export function getComponentStatus(
   const target = normalize(name)
   const targetLeaf = normalize(leaf(name))
 
-  // When several entries match, prefer the one in the "components" zone.
-  const pick = (pool: ComponentEntry[]) =>
-    pool.find((c) => c.zone === "components") ?? pool[0]
+  // When several entries match, prefer the one spelled exactly like the query.
+  // `normalize` drops an `F0` prefix so that "Button" finds "F0Button", which
+  // also means "F0AiCallout" and "AICallout" land in the same pool — and
+  // without this the deprecated twin could win and report a live component as
+  // scheduled for removal. Zone is the next tie-break, as before.
+  // It narrows the pool rather than replacing the zone rule: with two entries
+  // both named "Button", both are exact and the zone still decides.
+  const queryLeaf = leaf(name).toLowerCase()
+  const pick = (pool: ComponentEntry[]) => {
+    const exact = pool.filter((c) => leaf(c.name).toLowerCase() === queryLeaf)
+    const candidates = exact.length > 0 ? exact : pool
+    return candidates.find((c) => c.zone === "components") ?? candidates[0]
+  }
 
   // Tier 1 — exact full-name match. Handles fully-qualified Storybook titles
   // like "Data Collection/Visualizations/Card" resolving to that exact entry.

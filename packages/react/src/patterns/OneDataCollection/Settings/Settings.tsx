@@ -20,7 +20,10 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
-import { GroupingSelector } from "./components/GroupingSelector"
+import {
+  canSelectGrouping,
+  GroupingSelector,
+} from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { useDataCollectionSettings } from "./SettingsProvider"
 import {
@@ -199,20 +202,15 @@ export const Settings = <
           sideOffset={8}
         >
           {[
-            hasGrouping &&
-              !grouping?.hideSelector &&
-              !(
-                !!grouping.mandatory &&
-                Object.entries(grouping.groupBy).length < 2
-              ) && (
-                <div key="grouping" className="p-3">
-                  <GroupingSelector
-                    grouping={grouping}
-                    currentGrouping={currentGrouping}
-                    onGroupingChange={handleGroupingChange}
-                  />
-                </div>
-              ),
+            hasGrouping && canSelectGrouping(grouping) && (
+              <div key="grouping" className="p-3">
+                <GroupingSelector
+                  grouping={grouping}
+                  currentGrouping={currentGrouping}
+                  onGroupingChange={handleGroupingChange}
+                />
+              </div>
+            ),
             hasSortings && (
               <div key="sorting" className="p-3">
                 <SortingSelector

@@ -85,6 +85,14 @@ export const SidebarChatList = ({
           (sum, chat) => sum + (chat.unreadCount ?? 0),
           0
         )
+        // The collapsed total belongs to no single row, so it takes the group's
+        // kind — and only when every row agrees. A mixed group keeps the
+        // conversation wording, which is the safe reading of "3 unread things".
+        const groupKind =
+          group.chats.length > 0 &&
+          group.chats.every((chat) => chat.kind === "community")
+            ? "community"
+            : "conversation"
         return {
           id: group.id,
           title: group.title,
@@ -93,7 +101,10 @@ export const SidebarChatList = ({
           // and surface the group's total unread count as a badge.
           highlightWhenCollapsed: totalUnread > 0,
           collapsedBadge:
-            totalUnread > 0 ? <UnreadBadge count={totalUnread} /> : undefined,
+            totalUnread > 0 ? (
+              <UnreadBadge count={totalUnread} kind={groupKind} />
+            ) : undefined,
+          action: group.action,
           items: group.chats.map((chat) => ({
             id: chat.id,
             searchText: chat.label,

@@ -173,6 +173,7 @@ export const SidebarTabPanel = ({
                     isOpen={isSearching ? true : group.isOpen}
                     highlightWhenCollapsed={group.highlightWhenCollapsed}
                     collapsedBadge={group.collapsedBadge}
+                    action={group.action}
                   >
                     {/* `popLayout` pulls an exiting row out of flow at once, so
                         the rows that stay slide up immediately instead of
@@ -228,6 +229,7 @@ export const SidebarTabPanel = ({
                 isOpen={isSearching ? true : group.isOpen}
                 highlightWhenCollapsed={group.highlightWhenCollapsed}
                 collapsedBadge={group.collapsedBadge}
+                action={group.action}
               >
                 {group.items.map((item) => (
                   <Fragment key={item.id}>{item.content}</Fragment>

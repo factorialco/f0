@@ -644,7 +644,9 @@ export function buildTooltip({
       fontSize: 14,
     },
     // Smart position: flip tooltip to the other side of the cursor at the
-    // chart midpoint so it never clips outside the container
+    // chart midpoint so it never clips outside the container. The parameter
+    // list is ECharts' callback signature.
+    // oxlint-disable-next-line max-params
     position(
       point: [number, number],
       _params: unknown,

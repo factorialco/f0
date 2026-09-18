@@ -20,6 +20,11 @@ import {
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
+import {
+  REFERENCE_LINE_SERIES,
+  referenceLineSeries,
+  referenceLineTooltip,
+} from "../../utils/referenceLines"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -523,39 +528,61 @@ function buildBorderRadiusResolver(
   }
 }
 
-/**
- * Build ECharts series entries for a single F0DataChartBarSeries.
- *
- * When the series contains target data points, two ECharts series are produced:
- *  1. The main (solid) bar showing `value`
- *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
- */
-function buildSeriesEntries(
-  series: F0DataChartBarSeries,
-  index: number,
-  isVertical: boolean,
-  showLabels: boolean,
-  stacked: boolean,
-  highlightOverachievement: boolean,
-  labelColor: string,
-  stackGapColor: string,
-  labelFontSize: number,
-  resolveBorderRadius: BorderRadiusResolver | undefined,
-  labelLayout?: echarts.BarSeriesOption["labelLayout"],
+type BuildSeriesEntriesOptions = {
+  series: F0DataChartBarSeries
+  index: number
+  isVertical: boolean
+  showLabels: boolean
+  stacked: boolean
+  highlightOverachievement: boolean
+  labelColor: string
+  stackGapColor: string
+  labelFontSize: number
+  resolveBorderRadius: BorderRadiusResolver | undefined
+  labelLayout?: echarts.BarSeriesOption["labelLayout"]
   valueFormatter?: (value: number) => string
-): echarts.BarSeriesOption[] {
-  const color = resolveColor(series, index)
-  const hasTargetData = hasTargets(series)
-  // When stacked, all series share "stacked"; when using targets, each series
-  // gets its own stack so the ghost bar stacks on its own solid bar only
-  const stackId = stacked
-    ? hasTargetData
-      ? `stacked-${index}`
-      : "stacked"
-    : hasTargetData
-      ? `stack-${index}`
-      : undefined
+}
 
+/**
+ * When stacked, every series shares one stack; with targets each series gets
+ * its own, so a ghost bar stacks on its own solid bar and nothing else.
+ */
+function resolveStackId(
+  stacked: boolean,
+  hasTargetData: boolean,
+  index: number
+): string | undefined {
+  if (stacked) {
+    return hasTargetData ? `stacked-${index}` : "stacked"
+  }
+  return hasTargetData ? `stack-${index}` : undefined
+}
+
+/** What both series of one bar share: its colour, its stack, its corners. */
+type SeriesShape = {
+  color: string
+  stackId: string | undefined
+  borderRadius: ReturnType<typeof barCornerRadius>
+}
+
+/** The solid bar: the value itself. */
+function buildMainSeries(
+  {
+    series,
+    index,
+    isVertical,
+    showLabels,
+    stacked,
+    highlightOverachievement,
+    labelColor,
+    stackGapColor,
+    labelFontSize,
+    resolveBorderRadius,
+    labelLayout,
+    valueFormatter,
+  }: BuildSeriesEntriesOptions,
+  { color, stackId, borderRadius }: SeriesShape
+): echarts.BarSeriesOption {
   // Build per-item data: use plain numbers unless the point needs its own
   // itemStyle (per-bar color override or a direction-specific corner radius)
   const mainData = series.data.map((point, dataIndex) => {
@@ -590,15 +617,6 @@ function buildSeriesEntries(
       // already applies.
     }
   })
-
-  // Round only the far end (away from the zero line):
-  // - Vertical: top corners rounded, bottom flat against x-axis
-  // - Horizontal: right corners rounded, left flat against y-axis
-  // This series-level default only applies when `resolveBorderRadius` is
-  // undefined (non-stacked, all-positive charts) — everything else
-  // (negatives, or any stacked chart) is overridden per data point below,
-  // since the direction and the outer-most segment can vary per category.
-  const borderRadius = barCornerRadius(isVertical, false)
 
   const mainSeries: echarts.BarSeriesOption = {
     name: series.name,
@@ -658,10 +676,14 @@ function buildSeriesEntries(
     }),
   }
 
-  if (!hasTargetData) {
-    return [mainSeries]
-  }
+  return mainSeries
+}
 
+/** The stacked ghost bar: how far the value still is from its target. */
+function buildTargetSeries(
+  { series, isVertical, stacked }: BuildSeriesEntriesOptions,
+  { color, stackId, borderRadius }: SeriesShape
+): echarts.BarSeriesOption {
   const targetData = series.data.map((point) => {
     const value = getValue(point)
     const target = getTarget(point)
@@ -732,7 +754,41 @@ function buildSeriesEntries(
     }),
   }
 
-  return [mainSeries, targetSeries]
+  return targetSeries
+}
+
+/**
+ * Build ECharts series entries for a single F0DataChartBarSeries.
+ *
+ * When the series contains target data points, two ECharts series are produced:
+ *  1. The main (solid) bar showing `value`
+ *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
+ */
+function buildSeriesEntries(
+  options: BuildSeriesEntriesOptions
+): echarts.BarSeriesOption[] {
+  const { series, index, isVertical, stacked } = options
+  const hasTargetData = hasTargets(series)
+  const shape: SeriesShape = {
+    color: resolveColor(series, index),
+    stackId: resolveStackId(stacked, hasTargetData, index),
+    // Round only the far end (away from the zero line):
+    // - Vertical: top corners rounded, bottom flat against x-axis
+    // - Horizontal: right corners rounded, left flat against y-axis
+    // This series-level default only applies when `resolveBorderRadius` is
+    // undefined (non-stacked, all-positive charts) — everything else
+    // (negatives, or any stacked chart) is overridden per data point,
+    // since the direction and the outer-most segment can vary per category.
+    borderRadius: barCornerRadius(isVertical, false),
+  }
+
+  const mainSeries = buildMainSeries(options, shape)
+
+  if (!hasTargetData) {
+    return [mainSeries]
+  }
+
+  return [mainSeries, buildTargetSeries(options, shape)]
 }
 
 /**
@@ -862,13 +918,21 @@ function stackTotals(
  * still reads as the full total. The tooltip's total behaves the same way, so
  * the two stay consistent with each other.
  */
-function buildStackTotalSeries(
-  totals: number[],
-  labelColor: string,
-  labelFontSize: number,
-  containerWidth: number,
+type BuildStackTotalSeriesOptions = {
+  totals: number[]
+  labelColor: string
+  labelFontSize: number
+  containerWidth: number
   valueFormatter?: (value: number) => string
-): echarts.BarSeriesOption {
+}
+
+function buildStackTotalSeries({
+  totals,
+  labelColor,
+  labelFontSize,
+  containerWidth,
+  valueFormatter,
+}: BuildStackTotalSeriesOptions): echarts.BarSeriesOption {
   return {
     name: STACK_TOTAL_SERIES_NAME,
     type: "bar",
@@ -962,6 +1026,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber = 2,
+    referenceLines,
     echartsOptions,
   }: F0DataChartBarProps,
   size: BarChartSize,
@@ -1116,20 +1181,21 @@ export function useBarChartOptions(
 
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
-      buildSeriesEntries(
-        s,
-        i,
+      buildSeriesEntries({
+        series: s,
+        index: i,
         isVertical,
         showLabels,
         stacked,
         highlightOverachievement,
-        theme.colors.foregroundSecondary,
-        theme.colors.containerBackground ?? theme.colors.background,
-        resolvedLabelFontSize,
+        labelColor: theme.colors.foregroundSecondary,
+        stackGapColor:
+          theme.colors.containerBackground ?? theme.colors.background,
+        labelFontSize: resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
-        valueFormatter
-      )
+        valueFormatter,
+      })
     )
 
     // A horizontal stacked bar reads as one quantity split into parts, so the
@@ -1142,13 +1208,13 @@ export function useBarChartOptions(
         : undefined
     if (totals) {
       echartsSeries.push(
-        buildStackTotalSeries(
+        buildStackTotalSeries({
           totals,
-          theme.colors.foregroundSecondary,
-          resolvedLabelFontSize,
+          labelColor: theme.colors.foregroundSecondary,
+          labelFontSize: resolvedLabelFontSize,
           containerWidth,
-          valueFormatter
-        )
+          valueFormatter,
+        })
       )
     }
 
@@ -1212,7 +1278,17 @@ export function useBarChartOptions(
     const options = buildBaseChartOptions({
       categories,
       theme,
-      series: echartsSeries,
+      // Appended, so a reference line never takes a palette colour from the
+      // data or shifts the bars' own ordering.
+      series: [
+        ...echartsSeries,
+        ...referenceLineSeries(
+          referenceLines,
+          theme,
+          isVertical ? "y" : "x",
+          true
+        ),
+      ],
       legendData,
       isVertical,
       showGrid,
@@ -1322,6 +1398,18 @@ export function useBarChartOptions(
             marker?: string
           }
           const hovered = String(p.seriesName ?? "")
+          // A markLine hover arrives here, not at the series' own tooltip, so
+          // the line answers from inside the chart's one formatter. Without
+          // this the reader is shown the internal series name.
+          if (hovered === REFERENCE_LINE_SERIES) {
+            return referenceLineTooltip(
+              referenceLines,
+              p.dataIndex,
+              formatTooltipValue,
+              theme
+            )
+          }
+
           const dataIndex = p.dataIndex ?? 0
           // Hovering the gradient reads as hovering the bar it tops, so the card
           // is the bar's: its own name, its own value — not the gap's height.
@@ -1509,6 +1597,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber,
+    referenceLines,
     echartsOptions,
     theme,
     i18n,

@@ -790,7 +790,7 @@ describe("F0GridStack", () => {
       }
 
       const allowed = node.allowedSizes ?? []
-      expect(allowed.length).toBe(0)
+      expect(allowed).toHaveLength(0)
     })
   })
 

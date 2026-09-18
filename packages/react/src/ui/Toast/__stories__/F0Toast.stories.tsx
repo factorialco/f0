@@ -105,7 +105,7 @@ export const Success: Story = {
   ),
 }
 
-export const Error: Story = {
+const ErrorState: Story = {
   args: {
     title: "Error occurred",
     description: "Something went wrong. Please try again.",
@@ -364,3 +364,6 @@ export const AllVariants: Story = {
     </div>
   ),
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

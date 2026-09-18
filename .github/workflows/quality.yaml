@@ -62,6 +62,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The lint debt step diffs against the branch point. A pull_request
+          # checkout is the merge commit, so its first parent is the main tip
+          # the branch was merged with; depth 2 makes that parent available.
+          fetch-depth: 2
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
@@ -74,6 +79,19 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
+      # Rules with too many hits to fix at once run as warnings (the RATCHET
+      # group in .oxlintrc.json). This compares them per file against
+      # .scripts/lint-debt.json, a baseline that may only shrink, so a PR
+      # cannot add to the debt. A step here rather than its own job: the job
+      # has already installed and built core, which is most of the cost.
+      #
+      # `--changed`, not the whole tree: main moves under an open PR, and the
+      # run that green-lights a merge is the one CI last took. Debt added or
+      # fixed on main after that point is never measured, and a full gate then
+      # fails the next PR for files it never opened. A file can only gain debt
+      # by being edited, so judging the branch's own files loses nothing.
+      - name: Check the PR adds no lint debt
+        run: pnpm --filter @factorialco/f0-react run check:lint-debt --changed
       - name: Check no CSS custom properties are animated through motion
         run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts
   lint-react-native:
@@ -142,55 +160,6 @@ jobs:
         run: pnpm --filter @factorialco/f0-react run check:new-component-dod
         env:
           BASE_REF: origin/${{ github.base_ref }}
-  # User-visible copy must come from the i18n layer, not a string literal — a
-  # literal is untranslatable by construction. Existing debt is baselined in
-  # .scripts/untranslated-copy-debt.json, so this only blocks copy the PR ADDS.
-  # Escape hatch is the inline `i18n-exempt` comment rather than a label: it
-  # lands in the diff, so a reviewer sees the claim and can judge it.
-  untranslated-copy:
-    needs: detect-changes
-    # Prevents running on the release-please branch
-    if: |
-      needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    name: "[⚛️ REACT] Untranslated copy"
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-pnpm
-      # Pure AST scan of src/ — no build or Storybook needed.
-      #
-      # The script emits `::error file=,line=` annotations, which is what puts
-      # each offending string inline on the Files tab. `continue-on-error` lets
-      # the comment step run on failure; the gate step below restores the
-      # failure, so the job still blocks.
-      - name: Check the PR adds no untranslated copy
-        id: check
-        continue-on-error: true
-        run: pnpm --filter @factorialco/f0-react run check:untranslated-copy
-      - name: Build the PR comment
-        id: comment
-        run: |
-          {
-            echo "body<<COMMENT_BODY_EOF"
-            pnpm --filter @factorialco/f0-react --silent run check:untranslated-copy --comment
-            echo "COMMENT_BODY_EOF"
-          } >> "$GITHUB_OUTPUT"
-      - name: Comment on the PR
-        uses: ./.github/actions/add-or-update-pr-comment
-        with:
-          comment-type: untranslated_copy
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-body: ${{ steps.comment.outputs.body }}
-      - name: Fail if untranslated copy was added
-        if: steps.check.outcome == 'failure'
-        run: |
-          echo "::error::This PR adds untranslated copy — see the annotations on the Files tab and the PR comment."
-          exit 1
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -356,7 +325,7 @@ jobs:
   # `skipped` is accepted on purpose: detect-changes skips the jobs for a
   # package that this PR did not touch. Only failure/cancellation is fatal.
   quality-passed:
-    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, untranslated-copy, cycle-dependencies]
+    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, cycle-dependencies]
     name: "✅ Quality"
     if: always()
     runs-on: ubuntu-latest

@@ -339,10 +339,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
         className="!invisible"
         style={handleStyle(targetPos)}
       />
-      <div
-        className="pointer-events-none flex items-start justify-center"
-        style={{ width: "100%" }}
-      >
+      <div className="pointer-events-none flex w-full items-start justify-center">
         <div
           className="pointer-events-auto"
           // A card is content-sized inside the inset layout box. A stacked row

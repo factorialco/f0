@@ -274,7 +274,7 @@ describe("CardCollection", () => {
       // Wait for loading state to finish
       await waitFor(() => {
         const cards = document.querySelectorAll('[role="article"]')
-        expect(cards.length).toBe(0)
+        expect(cards).toHaveLength(0)
       })
     })
 
@@ -416,7 +416,7 @@ describe("CardCollection", () => {
 
       // Should show exactly 12 cards (next multiple of 2, 3, and 4 after 10)
       const cards = screen.getAllByRole("article")
-      expect(cards.length).toBe(12)
+      expect(cards).toHaveLength(12)
     })
 
     it("defaults to 24 items per page when perPage is not specified", async () => {
@@ -481,7 +481,7 @@ describe("CardCollection", () => {
 
       // Should show exactly 24 cards (default)
       const cards = screen.getAllByRole("article")
-      expect(cards.length).toBe(24)
+      expect(cards).toHaveLength(24)
     })
   })
 })

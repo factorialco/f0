@@ -100,13 +100,16 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
           // `group`: the div is the focusable element but it is 0x0, so the
           // focus ring renders on the sized target span below via
           // `group-focus-visible:` (a ring on the div itself would be invisible).
-          className={cn("group cursor-pointer outline-none", className)}
-          // Zero-size origin (like a single marker) so maplibre's `center`
-          // anchor lands the origin exactly on the coordinate; everything is
-          // centred on that origin. A single sized box would anchor off-centre.
-          // The mount pop-in lives in the map layer's motion wrapper (one
-          // animation, coordinated with the markers' crossfade).
-          style={{ position: "relative", width: 0, height: 0 }}
+          // `relative h-0 w-0`: zero-size origin (like a single marker) so the
+          // adapter's centred anchor lands the origin exactly on the
+          // coordinate; everything is centred on that origin. A single sized
+          // box would anchor off-centre. The mount pop-in lives in the map
+          // layer's motion wrapper (one animation, coordinated with the
+          // markers' crossfade).
+          className={cn(
+            "group relative h-0 w-0 cursor-pointer outline-none",
+            className
+          )}
         >
           {/* Transparent hover/click target centred on the origin, so the whole
               cluster area (not just the items) triggers the hover spread. Also

@@ -1,7 +1,8 @@
-import { act, renderHook, waitFor } from "@testing-library/react"
+import { act, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 import { type F0ChatUser } from "../../types"
-import { type MentionEntry, useMentions } from "../useMentions"
+import { mentionEnd, type MentionEntry, useMentions } from "../useMentions"
 
 const MEMBERS: F0ChatUser[] = [
   { id: "ana-g", name: "Ana García" },
@@ -176,6 +177,7 @@ describe("useMentions", () => {
 // `@Name` is followed by whitespace — which a saved body often isn't.
 describe("useMentions — a mention survives an edit", () => {
   const ANA: MentionEntry = { id: "ana-g", name: "Ana García" }
+  const NFD_ANA: MentionEntry = { id: "ana-nfd", name: "Ana Garci\u0301a" }
 
   const withValue = (body: string, over: Partial<Props> = {}) =>
     makeProps({ inputValue: body, cursorPosition: body.length, ...over })
@@ -226,6 +228,126 @@ describe("useMentions — a mention survives an edit", () => {
       expect(result.current.getMentions().mentions).toEqual([ANA])
     )
     expect(setInputValue).not.toHaveBeenCalled()
+  })
+
+  it("keeps text inserted immediately before a mention outside its highlight", async () => {
+    let value = "Hola @Ana García, ¿vienes?"
+    const { result, rerender } = openForEditing(value, [ANA])
+
+    value = "Hola x@Ana García, ¿vienes?"
+    rerender(withValue(value))
+
+    await waitFor(() => expect(result.current.mentions[0]?.start).toBe(6))
+    const mention = result.current.mentions[0]!
+    expect(value.slice(mention.start, mentionEnd(mention))).toBe("@Ana García")
+  })
+
+  it("highlights the full body spelling when its canonical length differs", async () => {
+    const body = "Hola @Ana Garci\u0301a, ¿vienes?"
+    const { result } = openForEditing(body, [ANA])
+
+    await waitFor(() => expect(result.current.mentions).toHaveLength(1))
+    const mention = result.current.mentions[0]!
+    expect(body.slice(mention.start, mentionEnd(mention))).toBe(
+      `@${NFD_ANA.name}`
+    )
+  })
+
+  it("uses the composed body span for a decomposed metadata name", async () => {
+    const body = "Hola @Ana García, ¿vienes?"
+    const { result } = openForEditing(body, [NFD_ANA])
+
+    await waitFor(() => expect(result.current.mentions).toHaveLength(1))
+    const mention = result.current.mentions[0]!
+    expect(body.slice(mention.start, mentionEnd(mention))).toBe("@Ana García")
+  })
+
+  it("updates an existing anchor when reseeding changes only its body length", () => {
+    const { result } = renderHook((p: Props) => useMentions(p), {
+      initialProps: makeProps(),
+    })
+    const decomposedBody = "Hola @Ana Garci\u0301a"
+    const composedBody = "Hola @Ana García"
+
+    act(() => result.current.seedMentions([ANA], decomposedBody))
+    expect(result.current.mentions[0]?.length).toBe("@Ana Garci\u0301a".length)
+
+    act(() => result.current.seedMentions([ANA], composedBody))
+    expect(result.current.mentions[0]?.length).toBe("@Ana García".length)
+  })
+
+  it("preserves distinct canonical identities in the outgoing payload", async () => {
+    const nfc: MentionEntry = { id: "nfc", name: "Garc\u00EDa" }
+    const nfd: MentionEntry = { id: "nfd", name: "Garci\u0301a" }
+    const { result } = openForEditing(`@${nfd.name} and @${nfc.name}`, [
+      nfc,
+      nfd,
+    ])
+
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([nfd, nfc])
+    )
+  })
+
+  it("keeps a cross-spelling mention when punctuation immediately after it changes", async () => {
+    let value = "Hola @Ana García, ¿vienes?"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const { result, rerender } = openForEditing(value, [NFD_ANA], {
+      setInputValue,
+    })
+
+    value = "Hola @Ana García! ¿vienes?"
+    rerender(withValue(value, { setInputValue }))
+
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([NFD_ANA])
+    )
+    expect(setInputValue).not.toHaveBeenCalled()
+  })
+
+  it("removes a cross-spelling mention when its final character changes", async () => {
+    let value = "Hola @Ana Garci\u0301a, ¿vienes?"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const { result, rerender } = openForEditing(value, [ANA], { setInputValue })
+
+    value = "Hola @Ana Garci\u0301o, ¿vienes?"
+    rerender(
+      makeProps({ inputValue: value, cursorPosition: 16, setInputValue })
+    )
+
+    await waitFor(() =>
+      expect(setInputValue).toHaveBeenCalledWith("Hola , ¿vienes?")
+    )
+    expect(result.current.getMentions().mentions).toEqual([])
+  })
+
+  it("anchors and removes a composed Hangul name in a jamo body", async () => {
+    const hangul: MentionEntry = { id: "hangul", name: "\uAC01" }
+    let value = "Ping @\u1100\u1161\u11A8, now"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const { result, rerender } = openForEditing(value, [hangul], {
+      setInputValue,
+    })
+
+    await waitFor(() => expect(result.current.mentions).toHaveLength(1))
+    const mention = result.current.mentions[0]!
+    expect(value.slice(mention.start, mentionEnd(mention))).toBe(
+      "@\u1100\u1161\u11A8"
+    )
+
+    value = "Ping @\u1100\u1165\u11A8, now"
+    rerender(makeProps({ inputValue: value, cursorPosition: 7, setInputValue }))
+
+    await waitFor(() =>
+      expect(setInputValue).toHaveBeenCalledWith("Ping , now")
+    )
+    expect(result.current.getMentions().mentions).toEqual([])
   })
 
   it("removes the whole mention when the user edits inside it", async () => {

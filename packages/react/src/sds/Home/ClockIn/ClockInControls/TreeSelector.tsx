@@ -24,14 +24,32 @@ export type TreeSelectorItem = {
 type LeafRecord = {
   id: string
   name: string
-  /** The ancestor chain, which becomes the group heading. */
-  group: string
   /** Leaf + ancestors, for the trigger — out there a leaf name can be ambiguous. */
   path: string
   /** Leaf AND every ancestor: searching "Barcelona" must find its work areas. */
   haystack: string
   icon?: IconType
+  /**
+   * The leaf's ancestor at each depth, outermost first — one grouping level per
+   * field, which is what nests the headings instead of running the chain
+   * together on one line.
+   *
+   * A leaf shallower than the deepest branch leaves the levels below it UNSET
+   * on purpose: the grouping keeps a record with no value at a level as a row
+   * of the group above, rather than bucketing it under a heading with no name.
+   */
+  level0?: string
+  level1?: string
+  level2?: string
 }
+
+/**
+ * The grouping fields, outermost first. Bounded because the heading stack is
+ * what the reader pays for: three is already location → workplace → work area,
+ * and a fourth would indent a row off the side of a widget. A tree deeper than
+ * this still works — the last level simply holds everything below it.
+ */
+const LEVEL_FIELDS = ["level0", "level1", "level2"] as const
 
 /** Ancestors read as a trail; the leaf is set apart from them. */
 const ANCESTOR_SEPARATOR = " · "
@@ -52,8 +70,16 @@ const PER_PAGE = 20
  * tail to put it in. In a list that nests nowhere the caller skips grouping
  * entirely, so this only shows up in mixed lists.
  */
-export function flattenTree(items: TreeSelectorItem[]): LeafRecord[] {
+export function flattenTree(items: TreeSelectorItem[]): {
+  leaves: LeafRecord[]
+  /** What each level id is called, for the headings. */
+  levelNames: Map<string, string>
+  /** How many grouping levels the deepest branch actually needs. */
+  depth: number
+} {
   const leaves: LeafRecord[] = []
+  const levelNames = new Map<string, string>()
+  let depth = 0
 
   const walk = (node: TreeSelectorItem, ancestors: TreeSelectorItem[]) => {
     if (node.children?.length) {
@@ -64,10 +90,30 @@ export function flattenTree(items: TreeSelectorItem[]): LeafRecord[] {
     const names = ancestors.map((ancestor) => ancestor.name)
     const trail = names.join(ANCESTOR_SEPARATOR)
 
+    /**
+     * One level per ancestor, by ID rather than by name: two subprojects called
+     * "Design" under different projects are different groups, and a heading
+     * looks them back up by id.
+     *
+     * A top-level leaf heads a group of its own — F0Select's grouping is
+     * all-or-nothing (a group per record, or no groups), so there is no
+     * ungrouped tail to put it in.
+     */
+    const levels = Object.fromEntries(
+      LEVEL_FIELDS.map((field, depth) => [
+        field,
+        ancestors[depth]?.id ?? (depth === 0 ? node.id : undefined),
+      ])
+    )
+    ancestors.forEach((ancestor) => levelNames.set(ancestor.id, ancestor.name))
+    if (!ancestors.length) {
+      levelNames.set(node.id, node.name)
+    }
+
     leaves.push({
       id: node.id,
       name: node.name,
-      group: names.length ? trail : node.name,
+      ...levels,
       path: names.length ? `${node.name}${PATH_SEPARATOR}${trail}` : node.name,
       haystack: [node.name, ...names].join(" ").toLowerCase(),
       // The glyph that means something is usually the ROOT's (Office, Home,
@@ -79,8 +125,22 @@ export function flattenTree(items: TreeSelectorItem[]): LeafRecord[] {
     })
   }
 
+  const walkDepth = (node: TreeSelectorItem, level: number) => {
+    if (!node.children?.length) {
+      depth = Math.max(depth, level)
+      return
+    }
+    node.children.forEach((child) => walkDepth(child, level + 1))
+  }
+
   items.forEach((item) => walk(item, []))
-  return leaves
+  items.forEach((item) => walkDepth(item, 0))
+
+  return {
+    leaves,
+    levelNames,
+    depth: Math.min(Math.max(depth, 1), LEVEL_FIELDS.length),
+  }
 }
 
 /** The selected leaf, wherever it sits in the tree. */
@@ -139,7 +199,12 @@ export function TreeSelector({
   required = true,
   disabled,
 }: TreeSelectorProps) {
-  const leaves = useMemo(() => flattenTree(items), [items])
+  const { leaves, levelNames, depth } = useMemo(
+    () => flattenTree(items),
+    [items]
+  )
+  /** One grouping level per depth the tree actually reaches. */
+  const levelFields = useMemo(() => LEVEL_FIELDS.slice(0, depth), [depth])
   const nested = useMemo(
     () => items.some((item) => !!item.children?.length),
     [items]
@@ -167,14 +232,35 @@ export function TreeSelector({
   // itself. Memoized because its identity is what would otherwise refetch.
   const source = useMemo<DataSourceDefinition<LeafRecord>>(
     () => ({
+      /**
+       * NESTED, one level per depth: project heads the group, subproject splits
+       * it, the tasks are the rows. The alternative — one level keyed on the
+       * whole ancestor chain — reads as "Project · Subproject" on a single
+       * heading, which flattens the very hierarchy the picker exists to show.
+       *
+       * The hierarchy is the picker's own, not a view the reader chooses, so
+       * the selector stays hidden: picking a field there would replace the
+       * whole grouping, `thenBy` included, with no way back.
+       */
       grouping: {
         mandatory: true,
         hideSelector: true,
         collapsible: true,
         defaultOpenGroups: true,
-        groupBy: {
-          group: { name: label, label: (groupId) => String(groupId) },
-        },
+        groupBy: Object.fromEntries(
+          levelFields.map((field) => [
+            field,
+            {
+              name: label,
+              label: (groupId: unknown) =>
+                levelNames.get(String(groupId)) ?? "",
+            },
+          ])
+        ),
+      },
+      defaultGrouping: {
+        field: levelFields[0],
+        thenBy: levelFields.slice(1).map((field) => ({ field })),
       },
       dataAdapter: {
         paginationType: "infinite-scroll",
@@ -205,7 +291,7 @@ export function TreeSelector({
         },
       },
     }),
-    [leaves, label]
+    [leaves, label, levelFields, levelNames]
   )
 
   const shared = {

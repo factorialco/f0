@@ -26,8 +26,8 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
-    } catch (error) {
-      void error
+    } catch {
+      // Clipboard unavailable: leave the button as it is.
     }
   }
   return (

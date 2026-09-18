@@ -1,4 +1,4 @@
-import { ComponentProps, ComponentType, ReactNode } from "react"
+import { ComponentProps, ComponentType, ReactNode, RefObject } from "react"
 import { TableHead } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
@@ -241,6 +241,18 @@ export type TableVisualizationOptions<
   onLockedColumnIdsChange?: (columnIds: ColId[]) => void
 
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
+  /**
+   * Reveals the row-actions button only while its row is hovered or focused,
+   * instead of painting it on every row. Editable-table only — the plain table
+   * always reveals its actions on hover.
+   *
+   * The cell keeps its width either way, so a row's content cannot shift
+   * sideways as the pointer enters it.
+   *
+   * @default false
+   */
+  itemActionsOnHover?: boolean
+
   referenceRowType?: (item: R) => ReferenceType
 
   /**
@@ -350,3 +362,9 @@ export type TableCustomizationProps<
   /** Override the visualization settings key (column order/visibility). If not provided, uses the "table" key. */
   visualizationSettings?: TableVisualizationSettings
 }
+
+/** The `ref` a table row accepts, as callback or object. */
+export type TableRowRef =
+  | ((element: HTMLTableRowElement | null) => void)
+  | RefObject<HTMLTableRowElement>
+  | null

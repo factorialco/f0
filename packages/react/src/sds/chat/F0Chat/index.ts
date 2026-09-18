@@ -20,6 +20,20 @@ export type {
   F0ChatMessageReply,
   F0ChatMention,
   F0ChatItem,
+  F0ChatPost,
+  F0ChatPostEvent,
+  F0ChatPostAction,
+  F0ChatPostAttachment,
+  F0ChatPostRequiredAction,
+  F0ChatPostCommunity,
+  F0ChatCreatePostInput,
+  // The shelf's vocabulary. A host fills `channel.pinnedPosts` and answers
+  // `scheduledActions`/`draftActions`, so it needs to be able to NAME these —
+  // inference on an inline literal is not enough to write a typed handler.
+  F0ChatPinnedPost,
+  F0ChatScheduledPost,
+  F0ChatDraftPost,
+  F0ChatShelfAction,
   F0ChatSystemMessage,
   F0ChatSystemPayload,
   F0ChatSystemEvent,
@@ -40,6 +54,7 @@ export {
   f0ChatSenderColors,
   isSystemMessage,
   isUserMessage,
+  isPost,
   LATEST,
 } from "./types"
 // Re-exported because `F0ChatRuntime.transcribe` is typed as `TranscribeFn`;

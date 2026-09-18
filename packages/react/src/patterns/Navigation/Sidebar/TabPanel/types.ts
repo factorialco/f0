@@ -1,5 +1,6 @@
 import { ReactNode } from "react"
 import { IconType } from "@/components/F0Icon"
+import type { SidebarSectionAction } from "../CollapsibleSection"
 
 /**
  * A top-of-panel action (e.g. "New chat", "New group"). The panel renders one
@@ -40,6 +41,8 @@ export type SidebarTabPanelGroup = {
   highlightWhenCollapsed?: boolean
   /** Content shown at the end of the header only while collapsed. */
   collapsedBadge?: ReactNode
+  /** Hover-revealed action on the group's own header. */
+  action?: SidebarSectionAction
   items: SidebarTabPanelItem[]
 }
 

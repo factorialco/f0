@@ -41,6 +41,12 @@ useGroups<R>(
 
 Array of group records from the data object returned by `useData`.
 
+When the grouping is multi-level (`thenBy`), the whole tree is managed, not
+just its first level: every nested group gets its own entry in `openGroups`,
+under its own key. `defaultOpenGroups` as an array therefore accepts nested
+keys too — but those keys are scoped to their parent and should be treated as
+opaque, so prefer `true`/`false` unless you captured the key from the data.
+
 #### `defaultOpenGroups?: boolean | GroupRecord<R>["key"][]`
 
 Default open state for groups. Can be:

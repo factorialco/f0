@@ -32,6 +32,7 @@ const meta: Meta<typeof DialogNotificationInternal> = {
         "secondaryAction",
         "isOpen",
         "onClose",
+        "dismissable",
       ],
     }),
   },
@@ -98,6 +99,7 @@ export const Warning: Story = {
     type: "warning",
     title: "Warning",
     description: "Proceed with caution.",
+    isOpen: false,
   },
 }
 

@@ -29,33 +29,15 @@ describe("isEmptyNumeric", () => {
   })
 
   describe("number values", () => {
-    it("should return false for zero", () => {
-      const result = isEmptyNumeric(0)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for positive numbers", () => {
-      const result = isEmptyNumeric(123.45)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for negative numbers", () => {
-      const result = isEmptyNumeric(-123.45)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for very small numbers", () => {
-      const result = isEmptyNumeric(0.0001)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for large numbers", () => {
-      const result = isEmptyNumeric(999999999.99)
-      expect(result).toBe(false)
-    })
-
-    it("should return false for integers", () => {
-      const result = isEmptyNumeric(42)
+    it.each([
+      { name: "zero", value: 0 },
+      { name: "positive numbers", value: 123.45 },
+      { name: "negative numbers", value: -123.45 },
+      { name: "very small numbers", value: 0.0001 },
+      { name: "large numbers", value: 999999999.99 },
+      { name: "integers", value: 42 },
+    ])("should return false for $name", ({ value }) => {
+      const result = isEmptyNumeric(value)
       expect(result).toBe(false)
     })
   })

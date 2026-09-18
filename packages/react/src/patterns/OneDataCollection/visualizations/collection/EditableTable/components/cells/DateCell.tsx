@@ -77,6 +77,8 @@ export function DateCell<R extends RecordType>({
           label={editableColumn.label}
           hideLabel
           transparent
+          showIcon={dateConfig?.showIcon ?? true}
+          clearable={dateConfig?.clearable}
           displayFormat="default"
           value={datePickerValue}
           onChange={handleChange}

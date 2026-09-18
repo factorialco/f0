@@ -12,7 +12,7 @@ import {
 import MockDate from "mockdate"
 import { useState } from "react"
 import { OneCalendar, OneCalendarInternal } from "./OneCalendar"
-import { DateRange, WeekStartDay } from "./types"
+import { CalendarSelection, DateRange, WeekStartDay } from "./types"
 
 const mockDate = new Date(2025, 6, 30)
 const mockTodayDate = new Date(2025, 5, 30)
@@ -100,7 +100,7 @@ export const MonthSingle: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -139,7 +139,7 @@ export const MonthRange: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -176,7 +176,7 @@ export const YearSingle: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -215,7 +215,7 @@ export const YearRange: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -252,7 +252,7 @@ export const DaySingle: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -298,7 +298,7 @@ export const DayRange: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -342,7 +342,7 @@ export const Week: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         setSelectedRange(null)
         return
@@ -377,7 +377,7 @@ export const QuarterSingle: Story = {
       return new Date(now.getFullYear(), quarterStartMonth, 1)
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         setSelectedDate(null)
         return
@@ -431,7 +431,7 @@ export const QuarterRange: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         setSelectedRange(null)
         return
@@ -466,7 +466,7 @@ export const HalfYearSingle: Story = {
       return new Date(now.getFullYear(), halfYearStartMonth, 1)
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         setSelectedDate(null)
         return
@@ -519,7 +519,7 @@ export const HalfYearRange: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         setSelectedRange(null)
         return
@@ -673,7 +673,7 @@ export const CompactMonthSingle: OneCalendarInternalStory = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -713,7 +713,7 @@ export const CompactMonthRange: OneCalendarInternalStory = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -758,7 +758,7 @@ export const CompactWeek: OneCalendarInternalStory = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         setSelectedRange(null)
         return
@@ -801,7 +801,7 @@ export const CompactDayRange: OneCalendarInternalStory = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }
@@ -840,7 +840,7 @@ export const RegularVsCompact: Story = {
       }
     })
 
-    const handleSelect = (date: Date | DateRange | null) => {
+    const handleSelect = (date: CalendarSelection) => {
       if (!date) {
         return
       }

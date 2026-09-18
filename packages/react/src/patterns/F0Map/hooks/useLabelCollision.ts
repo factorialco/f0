@@ -1,10 +1,10 @@
-import type maplibregl from "maplibre-gl"
 import { useEffect, useState } from "react"
 import {
   getMarkerMetrics,
   type BaseMapMarkerLabelPlacement,
   type BaseMapMarkerSize,
 } from "../components/internal/BaseMapMarker"
+import type { MapAdapter } from "../providers/types"
 import type { F0MapPoint } from "../types"
 
 const GAP_EXTRA_BOTTOM = 4 // matches the marker's extra separation below
@@ -42,13 +42,15 @@ export const measureLabel = (text: string, fontPx: number): number => {
 }
 
 // Label box for a given placement, relative to a head centered at (cx, cy).
-const labelBox = (
-  placement: BaseMapMarkerLabelPlacement,
-  cx: number,
-  cy: number,
-  point: F0MapPoint,
+type LabelBoxOptions = {
+  placement: BaseMapMarkerLabelPlacement
+  cx: number
+  cy: number
+  point: F0MapPoint
   size: BaseMapMarkerSize
-): Box => {
+}
+
+const labelBox = ({ placement, cx, cy, point, size }: LabelBoxOptions): Box => {
   const m = getMarkerMetrics(size)
   const raw = measureLabel(point.label ?? "", m.label) + 2
   const half = m.d / 2
@@ -83,14 +85,14 @@ export type LabelPlacements = Record<string, BaseMapMarkerLabelPlacement | null>
  * every marker's on-screen position.
  */
 export const useLabelCollision = (
-  map: maplibregl.Map | null,
+  adapter: MapAdapter | null,
   points: F0MapPoint[],
   size: BaseMapMarkerSize = "md"
 ): LabelPlacements => {
   const [placements, setPlacements] = useState<LabelPlacements>({})
 
   useEffect(() => {
-    if (!map) {
+    if (!adapter) {
       setPlacements({})
       return
     }
@@ -101,7 +103,11 @@ export const useLabelCollision = (
       const heads: Box[] = []
       const center: { x: number; y: number }[] = []
       for (const p of points) {
-        const pt = map.project(p.coordinates)
+        const pt = adapter.project(p.coordinates)
+        // Not projectable yet: leave the previous placements until `ready`.
+        if (!pt) {
+          return
+        }
         heads.push({ x: pt.x - d / 2, y: pt.y - d / 2, w: d, h: d })
         center.push({ x: pt.x, y: pt.y })
       }
@@ -145,7 +151,7 @@ export const useLabelCollision = (
 
         let chosen: BaseMapMarkerLabelPlacement | null = null
         for (const placement of candidates) {
-          const box = labelBox(placement, s.x, s.y, p, size)
+          const box = labelBox({ placement, cx: s.x, cy: s.y, point: p, size })
           const hitsHead = heads.some((h) => boxesOverlap(box, h))
           const hitsLabel = placedLabels.some((l) => boxesOverlap(box, l))
           if (!hitsHead && !hitsLabel) {
@@ -190,16 +196,16 @@ export const useLabelCollision = (
     }
 
     schedule()
-    map.on("move", schedule)
-    map.on("zoom", schedule)
-    map.on("resize", schedule)
+    const offs = [
+      adapter.on("move", schedule),
+      adapter.on("zoom", schedule),
+      adapter.on("resize", schedule),
+    ]
     return () => {
       cancelAnimationFrame(raf)
-      map.off("move", schedule)
-      map.off("zoom", schedule)
-      map.off("resize", schedule)
+      offs.forEach((off) => off())
     }
-  }, [map, points, size])
+  }, [adapter, points, size])
 
   return placements
 }

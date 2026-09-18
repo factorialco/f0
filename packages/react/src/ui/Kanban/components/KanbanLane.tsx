@@ -599,10 +599,8 @@ export function KanbanLane<TRecord extends RecordType>({
       const originalHeight = outer.style.height
       outer.style.height = "auto"
 
-      // Force reflow to ensure accurate measurement
-      void measure.offsetHeight
-
-      // Get natural content height by looking at the Lane component inside
+      // Get natural content height by looking at the Lane component inside.
+      // Reading scrollHeight forces the reflow after the height change above.
       const contentHeight = measure.scrollHeight
 
       // Restore constraint
