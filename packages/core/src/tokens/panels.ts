@@ -60,12 +60,12 @@ export const panelWidths = {
  */
 export const sidebarWidths = {
   /**
-   * The module rail: a 32px icon box with 6px either side, wide enough for a
-   * 9px label under it. One width at every viewport — it is narrow enough that
-   * a phone can carry it, and it is the one part of the navigation that never
-   * goes away.
+   * The module rail: a 36px icon chip with 6px either side, wide enough for an
+   * 11px label under it to read as a word rather than as a caption. One width
+   * at every viewport — it is narrow enough that a phone can carry it, and it
+   * is the one part of the navigation that never goes away.
    */
-  rail: 48,
+  rail: 68,
   /** The section panel. Mirrored as `--ds-sidebar-width`. */
   panel: 240,
 }

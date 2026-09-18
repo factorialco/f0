@@ -137,8 +137,9 @@ export function SidebarRail({
       )}
     >
       {/* 60px, the same height as the panel's title bar beside it, so the logo
-          and the section title sit on one line. */}
-      <div className="flex h-[60px] shrink-0 items-center justify-center">
+          and the section title sit on one line. Full width: the selector takes
+          the whole row as its target. */}
+      <div className="flex h-[60px] w-full shrink-0 items-stretch justify-center">
         <CompanySelector {...company} variant="compact" />
       </div>
 
@@ -163,12 +164,12 @@ export function SidebarRail({
       </div>
 
       {(actions.length > 0 || user) && (
-        <div className="mt-auto flex shrink-0 flex-col items-center gap-0.5 pb-3 pt-2">
+        <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-0.5 pb-3 pt-2">
           {actions.map((action) => (
             <RailAction key={action.id} action={action} />
           ))}
           {user && (
-            <span className="pt-1.5">
+            <span className="w-full pt-1.5">
               <SidebarUserMenu {...user} compact />
             </span>
           )}

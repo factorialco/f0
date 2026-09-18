@@ -31,7 +31,7 @@ export type RailTabProps = {
 }
 
 /**
- * One module in the rail: a 32px icon box with a 9px label under it.
+ * One module in the rail: a 36px icon chip with an 11px label under it.
  *
  * The selection is the icon box's background, not a pill spanning the whole
  * button — the label belongs to the module either way, so highlighting it too
@@ -51,26 +51,30 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
         onClick={onSelect}
         onKeyDown={onKeyDown}
         className={cn(
-          "group flex w-full cursor-pointer flex-col items-center gap-0.5 rounded-[10px]",
+          "group flex w-full cursor-pointer flex-col items-center gap-1 rounded-[10px] py-2",
           focusRing()
         )}
       >
         <span
           className={cn(
-            "relative flex size-8 items-center justify-center rounded-[10px] transition-colors",
+            "relative flex size-9 items-center justify-center rounded-lg transition-colors",
             isActive
-              ? "bg-f1-background-secondary"
+              ? "bg-f1-background-secondary text-f1-icon-bold"
               : "group-hover:bg-f1-background-secondary"
           )}
         >
-          <F0Icon icon={tab.icon} size="md" color="default" />
+          <F0Icon
+            icon={isActive && tab.activeIcon ? tab.activeIcon : tab.icon}
+            size="lg"
+            color={isActive ? "currentColor" : "default"}
+          />
           {!!tab.badge && <UnreadDot />}
         </span>
         {/* Truncated, never hidden. Unlike the horizontal row there is nothing
-            to measure: 48px is 48px whatever the translation says, so a long
+            to measure: 68px is 68px whatever the translation says, so a long
             label can only ever be cut — and the full one is in the title and
             in the accessible name. */}
-        <span className="w-full truncate text-center text-[9px] font-medium leading-3 text-f1-foreground-secondary">
+        <span className="w-full truncate text-center text-[11px] font-semibold leading-3 text-f1-foreground-secondary">
           {tab.label}
         </span>
       </button>

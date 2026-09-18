@@ -17,7 +17,9 @@ import One from "@/icons/ai/One"
 import {
   ChartVerticalBars,
   Home,
+  HomeFilled,
   Lightbulb,
+  MessagesFilled,
   New,
   Pencil,
   Search,
@@ -1585,11 +1587,17 @@ const ConversationsSidebarInner = ({
     // The rail names the modules the way the navigation does ("Home", "Comms");
     // the tab row names the panel's contents ("Menu", "Chat"), which is what a
     // row above the body is describing.
-    { id: "home", label: isRail ? "Home" : "Menu", icon: Home },
+    {
+      id: "home",
+      label: isRail ? "Home" : "Menu",
+      icon: Home,
+      activeIcon: HomeFilled,
+    },
     {
       id: "messages",
       label: isRail ? "Comms" : "Chat",
       icon: Comment,
+      activeIcon: MessagesFilled,
       badge: unreadChatsCount || undefined,
     },
     // The AI chat is reached from the page header's One switch, never from a

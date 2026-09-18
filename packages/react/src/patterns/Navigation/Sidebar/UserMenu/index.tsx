@@ -47,23 +47,35 @@ export function SidebarUserMenu({
         aria-label={compact ? fullName : undefined}
         title={compact ? fullName : undefined}
         className={cn(
-          "flex items-center font-medium transition-colors",
+          "group flex items-center font-medium transition-colors",
           compact
-            ? // The avatar itself is the control, on the rail's round shape.
-              "shrink-0 cursor-pointer justify-center rounded-full"
+            ? // The whole rail row is the target; the chip inside it is what
+              // lights up, matching the company selector at the other end.
+              "w-full cursor-pointer justify-center"
             : "w-full max-w-full gap-1.5 rounded p-1.5 hover:bg-f1-background-secondary data-[state=open]:bg-f1-background-secondary",
           focusRing("focus-visible:ring-inset")
         )}
         onClick={onDropdownClick}
       >
-        <F0AvatarPerson
-          src={user.avatarUrl}
-          firstName={user.firstName}
-          lastName={user.lastName}
-          size={compact ? "sm" : "xs"}
-        />
-        {!compact && (
-          <OneEllipsis className="text-f1-foreground">{fullName}</OneEllipsis>
+        {compact ? (
+          <span className="flex size-10 items-center justify-center rounded-lg transition-colors group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary">
+            <F0AvatarPerson
+              src={user.avatarUrl}
+              firstName={user.firstName}
+              lastName={user.lastName}
+              size="sm"
+            />
+          </span>
+        ) : (
+          <>
+            <F0AvatarPerson
+              src={user.avatarUrl}
+              firstName={user.firstName}
+              lastName={user.lastName}
+              size="xs"
+            />
+            <OneEllipsis className="text-f1-foreground">{fullName}</OneEllipsis>
+          </>
         )}
       </button>
     </Dropdown>
