@@ -34,7 +34,7 @@ export const resourceFilters = {
     options: {
       options: [
         { value: "Alicia Keys", label: "Alicia Keys" },
-        { value: "Dani Moreno", label: "Dani Moreno" },
+        { value: "Jordan Avery", label: "Jordan Avery" },
         { value: "Marta Soler", label: "Marta Soler" },
         { value: "Nora Park", label: "Nora Park" },
       ],
@@ -59,7 +59,7 @@ export const ENGAGEMENT_RESOURCES: Resource[] = [
   {
     id: "2",
     name: "Q3 performance review cycle",
-    owner: "Dani Moreno",
+    owner: "Jordan Avery",
     status: "Complete",
   },
   {
@@ -93,7 +93,7 @@ export const TRAINING_RESOURCES: Resource[] = [
   {
     id: "3",
     name: "Security awareness refresher",
-    owner: "Dani Moreno",
+    owner: "Jordan Avery",
     status: "Needs details",
   },
   {

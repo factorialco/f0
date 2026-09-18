@@ -131,14 +131,7 @@ const StackedToasts = ({
               return (
                 <motion.div
                   key={item.id}
-                  style={{
-                    position: "absolute",
-                    width: 0,
-                    height: 0,
-                    overflow: "hidden",
-                    opacity: 0,
-                    pointerEvents: "none",
-                  }}
+                  className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
                   exit={{ transition: { duration: 0 } }}
                 />
               )

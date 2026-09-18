@@ -13,7 +13,11 @@ function Section({
 }) {
   return (
     <View className="mb-8">
-      <F0Text variant="body-xs-medium" color="secondary" className="mb-4 uppercase">
+      <F0Text
+        variant="body-xs-medium"
+        color="secondary"
+        className="mb-4 uppercase"
+      >
         {title}
       </F0Text>
       <View className="rounded-xl border border-f0-border-secondary p-4">
@@ -115,7 +119,12 @@ export function F0MetadataShowcase() {
             },
             {
               label: "Progress linear",
-              value: { type: "progress-bar", value: 65, max: 100, label: "65%" },
+              value: {
+                type: "progress-bar",
+                value: 65,
+                max: 100,
+                label: "65%",
+              },
             },
             {
               label: "Progress circular",

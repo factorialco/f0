@@ -14,7 +14,10 @@ pnpm --filter @factorialco/f0-react run format
 pnpm --filter @factorialco/f0-react run tsc
 ```
 
-Failing to run `format` before committing will cause the `Format` CI check to fail on every PR.
+The git hooks run both as well — `format` (plus `oxlint --fix`) on the staged files at commit time
+through lint-staged, and `tsc` on push (see [docs/development/git-hooks.md](docs/development/git-hooks.md)) —
+but run them yourself first: a hook that rewrites files after your last edit is surprising, and a
+commit made with `--no-verify` or `LEFTHOOK=0` skips the hook and fails the `Format` CI check.
 `oxfmt` rewrites whitespace, quote style, trailing commas, and import order — always run it last,
 after all code edits are done, and include the resulting changes in the same commit.
 
@@ -211,7 +214,12 @@ Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
 - CVA from `"cva"` (not `"class-variance-authority"`) for multi-variant components
 - Design tokens use `f1-` prefix: `text-f1-foreground`, `bg-f1-background`, `border-f1-border`, etc.
 - `focusRing()` from `@/lib/utils` on all focusable elements
-- Inline `style` only for truly dynamic values (hex colors, percentages)
+- Inline `style` only for truly dynamic values (hex colors, percentages) — a
+  measured offset, a `${percentage}%` width, a colour that arrives as data. Take
+  the exception with an `oxlint-disable` comment naming the reason. Everything
+  else is a Tailwind class. Enforced by `f0-styles/no-inline-styles`, a RATCHET
+  rule: existing hits are baselined in `.scripts/lint-debt.json` and that count
+  may only shrink. `src/ui/` is out of scope (re-synced third-party wrappers).
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 
@@ -240,15 +248,27 @@ renderers) imports the same constant.
 - Translation keys: camelCase, domain-namespaced (`actions.save`), `one`/`other` sub-keys for plurals
 - Missing keys: log `console.warn` and return the key string
 - **Never hardcode user-visible copy.** A string literal is untranslatable by construction — no consumer dictionary can reach it, so every locale renders English. This includes defaults: `label = "Actions"` and `{ label: "Today" }` in a lookup table are the same bug as `<span>Save</span>`.
-- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). The check names the existing key when it finds one.
-- `pnpm check:untranslated-copy` enforces this, and blocks CI on copy a PR **adds**. Existing debt is baselined in `.scripts/untranslated-copy-debt.json`; the list may only shrink.
-  - `--report` — the full inventory across `src/`
-  - `--update` — rewrite the baseline (after translating something, to lock the win in)
-  - `--comment` — the PR-comment markdown CI posts
-  - Genuinely untranslatable literal (brand name, keyboard key)? Put `i18n-exempt` in a comment on that line.
-- On a failing PR the offending lines are annotated **inline on the Files tab** (`::error file=,line=`) and summarised in a PR comment that separates "already has a key, swap it" from "needs a new key" — no digging through CI logs.
+- **Check for an existing key before writing one.** Around 40% of the current debt is a string whose key already exists — someone hardcoded the English next to a key that already held it (`date.presets.last7Days` exists; `ui/DatePickerPopup/presets.ts` hardcodes `"Last 7 days"` and nothing reads the key). Grep `i18n-provider-defaults.ts` for the English before adding a key, and reuse `actions.*`/`navigation.*` rather than a feature key from another domain.
+- `f0-i18n/no-untranslated-copy` (a local oxlint rule, see `.oxlint-plugins/`) enforces this. It runs in `pnpm lint`, the pre-commit hook and CI, and covers JSX text, attributes, object properties at any depth, and default values.
+- It is a RATCHET rule: on as a warning, with the existing debt baselined per file in `.scripts/lint-debt.json`, which may only shrink. `pnpm check:lint-debt` is what blocks a PR that adds one, and annotates the offending lines inline on the Files tab.
+- Genuinely untranslatable literal (a brand name, a keyboard key)? `// oxlint-disable-next-line f0-i18n/no-untranslated-copy -- reason`. It lands in the diff, so a reviewer sees the claim.
 
 See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
+
+## Lint debt (ratchet)
+
+Rules with more violations than one PR can fix run as `"warn"` in the RATCHET
+group of `.oxlintrc.json`. `pnpm lint` shows only errors; `pnpm check:lint-debt`
+compares the warnings per file against `.scripts/lint-debt.json`, a baseline
+that may only shrink. It runs on staged files in the pre-commit hook and over
+the whole tree in CI.
+
+- A file that gains a warning fails the check. Fix the warning.
+- A file that loses one also fails: run `pnpm check:lint-debt --update` and
+  commit the baseline. That is what locks the win in.
+- `sonarjs/cognitive-complexity` (threshold 15) is in the group. Reduce it by
+  extracting the nested branches into named functions, not by raising the
+  threshold.
 
 ## Accessibility
 
@@ -259,6 +279,36 @@ See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`,
 - Keyboard handling on custom interactive elements: `onKeyDown` for Enter/Space, `tabIndex={0}`, `role`
 - Delegate complex widgets (dialogs, selects, toggles) to Radix via `@/ui/`
 - Load the `a11y` skill for detailed WCAG patterns and decision trees
+
+### Accessible names are a public API
+
+Roles and accessible names are what consumers query — `getByRole("button", {
+name: "Clear" })` in unit tests, `cy.findByRole(...)` in Cypress. Changing one
+breaks them, and neither of the other checks notices: the public API check
+diffs `.d.ts` files (names are values, not types) and axe only asks whether a
+name _exists_, not whether it changed.
+
+The **aria surface** check covers this. Every story's role + accessible-name
+pairs are captured in the Storybook test-runner and diffed against the baseline
+from the latest `main` run, then reported as a PR comment. It is **advisory** —
+it never blocks a merge.
+
+- Treat a rename in that comment as a breaking change: it needs the same
+  deliberation as removing a prop.
+- Hardcoded `aria-label`s in component bodies are the usual source. i18n-ing one
+  changes the name in every non-English locale.
+- A story with nondeterministic content can opt out with
+  `parameters: { ariaSnapshot: { skip: true } }` rather than emit a diff on
+  every run.
+- **It only sees what a story actually renders.** F0InputField's clear button
+  is a live example: it mounts only once the field has a value, so renaming its
+  `aria-label` shows up in the one story with a filled input and nowhere else.
+  A conditional element with no story covering that state is invisible to this
+  check — which is one more reason to give new states their own story.
+
+```bash
+pnpm check:aria-surface --base <dir|file> --head <dir|file>
+```
 
 ## Code Quality
 
@@ -277,8 +327,9 @@ pnpm build          # build library and generate types
 pnpm vitest         # unit tests (watch)
 pnpm vitest:ci      # unit tests (CI, run once)
 pnpm test-storybook # Storybook interaction + a11y tests
-pnpm lint           # lint check
+pnpm lint           # lint check (errors only; warnings belong to the ratchet)
 pnpm lint-fix       # auto-fix lint issues
+pnpm check:lint-debt # ratchet rules: no file may gain a warning
 pnpm tsc            # type-check
 pnpm format         # auto-fix formatting (oxfmt) — run before every commit
 pnpm format:check   # check formatting without modifying files (same as CI)

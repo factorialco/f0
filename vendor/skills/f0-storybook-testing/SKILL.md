@@ -51,7 +51,6 @@ parameters: {
     test: "warning"
   }
 }
-
 ```
 
 - The contract: `test: "error"` = enforced (default), `test: "todo"` = known debt to fix, `test: "warning"` = intentional. axe always runs.

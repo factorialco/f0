@@ -1,7 +1,6 @@
 import React from "react"
 import { addons } from "storybook/manager-api"
 import { create } from "storybook/theming"
-
 // Generated at Storybook startup by `.storybook/main.ts` (the manager is an
 // esbuild bundle that can't compute component status itself). Maps a normalized
 // leaf name → effective status for the non-stable levels.
@@ -23,13 +22,10 @@ const STATUS_MARKER: Record<string, { emoji: string; title: string }> = {
   },
 }
 
-/** Must match `normalizeComponentName`/`leafName` in component-status-build.mjs. */
+/** Must match `sidebarStatusKey`/`leafName` in component-status-build.mjs. */
 function normalizeLeaf(name: string) {
   const leaf = name.split("/").pop() ?? name
-  return leaf
-    .toLowerCase()
-    .replace(/^f0/, "")
-    .replace(/[^a-z0-9]/g, "")
+  return leaf.toLowerCase().replace(/[^a-z0-9]/g, "")
 }
 
 const theme = create({
@@ -45,10 +41,14 @@ const theme = create({
  * unchanged. See the component-status API.
  */
 function renderSidebarLabel(item: { name: string; type: string }) {
-  if (item.type !== "component" && item.type !== "docs") return item.name
+  if (item.type !== "component" && item.type !== "docs") {
+    return item.name
+  }
   const status = statusByLeaf[normalizeLeaf(item.name)]
   const marker = status && STATUS_MARKER[status]
-  if (!marker) return item.name
+  if (!marker) {
+    return item.name
+  }
 
   return React.createElement(
     "span",

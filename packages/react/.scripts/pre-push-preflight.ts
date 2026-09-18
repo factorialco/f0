@@ -12,15 +12,11 @@
  *   2. New components — every component whose story file is added by the
  *      branch must meet the full mechanical Definition of Done
  *      (check-new-component-dod.ts runs the same policy in CI).
- *   3. Untranslated copy — the branch must not add user-visible string literals
- *      that bypass the i18n layer (check-untranslated-copy.ts, same policy in
- *      CI). Its own escape hatch is the inline `i18n-exempt` comment.
  *
  * Escape hatches (e.g. pushing WIP to a personal branch):
  *   F0_SKIP_PREFLIGHT=1 git push          # skip every check once
  *   SKIP_RED_GREEN=1 git push             # skip only the bugfix gate
  *   SKIP_NEW_COMPONENT_DOD=1 git push     # skip only the new-component gate
- *   SKIP_UNTRANSLATED_COPY=1 git push     # skip only the i18n gate
  *
  * The CI gates still run on the PR (with the `skip-red-green` /
  * `skip-new-component-dod` labels as their escape hatches), so skipping here
@@ -29,9 +25,7 @@
 import { spawnSync } from "node:child_process"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import consola from "consola"
-
 import { computeComponentStatusData } from "../scripts/component-status-build.mjs"
 import {
   isBugfixTitle,
@@ -43,7 +37,6 @@ import {
   gatherSignals,
   reportResult,
 } from "./check-new-component-dod"
-import { runGate as untranslatedCopyGate } from "./check-untranslated-copy"
 import { type StatusEntry } from "./check-stable-dod"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -113,16 +106,6 @@ function checkNewComponentsDod(): boolean {
   return ok
 }
 
-function checkUntranslatedCopy(): boolean {
-  const ok = untranslatedCopyGate()
-  if (!ok) {
-    consola.log(
-      "  To push anyway (e.g. WIP): SKIP_UNTRANSLATED_COPY=1 git push"
-    )
-  }
-  return ok
-}
-
 function main(): void {
   if (process.env.F0_SKIP_PREFLIGHT === "1") {
     consola.warn("F0_SKIP_PREFLIGHT=1 — skipping pre-push preflight.")
@@ -159,12 +142,6 @@ function main(): void {
     )
   } else {
     ok = checkNewComponentsDod() && ok
-  }
-
-  if (process.env.SKIP_UNTRANSLATED_COPY === "1") {
-    consola.warn("SKIP_UNTRANSLATED_COPY=1 — skipping the i18n copy gate.")
-  } else {
-    ok = checkUntranslatedCopy() && ok
   }
 
   process.exit(ok ? 0 : 1)

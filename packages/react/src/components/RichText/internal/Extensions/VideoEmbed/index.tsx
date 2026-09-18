@@ -78,7 +78,7 @@ const VideoEmbedNodeView = ({
           selected && "border-2 border-solid border-f1-border-selected-bold"
         )}
       >
-        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+        <div className="relative w-full pb-[56.25%]">
           {/* No sandbox: the YouTube and Vimeo players need allow-scripts and
               allow-same-origin together, which the rule rejects. `src` only
               ever comes from parseVideoUrl, so it is one of those two hosts. */}

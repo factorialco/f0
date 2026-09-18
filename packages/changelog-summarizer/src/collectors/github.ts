@@ -4,32 +4,32 @@
  * bug fixes are noisy and the CHANGELOG one-liner is usually enough.
  */
 
-const REPO = "factorialco/f0";
-const API_BASE = `https://api.github.com/repos/${REPO}`;
-const SEARCH_BASE = "https://api.github.com/search/issues";
-const MAX_BODY_CHARS = 600;
-const REQUEST_DELAY_MS = 150;
+const REPO = "factorialco/f0"
+const API_BASE = `https://api.github.com/repos/${REPO}`
+const SEARCH_BASE = "https://api.github.com/search/issues"
+const MAX_BODY_CHARS = 600
+const REQUEST_DELAY_MS = 150
 
 export interface PrInfo {
-  number: number;
-  body: string;
+  number: number
+  body: string
 }
 
 /** A merged pull request, as returned by the search API. */
 export interface MergedPr {
-  number: number;
-  title: string;
-  author: string;
-  labels: string[];
+  number: number
+  title: string
+  author: string
+  labels: string[]
 }
 
 /** A single file changed by a pull request. */
 export interface PrFile {
-  filename: string;
+  filename: string
   /** "added" | "modified" | "removed" | "renamed" | "copied" | "changed" */
-  status: string;
+  status: string
   /** Unified diff for the file. Omitted by GitHub for very large/binary files. */
-  patch?: string;
+  patch?: string
 }
 
 function ghHeaders(token?: string): Record<string, string> {
@@ -37,12 +37,12 @@ function ghHeaders(token?: string): Record<string, string> {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
     "User-Agent": "factorial-one-changelog-summarizer",
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  return headers;
+  }
+  if (token) headers["Authorization"] = `Bearer ${token}`
+  return headers
 }
 
-const PR_NUMBER_REGEX = /(?:#|\/pull\/)(\d{2,})/g;
+const PR_NUMBER_REGEX = /(?:#|\/pull\/)(\d{2,})/g
 
 /**
  * Extract PR numbers from arbitrary text. Recognises `#1234` and `/pull/1234`
@@ -50,49 +50,49 @@ const PR_NUMBER_REGEX = /(?:#|\/pull\/)(\d{2,})/g;
  * recent PRs are fetched first.
  */
 export function extractPrNumbers(text: string): number[] {
-  if (!text) return [];
+  if (!text) return []
 
-  const seen = new Set<number>();
+  const seen = new Set<number>()
   for (const match of text.matchAll(PR_NUMBER_REGEX)) {
-    const n = Number.parseInt(match[1], 10);
-    if (Number.isFinite(n) && n > 0) seen.add(n);
+    const n = Number.parseInt(match[1], 10)
+    if (Number.isFinite(n) && n > 0) seen.add(n)
   }
 
-  return [...seen].sort((a, b) => b - a);
+  return [...seen].sort((a, b) => b - a)
 }
 
 function cleanBoilerplate(body: string): string {
   // Strip common Factorial PR template sections that add no signal.
-  const lines = body.replace(/\r\n/g, "\n").split("\n");
-  const cleaned: string[] = [];
+  const lines = body.replace(/\r\n/g, "\n").split("\n")
+  const cleaned: string[] = []
 
   // Headings (markdown) that mark template noise we want to drop along with
   // everything below them until the next heading of equal or higher level.
   const NOISE_HEADINGS =
-    /^#{1,6}\s+(checklist|how to test|how to qa|qa|screenshots?|videos?|notes for reviewers?|related (issues|tickets|prs)|references?)\s*$/i;
+    /^#{1,6}\s+(checklist|how to test|how to qa|qa|screenshots?|videos?|notes for reviewers?|related (issues|tickets|prs)|references?)\s*$/i
 
-  let skip = false;
+  let skip = false
   for (const line of lines) {
-    const headingMatch = line.match(/^(#{1,6})\s+/);
+    const headingMatch = line.match(/^(#{1,6})\s+/)
     if (headingMatch) {
-      skip = NOISE_HEADINGS.test(line);
-      if (skip) continue;
+      skip = NOISE_HEADINGS.test(line)
+      if (skip) continue
     }
-    if (skip) continue;
+    if (skip) continue
 
     // Strip HTML comments often left over from templates.
-    if (/^<!--/.test(line) || /-->$/.test(line)) continue;
+    if (line.startsWith("<!--") || line.endsWith("-->")) continue
 
-    cleaned.push(line);
+    cleaned.push(line)
   }
 
-  return cleaned.join("\n").trim();
+  return cleaned.join("\n").trim()
 }
 
 function truncateAtSentence(text: string, max: number): string {
-  if (text.length <= max) return text;
+  if (text.length <= max) return text
 
-  const slice = text.slice(0, max);
+  const slice = text.slice(0, max)
   // Prefer breaking at the last sentence boundary.
   const lastStop = Math.max(
     slice.lastIndexOf(". "),
@@ -100,18 +100,18 @@ function truncateAtSentence(text: string, max: number): string {
     slice.lastIndexOf("? "),
     slice.lastIndexOf(".\n"),
     slice.lastIndexOf("!\n"),
-    slice.lastIndexOf("?\n"),
-  );
+    slice.lastIndexOf("?\n")
+  )
 
   if (lastStop > max * 0.5) {
-    return `${slice.slice(0, lastStop + 1).trim()}…`;
+    return `${slice.slice(0, lastStop + 1).trim()}…`
   }
 
-  return `${slice.trim()}…`;
+  return `${slice.trim()}…`
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
@@ -126,60 +126,56 @@ function sleep(ms: number): Promise<void> {
  */
 export async function fetchPrBodies(
   prNumbers: number[],
-  token?: string,
+  token?: string
 ): Promise<Map<number, PrInfo>> {
-  const map = new Map<number, PrInfo>();
-  if (prNumbers.length === 0) return map;
+  const map = new Map<number, PrInfo>()
+  if (prNumbers.length === 0) return map
 
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
     "User-Agent": "factorial-one-changelog-summarizer",
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  }
+  if (token) headers["Authorization"] = `Bearer ${token}`
 
   for (const num of prNumbers) {
     try {
-      const res = await fetch(`${API_BASE}/pulls/${num}`, { headers });
+      const res = await fetch(`${API_BASE}/pulls/${num}`, { headers })
 
       if (res.status === 403 || res.status === 404) {
-        console.error(
-          `[github] PR #${num}: HTTP ${res.status} — skipping`,
-        );
-        await sleep(REQUEST_DELAY_MS);
-        continue;
+        console.error(`[github] PR #${num}: HTTP ${res.status} — skipping`)
+        await sleep(REQUEST_DELAY_MS)
+        continue
       }
 
       if (!res.ok) {
-        console.error(
-          `[github] PR #${num}: HTTP ${res.status} — skipping`,
-        );
-        await sleep(REQUEST_DELAY_MS);
-        continue;
+        console.error(`[github] PR #${num}: HTTP ${res.status} — skipping`)
+        await sleep(REQUEST_DELAY_MS)
+        continue
       }
 
-      const json = (await res.json()) as { body?: string | null };
-      const rawBody = typeof json.body === "string" ? json.body : "";
-      const cleaned = cleanBoilerplate(rawBody);
-      const truncated = truncateAtSentence(cleaned, MAX_BODY_CHARS);
+      const json = (await res.json()) as { body?: string | null }
+      const rawBody = typeof json.body === "string" ? json.body : ""
+      const cleaned = cleanBoilerplate(rawBody)
+      const truncated = truncateAtSentence(cleaned, MAX_BODY_CHARS)
 
       if (truncated.length > 0) {
-        map.set(num, { number: num, body: truncated });
+        map.set(num, { number: num, body: truncated })
         console.error(
-          `[github] PR #${num}: fetched (${truncated.length} chars)`,
-        );
+          `[github] PR #${num}: fetched (${truncated.length} chars)`
+        )
       } else {
-        console.error(`[github] PR #${num}: empty body — skipping`);
+        console.error(`[github] PR #${num}: empty body — skipping`)
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[github] PR #${num}: error (${msg}) — skipping`);
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error(`[github] PR #${num}: error (${msg}) — skipping`)
     }
 
-    await sleep(REQUEST_DELAY_MS);
+    await sleep(REQUEST_DELAY_MS)
   }
 
-  return map;
+  return map
 }
 
 /**
@@ -191,39 +187,39 @@ export async function fetchPrBodies(
 export async function listMergedPRs(
   from: string,
   to: string,
-  token?: string,
+  token?: string
 ): Promise<MergedPr[]> {
-  const headers = ghHeaders(token);
-  const q = `repo:${REPO} is:pr is:merged base:main merged:${from}..${to}`;
-  const all: MergedPr[] = [];
+  const headers = ghHeaders(token)
+  const q = `repo:${REPO} is:pr is:merged base:main merged:${from}..${to}`
+  const all: MergedPr[] = []
 
   for (let page = 1; page <= 10; page++) {
-    const url = `${SEARCH_BASE}?q=${encodeURIComponent(q)}&per_page=100&page=${page}&sort=created&order=asc`;
-    let res: Response;
+    const url = `${SEARCH_BASE}?q=${encodeURIComponent(q)}&per_page=100&page=${page}&sort=created&order=asc`
+    let res: Response
     try {
-      res = await fetch(url, { headers });
+      res = await fetch(url, { headers })
     } catch (err) {
       console.error(
-        `[github] search PRs page ${page}: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      break;
+        `[github] search PRs page ${page}: ${err instanceof Error ? err.message : String(err)}`
+      )
+      break
     }
 
     if (!res.ok) {
-      console.error(`[github] search PRs page ${page}: HTTP ${res.status}`);
-      break;
+      console.error(`[github] search PRs page ${page}: HTTP ${res.status}`)
+      break
     }
 
     const json = (await res.json()) as {
       items?: Array<{
-        number: number;
-        title: string;
-        user?: { login?: string };
-        labels?: Array<{ name?: string }>;
-      }>;
-    };
+        number: number
+        title: string
+        user?: { login?: string }
+        labels?: Array<{ name?: string }>
+      }>
+    }
 
-    const items = json.items ?? [];
+    const items = json.items ?? []
     for (const it of items) {
       all.push({
         number: it.number,
@@ -232,15 +228,15 @@ export async function listMergedPRs(
         labels: (it.labels ?? [])
           .map((l) => l.name ?? "")
           .filter((n) => n.length > 0),
-      });
+      })
     }
 
-    if (items.length < 100) break;
-    await sleep(REQUEST_DELAY_MS);
+    if (items.length < 100) break
+    await sleep(REQUEST_DELAY_MS)
   }
 
-  console.error(`[github] Found ${all.length} merged PRs in ${from}..${to}`);
-  return all;
+  console.error(`[github] Found ${all.length} merged PRs in ${from}..${to}`)
+  return all
 }
 
 /**
@@ -251,45 +247,45 @@ export async function listMergedPRs(
  */
 export async function fetchPrFiles(
   prNumber: number,
-  token?: string,
+  token?: string
 ): Promise<PrFile[]> {
-  const headers = ghHeaders(token);
-  const files: PrFile[] = [];
+  const headers = ghHeaders(token)
+  const files: PrFile[] = []
 
   for (let page = 1; page <= 10; page++) {
-    let res: Response;
+    let res: Response
     try {
       res = await fetch(
         `${API_BASE}/pulls/${prNumber}/files?per_page=100&page=${page}`,
-        { headers },
-      );
+        { headers }
+      )
     } catch (err) {
       console.error(
-        `[github] PR #${prNumber} files: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      break;
+        `[github] PR #${prNumber} files: ${err instanceof Error ? err.message : String(err)}`
+      )
+      break
     }
 
     if (!res.ok) {
       if (res.status !== 404) {
-        console.error(`[github] PR #${prNumber} files: HTTP ${res.status}`);
+        console.error(`[github] PR #${prNumber} files: HTTP ${res.status}`)
       }
-      break;
+      break
     }
 
     const json = (await res.json()) as Array<{
-      filename: string;
-      status: string;
-      patch?: string;
-    }>;
+      filename: string
+      status: string
+      patch?: string
+    }>
 
     for (const f of json) {
-      files.push({ filename: f.filename, status: f.status, patch: f.patch });
+      files.push({ filename: f.filename, status: f.status, patch: f.patch })
     }
 
-    if (json.length < 100) break;
-    await sleep(REQUEST_DELAY_MS);
+    if (json.length < 100) break
+    await sleep(REQUEST_DELAY_MS)
   }
 
-  return files;
+  return files
 }

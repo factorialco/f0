@@ -1,3 +1,7 @@
+import { execSync } from "node:child_process"
+import { readFileSync } from "node:fs"
+import { globSync } from "node:fs"
+import { relative, resolve } from "node:path"
 /**
  * Bans animating a CSS custom property through motion's `animate` prop.
  *
@@ -20,10 +24,6 @@
  * Run over the whole tree, or with `--staged` for staged files only.
  */
 import { consola } from "consola"
-import { execSync } from "node:child_process"
-import { readFileSync } from "node:fs"
-import { globSync } from "node:fs"
-import { relative, resolve } from "node:path"
 
 const ROOT = resolve(import.meta.dirname, "..")
 

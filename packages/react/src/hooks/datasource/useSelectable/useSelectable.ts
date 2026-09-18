@@ -966,6 +966,33 @@ export function useSelectable<
     isAllSelectedRef.current = isAllSelected
   }, [isAllSelected])
 
+  /**
+   * After the data changed, re-apply the selection of every record whose group
+   * is checked — the records are new objects, the group's state is not.
+   */
+  const restoreCheckedGroupSelections = useCallback(
+    (records: R[]) => {
+      for (const record of records) {
+        const recordId = getSelectable?.(record)
+        if (recordId === undefined) {
+          continue
+        }
+
+        const groupId = (record as WithGroupId<R>)[GROUP_ID_SYMBOL] as
+          | string
+          | undefined
+        if (!groupId) {
+          continue
+        }
+
+        if (groupsState.get(groupId)?.checked) {
+          handleSelectItemChangeInternal(recordId, true, true)
+        }
+      }
+    },
+    [getSelectable, groupsState, handleSelectItemChangeInternal]
+  )
+
   // Sync selection state when data changes
   useEffect(() => {
     const allRecords = getAllRecords()
@@ -991,22 +1018,7 @@ export function useSelectable<
     }
 
     if (isGrouped) {
-      for (const record of allRecords) {
-        const recordId = getSelectable?.(record)
-        if (recordId === undefined) {
-          continue
-        }
-
-        const groupId = (record as WithGroupId<R>)[GROUP_ID_SYMBOL] as
-          | string
-          | undefined
-        if (groupId) {
-          const groupState = groupsState.get(groupId)
-          if (groupState?.checked) {
-            handleSelectItemChangeInternal(recordId, true, true)
-          }
-        }
-      }
+      restoreCheckedGroupSelections(allRecords)
     } else {
       if (isMultiSelection && !isPageOnlySelection) {
         handleSelectItemChangeInternal(
@@ -1053,10 +1065,10 @@ export function useSelectable<
     getSelectable,
     getAllRecords,
     isGrouped,
-    groupsState,
     isMultiSelection,
     handleSelectItemChangeInternal,
     isPageOnlySelection,
+    restoreCheckedGroupSelections,
   ])
 
   // Reset "all selected" state when empty

@@ -5,6 +5,7 @@ import {
   fireEvent,
   screen,
   userEvent,
+  waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
 import { F0CommandPaletteProvider, useCommandPalette } from ".."
@@ -236,8 +237,13 @@ const open = async (options: SetupOptions = {}) => {
 
 const ZWSP = "​"
 
-/** Let a deferred state update land: the search hook defers by one task. */
 const flushTask = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+/** The hook defers each answer by a task, so wait for it, not for a timer. */
+const settled = () =>
+  waitFor(() =>
+    expect(screen.getByRole("listbox")).not.toHaveAttribute("aria-busy")
+  )
 
 const chipsOf = (field: HTMLElement) =>
   Array.from(field.querySelectorAll("[data-scope-chip]"))
@@ -1126,19 +1132,13 @@ describe("remote entity search", () => {
     }
     return {
       provider,
-      // Resolving queues a microtask AND the hook defers the state update by a
-      // task (see `onNextTask`), so both have to be flushed before asserting.
       release: async (refs: CommandEntityRef[]) => {
-        await act(async () => {
-          release(refs)
-          await flushTask()
-        })
+        release(refs)
+        await settled()
       },
       reject: async () => {
-        await act(async () => {
-          reject()
-          await flushTask()
-        })
+        reject()
+        await settled()
       },
     }
   }
@@ -1216,10 +1216,9 @@ describe("remote entity search", () => {
       id: "d-2",
       label: 'MacBook Air 13"',
     }
-    await act(async () => {
-      answers[1]!([air])
-      await flushTask()
-    })
+    answers[1]!([air])
+    await settled()
+    // The stale answer gets its task too, and is expected to do nothing with it.
     await act(async () => {
       answers[0]!([laptopRef])
       await flushTask()

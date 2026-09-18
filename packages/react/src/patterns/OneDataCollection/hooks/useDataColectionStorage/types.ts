@@ -31,6 +31,9 @@ export type DataCollectionStatus<
   visualizationFilters?: Record<string, CurrentFiltersState>
   /** User-created custom presets persisted alongside the rest of the state. */
   customPresets?: PresetsDefinition<FiltersDefinition>
+  /** The active view's id, so a revisit restores which view is selected and not
+   *  just the views themselves. */
+  selectedPresetId?: string
 }
 
 export type DataCollectionStatusComplete<
@@ -109,5 +112,9 @@ export type FeatureProviders<
   customPresets?: {
     value: PresetsDefinition<Filters>
     setValue: React.Dispatch<React.SetStateAction<PresetsDefinition<Filters>>>
+  }
+  selectedPresetId?: {
+    value: string | undefined
+    setValue: (value: string | undefined) => void
   }
 }

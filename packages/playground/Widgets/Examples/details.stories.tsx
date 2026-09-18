@@ -1,14 +1,15 @@
+import { Meta, StoryObj } from "@storybook/react"
+import { ComponentProps } from "react"
+
 import {
   PersonTag,
   TeamTag,
-} from "~/packages/react/experimental/Information/Tags/exports";
+} from "~/packages/react/experimental/Information/Tags/exports"
 import {
   DetailsItem,
   DetailsItemType,
-} from "~/packages/react/experimental/PageLayouts/Utils/DetailsItem";
-import { Weekdays } from "~/packages/react/experimental/Widgets/Content/Weekdays";
-import { Meta, StoryObj } from "@storybook/react";
-import { ComponentProps } from "react";
+} from "~/packages/react/experimental/PageLayouts/Utils/DetailsItem"
+import { Weekdays } from "~/packages/react/experimental/Widgets/Content/Weekdays"
 
 const meta: Meta = {
   title: "Insights/Examples/Details",
@@ -58,20 +59,20 @@ const meta: Meta = {
       </div>
     ),
   ],
-};
+}
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 interface DetailsType {
-  title?: string;
-  details?: DetailsItemType[];
-  manager?: { title: string; name: string; avatar: string };
-  teams?: { title: string; list: string[] };
+  title?: string
+  details?: DetailsItemType[]
+  manager?: { title: string; name: string; avatar: string }
+  teams?: { title: string; list: string[] }
   workableDays?: {
-    title: string;
-    activatedDays?: ComponentProps<typeof Weekdays>["activatedDays"];
-  };
+    title: string
+    activatedDays?: ComponentProps<typeof Weekdays>["activatedDays"]
+  }
 }
 
 export const Details: Story = {
@@ -79,7 +80,7 @@ export const Details: Story = {
     return (
       <div className="flex flex-col gap-4">
         {!!title && (
-          <p className="mb-1 text-sm font-medium text-f1-foreground">{title}</p>
+          <p className="text-f1-foreground mb-1 text-sm font-medium">{title}</p>
         )}
         {details?.map((item) => {
           return !item?.title ? null : (
@@ -88,7 +89,7 @@ export const Details: Story = {
               key={item.title}
               content={item.content}
             />
-          );
+          )
         })}
         {workableDays?.title && (
           <DetailsItem
@@ -116,13 +117,13 @@ export const Details: Story = {
                       teamName={team}
                       teamImageUrl={team[0]}
                     />
-                  );
+                  )
                 })}
               </div>
             }
           />
         )}
       </div>
-    );
+    )
   },
-};
+}

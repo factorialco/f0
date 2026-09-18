@@ -1,5 +1,4 @@
 import baseCss from "@factorialco/f0-core/base.css?raw"
-
 import { BareColor } from "./BareColor"
 
 function parseBareColorVars(css: string): string[] {

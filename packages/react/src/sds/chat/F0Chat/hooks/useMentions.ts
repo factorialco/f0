@@ -33,11 +33,13 @@ export type MentionEntry = {
 export type AnchoredMention = MentionEntry & {
   /** Index of the `@` in the composer text. */
   start: number
+  /** Length of the `@name` occurrence as it is spelled in composer text. */
+  length: number
 }
 
 /** Index just past the last character of an anchored mention's name. */
 export const mentionEnd = (mention: AnchoredMention): number =>
-  mention.start + mention.name.length + 1
+  mention.start + mention.length
 
 /** A row in the mention popover: a group member, or the "everyone" option. */
 export type MentionCandidate =
@@ -180,7 +182,7 @@ const reanchorMentions = (
   // Positions inside the changed span have no image in `next`; clamp a start
   // down and an end up so an erased range covers the whole disturbed region.
   const mapStart = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : prefix
+    pos < prefix ? pos : pos >= prevEnd ? pos + delta : prefix
   const mapEnd = (pos: number): number =>
     pos <= prefix ? pos : pos >= prevEnd ? pos + delta : nextEnd
 
@@ -366,7 +368,8 @@ export function useMentions({
           candidate !== undefined &&
           candidate.id === mention.id &&
           candidate.name === mention.name &&
-          candidate.start === mention.start
+          candidate.start === mention.start &&
+          candidate.length === mention.length
         )
       })
     if (unchanged) {
@@ -537,7 +540,7 @@ export function useMentions({
         .map((m) =>
           m.start >= cursorPosition ? { ...m, start: m.start + shift } : m
         )
-      anchored.push({ ...entry, start: atIndex })
+      anchored.push({ ...entry, start: atIndex, length: name.length + 1 })
       anchored.sort((a, b) => a.start - b.start)
       prevValueRef.current = newValue
       commitMentions(anchored)
@@ -621,7 +624,7 @@ export function useMentions({
     // Anchors are per occurrence; the payload is a set of people, so the same
     // person mentioned twice is sent once.
     const users = new Map<string, MentionEntry>()
-    for (const { start: _start, ...entry } of mentions) {
+    for (const { start: _start, length: _length, ...entry } of mentions) {
       if (entry.id === MENTION_EVERYONE_ID) {
         continue
       }
@@ -637,32 +640,12 @@ export function useMentions({
       const text = forText ?? inputValueRef.current
       prevValueRef.current = text
 
-      // A saved message carries a set of people, not positions, so the text is
-      // what says where they are. Occurrences of one `@name` are handed out to
-      // the entries sharing that name in order — two people with the same
-      // display name get one each, while one person named twice keeps both.
-      const byName = new Map<string, MentionEntry[]>()
-      for (const entry of entries) {
-        const group = byName.get(entry.name)
-        if (group) {
-          group.push(entry)
-        } else {
-          byName.set(entry.name, [entry])
-        }
-      }
-
-      const taken = new Map<string, number>()
       commitMentions(
-        locateMentions(
-          text,
-          [...byName.keys()].map((name) => ({ name }))
-        ).flatMap(({ entry: { name }, start }) => {
-          const group = byName.get(name) ?? []
-          const index = taken.get(name) ?? 0
-          taken.set(name, index + 1)
-          const picked = group[Math.min(index, group.length - 1)]
-          return picked ? [{ ...picked, start }] : []
-        })
+        locateMentions(text, entries).map(({ entry, start, end }) => ({
+          ...entry,
+          start,
+          length: end - start,
+        }))
       )
     },
     [commitMentions]

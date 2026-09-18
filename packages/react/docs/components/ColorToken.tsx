@@ -1,8 +1,7 @@
+import { CopyIcon } from "lucide-react"
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
-import { CopyIcon } from "lucide-react"
 type Props = {
   name: string
   description?: string

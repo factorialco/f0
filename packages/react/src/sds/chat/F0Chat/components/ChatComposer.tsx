@@ -940,6 +940,76 @@ export const ChatComposer = (): ReactNode => {
     return true
   }, [history, value, cursorPosition, mentions.mentions, applySnapshot])
 
+  // Undo/redo before anything else: the composer rewrites its own value
+  // (inserting a mention, removing one whole, swapping an emoji shortcode)
+  // and each write clears the textarea's native undo stack, so the
+  // browser's own Cmd+Z has nothing useful left. Always preventDefault, or
+  // that empty native stack fires too and wipes what we just restored.
+  const handleUndoRedoKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) {
+        return false
+      }
+      const key = e.key.toLowerCase()
+      if (key === "z") {
+        e.preventDefault()
+        if (e.shiftKey) {
+          redo()
+        } else {
+          undo()
+        }
+        return true
+      }
+      if (key === "y") {
+        e.preventDefault()
+        redo()
+        return true
+      }
+      return false
+    },
+    [undo, redo]
+  )
+
+  // Escape, once neither autocomplete claimed it, undoes one thing at a
+  // time: the chip if one is open, else the text. No double-tap — a timed
+  // window put the gesture behind an invisible armed state and a rhythm,
+  // and the guard it was there to provide is now Cmd+Z, which puts a
+  // cleared draft straight back.
+  const handleEscapeKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key !== "Escape") {
+        return false
+      }
+      if (target.kind !== "none") {
+        e.preventDefault()
+        if (isEditing) {
+          dismissEdit()
+        } else {
+          dismissReply()
+        }
+        return true
+      }
+      // Nothing to lose: the key belongs to whatever the chat is mounted in,
+      // so a host dialog can still be closed from a focused composer.
+      if (value.length === 0) {
+        return false
+      }
+      e.preventDefault()
+      clearComposerText()
+      void stopTyping?.()
+      return true
+    },
+    [
+      target.kind,
+      isEditing,
+      dismissEdit,
+      dismissReply,
+      value.length,
+      clearComposerText,
+      stopTyping,
+    ]
+  )
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       // Enter confirms the active IME composition. It must never select an
@@ -947,27 +1017,8 @@ export const ChatComposer = (): ReactNode => {
       if (e.nativeEvent.isComposing) {
         return
       }
-      // Undo/redo before anything else: the composer rewrites its own value
-      // (inserting a mention, removing one whole, swapping an emoji shortcode)
-      // and each write clears the textarea's native undo stack, so the
-      // browser's own Cmd+Z has nothing useful left. Always preventDefault, or
-      // that empty native stack fires too and wipes what we just restored.
-      if ((e.metaKey || e.ctrlKey) && !e.altKey) {
-        const key = e.key.toLowerCase()
-        if (key === "z") {
-          e.preventDefault()
-          if (e.shiftKey) {
-            redo()
-          } else {
-            undo()
-          }
-          return
-        }
-        if (key === "y") {
-          e.preventDefault()
-          redo()
-          return
-        }
+      if (handleUndoRedoKeyDown(e)) {
+        return
       }
       // Emoji shortcode suggestions take precedence when the active caret token
       // starts with `:`; Enter/Tab select instead of sending the message.
@@ -978,29 +1029,7 @@ export const ChatComposer = (): ReactNode => {
       if (mentions.handleKeyDown(e)) {
         return
       }
-      // Escape, once neither autocomplete claimed it, undoes one thing at a
-      // time: the chip if one is open, else the text. No double-tap — a timed
-      // window put the gesture behind an invisible armed state and a rhythm,
-      // and the guard it was there to provide is now Cmd+Z, which puts a
-      // cleared draft straight back.
-      if (e.key === "Escape") {
-        if (target.kind !== "none") {
-          e.preventDefault()
-          if (isEditing) {
-            dismissEdit()
-          } else {
-            dismissReply()
-          }
-          return
-        }
-        // Nothing to lose: the key belongs to whatever the chat is mounted in,
-        // so a host dialog can still be closed from a focused composer.
-        if (value.length === 0) {
-          return
-        }
-        e.preventDefault()
-        clearComposerText()
-        void stopTyping?.()
+      if (handleEscapeKeyDown(e)) {
         return
       }
       // A modifier makes ↑ a selection gesture, never this shortcut; and with
@@ -1025,16 +1054,9 @@ export const ChatComposer = (): ReactNode => {
     [
       handleSend,
       handleEmojiAutocompleteKeyDown,
+      handleEscapeKeyDown,
+      handleUndoRedoKeyDown,
       mentions,
-      isEditing,
-      dismissEdit,
-      dismissReply,
-      target.kind,
-      value.length,
-      clearComposerText,
-      stopTyping,
-      undo,
-      redo,
       isComposerIdle,
       editLastOwnMessage,
     ]

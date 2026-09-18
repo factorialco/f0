@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-core",
-  "version": "2.2.0",
+  "version": "2.4.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/factorialco/f0.git",
@@ -35,7 +35,10 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "oxlint src",
+    "lint:fix": "oxlint src --fix",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src"
   },
   "keywords": [
     "factorial",
@@ -51,7 +54,6 @@
     "typescript": "^5.7.2"
   },
   "devDependencies": {
-    "prettier": "^3.5.2",
     "tsup": "^8.3.5"
   }
 }

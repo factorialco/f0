@@ -57,6 +57,10 @@ export function SelectCell<R extends RecordType>({
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
     onOpenChange: setIsOpen,
+    actions:
+      typeof config.actions === "function"
+        ? config.actions(item)
+        : config.actions,
   }
 
   const clearableProps = config.clearable

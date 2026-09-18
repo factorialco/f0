@@ -14,6 +14,7 @@
  */
 
 import { writeFileSync } from "fs"
+
 import { collectStoryUrls } from "../src/collectors/stories.js"
 import {
   jsonToSlackText,
@@ -119,14 +120,16 @@ async function main(): Promise<void> {
   const payload = { blocks }
   writeFileSync(
     "/tmp/zerito-preview-blocks.json",
-    JSON.stringify(payload, null, 2),
+    JSON.stringify(payload, null, 2)
   )
 
   console.error("")
   console.error("✅ Preview ready:")
   console.error("   /tmp/zerito-preview.md          (raw summary file)")
   console.error("   /tmp/zerito-preview-thread.txt  (threaded reply)")
-  console.error("   /tmp/zerito-preview-blocks.json (paste in Block Kit Builder)")
+  console.error(
+    "   /tmp/zerito-preview-blocks.json (paste in Block Kit Builder)"
+  )
   console.error("")
   console.error("Resolved Storybook links:")
   for (const entry of [
@@ -134,10 +137,14 @@ async function main(): Promise<void> {
     ...(json.sections.enhancements ?? []),
   ]) {
     if (!entry.storybook) continue
-    const url = storyUrls.get(entry.component.toLowerCase()) ??
+    const url =
+      storyUrls.get(entry.component.toLowerCase()) ??
       storyUrls.get(`f0${entry.component.toLowerCase()}`) ??
-      storyUrls.get(entry.component.toLowerCase().replace(/^f0/, "")) ?? null
-    const status = url ? `→ ${url}` : "→ (no docs page — bullet shown without link)"
+      storyUrls.get(entry.component.toLowerCase().replace(/^f0/, "")) ??
+      null
+    const status = url
+      ? `→ ${url}`
+      : "→ (no docs page — bullet shown without link)"
     console.error(`   ${entry.component.padEnd(22)} ${status}`)
   }
 }

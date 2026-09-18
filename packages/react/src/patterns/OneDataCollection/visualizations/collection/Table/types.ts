@@ -241,6 +241,18 @@ export type TableVisualizationOptions<
   onLockedColumnIdsChange?: (columnIds: ColId[]) => void
 
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
+  /**
+   * Reveals the row-actions button only while its row is hovered or focused,
+   * instead of painting it on every row. Editable-table only — the plain table
+   * always reveals its actions on hover.
+   *
+   * The cell keeps its width either way, so a row's content cannot shift
+   * sideways as the pointer enters it.
+   *
+   * @default false
+   */
+  itemActionsOnHover?: boolean
+
   referenceRowType?: (item: R) => ReferenceType
 
   /**

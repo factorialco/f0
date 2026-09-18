@@ -10,8 +10,8 @@
     "ios": {
       "icon": {
         "dark": "./assets/images/ios-dark.png",
-        "light": "./assets/images/ios-light.png",
-      },
+        "light": "./assets/images/ios-light.png"
+      }
     },
     "android": {
       "adaptiveIcon": {

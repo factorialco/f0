@@ -5,10 +5,20 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
-const UnreadDot = () => {
+
+const UnreadDot = ({ isActive }: { isActive: boolean }) => {
   return (
-    <div className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
-      <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
+    <div className="absolute right-0 top-0 flex h-2 w-2 items-center justify-center rounded-full bg-f1-background">
+      <div
+        className={cn(
+          "flex h-2 w-2 items-center justify-center rounded-full",
+          isActive
+            ? " bg-f1-background-secondary"
+            : "bg-f1-background-secondary-hover"
+        )}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-f1-special-highlight" />
+      </div>
     </div>
   )
 }
@@ -128,10 +138,7 @@ const TabButton = ({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded"
         >
-          <span
-            style={{ animationDuration: "8s" }}
-            className="absolute inset-0 animate-rotate-gradient rounded bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] opacity-80 blur-sm [--gradient-angle:0deg]"
-          />
+          <span className="[animation-duration:8s] absolute inset-0 animate-rotate-gradient rounded bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] opacity-80 blur-sm [--gradient-angle:0deg]" />
           <span className="absolute inset-0 rounded bg-f1-background" />
         </span>
       ) : null}
@@ -157,6 +164,8 @@ const TabButton = ({
           <F0Icon icon={tab.icon} size="md" color="currentColor" />
           {/* The unread dot shows on an inactive tab (hover only darkens the
               icon now, so the dot no longer needs to hide). */}
+
+          {tab.badge ? <UnreadDot isActive={isActive} /> : null}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
@@ -179,8 +188,6 @@ const TabButton = ({
           </span>
         </span>
       </div>
-
-      {tab.badge ? <UnreadDot /> : null}
     </button>
   )
 }

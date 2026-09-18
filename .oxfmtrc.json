@@ -9,5 +9,11 @@
   "printWidth": 80,
   "experimentalSortPackageJson": true,
   "experimentalSortImports": {},
-  "experimentalTailwindcss": {}
+  "experimentalTailwindcss": {},
+  "ignorePatterns": [
+    "**/*.svg",
+    "**/*.mdx",
+    "packages/*/CHANGELOG.md",
+    "packages/*/package.json"
+  ]
 }

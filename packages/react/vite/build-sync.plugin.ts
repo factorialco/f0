@@ -1,9 +1,9 @@
-import chalk from "chalk"
-import { consola } from "consola"
 import { readFileSync } from "fs"
 import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 import { resolve } from "path"
+import chalk from "chalk"
+import { consola } from "consola"
 import { UserConfig } from "vite"
 
 const consolaPrefix = chalk.cyanBright("[Sync plugin]")

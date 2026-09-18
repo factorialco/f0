@@ -1,8 +1,9 @@
+import { ComponentProps, forwardRef } from "react"
+
 import { ChartItem } from "~/packages/react/components/Charts/utils/types"
 import { AreaChartWidget } from "~/packages/react/experimental/Widgets/Charts/AreaChartWidget"
 import { ChartWidgetEmptyState } from "~/packages/react/experimental/Widgets/ChartWidgetEmptyState"
 import { ChartConfig } from "~/packages/react/ui/chart"
-import { ComponentProps, forwardRef } from "react"
 
 export interface PerformanceInsightType {
   title: string

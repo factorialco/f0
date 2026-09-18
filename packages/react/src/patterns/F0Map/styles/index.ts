@@ -1,24 +1,5 @@
-// Bundled with the package as a same-origin URL asset (not a runtime CDN
-// fetch), so it works offline and adds no third-party dependency.
-import rtlTextPluginUrl from "@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.js?url"
-import maplibregl from "maplibre-gl"
 import darkStyle from "./f0-dark.json"
 import lightStyle from "./f0-light.json"
-
-// Arabic / Hebrew labels need the RTL text plugin to shape and order glyphs
-// correctly. Register it once, lazily - MapLibre only pulls it in when RTL
-// text actually appears. Guarded for SSR and for the mocked map in tests.
-if (
-  typeof window !== "undefined" &&
-  typeof maplibregl.getRTLTextPluginStatus === "function" &&
-  maplibregl.getRTLTextPluginStatus() === "unavailable"
-) {
-  try {
-    maplibregl.setRTLTextPlugin(rtlTextPluginUrl, true)
-  } catch {
-    // Already registered (HMR / multiple entrypoints) - safe to ignore.
-  }
-}
 
 /**
  * Which rendering engine a style is written for. The tag exists so a style

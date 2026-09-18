@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       pr-number:
-        description: 'Pull Request Number'
+        description: "Pull Request Number"
         required: true
         type: number
       days:
-        description: 'Number of days to keep (default: 5)'
+        description: "Number of days to keep (default: 5)"
         required: false
         type: number
 

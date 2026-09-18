@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
+import { Delete, InfoCircleLine, Pencil, Table } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -94,6 +94,80 @@ export const BasicEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-basic/v1"
+      />
+    )
+  },
+}
+
+/**
+ * `itemActionsOnHover` reveals the row-actions button only while its row is
+ * hovered or focused, instead of painting it on every row. Off by default, so
+ * existing tables keep showing their actions at all times.
+ *
+ * The actions cell keeps its width either way, so a row's content does not
+ * shift sideways as the pointer enters it. An open dropdown stays visible once
+ * the pointer leaves, and keyboard focus reveals the actions too.
+ */
+export const EditableTableWithItemActionsOnHover: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              itemActionsOnHover: true,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-item-actions-on-hover/v1"
+      />
+    )
+  },
+}
+
+/**
+ * The view-switcher chip is presented as a plain table: `label` replaces the
+ * built-in "Editable table" text and `icon` replaces the built-in pencil, so
+ * the editing affordance is not advertised in the switcher. Both overrides are
+ * independent — pass either one alone — and the view still behaves as an
+ * editable table.
+ */
+export const EditableTableWithCustomChip: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            label: "Table",
+            icon: Table,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+          mockVisualizations.list,
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-custom-chip/v1"
       />
     )
   },
@@ -1335,7 +1409,7 @@ export const EditableTableWithPerRowDateConfig: Story = {
     docs: {
       description: {
         story:
-          "`dateConfig` as a per-row function `(item) => ({ minDate, maxDate })`. The End date picker's `minDate` — and therefore the month it opens on, since the picker's default month follows `minDate` — tracks each row's Start date, so an empty/unset End cell opens the calendar on that row's start. The Start date picker's `maxDate` tracks each row's End date. To test: the three rows have different start dates, so opening each End picker opens on a different month; then change a row's Start date and reopen its End picker — it now opens on the new start month, and earlier dates are disabled.",
+          "`dateConfig` as a per-row function `(item) => ({ minDate, maxDate })`. The End date picker's `minDate` — and therefore the month it opens on, since the picker's default month follows `minDate` — tracks each row's Start date, so an empty/unset End cell opens the calendar on that row's start. The Start date picker's `maxDate` tracks each row's End date. To test: the three rows have different start dates, so opening each End picker opens on a different month; then change a row's Start date and reopen its End picker — it now opens on the new start month, and earlier dates are disabled. The End date column also demos `dateConfig.showIcon: false` (no calendar icon) and `dateConfig.clearable: true` (a clear button empties the date).",
       },
     },
   },
@@ -1440,7 +1514,7 @@ export const EditableTableWithPerRowDateConfig: Story = {
                   inputPlaceholder: "DD/MM/YYYY",
                   render: (item: Hire) => item.startDate,
                   dateConfig: (item: Hire) => ({
-                    maxDate: parseISO(item.endDate),
+                    maxDate: item.endDate ? parseISO(item.endDate) : undefined,
                   }),
                 },
                 {
@@ -1450,7 +1524,11 @@ export const EditableTableWithPerRowDateConfig: Story = {
                   inputPlaceholder: "DD/MM/YYYY",
                   render: (item: Hire) => item.endDate,
                   dateConfig: (item: Hire) => ({
-                    minDate: parseISO(item.startDate),
+                    minDate: item.startDate
+                      ? parseISO(item.startDate)
+                      : undefined,
+                    showIcon: false,
+                    clearable: true,
                   }),
                 },
               ],
@@ -1892,6 +1970,17 @@ export const EditableTableWithStatusPillSelect: Story = {
                   selectConfig: {
                     placeholder: "Status",
                     showSearchBox: false,
+                    actions: (item: MockUser) =>
+                      item.status === "pending"
+                        ? [
+                            {
+                              label: "Withdraw request",
+                              icon: Delete,
+                              variant: "ghost" as const,
+                              onClick: () => alert(`Withdrawn: ${item.name}`),
+                            },
+                          ]
+                        : undefined,
                     options: STATUS_VALUES.map((id) => ({
                       value: id,
                       label: STATUS_LABEL[id],

@@ -1,7 +1,6 @@
-import { useState } from "react"
-
-import { F0Button } from "@/components/F0Button"
 import { CopyIcon } from "lucide-react"
+import { useState } from "react"
+import { F0Button } from "@/components/F0Button"
 
 type Props = {
   name: string
