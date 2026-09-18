@@ -69,10 +69,6 @@ type InlineRoleSelectProps = {
   portalContainer?: HTMLElement | null
 }
 
-/**
- * The parent owns the mode: the story holds `editing`, the component only
- * reports what the user did.
- */
 function InlineRoleSelect({
   value: initialValue,
   options = roleOptions,
@@ -87,7 +83,7 @@ function InlineRoleSelect({
   const [editing, setEditing] = useState(initialEditing)
 
   return (
-    <div className="flex w-[320px] flex-col gap-2">
+    <div className="flex w-80 flex-col gap-2">
       <button
         type="button"
         data-testid="toggle-editing"
@@ -96,8 +92,7 @@ function InlineRoleSelect({
       >
         {editing ? "Stop editing" : "Start editing"}
       </button>
-      {/* Somewhere to send focus without changing the mode, so a dismissal can
-          be told apart from the parent closing the dropdown. */}
+      {/* Keep focus changes independent of the controlled edit mode. */}
       <button
         type="button"
         data-testid="focus-sink"
@@ -105,7 +100,7 @@ function InlineRoleSelect({
       >
         Focus something else
       </button>
-      <div data-testid="value-box" className="h-10 w-[320px]">
+      <div data-testid="value-box" className="h-10 w-80">
         <F0Select
           {...props}
           variant="inline"
@@ -125,13 +120,11 @@ function InlineRoleSelect({
   )
 }
 
-/** Where the first glyph of the value is painted, inset included. */
 function textStartX(element: Element) {
   const { left } = element.getBoundingClientRect()
   return left + parseFloat(getComputedStyle(element).paddingLeft)
 }
 
-/** The element that carries the inset, in whichever mode is on screen. */
 function control(canvasElement: HTMLElement) {
   const element = canvasElement.querySelector(
     "[data-testid='select-inline-value'], [role='combobox']"
@@ -191,7 +184,7 @@ export const AtRest: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // The label arrives with the dataset, so the first paint is still `...`.
+    // Wait for source-backed labels to load.
     await waitFor(async () => {
       await expect(canvas.getByTestId("select-inline-value")).toHaveTextContent(
         "Viewer"
@@ -255,10 +248,6 @@ export const LongLabel: Story = {
   ],
 }
 
-/**
- * The value must not move when the row activates it: same first glyph, same
- * box.
- */
 export const TextDoesNotMove: Story = {
   args: {
     value: "viewer",
@@ -297,7 +286,6 @@ export const TextDoesNotMove: Story = {
   },
 }
 
-/** Both presentations fill whatever box the row declares. */
 export const FillsTheRowBox: Story = {
   args: {
     value: "viewer",
@@ -352,8 +340,7 @@ function FixedBox({
       </button>
       <div
         data-testid="fixed-box"
-        // A ring, not a border: it marks the 40 by 320 box without taking any
-        // space out of it, so the measurement stays honest.
+        // A ring marks the box without changing its dimensions.
         className="h-10 w-80 ring-1 ring-f1-border"
       >
         <F0Select
@@ -370,10 +357,6 @@ function FixedBox({
   )
 }
 
-/**
- * Every dismissal is reported and none of them changes what is drawn. The
- * parent decides, or the row gets stuck.
- */
 export const ReportsDismissWithoutClosing: Story = {
   args: {
     value: "viewer",
@@ -385,8 +368,7 @@ export const ReportsDismissWithoutClosing: Story = {
   play: async ({ canvasElement, args, step }) => {
     const page = within(canvasElement.closest("body")!)
 
-    // The list is virtualised behind the opening animation: the listbox lands
-    // before its options do.
+    // Wait for virtualized options, which mount after the listbox.
     await waitFor(
       async () => {
         await expect(page.getAllByRole("option").length).toBeGreaterThan(0)
@@ -418,8 +400,7 @@ export const ReportsDismissWithoutClosing: Story = {
     })
 
     await step("closing the popup from outside reports it", async () => {
-      // The open popup sets `pointer-events: none` on the body, which stops
-      // userEvent before it dispatches. The layer listens for pointerdown.
+      // Radix blocks body pointer events; dispatch pointerdown to dismiss.
       fireEvent.pointerDown(document.body)
       await waitFor(async () => {
         await expect(args.onDismiss).toHaveBeenCalledWith("popupClose")
@@ -447,9 +428,8 @@ export const DarkMode: Story = {
   ),
 }
 
-/** The row's box, so every sample is measured against the same 40px. */
 function SnapshotRow({
-  width = "w-[320px]",
+  width = "w-80",
   ...props
 }: Omit<InlineRoleSelectProps, "onChange"> & { width?: string }) {
   return (
@@ -472,7 +452,7 @@ export const Snapshot: Story = {
   args: {},
   parameters: withSnapshot({ a11y: { test: "todo" } }),
   render: () => (
-    <div className="flex min-w-[360px] flex-col gap-4 p-4">
+    <div className="flex min-w-90 flex-col gap-4 p-4">
       <SnapshotRow value="viewer" />
       <SnapshotRow />
       <SnapshotRow value="viewer" disabled />
@@ -493,15 +473,14 @@ export const Snapshot: Story = {
   ),
 }
 
-/** The editing presentation, with the popup kept inside the snapshot frame. */
 function OpenInlineRoleSelect() {
   const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
     null
   )
 
   return (
-    <div ref={setPortalContainer} className="relative min-h-[280px] w-[320px]">
-      <div className="h-10 w-[320px]">
+    <div ref={setPortalContainer} className="relative min-h-70 w-80">
+      <div className="h-10 w-80">
         <F0Select
           variant="inline"
           label="Access level"

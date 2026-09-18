@@ -365,10 +365,7 @@ describe("Select", () => {
 
     const inlineValue = () => screen.getByTestId("select-inline-value")
 
-    /**
-     * The open dropdown puts the trigger under `aria-hidden`, so the accessible
-     * queries stop seeing it while the select is editing.
-     */
+    /** The open popup aria-hides its trigger, so query the DOM directly. */
     const inlineTrigger = (name: string) =>
       screen.getByRole("combobox", { name, hidden: true })
 
