@@ -6,6 +6,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0TextInput } from ".."
 
 type InlineJobTitleProps = {
+  type?: "text" | "private"
   label?: string
   value?: string
   placeholder?: string
@@ -15,6 +16,7 @@ type InlineJobTitleProps = {
 }
 
 function InlineJobTitle({
+  type,
   label = "Job title",
   value: initialValue = "Head of design",
   placeholder = "Add a job title",
@@ -46,6 +48,7 @@ function InlineJobTitle({
       <div data-testid="value-box" className="w-80">
         <F0TextInput
           variant="inline"
+          type={type}
           label={label}
           hideLabel={hideLabel}
           placeholder={placeholder}
@@ -102,6 +105,42 @@ export const AtRest: Story = {
 
     await expect(canvas.getByText("Head of design")).toBeVisible()
     await expect(canvas.queryByRole("textbox")).toBeNull()
+  },
+}
+
+export const PrivateFocus: Story = {
+  args: {
+    label: "Social security number",
+    type: "private",
+    value: "123-45-6789",
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTitle("••••••••")).toBeVisible()
+    await expect(canvas.queryByText("123-45-6789")).toBeNull()
+    await expect(canvas.queryByTitle("123-45-6789")).toBeNull()
+
+    await userEvent.click(canvas.getByTestId("toggle-editing"))
+    const input = canvas.getByRole("textbox", {
+      name: "Social security number",
+    })
+    await expect(input).toHaveFocus()
+    await expect(input).toHaveValue("123-45-6789")
+    await userEvent.click(canvas.getByTestId("focus-sink"))
+    await expect(input).toHaveAttribute("type", "password")
+    await expect(input).toBeVisible()
+    await expect(args.onDismiss).toHaveBeenCalledWith("blur")
+
+    await userEvent.click(input)
+    await expect(input).toHaveAttribute("type", "text")
+    await userEvent.type(input, "0")
+    await userEvent.click(canvas.getByTestId("toggle-editing"))
+    await expect(canvas.getByTitle("••••••••")).toBeVisible()
+    await expect(canvas.queryByTitle("123-45-67890")).toBeNull()
+    await userEvent.click(canvas.getByTestId("toggle-editing"))
+    await expect(
+      canvas.getByRole("textbox", { name: "Social security number" })
+    ).toHaveValue("123-45-67890")
   },
 }
 

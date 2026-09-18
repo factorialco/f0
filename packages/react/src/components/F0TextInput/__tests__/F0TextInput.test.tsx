@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
 import { F0TextInput } from "../F0TextInput"
@@ -46,6 +46,16 @@ describe("F0TextInput", () => {
       expect(input.type).toBe("password")
     })
 
+    it("keeps password visibility independent of focus", () => {
+      render(<F0TextInput label="Password" type="password" value="secret" />)
+      const input = screen.getByLabelText("Password", { selector: "input" })
+      fireEvent.focus(input)
+      expect(input).toHaveAttribute("type", "password")
+      fireEvent.click(screen.getByRole("button", { name: /show password/i }))
+      fireEvent.blur(input)
+      expect(input).toHaveAttribute("type", "text")
+    })
+
     it("renders an eye toggle that reveals the value when clicked", () => {
       render(<F0TextInput label="Password" type="password" />)
 
@@ -79,29 +89,33 @@ describe("F0TextInput", () => {
       expect(input.type).toBe("password")
     })
 
-    it("renders an eye toggle that reveals and re-masks the value", () => {
-      render(<F0TextInput label="SSN" type="private" />)
-
-      const input = screen.getAllByLabelText("SSN")[0] as HTMLInputElement
-      fireEvent.click(screen.getByRole("button", { name: /show/i }))
-      expect(input.type).toBe("text")
-
-      fireEvent.click(screen.getByRole("button", { name: /hide/i }))
-      expect(input.type).toBe("password")
+    it("reveals while focused and masks when focus leaves", () => {
+      const onBlur = vi.fn()
+      render(
+        <F0TextInput
+          label="SSN"
+          type="private"
+          value="123-45-6789"
+          onBlur={onBlur}
+        />
+      )
+      const input = screen.getByLabelText("SSN", { selector: "input" })
+      fireEvent.focus(input)
+      expect(input).toHaveAttribute("type", "text")
+      fireEvent.blur(input)
+      expect(input).toHaveAttribute("type", "password")
+      expect(input).toHaveValue("123-45-6789")
+      expect(onBlur).toHaveBeenCalledTimes(1)
     })
 
-    it("builds the eye-toggle accessible name from the field label", () => {
-      // So screen-reader users can tell multiple private fields apart.
-      render(<F0TextInput label="Social security number" type="private" />)
-
-      expect(
-        screen.getByRole("button", { name: "Show Social security number" })
-      ).toBeInTheDocument()
+    it("does not render an eye toggle", () => {
+      render(<F0TextInput label="SSN" type="private" />)
+      expect(screen.queryByRole("button")).toBeNull()
     })
 
     it("does not render the lock icon that password forces", () => {
       // password forces a leading lock icon IN ADDITION to the eye toggle;
-      // private renders only the eye toggle (no forced icon), so it must have
+      // private has no toggle or forced icon, so it must have
       // strictly fewer rendered icons. This fails if a lock icon ever regresses
       // back onto the private field.
       const countIcons = (c: HTMLElement) => c.querySelectorAll("svg").length
@@ -112,15 +126,6 @@ describe("F0TextInput", () => {
       expect(countIcons(privateRender.container)).toBeLessThan(
         countIcons(passwordRender.container)
       )
-      // The private eye toggle uses the neutral "Show" label (not "Show password").
-      expect(
-        within(privateRender.container).queryByRole("button", {
-          name: /show password/i,
-        })
-      ).not.toBeInTheDocument()
-      expect(
-        within(privateRender.container).getByRole("button", { name: /show/i })
-      ).toBeInTheDocument()
     })
 
     it("disables password managers", () => {
