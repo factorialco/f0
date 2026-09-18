@@ -1,14 +1,12 @@
-// This file has been automatically migrated to valid ESM format by Storybook.
-import type { StorybookConfig } from "@storybook/react-vite"
-
 import { writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import { fileURLToPath } from "node:url"
+// This file has been automatically migrated to valid ESM format by Storybook.
+import type { StorybookConfig } from "@storybook/react-vite"
 import remarkGfm from "remark-gfm"
 import { Preset } from "storybook/internal/types"
-
 import {
   componentStatusVitePlugin,
   computeComponentStatusData,
@@ -78,6 +76,10 @@ const config: StorybookConfig = {
     },
     {
       directory: "../src/experimental/F0SegmentedBar",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental/F0SwipeDeck",
       titlePrefix: "Components",
     },
     {
@@ -236,10 +238,9 @@ const config: StorybookConfig = {
   },
   docs: {
     defaultName: "Documentation",
-    docsMode:
+    docsMode: Boolean(
       process.env.STORYBOOK_PUBLIC_BUILD || process.env.DOCS_MODE
-        ? true
-        : false,
+    ),
   },
   typescript: {
     reactDocgen: "react-docgen",
@@ -259,9 +260,9 @@ const config: StorybookConfig = {
     // computed from source at build time). Guarded so it is not added twice if
     // Storybook already merged it from vite.config.ts.
     config.plugins = config.plugins || []
-    const existing = (config.plugins as unknown[]).flat(Infinity) as Array<{
+    const existing = (config.plugins as unknown[]).flat(Infinity) as ({
       name?: string
-    } | null>
+    } | null)[]
     const hasComponentStatus = existing.some(
       (p) => p?.name === "f0-component-status"
     )
