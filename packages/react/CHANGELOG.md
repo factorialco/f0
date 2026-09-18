@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.7.0](https://github.com/factorialco/f0/compare/f0-react-v7.6.0...f0-react-v7.7.0) (2026-09-18)
+
+
+### Features
+
+* **react:** add itemActionsOnHover to the editable table ([#5582](https://github.com/factorialco/f0/issues/5582)) ([cf3119b](https://github.com/factorialco/f0/commit/cf3119b9b8000da0b1315573f738debbce967ece))
+
 ## [7.6.0](https://github.com/factorialco/f0/compare/f0-react-v7.5.0...f0-react-v7.6.0) (2026-09-18)
 
 
