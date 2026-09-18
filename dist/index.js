@@ -480,8 +480,8 @@ var betweenSpacing = {
   xl: relativeSpacing[4]
 };
 var pageSpacing = {
-  page: absoluteSpacing[6]
-  // 24px
+  page: absoluteSpacing[4]
+  // 16px
 };
 var interactiveHeights = {
   sm: absoluteSpacing[6],
