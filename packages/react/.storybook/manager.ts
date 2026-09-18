@@ -41,10 +41,14 @@ const theme = create({
  * unchanged. See the component-status API.
  */
 function renderSidebarLabel(item: { name: string; type: string }) {
-  if (item.type !== "component" && item.type !== "docs") {return item.name}
+  if (item.type !== "component" && item.type !== "docs") {
+    return item.name
+  }
   const status = statusByLeaf[normalizeLeaf(item.name)]
   const marker = status && STATUS_MARKER[status]
-  if (!marker) {return item.name}
+  if (!marker) {
+    return item.name
+  }
 
   return React.createElement(
     "span",

@@ -28,17 +28,21 @@
 import fs from "node:fs"
 import path from "node:path"
 import { parse } from "yaml"
+
 import { TEAMS_FILE, getManifestFiles, loadManifest } from "./lib.ts"
 
 const DOCS_PATTERN = /(\.mdx?|\.stories\.tsx?)$/
-const isDoc = (file: string) => DOCS_PATTERN.test(file) || file.includes("/__stories__/")
+const isDoc = (file: string) =>
+  DOCS_PATTERN.test(file) || file.includes("/__stories__/")
 const FEAT_PATTERN = /^feat(\([^)]*\))?!?:/
 const DESIGN_LABEL = "needs-design-review"
 const COMMENT_MARKER = "<!-- comment-type: review-policy -->"
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, DRY_RUN } = process.env
 if (!GITHUB_TOKEN || !GITHUB_REPOSITORY || !PR_NUMBER) {
-  console.error("Missing required env vars: GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER")
+  console.error(
+    "Missing required env vars: GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER"
+  )
   process.exit(2)
 }
 
@@ -53,7 +57,9 @@ async function api<T>(pathname: string, init?: RequestInit): Promise<T> {
     },
   })
   if (!response.ok) {
-    throw new Error(`${init?.method ?? "GET"} ${pathname} -> ${response.status}: ${await response.text()}`)
+    throw new Error(
+      `${init?.method ?? "GET"} ${pathname} -> ${response.status}: ${await response.text()}`
+    )
   }
   return response.json() as Promise<T>
 }
@@ -61,7 +67,9 @@ async function api<T>(pathname: string, init?: RequestInit): Promise<T> {
 async function paginate<T>(pathname: string): Promise<T[]> {
   const results: T[] = []
   for (let page = 1; ; page++) {
-    const batch = await api<T[]>(`${pathname}${pathname.includes("?") ? "&" : "?"}per_page=100&page=${page}`)
+    const batch = await api<T[]>(
+      `${pathname}${pathname.includes("?") ? "&" : "?"}per_page=100&page=${page}`
+    )
     results.push(...batch)
     if (batch.length < 100) return results
   }
@@ -87,10 +95,18 @@ function classify(params: {
   addedFiles: string[]
   title: string
   labels: string[]
-}): { name: string; description: string; requirements: Requirement[]; ownedByModule: Map<string, string[]> } {
+}): {
+  name: string
+  description: string
+  requirements: Requirement[]
+  ownedByModule: Map<string, string[]>
+} {
   const moduleOwners = new Map<string, string>() // module dir -> owner team
   for (const manifestFile of getManifestFiles()) {
-    moduleOwners.set(path.dirname(manifestFile), loadManifest(manifestFile).metadata.owner)
+    moduleOwners.set(
+      path.dirname(manifestFile),
+      loadManifest(manifestFile).metadata.owner
+    )
   }
 
   const ownedByModule = new Map<string, string[]>() // module dir -> touched files
@@ -101,7 +117,10 @@ function classify(params: {
       .filter((dir) => file.startsWith(`${dir}/`))
       .sort((a, b) => b.length - a.length)[0]
     if (moduleDir) {
-      ownedByModule.set(moduleDir, [...(ownedByModule.get(moduleDir) ?? []), file])
+      ownedByModule.set(moduleDir, [
+        ...(ownedByModule.get(moduleDir) ?? []),
+        file,
+      ])
     } else {
       remainder.push(file)
     }
@@ -138,11 +157,18 @@ function classify(params: {
     )
   } else {
     name = "Code change"
-    description = "Default rule: any other change needs one approval from f0-devs (rule 4)."
-    requirements.push({ team: "f0-devs", reason: "Every code change needs a dev approval" })
+    description =
+      "Default rule: any other change needs one approval from f0-devs (rule 4)."
+    requirements.push({
+      team: "f0-devs",
+      reason: "Every code change needs a dev approval",
+    })
   }
 
-  if (params.labels.includes(DESIGN_LABEL) && !requirements.some((r) => r.team === "f0-designers")) {
+  if (
+    params.labels.includes(DESIGN_LABEL) &&
+    !requirements.some((r) => r.team === "f0-designers")
+  ) {
     requirements.push({
       team: "f0-designers",
       reason: `The \`${DESIGN_LABEL}\` label explicitly requests a design approval`,
@@ -152,7 +178,10 @@ function classify(params: {
   const newModules = params.addedFiles
     .filter((file) => NEW_MODULE_PATTERN.test(file))
     .map((file) => path.dirname(file).replace("packages/react/src/", ""))
-  if (newModules.length > 0 && !requirements.some((r) => r.team === "f0-general")) {
+  if (
+    newModules.length > 0 &&
+    !requirements.some((r) => r.team === "f0-general")
+  ) {
     requirements.push({
       team: "f0-general",
       reason: `New sds module (\`${newModules.join("`, `")}\`) — creating a module needs f0-general sign-off`,
@@ -163,14 +192,19 @@ function classify(params: {
 }
 
 /** Latest approval-relevant review state per reviewer (COMMENTED never revokes) */
-function approversFrom(reviews: { user: { login: string }; state: string }[], author: string): string[] {
+function approversFrom(
+  reviews: { user: { login: string }; state: string }[],
+  author: string
+): string[] {
   const stateByUser = new Map<string, string>()
   for (const review of reviews) {
     if (review.user.login === author) continue
     if (review.state === "COMMENTED" || review.state === "PENDING") continue
     stateByUser.set(review.user.login, review.state)
   }
-  return [...stateByUser].filter(([, state]) => state === "APPROVED").map(([login]) => login)
+  return [...stateByUser]
+    .filter(([, state]) => state === "APPROVED")
+    .map(([login]) => login)
 }
 
 const [owner, repo] = GITHUB_REPOSITORY.split("/")
@@ -183,8 +217,12 @@ const pr = await api<{
   requested_teams: { slug: string }[]
   head: { sha: string }
 }>(prPath)
-const files = await paginate<{ filename: string; status: string }>(`${prPath}/files`)
-const reviews = await paginate<{ user: { login: string }; state: string }>(`${prPath}/reviews`)
+const files = await paginate<{ filename: string; status: string }>(
+  `${prPath}/files`
+)
+const reviews = await paginate<{ user: { login: string }; state: string }>(
+  `${prPath}/reviews`
+)
 
 const approvers = approversFrom(reviews, pr.user.login)
 const policyTeams = getPolicyTeams()
@@ -204,12 +242,7 @@ const pending = evaluated.filter((r) => !r.satisfied)
 
 // --- Explanatory PR comment -------------------------------------------------
 
-const lines: string[] = [
-  `## 🔍 Review policy: ${name}`,
-  "",
-  description,
-  "",
-]
+const lines: string[] = [`## 🔍 Review policy: ${name}`, "", description, ""]
 
 if (ownedByModule.size > 0) {
   lines.push("### Module ownership (via CODEOWNERS)", "")
@@ -234,7 +267,9 @@ if (evaluated.length > 0) {
     const status = requirement.satisfied
       ? `✅ approved by ${requirement.approvedBy.map((login) => `@${login}`).join(", ")}`
       : "⏳ pending"
-    lines.push(`| @factorialco/${requirement.team} | ${requirement.reason} | ${status} |`)
+    lines.push(
+      `| @factorialco/${requirement.team} | ${requirement.reason} | ${status} |`
+    )
   }
   lines.push("")
 } else {
@@ -265,7 +300,9 @@ if (DRY_RUN) {
   const comments = await paginate<{ id: number; body?: string }>(
     `/repos/${owner}/${repo}/issues/${PR_NUMBER}/comments`
   )
-  const existing = comments.find((comment) => comment.body?.includes(COMMENT_MARKER))
+  const existing = comments.find((comment) =>
+    comment.body?.includes(COMMENT_MARKER)
+  )
   if (existing) {
     await api(`/repos/${owner}/${repo}/issues/comments/${existing.id}`, {
       method: "PATCH",
@@ -282,7 +319,9 @@ if (DRY_RUN) {
   // approve. The status check is the enforcement; failing to request a team
   // review (e.g. token scope) must not fail the job on its own.
   const alreadyRequested = pr.requested_teams.map((team) => team.slug)
-  const toRequest = pending.map((r) => r.team).filter((slug) => !alreadyRequested.includes(slug))
+  const toRequest = pending
+    .map((r) => r.team)
+    .filter((slug) => !alreadyRequested.includes(slug))
   if (toRequest.length > 0) {
     try {
       await api(`${prPath}/requested_reviewers`, {
@@ -291,7 +330,9 @@ if (DRY_RUN) {
       })
       console.log(`Requested review from: ${toRequest.join(", ")}`)
     } catch (error) {
-      console.warn(`Could not request team reviews (${(error as Error).message})`)
+      console.warn(
+        `Could not request team reviews (${(error as Error).message})`
+      )
     }
   }
 }
@@ -312,10 +353,13 @@ const statusDescription = (
 
 const { GITHUB_SERVER_URL, GITHUB_RUN_ID } = process.env
 const targetUrl =
-  GITHUB_RUN_ID && `${GITHUB_SERVER_URL ?? "https://github.com"}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`
+  GITHUB_RUN_ID &&
+  `${GITHUB_SERVER_URL ?? "https://github.com"}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`
 
 if (DRY_RUN) {
-  console.log(`\nDRY RUN: would set commit status "${state}" — ${statusDescription}`)
+  console.log(
+    `\nDRY RUN: would set commit status "${state}" — ${statusDescription}`
+  )
 } else {
   await api(`/repos/${owner}/${repo}/statuses/${pr.head.sha}`, {
     method: "POST",
@@ -331,7 +375,9 @@ if (DRY_RUN) {
 console.log(`\nClassification: ${name}`)
 for (const requirement of evaluated) {
   const icon = requirement.satisfied ? "✅" : "⏳"
-  console.log(`${icon} @factorialco/${requirement.team} — ${requirement.reason}`)
+  console.log(
+    `${icon} @factorialco/${requirement.team} — ${requirement.reason}`
+  )
 }
 console.log(
   pending.length > 0

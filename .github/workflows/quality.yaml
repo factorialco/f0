@@ -324,8 +324,39 @@ jobs:
   #
   # `skipped` is accepted on purpose: detect-changes skips the jobs for a
   # package that this PR did not touch. Only failure/cancellation is fatal.
+  # Clones the checkout into a temp dir, installs with CI unset so lefthook
+  # wires the hooks, then commits and pushes against a throwaway bare remote:
+  # proves a fresh clone gets formatting/autofix on commit and the preflight
+  # + typecheck on push. Costs a full install, so it only runs when a
+  # hook-related file changes (see _check-workspaces-changes.yaml).
+  git-hooks:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.git_hooks == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "Git hooks (lefthook + lint-staged)"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      - name: End-to-end check of the git hooks in a fresh clone
+        run: pnpm hooks:e2e
+
   quality-passed:
-    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, cycle-dependencies]
+    needs:
+      [
+        detect-changes,
+        format,
+        format-react-native,
+        lint,
+        lint-react-native,
+        stable-dod,
+        new-component-dod,
+        cycle-dependencies,
+        git-hooks,
+      ]
     name: "✅ Quality"
     if: always()
     runs-on: ubuntu-latest

@@ -36,6 +36,8 @@ The project uses `oxfmt` configured via `.oxfmtrc.json` at the repo root. Key ru
 - Trailing commas where valid in ES5 (`"trailingComma": "es5"`)
 - Imports are sorted by the formatter (`experimentalSortImports`); do not hand-order them
 
+Formatting and autofixable lint run automatically on the staged files at commit time (lint-staged, run by lefthook — see [packages/react/docs/development/git-hooks.md](packages/react/docs/development/git-hooks.md)). `oxfmt` and `oxlint` read their config from the current directory, so run them from the package directory (`pnpm --filter @factorialco/f0-react run format`), never `oxfmt .` from the repo root.
+
 ### Monorepo Structure
 
 ```

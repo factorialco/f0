@@ -13,7 +13,6 @@
 
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import { computeComponentStatusData } from "./component-status-build.mjs"
 import {
   exportedNamesOf,

@@ -93,7 +93,11 @@ export function F0ChipShowcase() {
       <View className="mb-6 flex-row flex-wrap gap-2">
         <F0Chip label="Default close" onClose={() => {}} />
         <F0Chip label="Selected close" variant="selected" onClose={() => {}} />
-        <F0Chip label="Avatar close" onClose={() => {}} avatar={{ type: "team", name: "People" }} />
+        <F0Chip
+          label="Avatar close"
+          onClose={() => {}}
+          avatar={{ type: "team", name: "People" }}
+        />
       </View>
 
       {sectionTitle("Interactive")}

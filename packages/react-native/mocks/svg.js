@@ -1,1 +1,1 @@
-module.exports = "SvgMock";
+module.exports = "SvgMock"

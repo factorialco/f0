@@ -7,9 +7,7 @@
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [
-    6006
-  ],
+  "forwardPorts": [6006],
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "npm install",
   "postStartCommand": "npm run dev",

@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 import { ScrollView, StyleSheet, View } from "react-native"
 
+import { F0Button } from "../../../src/components/F0Button"
 import { F0BlurView } from "../../../src/components/primitives/F0BlurView"
 import { F0Image } from "../../../src/components/primitives/F0Image"
 import { F0Text } from "../../../src/components/primitives/F0Text"
-import { F0Button } from "../../../src/components/F0Button"
 
 const SAMPLE_IMAGE =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1200&auto=format&fit=crop"
@@ -53,8 +53,10 @@ function HintOverlayExample() {
 
   return (
     <View className="overflow-hidden rounded-xl border border-f0-border-secondary bg-f0-background">
-      <View className="p-5 gap-3">
-        <F0Text variant="body-xs-medium" color="secondary">✓ Multiple choice *</F0Text>
+      <View className="gap-3 p-5">
+        <F0Text variant="body-xs-medium" color="secondary">
+          ✓ Multiple choice *
+        </F0Text>
         <F0Text variant="heading-sm">
           What is considered "personal data" under GDPR? Select all that apply.
         </F0Text>
@@ -65,13 +67,13 @@ function HintOverlayExample() {
           well-maintained.
         </F0Text>
         <F0Text variant="body-sm-default" color="secondary">
-          Before engaging in any tasks, review the safety guidelines. Be
-          mindful of potential risks, use the correct protective equipment, and
-          ensure the workspace is adequately ventilated.
+          Before engaging in any tasks, review the safety guidelines. Be mindful
+          of potential risks, use the correct protective equipment, and ensure
+          the workspace is adequately ventilated.
         </F0Text>
         <F0Text variant="body-sm-default" color="secondary">
-          Immediately report any injuries to your supervisors, regardless of
-          how minor they may seem.
+          Immediately report any injuries to your supervisors, regardless of how
+          minor they may seem.
         </F0Text>
       </View>
 
@@ -111,10 +113,10 @@ function ScrollFadeExample() {
       className="rounded-xl border border-f0-border-secondary bg-f0-background"
       style={{ overflow: "hidden", height: 208 }}
     >
-      <View className="p-4 gap-3">
+      <View className="gap-3 p-4">
         {LOREM_ROWS.map((row, i) => (
           <View key={i} className="flex-row items-center gap-3">
-            <View className="w-8 h-8 rounded-full bg-f0-background-secondary items-center justify-center">
+            <View className="h-8 w-8 items-center justify-center rounded-full bg-f0-background-secondary">
               <F0Text variant="body-xs-medium" color="secondary">
                 {i + 1}
               </F0Text>
@@ -127,7 +129,14 @@ function ScrollFadeExample() {
       <F0BlurView
         intensity={30}
         tint="default"
-        style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, height: 100 }}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+          height: 100,
+        }}
       />
     </View>
   )
@@ -141,10 +150,10 @@ function ContentGateExample() {
 
   return (
     <View className="overflow-hidden rounded-xl border border-f0-border-secondary bg-f0-background">
-      <View className="p-4 gap-3">
+      <View className="gap-3 p-4">
         {LOREM_ROWS.slice(0, 4).map((row, i) => (
           <View key={i} className="flex-row items-center gap-3">
-            <View className="w-8 h-8 rounded-full bg-f0-background-secondary items-center justify-center">
+            <View className="h-8 w-8 items-center justify-center rounded-full bg-f0-background-secondary">
               <F0Text variant="body-xs-medium" color="secondary">
                 {i + 1}
               </F0Text>
@@ -155,7 +164,7 @@ function ContentGateExample() {
       </View>
 
       {unlocked ? (
-        <View className="items-center py-3 border-t border-f0-border-secondary">
+        <View className="items-center border-t border-f0-border-secondary py-3">
           <F0Button
             label="Lock again"
             variant="ghost"
@@ -170,11 +179,18 @@ function ContentGateExample() {
           className="items-center justify-center gap-3 p-6"
         >
           <F0Text variant="heading-sm">Restricted content</F0Text>
-          <F0Text variant="body-sm-default" color="secondary" className="text-center">
+          <F0Text
+            variant="body-sm-default"
+            color="secondary"
+            className="text-center"
+          >
             You need manager permissions to view these records.
           </F0Text>
           <View style={{ elevation: 0 }}>
-            <F0Button label="Request access" onPress={() => setUnlocked(true)} />
+            <F0Button
+              label="Request access"
+              onPress={() => setUnlocked(true)}
+            />
           </View>
         </F0BlurView>
       )}
@@ -227,7 +243,6 @@ export function F0BlurViewShowcase() {
 
       <Section
         title="Photo caption"
-        
         description="Over images, anchor F0BlurView to a strip for a frosted-glass label bar."
       >
         <PhotoExample />
@@ -235,4 +250,3 @@ export function F0BlurViewShowcase() {
     </ScrollView>
   )
 }
-

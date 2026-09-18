@@ -1,5 +1,11 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  // *.mdx — oxfmt has no MDX parser; it formats .mdx as Markdown and corrupts
+  // the JSX comments in it, which breaks the Storybook build.
+  // package.json — release-please rewrites the version on every release, and
+  // sorting the keys moves other keys up against that line, so the formatter
+  // and the release bot fight over the same hunk.
+  "ignorePatterns": ["CHANGELOG.md", "**/*.mdx", "package.json"],
   "endOfLine": "lf",
   "semi": false,
   "singleQuote": false,
@@ -16,15 +22,15 @@
       ["internal", "type-internal"],
       ["parent", "type-parent"],
       ["sibling", "type-sibling"],
-      ["index", "type-index"]
+      ["index", "type-index"],
     ],
     "internalPattern": ["@/"],
-    "newlinesBetween": true
+    "newlinesBetween": true,
   },
   "experimentalTailwindcss": {
     "stylesheet": "./.oxfmt-tailwind.css",
     "attributes": ["class", "className"],
     "functions": ["cn", "clsx", "cva", "twMerge"],
-    "preserveWhitespace": true
-  }
+    "preserveWhitespace": true,
+  },
 }

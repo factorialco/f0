@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import type { UsageResult } from "../scripts/product-usage-scan.mjs"
 
 /**

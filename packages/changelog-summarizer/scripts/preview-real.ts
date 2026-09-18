@@ -7,6 +7,7 @@
  */
 
 import { writeFileSync } from "fs"
+
 import { collectStoryUrls, resolveStoryUrl } from "../src/collectors/stories.js"
 import {
   jsonToSlackText,
@@ -24,8 +25,7 @@ const realJson = {
     new: [
       {
         component: "F0Graph",
-        summary:
-          "New chart pattern for building runtime graph visualizations",
+        summary: "New chart pattern for building runtime graph visualizations",
         detail: "Lives under Patterns/Graph in Storybook",
         storybook: true,
         author: "Ángel Saavedra",
@@ -162,7 +162,7 @@ const realJson = {
     ],
   },
   thread_details:
-    "Technical notes for consumers: F0AiChat received a breaking change (#4106) — built-in actions were dropped and the canvas is now pluggable; please review your composition before upgrading. A new ExpenseEntityRef hover card was added alongside the existing Candidate/Requisition/Vacancy ones — registered automatically via entityRefRegistry. F0Graph is a new pattern, see Patterns/Graph in Storybook. F0SegmentedControl is experimental — API may still change. UpsellingAlert lives in the upselling-kit (SDS). F0DatePicker and OneEmptyState were promoted from experimental to stable. EditableTable gained per-row dynamic units (`unitsByRow`), formulas/hints (`hint`, `formula`), and number cells now accept null. F0Card now exposes a controlled `alert` prop on top of the new `CardAlert.action`. F0Form's `autosubmit` submit type preserves focus on the active input. F0Box gained `insetX`/`insetY` props. F0Tabs id type is now generic — `<F0Tabs<\"foo\" | \"bar\">>`. PageHeader actions can now be tagged as AI-kind. Fixes this week: F0Select double-emit on async datasources and external value resets, RichTextEditor fullscreen inside dialogs, F0Button docs sidebar visibility, ApplicationFrame stories, MultitaskHeader icon consistency, SurveyAnsweringForm centering, and MDX formatting in CrudPatterns. Infra: Storybook MDX sidebar visibility improved, CRUD patterns docs landed, the release workflow can now be triggered manually, and the F0Button/F0ButtonDropdown docs pages are now discoverable.",
+    'Technical notes for consumers: F0AiChat received a breaking change (#4106) — built-in actions were dropped and the canvas is now pluggable; please review your composition before upgrading. A new ExpenseEntityRef hover card was added alongside the existing Candidate/Requisition/Vacancy ones — registered automatically via entityRefRegistry. F0Graph is a new pattern, see Patterns/Graph in Storybook. F0SegmentedControl is experimental — API may still change. UpsellingAlert lives in the upselling-kit (SDS). F0DatePicker and OneEmptyState were promoted from experimental to stable. EditableTable gained per-row dynamic units (`unitsByRow`), formulas/hints (`hint`, `formula`), and number cells now accept null. F0Card now exposes a controlled `alert` prop on top of the new `CardAlert.action`. F0Form\'s `autosubmit` submit type preserves focus on the active input. F0Box gained `insetX`/`insetY` props. F0Tabs id type is now generic — `<F0Tabs<"foo" | "bar">>`. PageHeader actions can now be tagged as AI-kind. Fixes this week: F0Select double-emit on async datasources and external value resets, RichTextEditor fullscreen inside dialogs, F0Button docs sidebar visibility, ApplicationFrame stories, MultitaskHeader icon consistency, SurveyAnsweringForm centering, and MDX formatting in CrudPatterns. Infra: Storybook MDX sidebar visibility improved, CRUD patterns docs landed, the release workflow can now be triggered manually, and the F0Button/F0ButtonDropdown docs pages are now discoverable.',
 }
 
 async function main(): Promise<void> {
@@ -184,7 +184,7 @@ async function main(): Promise<void> {
   const blocks = buildBlocks(summaryFile)
   writeFileSync(
     "/tmp/zerito-real-blocks.json",
-    JSON.stringify({ blocks }, null, 2),
+    JSON.stringify({ blocks }, null, 2)
   )
 
   console.error("")

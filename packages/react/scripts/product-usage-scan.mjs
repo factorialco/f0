@@ -584,10 +584,19 @@ export function scanComponentExports({ srcDir = SRC_DIR } = {}) {
       return
     }
 
-    if (entries.some((entry) => entry.isFile() && BARREL_FILES.includes(entry.name))) {
+    if (
+      entries.some(
+        (entry) => entry.isFile() && BARREL_FILES.includes(entry.name)
+      )
+    ) {
       const names = exportedNamesOf(dir)
       if (names.length > 0) {
-        byPath[dir.slice(srcDir.length + 1).split(sep).join("/")] = names
+        byPath[
+          dir
+            .slice(srcDir.length + 1)
+            .split(sep)
+            .join("/")
+        ] = names
       }
     }
 
@@ -778,12 +787,17 @@ const stashes = Object.create(null)
 
 function runGit(args, options = {}) {
   return new Promise((resolvePromise) => {
-    execFile("git", args, { maxBuffer: 1024 * 1024, ...options }, (error, stdout, stderr) => {
-      resolvePromise({
-        ok: !error,
-        output: (stdout || "") + (stderr || ""),
-      })
-    })
+    execFile(
+      "git",
+      args,
+      { maxBuffer: 1024 * 1024, ...options },
+      (error, stdout, stderr) => {
+        resolvePromise({
+          ok: !error,
+          output: (stdout || "") + (stderr || ""),
+        })
+      }
+    )
   })
 }
 
@@ -970,15 +984,18 @@ export function productUsageVitePlugin() {
       server.middlewares.use(UNUSED_COMPONENTS_ENDPOINT, async (req, res) => {
         // Imported lazily: it pulls in the component-status scan, which the
         // usage endpoint doesn't need.
-        const { computeUsageReport } = await import(
-          "./component-usage-report.mjs"
-        )
+        const { computeUsageReport } =
+          await import("./component-usage-report.mjs")
         const full = (req.url ?? "").includes("full=1")
         const refresh = (req.url ?? "").includes("refresh=1")
 
         const key = full ? "full" : "scoped"
         const now = Date.now()
-        if (refresh || !reportCache[key] || now - reportCache[key].at > CACHE_TTL_MS) {
+        if (
+          refresh ||
+          !reportCache[key] ||
+          now - reportCache[key].at > CACHE_TTL_MS
+        ) {
           reportCache[key] = { at: now, data: computeUsageReport({ full }) }
         }
 
@@ -1003,8 +1020,14 @@ export function productUsageVitePlugin() {
         if (req.method !== "POST") {
           return json(405, { ok: false, message: "POST only" })
         }
-        if (origin && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-          return json(403, { ok: false, message: "Cross-origin request refused" })
+        if (
+          origin &&
+          !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+        ) {
+          return json(403, {
+            ok: false,
+            message: "Cross-origin request refused",
+          })
         }
 
         const params = new URLSearchParams((req.url ?? "").split("?")[1] ?? "")

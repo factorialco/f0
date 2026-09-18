@@ -248,7 +248,7 @@ Single unified table. Placed inside `## Anatomy`, after `<Canvas>` and `<Control
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Prop</th>
@@ -294,7 +294,7 @@ Describes structural behavior only. No "When to use" column — that guidance be
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Mode</th>
@@ -326,7 +326,7 @@ Describes structural behavior only. No "When to use" column — that guidance be
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Variant</th>
@@ -351,7 +351,7 @@ Use visual/structural descriptions (height, padding, density). Avoid generic pla
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Size</th>
@@ -394,7 +394,7 @@ Only positive cases (when TO use). Never mix with negative cases.
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -417,7 +417,7 @@ Separate section, separate table. Never include these rows in the "When to use" 
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Situation</th>
@@ -444,7 +444,7 @@ Separate section, separate table. Never include these rows in the "When to use" 
 
 ```mdx
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Key</th>

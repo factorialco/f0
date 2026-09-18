@@ -15,7 +15,12 @@ export default {
   transformIgnorePatterns: [
     "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|@sentry/react-native|native-base|react-native-svg|react-test-renderer))",
   ],
-  testPathIgnorePatterns: ["/node_modules/", "/dist/", "<rootDir>/lib/", "\\.d\\.ts$"],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/dist/",
+    "<rootDir>/lib/",
+    "\\.d\\.ts$",
+  ],
   modulePathIgnorePatterns: ["<rootDir>/lib/"],
   moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
   moduleNameMapper: {
@@ -28,4 +33,4 @@ export default {
       "<rootDir>/mocks/ViewConfigIgnore.js",
   },
   testEnvironment: "node",
-};
+}

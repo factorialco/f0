@@ -1,31 +1,35 @@
-import React from "react";
-import { ScrollView, View, Text } from "react-native";
-import { Button } from "../../../src/components/Button";
-import { AppIcons } from "../../../src/icons";
-import { useCSSVariable } from "uniwind";
+import React from "react"
+import { ScrollView, View, Text } from "react-native"
+import { useCSSVariable } from "uniwind"
 
-const { Add, Archive, Delete, Save } = AppIcons;
+import { Button } from "../../../src/components/Button"
+import { AppIcons } from "../../../src/icons"
+
+const { Add, Archive, Delete, Save } = AppIcons
 
 export function ButtonShowcase() {
-  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(["--color-f0-foreground"])
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    return "#000000"
+  }
 
   return (
-    <ScrollView 
-      className="p-4" 
+    <ScrollView
+      className="p-4"
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
       {/* Basic Variants */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Default Variants
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
+      <View className="mb-6 flex-row flex-wrap gap-2" style={{ width: "100%" }}>
         <Button
           variant="default"
           label="Default"
@@ -59,10 +63,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* With Icons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         With Icons
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
+      <View className="mb-6 flex-row flex-wrap gap-2" style={{ width: "100%" }}>
         <Button
           variant="default"
           label="Add item"
@@ -102,10 +109,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Only */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Icon Only
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <View className="mb-6 flex-row flex-wrap gap-2">
         <Button
           variant="default"
           label="Add"
@@ -166,8 +176,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>Sizes</Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
+        Sizes
+      </Text>
+      <View className="mb-6 flex-row items-center gap-2">
         <Button size="sm" label="Small" accessibilityHint="Small size button" />
         <Button
           size="md"
@@ -178,8 +193,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* States */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>States</Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
+        States
+      </Text>
+      <View className="mb-6 flex-row flex-wrap gap-2">
         <Button label="Default" accessibilityHint="Interactive button" />
         <Button
           disabled
@@ -194,10 +214,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Button Groups */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Icon Button Groups
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <Button
           variant="ghost"
           icon={Add}
@@ -225,10 +248,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Only Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Icon Only Sizes
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <Button
           variant="default"
           icon={Add}
@@ -257,7 +283,7 @@ export function ButtonShowcase() {
           accessibilityHint="Large icon-only button"
         />
       </View>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <Button
           variant="critical"
           icon={Delete}
@@ -288,10 +314,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* Emoji Buttons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Emoji Buttons
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <Button
           emoji="🥰"
           label="Love"
@@ -320,10 +349,13 @@ export function ButtonShowcase() {
       </View>
 
       {/* Notification Badge */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         With Notification Badge
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <View className="mb-6 flex-row flex-wrap gap-2">
         <Button
           variant="outline"
           label="Messages"
@@ -349,7 +381,10 @@ export function ButtonShowcase() {
       </View>
 
       {/* Async Example */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Async Action
       </Text>
       <View className="mb-6 items-start">
@@ -358,11 +393,11 @@ export function ButtonShowcase() {
           icon={Save}
           accessibilityHint="Save changes with loading state"
           onPress={async () => {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            console.log("Changes saved!");
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            console.log("Changes saved!")
           }}
         />
       </View>
     </ScrollView>
-  );
+  )
 }

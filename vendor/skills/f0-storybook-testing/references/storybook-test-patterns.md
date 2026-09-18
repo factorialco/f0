@@ -87,12 +87,12 @@ Default on violation: **test fails** (`test: "error"`) — but note `preview.tsx
 
 A story can look clean in the Storybook Accessibility panel and still fail CI. Four things differ; only the first is now aligned:
 
-| | Addon panel | CI test-runner | Aligned? |
-| --- | --- | --- | --- |
-| **Rule set** | shared tag list | shared tag list | ✅ yes |
-| **State** | whatever is on screen right now | each story from its own `args`, **then** its play function | ❌ no |
-| **Scope** | whole document | `#storybook-root` | ❌ no |
-| **Viewport** | your canvas size | 1280x720 | ❌ no |
+|              | Addon panel                     | CI test-runner                                             | Aligned? |
+| ------------ | ------------------------------- | ---------------------------------------------------------- | -------- |
+| **Rule set** | shared tag list                 | shared tag list                                            | ✅ yes   |
+| **State**    | whatever is on screen right now | each story from its own `args`, **then** its play function | ❌ no    |
+| **Scope**    | whole document                  | `#storybook-root`                                          | ❌ no    |
+| **Viewport** | your canvas size                | 1280x720                                                   | ❌ no    |
 
 Consequences worth knowing:
 
@@ -154,7 +154,7 @@ Use instead:
 - **Intentional / accepted** → `a11y: { test: "warning" }`.
 - **One element genuinely not applicable** → an element-scoped opt-out, so only that node is exempt rather than the whole story. `data-a11y-color-contrast-ignore` is the existing example — `.storybook/preview.tsx` narrows the `color-contrast` rule with `selector: "*:not([data-a11y-color-contrast-ignore])"`, and `BaseAvatar.tsx` uses it on the avatar surface.
 
-*Enabling* or reconfiguring a rule is fine — the gate only rejects disabling.
+_Enabling_ or reconfiguring a rule is fine — the gate only rejects disabling.
 
 ### withSkipA11y() (deprecated) vs withSnapshot()
 

@@ -105,7 +105,9 @@ export type PatternProblem = "unanchored" | "missing" | "not-a-directory"
  * directory is moved or renamed the rule keeps parsing but stops matching, and
  * its files silently fall back to the global owner.
  */
-export function checkCodeownersPattern(pattern: string): PatternProblem | undefined {
+export function checkCodeownersPattern(
+  pattern: string
+): PatternProblem | undefined {
   if (pattern === "*") return undefined // global fallback
   if (!pattern.startsWith("/")) return "unanchored"
 
@@ -120,7 +122,11 @@ export function checkCodeownersPattern(pattern: string): PatternProblem | undefi
 
   const absolute = path.join(REPO_ROOT, probe)
   if (!fs.existsSync(absolute)) return "missing"
-  if (probe === target && expectsDirectory && !fs.statSync(absolute).isDirectory()) {
+  if (
+    probe === target &&
+    expectsDirectory &&
+    !fs.statSync(absolute).isDirectory()
+  ) {
     return "not-a-directory"
   }
   return undefined
@@ -157,7 +163,8 @@ function codeownersLinesFor(manifestFile: string): string[] {
   }
   for (const [include, teams] of [...teamsByPath].sort()) {
     const absInclude = path.join(REPO_ROOT, moduleDir, include)
-    const isDir = fs.existsSync(absInclude) && fs.statSync(absInclude).isDirectory()
+    const isDir =
+      fs.existsSync(absInclude) && fs.statSync(absInclude).isDirectory()
     lines.push(`/${moduleDir}/${include}${isDir ? "/" : ""} ${teams.join(" ")}`)
   }
   return lines

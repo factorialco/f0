@@ -1,4 +1,4 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from "expo-router/unstable-native-tabs"
 
 /**
  * Playground tab bar.
@@ -23,5 +23,5 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Label>Design Tokens</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
-  );
+  )
 }

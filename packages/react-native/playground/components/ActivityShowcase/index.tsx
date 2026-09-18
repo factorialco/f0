@@ -1,35 +1,42 @@
-import React from "react";
-import { ScrollView, View, Text } from "react-native";
-import { ActivityItem, ActivityItemSkeleton } from "../../../src/components/Activity/ActivityItem";
-import { AppIcons } from "../../../src/icons";
-import { useCSSVariable } from "uniwind";
+import React from "react"
+import { ScrollView, View, Text } from "react-native"
+import { useCSSVariable } from "uniwind"
 
-const { Check, Alert, Home, Settings, Archive, Bell, MessageFilled } = AppIcons;
+import {
+  ActivityItem,
+  ActivityItemSkeleton,
+} from "../../../src/components/Activity/ActivityItem"
+import { AppIcons } from "../../../src/icons"
+
+const { Check, Alert, Home, Settings, Archive, Bell, MessageFilled } = AppIcons
 
 export function ActivityShowcase() {
-  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(["--color-f0-foreground"])
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    return "#000000"
+  }
 
   const handlePress = (id: string) => {
-    console.log("Activity pressed:", id);
-  };
+    console.log("Activity pressed:", id)
+  }
 
   return (
-    <ScrollView 
-      className="p-4" 
+    <ScrollView
+      className="p-4"
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
       {/* Basic Activity Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Basic Activity Items
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItem
           id="1"
           title="New message received"
@@ -60,10 +67,13 @@ export function ActivityShowcase() {
       </View>
 
       {/* With Unread Indicator */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Unread Activities
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItem
           id="4"
           title="New notification"
@@ -87,10 +97,13 @@ export function ActivityShowcase() {
       </View>
 
       {/* Without Description */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Without Description
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItem
           id="6"
           title="Settings updated"
@@ -110,10 +123,13 @@ export function ActivityShowcase() {
       </View>
 
       {/* Without Icon */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Without Icon
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItem
           id="8"
           title="Activity without icon"
@@ -134,10 +150,13 @@ export function ActivityShowcase() {
       </View>
 
       {/* Long Descriptions */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Long Descriptions
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItem
           id="10"
           title="Long title that might wrap to multiple lines if it's really long"
@@ -150,20 +169,26 @@ export function ActivityShowcase() {
       </View>
 
       {/* Skeleton Loading State */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Skeleton Loading State
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItemSkeleton />
         <ActivityItemSkeleton />
         <ActivityItemSkeleton />
       </View>
 
       {/* Mixed States */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Mixed States
       </Text>
-      <View className="gap-2 mb-6">
+      <View className="mb-6 gap-2">
         <ActivityItem
           id="11"
           title="Read activity"
@@ -202,5 +227,5 @@ export function ActivityShowcase() {
         />
       </View>
     </ScrollView>
-  );
+  )
 }

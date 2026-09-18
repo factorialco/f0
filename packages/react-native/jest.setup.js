@@ -1,27 +1,27 @@
 // Jest setup file to mock problematic React Native files
 jest.mock("react-native/Libraries/NativeComponent/ViewConfigIgnore", () => {
-  const Platform = require("react-native").Platform;
-  const ignoredViewConfigProps = new WeakSet();
+  const Platform = require("react-native").Platform
+  const ignoredViewConfigProps = new WeakSet()
 
   return {
     DynamicallyInjectedByGestureHandler: (object) => {
-      ignoredViewConfigProps.add(object);
-      return object;
+      ignoredViewConfigProps.add(object)
+      return object
     },
     ConditionallyIgnoredEventHandlers: (value) => {
       if (Platform && Platform.OS === "ios") {
-        return value;
+        return value
       }
-      return undefined;
+      return undefined
     },
     isIgnored: (value) => {
       if (typeof value === "object" && value != null) {
-        return ignoredViewConfigProps.has(value);
+        return ignoredViewConfigProps.has(value)
       }
-      return false;
+      return false
     },
-  };
-});
+  }
+})
 
 // Mock react-native-worklets to avoid native worklets initialization in Jest.
 // Reanimated 4's mock pulls in react-native-worklets, whose native module
@@ -44,21 +44,21 @@ jest.mock("react-native-worklets", () => ({
     Custom: "Custom",
   },
   serializableMappingCache: new WeakMap(),
-}));
+}))
 
 // Mock react-native-reanimated
 jest.mock("react-native-reanimated", () =>
-  require("react-native-reanimated/mock"),
-);
+  require("react-native-reanimated/mock")
+)
 
 // Mock expo-image for Jest environment
 jest.mock("expo-image", () => {
-  const React = require("react");
-  const { Image } = require("react-native");
+  const React = require("react")
+  const { Image } = require("react-native")
 
   return {
     Image: React.forwardRef((props, ref) =>
-      React.createElement(Image, { ...props, ref }),
+      React.createElement(Image, { ...props, ref })
     ),
-  };
-});
+  }
+})

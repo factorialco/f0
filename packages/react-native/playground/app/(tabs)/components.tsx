@@ -22,8 +22,8 @@ import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
-import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0MetadataShowcase } from "../../components/F0MetadataShowcase"
+import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
 import { F0StepShowcase } from "../../components/F0StepShowcase"
 import { F0TabsShowcase } from "../../components/F0TabsShowcase"
@@ -191,7 +191,7 @@ export default function ComponentsShowcase() {
   }
 
   return (
-    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-f0-background" edges={["top", "bottom"]}>
       <View
         className="flex-1"
         style={{ backgroundColor: asString(f0Background) }}

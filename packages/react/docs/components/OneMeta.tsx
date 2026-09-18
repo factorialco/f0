@@ -1,5 +1,4 @@
 import { Meta, Title, Unstyled } from "@storybook/addon-docs/blocks"
-
 import { ComponentProps } from "react"
 import { F0Icon } from "../../src/components/F0Icon"
 import { Check, Cross, ExternalLink } from "../../src/icons/app"

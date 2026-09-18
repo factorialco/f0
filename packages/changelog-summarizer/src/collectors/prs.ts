@@ -23,79 +23,98 @@ import type {
   SummaryJson,
   SummaryNewEntry,
   SummaryStabilizedEntry,
-} from "../types.js";
-import type { MergedPr, PrFile } from "./github.js";
+} from "../types.js"
+import type { MergedPr, PrFile } from "./github.js"
+
 import {
   resolveStoryDeepLink,
   resolveStoryUrl,
   type StoryIndex,
-} from "./stories.js";
+} from "./stories.js"
 
 export interface PrWithFiles extends MergedPr {
-  files: PrFile[];
+  files: PrFile[]
   /** PR description, fetched for breaking-change PRs to explain the migration. */
-  body?: string;
+  body?: string
 }
 
 /** Conventional-commit types whose diff we must inspect to find new/stable. */
-export const TYPES_NEEDING_FILES = new Set(["feat", "perf", "refactor", "docs"]);
+export const TYPES_NEEDING_FILES = new Set(["feat", "perf", "refactor", "docs"])
 
 interface ParsedTitle {
-  type: string;
-  scope?: string;
-  breaking: boolean;
-  subject: string;
+  type: string
+  scope?: string
+  breaking: boolean
+  subject: string
 }
 
-const TITLE_RE = /^(\w+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/;
+const TITLE_RE = /^(\w+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/
 
 export function parseConventionalTitle(title: string): ParsedTitle {
-  const m = title.trim().match(TITLE_RE);
-  if (!m) return { type: "", breaking: false, subject: title.trim() };
+  const m = title.trim().match(TITLE_RE)
+  if (!m) return { type: "", breaking: false, subject: title.trim() }
   return {
     type: m[1].toLowerCase(),
     scope: m[2]?.trim() || undefined,
     breaking: m[3] === "!",
     subject: m[4].trim(),
-  };
+  }
 }
 
-const STORY_RE = /\.stories\.tsx$/;
-const REACT_SRC = "packages/react/src/";
+const STORY_RE = /\.stories\.tsx$/
+const REACT_SRC = "packages/react/src/"
 
 // Folder/segment words that are never a component name.
 const GENERIC = new Set([
-  "components", "patterns", "kits", "sds", "lib", "hooks", "experimental",
-  "utilities", "ui", "react", "core", "docs", "ai", "examples", "playground",
-  "internal", "dashboard", "deps", "repo", "ci", "build",
-]);
+  "components",
+  "patterns",
+  "kits",
+  "sds",
+  "lib",
+  "hooks",
+  "experimental",
+  "utilities",
+  "ui",
+  "react",
+  "core",
+  "docs",
+  "ai",
+  "examples",
+  "playground",
+  "internal",
+  "dashboard",
+  "deps",
+  "repo",
+  "ci",
+  "build",
+])
 
 /** A real F0 component name: PascalCase, or F0/One-prefixed. No slashes. */
 function isComponentName(name: string | null | undefined): name is string {
-  if (!name || name.includes("/")) return false;
-  if (GENERIC.has(name.toLowerCase())) return false;
-  return /^(F0|One)/.test(name) || /^[A-Z][A-Za-z0-9]+$/.test(name);
+  if (!name || name.includes("/")) return false
+  if (GENERIC.has(name.toLowerCase())) return false
+  return /^(F0|One)/.test(name) || /^[A-Z][A-Za-z0-9]+$/.test(name)
 }
 
 function isReactStory(path: string): boolean {
-  return path.startsWith(REACT_SRC) && STORY_RE.test(path);
+  return path.startsWith(REACT_SRC) && STORY_RE.test(path)
 }
 
 /** Extract a (validated) component name from a story file path, else null. */
 function componentFromStoryPath(path: string): string | null {
-  const parts = path.split("/");
-  const storiesIdx = parts.findIndex((p) => p === "__stories__");
-  let candidate: string | null = null;
+  const parts = path.split("/")
+  const storiesIdx = parts.findIndex((p) => p === "__stories__")
+  let candidate: string | null = null
   if (storiesIdx > 0) {
-    candidate = parts[storiesIdx - 1];
+    candidate = parts[storiesIdx - 1]
   } else {
-    const fileIdx = parts.findIndex((p) => STORY_RE.test(p));
+    const fileIdx = parts.findIndex((p) => STORY_RE.test(p))
     if (fileIdx > 0) {
-      const base = parts[fileIdx].replace(STORY_RE, "");
-      candidate = base.toLowerCase() === "index" ? parts[fileIdx - 1] : base;
+      const base = parts[fileIdx].replace(STORY_RE, "")
+      candidate = base.toLowerCase() === "index" ? parts[fileIdx - 1] : base
     }
   }
-  return isComponentName(candidate) ? candidate : null;
+  return isComponentName(candidate) ? candidate : null
 }
 
 /**
@@ -107,29 +126,51 @@ function componentFromStoryPath(path: string): string | null {
  * judgement call the LLM finalises; this just gets the common cases right.
  */
 function newComponentFromTitle(
-  subject: string,
+  subject: string
 ): { component: string; kind: "pattern" | "component" } | null {
   // "add <Component> [experimental] component|pattern" — the trailing
   // "component"/"pattern" keyword is what separates a genuinely new component
   // from a docs PR ("add <Component> Storybook documentation") or a feature
   // ("add alert option").
   const m = subject.match(
-    /\b(?:[Aa]dd(?:s|ed)?|[Ii]ntroduces?|[Nn]ew)\s+(?:the\s+|an?\s+)?((?:F0|One)[A-Za-z0-9]+|[A-Z][A-Za-z0-9]{2,})\s+(?:\w+\s+){0,2}(component|pattern)s?\b/,
-  );
-  if (!m || !isComponentName(m[1])) return null;
+    /\b(?:[Aa]dd(?:s|ed)?|[Ii]ntroduces?|[Nn]ew)\s+(?:the\s+|an?\s+)?((?:F0|One)[A-Za-z0-9]+|[A-Z][A-Za-z0-9]{2,})\s+(?:\w+\s+){0,2}(component|pattern)s?\b/
+  )
+  if (!m || !isComponentName(m[1])) return null
   return {
     component: m[1],
     kind: m[2].toLowerCase() === "pattern" ? "pattern" : "component",
-  };
+  }
 }
 
 // Organisational "area" folders a component dir sits directly inside.
 const AREA_SEGMENTS = new Set([
-  "components", "patterns", "kits", "lib", "library", "layouts", "hooks", "ui",
-  "experimental", "sds", "ai", "surveys", "home", "communities", "charts",
-  "navigation", "information", "actions", "inputs", "utilities", "data",
-  "datacollection", "visualizations", "post", "feedback", "forms",
-]);
+  "components",
+  "patterns",
+  "kits",
+  "lib",
+  "library",
+  "layouts",
+  "hooks",
+  "ui",
+  "experimental",
+  "sds",
+  "ai",
+  "surveys",
+  "home",
+  "communities",
+  "charts",
+  "navigation",
+  "information",
+  "actions",
+  "inputs",
+  "utilities",
+  "data",
+  "datacollection",
+  "visualizations",
+  "post",
+  "feedback",
+  "forms",
+])
 
 /**
  * Detect a brand-new component from ADDED source files: the component's ROOT
@@ -139,26 +180,30 @@ const AREA_SEGMENTS = new Set([
  * ignoring sub-files added inside an existing component.
  */
 function newComponentFromFiles(
-  files: PrFile[],
+  files: PrFile[]
 ): { component: string; kind: "pattern" | "component" } | null {
-  const cands: Array<{ comp: string; depth: number; kind: "pattern" | "component" }> = [];
+  const cands: Array<{
+    comp: string
+    depth: number
+    kind: "pattern" | "component"
+  }> = []
   for (const f of files) {
-    if (f.status !== "added" || !f.filename.startsWith(REACT_SRC)) continue;
-    const parts = f.filename.split("/");
-    const file = parts[parts.length - 1];
-    const comp = parts[parts.length - 2];
-    const parent = parts[parts.length - 3];
-    if (!isComponentName(comp)) continue;
-    const isRoot = /^index\.tsx?$/.test(file) || file === `${comp}.tsx`;
-    if (!isRoot || !parent || !AREA_SEGMENTS.has(parent.toLowerCase())) continue;
+    if (f.status !== "added" || !f.filename.startsWith(REACT_SRC)) continue
+    const parts = f.filename.split("/")
+    const file = parts[parts.length - 1]
+    const comp = parts[parts.length - 2]
+    const parent = parts[parts.length - 3]
+    if (!isComponentName(comp)) continue
+    const isRoot = /^index\.tsx?$/.test(file) || file === `${comp}.tsx`
+    if (!isRoot || !parent || !AREA_SEGMENTS.has(parent.toLowerCase())) continue
     cands.push({
       comp,
       depth: parts.length,
       kind: /\/patterns\//.test(f.filename) ? "pattern" : "component",
-    });
+    })
   }
-  cands.sort((a, b) => a.depth - b.depth);
-  return cands.length ? { component: cands[0].comp, kind: cands[0].kind } : null;
+  cands.sort((a, b) => a.depth - b.depth)
+  return cands.length ? { component: cands[0].comp, kind: cands[0].kind } : null
 }
 
 /**
@@ -169,18 +214,18 @@ function newComponentFromFiles(
  */
 function componentFromTitle(
   subject: string,
-  storyIndex?: StoryIndex,
+  storyIndex?: StoryIndex
 ): string | null {
-  if (!storyIndex) return null;
-  const tokens = subject.match(/\b(?:F0|One)?[A-Z][A-Za-z0-9]+\b/g) ?? [];
-  let best: string | null = null;
+  if (!storyIndex) return null
+  const tokens = subject.match(/\b(?:F0|One)?[A-Z][A-Za-z0-9]+\b/g) ?? []
+  let best: string | null = null
   for (const t of tokens) {
-    if (isComponentName(t) && resolveStoryUrl(t, storyIndex.urlByKey)) best = t;
+    if (isComponentName(t) && resolveStoryUrl(t, storyIndex.urlByKey)) best = t
   }
-  return best;
+  return best
 }
 
-const MDX_RE = /\.mdx$/;
+const MDX_RE = /\.mdx$/
 
 /**
  * Extract the component a `.mdx` doc file belongs to. In F0, writing a
@@ -189,11 +234,12 @@ const MDX_RE = /\.mdx$/;
  * is now genuinely stable (vs. just carrying a `stable` tag set prematurely).
  */
 function componentFromMdxPath(path: string): string | null {
-  if (!path.startsWith(REACT_SRC) || !MDX_RE.test(path)) return null;
-  const parts = path.split("/");
-  const storiesIdx = parts.findIndex((p) => p === "__stories__");
-  const candidate = storiesIdx > 0 ? parts[storiesIdx - 1] : parts[parts.length - 2];
-  return isComponentName(candidate) ? candidate : null;
+  if (!path.startsWith(REACT_SRC) || !MDX_RE.test(path)) return null
+  const parts = path.split("/")
+  const storiesIdx = parts.findIndex((p) => p === "__stories__")
+  const candidate =
+    storiesIdx > 0 ? parts[storiesIdx - 1] : parts[parts.length - 2]
+  return isComponentName(candidate) ? candidate : null
 }
 
 /**
@@ -207,72 +253,79 @@ function stabilizedComponents(files: PrFile[]): string[] {
       files
         .filter((f) => f.status === "added")
         .map((f) => componentFromMdxPath(f.filename))
-        .filter((c): c is string => c !== null),
+        .filter((c): c is string => c !== null)
     ),
-  ];
+  ]
 }
 
 /** Story exports added by this diff (e.g. `+export const WithAlertAction = …`). */
 function addedStoryExports(patch?: string): string[] {
-  if (!patch) return [];
-  const out: string[] = [];
+  if (!patch) return []
+  const out: string[] = []
   for (const l of patch.split("\n")) {
-    if (!l.startsWith("+") || l.startsWith("+++")) continue;
-    const m = l.match(/^\+\s*export const (\w+)\s*[:=]/);
-    if (m && !/^(meta|default)$/i.test(m[1])) out.push(m[1]);
+    if (!l.startsWith("+") || l.startsWith("+++")) continue
+    const m = l.match(/^\+\s*export const (\w+)\s*[:=]/)
+    if (m && !/^(meta|default)$/i.test(m[1])) out.push(m[1])
   }
-  return out;
+  return out
 }
 
 function scopeIsComponent(scope?: string): scope is string {
-  return isComponentName(scope);
+  return isComponentName(scope)
 }
 
 function cleanSubject(subject: string): string {
-  const s = subject.replace(/\s+#\d+\s*$/, "").replace(/[.\s]+$/, "").trim();
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  const s = subject
+    .replace(/\s+#\d+\s*$/, "")
+    .replace(/[.\s]+$/, "")
+    .trim()
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export interface PrFacts {
-  skeleton: SummaryJson;
-  fixes: string[];
-  infra: string[];
-  contributors: string[];
-  unclassified: string[];
+  skeleton: SummaryJson
+  fixes: string[]
+  infra: string[]
+  contributors: string[]
+  unclassified: string[]
 }
 
 // Explicit promotion in the PR title — catches "promote to stable" PRs that
 // only flip the tag / transfer CODEOWNERS without adding new MDX docs.
 const PROMOTE_RE =
-  /\bpromot\w+\b[^.]*\bstable\b|\bmark\w*\s+as\s+stable\b|\bstabili[sz]\w+\b/i;
+  /\bpromot\w+\b[^.]*\bstable\b|\bmark\w*\s+as\s+stable\b|\bstabili[sz]\w+\b/i
 
 export function classifyMergedPrs(
   prs: PrWithFiles[],
   storyIndex?: StoryIndex,
-  foundationsAuthors?: Set<string>,
+  foundationsAuthors?: Set<string>
 ): PrFacts {
-  const newEntries: SummaryNewEntry[] = [];
-  const stabilized: SummaryStabilizedEntry[] = [];
-  const enhancements: SummaryEnhancementEntry[] = [];
+  const newEntries: SummaryNewEntry[] = []
+  const stabilized: SummaryStabilizedEntry[] = []
+  const enhancements: SummaryEnhancementEntry[] = []
   // Raw per-PR enhancements, grouped by component after the loop so a component
   // with several PRs this period becomes ONE bullet (less noise).
   const rawEnhancements: Array<{
-    component: string;
-    summary: string;
-    author: string;
-    url?: string;
-  }> = [];
-  const breaking: SummaryBreakingChangeEntry[] = [];
-  const fixes: string[] = [];
-  const infra: string[] = [];
-  const contributors = new Set<string>();
-  const unclassified: string[] = [];
+    component: string
+    summary: string
+    author: string
+    url?: string
+  }> = []
+  const breaking: SummaryBreakingChangeEntry[] = []
+  const fixes: string[] = []
+  const infra: string[] = []
+  const contributors = new Set<string>()
+  const unclassified: string[] = []
 
   for (const pr of prs) {
-    const { type, scope, breaking: isBreaking, subject } =
-      parseConventionalTitle(pr.title);
-    const summary = cleanSubject(subject);
-    const reactStories = pr.files.filter((f) => isReactStory(f.filename));
+    const {
+      type,
+      scope,
+      breaking: isBreaking,
+      subject,
+    } = parseConventionalTitle(pr.title)
+    const summary = cleanSubject(subject)
+    const reactStories = pr.files.filter((f) => isReactStory(f.filename))
 
     // 1. New component/pattern — the PR title introduces it ("add <Component>").
     //    Adding a feature to an existing component is NOT new — it's an
@@ -283,7 +336,7 @@ export function classifyMergedPrs(
       newComponentFromTitle(subject) ??
       (type === "feat" || type === "perf"
         ? newComponentFromFiles(pr.files)
-        : null);
+        : null)
     if (newComp) {
       newEntries.push({
         component: newComp.component,
@@ -291,9 +344,9 @@ export function classifyMergedPrs(
         detail: newComp.kind === "pattern" ? "New pattern" : undefined,
         storybook: true,
         author: pr.author,
-      });
-      contributors.add(pr.author);
-      continue;
+      })
+      contributors.add(pr.author)
+      continue
     }
 
     // 2. Stabilization (Foundations only). Two signals:
@@ -302,22 +355,22 @@ export function classifyMergedPrs(
     //        "stabilize", "mark as stable") — e.g. a tag flip with no new docs.
     //    The `stable` tag alone is NOT trusted, and only Foundations promotes:
     //    other teams can ship new components but can't mark something stable.
-    const stabilizedComps = new Set(stabilizedComponents(pr.files));
+    const stabilizedComps = new Set(stabilizedComponents(pr.files))
     if (PROMOTE_RE.test(pr.title)) {
       const c = isComponentName(scope)
         ? scope
-        : pr.files
+        : (pr.files
             .map((f) => componentFromMdxPath(f.filename))
             .find((x): x is string => x !== null) ??
           reactStories
             .map((f) => componentFromStoryPath(f.filename))
             .find((x): x is string => x !== null) ??
-          null;
-      if (c) stabilizedComps.add(c);
+          null)
+      if (c) stabilizedComps.add(c)
     }
     if (stabilizedComps.size > 0) {
       const byFoundations =
-        !foundationsAuthors || foundationsAuthors.has(pr.author);
+        !foundationsAuthors || foundationsAuthors.has(pr.author)
       if (byFoundations) {
         for (const component of stabilizedComps) {
           stabilized.push({
@@ -325,10 +378,10 @@ export function classifyMergedPrs(
             summary: "Now stable — safe to use in production",
             storybook: true,
             author: pr.author,
-          });
+          })
         }
-        contributors.add(pr.author);
-        continue;
+        contributors.add(pr.author)
+        continue
       }
       // Detected as a promotion but by a non-Foundations author → not stable.
       // Fall through and let it be classified as an enhancement/other.
@@ -341,68 +394,68 @@ export function classifyMergedPrs(
         summary,
         // The PR description carries the migration; the LLM polishes it later.
         migration: pr.body?.trim() ?? "",
-      });
-      contributors.add(pr.author);
-      continue;
+      })
+      contributors.add(pr.author)
+      continue
     }
 
     // 4. Enhancement (feat/perf on a resolvable component, with story deep-link)
     if (type === "feat" || type === "perf") {
       const component = scopeIsComponent(scope)
         ? scope
-        : componentFromTitle(subject, storyIndex) ??
+        : (componentFromTitle(subject, storyIndex) ??
           reactStories
             .map((f) => componentFromStoryPath(f.filename))
             .find((c): c is string => c !== null) ??
-          null;
+          null)
 
       if (component) {
-        let url: string | undefined;
+        let url: string | undefined
         if (storyIndex) {
           const exports = reactStories.flatMap((f) =>
-            addedStoryExports(f.patch),
-          );
+            addedStoryExports(f.patch)
+          )
           for (const ex of exports) {
-            const link = resolveStoryDeepLink(component, ex, storyIndex);
+            const link = resolveStoryDeepLink(component, ex, storyIndex)
             if (link) {
-              url = link;
-              break;
+              url = link
+              break
             }
           }
         }
-        rawEnhancements.push({ component, summary, author: pr.author, url });
-        contributors.add(pr.author);
+        rawEnhancements.push({ component, summary, author: pr.author, url })
+        contributors.add(pr.author)
       } else {
         // A feature with no resolvable component → keep it out of the clean
         // product sections; let it live in the technical thread instead.
-        infra.push(summary);
+        infra.push(summary)
       }
-      continue;
+      continue
     }
 
     // 5. Fix
     if (type === "fix") {
-      fixes.push(summary);
-      continue;
+      fixes.push(summary)
+      continue
     }
 
     // 6. Infra / other
-    infra.push(summary);
-    if (type === "") unclassified.push(`#${pr.number} ${pr.title}`);
+    infra.push(summary)
+    if (type === "") unclassified.push(`#${pr.number} ${pr.title}`)
   }
 
   // Group enhancements by component: one bullet per component, with the extra
   // changes folded into `detail`. A deep-link is only kept when the component
   // had a single enhancement (otherwise it's ambiguous → docs page).
-  const byComponent = new Map<string, typeof rawEnhancements>();
+  const byComponent = new Map<string, typeof rawEnhancements>()
   for (const e of rawEnhancements) {
-    const list = byComponent.get(e.component) ?? [];
-    list.push(e);
-    byComponent.set(e.component, list);
+    const list = byComponent.get(e.component) ?? []
+    list.push(e)
+    byComponent.set(e.component, list)
   }
   for (const [component, group] of byComponent) {
-    const summaries = [...new Set(group.map((g) => g.summary))];
-    const authors = [...new Set(group.map((g) => g.author))].filter(Boolean);
+    const summaries = [...new Set(group.map((g) => g.summary))]
+    const authors = [...new Set(group.map((g) => g.author))].filter(Boolean)
     enhancements.push({
       component,
       summary: summaries[0],
@@ -413,28 +466,28 @@ export function classifyMergedPrs(
       storybook: true,
       author: authors.join(", "),
       url: group.length === 1 ? group[0].url : undefined,
-    });
+    })
   }
 
   // One component → one section. Priority: stabilized > new > breaking >
   // enhancements. A component promoted/new this week shouldn't also be repeated
   // under Enhancements for its other PRs.
-  const claimed = new Set<string>();
-  const ckey = (c: string) => c.trim().toLowerCase();
-  for (const e of stabilized) claimed.add(ckey(e.component));
-  const newDeduped = newEntries.filter((e) => !claimed.has(ckey(e.component)));
-  for (const e of newDeduped) claimed.add(ckey(e.component));
-  for (const e of breaking) claimed.add(ckey(e.component));
-  const enhDeduped = enhancements.filter((e) => !claimed.has(ckey(e.component)));
+  const claimed = new Set<string>()
+  const ckey = (c: string) => c.trim().toLowerCase()
+  for (const e of stabilized) claimed.add(ckey(e.component))
+  const newDeduped = newEntries.filter((e) => !claimed.has(ckey(e.component)))
+  for (const e of newDeduped) claimed.add(ckey(e.component))
+  for (const e of breaking) claimed.add(ckey(e.component))
+  const enhDeduped = enhancements.filter((e) => !claimed.has(ckey(e.component)))
 
   // "What's new" only announces components that are actually browsable in
   // Storybook — internal components with no docs page (e.g. PresetFormDialog)
   // aren't something the team can go see/use, so we drop them from the section.
   const browsableNew = storyIndex
     ? newDeduped.filter(
-        (e) => resolveStoryUrl(e.component, storyIndex.urlByKey) !== null,
+        (e) => resolveStoryUrl(e.component, storyIndex.urlByKey) !== null
       )
-    : newDeduped;
+    : newDeduped
 
   const skeleton: SummaryJson = {
     sections: {
@@ -443,7 +496,7 @@ export function classifyMergedPrs(
       ...(enhDeduped.length > 0 ? { enhancements: enhDeduped } : {}),
       ...(breaking.length > 0 ? { breaking_changes: breaking } : {}),
     },
-  };
+  }
 
   return {
     skeleton,
@@ -451,5 +504,5 @@ export function classifyMergedPrs(
     infra,
     contributors: [...contributors].filter(Boolean),
     unclassified,
-  };
+  }
 }
