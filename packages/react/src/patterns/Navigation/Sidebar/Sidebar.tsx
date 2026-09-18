@@ -216,10 +216,18 @@ function _Sidebar({
           "h-full",
           // The hairline between the two levels of the navigation. It is the
           // panel's, not the rail's: it exists to separate the pair, so it
-          // leaves when the panel leaves. Inside the panel's own width
-          // (border-box), so the 1px does not push it off the room the frame
-          // reserved.
-          rail && "border-0 border-l border-solid border-f1-border-secondary"
+          // leaves when the panel leaves.
+          //
+          // Drawn as a masked pseudo-element rather than a border so it can
+          // fade out over its last 16px at each end. A hairline that runs the
+          // full height reads as a frame around the rail; one that dissolves
+          // into the ground reads as a seam between two things standing on it,
+          // which is what these are. It is inside the panel's own box, so the
+          // 1px does not push it off the room the frame reserved.
+          rail && [
+            "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-f1-border-secondary before:content-['']",
+            "before:[mask-image:linear-gradient(to_bottom,transparent_0,#000_16px,#000_calc(100%-16px),transparent_100%)]",
+          ]
         )
       : cn(
           "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",

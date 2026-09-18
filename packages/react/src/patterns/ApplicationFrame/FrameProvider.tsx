@@ -166,7 +166,11 @@ export function FrameProvider({ children }: FrameProviderProps) {
   const sidebarState: SidebarState = useMemo(() => {
     // The panel never floats beside a rail. It takes room from the content or
     // it gives the room back; it does not hover over it.
-    if (hasRail && !isSmallScreen) return locked ? "locked" : "hidden"
+    // With a rail the panel is the user's to collapse, at every width. A
+    // narrow window is a reason to make things smaller, not a reason to decide
+    // for somebody which half of the navigation they keep — and the rail is
+    // already the answer to "there is no room for all of it".
+    if (hasRail) return locked ? "locked" : "hidden"
     if (isSmallScreen) {
       if (visible) return "unlocked"
       return "hidden"

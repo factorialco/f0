@@ -1,5 +1,5 @@
 /**
- * Press feedback for the navigation's bespoke buttons: a 0.9 scale on the
+ * Press feedback for the navigation's bespoke buttons: a 0.95 scale on the
  * shared ease-out, dropped entirely under reduced motion.
  *
  * It goes on the CHIP, not on the button, and reads the button's `group`:
@@ -13,4 +13,4 @@
  * it is catching up with the cursor.
  */
 export const PRESSABLE_CHIP =
-  "transition-transform duration-150 ease-out group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100"
+  "transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none motion-reduce:group-active:scale-100"
