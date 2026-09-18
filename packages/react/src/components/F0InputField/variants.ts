@@ -32,22 +32,22 @@ export const inputFieldVariants = cva({
     {
       size: "sm",
       canGrow: true,
-      class: "min-h-[32px]",
+      class: "min-h-8",
     },
     {
       size: "md",
       canGrow: true,
-      class: "min-h-[40px]",
+      class: "min-h-10",
     },
     {
       size: "sm",
       canGrow: false,
-      class: "h-[32px]",
+      class: "h-8",
     },
     {
       size: "md",
       canGrow: false,
-      class: "h-[40px]",
+      class: "h-10",
     },
   ],
   defaultVariants: {
