@@ -5659,7 +5659,8 @@ declare const defaultTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
-        readonly addToMessage: "Add to message";
+        readonly addToConversation: "Add to this conversation";
+        readonly addFilesOrPhotos: "Add files or photos";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -6533,20 +6534,16 @@ declare type DropdownInternalProps = {
     container?: HTMLElement | null;
 } & DataAttributes_3;
 
-export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
+export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel | DropdownItemSubmenu | DropdownItemSwitch;
 
 export declare type DropdownItemLabel = {
     type: "label";
     text: string;
 };
 
-export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
+export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & Omit<DropdownItemVisuals, "label"> & {
     type?: "item";
     onClick?: () => void;
-    icon?: IconType;
-    description?: string;
-    critical?: boolean;
-    avatar?: AvatarVariant;
     disabled?: boolean;
     /**
      * Tooltip shown on hover while the item is `disabled` — use it to explain why
@@ -6557,8 +6554,50 @@ export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> 
     disabledTooltip?: string;
 };
 
-declare type DropdownItemSeparator = {
+export declare type DropdownItemSeparator = {
     type: "separator";
+};
+
+/**
+ * A row that opens a menu of its own beside this one, rather than doing
+ * something. Use it to keep a long list one step in — the connectors a chat can
+ * reach, say — instead of unrolling it into the parent menu.
+ */
+export declare type DropdownItemSubmenu = DropdownItemVisuals & {
+    type: "submenu";
+    items: DropdownItem[];
+    disabled?: boolean;
+    /**
+     * Shown INSIDE the submenu when `items` is empty, so choosing it never opens
+     * an empty panel. Without it an empty submenu renders nothing.
+     */
+    emptyLabel?: string;
+};
+
+/**
+ * A row you flip rather than press: it carries a switch, and choosing it keeps
+ * the menu open so several can be set in a row. The item itself is what the
+ * keyboard and the accessibility tree see (`aria-checked`); the switch is drawn
+ * for the eye only.
+ */
+export declare type DropdownItemSwitch = DropdownItemVisuals & {
+    type: "switch";
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
+    disabled?: boolean;
+    /** Tooltip shown on hover while `disabled`, as on `DropdownItemObject`. */
+    disabledTooltip?: string;
+};
+
+/** What any row shows, whatever it does when you choose it. */
+declare type DropdownItemVisuals = {
+    label: string;
+    icon?: IconType;
+    description?: string;
+    avatar?: AvatarVariant;
+    /** Short trailing tag beside the label, e.g. "New". Not a sentence. */
+    tag?: string;
+    critical?: boolean;
 };
 
 export declare type DropdownItemWithoutIcon = Omit<DropdownItemObject, "icon">;

@@ -468,7 +468,10 @@ declare type AIButton = {
  * contributes that entry itself from `fileAttachments`, so a host adding
  * "Connectors" doesn't have to rewire the file picker to keep it.
  */
-export declare type AiChatComposerAction = {
+export declare type AiChatComposerAction = AiChatComposerActionItem | AiChatComposerActionSubmenu | AiChatComposerActionToggle | AiChatComposerActionSeparator;
+
+/** What every composer-menu entry shows, whatever choosing it does. */
+declare type AiChatComposerActionBase = {
     /**
      * Host-side bookkeeping — a key for the host's own list, and what it reads
      * back in analytics. The composer neither renders it nor keys the menu by it.
@@ -476,9 +479,12 @@ export declare type AiChatComposerAction = {
     id: string;
     label: string;
     icon?: IconType;
+    /** A partner's logo, where an f0 icon would be wrong — a connector's mark. */
+    avatar?: AvatarVariant;
+    /** Short trailing tag beside the label, e.g. "New". Not a sentence. */
+    tag?: string;
     /** Secondary line under the label. */
     description?: string;
-    onClick: () => void;
     disabled?: boolean;
     /**
      * Shown on hover while `disabled` — say why the action is unavailable.
@@ -487,6 +493,40 @@ export declare type AiChatComposerAction = {
      * label alone doesn't already imply.
      */
     disabledTooltip?: string;
+};
+
+/** An entry that DOES something and closes the menu. */
+export declare type AiChatComposerActionItem = AiChatComposerActionBase & {
+    type?: "action";
+    onClick: () => void;
+};
+
+/** A rule between groups of entries. Carries no label and nothing to press. */
+export declare type AiChatComposerActionSeparator = {
+    type: "separator";
+};
+
+/**
+ * An entry that opens a menu of its own beside this one. Use it to keep a long
+ * or stateful list one step in — the connectors this chat can reach — instead
+ * of unrolling it where the file picker lives.
+ */
+export declare type AiChatComposerActionSubmenu = AiChatComposerActionBase & {
+    type: "submenu";
+    actions: AiChatComposerAction[];
+    /** Shown inside the submenu while `actions` is empty, so it never opens bare. */
+    emptyLabel?: string;
+};
+
+/**
+ * An entry you flip rather than press: it carries a switch and the menu STAYS
+ * OPEN, so several can be set in one visit. The host owns `checked` — the
+ * composer renders what it is told and reports back through `onCheckedChange`.
+ */
+export declare type AiChatComposerActionToggle = AiChatComposerActionBase & {
+    type: "toggle";
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
 };
 
 /**
@@ -1222,7 +1262,8 @@ export declare const aiTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
-        readonly addToMessage: "Add to message";
+        readonly addToConversation: "Add to this conversation";
+        readonly addFilesOrPhotos: "Add files or photos";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -5639,7 +5680,8 @@ export declare const defaultTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
-        readonly addToMessage: "Add to message";
+        readonly addToConversation: "Add to this conversation";
+        readonly addFilesOrPhotos: "Add files or photos";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -6590,20 +6632,16 @@ declare type DrawerSize = (typeof drawerSizes)[number];
 
 declare const drawerSizes: readonly ["md"];
 
-export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
+export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel | DropdownItemSubmenu | DropdownItemSwitch;
 
 declare type DropdownItemLabel = {
     type: "label";
     text: string;
 };
 
-declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
+declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & Omit<DropdownItemVisuals, "label"> & {
     type?: "item";
     onClick?: () => void;
-    icon?: IconType;
-    description?: string;
-    critical?: boolean;
-    avatar?: AvatarVariant;
     disabled?: boolean;
     /**
      * Tooltip shown on hover while the item is `disabled` — use it to explain why
@@ -6616,6 +6654,48 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
 
 declare type DropdownItemSeparator = {
     type: "separator";
+};
+
+/**
+ * A row that opens a menu of its own beside this one, rather than doing
+ * something. Use it to keep a long list one step in — the connectors a chat can
+ * reach, say — instead of unrolling it into the parent menu.
+ */
+declare type DropdownItemSubmenu = DropdownItemVisuals & {
+    type: "submenu";
+    items: DropdownItem[];
+    disabled?: boolean;
+    /**
+     * Shown INSIDE the submenu when `items` is empty, so choosing it never opens
+     * an empty panel. Without it an empty submenu renders nothing.
+     */
+    emptyLabel?: string;
+};
+
+/**
+ * A row you flip rather than press: it carries a switch, and choosing it keeps
+ * the menu open so several can be set in a row. The item itself is what the
+ * keyboard and the accessibility tree see (`aria-checked`); the switch is drawn
+ * for the eye only.
+ */
+declare type DropdownItemSwitch = DropdownItemVisuals & {
+    type: "switch";
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
+    disabled?: boolean;
+    /** Tooltip shown on hover while `disabled`, as on `DropdownItemObject`. */
+    disabledTooltip?: string;
+};
+
+/** What any row shows, whatever it does when you choose it. */
+declare type DropdownItemVisuals = {
+    label: string;
+    icon?: IconType;
+    description?: string;
+    avatar?: AvatarVariant;
+    /** Short trailing tag beside the label, e.g. "New". Not a sentence. */
+    tag?: string;
+    critical?: boolean;
 };
 
 declare type DropdownMultiQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {

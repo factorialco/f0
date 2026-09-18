@@ -745,7 +745,8 @@ const e = {
       dismiss: "Dismiss"
     },
     attachFile: "Attach file",
-    addToMessage: "Add to message",
+    addToConversation: "Add to this conversation",
+    addFilesOrPhotos: "Add files or photos",
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",

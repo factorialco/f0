@@ -745,7 +745,8 @@ export declare const defaultTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
-        readonly addToMessage: "Add to message";
+        readonly addToConversation: "Add to this conversation";
+        readonly addFilesOrPhotos: "Add files or photos";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
