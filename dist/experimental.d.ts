@@ -4709,6 +4709,10 @@ declare type DateCellConfig = {
     minDate?: Date;
     /** Latest selectable date. Dates after this are disabled in the picker. */
     maxDate?: Date;
+    /** Show the leading calendar icon in the cell. Defaults to `true`. */
+    showIcon?: boolean;
+    /** Show a clear button to empty the cell's date. Defaults to `false`. */
+    clearable?: boolean;
 };
 
 export declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
@@ -5639,12 +5643,6 @@ declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -5893,138 +5891,16 @@ declare const defaultTranslations: {
             readonly discard: "Discard";
             readonly keepEditing: "Keep editing";
             readonly publishError: "Couldn't publish this post";
-            readonly emptyTitle: "No posts yet";
-            readonly emptyDescription: "Posts shared in this community will appear here.";
-            readonly emptyDescriptionCanPost: "Be the first to post here.";
             readonly pinnedPost: "Pinned post";
             readonly pinnedPosts: "Pinned";
-            readonly pinnedPostsCount: {
-                readonly one: "{{count}} pinned post";
-                readonly other: "{{count}} pinned posts";
-            };
-            readonly pinPost: "Pin post";
             readonly unpinPost: "Unpin post";
             readonly goToPost: "Go to post";
-            readonly noPinnedPosts: "No pinned posts";
-            readonly noPinnedPostsDescription: "Pin a post and it stays at the top of this community.";
             readonly scheduledPosts: "Scheduled";
-            readonly scheduledPostsCount: {
-                readonly one: "{{count}} scheduled post";
-                readonly other: "{{count}} scheduled posts";
-            };
             readonly scheduledEvent: "Event";
-            /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
-            readonly publishesAt: "Publishes {{when}}";
-            readonly noScheduledPosts: "Nothing scheduled";
-            readonly noScheduledPostsDescription: "Posts you schedule will wait here until their time.";
-            readonly scheduledActions: "Scheduled post actions";
-            readonly publishNow: "Publish now";
-            readonly cancelScheduled: "Cancel";
             readonly draftPosts: "Drafts";
-            readonly draftPostsCount: {
-                readonly one: "{{count}} draft";
-                readonly other: "{{count}} drafts";
-            };
-            /** Where a scheduled row prints its date, a draft prints this. */
             readonly draftUntitled: "Untitled post";
             readonly draftSavedAt: "Saved {{when}}";
-            readonly publishDraft: "Publish";
-            readonly deleteDraft: "Delete draft";
             readonly shelfLabel: "Pinned, scheduled and draft posts";
-        };
-    };
-    readonly communities: {
-        readonly composer: {
-            readonly createPost: "Create post";
-            readonly createEvent: "Create event";
-            readonly editPost: "Edit post";
-            readonly basicInformation: "Basic information";
-            readonly postSettings: "Post settings";
-            readonly postCover: "Post cover";
-            readonly addMedia: "Drag and drop or click here";
-            readonly addMediaSubtitle: "any image, video or GIF";
-            readonly addMediaSize: "1200x600px";
-            readonly deletePhoto: "Delete photo";
-            readonly deleteVideo: "Delete video";
-            readonly coverActions: "Cover options";
-            readonly title: "Title";
-            readonly titlePlaceholder: "e.g. World Mental Health Day";
-            readonly description: "Description";
-            readonly descriptionPlaceholder: "Share what's special about it";
-            readonly attachmentsSizePerPost: "Up to 150 MB in attachments per post";
-            readonly previousAttachments: "Previously added attachments";
-            readonly isEventLabel: "This is an event";
-            readonly isEventDescription: "Select this to include a date, time, and location for this event.";
-            readonly eventStartDate: "Event start date";
-            readonly eventStartTime: "Start time";
-            readonly eventLocation: "Event location";
-            readonly eventLocationPlaceholder: "Where will this take place?";
-            readonly requireAction: "Require action";
-            readonly requireActionDescription: "Select how you want to track that users have taken the required action";
-            readonly actionType: "Action type";
-            readonly actionTypePlaceholder: "Select action type";
-            readonly actionTypeAcknowledge: "Acknowledge post";
-            readonly actionTypeAcknowledgeDescription: "Employees read and acknowledge the post";
-            readonly actionTypeWatchVideo: "Watch video";
-            readonly actionTypeWatchVideoDescription: "Employees watch the entire video";
-            readonly actionTypeClickedLink: "Clicked a link";
-            readonly actionTypeClickedLinkDescription: "Employees click the first link in the post";
-            readonly actionTypeComingSoon: "Coming soon";
-            readonly continue: "Continue";
-            readonly publishTitle: "Publish";
-            readonly publishDescription: "When publishing the post, it will be visible in the dashboard of each employee.";
-            readonly publish: "Publish";
-            readonly selectCommunity: "Select community";
-            readonly allowCommentsAndReactions: "Allow comments and reactions.";
-            readonly sendEmailNotification: "Send email notification";
-            readonly schedulePost: "Schedule post";
-            readonly scheduleDate: "Date";
-            readonly scheduleTime: "Time";
-            readonly confirm: "Confirm";
-            readonly cancel: "Cancel";
-            readonly saveAsDraft: "Save as draft";
-            readonly save: "Save";
-            readonly cantBeEmpty: "can't be empty";
-            readonly invalidInput: "Invalid input. Only alphanumeric characters are allowed";
-            readonly publishedSuccess: "The post has been published";
-            readonly scheduledSuccess: "The post has been scheduled";
-            readonly draftSuccess: "The post has been saved as draft";
-            readonly publishError: "There was an error creating the post, please try again.";
-        };
-        readonly detail: {
-            readonly postActions: "Post actions";
-            readonly edit: "Edit post";
-            readonly delete: "Delete post";
-            readonly deleteDescription: "Are you sure you want to delete this post? This action cannot be undone.";
-            readonly proceed: "Proceed";
-            readonly turnInteractionsOff: "Turn comments and reactions off";
-            readonly turnInteractionsOn: "Turn comments and reactions on";
-            readonly insights: "Insights";
-            readonly visits: {
-                readonly one: "Visit";
-                readonly other: "Visits";
-            };
-            readonly postViews: "Post views";
-            readonly anonymous: "Anonymous";
-            readonly comments: {
-                readonly one: "{{count}} comment";
-                readonly other: "{{count}} comments";
-            };
-            readonly commentPlaceholder: "Click here to write a comment...";
-            readonly submit: "Submit";
-            readonly deleteComment: "Delete comment";
-            readonly deleteCommentDescription: "Are you sure you want to delete this comment? This action cannot be undone.";
-            readonly editComment: "Edit";
-            readonly acknowledgeRequired: "Post acknowledgement required";
-            readonly acknowledge: "I acknowledge";
-            readonly acknowledgeLater: "Acknowledge later";
-            readonly acknowledgedOn: "Acknowledged on {{date}}, at {{time}}";
-            readonly closePostTitle: "Close post?";
-            readonly closePostDescription: "You haven't acknowledged this post yet. You can acknowledge it later.";
-            readonly closePost: "Close post";
-            readonly continueReading: "Continue reading";
-            readonly close: "Close";
-            readonly home: "Home";
         };
     };
     readonly dataChart: {
@@ -6314,6 +6190,10 @@ declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -6353,19 +6233,14 @@ declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -6764,7 +6639,8 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     numberConfig?: NumberCellConfig<R>;
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
-     * restrict the selectable date range in the picker.
+     * restrict the selectable date range in the picker, `showIcon` to hide
+     * the leading calendar icon, and `clearable` for a clear button.
      *
      * Can be a static object or a function that receives the current row item
      * to return a per-row range (e.g. bound one date field by another field's
@@ -7982,7 +7858,12 @@ export declare type F0ChatChannelType = "dm" | "group" | "announcement" | "commu
 export declare type F0ChatComposableAttachment = Exclude<F0ChatAttachment, F0ChatCardAttachment>;
 
 /**
- * What the post composer produces — the whole form, not a subset.
+ * What a post composer produces.
+ *
+ * F0's own built-in dialog fills only `title`, `description` and `mentions` —
+ * the rest is the contract a HOST's composer fills when it answers
+ * `composePost`, and the shape `createPost` will grow into. All of it is
+ * optional, so neither side has to know about the other's fields.
  *
  * Files go RAW, un-uploaded: a post's media belongs in its own storage rather
  * than the chat's attachment bucket, so reusing `uploadFiles` would leave it in
@@ -8029,7 +7910,7 @@ export declare type F0ChatCreatePostInput = {
  * same reason: a draft has no moment to bring forward, so it is published or
  * deleted, never "published NOW" or "cancelled".
  */
-declare type F0ChatDraftPost = {
+export declare type F0ChatDraftPost = {
     id: string;
     /** May be empty — a draft is unfinished by definition, title included. */
     title: string;
@@ -8399,7 +8280,7 @@ export declare type F0ChatMessageStatus = "sending" | "sent" | "delivered" | "re
  * A pinned post as the bar needs it: enough to name it, and its id to jump to.
  * The post itself is fetched by the jump, not carried here.
  */
-declare type F0ChatPinnedPost = {
+export declare type F0ChatPinnedPost = {
     id: string;
     title: string;
     /** ISO — when it was pinned, which is what orders the list. */
@@ -8454,9 +8335,11 @@ export declare type F0ChatPost = {
      */
     author?: F0ChatUser;
     /**
-     * Whether the current user wrote it. Feeds the default edit/delete policy in
-     * `postActions` — NOT any alignment: a post is never tinted "mine", it takes
-     * the full width for everyone.
+     * Whether the current user wrote it. F0 reads nothing from it — `postActions`
+     * is entirely the host's, and there is no default edit/delete policy. It is
+     * here so a consumer can ask "mine?" across the whole `F0ChatItem` union
+     * without narrowing first. NOT alignment: a post is never tinted "mine", it
+     * takes the full width for everyone.
      */
     isMine?: boolean;
     /** One-line headline, always visible (the card clamps it to two lines). */
@@ -8564,19 +8447,8 @@ export declare type F0ChatPostAttachment = {
     url: string;
 };
 
-/** A comment on a post. */
-export declare type F0ChatPostComment = {
-    id: string;
-    author: F0ChatUser;
-    /** Sanitized HTML — comments carry mentions, so they are not plain text. */
-    text: string;
-    createdAt: string;
-    /** Whether the current user may edit or delete it. */
-    isMine?: boolean;
-};
-
 /** The community a post came from, for an aggregated feed's origin label. */
-declare type F0ChatPostCommunity = {
+export declare type F0ChatPostCommunity = {
     id: string;
     /** As the reader knows it — "Barcelona", "Company news". No `#`. */
     name: string;
@@ -8609,14 +8481,6 @@ export declare type F0ChatPostRequiredAction = {
     type: "acknowledge";
     /** ISO, when the CURRENT user completed it. Absent ⇒ still pending. */
     completedAt?: string;
-};
-
-/** One entry of "who has opened this post". */
-export declare type F0ChatPostVisit = {
-    id: string;
-    /** Absent when the host cannot resolve the visitor — rendered as "Anonymous". */
-    author?: F0ChatUser;
-    createdAt: string;
 };
 
 export declare type F0ChatProps = {
@@ -8955,7 +8819,7 @@ export declare type F0ChatRuntime = {
 };
 
 /** A post waiting for its moment. */
-declare type F0ChatScheduledPost = {
+export declare type F0ChatScheduledPost = {
     id: string;
     title: string;
     /** ISO — when it becomes visible. */
@@ -8997,7 +8861,7 @@ export declare type F0ChatSendInput = {
  * counters, no reactions — nothing has happened yet), so the host closes over
  * the one it is building the menu for instead of being handed it back.
  */
-declare type F0ChatShelfAction = {
+export declare type F0ChatShelfAction = {
     id: string;
     label: string;
     icon?: IconType;
@@ -9684,34 +9548,13 @@ declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 /** @experimental This is an experimental component, use it at your own risk. */
 export declare const F0LocationInput: ForwardRefExoticComponent<F0LocationInputProps_2 & RefAttributes<HTMLInputElement>>;
 
-export declare type F0LocationInputChangeMeta = {
-    /**
-     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
-     * `"typed"` in every other case, which includes a suggestion that could not
-     * be resolved, so do not read `"typed"` as "the user did not use the list".
-     * `isResolved` is what says whether the value can be trusted.
-     */
-    source: "picked" | "typed";
-    /** Whether the value still carries trustworthy coordinates and place id */
-    isResolved: boolean;
-};
-
-export declare interface F0LocationInputProps {
+declare type F0LocationInputBaseProps = {
     label: string;
     /** Controlled value */
     value?: F0LocationInputValue;
     /** Initial value when uncontrolled */
     defaultValue?: F0LocationInputValue;
     onChange?: (value: F0LocationInputValue | undefined, meta: F0LocationInputChangeMeta) => void;
-    /**
-     * Renders the whole address as separate fields the user can fill in by
-     * hand: country, address line 1 and 2, city, region and postal code.
-     * Changing the country clears the other parts, since they described a
-     * place in the previous one. Without it the component is the address
-     * field alone.
-     * @default false
-     */
-    manualEntry?: boolean;
     /** Overrides for the per-part labels, which default to translated copy */
     partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
@@ -9723,20 +9566,6 @@ export declare interface F0LocationInputProps {
      * silently lock every later search to its country.
      */
     defaultCountry?: CountryCode;
-    /**
-     * Suggestion provider. Without it there is no autocomplete and the parts
-     * stand alone as plain fields. Called with the current country so the
-     * consumer can restrict the provider (e.g. Places `componentRestrictions`).
-     */
-    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /**
-     * Resolves a picked suggestion into a full value. Every field of
-     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
-     * the value needs `formatted` or `addressLine1` to be shown at all, and
-     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
-     * provider's formatted address without its granular parts is supported.
-     */
-    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
     placeholder?: string;
     hideLabel?: boolean;
     labelIcon?: IconType;
@@ -9753,7 +9582,27 @@ export declare interface F0LocationInputProps {
     autoFocus?: boolean;
     onBlur?: () => void;
     onFocus?: () => void;
-}
+};
+
+export declare type F0LocationInputChangeMeta = {
+    /**
+     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
+     * `"typed"` in every other case, which includes a suggestion that could not
+     * be resolved, so do not read `"typed"` as "the user did not use the list".
+     * `isResolved` is what says whether the value can be trusted.
+     */
+    source: "picked" | "typed";
+    /** Whether the value still carries trustworthy coordinates and place id */
+    isResolved: boolean;
+};
+
+export declare type F0LocationInputProps = F0LocationInputBaseProps & F0LocationInputShapeProps;
+
+/**
+ * The two shapes a location field takes: a searchable address line, or every
+ * part typed by hand.
+ */
+export declare type F0LocationInputShapeProps = F0LocationSearchProps | F0LocationManualProps;
 
 /**
  * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
@@ -9781,9 +9630,57 @@ export declare type F0LocationInputValue = {
     timezone?: string;
 };
 
+/**
+ * Every part typed by hand. Nothing is searched in this shape, so a provider
+ * would never be called: `searchPlaces` and `resolvePlace` are ruled out
+ * rather than quietly ignored.
+ */
+declare type F0LocationManualProps = {
+    /**
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code.
+     * Changing the country clears the other parts, since they described a
+     * place in the previous one.
+     */
+    manualEntry: true;
+    searchPlaces?: never;
+    resolvePlace?: never;
+    manualEntryFallback?: never;
+};
+
 export declare type F0LocationSearchContext = {
     /** Country to scope the search to, when one is selected or implied */
     country?: CountryCode;
+};
+
+/**
+ * The address line as an autocomplete. A provider makes the suggestions, and
+ * the user who finds nothing there can still fall back to typing.
+ */
+declare type F0LocationSearchProps = {
+    manualEntry?: false;
+    /**
+     * Suggestion provider. Without it there is no autocomplete and the address
+     * line is a plain field. Called with the current country so the consumer
+     * can restrict the provider (e.g. Places `componentRestrictions`).
+     */
+    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
+    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
+    /**
+     * Whether a search that comes back empty offers to switch to manual entry.
+     * Turn it off where a typed address is of no use to the consumer, such as a
+     * field that feeds a map or a geofence and needs the coordinates only a
+     * picked place carries.
+     * @default true
+     */
+    manualEntryFallback?: boolean;
 };
 
 export declare type F0LocationSuggestion = {
@@ -10053,11 +9950,7 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      * zoom in - best for a world-scale view. Changing it re-projects live.
      */
     projection?: F0MapProjection;
-    /**
-     * Rendering engine. Defaults to the `F0Provider` `map.provider`, and to
-     * `maplibre` when that is unset: it needs no API key, so the library default
-     * cannot depend on a billing account being registered.
-     */
+    /** Defaults to the `F0Provider` `map.provider`, then to `maplibre`. */
     provider?: F0MapProvider;
     /** Show the skeleton instead of the map. */
     loading?: boolean;
@@ -10068,13 +9961,8 @@ export declare interface F0MapProps extends WithDataTestIdProps {
 }
 
 /**
- * Which rendering engine a style or a map is written for. A leaf module on
- * purpose: `F0Provider` and the registry both need the name, and neither may
- * pull an engine (or F0Map itself) in to get it.
- *
- * The tag exists so a style built for one engine can never be handed to
- * another: the shapes are not interchangeable, and without it the mismatch
- * would only surface at runtime.
+ * A leaf module on purpose: `F0Provider` and the registry both need the name,
+ * and neither may pull an engine in to get it.
  */
 export declare type F0MapProvider = "maplibre" | "google";
 
@@ -14220,6 +14108,7 @@ export declare const OneRestrictComponent: FC<RestrictComponentProps>;
 
 export declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
+    selectableTotal?: number;
     filters: FiltersState<Filters>;
     search: string | undefined;
     isInitialLoading: boolean;
@@ -15701,8 +15590,6 @@ export declare type SidePanelContent = {
 };
 
 declare type SidePanelContextValue = {
-    /** Every view declared for this frame, in declaration order. */
-    views: SidePanelViewDefinition[];
     /**
      * Whether anything can occupy the panel. False means the panel does not
      * exist: no chrome, no reserved width, no DOM.
@@ -15774,16 +15661,16 @@ export declare type SidePanelLayout = "sidepanel" | "fullscreen";
  * communications and no assistant got no panel.
  */
 export declare type SidePanelViewDefinition = {
+    /**
+     * Names the claim on the panel — `"ai"` is f0's own. Host bookkeeping: the
+     * panel never looks a view up by it, and the id it restores on reload is the
+     * CONTENT's, not this one.
+     */
     id: string;
     /** Can this view occupy the panel at all? @default true */
     available?: boolean;
     /** Edge this view docks to. Falls back to the panel's `side`. */
     side?: "left" | "right";
-    /**
-     * Static renderer, for views that own their whole surface (the AI chat).
-     * Omit for views whose content is pushed at runtime via `present()`.
-     */
-    render?: () => React.ReactNode;
 };
 
 /**

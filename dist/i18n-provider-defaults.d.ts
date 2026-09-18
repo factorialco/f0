@@ -725,12 +725,6 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -979,138 +973,16 @@ export declare const defaultTranslations: {
             readonly discard: "Discard";
             readonly keepEditing: "Keep editing";
             readonly publishError: "Couldn't publish this post";
-            readonly emptyTitle: "No posts yet";
-            readonly emptyDescription: "Posts shared in this community will appear here.";
-            readonly emptyDescriptionCanPost: "Be the first to post here.";
             readonly pinnedPost: "Pinned post";
             readonly pinnedPosts: "Pinned";
-            readonly pinnedPostsCount: {
-                readonly one: "{{count}} pinned post";
-                readonly other: "{{count}} pinned posts";
-            };
-            readonly pinPost: "Pin post";
             readonly unpinPost: "Unpin post";
             readonly goToPost: "Go to post";
-            readonly noPinnedPosts: "No pinned posts";
-            readonly noPinnedPostsDescription: "Pin a post and it stays at the top of this community.";
             readonly scheduledPosts: "Scheduled";
-            readonly scheduledPostsCount: {
-                readonly one: "{{count}} scheduled post";
-                readonly other: "{{count}} scheduled posts";
-            };
             readonly scheduledEvent: "Event";
-            /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
-            readonly publishesAt: "Publishes {{when}}";
-            readonly noScheduledPosts: "Nothing scheduled";
-            readonly noScheduledPostsDescription: "Posts you schedule will wait here until their time.";
-            readonly scheduledActions: "Scheduled post actions";
-            readonly publishNow: "Publish now";
-            readonly cancelScheduled: "Cancel";
             readonly draftPosts: "Drafts";
-            readonly draftPostsCount: {
-                readonly one: "{{count}} draft";
-                readonly other: "{{count}} drafts";
-            };
-            /** Where a scheduled row prints its date, a draft prints this. */
             readonly draftUntitled: "Untitled post";
             readonly draftSavedAt: "Saved {{when}}";
-            readonly publishDraft: "Publish";
-            readonly deleteDraft: "Delete draft";
             readonly shelfLabel: "Pinned, scheduled and draft posts";
-        };
-    };
-    readonly communities: {
-        readonly composer: {
-            readonly createPost: "Create post";
-            readonly createEvent: "Create event";
-            readonly editPost: "Edit post";
-            readonly basicInformation: "Basic information";
-            readonly postSettings: "Post settings";
-            readonly postCover: "Post cover";
-            readonly addMedia: "Drag and drop or click here";
-            readonly addMediaSubtitle: "any image, video or GIF";
-            readonly addMediaSize: "1200x600px";
-            readonly deletePhoto: "Delete photo";
-            readonly deleteVideo: "Delete video";
-            readonly coverActions: "Cover options";
-            readonly title: "Title";
-            readonly titlePlaceholder: "e.g. World Mental Health Day";
-            readonly description: "Description";
-            readonly descriptionPlaceholder: "Share what's special about it";
-            readonly attachmentsSizePerPost: "Up to 150 MB in attachments per post";
-            readonly previousAttachments: "Previously added attachments";
-            readonly isEventLabel: "This is an event";
-            readonly isEventDescription: "Select this to include a date, time, and location for this event.";
-            readonly eventStartDate: "Event start date";
-            readonly eventStartTime: "Start time";
-            readonly eventLocation: "Event location";
-            readonly eventLocationPlaceholder: "Where will this take place?";
-            readonly requireAction: "Require action";
-            readonly requireActionDescription: "Select how you want to track that users have taken the required action";
-            readonly actionType: "Action type";
-            readonly actionTypePlaceholder: "Select action type";
-            readonly actionTypeAcknowledge: "Acknowledge post";
-            readonly actionTypeAcknowledgeDescription: "Employees read and acknowledge the post";
-            readonly actionTypeWatchVideo: "Watch video";
-            readonly actionTypeWatchVideoDescription: "Employees watch the entire video";
-            readonly actionTypeClickedLink: "Clicked a link";
-            readonly actionTypeClickedLinkDescription: "Employees click the first link in the post";
-            readonly actionTypeComingSoon: "Coming soon";
-            readonly continue: "Continue";
-            readonly publishTitle: "Publish";
-            readonly publishDescription: "When publishing the post, it will be visible in the dashboard of each employee.";
-            readonly publish: "Publish";
-            readonly selectCommunity: "Select community";
-            readonly allowCommentsAndReactions: "Allow comments and reactions.";
-            readonly sendEmailNotification: "Send email notification";
-            readonly schedulePost: "Schedule post";
-            readonly scheduleDate: "Date";
-            readonly scheduleTime: "Time";
-            readonly confirm: "Confirm";
-            readonly cancel: "Cancel";
-            readonly saveAsDraft: "Save as draft";
-            readonly save: "Save";
-            readonly cantBeEmpty: "can't be empty";
-            readonly invalidInput: "Invalid input. Only alphanumeric characters are allowed";
-            readonly publishedSuccess: "The post has been published";
-            readonly scheduledSuccess: "The post has been scheduled";
-            readonly draftSuccess: "The post has been saved as draft";
-            readonly publishError: "There was an error creating the post, please try again.";
-        };
-        readonly detail: {
-            readonly postActions: "Post actions";
-            readonly edit: "Edit post";
-            readonly delete: "Delete post";
-            readonly deleteDescription: "Are you sure you want to delete this post? This action cannot be undone.";
-            readonly proceed: "Proceed";
-            readonly turnInteractionsOff: "Turn comments and reactions off";
-            readonly turnInteractionsOn: "Turn comments and reactions on";
-            readonly insights: "Insights";
-            readonly visits: {
-                readonly one: "Visit";
-                readonly other: "Visits";
-            };
-            readonly postViews: "Post views";
-            readonly anonymous: "Anonymous";
-            readonly comments: {
-                readonly one: "{{count}} comment";
-                readonly other: "{{count}} comments";
-            };
-            readonly commentPlaceholder: "Click here to write a comment...";
-            readonly submit: "Submit";
-            readonly deleteComment: "Delete comment";
-            readonly deleteCommentDescription: "Are you sure you want to delete this comment? This action cannot be undone.";
-            readonly editComment: "Edit";
-            readonly acknowledgeRequired: "Post acknowledgement required";
-            readonly acknowledge: "I acknowledge";
-            readonly acknowledgeLater: "Acknowledge later";
-            readonly acknowledgedOn: "Acknowledged on {{date}}, at {{time}}";
-            readonly closePostTitle: "Close post?";
-            readonly closePostDescription: "You haven't acknowledged this post yet. You can acknowledge it later.";
-            readonly closePost: "Close post";
-            readonly continueReading: "Continue reading";
-            readonly close: "Close";
-            readonly home: "Home";
         };
     };
     readonly dataChart: {
@@ -1400,6 +1272,10 @@ export declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -1439,19 +1315,14 @@ export declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {

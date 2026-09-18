@@ -1965,23 +1965,23 @@ declare type BoxVariantProps = VariantProps<typeof boxVariants>;
 
 declare const boxVariants: (props?: ({
     zIndex?: "0" | "auto" | "10" | "20" | "50" | "40" | "30" | undefined;
-    boxShadow?: "none" | "lg" | "md" | "sm" | "xl" | undefined;
+    boxShadow?: "lg" | "md" | "sm" | "none" | "xl" | undefined;
     divider?: "x" | "y" | undefined;
     dividerColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     overflow?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowX?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowY?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     borderColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
-    border?: "none" | "default" | "thick" | undefined;
-    borderTop?: "none" | "default" | "thick" | undefined;
-    borderBottom?: "none" | "default" | "thick" | undefined;
-    borderLeft?: "none" | "default" | "thick" | undefined;
-    borderRight?: "none" | "default" | "thick" | undefined;
-    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
-    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    border?: "default" | "none" | "thick" | undefined;
+    borderTop?: "default" | "none" | "thick" | undefined;
+    borderBottom?: "default" | "none" | "thick" | undefined;
+    borderLeft?: "default" | "none" | "thick" | undefined;
+    borderRight?: "default" | "none" | "thick" | undefined;
+    borderRadius?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -1995,32 +1995,32 @@ declare const boxVariants: (props?: ({
     colSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "full" | undefined;
     colStart?: "1" | "2" | "3" | "4" | "auto" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | undefined;
     rowSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "full" | undefined;
-    gap?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    gap?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     alignItems?: "center" | "end" | "baseline" | "start" | "stretch" | undefined;
     justifyContent?: "center" | "end" | "start" | "between" | "stretch" | "around" | "evenly" | undefined;
     flexDirection?: "row" | "column" | "column-reverse" | "row-reverse" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
     grow?: boolean | undefined;
     shrink?: boolean | undefined;
-    margin?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginX?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginY?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginTop?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginBottom?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginLeft?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginRight?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    padding?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingX?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingY?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingTop?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingBottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    top?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    right?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    bottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    left?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    display?: "block" | "inline" | "flex" | "grid" | "inline-flex" | "none" | undefined;
+    margin?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginX?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginY?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginTop?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginBottom?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginLeft?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginRight?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    padding?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingX?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingY?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingTop?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingBottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    top?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    right?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    bottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    left?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    display?: "block" | "grid" | "none" | "inline" | "flex" | "inline-flex" | undefined;
     position?: "fixed" | "sticky" | "relative" | "static" | "absolute" | undefined;
 } & ({
     class?: ClassValue;
@@ -3902,6 +3902,14 @@ export declare type DashboardChartConfig = BarChartConfig | LineChartConfig | Fu
 export declare interface DashboardChartData {
     /** Category axis labels. Required for bar/line charts. */
     categories?: string[];
+    /**
+     * Constants to draw across the plot — a peer median, a target, an average.
+     *
+     * Part of the DATA, not the config: a figure like this arrives with the
+     * values it is compared against, and changes when they do. Bar and line
+     * charts render them; every other type ignores them.
+     */
+    referenceLines?: F0DataChartReferenceLine[];
     /** X-axis category labels for heatmap charts. */
     xCategories?: string[];
     /** Y-axis category labels for heatmap charts. */
@@ -4126,6 +4134,30 @@ export declare interface DashboardMetricData {
     value: number;
     /** Optional previous value — used to compute a trend indicator */
     previousValue?: number;
+    /**
+     * A reference figure to show the value against, under the number.
+     *
+     * Distinct from {@link DashboardMetricData.previousValue}, which is this
+     * metric at an earlier time and renders as a rise or a fall. A comparison is
+     * a different quantity entirely — a peer median, a target, a company-wide
+     * average — so it is stated rather than turned into a trend: an arrow next to
+     * it would read as "it moved", which it did not.
+     *
+     * `value` is in the metric's own units and is formatted exactly like the
+     * headline number, so the two can be read against each other. `label` says
+     * what the figure is, in the consumer's own words and language.
+     */
+    comparison?: {
+        value: number;
+        label: string;
+        /**
+         * Where the figure comes from, revealed by an ⓘ icon after it — "the
+         * median across all companies on Factorial", say. A string renders a
+         * plain tooltip; the structured form renders a hoverable card that can
+         * carry a link, the same affordance as `DashboardItemBase.info`.
+         */
+        info?: string | InfoHintContent;
+    };
 }
 
 /**
@@ -4596,7 +4628,7 @@ export declare type DataSourceItemId = string | number | symbol;
  * Wrapper component that conditionally renders a `data-testid` attribute.
  *
  * When `dataTestId` is provided and the platform context enables test id rendering,
- * wraps children in a `<div data-testid={dataTestId} style={{ display: "contents" }}>`.
+ * wraps children in a `<div data-testid={dataTestId} className="contents">`.
  * Otherwise renders children as-is with no wrapper element.
  *
  * Use this directly inside components with complex generic types (e.g. F0Select,
@@ -4620,6 +4652,10 @@ declare type DateCellConfig = {
     minDate?: Date;
     /** Latest selectable date. Dates after this are disabled in the picker. */
     maxDate?: Date;
+    /** Show the leading calendar icon in the cell. Defaults to `true`. */
+    showIcon?: boolean;
+    /** Show a clear button to empty the cell's date. Defaults to `false`. */
+    clearable?: boolean;
 };
 
 /**
@@ -5559,12 +5595,6 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
-            /**
-             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
-             * override it — factorial renders it as plain "Ask" for the widget and
-             * insight-card buttons). This menu entry needs the product name spelled
-             * out, so it owns its own key.
-             */
             readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
@@ -5813,138 +5843,16 @@ export declare const defaultTranslations: {
             readonly discard: "Discard";
             readonly keepEditing: "Keep editing";
             readonly publishError: "Couldn't publish this post";
-            readonly emptyTitle: "No posts yet";
-            readonly emptyDescription: "Posts shared in this community will appear here.";
-            readonly emptyDescriptionCanPost: "Be the first to post here.";
             readonly pinnedPost: "Pinned post";
             readonly pinnedPosts: "Pinned";
-            readonly pinnedPostsCount: {
-                readonly one: "{{count}} pinned post";
-                readonly other: "{{count}} pinned posts";
-            };
-            readonly pinPost: "Pin post";
             readonly unpinPost: "Unpin post";
             readonly goToPost: "Go to post";
-            readonly noPinnedPosts: "No pinned posts";
-            readonly noPinnedPostsDescription: "Pin a post and it stays at the top of this community.";
             readonly scheduledPosts: "Scheduled";
-            readonly scheduledPostsCount: {
-                readonly one: "{{count}} scheduled post";
-                readonly other: "{{count}} scheduled posts";
-            };
             readonly scheduledEvent: "Event";
-            /** The preview's bar, e.g. "Publishes 4 Jun at 09:00". */
-            readonly publishesAt: "Publishes {{when}}";
-            readonly noScheduledPosts: "Nothing scheduled";
-            readonly noScheduledPostsDescription: "Posts you schedule will wait here until their time.";
-            readonly scheduledActions: "Scheduled post actions";
-            readonly publishNow: "Publish now";
-            readonly cancelScheduled: "Cancel";
             readonly draftPosts: "Drafts";
-            readonly draftPostsCount: {
-                readonly one: "{{count}} draft";
-                readonly other: "{{count}} drafts";
-            };
-            /** Where a scheduled row prints its date, a draft prints this. */
             readonly draftUntitled: "Untitled post";
             readonly draftSavedAt: "Saved {{when}}";
-            readonly publishDraft: "Publish";
-            readonly deleteDraft: "Delete draft";
             readonly shelfLabel: "Pinned, scheduled and draft posts";
-        };
-    };
-    readonly communities: {
-        readonly composer: {
-            readonly createPost: "Create post";
-            readonly createEvent: "Create event";
-            readonly editPost: "Edit post";
-            readonly basicInformation: "Basic information";
-            readonly postSettings: "Post settings";
-            readonly postCover: "Post cover";
-            readonly addMedia: "Drag and drop or click here";
-            readonly addMediaSubtitle: "any image, video or GIF";
-            readonly addMediaSize: "1200x600px";
-            readonly deletePhoto: "Delete photo";
-            readonly deleteVideo: "Delete video";
-            readonly coverActions: "Cover options";
-            readonly title: "Title";
-            readonly titlePlaceholder: "e.g. World Mental Health Day";
-            readonly description: "Description";
-            readonly descriptionPlaceholder: "Share what's special about it";
-            readonly attachmentsSizePerPost: "Up to 150 MB in attachments per post";
-            readonly previousAttachments: "Previously added attachments";
-            readonly isEventLabel: "This is an event";
-            readonly isEventDescription: "Select this to include a date, time, and location for this event.";
-            readonly eventStartDate: "Event start date";
-            readonly eventStartTime: "Start time";
-            readonly eventLocation: "Event location";
-            readonly eventLocationPlaceholder: "Where will this take place?";
-            readonly requireAction: "Require action";
-            readonly requireActionDescription: "Select how you want to track that users have taken the required action";
-            readonly actionType: "Action type";
-            readonly actionTypePlaceholder: "Select action type";
-            readonly actionTypeAcknowledge: "Acknowledge post";
-            readonly actionTypeAcknowledgeDescription: "Employees read and acknowledge the post";
-            readonly actionTypeWatchVideo: "Watch video";
-            readonly actionTypeWatchVideoDescription: "Employees watch the entire video";
-            readonly actionTypeClickedLink: "Clicked a link";
-            readonly actionTypeClickedLinkDescription: "Employees click the first link in the post";
-            readonly actionTypeComingSoon: "Coming soon";
-            readonly continue: "Continue";
-            readonly publishTitle: "Publish";
-            readonly publishDescription: "When publishing the post, it will be visible in the dashboard of each employee.";
-            readonly publish: "Publish";
-            readonly selectCommunity: "Select community";
-            readonly allowCommentsAndReactions: "Allow comments and reactions.";
-            readonly sendEmailNotification: "Send email notification";
-            readonly schedulePost: "Schedule post";
-            readonly scheduleDate: "Date";
-            readonly scheduleTime: "Time";
-            readonly confirm: "Confirm";
-            readonly cancel: "Cancel";
-            readonly saveAsDraft: "Save as draft";
-            readonly save: "Save";
-            readonly cantBeEmpty: "can't be empty";
-            readonly invalidInput: "Invalid input. Only alphanumeric characters are allowed";
-            readonly publishedSuccess: "The post has been published";
-            readonly scheduledSuccess: "The post has been scheduled";
-            readonly draftSuccess: "The post has been saved as draft";
-            readonly publishError: "There was an error creating the post, please try again.";
-        };
-        readonly detail: {
-            readonly postActions: "Post actions";
-            readonly edit: "Edit post";
-            readonly delete: "Delete post";
-            readonly deleteDescription: "Are you sure you want to delete this post? This action cannot be undone.";
-            readonly proceed: "Proceed";
-            readonly turnInteractionsOff: "Turn comments and reactions off";
-            readonly turnInteractionsOn: "Turn comments and reactions on";
-            readonly insights: "Insights";
-            readonly visits: {
-                readonly one: "Visit";
-                readonly other: "Visits";
-            };
-            readonly postViews: "Post views";
-            readonly anonymous: "Anonymous";
-            readonly comments: {
-                readonly one: "{{count}} comment";
-                readonly other: "{{count}} comments";
-            };
-            readonly commentPlaceholder: "Click here to write a comment...";
-            readonly submit: "Submit";
-            readonly deleteComment: "Delete comment";
-            readonly deleteCommentDescription: "Are you sure you want to delete this comment? This action cannot be undone.";
-            readonly editComment: "Edit";
-            readonly acknowledgeRequired: "Post acknowledgement required";
-            readonly acknowledge: "I acknowledge";
-            readonly acknowledgeLater: "Acknowledge later";
-            readonly acknowledgedOn: "Acknowledged on {{date}}, at {{time}}";
-            readonly closePostTitle: "Close post?";
-            readonly closePostDescription: "You haven't acknowledged this post yet. You can acknowledge it later.";
-            readonly closePost: "Close post";
-            readonly continueReading: "Continue reading";
-            readonly close: "Close";
-            readonly home: "Home";
         };
     };
     readonly dataChart: {
@@ -6234,6 +6142,10 @@ export declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -6273,19 +6185,14 @@ export declare const defaultTranslations: {
         readonly stepOf: "Step {{current}} of {{total}}";
     };
     readonly widgets: {
-        /** Turns a widget over to read what it is telling you (Home's `info`). */
         readonly whatThisMeans: "What this info means?";
-        /** The button on that other side, which turns it back. */
         readonly gotIt: "Got it";
-        /** The widget menu's own items, and the dialogs they open. */
         readonly editParams: "Edit params";
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
         readonly configureWidget: "Configure {{title}}";
-        /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
-        /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
         readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
@@ -6817,7 +6724,8 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     numberConfig?: NumberCellConfig<R>;
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
-     * restrict the selectable date range in the picker.
+     * restrict the selectable date range in the picker, `showIcon` to hide
+     * the leading calendar icon, and `clearable` for a clear button.
      *
      * Can be a static object or a function that receives the current row item
      * to return a per-row range (e.g. bound one date field by another field's
@@ -9506,6 +9414,8 @@ export declare interface F0DataChartBarProps extends F0DataChartBaseProps {
     type: "bar";
     /** One or more data series to render as bars */
     series: F0DataChartBarSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Bar orientation. @default "vertical" */
     orientation?: "vertical" | "horizontal";
     /** Stack all series into a single bar per category. @default false */
@@ -9856,6 +9766,8 @@ export declare interface F0DataChartLineProps extends F0DataChartBaseProps {
     type: "line";
     /** One or more data series to render as lines */
     series: F0DataChartLineSeries[];
+    /** Constants drawn across the plot. See {@link F0DataChartReferenceLine}. */
+    referenceLines?: F0DataChartReferenceLine[];
     /** Line interpolation type. @default "linear" */
     lineType?: F0DataChartLineType;
     /** Show gradient area fill below lines. @default true */
@@ -10075,6 +9987,35 @@ export declare interface F0DataChartRadarSeries {
     data: number[];
     /** Override color for this series. Must be an F0 design token name. */
     color?: ChartColorToken;
+}
+
+/**
+ * A constant drawn across the whole plot rather than per category.
+ *
+ * For a figure that does not vary with the categories — a peer median, a
+ * target, an average. Drawn as one dashed line with its label at the end, so it
+ * reads as a threshold the bars are measured against rather than as another
+ * series: a constant repeated once per category would claim to be a quantity
+ * each of them has.
+ */
+export declare interface F0DataChartReferenceLine {
+    /** Where on the value axis to draw it. */
+    value: number;
+    /** Shown at the end of the line. Omit for an unlabelled rule. */
+    label?: string;
+    /** Must be an F0 design token name. Falls back to a neutral line colour. */
+    color?: ChartColorToken;
+    /** Solid instead of dashed. @default false */
+    solid?: boolean;
+    /**
+     * Shown when the reader hovers the line, under its label and value.
+     *
+     * For saying what the figure actually is — which companies a peer median
+     * covers, which quarter a target belongs to, whether it is an estimate. A
+     * line with no description is not hoverable: there would be nothing to add
+     * beyond the label already printed beside it.
+     */
+    description?: string;
 }
 
 /**
@@ -10930,7 +10871,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0LocationField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -10970,7 +10911,7 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -11530,6 +11471,42 @@ export declare namespace f0FormField {
     export function phone(config: PhoneFieldShortcutConfig & {
         optional?: false;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
+    export type LocationObjectSchema = z.ZodEffects<z.ZodObject<{
+        formatted: z.ZodOptional<z.ZodString>;
+        addressLine1: z.ZodOptional<z.ZodString>;
+        addressLine2: z.ZodOptional<z.ZodString>;
+        city: z.ZodOptional<z.ZodString>;
+        state: z.ZodOptional<z.ZodString>;
+        postalCode: z.ZodOptional<z.ZodString>;
+        country: z.ZodOptional<z.ZodString>;
+        placeId: z.ZodOptional<z.ZodString>;
+        latitude: z.ZodOptional<z.ZodNumber>;
+        longitude: z.ZodOptional<z.ZodNumber>;
+        timezone: z.ZodOptional<z.ZodString>;
+    }>>;
+    export type LocationFieldShortcutConfig = DistributiveOmit<F0LocationFieldConfig, "fieldType"> & {
+        optional?: boolean;
+        /**
+         * Requires a value picked from the suggestions, i.e. one that still
+         * carries a place id and coordinates. Use it when the address feeds a
+         * map or a geofence; a typed address has no coordinates until the
+         * consumer geocodes it. Only satisfiable with `searchPlaces` and
+         * `resolvePlace`, and without `manualEntry`, since nothing else produces
+         * a resolved value.
+         * @default false
+         */
+        requireResolved?: boolean;
+        /** Message shown when the field is empty and required */
+        emptyMessage?: string;
+        /** Message shown when `requireResolved` is not satisfied */
+        unresolvedMessage?: string;
+    };
+    export function location(config: LocationFieldShortcutConfig & {
+        optional: true;
+    }): z.ZodOptional<LocationObjectSchema> & F0ZodType<z.ZodOptional<LocationObjectSchema>>;
+    export function location(config: LocationFieldShortcutConfig & {
+        optional?: false;
+    }): LocationObjectSchema & F0ZodType<LocationObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -12251,13 +12228,133 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 };
 
 /**
- * Which rendering engine a style or a map is written for. A leaf module on
- * purpose: `F0Provider` and the registry both need the name, and neither may
- * pull an engine (or F0Map itself) in to get it.
- *
- * The tag exists so a style built for one engine can never be handed to
- * another: the shapes are not interchangeable, and without it the mismatch
- * would only surface at runtime.
+ * F0 config options specific to location fields. The shape props come
+ * straight from the component, so the field inherits its rule: manual entry
+ * is typed rather than searched, and rules out a suggestion provider instead
+ * of accepting one it would never call.
+ */
+export declare type F0LocationConfig = {
+    /** Overrides for the per-part labels, which default to translated copy */
+    partLabels?: Partial<Record<LocationPart, string>>;
+    /** Restricts the country selector. A single entry also scopes the search */
+    allowedCountries?: CountryCode[];
+    /** Scopes the search. Never read from the value's own country */
+    defaultCountry?: CountryCode;
+} & F0LocationInputShapeProps;
+
+/**
+ * Location field with all properties for rendering
+ */
+export declare type F0LocationField = F0BaseField & F0LocationConfig & {
+    type: "location";
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean;
+    /** Conditional rendering based on another field's value */
+    renderIf?: LocationFieldRenderIf;
+};
+
+/**
+ * Config for location fields (form value is a structured address object)
+ */
+export declare type F0LocationFieldConfig = F0BaseConfig & F0LocationConfig & {
+    fieldType: "location";
+};
+
+/**
+ * The two shapes a location field takes: a searchable address line, or every
+ * part typed by hand.
+ */
+declare type F0LocationInputShapeProps = F0LocationSearchProps | F0LocationManualProps;
+
+/**
+ * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
+ * country so every consumer stores the same thing.
+ */
+declare type F0LocationInputValue = {
+    /** Display string. Comes from `resolvePlace` when picked, assembled locally once edited */
+    formatted?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    /** Region, state or province, as free text */
+    state?: string;
+    postalCode?: string;
+    country?: CountryCode;
+    /**
+     * Provider id of the picked place. Cleared as soon as a part that describes
+     * where the pin is gets edited; `addressLine2` does not, since a floor
+     * number stays inside the same building.
+     */
+    placeId?: string;
+    latitude?: number;
+    longitude?: number;
+    /** Carried through from `resolvePlace`, never derived here */
+    timezone?: string;
+};
+
+/**
+ * Every part typed by hand. Nothing is searched in this shape, so a provider
+ * would never be called: `searchPlaces` and `resolvePlace` are ruled out
+ * rather than quietly ignored.
+ */
+declare type F0LocationManualProps = {
+    /**
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code.
+     * Changing the country clears the other parts, since they described a
+     * place in the previous one.
+     */
+    manualEntry: true;
+    searchPlaces?: never;
+    resolvePlace?: never;
+    manualEntryFallback?: never;
+};
+
+declare type F0LocationSearchContext = {
+    /** Country to scope the search to, when one is selected or implied */
+    country?: CountryCode;
+};
+
+/**
+ * The address line as an autocomplete. A provider makes the suggestions, and
+ * the user who finds nothing there can still fall back to typing.
+ */
+declare type F0LocationSearchProps = {
+    manualEntry?: false;
+    /**
+     * Suggestion provider. Without it there is no autocomplete and the address
+     * line is a plain field. Called with the current country so the consumer
+     * can restrict the provider (e.g. Places `componentRestrictions`).
+     */
+    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
+    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
+    /**
+     * Whether a search that comes back empty offers to switch to manual entry.
+     * Turn it off where a typed address is of no use to the consumer, such as a
+     * field that feeds a map or a geofence and needs the coordinates only a
+     * picked place carries.
+     * @default true
+     */
+    manualEntryFallback?: boolean;
+};
+
+declare type F0LocationSuggestion = {
+    id: string;
+    label: string;
+    /** Appended to the label, so each suggestion reads as one line */
+    description?: string;
+};
+
+/**
+ * A leaf module on purpose: `F0Provider` and the registry both need the name,
+ * and neither may pull an engine in to get it.
  */
 declare type F0MapProvider = "maplibre" | "google";
 
@@ -12440,12 +12537,12 @@ declare type F0NumberSelectConfig<R extends Record<string, unknown> = Record<str
 };
 
 /**
- * Config for object fields (richtext, daterange, phone, or custom)
+ * Config for object fields (richtext, daterange, phone, location, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
+declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0LocationFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -14061,7 +14158,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -15874,6 +15971,16 @@ declare interface LocalizedOption<T> {
 }
 
 /**
+ * All valid renderIf conditions for location fields
+ */
+declare type LocationFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+declare type LocationPart = (typeof locationParts)[number];
+
+/** Every part the manual entry block renders, in the order it renders them */
+declare const locationParts: readonly ["country", "addressLine1", "addressLine2", "city", "state", "postalCode"];
+
+/**
  * The parts of a question that `lockedFields` can freeze on their own, without
  * locking the question outright. Both are the question's wording — what it asks
  * — as opposed to the answer it collects.
@@ -15898,11 +16005,7 @@ export declare type LockedSectionNotice = {
 };
 
 declare interface MapContextValue {
-    /**
-     * Engine every `F0Map` in the app uses unless it names its own. Defaults to
-     * `maplibre`: it is keyless, so a library default cannot depend on someone
-     * having registered a billing account.
-     */
+    /** Engine every `F0Map` uses unless it names its own. Keyless by default. */
     provider?: F0MapProvider;
     /** Settings the chosen engine needs, such as Google's API key. */
     config?: MapProviderConfig;
@@ -16939,6 +17042,7 @@ export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
 declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
+    selectableTotal?: number;
     filters: FiltersState<Filters>;
     search: string | undefined;
     isInitialLoading: boolean;
