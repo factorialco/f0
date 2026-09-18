@@ -113875,7 +113875,7 @@ function jG1({ metadata: e }) {
     a(n, { visualization: "card" })
   ] });
 }
-const y32 = "flex h-full min-h-[40px] w-full items-center border border-solid border-transparent px-3";
+const y32 = "flex h-full min-h-10 w-full items-center border border-solid border-transparent px-3";
 function b32(e) {
   const t = A.useRef({ value: e, previous: e });
   return A.useMemo(() => (t.current.value !== e && (t.current.previous = t.current.value, t.current.value = e), t.current.previous), [e]);
@@ -114076,8 +114076,7 @@ const c$ = A.forwardRef(
 c$.displayName = P32.displayName;
 function UG1({
   variant: e = "field",
-  // Typed `never`, stripped here so a stray prop from an untyped caller never
-  // reaches the DOM.
+  // Strip unsupported props from untyped callers before spreading to the DOM.
   editing: t,
   onDismiss: n,
   title: r,
@@ -117688,22 +117687,22 @@ const IY1 = ({ text: e }) => /* @__PURE__ */ i(
     {
       size: "sm",
       canGrow: !0,
-      class: "min-h-[32px]"
+      class: "min-h-8"
     },
     {
       size: "md",
       canGrow: !0,
-      class: "min-h-[40px]"
+      class: "min-h-10"
     },
     {
       size: "sm",
       canGrow: !1,
-      class: "h-[32px]"
+      class: "h-8"
     },
     {
       size: "md",
       canGrow: !1,
-      class: "h-[40px]"
+      class: "h-10"
     }
   ],
   defaultVariants: {
@@ -117734,8 +117733,8 @@ const IY1 = ({ text: e }) => /* @__PURE__ */ i(
           {
             "data-slot": "icon",
             className: U(
-              "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
-              a === "md" && "left-3 top-[9px]"
+              "pointer-events-none absolute left-2 top-1.25 my-auto h-5 w-5 shrink-0",
+              a === "md" && "left-3 top-2.25"
             ),
             children: /* @__PURE__ */ i(C1, { icon: o, color: "default" })
           }
@@ -126971,8 +126970,7 @@ const N42 = A.forwardRef(({ className: e, disabled: t, hideLabel: n, required: r
 N42.displayName = H$.displayName;
 function J23({
   variant: e = "field",
-  // Typed `never`, stripped here so a stray prop from an untyped caller never
-  // reaches the DOM.
+  // Strip unsupported props from untyped callers before spreading to the DOM.
   editing: t,
   onDismiss: n,
   title: r,
