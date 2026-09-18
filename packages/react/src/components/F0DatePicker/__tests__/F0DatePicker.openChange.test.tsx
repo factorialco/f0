@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from "vitest"
 import { screen, zeroRender as render, waitFor } from "@/testing/test-utils"
 import { F0DatePicker } from "../F0DatePicker"
 
-/**
- * A consumer that controls `open` only learns about a close through
- * `onOpenChange`. Picking a day closes the calendar, so it has to report it.
- */
 describe("F0DatePicker open reporting", () => {
   it("reports the close that selecting a day causes", async () => {
     const user = userEvent.setup()
