@@ -983,11 +983,7 @@ function YK({
     "div",
     {
       className: Be(
-        // 16px rather than the page's own 24: the header is chrome, and its
-        // first element is an avatar whose own shape carries the inset. At 24
-        // the title started a long way in from the sheet's edge while the rail
-        // beside it sits at 16.
-        "flex items-center justify-between px-4 py-4",
+        "flex items-center justify-between px-page py-4",
         Q ? "h-12" : "h-16"
       ),
       children: [
@@ -36030,7 +36026,7 @@ const Nd = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Zd = "w-[24rem] max-w-full", $P = "w-[32rem] max-w-full", eV = "gap-0.5", tV = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", iV = "bg-[hsl(222_31%_11%)]", nV = "bg-[hsl(220_39%_6%/0.72)]", gV = "bg-[hsl(220_39%_6%/0.6)]", aV = "bg-[hsl(220_39%_6%/0.55)]", oV = () => import("./LocationMap-D9DttHD-.js"), rV = Fr(oV), sV = 3 / 2, IV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, LU = ({
+}, Zd = "w-[24rem] max-w-full", $P = "w-[32rem] max-w-full", eV = "gap-0.5", tV = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", iV = "bg-[hsl(222_31%_11%)]", nV = "bg-[hsl(220_39%_6%/0.72)]", gV = "bg-[hsl(220_39%_6%/0.6)]", aV = "bg-[hsl(220_39%_6%/0.55)]", oV = () => import("./LocationMap-i2KWSWxR.js"), rV = Fr(oV), sV = 3 / 2, IV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, LU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -44970,7 +44966,7 @@ const PE = 1e3, VE = ({
     }
   );
 }, LT = /* @__PURE__ */ new Set(), XT = Fr(
-  () => import("./ChatPostComposerDialog-CXw3hIvv.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-DAkjFbqw.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), qT = () => {
