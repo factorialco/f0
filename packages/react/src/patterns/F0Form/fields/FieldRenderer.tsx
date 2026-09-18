@@ -217,9 +217,11 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
         name={field.id}
         {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
         render={({ field: formField, fieldState }) => (
-          /* No anchor wrapper: the rows are direct children of the card, which
-             is what lets the last one drop its divider. */
+          /* The anchor id rides on the row element itself: a wrapper would stop
+             the rows being direct children of the card, which is what lets the
+             last one drop its divider. */
           <InlineFieldRenderer
+            anchorId={anchorId}
             field={field}
             formField={formField}
             fieldState={fieldState}

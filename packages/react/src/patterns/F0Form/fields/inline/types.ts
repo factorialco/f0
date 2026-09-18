@@ -11,6 +11,8 @@ export type RowAction = {
 }
 
 export type InlineFieldRowProps = {
+  /** Anchor the row so section navigation and error scrolling can reach it. */
+  anchorId?: string
   label: string
   /** Hint shown beside the label. */
   hint?: string

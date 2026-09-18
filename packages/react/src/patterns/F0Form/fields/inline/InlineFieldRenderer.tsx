@@ -16,6 +16,8 @@ import type { RowAction } from "./types"
 import { useInlineField } from "./useInlineField"
 
 export interface InlineFieldRendererProps {
+  /** Anchor id for section navigation and error scrolling. */
+  anchorId?: string
   field: F0Field
   formField: import("react-hook-form").ControllerRenderProps<
     import("react-hook-form").FieldValues
@@ -31,6 +33,7 @@ export interface InlineFieldRendererProps {
 
 /** Owns edit mode and builds the row value and actions. */
 export function InlineFieldRenderer({
+  anchorId,
   field,
   formField,
   fieldState,
@@ -107,6 +110,7 @@ export function InlineFieldRenderer({
   return (
     <InlineFieldRow
       ref={activatorRef}
+      anchorId={anchorId}
       label={field.label}
       hint={field.helpText}
       value={input}

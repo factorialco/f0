@@ -152,6 +152,7 @@ const RowValue = forwardRef<
 export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
   function InlineFieldRow(
     {
+      anchorId,
       label,
       hint,
       value,
@@ -187,9 +188,10 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
 
     return (
       <div
+        id={anchorId}
         data-slot="inline-field-row"
         className={cn(
-          "group flex min-h-14 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2",
+          "group flex min-h-14 scroll-mt-4 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2",
           // Hidden controllers render spans; only the last div row loses its divider.
           "border-0 border-b border-solid border-f1-border-secondary last-of-type:border-b-0"
         )}

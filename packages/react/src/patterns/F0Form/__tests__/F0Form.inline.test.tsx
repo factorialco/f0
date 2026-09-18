@@ -10,6 +10,7 @@ import {
   zeroRender as render,
   screen,
   waitFor,
+  within,
 } from "@/testing/test-utils"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
@@ -681,5 +682,108 @@ describe("inline prop boundary on the definition overloads", () => {
     "F0FormPropsWithPerSectionDefinition",
   ])("%s rejects inline with never", (name) => {
     expect(bodyOf(name)).toMatch(/^\s*inline\?: never$/m)
+  })
+})
+
+describe("F0Form inline anchors", () => {
+  const anchoredSchema = z.object({
+    fullName: f0FormField(z.string().min(3), {
+      label: "Full name",
+      section: "personal",
+    }),
+    jobTitle: f0FormField(z.string(), {
+      label: "Job title",
+      section: "work",
+    }),
+  })
+
+  const anchoredSections = {
+    personal: { title: "Personal" },
+    work: { title: "Work" },
+  }
+
+  const renderAnchored = (props: Record<string, unknown> = {}) =>
+    render(
+      <F0Form
+        name="anchored"
+        inline
+        schema={anchoredSchema}
+        sections={anchoredSections}
+        defaultValues={{ fullName: "Ada Lovelace", jobTitle: "Analyst" }}
+        onSubmit={async () => ({ success: true })}
+        {...props}
+      />
+    )
+
+  beforeEach(() => {
+    // jsdom reports no offsetParent, which would send the error navigation
+    // walking past the row and up to the document.
+    Object.defineProperty(HTMLElement.prototype, "offsetParent", {
+      configurable: true,
+      get: () => document.body,
+    })
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      writable: true,
+      value: () => {},
+    })
+  })
+
+  it("anchors the row itself so it stays a direct child of the card", () => {
+    const { container } = renderAnchored()
+
+    const row = document.getElementById("forms.anchored.personal.fullName")
+    expect(row).toHaveAttribute("data-slot", "inline-field-row")
+    expect(row?.parentElement).toBe(
+      container.querySelectorAll("[data-slot='inline-field-row']")[0]
+        .parentElement
+    )
+    expect(document.getElementById("forms.anchored.work")).toBeInTheDocument()
+  })
+
+  it("scrolls to a section from the sidepanel", async () => {
+    const user = userEvent.setup()
+    const scrollTo = vi.fn()
+    Object.defineProperty(Element.prototype, "scrollTo", {
+      configurable: true,
+      writable: true,
+      value: scrollTo,
+    })
+
+    const { container } = renderAnchored({
+      styling: { showSectionsSidepanel: true },
+    })
+
+    const sidebar = container.querySelector(".sticky") as HTMLElement
+    expect(sidebar).toBeInTheDocument()
+
+    await user.click(within(sidebar).getByText("Work"))
+
+    expect(scrollTo).toHaveBeenCalled()
+  })
+
+  it("scrolls to the row that failed validation", async () => {
+    const user = userEvent.setup()
+    const scrolled: HTMLElement[] = []
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      writable: true,
+      value: function scrollIntoViewStub(this: HTMLElement) {
+        scrolled.push(this)
+      },
+    })
+
+    renderAnchored({ errorTriggerMode: "on-change" })
+
+    await user.click(activator("Full name"))
+    const input = await screen.findByRole("textbox", { name: "Full name" })
+    await user.clear(input)
+    await user.type(input, "Ad")
+
+    await waitFor(() =>
+      expect(scrolled).toContain(
+        document.getElementById("forms.anchored.personal.fullName")
+      )
+    )
   })
 })

@@ -459,3 +459,62 @@ export const WithSections: Story = {
     })
   },
 }
+
+/** The sidepanel navigates a record the same way it navigates a form. */
+export const SectionsSidepanel: Story = {
+  render: () => (
+    <div className="w-180">
+      <F0Form
+        name="inline-sidepanel"
+        inline
+        schema={z.object({
+          fullName: f0FormField(z.string(), {
+            label: "Full name",
+            section: "personal",
+          }),
+          email: f0FormField(z.string().email(), {
+            label: "Email",
+            section: "personal",
+          }),
+          team: f0FormField(z.enum(["design", "engineering"]), {
+            label: "Team",
+            options: TEAMS,
+            section: "work",
+          }),
+        })}
+        sections={{
+          personal: { title: "Personal" },
+          work: { title: "Work" },
+        }}
+        defaultValues={{
+          fullName: "Ada Lovelace",
+          email: "ada@factorial.co",
+          team: "design",
+        }}
+        onSubmit={submit}
+        submitConfig={actionBar}
+        styling={{ showSectionsSidepanel: true }}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Anchor every row and every section", async () => {
+      const row = document.getElementById(
+        "forms.inline-sidepanel.personal.email"
+      )
+      await expect(row).toHaveAttribute("data-slot", "inline-field-row")
+      await expect(
+        document.getElementById("forms.inline-sidepanel.work")
+      ).toBeInTheDocument()
+    })
+
+    await step("Navigate to a section from the sidepanel", async () => {
+      const sidebar = canvasElement.querySelector(".sticky") as HTMLElement
+      await expect(sidebar).toBeInTheDocument()
+      await userEvent.click(within(sidebar).getByText("Work"))
+      await expect(await canvas.findByText("Design")).toBeVisible()
+    })
+  },
+}
