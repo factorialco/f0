@@ -1,22 +1,26 @@
+import { forwardRef } from "react"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { DropdownOpen } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
-export const Arrow = ({
-  disabled,
-  open,
-  onChange,
-  size = "sm",
-  className,
-}: {
-  disabled?: boolean
-  open?: boolean
-  onChange?: (open: boolean) => void
-  size: "sm" | "md"
-  className?: string
-}) => {
+/**
+ * Decoration, deliberately: the field is the control. A button here would be a
+ * second touch target inside a 32px field, so the field's own click handler
+ * closes the list when the click landed on this glyph.
+ */
+export const Arrow = forwardRef<
+  HTMLDivElement,
+  {
+    disabled?: boolean
+    open?: boolean
+    size: "sm" | "md"
+    className?: string
+  }
+>(function Arrow({ disabled, open, size = "sm", className }, ref) {
   return (
     <div
+      ref={ref}
+      data-testid="select-arrow"
       className={cn(
         !disabled && "cursor-pointer",
         "origin-center transition-transform duration-200",
@@ -25,14 +29,8 @@ export const Arrow = ({
         size === "md" && "scale-110",
         className
       )}
-      onClick={() => {
-        if (disabled) {
-          return
-        }
-        onChange?.(!open)
-      }}
     >
       <F0Icon icon={DropdownOpen} size="lg" />
     </div>
   )
-}
+})

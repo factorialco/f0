@@ -353,7 +353,7 @@ export const States: Story = {
 }
 
 /**
- * Search and pick through the select: open it, type in its search box, choose
+ * Search and pick through the select: open it, type in the field itself, choose
  * the first suggestion, and check the resolved value reaches `onChange`.
  */
 export const SearchAndPick: Story = {
@@ -363,8 +363,7 @@ export const SearchAndPick: Story = {
     const body = within(document.body)
 
     await userEvent.click(canvas.getByRole("combobox", { name: "Address" }))
-    const search = await body.findByRole("searchbox")
-    await userEvent.type(search, "Colon")
+    await userEvent.keyboard("Colon")
 
     // Not "some option": the empty-state message is an option too, so waiting
     // for the list to be non-empty clicks the disabled hint before the
@@ -393,13 +392,12 @@ export const OpenSuggestionList: Story = {
     const canvas = within(canvasElement)
     const body = within(document.body)
 
-    // Held from before the open: Radix marks everything outside the portal
-    // `aria-hidden` while the list is up, so the trigger is no longer
-    // reachable by role once it has been clicked
+    // The trigger is the search field, so it stays reachable while the list is
+    // up: the select exempts it from the `aria-hidden` Radix puts on everything
+    // outside the portal
     const trigger = canvas.getByRole("combobox", { name: "Address" })
     await userEvent.click(trigger)
-    const search = await body.findByRole("searchbox")
-    await userEvent.type(search, "Colon")
+    await userEvent.keyboard("Colon")
 
     const suggestion = await body.findByRole("option", {
       name: /Carrer de Colón/,
@@ -424,8 +422,7 @@ export const NoResultsEscapeHatch: Story = {
     const body = within(document.body)
 
     await userEvent.click(canvas.getByRole("combobox", { name: "Address" }))
-    const search = await body.findByRole("searchbox")
-    await userEvent.type(search, "Calle Falsa 123")
+    await userEvent.keyboard("Calle Falsa 123")
 
     await expect(
       await body.findByRole("button", { name: "Enter it manually" })
