@@ -1181,108 +1181,15 @@ const MockChatPanel = ({
 }
 
 /**
- * Realistic "Main" menu mirroring the production Factorial sidebar (root nav +
- * Personal / Company / Operations / Talent / IT Management / Finance / More).
+ * Everything the navigation can reach, behind Tools.
+ *
+ * It used to be the Home panel, back when Home was the only module and its
+ * second level had to carry the whole product. With a rail, a module's panel
+ * is that module's own contents — so the catalog is a destination like any
+ * other, and the modules with a place on the rail are the ones you do not
+ * have to come here for.
  */
-/** Calendar's own second level: what you are looking at, and whose. */
-const calendarMenuTree: MenuCategory[] = [
-  {
-    id: "views",
-    title: "Views",
-    isRoot: true,
-    isSortable: false,
-    items: [
-      { label: "Month", icon: Icons.Calendar, href: "/calendar" },
-      { label: "Week", icon: Icons.Calendar, href: "/calendar/week" },
-      { label: "Agenda", icon: Icons.Completed, href: "/calendar/agenda" },
-    ],
-  },
-  {
-    id: "calendars",
-    title: "Calendars",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      { label: "Time off", icon: Icons.PalmTree, href: "/calendar/time-off" },
-      { label: "Shifts", icon: Icons.Schedule, href: "/calendar/shifts" },
-      {
-        label: "Company events",
-        icon: Icons.Megaphone,
-        href: "/calendar/events",
-      },
-    ],
-  },
-]
-
-/** Files: the two destinations, then the library itself. */
-const filesMenuTree: MenuCategory[] = [
-  {
-    id: "files-main",
-    title: "Files",
-    isRoot: true,
-    isSortable: false,
-    items: [
-      { label: "All files", icon: Icons.Folders, href: "/files" },
-      { label: "Policies", icon: Icons.Shield, href: "/files/policies" },
-    ],
-  },
-  {
-    id: "library",
-    title: "Library",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      { label: "Contracts", icon: Icons.Folder, href: "/files/contracts" },
-      { label: "Payroll", icon: Icons.Folder, href: "/files/payroll" },
-      { label: "Onboarding", icon: Icons.Folder, href: "/files/onboarding" },
-      { label: "Headcount plan", icon: Icons.Files, href: "/files/headcount" },
-    ],
-  },
-]
-
-/** Tools: the module catalog, which is what the rail promotes out of. */
 const toolsMenuTree: MenuCategory[] = [
-  {
-    id: "tools-company",
-    title: "Company",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      {
-        label: "Organization",
-        icon: Icons.Organization,
-        href: "/organization",
-      },
-      { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
-      { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
-    ],
-  },
-  {
-    id: "tools-operations",
-    title: "Operations",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      { label: "Time tracking", icon: Icons.Timer, href: "/time-tracking" },
-      { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
-      { label: "Projects", icon: Icons.Kanban, href: "/projects" },
-      { label: "Payroll", icon: Icons.MoneyBag, href: "/payroll" },
-    ],
-  },
-  {
-    id: "tools-talent",
-    title: "Talent",
-    isOpen: true,
-    isSortable: true,
-    items: [
-      { label: "Performance", icon: Icons.Graph, href: "/performance" },
-      { label: "Recruitment", icon: Icons.SearchPerson, href: "/recruitment" },
-      { label: "Training", icon: Icons.AcademicCap, href: "/training" },
-    ],
-  },
-]
-
-const homeMenuTree: MenuCategory[] = [
   {
     id: "main",
     title: "Main",
@@ -1742,14 +1649,11 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
-    ) : tab === "calendar" ? (
-      <Menu tree={calendarMenuTree} />
-    ) : tab === "files" ? (
-      <Menu tree={filesMenuTree} />
     ) : tab === "tools" ? (
       <Menu tree={toolsMenuTree} />
-    ) : (
-      <Menu tree={homeMenuTree} />
+    ) : isRail ? // the rail had not changed anything. // the honest state: falling through to another module's list would say // Home, Calendar and Files have no second level yet. An empty panel is
+    undefined : (
+      <Menu tree={toolsMenuTree} />
     )
 
   if (isRail) {
@@ -1797,7 +1701,9 @@ const ConversationsSidebarInner = ({
             <SidebarPanelHeader
               title={tabs.find((t) => t.id === tab)?.label ?? ""}
             />
-            {tab === "home" && (
+            {/* Search sits with the catalog: it is the panel with something to
+                search. Home's own search is the page's, not the nav's. */}
+            {tab === "tools" && (
               <SearchBar placeholder="Search..." onClick={() => {}} />
             )}
           </>
