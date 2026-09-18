@@ -23,6 +23,7 @@ import One from "@/icons/ai/One"
 import {
   Calendar,
   CalendarFilled,
+  Directory,
   ChartVerticalBars,
   Folders,
   FoldersFilled,
@@ -1561,11 +1562,6 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      {
-        label: "Organization",
-        icon: Icons.Organization,
-        href: "/organization",
-      },
       { label: "Documents", icon: Icons.Folder, href: "/documents" },
       { label: "Policies", icon: Icons.Shield, href: "/policies" },
       { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
@@ -1986,6 +1982,9 @@ const ConversationsSidebarInner = ({
             icon: Calendar,
             activeIcon: CalendarFilled,
           },
+          // The people you look up are a destination, not a tool you open:
+          // Directory takes the Organization row's place on the first level.
+          { id: "directory", label: "Directory", icon: Directory },
           {
             id: "files",
             label: "Files",
