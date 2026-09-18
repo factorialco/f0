@@ -6,9 +6,8 @@ import {
   type LayoutChangeEvent,
 } from "react-native"
 
-import type { F0WizardStep } from "../../../src/components/F0Wizard"
-
 import { F0Button } from "../../../src/components/F0Button"
+import type { F0WizardStep } from "../../../src/components/F0Wizard"
 import { F0Wizard } from "../../../src/components/F0Wizard"
 import { F0Text } from "../../../src/components/primitives/F0Text"
 

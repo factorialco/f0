@@ -121,8 +121,6 @@
  * - Supports migration from old plain-text baseline format
  */
 
-import { consola } from "consola"
-import { colorize } from "consola/utils"
 import { execSync } from "node:child_process"
 import {
   existsSync,
@@ -134,6 +132,8 @@ import {
 import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
+import { consola } from "consola"
+import { colorize } from "consola/utils"
 
 interface CycleDependency {
   cycle: string

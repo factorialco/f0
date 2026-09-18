@@ -10,8 +10,15 @@ module: one-data-collection
 component: SortAndHideList
 date: 2026-08-20
 tags: [controlled-state, drag-and-drop, ordering, regression-testing]
-related_components: [packages/react/src/patterns/OneDataCollection/visualizations/collection/Table/components/SortAndHideList/SortAndHideList.tsx]
-symptoms: [Dragging a movable row removes fixed row IDs from the persisted order, A locked middle row moves to the end after the next settings render]
+related_components:
+  [
+    packages/react/src/patterns/OneDataCollection/visualizations/collection/Table/components/SortAndHideList/SortAndHideList.tsx,
+  ]
+symptoms:
+  [
+    Dragging a movable row removes fixed row IDs from the persisted order,
+    A locked middle row moves to the end after the next settings render,
+  ]
 root_cause: wrong-api
 resolution_type: code-fix
 applied_count: 0

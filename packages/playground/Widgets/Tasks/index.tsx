@@ -1,7 +1,8 @@
+import { forwardRef } from "react"
+
 import { IndicatorsList } from "~/packages/react/experimental/Widgets/Content/IndicatorsList"
 import { TasksList } from "~/packages/react/experimental/Widgets/Content/TasksList"
 import { Widget } from "~/packages/react/experimental/Widgets/Widget"
-import { forwardRef } from "react"
 
 export interface TasksInsightData {
   title: string

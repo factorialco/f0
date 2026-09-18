@@ -7,10 +7,8 @@ import { DARK_MODE_EVENT_NAME } from "@vueless/storybook-dark-mode"
 import React from "react"
 import { FC, PropsWithChildren, useEffect, useState } from "react"
 import { addons } from "storybook/preview-api"
-
-import { I18nProvider } from "@/lib/providers/i18n/i18n-provider"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
-
+import { I18nProvider } from "@/lib/providers/i18n/i18n-provider"
 import { ComponentStatusPanel } from "./ComponentStatusPanel.tsx"
 import lightTheme, { darkTheme } from "./FactorialOne.ts"
 import { ImportBanner } from "./ImportBanner.tsx"

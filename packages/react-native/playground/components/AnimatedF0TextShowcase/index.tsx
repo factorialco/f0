@@ -20,9 +20,9 @@ import {
   withTiming,
 } from "react-native-reanimated"
 
-import { PressableFeedback } from "../../../src/components/primitives/PressableFeedback"
 import { AnimatedF0Text } from "../../../src/components/primitives/F0Text"
 import { F0Text } from "../../../src/components/primitives/F0Text"
+import { PressableFeedback } from "../../../src/components/primitives/PressableFeedback"
 
 export function AnimatedF0TextShowcase() {
   const [enteringKey, setEnteringKey] = useState(0)
@@ -73,10 +73,10 @@ export function AnimatedF0TextShowcase() {
         Tap "Replay" to re-trigger entering animations
       </F0Text>
 
-      <View className="mb-2 mt-2">
+      <View className="mt-2 mb-2">
         <PressableFeedback
           onPress={replayEntering}
-          className="bg-f0-background-secondary border border-f0-border self-start rounded-lg px-4 py-2"
+          className="self-start rounded-lg border border-f0-border bg-f0-background-secondary px-4 py-2"
         >
           <F0Text variant="body-sm-semibold">Replay</F0Text>
         </PressableFeedback>
@@ -87,10 +87,7 @@ export function AnimatedF0TextShowcase() {
           <F0Text variant="body-xs-medium" color="tertiary">
             FadeIn
           </F0Text>
-          <AnimatedF0Text
-            variant="heading-xl"
-            entering={FadeIn.duration(600)}
-          >
+          <AnimatedF0Text variant="heading-xl" entering={FadeIn.duration(600)}>
             Hello, Factorial
           </AnimatedF0Text>
         </View>
@@ -176,16 +173,16 @@ export function AnimatedF0TextShowcase() {
         Tap "Toggle" to show/hide with exit animation
       </F0Text>
 
-      <View className="mb-2 mt-2">
+      <View className="mt-2 mb-2">
         <PressableFeedback
           onPress={toggleExiting}
-          className="bg-f0-background-secondary border border-f0-border self-start rounded-lg px-4 py-2"
+          className="self-start rounded-lg border border-f0-border bg-f0-background-secondary px-4 py-2"
         >
           <F0Text variant="body-sm-semibold">Toggle</F0Text>
         </PressableFeedback>
       </View>
 
-      <View className="bg-f0-background-secondary mb-8 min-h-[120px] gap-3 rounded-lg p-4">
+      <View className="mb-8 min-h-[120px] gap-3 rounded-lg bg-f0-background-secondary p-4">
         {showExiting && (
           <>
             <AnimatedF0Text
@@ -229,16 +226,16 @@ export function AnimatedF0TextShowcase() {
         Tap "Pulse" to trigger a custom opacity animation
       </F0Text>
 
-      <View className="mb-2 mt-2">
+      <View className="mt-2 mb-2">
         <PressableFeedback
           onPress={startPulse}
-          className="bg-f0-background-secondary border border-f0-border self-start rounded-lg px-4 py-2"
+          className="self-start rounded-lg border border-f0-border bg-f0-background-secondary px-4 py-2"
         >
           <F0Text variant="body-sm-semibold">Pulse</F0Text>
         </PressableFeedback>
       </View>
 
-      <View className="bg-f0-background-secondary mb-8 rounded-lg p-4">
+      <View className="mb-8 rounded-lg bg-f0-background-secondary p-4">
         <AnimatedF0Text variant="heading-xl" style={pulseStyle}>
           Pulsing text
         </AnimatedF0Text>
@@ -250,10 +247,10 @@ export function AnimatedF0TextShowcase() {
         Items appear with staggered delay
       </F0Text>
 
-      <View className="mb-2 mt-2">
+      <View className="mt-2 mb-2">
         <PressableFeedback
           onPress={replayEntering}
-          className="bg-f0-background-secondary border border-f0-border self-start rounded-lg px-4 py-2"
+          className="self-start rounded-lg border border-f0-border bg-f0-background-secondary px-4 py-2"
         >
           <F0Text variant="body-sm-semibold">Replay</F0Text>
         </PressableFeedback>

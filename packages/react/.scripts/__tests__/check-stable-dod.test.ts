@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { check } from "../check-stable-dod"
 
 /**

@@ -27,6 +27,66 @@ export type HeaderProps = {
   otherActions?: DropdownInternalProps["items"]
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
+// At module scope on purpose. Declared inside Header these were a new
+// component type on each render, so React tore the subtree down and rebuilt it
+// instead of updating it — dropping focus and any state it held.
+
+const Divider = () => (
+  <div className="h-4 w-px self-center bg-f1-background-secondary" />
+)
+
+const Actions = ({ otherActions }: Pick<HeaderProps, "otherActions">) => {
+  const otherActionItems =
+    otherActions?.filter(
+      (action): action is DropdownItemObject =>
+        action.type !== "separator" && action.type !== "label"
+    ) ?? []
+
+  if (!otherActionItems.length || !otherActions) {
+    return null
+  }
+
+  if (otherActionItems.length <= 2) {
+    return (
+      <div className="flex flex-row gap-2">
+        {otherActionItems.map((action) => (
+          <ButtonInternal
+            key={action.label}
+            variant="outline"
+            icon={action.icon}
+            onClick={action.onClick}
+            label={action.label}
+            hideLabel
+          />
+        ))}
+      </div>
+    )
+  }
+
+  return <DropdownInternal items={otherActions} />
+}
+
+const Module = ({ module }: Pick<HeaderProps, "module">) => {
+  if (!module) {
+    return null
+  }
+
+  return (
+    <BreadcrumbList>
+      <BreadcrumbItem
+        item={{
+          id: module.id,
+          label: module.label,
+          href: module.href,
+          module: module.id,
+        }}
+        isLast={false}
+        isFirst={true}
+      />
+    </BreadcrumbList>
+  )
+}
+
 export const Header = ({
   title,
   description,
@@ -42,62 +102,6 @@ export const Header = ({
   const { onClose } = useDialogWrapperContext()
   const hasTabs = !!tabs
 
-  const Divider = () => {
-    return <div className="h-4 w-px self-center bg-f1-background-secondary" />
-  }
-
-  const otherActionItems =
-    otherActions?.filter(
-      (action): action is DropdownItemObject =>
-        action.type !== "separator" && action.type !== "label"
-    ) ?? []
-
-  const Actions = () => {
-    if (!otherActionItems.length || !otherActions) {
-      return null
-    }
-
-    if (otherActionItems.length <= 2) {
-      return (
-        <div className="flex flex-row gap-2">
-          {otherActionItems.map((action) => (
-            <ButtonInternal
-              key={action.label}
-              variant="outline"
-              icon={action.icon}
-              onClick={action.onClick}
-              label={action.label}
-              hideLabel
-            />
-          ))}
-        </div>
-      )
-    }
-
-    return <DropdownInternal items={otherActions} />
-  }
-
-  const Module = () => {
-    if (!module) {
-      return null
-    }
-
-    return (
-      <BreadcrumbList>
-        <BreadcrumbItem
-          item={{
-            id: module.id,
-            label: module.label,
-            href: module.href,
-            module: module.id,
-          }}
-          isLast={false}
-          isFirst={true}
-        />
-      </BreadcrumbList>
-    )
-  }
-
   return (
     <>
       <div
@@ -109,7 +113,7 @@ export const Header = ({
       >
         <div className="flex flex-col gap-1">
           {module ? (
-            <Module />
+            <Module module={module} />
           ) : (
             title && (
               <DialogTitle className="py-1 text-lg font-semibold text-f1-foreground">
@@ -124,7 +128,7 @@ export const Header = ({
           ) : null}
         </div>
         <div className="flex flex-row gap-2">
-          <Actions />
+          <Actions otherActions={otherActions} />
           {otherActions ? <Divider /> : null}
           <ButtonInternal
             variant="outline"

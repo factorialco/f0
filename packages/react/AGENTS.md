@@ -14,7 +14,10 @@ pnpm --filter @factorialco/f0-react run format
 pnpm --filter @factorialco/f0-react run tsc
 ```
 
-Failing to run `format` before committing will cause the `Format` CI check to fail on every PR.
+The git hooks run both as well — `format` (plus `oxlint --fix`) on the staged files at commit time
+through lint-staged, and `tsc` on push (see [docs/development/git-hooks.md](docs/development/git-hooks.md)) —
+but run them yourself first: a hook that rewrites files after your last edit is surprising, and a
+commit made with `--no-verify` or `LEFTHOOK=0` skips the hook and fails the `Format` CI check.
 `oxfmt` rewrites whitespace, quote style, trailing commas, and import order — always run it last,
 after all code edits are done, and include the resulting changes in the same commit.
 
@@ -283,7 +286,7 @@ Roles and accessible names are what consumers query — `getByRole("button", {
 name: "Clear" })` in unit tests, `cy.findByRole(...)` in Cypress. Changing one
 breaks them, and neither of the other checks notices: the public API check
 diffs `.d.ts` files (names are values, not types) and axe only asks whether a
-name *exists*, not whether it changed.
+name _exists_, not whether it changed.
 
 The **aria surface** check covers this. Every story's role + accessible-name
 pairs are captured in the Storybook test-runner and diffed against the baseline

@@ -1,10 +1,11 @@
-import { resolveStoryUrl } from "../collectors/stories.js";
 import type {
   SummaryEnhancementEntry,
   SummaryJson,
   SummaryNewEntry,
   SummaryStabilizedEntry,
-} from "../types.js";
+} from "../types.js"
+
+import { resolveStoryUrl } from "../collectors/stories.js"
 
 /**
  * Deterministic plain-English replacements applied to every product-facing
@@ -25,7 +26,7 @@ const JARGON_REPLACEMENTS: Array<[RegExp, string]> = [
   ],
   [/\bmotion polish\b/gi, "smoother animations"],
   [/\bpersistence\b/gi, "remembers your state between sessions"],
-];
+]
 
 /** Normalize raw PR-body markdown into Slack-friendly inline text. */
 function stripMarkdown(text: string): string {
@@ -36,73 +37,76 @@ function stripMarkdown(text: string): string {
     .replace(/\s*\n+\s*/g, " ") // flatten line breaks
     .replace(/\s{2,}/g, " ")
     .replace(/^Summary\s+/i, "") // the leading "Summary" label adds nothing
-    .trim();
+    .trim()
 }
 
 function dejargon(text: string): string {
-  let out = text;
+  let out = text
   for (const [regex, replacement] of JARGON_REPLACEMENTS) {
-    out = out.replace(regex, replacement);
+    out = out.replace(regex, replacement)
   }
   // Collapse the double spaces / dangling " — " that omissions can leave behind.
-  out = out.replace(/\s{2,}/g, " ").replace(/\s+—\s+\./g, ".").trim();
-  return out;
+  out = out
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+—\s+\./g, ".")
+    .trim()
+  return out
 }
 
 function storybookLink(
   componentName: string,
-  storyUrls: Map<string, string>,
+  storyUrls: Map<string, string>
 ): string | null {
-  return resolveStoryUrl(componentName, storyUrls);
+  return resolveStoryUrl(componentName, storyUrls)
 }
 
 function joinSummaryAndDetail(summary: string, detail?: string): string {
-  const s = dejargon(summary).replace(/\s+$/, "");
-  if (!detail) return s;
-  const d = dejargon(detail).replace(/^\s+/, "");
-  if (d.length === 0) return s;
+  const s = dejargon(summary).replace(/\s+$/, "")
+  if (!detail) return s
+  const d = dejargon(detail).replace(/^\s+/, "")
+  if (d.length === 0) return s
   // Ensure a clean separator without doubling punctuation.
-  const trimmedSummary = s.replace(/[.\s]+$/, "");
-  return `${trimmedSummary} — ${d}`;
+  const trimmedSummary = s.replace(/[.\s]+$/, "")
+  return `${trimmedSummary} — ${d}`
 }
 
 function bulletNew(
   entry: SummaryNewEntry,
-  storyUrls: Map<string, string>,
+  storyUrls: Map<string, string>
 ): string {
-  const component = entry.component.trim();
-  const text = joinSummaryAndDetail(entry.summary, entry.detail);
-  let head = `• *${component}* — ${text}`;
+  const component = entry.component.trim()
+  const text = joinSummaryAndDetail(entry.summary, entry.detail)
+  let head = `• *${component}* — ${text}`
   if (entry.author && entry.author.trim().length > 0) {
-    head += ` _— by ${entry.author.trim()}_`;
+    head += ` _— by ${entry.author.trim()}_`
   }
 
   // Prefer a pre-resolved deep-link to a specific story; otherwise fall back to
   // the component's docs page.
-  const deepLink = entry.url;
-  const docsLink = entry.storybook ? storybookLink(component, storyUrls) : null;
-  const url = deepLink ?? docsLink;
+  const deepLink = entry.url
+  const docsLink = entry.storybook ? storybookLink(component, storyUrls) : null
+  const url = deepLink ?? docsLink
   if (url) {
-    const label = deepLink ? "View story" : "View in Storybook";
-    return `${head}\n_<${url}|${label}>_`;
+    const label = deepLink ? "View story" : "View in Storybook"
+    return `${head}\n_<${url}|${label}>_`
   }
-  return head;
+  return head
 }
 
 function bulletEnhancement(
   entry: SummaryEnhancementEntry,
-  storyUrls: Map<string, string>,
+  storyUrls: Map<string, string>
 ): string {
   // Same shape as `new` entries for now; kept separate so we can diverge later.
-  return bulletNew(entry as SummaryNewEntry, storyUrls);
+  return bulletNew(entry as SummaryNewEntry, storyUrls)
 }
 
 function bulletStabilized(
   entry: SummaryStabilizedEntry,
-  storyUrls: Map<string, string>,
+  storyUrls: Map<string, string>
 ): string {
   // Same shape as `new` entries; kept separate so we can diverge later.
-  return bulletNew(entry as SummaryNewEntry, storyUrls);
+  return bulletNew(entry as SummaryNewEntry, storyUrls)
 }
 
 /**
@@ -111,74 +115,74 @@ function bulletStabilized(
  * a JSON string value, which would otherwise make `JSON.parse` fail.
  */
 function stripFences(raw: string): string {
-  let s = raw.trim();
+  let s = raw.trim()
   if (s.startsWith("```")) {
-    s = s.replace(/^```(?:json)?\s*\n?/i, "");
-    s = s.replace(/```\s*$/i, "");
+    s = s.replace(/^```(?:json)?\s*\n?/i, "")
+    s = s.replace(/```\s*$/i, "")
   }
-  return s.trim();
+  return s.trim()
 }
 
 function sanitizeJsonNewlines(raw: string): string {
   // Walk the string; while inside a "double-quoted" region replace literal \n
   // and \r with their escaped forms. Respect backslash escapes so we don't
   // double-escape already-escaped quotes.
-  let out = "";
-  let inString = false;
-  let escape = false;
+  let out = ""
+  let inString = false
+  let escape = false
 
   for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i];
+    const ch = raw[i]
 
     if (escape) {
-      out += ch;
-      escape = false;
-      continue;
+      out += ch
+      escape = false
+      continue
     }
 
     if (ch === "\\") {
-      out += ch;
-      escape = true;
-      continue;
+      out += ch
+      escape = true
+      continue
     }
 
     if (ch === '"') {
-      inString = !inString;
-      out += ch;
-      continue;
+      inString = !inString
+      out += ch
+      continue
     }
 
     if (inString && ch === "\n") {
-      out += "\\n";
-      continue;
+      out += "\\n"
+      continue
     }
     if (inString && ch === "\r") {
-      out += "\\r";
-      continue;
+      out += "\\r"
+      continue
     }
     if (inString && ch === "\t") {
-      out += "\\t";
-      continue;
+      out += "\\t"
+      continue
     }
 
-    out += ch;
+    out += ch
   }
 
-  return out;
+  return out
 }
 
 export function parseSummaryJson(raw: string): SummaryJson {
-  const stripped = stripFences(raw);
-  const sanitized = sanitizeJsonNewlines(stripped);
+  const stripped = stripFences(raw)
+  const sanitized = sanitizeJsonNewlines(stripped)
 
-  let parsed: unknown;
+  let parsed: unknown
   try {
-    parsed = JSON.parse(sanitized);
+    parsed = JSON.parse(sanitized)
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = err instanceof Error ? err.message : String(err)
     throw new Error(
-      `Failed to parse LLM output as JSON (${msg}). First 200 chars: ${sanitized.slice(0, 200)}`,
-    );
+      `Failed to parse LLM output as JSON (${msg}). First 200 chars: ${sanitized.slice(0, 200)}`
+    )
   }
 
   if (
@@ -186,18 +190,18 @@ export function parseSummaryJson(raw: string): SummaryJson {
     parsed === null ||
     !("sections" in parsed)
   ) {
-    throw new Error("LLM output JSON is missing a top-level `sections` object");
+    throw new Error("LLM output JSON is missing a top-level `sections` object")
   }
 
-  return parsed as SummaryJson;
+  return parsed as SummaryJson
 }
 
 function isNonEmpty<T>(arr: T[] | undefined): arr is T[] {
-  return Array.isArray(arr) && arr.length > 0;
+  return Array.isArray(arr) && arr.length > 0
 }
 
 function hasText(s: string | undefined): s is string {
-  return typeof s === "string" && s.trim().length > 0;
+  return typeof s === "string" && s.trim().length > 0
 }
 
 /**
@@ -209,44 +213,48 @@ function hasText(s: string | undefined): s is string {
  */
 export function jsonToSlackText(
   json: SummaryJson,
-  storyUrls: Map<string, string>,
+  storyUrls: Map<string, string>
 ): string | null {
-  const sections = json.sections ?? {};
-  const parts: string[] = [];
+  const sections = json.sections ?? {}
+  const parts: string[] = []
 
   if (isNonEmpty(sections.new)) {
-    const bullets = sections.new.map((e) => bulletNew(e, storyUrls)).join("\n\n");
-    parts.push(`🚀 What's new\n\n${bullets}`);
+    const bullets = sections.new
+      .map((e) => bulletNew(e, storyUrls))
+      .join("\n\n")
+    parts.push(`🚀 What's new\n\n${bullets}`)
   }
 
   if (isNonEmpty(sections.stabilized)) {
     const bullets = sections.stabilized
       .map((e) => bulletStabilized(e, storyUrls))
-      .join("\n\n");
-    parts.push(`✅ Now stable — safe to use\n\n${bullets}`);
+      .join("\n\n")
+    parts.push(`✅ Now stable — safe to use\n\n${bullets}`)
   }
 
   if (isNonEmpty(sections.enhancements)) {
     const bullets = sections.enhancements
       .map((e) => bulletEnhancement(e, storyUrls))
-      .join("\n\n");
-    parts.push(`✨ Enhancements\n\n${bullets}`);
+      .join("\n\n")
+    parts.push(`✨ Enhancements\n\n${bullets}`)
   }
 
   if (isNonEmpty(sections.breaking_changes)) {
     const bullets = sections.breaking_changes
       .map((e) => {
-        const head = `• *${e.component.trim()}* — ${dejargon(e.summary)}`;
+        const head = `• *${e.component.trim()}* — ${dejargon(e.summary)}`
         const migration = hasText(e.migration)
           ? `\n_What to do: ${dejargon(stripMarkdown(e.migration))}_`
-          : "";
-        return `${head}${migration}`;
+          : ""
+        return `${head}${migration}`
       })
-      .join("\n\n");
-    parts.push(`⚠️ Breaking changes — you may need to update your code\n\n${bullets}`);
+      .join("\n\n")
+    parts.push(
+      `⚠️ Breaking changes — you may need to update your code\n\n${bullets}`
+    )
   }
 
-  if (parts.length === 0) return null;
+  if (parts.length === 0) return null
 
-  return parts.join("\n---\n");
+  return parts.join("\n---\n")
 }

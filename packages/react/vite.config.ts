@@ -1,13 +1,12 @@
-import react from "@vitejs/plugin-react"
-import { consola } from "consola"
-import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs"
 import path, { resolve } from "path"
+import react from "@vitejs/plugin-react"
+import { consola } from "consola"
+import dotenv from "dotenv"
 import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
-
 import { componentStatusVitePlugin } from "./scripts/component-status-build.mjs"
 import { buildSyncPlugin } from "./vite/build-sync.plugin"
 

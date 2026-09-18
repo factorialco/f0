@@ -1,26 +1,27 @@
-import React from "react";
-import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { useCSSVariable, useUniwind, withUniwind } from "uniwind";
-import { ThemeSwitcher } from "../../components/ThemeSwitcher";
+import React from "react"
+import { ScrollView, Text, View } from "react-native"
+import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context"
+import { useCSSVariable, useUniwind, withUniwind } from "uniwind"
 
-const SafeAreaView = withUniwind(RNSafeAreaView);
+import { ThemeSwitcher } from "../../components/ThemeSwitcher"
+
+const SafeAreaView = withUniwind(RNSafeAreaView)
 
 export default function Index() {
   // Forzar re-render cuando cambia el tema
-  const { theme } = useUniwind();
+  const { theme } = useUniwind()
 
   // Debug: Log cuando cambia el tema
   React.useEffect(() => {
-    console.log("Theme changed to:", theme);
-  }, [theme]);
+    console.log("Theme changed to:", theme)
+  }, [theme])
 
   // Helper para asegurar que los valores sean strings
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === "string") return value;
-    if (typeof value === "number") return String(value);
-    return "#000000"; // fallback
-  };
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    return "#000000" // fallback
+  }
 
   // Obtener todos los colores base
   const [
@@ -167,7 +168,7 @@ export default function Index() {
     "--color-purple-50",
     "--color-purple-60",
     "--color-purple-70",
-  ]);
+  ])
 
   // Obtener colores F0 semánticos
   const [
@@ -324,7 +325,7 @@ export default function Index() {
     "--color-f0-special-ring",
     "--color-f0-special-page",
     "--color-f0-special-highlight",
-  ]);
+  ])
 
   // Semantic colors now map directly to base colors:
   // accent -> radical, warning -> orange, selected -> viridian, critical -> red
@@ -347,7 +348,7 @@ export default function Index() {
     "--spacing-20",
     "--spacing-24",
     "--spacing-32",
-  ]);
+  ])
 
   // Obtener valores de border radius
   const radiusValues = useCSSVariable([
@@ -361,16 +362,16 @@ export default function Index() {
     "--radius-xl",
     "--radius-2xl",
     "--radius-full",
-  ]);
+  ])
 
   const ColorSwatch = ({
     name,
     color,
     size = 80,
   }: {
-    name: string;
-    color: string | number | undefined;
-    size?: number;
+    name: string
+    color: string | number | undefined
+    size?: number
   }) => (
     <View className="mb-4 items-center gap-2">
       <View
@@ -395,14 +396,14 @@ export default function Index() {
         {asString(color).substring(0, 20)}
       </Text>
     </View>
-  );
+  )
 
   const ColorGroup = ({
     title,
     colors,
   }: {
-    title: string;
-    colors: { name: string; color: string | number | undefined }[];
+    title: string
+    colors: { name: string; color: string | number | undefined }[]
   }) => (
     <View className="mb-8">
       <Text
@@ -417,15 +418,15 @@ export default function Index() {
         ))}
       </View>
     </View>
-  );
+  )
 
   // Componente para mostrar spacing
   const SpacingExample = ({
     name,
     value,
   }: {
-    name: string;
-    value: string | number | undefined;
+    name: string
+    value: string | number | undefined
   }) => (
     <View className="mb-4 items-center">
       <View
@@ -450,7 +451,7 @@ export default function Index() {
         {asString(value)}
       </Text>
     </View>
-  );
+  )
 
   // Componente para mostrar border radius
   const RadiusExample = ({
@@ -458,9 +459,9 @@ export default function Index() {
     value,
     className,
   }: {
-    name: string;
-    value: string | number | undefined;
-    className?: string;
+    name: string
+    value: string | number | undefined
+    className?: string
   }) => {
     return (
       <View className="mb-4 items-center">
@@ -487,16 +488,16 @@ export default function Index() {
           {typeof value === "number" ? `${value}px` : asString(value)}
         </Text>
       </View>
-    );
-  };
+    )
+  }
 
   // Componente para mostrar padding examples visuales
   const PaddingExample = ({
     name,
     className,
   }: {
-    name: string;
-    className: string;
+    name: string
+    className: string
   }) => (
     <View className="mb-4">
       <View
@@ -530,15 +531,15 @@ export default function Index() {
         {name}
       </Text>
     </View>
-  );
+  )
 
   // Componente para mostrar border examples
   const BorderExample = ({
     name,
     className,
   }: {
-    name: string;
-    className: string;
+    name: string
+    className: string
   }) => (
     <View className="mb-4 items-center">
       <View
@@ -564,10 +565,10 @@ export default function Index() {
         {name}
       </Text>
     </View>
-  );
+  )
 
   return (
-    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-f0-background" edges={["top", "bottom"]}>
       <ScrollView
         className="flex-1"
         style={{ backgroundColor: asString(f0Background) }}
@@ -621,14 +622,14 @@ export default function Index() {
                   "20",
                   "24",
                   "32",
-                ];
+                ]
                 return (
                   <SpacingExample
                     key={index}
                     name={`spacing-${spacingNames[index] || index}`}
                     value={value}
                   />
-                );
+                )
               })}
             </View>
           </View>
@@ -746,11 +747,11 @@ export default function Index() {
                   "xl",
                   "2xl",
                   "full",
-                ];
+                ]
                 const name =
                   radiusNames[index] === "base"
                     ? "radius"
-                    : `radius-${radiusNames[index]}`;
+                    : `radius-${radiusNames[index]}`
                 const tailwindClasses = [
                   "rounded-none",
                   "rounded-2xs",
@@ -762,7 +763,7 @@ export default function Index() {
                   "rounded-xl",
                   "rounded-2xl",
                   "rounded-full",
-                ];
+                ]
                 return (
                   <RadiusExample
                     key={index}
@@ -770,7 +771,7 @@ export default function Index() {
                     value={value}
                     className={tailwindClasses[index]}
                   />
-                );
+                )
               })}
             </View>
           </View>
@@ -1307,5 +1308,5 @@ export default function Index() {
         </View>
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }

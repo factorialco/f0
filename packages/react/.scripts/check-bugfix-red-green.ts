@@ -31,7 +31,6 @@ import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import consola from "consola"
 
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")

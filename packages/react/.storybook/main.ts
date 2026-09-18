@@ -1,14 +1,12 @@
-// This file has been automatically migrated to valid ESM format by Storybook.
-import type { StorybookConfig } from "@storybook/react-vite"
-
 import { writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import { fileURLToPath } from "node:url"
+// This file has been automatically migrated to valid ESM format by Storybook.
+import type { StorybookConfig } from "@storybook/react-vite"
 import remarkGfm from "remark-gfm"
 import { Preset } from "storybook/internal/types"
-
 import {
   componentStatusVitePlugin,
   computeComponentStatusData,

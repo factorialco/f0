@@ -1,9 +1,7 @@
 import React from "react"
-
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { LayersFront } from "@/icons/app"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/tooltip"
-
 import type {
   ComposerPrototype,
   ProductUsageData,

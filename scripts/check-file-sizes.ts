@@ -46,7 +46,10 @@ function trackedFiles(stagedOnly: boolean): string[] {
   const args = stagedOnly
     ? ["diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"]
     : ["ls-files", "-z"]
-  return execFileSync("git", args, { cwd: REPO_ROOT, maxBuffer: 64 * 1024 * 1024 })
+  return execFileSync("git", args, {
+    cwd: REPO_ROOT,
+    maxBuffer: 64 * 1024 * 1024,
+  })
     .toString("utf-8")
     .split("\0")
     .filter(Boolean)

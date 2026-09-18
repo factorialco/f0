@@ -53,7 +53,11 @@ export function F0CheckboxShowcase() {
         <View className="flex-row gap-4">
           <F0Checkbox label="Hidden label (unchecked)" hideLabel />
           <F0Checkbox label="Hidden label (checked)" checked hideLabel />
-          <F0Checkbox label="Hidden label (indeterminate)" indeterminate hideLabel />
+          <F0Checkbox
+            label="Hidden label (indeterminate)"
+            indeterminate
+            hideLabel
+          />
         </View>
       </Section>
     </ScrollView>

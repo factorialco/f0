@@ -21,11 +21,11 @@ Do this **with** the contributor, in the conversation, before proposing or build
 
 Search the repo (`components/`, `experimental/`, `kits/`, `sds/`, `patterns/`) **and** Storybook. Then land on one of:
 
-| You find…                                                         | Outcome                                        | Stop here? |
-| ----------------------------------------------------------------- | ---------------------------------------------- | ---------- |
-| A component (or a composition of existing ones) covers their case | **Use it** (document the composition if needed). Point them to it. | ✅ yes |
-| It's one screen, no reuse, no shared identity                     | **It lives in their product**, not F0.         | ✅ yes     |
-| A real, reusable need with no existing solution                   | **It's a contribution** → Phase 1.             | continue   |
+| You find…                                                         | Outcome                                                            | Stop here? |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------ | ---------- |
+| A component (or a composition of existing ones) covers their case | **Use it** (document the composition if needed). Point them to it. | ✅ yes     |
+| It's one screen, no reuse, no shared identity                     | **It lives in their product**, not F0.                             | ✅ yes     |
+| A real, reusable need with no existing solution                   | **It's a contribution** → Phase 1.                                 | continue   |
 
 If you can resolve it here, **do** — don't push the contributor into a heavier flow than the change needs. Whether it's **new or an extension** of something existing is decided in Phase 1, not here.
 
@@ -35,7 +35,7 @@ If you can resolve it here, **do** — don't push the contributor into a heavier
 
 **Everything that enters F0 is reviewed — always**, whatever the maturity: Foundations confirms in `#f0-support` that it belongs and where (Phase 1), and the PR goes through **code review + `f0-quality-gate`**. A **new component** also gets a **design review** (Phase 2). "Iterating freely" only means the owner can change an already-**experimental** component's API without a fresh design review — experimental is unstable by design; it still entered through the same review.
 
-Beyond that, how much *extra* validation is set by **two questions**:
+Beyond that, how much _extra_ validation is set by **two questions**:
 
 1. **Is it already in use?** Changing something consumers already use is high-impact → it needs a **migration plan** (see "Changing something already in use" in the release/versioning docs: prefer additive + deprecation; if a real break, a migration guide from `docs/migrations/TEMPLATE.md`, deprecation, consumer notice, major bump). Adding something new rarely ripples.
 2. **Is it shared vocabulary, or a new public API?** A new or changed **token** or **icon**, or a new component's API, gets a **design review** — consistency is expensive even when nothing breaks. A backward-compatible prop on an experimental component doesn't.

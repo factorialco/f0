@@ -6,7 +6,15 @@
   // staging a file in there made `git commit` impossible, because the
   // pre-commit hook passes staged paths straight to oxlint.
   "ignorePatterns": [".scripts/**", ".oxlint-plugins/**"],
-  "plugins": ["react", "typescript", "vitest", "import", "unicorn", "oxc", "promise"],
+  "plugins": [
+    "react",
+    "typescript",
+    "vitest",
+    "import",
+    "unicorn",
+    "oxc",
+    "promise"
+  ],
   "categories": {
     "correctness": "error"
   },
@@ -308,9 +316,22 @@
     // information, so only the syntax-based rules are useful. `f0-react` wraps
     // its jsx-no-leaked-render to check JSX children only, not attributes.
     // Ternaries everywhere is the only leak-safe strategy without types.
-    "f0-react/jsx-no-leaked-render": ["error", { "validStrategies": ["ternary"] }],
+    "f0-react/jsx-no-leaked-render": [
+      "error",
+      { "validStrategies": ["ternary"] }
+    ],
     "react-js/no-deprecated": "error",
     "react-js/no-invalid-html-attribute": "error",
+    // Graduated from DEBT, where it sat at 25 hits. `allowAsProps` is what
+    // made it tractable: F0 passes components as props on purpose
+    // (`leftIcon`, `WidgetWrapper`), and over half those hits were that
+    // pattern rather than a bug. The rest are fixed. A component declared
+    // inside another is a new type on every render, so React remounts it and
+    // the subtree loses its state.
+    "react-js/no-unstable-nested-components": [
+      "error",
+      { "allowAsProps": true }
+    ],
 
     // RATCHET. On as warnings. `pnpm lint` hides warnings (`--quiet`);
     // `pnpm check:lint-debt` compares them per file against
@@ -343,7 +364,6 @@
     "import/named": "off", // nursery rule, false positives
     "import/export": "off", // nursery rule, false positives on export *
     "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
-    "react-js/no-unstable-nested-components": "off", // 25
     "react-js/jsx-no-constructed-context-values": "off", // 35
     "react-js/no-unused-prop-types": "off", // 34
     "react-js/no-object-type-as-default-prop": "off", // 59

@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import { F0AvatarIcon } from "../../src/components/avatars/F0AvatarIcon"
 import { F0AvatarModule } from "../../src/components/avatars/F0AvatarModule"
 import {

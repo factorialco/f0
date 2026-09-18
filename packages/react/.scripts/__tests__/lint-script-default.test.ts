@@ -1,16 +1,15 @@
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
-
 import { describe, expect, it } from "vitest"
 
 /**
  * The lint scripts wrap oxlint in `sh -c '… "${@:-<default>}"' --` so that
- * lefthook can pass staged paths. Because the parameter expansion is quoted,
- * the shell never globs the default — oxlint receives it as a single literal
- * word and resolves it as a path. A glob such as `src/**` + `/*` therefore
- * matches nothing, oxlint reports "0 files", exits 0, and the CI lint job
- * passes without reading any code. That is what happened between 2026-01-12
- * and this test being added.
+ * lint-staged (run by lefthook) can pass staged paths. Because the parameter
+ * expansion is quoted, the shell never globs the default — oxlint receives it
+ * as a single literal word and resolves it as a path. A glob such as `src/**`
+ * + `/*` therefore matches nothing, oxlint reports "0 files", exits 0, and
+ * the CI lint job passes without reading any code. That is what happened
+ * between 2026-01-12 and this test being added.
  *
  * So the default has to be a real path on disk, not a pattern.
  */

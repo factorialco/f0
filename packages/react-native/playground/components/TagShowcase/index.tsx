@@ -142,7 +142,6 @@ export function TagShowcase() {
         <RawTag text="Raw Icon" icon={Home} />
         <RawTag text="Raw No Border" noBorder />
       </View>
-
     </ScrollView>
   )
 }

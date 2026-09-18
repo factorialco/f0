@@ -13,3 +13,4 @@ factorial's app
   - [Using f0 without build it](development/using-f0-source.md)
   - [Release and Versioning](development/release-and-versioning.mdx)
   - [Github Actions](development/github-actions.md)
+  - [Git hooks](development/git-hooks.md)

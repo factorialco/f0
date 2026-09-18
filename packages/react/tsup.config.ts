@@ -1,5 +1,4 @@
 import { defineConfig } from "tsup"
-
 import { componentStatusEsbuildPlugin } from "./scripts/component-status-build.mjs"
 
 export default defineConfig({

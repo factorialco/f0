@@ -1,7 +1,14 @@
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
 import { SymbolView } from "expo-symbols"
 import React, { useMemo, useState } from "react"
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native"
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native"
 import { useCSSVariable } from "uniwind"
 
 import type { SelectProps } from "./types"
@@ -113,7 +120,7 @@ export function Select<T extends string>({
         onRequestClose={close}
       >
         <View style={{ flex: 1, backgroundColor: asString(bg) }}>
-          <View className="flex-row items-center justify-between px-4 pb-2 pt-4">
+          <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
             <Text className="text-xl font-bold" style={{ color: asString(fg) }}>
               Components
             </Text>
