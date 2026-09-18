@@ -69,9 +69,7 @@ const meta = {
 } satisfies Meta<typeof F0TextInput>
 
 export default meta
-// The component's props are a discriminated union (`variant="inline"` adds
-// `editing` and `onDismiss`), which collapses `StoryObj<typeof meta>` args to
-// `never`. These stories all exercise the default field variant.
+// Use explicit props because StoryObj<typeof meta> collapses this union to never.
 type Story = StoryObj<F0TextInputFieldProps>
 
 export const Primary: Story = {

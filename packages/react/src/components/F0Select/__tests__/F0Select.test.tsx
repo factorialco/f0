@@ -319,8 +319,8 @@ describe("Select", () => {
 
     const fieldWrapper = screen.getByTestId("input-field-wrapper")
 
-    expect(fieldWrapper).toHaveClass("h-[32px]", "rounded")
-    expect(fieldWrapper).not.toHaveClass("h-[40px]", "rounded-md")
+    expect(fieldWrapper).toHaveClass("h-8", "rounded")
+    expect(fieldWrapper).not.toHaveClass("h-10", "rounded-md")
     expect(screen.getByRole("combobox").className).not.toContain("h-7")
   })
 
@@ -365,10 +365,7 @@ describe("Select", () => {
 
     const inlineValue = () => screen.getByTestId("select-inline-value")
 
-    /**
-     * The open dropdown puts the trigger under `aria-hidden`, so the accessible
-     * queries stop seeing it while the select is editing.
-     */
+    /** The open popup aria-hides its trigger, so query the DOM directly. */
     const inlineTrigger = (name: string) =>
       screen.getByRole("combobox", { name, hidden: true })
 
@@ -1001,8 +998,8 @@ describe("Select", () => {
       />
     )
 
-    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
-    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+    expect(container.querySelector(".h-10")).toBeTruthy()
+    expect(container.querySelector(".h-8")).toBeFalsy()
   })
 
   it("forces at least md trigger size for a preselected status pill not yet in the dataset", () => {
@@ -1025,8 +1022,8 @@ describe("Select", () => {
       />
     )
 
-    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
-    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+    expect(container.querySelector(".h-10")).toBeTruthy()
+    expect(container.querySelector(".h-8")).toBeFalsy()
   })
 
   it("keeps the requested sm trigger size when no status tags are present", () => {
@@ -1039,8 +1036,8 @@ describe("Select", () => {
       />
     )
 
-    expect(container.querySelector(".h-\\[32px\\]")).toBeTruthy()
-    expect(container.querySelector(".h-\\[40px\\]")).toBeFalsy()
+    expect(container.querySelector(".h-8")).toBeTruthy()
+    expect(container.querySelector(".h-10")).toBeFalsy()
   })
 
   it("filters options based on search input", async () => {

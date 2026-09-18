@@ -31,11 +31,7 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
 export const selectVariants = ["field", "inline"] as const
 export type F0SelectVariant = (typeof selectVariants)[number]
 
-/**
- * Why an edit ended, reported by the inline variant so the owner of `editing`
- * can decide what to do with it. A narrowing of `InlineDismissReason`: a select
- * has no blur to report, because the popup takes focus.
- */
+/** Select dismiss reasons exclude blur because opening the popup moves focus. */
 export const selectInlineDismissReasons = [
   "popupClose",
   "escape",
@@ -260,18 +256,10 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     InputFieldProps<T>,
     "label" | "placeholder" | "disabled" | "hideLabel"
   > & {
-    /**
-     * Detail-row presentation for single-value controls. The selection reads as
-     * plain text — avatar and icon included — and becomes the dropdown only
-     * while `editing` is true. The required label is the accessible name and is
-     * never shown visually, with or without `hideLabel`.
-     */
+    /** Single-value detail row. Shows text until editing; label supplies the accessible name. */
     variant: "inline"
     /**
-     * Whether the dropdown is the presentation right now. Controlled: the
-     * component never changes it, it only reports what the user did through
-     * `onDismiss` and keeps the dropdown open until the owner says otherwise.
-     *
+     * Controlled dropdown visibility. Reports dismissal through onDismiss.
      * @default false
      */
     editing?: boolean

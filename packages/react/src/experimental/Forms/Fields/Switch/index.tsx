@@ -65,18 +65,10 @@ export type SwitchFieldProps = SwitchBaseProps & {
 }
 
 export type SwitchInlineProps = SwitchBaseProps & {
-  /**
-   * `"inline"` is the detail-row presentation: the switch fills the row's box
-   * and carries no chrome of its own.
-   */
+  /** Fills the detail row without field chrome. */
   variant: "inline"
 
-  /**
-   * A switch has no separate editor — one click commits through
-   * `onCheckedChange` — so there is no edit mode to enter and nothing to
-   * dismiss. Both props exist as `never` so a field layer can hand every
-   * inline component the same prop bag.
-   */
+  /** Toggles commit directly through onCheckedChange and have no edit mode. */
   editing?: never
   onDismiss?: never
 }
@@ -85,8 +77,7 @@ export type SwitchProps = SwitchFieldProps | SwitchInlineProps
 
 function _Switch({
   variant = "field",
-  // Typed `never`, stripped here so a stray prop from an untyped caller never
-  // reaches the DOM.
+  // Strip unsupported props from untyped callers before spreading to the DOM.
   editing: _editing,
   onDismiss: _onDismiss,
   title,

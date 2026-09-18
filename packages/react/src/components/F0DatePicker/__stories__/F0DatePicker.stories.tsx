@@ -102,7 +102,7 @@ const meta = {
   tags: ["stable", "!autodocs"],
   decorators: [
     (Story, { args, parameters }) => {
-      const width = parameters?.width || "300px"
+      const width = parameters?.width
       const [value, setValue] = useState<DatePickerValue | undefined>(
         args?.value as DatePickerValue
       )
@@ -110,7 +110,7 @@ const meta = {
       const [valueSimple, setValueSimple] = useState<string | undefined>()
 
       return (
-        <div style={{ width }}>
+        <div className="w-75" style={width ? { width } : undefined}>
           <Story
             args={{
               ...args,
@@ -132,9 +132,7 @@ const meta = {
 } satisfies Meta<typeof F0DatePicker>
 
 export default meta
-// The component's props are a discriminated union (`variant="inline"` adds
-// `editing` and `onDismiss`), which collapses `StoryObj<typeof meta>` args to
-// `never`. These stories all exercise the default field variant.
+// Use explicit props because StoryObj<typeof meta> collapses this union to never.
 type Story = StoryObj<F0DatePickerFieldProps>
 
 const today = mockDate
@@ -402,12 +400,12 @@ export const Snapshot: Story = {
               {snapshotVariants.map((variant, index) => (
                 <div
                   key={`${size}-${index}`}
-                  className={variant.open ? "mb-[400px]" : ""}
+                  className={variant.open ? "mb-100" : ""}
                 >
                   <p className="mb-3 text-sm">
                     Variant: {JSON.stringify(variant)}
                   </p>
-                  <div style={{ width: "300px" }}>
+                  <div className="w-75">
                     <F0DatePicker size={size} {...variant} onChange={fn()} />
                   </div>
                 </div>

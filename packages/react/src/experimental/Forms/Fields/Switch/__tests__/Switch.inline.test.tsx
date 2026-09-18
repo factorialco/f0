@@ -3,9 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 import { Switch } from ".."
 
-// jsdom has no layout, so the box is asserted on its classes. The measured
-// 40px height and 12px inset are asserted in Switch.inline.stories.tsx, which
-// runs against real CSS.
+// Storybook tests measure layout; jsdom only checks classes.
 const box = () => screen.getByTestId("switch-inline-box")
 
 describe("Switch inline variant", () => {
@@ -21,11 +19,10 @@ describe("Switch inline variant", () => {
     render(<Switch variant="inline" title="Remote worker" />)
 
     expect(box().className).toMatch(/\bpx-3\b/)
-    expect(box().className).toMatch(/\bmin-h-\[40px\]/)
+    expect(box()).toHaveClass("min-h-10")
     expect(box().className).toMatch(/\bh-full\b/)
     expect(box().className).toMatch(/\bw-full\b/)
-    // The transparent border is what makes the control start at the same x as
-    // an input field's first glyph.
+    // Match the input text inset.
     expect(box().className).toMatch(/\bborder-transparent\b/)
   })
 
