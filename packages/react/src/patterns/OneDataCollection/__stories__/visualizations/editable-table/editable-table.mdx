@@ -297,8 +297,11 @@ actions appear as a floating overlay on hover.
 
 Set `itemActionsOnHover` to reveal the button only while its row is hovered or
 focused, which keeps a long sheet from showing a column of buttons down every
-row. It is off by default, so existing tables are unaffected. The cell keeps its
-width either way, so a row's content does not shift sideways on hover.
+row. It is off by default, so existing tables are unaffected.
+
+With it set the actions take the same overlay the regular table uses: they are
+drawn over the last column rather than in a column of their own, so they
+reserve no width and a row's content does not shift sideways on hover.
 
 ```tsx
 visualizations={[

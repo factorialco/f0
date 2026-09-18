@@ -234,6 +234,8 @@ export const TableCollection = <
   // Editable tables render actions as a single dedicated column,
   // while the regular table uses two columns (desktop overlay + mobile dropdown).
   const isEditableTable = fromVisualization === "editableTable"
+  // Mirrors Row: revealing the actions on hover takes the overlay, which occupies no column.
+  const actionsAsColumn = isEditableTable && !itemActionsOnHover
   const actionColCount = isEditableTable ? 1 : 2
 
   const effectiveSource = useMemo(
@@ -649,7 +651,7 @@ export const TableCollection = <
                     )
                   })}
                   {showItemActions ? (
-                    isEditableTable ? (
+                    actionsAsColumn ? (
                       <TableHead
                         key="actions"
                         width="fit"
@@ -756,7 +758,7 @@ export const TableCollection = <
                   )
                 })}
                 {showItemActions ? (
-                  isEditableTable ? (
+                  actionsAsColumn ? (
                     <TableHead key="actions" width="fit" sticky={{ right: 0 }}>
                       <span className="sr-only">
                         {i18n.collections.actions.actions}
@@ -1139,7 +1141,7 @@ export const TableCollection = <
                         </TableCell>
                       ))}
                       {showItemActions ? (
-                        isEditableTable ? (
+                        actionsAsColumn ? (
                           <TableCell
                             key="summary-actions"
                             sticky={{ right: 0 }}

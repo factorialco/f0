@@ -246,7 +246,8 @@ export type TableVisualizationOptions<
    * instead of painting it on every row. Editable-table only — the plain table
    * always reveals its actions on hover.
    *
-   * The cell keeps its width either way, so a row's content cannot shift
+   * The actions are then drawn over the last column rather than given one of
+   * their own, so they reserve no width and a row's content cannot shift
    * sideways as the pointer enters it.
    *
    * @default false
