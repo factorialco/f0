@@ -10149,12 +10149,19 @@ declare interface FrameContextType {
      */
     railWidth: number;
     /**
+     * The section panel's width. A module whose panel IS its content — an inbox
+     * list, a month — needs more than the 240 a menu needs, and everything laid
+     * out against the navigation has to read the same number.
+     */
+    panelWidth: number;
+    /**
      * Whether navigation is permanently on screen. What reads this is the
      * "Open main menu" button in the page surfaces: with a rail there is no
      * state without navigation, so the button has nothing to restore.
      */
     hasRail: boolean;
     setRailWidth: (width: number) => void;
+    setPanelWidth: (width: number) => void;
 }
 
 /**
@@ -13977,7 +13984,7 @@ declare const shortcutVariants: (props?: ({
 
 export declare const Sidebar: WithDataTestIdReturnType_3<typeof _Sidebar>;
 
-declare function _Sidebar({ header, body, footer, onFooterDropdownClick, rail, }: SidebarProps): JSX_2.Element;
+declare function _Sidebar({ header, body, footer, onFooterDropdownClick, rail, panelWidth, }: SidebarProps): JSX_2.Element;
 
 export declare type SidebarChat = {
     id: string;
@@ -14289,6 +14296,12 @@ declare interface SidebarProps {
      * thing that slides away. Omit it and the sidebar behaves exactly as before.
      */
     rail?: ReactNode;
+    /**
+     * The panel's width in px. Defaults to the 240 a menu needs; a module whose
+     * panel IS its content — an inbox list, a month — passes its own, and the
+     * frame reserves that instead.
+     */
+    panelWidth?: number;
 }
 
 /**
@@ -16776,6 +16789,16 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         indent: {
             setIndent: (level: number) => ReturnType;
             unsetIndent: () => ReturnType;
@@ -16789,16 +16812,6 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
         };
     }
 }
