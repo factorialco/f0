@@ -84,6 +84,50 @@ const useIsSmallScreen = () =>
   })
 
 /**
+ * Section rail beside the form content. Detail rows already read as a bordered
+ * card, so inline drops the rule and anchors the card against the rail instead
+ * of floating it in the middle of the space.
+ */
+const SectionsSidepanelLayout = React.forwardRef<
+  HTMLDivElement,
+  {
+    inline: boolean
+    items: TOCItem[]
+    activeItem: string | undefined
+    children: React.ReactNode
+  }
+>(function SectionsSidepanelLayout(
+  { inline, items, activeItem, children },
+  ref
+) {
+  return (
+    <div ref={ref} className="flex w-full overflow-scroll">
+      <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
+        <F0TableOfContent
+          items={items}
+          activeItem={activeItem}
+          scrollable={false}
+        />
+      </div>
+      <div
+        className={cn(
+          "sticky bottom-0 top-0 mr-4",
+          !inline && "w-px bg-f1-border-secondary"
+        )}
+      />
+      <div
+        className={cn(
+          "flex w-full px-4 py-2",
+          inline ? "justify-start" : "justify-center"
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  )
+})
+
+/**
  * Flatten RHF FieldErrors into a dot-path → message map.
  * Handles nested errors (e.g. daterange `errors.range.from`).
  */
@@ -425,17 +469,13 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
       <>
-        <div className="flex w-full overflow-scroll">
-          <div className="sticky top-0 mr-4 h-fit shrink-0 self-start pt-2">
-            <F0TableOfContent
-              items={tocItems}
-              activeItem={effectiveActiveSection}
-              scrollable={false}
-            />
-          </div>
-          <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
-          <div className="flex w-full justify-center px-4 py-2">{content}</div>
-        </div>
+        <SectionsSidepanelLayout
+          inline={inline}
+          items={tocItems}
+          activeItem={effectiveActiveSection}
+        >
+          {content}
+        </SectionsSidepanelLayout>
         {actionBar}
       </>
     )
@@ -1837,24 +1877,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     <F0FormContext.Provider value={contextValue}>
       <FormProvider {...form}>
         {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div ref={scrollContainerRef} className="flex w-full overflow-scroll">
-            {/* Sections sidebar */}
-            <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
-              <F0TableOfContent
-                items={tocItems}
-                activeItem={effectiveActiveSection}
-                scrollable={false}
-              />
-            </div>
-
-            {/* Separator */}
-            <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
-
-            {/* Form content - centered in available space */}
-            <div className="flex w-full justify-center px-4 py-2">
-              {formContent}
-            </div>
-          </div>
+          <SectionsSidepanelLayout
+            ref={scrollContainerRef}
+            inline={inline}
+            items={tocItems}
+            activeItem={effectiveActiveSection}
+          >
+            {formContent}
+          </SectionsSidepanelLayout>
         ) : (
           <div className={cn("flex justify-center", !noPadding && "p-4")}>
             {formContent}

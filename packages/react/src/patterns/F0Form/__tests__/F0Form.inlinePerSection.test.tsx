@@ -70,6 +70,23 @@ describe("F0Form inline per-section mode", () => {
   beforeEach(() => resetInlineWarnings())
   afterEach(() => vi.restoreAllMocks())
 
+  it("anchors the cards left of the rail, with no rule between them", () => {
+    const { container } = renderRecord({
+      styling: { showSectionsSidepanel: true },
+    })
+
+    const rail = container.querySelector(".overflow-scroll") as HTMLElement
+    const columns = Array.from(rail.children)
+
+    expect(columns.some((c) => c.classList.contains("justify-start"))).toBe(
+      true
+    )
+    expect(columns.some((c) => c.classList.contains("justify-center"))).toBe(
+      false
+    )
+    expect(rail.querySelector(".w-px.bg-f1-border-secondary")).toBeNull()
+  })
+
   it("reads every section as a card of rows under its own heading", () => {
     const { container } = renderRecord()
 

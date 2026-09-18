@@ -751,6 +751,23 @@ describe("F0Form inline anchors", () => {
     expect(scrollTo).toHaveBeenCalled()
   })
 
+  it("anchors the rows left of the rail, with no rule between them", () => {
+    const { container } = renderAnchored({
+      styling: { showSectionsSidepanel: true },
+    })
+
+    const rail = container.querySelector(".overflow-scroll") as HTMLElement
+    const columns = Array.from(rail.children)
+
+    expect(columns.some((c) => c.classList.contains("justify-start"))).toBe(
+      true
+    )
+    expect(columns.some((c) => c.classList.contains("justify-center"))).toBe(
+      false
+    )
+    expect(rail.querySelector(".w-px.bg-f1-border-secondary")).toBeNull()
+  })
+
   it("scrolls to the row that failed validation", async () => {
     const user = userEvent.setup()
     const scrolled: HTMLElement[] = []
