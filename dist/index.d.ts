@@ -289,6 +289,94 @@ declare const f1Colors: {
 };
 type F1Color = keyof typeof f1Colors;
 
+/**
+ * The motion vocabulary — durations and easings shared by everything that
+ * moves as part of the application shell.
+ *
+ * One token because a single gesture is almost never drawn by a single
+ * animation: opening the side panel moves the main content's padding, the
+ * panel's own width and the canvas inset, and collapsing the sidebar moves
+ * its slot and the nav itself. When those carry their own durations and curves
+ * they cannot stay in step, and the seam between them is exactly where the
+ * mismatch shows.
+ *
+ * Calibrated the same way as the chat's own vocabulary: short ease-out tweens
+ * with NO overshoot — underdamped springs read as bounce.
+ */
+declare const motionTokens: {
+    duration: {
+        /** Micro-presences: chips, dots, hover affordances. */
+        micro: number;
+        /** Row entries and crossfades. */
+        fast: number;
+        /** The shell's default — anything moving the panel/content seam. */
+        base: number;
+        /** A surface changing what it is: entering or leaving fullscreen. */
+        reveal: number;
+    };
+    ease: {
+        /** Fast start, soft landing, no overshoot (Material "emphasized decelerate"). */
+        outSwift: [number, number, number, number];
+        /** Pure disappearances, where nothing has to be tracked on the way out. */
+        in: [number, number, number, number];
+    };
+    /**
+     * How long a continuous gesture (a window drag) must hold still before it
+     * counts as settled rather than mid-flight.
+     */
+    settleMs: number;
+};
+
+/**
+ * Widths for the application frame's side panel — the slot the AI chat, hosted
+ * conversations and the meeting panel all take turns occupying.
+ *
+ * These lived as private constants in three places (the chat kit, its
+ * localStorage validator, and the meeting window) that were manually kept in
+ * step. They are one token now because changing one copy silently invalidated
+ * values persisted against another.
+ */
+declare const panelWidths: {
+    min: number;
+    max: number;
+    default: number;
+    /**
+     * How much room the main content keeps before the panel takes any — the
+     * split the frame arrives at on its own.
+     *
+     * The panel is the guest here. Product surfaces are dense — filters, table
+     * headers, bulk actions — and they degrade far worse in a narrow column than
+     * a chat does, so the content is served first and the panel gets what is
+     * left, down to its own `min`.
+     *
+     * This is what the layout CHOOSES, not a hard limit: an explicit drag may
+     * cross it, down to `mainHardMin`. See `mainHardMin` and `splitMinFrame`.
+     */
+    mainMin: number;
+    /**
+     * The floor a deliberate drag may not cross.
+     *
+     * `mainMin` decides the default; this decides how far the user is allowed to
+     * overrule it. Someone who drags the panel wider on a narrow window has said
+     * what they want and should get it — but not to the point where the content
+     * behind stops being a usable page.
+     */
+    mainHardMin: number;
+    /**
+     * Below this the panel covers the frame instead of splitting it.
+     *
+     * Independent of `mainMin` on purpose. Deriving it as `mainMin + min` tied
+     * two unrelated questions together — "how much room does the content want"
+     * and "when is splitting no longer worth it" — so making the content more
+     * comfortable on a laptop also stopped a half-screen window from splitting
+     * at all. They move separately now.
+     *
+     * 700 leaves at least 350 a side, which is the narrowest split that still
+     * reads as two columns rather than two slivers.
+     */
+    splitMinFrame: number;
+};
+
 declare const boxShadow: {
     readonly DEFAULT: "0 2px 20px 0 hsl(var(--shadow) / 0.04)";
     readonly md: "0 4px 20px 0 hsl(var(--shadow) / 0.08)";
@@ -368,10 +456,28 @@ declare const fontSize: {
         readonly letterSpacing: "-0.02em";
     };
 };
+/**
+ * Font stacks.
+ *
+ * `emoji` is for surfaces that render an emoji **on its own** — a picker cell, a
+ * reaction pill, a channel icon. It must NOT be applied to prose: `*`, `#`, the
+ * digits and `™` are technically emoji in Unicode, so an emoji font over mixed
+ * text turns numbers and symbols into pictures. Body copy relies on the
+ * browser's own per-character fallback instead, which already picks the system
+ * emoji font for emoji codepoints.
+ *
+ * "Twemoji Mozilla" leads because Firefox ships it and it is the only stack
+ * entry that carries flag glyphs on Windows (Segoe UI Emoji has none, so
+ * Chromium there falls back to the two regional-indicator letters).
+ */
+declare const fontFamily: {
+    readonly sans: readonly ["Inter", "sans-serif"];
+    readonly emoji: readonly ["Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "EmojiOne Color", "Android Emoji", "sans-serif"];
+};
 declare const fontWeight: {
     readonly normal: "400";
     readonly medium: "500";
     readonly semibold: "600";
 };
 
-export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontSize, fontWeight, interactiveHeights, pageSpacing, relativeSpacing };
+export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontFamily, fontSize, fontWeight, interactiveHeights, motionTokens, pageSpacing, panelWidths, relativeSpacing };

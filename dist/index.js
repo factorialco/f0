@@ -27,10 +27,13 @@ __export(index_exports, {
   boxShadow: () => boxShadow,
   breakpoints: () => breakpoints,
   f1Colors: () => f1Colors,
+  fontFamily: () => fontFamily,
   fontSize: () => fontSize,
   fontWeight: () => fontWeight,
   interactiveHeights: () => interactiveHeights,
+  motionTokens: () => motionTokens,
   pageSpacing: () => pageSpacing,
+  panelWidths: () => panelWidths,
   relativeSpacing: () => relativeSpacing
 });
 module.exports = __toCommonJS(index_exports);
@@ -305,6 +308,73 @@ var f1Colors = {
   }
 };
 
+// src/tokens/motion.ts
+var motionTokens = {
+  duration: {
+    /** Micro-presences: chips, dots, hover affordances. */
+    micro: 0.12,
+    /** Row entries and crossfades. */
+    fast: 0.16,
+    /** The shell's default — anything moving the panel/content seam. */
+    base: 0.22,
+    /** A surface changing what it is: entering or leaving fullscreen. */
+    reveal: 0.3
+  },
+  ease: {
+    /** Fast start, soft landing, no overshoot (Material "emphasized decelerate"). */
+    outSwift: [0.05, 0.7, 0.1, 1],
+    /** Pure disappearances, where nothing has to be tracked on the way out. */
+    in: [0.32, 0, 0.67, 0]
+  },
+  /**
+   * How long a continuous gesture (a window drag) must hold still before it
+   * counts as settled rather than mid-flight.
+   */
+  settleMs: 120
+};
+
+// src/tokens/panels.ts
+var panelWidths = {
+  min: 300,
+  max: 712,
+  default: 360,
+  /**
+   * How much room the main content keeps before the panel takes any — the
+   * split the frame arrives at on its own.
+   *
+   * The panel is the guest here. Product surfaces are dense — filters, table
+   * headers, bulk actions — and they degrade far worse in a narrow column than
+   * a chat does, so the content is served first and the panel gets what is
+   * left, down to its own `min`.
+   *
+   * This is what the layout CHOOSES, not a hard limit: an explicit drag may
+   * cross it, down to `mainHardMin`. See `mainHardMin` and `splitMinFrame`.
+   */
+  mainMin: 640,
+  /**
+   * The floor a deliberate drag may not cross.
+   *
+   * `mainMin` decides the default; this decides how far the user is allowed to
+   * overrule it. Someone who drags the panel wider on a narrow window has said
+   * what they want and should get it — but not to the point where the content
+   * behind stops being a usable page.
+   */
+  mainHardMin: 400,
+  /**
+   * Below this the panel covers the frame instead of splitting it.
+   *
+   * Independent of `mainMin` on purpose. Deriving it as `mainMin + min` tied
+   * two unrelated questions together — "how much room does the content want"
+   * and "when is splitting no longer worth it" — so making the content more
+   * comfortable on a laptop also stopped a half-screen window from splitting
+   * at all. They move separately now.
+   *
+   * 700 leaves at least 350 a side, which is the narrowest split that still
+   * reads as two columns rather than two slivers.
+   */
+  splitMinFrame: 700
+};
+
 // src/tokens/shadows.ts
 var boxShadow = {
   DEFAULT: "0 2px 20px 0 hsl(var(--shadow) / 0.04)",
@@ -421,6 +491,19 @@ var fontSize = {
   "3xl": { size: "1.625rem", lineHeight: "2rem", letterSpacing: "-0.01em" },
   "4xl": { size: "2.25rem", lineHeight: "2.5rem", letterSpacing: "-0.02em" }
 };
+var fontFamily = {
+  sans: ["Inter", "sans-serif"],
+  emoji: [
+    "Twemoji Mozilla",
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji",
+    "EmojiOne Color",
+    "Android Emoji",
+    "sans-serif"
+  ]
+};
 var fontWeight = {
   normal: "400",
   medium: "500",
@@ -435,10 +518,13 @@ var fontWeight = {
   boxShadow,
   breakpoints,
   f1Colors,
+  fontFamily,
   fontSize,
   fontWeight,
   interactiveHeights,
+  motionTokens,
   pageSpacing,
+  panelWidths,
   relativeSpacing
 });
 //# sourceMappingURL=index.js.map
