@@ -147,8 +147,10 @@ export function SidebarRail({
     >
       {/* 60px, the same height as the panel's title bar beside it, so the logo
           and the section title sit on one line. Full width: the selector takes
-          the whole row as its target. */}
-      <div className="flex h-[60px] w-full shrink-0 items-stretch justify-center">
+          the whole row as its target. The 8px below separates the workspace
+          mark from the first module — without it the two chips read as one
+          run, and the company becomes the item above Home. */}
+      <div className="flex h-[60px] w-full shrink-0 items-stretch justify-center pb-2">
         <CompanySelector {...company} variant="compact" />
       </div>
 
