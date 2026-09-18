@@ -117681,22 +117681,22 @@ const NY1 = ({ text: e }) => /* @__PURE__ */ i(
     {
       size: "sm",
       canGrow: !0,
-      class: "min-h-[32px]"
+      class: "min-h-8"
     },
     {
       size: "md",
       canGrow: !0,
-      class: "min-h-[40px]"
+      class: "min-h-10"
     },
     {
       size: "sm",
       canGrow: !1,
-      class: "h-[32px]"
+      class: "h-8"
     },
     {
       size: "md",
       canGrow: !1,
-      class: "h-[40px]"
+      class: "h-10"
     }
   ],
   defaultVariants: {
