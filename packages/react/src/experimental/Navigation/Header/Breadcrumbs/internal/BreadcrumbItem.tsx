@@ -1,7 +1,6 @@
 import { motion } from "motion/react"
 import { forwardRef, PropsWithChildren, ReactNode } from "react"
 
-import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
 import { getBreadcrumbKey } from "@/experimental/Navigation/Header/Breadcrumbs/getBreadcrumbKey"
@@ -69,12 +68,6 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
         )}
         transition={{ duration: 0.15 }}
       >
-        {!isLoading &&
-          "module" in item &&
-          item.module &&
-          (isOnly || isFirst) && (
-            <F0AvatarModule module={item.module} size={isOnly ? "sm" : "xs"} />
-          )}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}
         </span>
