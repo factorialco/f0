@@ -1,21 +1,60 @@
 import { forwardRef } from "react"
+import type { InlineDismissReason } from "@/components/F0InputField"
 import { InputInternal, type InputInternalProps } from "./internal"
 
-const privateProps = ["buttonToggle"] as const
+const privateProps = ["buttonToggle", "onPressEscape"] as const
 
-export type F0TextInputProps = Omit<
+type F0TextInputBaseProps = Omit<
   InputInternalProps,
-  (typeof privateProps)[number]
+  (typeof privateProps)[number] | "variant" | "editing"
 >
+
+export type F0TextInputFieldProps = F0TextInputBaseProps & {
+  variant?: "field"
+  editing?: never
+  onDismiss?: never
+}
+
+export type F0TextInputInlineProps = F0TextInputBaseProps & {
+  variant: "inline"
+  editing?: boolean
+  onDismiss?: (reason: InlineDismissReason) => void
+}
+
+export type F0TextInputProps = F0TextInputFieldProps | F0TextInputInlineProps
 
 const _F0TextInput = forwardRef<HTMLInputElement, F0TextInputProps>(
   function F0TextInput(props, ref) {
-    const publicProps = privateProps.reduce<InputInternalProps>((acc, key) => {
-      const { [key]: _, ...rest } = acc
-      return rest
-    }, props)
+    const { variant, editing, onDismiss, ...rest } =
+      props as F0TextInputInlineProps
 
-    return <InputInternal {...publicProps} ref={ref} />
+    const publicProps = privateProps.reduce<InputInternalProps>((acc, key) => {
+      const { [key]: _, ...restProps } = acc
+      return restProps
+    }, rest)
+
+    if (variant !== "inline") {
+      return <InputInternal {...publicProps} ref={ref} />
+    }
+
+    return (
+      <InputInternal
+        {...publicProps}
+        ref={ref}
+        variant="inline"
+        editing={editing ?? false}
+        autoFocus={publicProps.autoFocus ?? true}
+        onPressEnter={() => {
+          publicProps.onPressEnter?.()
+          onDismiss?.("commit")
+        }}
+        onPressEscape={() => onDismiss?.("escape")}
+        onBlur={() => {
+          publicProps.onBlur?.()
+          onDismiss?.("blur")
+        }}
+      />
+    )
   }
 )
 

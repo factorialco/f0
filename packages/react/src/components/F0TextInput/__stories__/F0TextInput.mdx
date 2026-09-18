@@ -118,7 +118,7 @@ The canonical writable text field — a single-line box where text, emails, pass
 <DoDonts
   do={{
     description:
-      'Use type="private" for sensitive, non-credential data — SSNs, national IDs, account numbers, tokens — with a concrete label so the eye toggle\'s accessible name is unambiguous.',
+      'Use type="private" for sensitive, non-credential data — SSNs, national IDs, account numbers, tokens — with a concrete label.',
     children: (
       <F0TextInput
         type="private"
@@ -165,12 +165,88 @@ When `type="password"`:
 `type="private"` is an F0-specific subtype for **sensitive, non-credential data** — Social Security numbers, national IDs, account numbers, tokens. It masks the value like `password`, but differs in two ways that matter:
 
 - **No lock icon** — the consumer `icon` prop is respected (default: none), so the field does not read as a login credential.
-- **Password managers are disabled** — the field sets `autocomplete="off"` plus `data-1p-ignore`, `data-lpignore`, `data-bwignore` and `data-form-type="other"`, so 1Password, LastPass, Bitwarden and browser autofill never offer to save or fill it.
+- **Password manager hints** — the field sets `autocomplete="off"` plus `data-1p-ignore`, `data-lpignore`, `data-bwignore` and `data-form-type="other"`, to ask 1Password, LastPass, Bitwarden and browser autofill not to save or fill it.
 
-A trailing eye-toggle flips between masked and visible text; its accessible name is built from the field label (e.g. "Show social security number") so screen-reader users can tell multiple private fields apart. As with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
+Private fields reveal their value when the input receives focus and mask it again on blur. They have no eye toggle. This applies to the standard field and the inline editor, even if the parent keeps `editing` enabled after blur. With `autoFocus={false}`, an inline editor stays masked until it receives focus.
+
+The inline resting presentation shows a fixed mask for nonempty private values, including the hover title. Empty values still show their placeholder. Masking only changes presentation; `value` and `onChange` retain the original text. Use `type="password"` for login passwords; its eye toggle and focus behavior are unchanged.
 
 <Canvas of={Stories.Private} />
 
 **Enter key**
 
 `onPressEnter` fires when `Enter` is pressed while the input has focus. Useful for form-less search boxes, inline editing, or single-field submit flows. It does not call `preventDefault` — wrap the input in a `<form onSubmit>` if native form submission is also needed.
+
+**Inline variant**
+
+`variant="inline"` is the detail-row presentation: a form that reads as rows, where the value prints as text and becomes its own editor when the row activates it. With no `variant`, nothing changes — the field presentation is still the default.
+
+The variant is presentational only. It holds no mode state: the parent passes `editing` and the component draws the matching presentation. When the user does something that would end an edit, the component reports it through `onDismiss` and keeps drawing the editor until `editing` changes. A component that closed itself would leave the row stuck, because the row decides whether a value commits, reverts, or stays in edit with a validation error showing.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Accepted when</th>
+        <th className="text-left">What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>variant</code>
+        </td>
+        <td>Always</td>
+        <td>
+          <code>"field"</code> (default) or <code>"inline"</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>editing</code>
+        </td>
+        <td>
+          <code>variant="inline"</code> only
+        </td>
+        <td>
+          <code>false</code> (default) draws the value as plain text;{" "}
+          <code>true</code> draws the input and focuses it
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onDismiss</code>
+        </td>
+        <td>
+          <code>variant="inline"</code> only
+        </td>
+        <td>
+          Reports <code>"commit"</code> on Enter, <code>"escape"</code> on
+          Escape, and <code>"blur"</code> when focus leaves
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+At rest the value is plain text: no border, no background, no input element, no tab stop — the activator belongs to the row. An empty value shows the `placeholder` in the secondary foreground colour, and a value too long for the box is cut with an ellipsis. Both presentations fill the box they are given in both axes and put the first glyph at the same x, so the text does not move when the row is activated.
+
+`label` stays required. Pass `hideLabel`, as every inline field renderer does, and it becomes the value's accessible name instead of a visible label.
+
+```tsx
+const [editing, setEditing] = useState(false)
+
+<F0TextInput
+  variant="inline"
+  label="Job title"
+  hideLabel
+  value={value}
+  editing={editing}
+  onChange={setValue}
+  onDismiss={(reason) => {
+    if (reason === "escape") setValue(valueAtActivation)
+    setEditing(false)
+  }}
+/>
+```
