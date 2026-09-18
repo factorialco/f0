@@ -878,8 +878,6 @@ const e = {
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
-    // Muted label on a message drafted with One and approved by its sender.
-    // "One" is the product name and stays untranslated.
     aiAssisted: "Drafted with One",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
