@@ -9,7 +9,7 @@ import {
 } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { Check, InfoCircleLine, LayersFront } from "@/icons/app"
+import { CheckCircle, InfoCircleLine, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import type { InlineFieldRowProps, RowAction } from "./types"
@@ -32,7 +32,7 @@ const ActionButton = ({ action }: { action: RowAction }) => (
     title={action.label}
     aria-live={action.positive ? "polite" : undefined}
     className={cn(
-      "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0 transition-colors",
+      "flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0 transition-colors motion-reduce:transition-none",
       action.positive
         ? "text-f1-icon-positive"
         : "text-f1-icon-bold hover:bg-f1-background-secondary-hover",
@@ -104,7 +104,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
             ...actions,
             {
               key: "copy",
-              icon: copied ? Check : LayersFront,
+              icon: copied ? CheckCircle : LayersFront,
               label: t(copied ? "forms.inline.copied" : "forms.inline.copy", {
                 label,
               }),
@@ -128,8 +128,12 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
         data-slot="inline-field-row-value"
         className={cn(
           "h-10 w-full min-w-0 rounded-md [&>*]:h-full [&>*]:w-full",
-          !editing && "transition-colors motion-reduce:transition-none",
-          activatable && "cursor-text group-hover:bg-f1-background-secondary"
+          {
+            "transition-colors motion-reduce:transition-none": !editing,
+            "cursor-text": activatable,
+            "bg-f1-background-positive": !editing && copied,
+            "group-hover:bg-f1-background-secondary": activatable && !copied,
+          }
         )}
       >
         {value}

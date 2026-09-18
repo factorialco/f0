@@ -182,13 +182,25 @@ describe("InlineFieldRow", () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     stubClipboard(writeText)
 
-    renderRow({ copyValue: "Senior designer" })
+    renderRow({ copyValue: "Senior designer", onActivate: vi.fn() })
 
     await userEvent.click(
       screen.getByRole("button", { name: "Copy Job title" })
     )
 
-    await screen.findByRole("button", { name: "Copied Job title" })
+    const confirmation = await screen.findByRole("button", {
+      name: "Copied Job title",
+    })
+    const value = document.querySelector('[data-slot="inline-field-row-value"]')
+    expect(value).toHaveClass("bg-f1-background-positive")
+    expect(value).not.toHaveClass("group-hover:bg-f1-background-secondary")
+    expect(confirmation).toHaveClass(
+      "text-f1-icon-positive",
+      "motion-reduce:transition-none"
+    )
+    expect(
+      confirmation.querySelector('svg path[fill="currentColor"]')
+    ).not.toBeNull()
 
     await new Promise((resolve) => setTimeout(resolve, 900))
     expect(
@@ -202,6 +214,32 @@ describe("InlineFieldRow", () => {
         ).toBeInTheDocument(),
       { timeout: 2000 }
     )
+    expect(value).not.toHaveClass("bg-f1-background-positive")
+    expect(value).toHaveClass("group-hover:bg-f1-background-secondary")
+  })
+
+  it("removes copy styling when editing starts", async () => {
+    stubClipboard(vi.fn().mockResolvedValue(undefined))
+    const { rerender } = renderRow({ copyValue: "Senior designer" })
+    await userEvent.click(
+      screen.getByRole("button", { name: "Copy Job title" })
+    )
+    await screen.findByRole("button", { name: "Copied Job title" })
+    rerender(
+      <InlineFieldRow
+        label="Job title"
+        value={<input aria-label="Job title" />}
+        actions={[]}
+        copyValue="Senior designer"
+        editing
+      />
+    )
+    expect(
+      document.querySelector('[data-slot="inline-field-row-value"]')
+    ).not.toHaveClass("bg-f1-background-positive")
+    expect(
+      screen.queryByRole("button", { name: "Copied Job title" })
+    ).toBeNull()
   })
 
   it("confirms nothing when the clipboard refuses", async () => {
@@ -215,6 +253,9 @@ describe("InlineFieldRow", () => {
     )
 
     await waitFor(() => expect(writeText).toHaveBeenCalled())
+    expect(
+      document.querySelector('[data-slot="inline-field-row-value"]')
+    ).not.toHaveClass("bg-f1-background-positive")
     expect(
       screen.queryByRole("button", { name: "Copied Job title" })
     ).toBeNull()
