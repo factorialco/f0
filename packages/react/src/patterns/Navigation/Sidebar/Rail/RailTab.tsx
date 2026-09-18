@@ -182,12 +182,12 @@ export const RailTab = forwardRef<HTMLButtonElement, RailTabProps>(
             if (event.pointerType === "touch") return
             schedule(false, FLYOUT_CLOSE_DELAY)
           }}
-          // Dark glass, always — a menu that floats over the page is not part
-          // of the page, and the surface is what says so. `dark` rather than
-          // an inverse background: it flips every token inside, so the rows
-          // that come out of it are the ones the navigation already ships
-          // rather than a second, hand-tinted set of them.
-          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl backdrop-blur-2xl backdrop-saturate-150"
+          // A dark, translucent sheet — a menu that floats over the page is
+          // not part of the page, and the surface is what says so. `dark`
+          // rather than an inverse background: it flips every token inside, so
+          // the rows that come out of it are the ones the navigation already
+          // ships rather than a second, hand-tinted set of them.
+          className="dark w-[264px] max-h-[min(36rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-xl border-solid border-f1-border-secondary bg-f1-background/60 p-2 shadow-xl"
         >
           {flyout}
         </PopoverContent>
