@@ -18,8 +18,9 @@ jobs:
     name: "[⚛️ REACT] Size"
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     timeout-minutes: 60
     runs-on: ubuntu-latest
     permissions:

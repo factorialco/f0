@@ -23,11 +23,13 @@ jobs:
   deploy:
     needs: detect-changes
     name: "[⚛️ REACT] Deploy Storybook to Azure Static Web Apps"
-    # Prevents running on the release-please branch
+    # No release-please guard here on purpose. This workflow runs on `push` and
+    # `workflow_dispatch`, so `github.head_ref` is always empty and
+    # `github.event.pull_request` is always null — the clauses other workflows
+    # carry could never evaluate to anything but true. Deploying the Storybook
+    # for a release commit is also exactly what should happen.
     if: |
-      needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      needs.detect-changes.outputs.package_react == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

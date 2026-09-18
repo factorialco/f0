@@ -19,8 +19,9 @@ jobs:
     if: |
       (needs.detect-changes.outputs.package_react == 'true' ||
        needs.detect-changes.outputs.package_core == 'true') &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[⚛️ REACT] Build types (${{ matrix.side }})"
     runs-on: ubuntu-22.04
     # One side failing must not wedge the run; the diff job handles a missing
@@ -75,8 +76,9 @@ jobs:
     if: |
       (needs.detect-changes.outputs.package_react == 'true' ||
        needs.detect-changes.outputs.package_core == 'true') &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[⚛️ REACT] Public API surface check"
     runs-on: ubuntu-22.04
     permissions:

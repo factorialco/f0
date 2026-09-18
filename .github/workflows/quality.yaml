@@ -25,11 +25,24 @@ jobs:
 
   format:
     needs: detect-changes
-    # Prevents running on the release-please branch
+    # Skips the release-please PR. Both halves are written the way they are for
+    # a reason, and this is the canonical copy — the other jobs repeat it.
+    #
+    # `startsWith`, because the branch is `release-please--branches--main`. The
+    # previous version compared against `...--master`, a branch this repo has
+    # never had, so it matched nothing for as long as it existed.
+    #
+    # `join` before `contains`, because `contains()` over an array matches whole
+    # elements, and the labels are `autorelease: pending` / `autorelease:
+    # tagged` — never the bare `autorelease` the old code looked for. Flattening
+    # the array to one string first turns it into the substring match that was
+    # intended. The `github.event_name` guard keeps the expression well-defined
+    # on non-PR events, where there is no label array to join.
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: Format
     runs-on: ubuntu-22.04
     steps:
@@ -42,8 +55,9 @@ jobs:
     # Prevents running on the release-please branch
     if: |
       needs.detect-changes.outputs.package_react_native == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[📱 REACT NATIVE] Format"
     runs-on: ubuntu-22.04
     steps:
@@ -56,8 +70,9 @@ jobs:
     # Prevents running on the release-please branch
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[⚛️ REACT] Linting"
     runs-on: ubuntu-22.04
     steps:
@@ -99,8 +114,9 @@ jobs:
     # Prevents running on the release-please branch
     if: |
       needs.detect-changes.outputs.package_react_native == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[📱 REACT NATIVE] Linting"
     runs-on: ubuntu-22.04
     steps:
@@ -124,8 +140,9 @@ jobs:
     # Prevents running on the release-please branch
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[⚛️ REACT] Stable Definition of Done"
     runs-on: ubuntu-22.04
     steps:
@@ -144,8 +161,9 @@ jobs:
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
       !contains(github.event.pull_request.labels.*.name, 'skip-new-component-dod') &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[⚛️ REACT] New Component Definition of Done"
     runs-on: ubuntu-22.04
     steps:
@@ -165,8 +183,9 @@ jobs:
     # Prevents running on the release-please branch
     if: |
       needs.detect-changes.outputs.package_react == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "[⚛️ REACT] Cycle Dependencies Check"
     runs-on: ubuntu-22.04
     permissions:
@@ -333,8 +352,9 @@ jobs:
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.git_hooks == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !startsWith(github.head_ref, 'release-please--') &&
+      (github.event_name != 'pull_request' ||
+        !contains(join(github.event.pull_request.labels.*.name, ','), 'autorelease'))
     name: "Git hooks (lefthook + lint-staged)"
     runs-on: ubuntu-22.04
     timeout-minutes: 20
