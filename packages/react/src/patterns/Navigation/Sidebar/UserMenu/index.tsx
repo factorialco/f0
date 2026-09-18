@@ -38,7 +38,15 @@ export function SidebarUserMenu({
   const fullName = `${user.firstName} ${user.lastName}`
 
   return (
-    <Dropdown items={options}>
+    // On the rail the menu opens beside the avatar, its foot on the avatar's:
+    // below it there is nothing but the window edge, and a menu that grows
+    // upward from the bottom-left corner of the screen reads as belonging to
+    // the viewport rather than to the button that opened it.
+    <Dropdown
+      items={options}
+      side={compact ? "right" : undefined}
+      align={compact ? "end" : undefined}
+    >
       <button
         type="button"
         // With the name hidden, it has to reach assistive tech some other way.

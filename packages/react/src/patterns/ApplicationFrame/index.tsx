@@ -200,6 +200,7 @@ function ApplicationFrameContent({
     railWidth,
     panelWidth,
     isLayoutJumping,
+    hasRail,
   } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const {
@@ -578,7 +579,12 @@ function ApplicationFrameContent({
             <motion.div
               className={cn(
                 "shrink-0",
-                sidebarState !== "locked" ? "z-30" : "z-0",
+                // The slot is raised over the content only for a panel that
+                // FLOATS. With a rail it never does, so a collapsing panel
+                // fading out on top of the page it is uncovering — its rows
+                // legible over the content for the length of the fade — is
+                // not a trade for anything.
+                sidebarState !== "locked" && !hasRail ? "z-30" : "z-0",
                 // Dropped when collapsed: with `box-sizing: border-box` a
                 // padding would hold the slot open at 12px instead of 0.
                 sidebarState === "locked" && "pl-3"

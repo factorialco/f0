@@ -21,6 +21,7 @@ import { OneCalendar } from "@/components/OneCalendar"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
+  Bell,
   BookOpen,
   Calendar,
   CalendarFilled,
@@ -1511,18 +1512,11 @@ const toolsMenuTree: MenuCategory[] = [
     isRoot: true,
     isSortable: false,
     items: [
-      { label: "Dashboard", icon: Icons.Hub, href: "/", exactMatch: true },
-      {
-        label: "Communications",
-        icon: Icons.Megaphone,
-        href: "/communications",
-      },
       // `data-test` is asserted by the Default story play test.
       {
-        label: "Inbox",
-        icon: Icons.Inbox,
-        href: "/inbox",
-        badge: 6,
+        label: "Marketplace",
+        icon: Marketplace,
+        href: "/marketplace",
         "data-test": "foo",
       },
       {
@@ -1564,11 +1558,6 @@ const toolsMenuTree: MenuCategory[] = [
     isOpen: true,
     isSortable: true,
     items: [
-      {
-        label: "Talent analytics",
-        icon: Icons.ChartLine,
-        href: "/talent-analytics",
-      },
       { label: "Performance", icon: Icons.Target, href: "/performance" },
       { label: "Recruitment", icon: Icons.SearchPerson, href: "/recruitment" },
       { label: "Engagement", icon: Icons.Heart, href: "/engagement" },
@@ -1613,7 +1602,6 @@ const toolsMenuTree: MenuCategory[] = [
         icon: Icons.UserProtected,
         href: "/trust-channel",
       },
-      { label: "Settings", icon: Icons.Settings, href: "/settings" },
     ],
   },
 ]
@@ -2000,9 +1988,11 @@ const ConversationsSidebarInner = ({
 
   if (isRail) {
     const { user, options } = SidebarFooterStories.Default.args
-    // Home is the one module that is only a page. Everything else has a
-    // list, a queue or a catalog to put beside it.
-    const hasPanel = tab !== "home"
+    // A panel is for a module whose second level is a list you pick from: the
+    // conversations, the queue, the catalog. Home, Calendar, Directory and
+    // Files are pages — the module IS the content, and a column of links
+    // beside it would be a table of contents for one page.
+    const hasPanel = ["messages", "inbox", "tools"].includes(tab)
     return (
       <Sidebar
         // The inbox list IS the module, and its rows do not fit in a menu's
@@ -2023,15 +2013,13 @@ const ConversationsSidebarInner = ({
               // section and opening the panel are the same intention.
               if (sidebarState !== "locked") toggleSidebar()
             }}
-            // Pressing the module you are already in folds the panel away, so
-            // the rail doubles as the collapse control.
-            onActiveTabPress={() => toggleSidebar()}
             persistKey={tabsPersistKey}
             actions={[
               {
-                id: "marketplace",
-                label: "Marketplace",
-                icon: Marketplace,
+                id: "notifications",
+                label: "Notifications",
+                icon: Bell,
+                hasUpdates: true,
                 onClick: () => {},
               },
               {
