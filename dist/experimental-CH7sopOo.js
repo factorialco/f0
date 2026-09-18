@@ -1,8 +1,8 @@
-import { cP as k_, cQ as u0, cR as x_, cS as D_, cT as RA, cU as S_, cV as R_, cW as M_, cX as P_, cY as Ph, cZ as f0, c_ as Ec, c$ as _A, d0 as V_, b_ as Jt, cu as _s, u as kt, d1 as G_, d2 as E_, d3 as MA, d4 as Vh, d5 as ZA, d6 as KA, bZ as Cn, bF as T_, bE as wy, W as ii, A as N_, B as Z_, bS as ci, bb as vy, L as K_, E as W_, n as pi, al as aC, S as Bt, c4 as Go, d7 as z_, d8 as Y_, d9 as H_, $ as O_, da as J_, as as Og, bc as Gh, ak as Eh, bV as Ma, cb as Bs, db as j_, e as Th, c6 as Po, dc as L_, a9 as Nh, cM as tl, w as Hn, s as gn, z as WA, v as oC, x as il, bw as Zh, y as rC, a$ as by, bQ as X_, ai as _y, bX as Yn, t as Cg, cG as mr, cw as nl, bP as h0, Z as q_, bY as Pn, dd as ky, de as Ih, cL as Eo, df as Kh, dg as $_, m as Wh, dh as sC, aS as ek, bJ as tk, Y as ik, i as nk, cF as gk, di as pr, dj as zh, dk as fa, bi as ak, dl as ok, af as rk, cc as Vo, dm as Ud, dn as xy, dp as sk, dq as Ik, b8 as Ck, dr as Qd, ds as Dy, j as wd, dt as Ak, at as lk, k as iC, du as Sy, bp as ck, dv as dk, dw as uk, dx as fk, dy as hk, dz as Ch, dA as Ry, cf as vd, ab as My, dB as mk, dC as pk, dD as Bk, dE as Fk, dF as io, dG as Ah, cd as Yh, dH as Py, cm as ks, dI as gd, dJ as Vy, dK as Hh, cj as yk, dL as ws, dM as Uk, dN as Qk, dO as wk, c5 as PA, bo as vk, bt as bd, aA as ad, aq as bk, dP as Gy, dQ as _k, b as Oh, dR as kk, dS as Mo, a as xk, dT as Pf, dU as _d, g as Dk, F as Sk, bu as Ey, cn as Rk, q as kd, cp as Mk, by as xd, K as Pk, bs as Vk, a6 as Ty, cy as Gk, am as Dd, dV as Jh, bh as Ek, bg as Tk, au as od, dW as Nk, dX as Zk, dY as Kk, dZ as Wk, d_ as zk, d$ as Yk, e0 as Hk, e1 as Ok, ce as lh, l as Sd, bU as jh, Q as ch, R as VA, aZ as Jk, aO as jk, b9 as Lk, be as Ny, bl as Zy, bm as Lh, ao as Xk, e2 as Ky, e3 as Wy, e4 as zy, e5 as Yy, cO as qk, cN as $k, e6 as Xh, bn as ex, c1 as tx, c3 as qh, bT as ix, e7 as Hy, e8 as Oy, e9 as Jy, bM as nx, o as gx, c7 as ax, c8 as ox, c9 as rx, ca as jy, az as Rd, U as sx, V as Ix, a7 as Ly, a0 as m0, a5 as Xy, bx as Cx, aQ as Ax, an as $h, cq as lx, c0 as cx, aP as qy, ah as $y, ea as no, eb as dx, ec as ux, ed as fx, ee as hx, ef as mx, cz as px, b0 as e1, eg as rd, eh as Bx, bq as Fx, bH as yx, ax as Ux, bC as Vf, aw as Qx, a_ as wx, ar as vx, ei as bx, bB as _x, cs as kx, ct as xx, ej as Dx, ek as t1, el as Sx, em as Rx } from "./F0CanvasPanel-BohaGDag.js";
+import { cP as k_, cQ as u0, cR as x_, cS as D_, cT as RA, cU as S_, cV as R_, cW as M_, cX as P_, cY as Ph, cZ as f0, c_ as Ec, c$ as _A, d0 as V_, b_ as Jt, cu as _s, u as kt, d1 as G_, d2 as E_, d3 as MA, d4 as Vh, d5 as ZA, d6 as KA, bZ as Cn, bF as T_, bE as wy, W as ii, A as N_, B as Z_, bS as ci, bb as vy, L as K_, E as W_, n as pi, al as aC, S as Bt, c4 as Go, d7 as z_, d8 as Y_, d9 as H_, $ as O_, da as J_, as as Og, bc as Gh, ak as Eh, bV as Ma, cb as Bs, db as j_, e as Th, c6 as Po, dc as L_, a9 as Nh, cM as tl, w as Hn, s as gn, z as WA, v as oC, x as il, bw as Zh, y as rC, a$ as by, bQ as X_, ai as _y, bX as Yn, t as Cg, cG as mr, cw as nl, bP as h0, Z as q_, bY as Pn, dd as ky, de as Ih, cL as Eo, df as Kh, dg as $_, m as Wh, dh as sC, aS as ek, bJ as tk, Y as ik, i as nk, cF as gk, di as pr, dj as zh, dk as fa, bi as ak, dl as ok, af as rk, cc as Vo, dm as Ud, dn as xy, dp as sk, dq as Ik, b8 as Ck, dr as Qd, ds as Dy, j as wd, dt as Ak, at as lk, k as iC, du as Sy, bp as ck, dv as dk, dw as uk, dx as fk, dy as hk, dz as Ch, dA as Ry, cf as vd, ab as My, dB as mk, dC as pk, dD as Bk, dE as Fk, dF as io, dG as Ah, cd as Yh, dH as Py, cm as ks, dI as gd, dJ as Vy, dK as Hh, cj as yk, dL as ws, dM as Uk, dN as Qk, dO as wk, c5 as PA, bo as vk, bt as bd, aA as ad, aq as bk, dP as Gy, dQ as _k, b as Oh, dR as kk, dS as Mo, a as xk, dT as Pf, dU as _d, g as Dk, F as Sk, bu as Ey, cn as Rk, q as kd, cp as Mk, by as xd, K as Pk, bs as Vk, a6 as Ty, cy as Gk, am as Dd, dV as Jh, bh as Ek, bg as Tk, au as od, dW as Nk, dX as Zk, dY as Kk, dZ as Wk, d_ as zk, d$ as Yk, e0 as Hk, e1 as Ok, ce as lh, l as Sd, bU as jh, Q as ch, R as VA, aZ as Jk, aO as jk, b9 as Lk, be as Ny, bl as Zy, bm as Lh, ao as Xk, e2 as Ky, e3 as Wy, e4 as zy, e5 as Yy, cO as qk, cN as $k, e6 as Xh, bn as ex, c1 as tx, c3 as qh, bT as ix, e7 as Hy, e8 as Oy, e9 as Jy, bM as nx, o as gx, c7 as ax, c8 as ox, c9 as rx, ca as jy, az as Rd, U as sx, V as Ix, a7 as Ly, a0 as m0, a5 as Xy, bx as Cx, aQ as Ax, an as $h, cq as lx, c0 as cx, aP as qy, ah as $y, ea as no, eb as dx, ec as ux, ed as fx, ee as hx, ef as mx, cz as px, b0 as e1, eg as rd, eh as Bx, bq as Fx, bH as yx, ax as Ux, bC as Vf, aw as Qx, a_ as wx, ar as vx, ei as bx, bB as _x, cs as kx, ct as xx, ej as Dx, ek as t1, el as Sx, em as Rx } from "./F0CanvasPanel-BNpSnkEV.js";
 import { jsx as h, jsxs as ee, Fragment as oi } from "react/jsx-runtime";
 import Kt, { forwardRef as Ui, useRef as Re, useTransition as Mx, useState as Ne, useLayoutEffect as yg, useId as vs, useContext as Ug, createContext as Vn, useEffect as Le, useCallback as Ye, useMemo as bt, useImperativeHandle as Px, Fragment as Fg, isValidElement as em, cloneElement as i1, Suspense as gl, lazy as Fr, createElement as Jc, memo as tm, Children as im } from "react";
 import { d as Be, T as Vx, a as Gx, b as Ex, f as Li, c as Tx, g as Nx } from "./tooltip-CMBdJvJA.js";
-import { C as Zx, P as Kx, c as Md, n as n1, E as Wx, a as zx, u as Yx, b as g1, e as Hx, f as Ox, g as Jx, h as jx, i as p0, M as Lx, p as Xx, j as a1, R as B0, k as o1, l as qx, m as $x, o as eD, q as tD, r as iD, s as nD, O as r1, t as s1, v as gD, W as Qs, A as aD, B as oD, L as rD, w as sD, V as ID, x as CD, y as AD, z as lD, D as nm, S as cD, G as I1, H as C1, I as dD, J as uD, K as fD, N as hD, Q as mD, T as pD, U as BD, X as FD, Y as yD, Z as UD, _ as F0, $ as QD, a0 as wD } from "./CoachmarkProvider-CgoAv36I.js";
+import { C as Zx, P as Kx, c as Md, n as n1, E as Wx, a as zx, u as Yx, b as g1, e as Hx, f as Ox, g as Jx, h as jx, i as p0, M as Lx, p as Xx, j as a1, R as B0, k as o1, l as qx, m as $x, o as eD, q as tD, r as iD, s as nD, O as r1, t as s1, v as gD, W as Qs, A as aD, B as oD, L as rD, w as sD, V as ID, x as CD, y as AD, z as lD, D as nm, S as cD, G as I1, H as C1, I as dD, J as uD, K as fD, N as hD, Q as mD, T as pD, U as BD, X as FD, Y as yD, Z as UD, _ as F0, $ as QD, a0 as wD } from "./CoachmarkProvider-CDohzWyE.js";
 import { g as vD } from "./_commonjsHelpers-ByX85dGu.js";
 import bD, { createPortal as dh } from "react-dom";
 import './experimental.css';const _D = k_("Search", [
@@ -983,7 +983,9 @@ function YK({
     "div",
     {
       className: Be(
-        "flex items-center justify-between px-page py-4",
+        // No padding above: the row is a fixed height and centres its own
+        // contents, so the top padding only pushed the title off that centre.
+        "flex items-center justify-between px-page pb-4",
         Q ? "h-12" : "h-16"
       ),
       children: [
@@ -35834,7 +35836,7 @@ const Nd = (a, I) => {
     ),
     children: a
   }
-), KP = () => import("./ChatPdfThumbnail-zsegz-SY.js"), WP = () => import("./ChatSheetThumbnail-CxGL5ukQ.js"), zP = () => import("./ChatDocxThumbnail-DzNPNFya.js"), YP = () => import("./ChatTextThumbnail-FVwMzn0I.js"), HP = Fr(KP), OP = Fr(WP), JP = Fr(zP), jP = Fr(YP), LP = 384, XP = 160, jU = ({
+), KP = () => import("./ChatPdfThumbnail-DVbdtIUt.js"), WP = () => import("./ChatSheetThumbnail-CxGL5ukQ.js"), zP = () => import("./ChatDocxThumbnail-DzNPNFya.js"), YP = () => import("./ChatTextThumbnail-FVwMzn0I.js"), HP = Fr(KP), OP = Fr(WP), JP = Fr(zP), jP = Fr(YP), LP = 384, XP = 160, jU = ({
   file: a,
   kind: I,
   cornerClass: f = "rounded-xl",
@@ -36026,7 +36028,7 @@ const Nd = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Zd = "w-[24rem] max-w-full", $P = "w-[32rem] max-w-full", eV = "gap-0.5", tV = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", iV = "bg-[hsl(222_31%_11%)]", nV = "bg-[hsl(220_39%_6%/0.72)]", gV = "bg-[hsl(220_39%_6%/0.6)]", aV = "bg-[hsl(220_39%_6%/0.55)]", oV = () => import("./LocationMap-i2KWSWxR.js"), rV = Fr(oV), sV = 3 / 2, IV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, LU = ({
+}, Zd = "w-[24rem] max-w-full", $P = "w-[32rem] max-w-full", eV = "gap-0.5", tV = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", iV = "bg-[hsl(222_31%_11%)]", nV = "bg-[hsl(220_39%_6%/0.72)]", gV = "bg-[hsl(220_39%_6%/0.6)]", aV = "bg-[hsl(220_39%_6%/0.55)]", oV = () => import("./LocationMap-DxZu-8Rc.js"), rV = Fr(oV), sV = 3 / 2, IV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, LU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -41429,7 +41431,7 @@ const l3 = {
     }
   ) }) });
 }, B3 = Fr(
-  () => import("./index-qo_8w9sG.js").then((a) => a.i).then((a) => ({
+  () => import("./index-CLgCaWfl.js").then((a) => a.i).then((a) => ({
     default: a.F0PdfViewer
   }))
 ), F3 = () => {
@@ -43426,7 +43428,7 @@ const PE = 1e3, VE = ({
       ]
     }
   );
-}, sT = () => import("./index-DNnAvnH-.js").then((a) => ({
+}, sT = () => import("./index-BtKChaEj.js").then((a) => ({
   default: a.F0VideoPlayer
 })), IT = Fr(sT), CT = ({
   file: a,
@@ -44966,7 +44968,7 @@ const PE = 1e3, VE = ({
     }
   );
 }, LT = /* @__PURE__ */ new Set(), XT = Fr(
-  () => import("./ChatPostComposerDialog-DAkjFbqw.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-Dlb7-Zhs.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), qT = () => {
