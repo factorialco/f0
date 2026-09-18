@@ -85,6 +85,21 @@ export type AutofillTimesheetCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * Bulk-resolve-inconsistencies canvas content — renders an AI-grouped proposal
+ * for resolving open time-tracking inconsistencies (a reviewable collection of
+ * employees/rows the user can trim and apply). Carries scope identity only:
+ * the proposal rows live in host state, keyed by this scope.
+ */
+export type BulkResolveInconsistenciesCanvasContent = CanvasContentBase & {
+  type: "bulkResolveInconsistencies"
+  /** Analysed period, YYYY-MM-DD. */
+  periodStart: string
+  periodEnd: string
+  /** Exact row ids the proposal was scoped to; null when the whole period was analysed. */
+  scopeInconsistencyIds?: string[] | null
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
@@ -93,6 +108,7 @@ export type CanvasContent =
   | FormCanvasContent
   | DataDownloadCanvasContent
   | AutofillTimesheetCanvasContent
+  | BulkResolveInconsistenciesCanvasContent
 
 // ---------------------------------------------------------------------------
 // Entity definition contract
