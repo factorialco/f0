@@ -3,6 +3,7 @@ import { useCallback, useRef } from "react"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Circle as CircleIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { cn, focusRing } from "@/lib/utils"
 import { Badge } from "@/ui/IconBadge"
 
@@ -90,6 +91,7 @@ export function SidebarRail({
   user,
 }: SidebarRailProps) {
   const i18n = useI18n()
+  const { jumpLayout } = useSidebar()
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   usePersistedTab(persistKey, tabs, activeTab, onTabChange)
@@ -105,9 +107,12 @@ export function SidebarRail({
         onActiveTabPress?.()
         return
       }
+      // Flagged BEFORE the change, so the panel and the content that come out
+      // of it are laid out with animation already off.
+      jumpLayout()
       onTabChange(id)
     },
-    [activeTab, onActiveTabPress, onTabChange]
+    [activeTab, jumpLayout, onActiveTabPress, onTabChange]
   )
 
   // Roving arrow keys down the column. The group keeps a single tab stop, so

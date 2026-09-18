@@ -199,6 +199,7 @@ function ApplicationFrameContent({
     setForceFloat,
     railWidth,
     panelWidth,
+    isLayoutJumping,
   } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const {
@@ -445,7 +446,10 @@ function ApplicationFrameContent({
   // The layout is following an input rather than playing a move: a handle drag
   // or a window resize. Everything laid out against the panel's edge reads this
   // so they travel together instead of each easing on its own schedule.
-  const isLayoutTracking = Boolean(isResizing) || isWindowResizing
+  // A module change lands instantly, for the same reason a drag does: neither
+  // is a movement anybody is watching.
+  const isLayoutTracking =
+    Boolean(isResizing) || isWindowResizing || isLayoutJumping
   const layoutTransition = resolveLayoutTransition(
     isLayoutTracking,
     shouldReduceMotion

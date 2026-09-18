@@ -72,8 +72,13 @@ function _Sidebar({
   rail,
   panelWidth = sidebarWidths.panel,
 }: SidebarProps) {
-  const { sidebarState, isSmallScreen, setRailWidth, setPanelWidth } =
-    useSidebar()
+  const {
+    sidebarState,
+    isSmallScreen,
+    setRailWidth,
+    setPanelWidth,
+    isLayoutJumping,
+  } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   // One width at every viewport: the rail is docked on a phone too, so a
   // breakpoint here would only be a second number to keep in step with the
@@ -124,17 +129,22 @@ function _Sidebar({
   // against; and the room this nav leaves behind is animated by the frame on
   // `outSwift`, so a different curve here means the slot and its occupant
   // travel apart.
-  const transition = {
-    x: {
-      ease: motionTokens.ease.outSwift,
-      duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
-    },
-    top: { duration: shouldReduceMotion ? 0 : 0.1 },
-    left: { duration: shouldReduceMotion ? 0 : 0.1 },
-    default: {
-      duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
-    },
-  }
+  const transition = isLayoutJumping
+    ? // A module change is not a movement to watch: the panel that arrives
+      // belongs to a different section, it is not this one on its way
+      // somewhere. It lands.
+      { duration: 0 }
+    : {
+        x: {
+          ease: motionTokens.ease.outSwift,
+          duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
+        },
+        top: { duration: shouldReduceMotion ? 0 : 0.1 },
+        left: { duration: shouldReduceMotion ? 0 : 0.1 },
+        default: {
+          duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
+        },
+      }
 
   const renderFooter = () => {
     if (!footer) return null

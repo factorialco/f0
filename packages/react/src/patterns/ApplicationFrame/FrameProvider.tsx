@@ -42,6 +42,15 @@ interface FrameContextType {
    * state without navigation, so the button has nothing to restore.
    */
   hasRail: boolean
+  /**
+   * True for the one frame in which a module change commits. Changing section
+   * is not a movement to watch: the panel and the content are a different
+   * section's, not this one's on its way somewhere, so everything laid out
+   * against the navigation lands at once instead of easing into place.
+   */
+  isLayoutJumping: boolean
+  /** Call before a module change to land the next layout without animation. */
+  jumpLayout: () => void
   setRailWidth: (width: number) => void
   setPanelWidth: (width: number) => void
 }
@@ -61,6 +70,8 @@ export function useSidebar(): FrameContextType {
       railWidth: 0,
       panelWidth: sidebarWidths.panel,
       hasRail: false,
+      isLayoutJumping: false,
+      jumpLayout: () => {},
       setRailWidth: () => {},
       setPanelWidth: () => {},
     }
@@ -77,6 +88,17 @@ export function FrameProvider({ children }: FrameProviderProps) {
   const [forceFloat, setForceFloat] = useState(false)
   const [railWidth, setRailWidth] = useState(0)
   const [panelWidth, setPanelWidth] = useState(sidebarWidths.panel)
+  const [isLayoutJumping, setIsLayoutJumping] = useState(false)
+
+  // Two frames: one for the caller's state change to commit with the flag up,
+  // one to be sure the layout that came out of it has been painted before
+  // animation is allowed back.
+  const jumpLayout = useCallback(() => {
+    setIsLayoutJumping(true)
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => setIsLayoutJumping(false))
+    )
+  }, [])
   const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
     useState(false)
 
@@ -164,6 +186,8 @@ export function FrameProvider({ children }: FrameProviderProps) {
         setForceFloat,
         railWidth,
         panelWidth,
+        isLayoutJumping,
+        jumpLayout,
         hasRail: railWidth > 0,
         setRailWidth,
         setPanelWidth,
