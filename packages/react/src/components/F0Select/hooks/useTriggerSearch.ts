@@ -92,6 +92,35 @@ export const useTriggerSearch = ({
   }, [])
 
   /**
+   * Arriving at the field selects the label whole, so the first keystroke is a
+   * fresh query rather than one appended to the answer already there. Settled
+   * in, the field is an ordinary text field again: a second click places a
+   * caret to edit part of the label.
+   *
+   * Two places, because a pointer takes both: focus runs on mousedown, whose
+   * mouseup then collapses what it selected, and the click that follows puts
+   * it back. Focus alone is what a keyboard arrival gets.
+   */
+  const arriving = useRef(true)
+  const selectOnArrival = useCallback(() => {
+    if (!arriving.current || !inputRef.current?.value) {
+      return
+    }
+    inputRef.current.select()
+  }, [])
+
+  const handleFocus = useCallback(() => {
+    arriving.current = true
+    selectOnArrival()
+  }, [selectOnArrival])
+
+  /** The click that lands the pointer; later ones are caret placement. */
+  const handleClick = useCallback(() => {
+    selectOnArrival()
+    arriving.current = false
+  }, [selectOnArrival])
+
+  /**
    * Closing drops the query, or reopening would land on a filtered list the
    * field no longer shows. A field the user emptied stays empty: that is a
    * clear, not a query. Focus only comes back when it never left the select:
@@ -168,6 +197,8 @@ export const useTriggerSearch = ({
   /** Keys that belong to the list. Everything else is the input's. */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
+      arriving.current = false
+
       if (event.defaultPrevented || event.nativeEvent.isComposing) {
         return
       }
@@ -226,6 +257,8 @@ export const useTriggerSearch = ({
     focusInput,
     resetText,
     handleChange,
+    handleFocus,
+    handleClick,
     handleBlur,
     handleKeyDown,
   }

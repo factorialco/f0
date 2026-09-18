@@ -3298,7 +3298,9 @@ describe("Select", () => {
       await waitFor(() => expect(trigger).toHaveValue("Option 1"))
 
       // The label is text, so this is the browser's own backspace. Editing
-      // turns the text into a query; the selection itself is not touched.
+      // turns the text into a query; the selection itself is not touched. The
+      // second click is the caret: the first one arrives and selects the label
+      await user.click(trigger)
       await user.click(trigger)
       await user.keyboard("{Backspace}")
 
@@ -3316,6 +3318,55 @@ describe("Select", () => {
       expect(handleChange).not.toHaveBeenCalled()
     })
 
+    it("replaces the selected label on arrival, so the first key is a query", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          value="option1"
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+
+      // Arriving selects the label whole, or the query would read
+      // "Option 1Opt" and match nothing
+      await user.click(trigger)
+      await user.keyboard("Opt")
+
+      expect(trigger).toHaveValue("Opt")
+      await settleList()
+      expect(handleChange).not.toHaveBeenCalled()
+    })
+
+    it("selects the label for a keyboard arrival too", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          value="option1"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+
+      // The other half of the arrival contract: tabbing in leaves the label
+      // selected, so the first letter is a query here too
+      await user.tab()
+      expect(trigger).toHaveFocus()
+      await user.keyboard("Opt")
+
+      expect(trigger).toHaveValue("Opt")
+      await settleList()
+    })
+
     it("continues the selected label when the user types after it", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
@@ -3331,12 +3382,16 @@ describe("Select", () => {
       const trigger = getTriggerSearchInput()
       await waitFor(() => expect(trigger).toHaveValue("Option 1"))
 
-      await user.type(trigger, " ")
+      // Settled in: the field is an ordinary text field again, and the caret
+      // the second click placed is where the text goes
+      await user.click(trigger)
+      await user.click(trigger)
+      await user.keyboard(" ")
 
       expect(trigger).toHaveValue("Option 1 ")
       await settleList()
 
-      await user.type(trigger, "x")
+      await user.keyboard("x")
       expect(trigger).toHaveValue("Option 1 x")
       expect(handleChange).not.toHaveBeenCalled()
     })

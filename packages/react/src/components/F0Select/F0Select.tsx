@@ -1447,6 +1447,8 @@ const F0SelectComponent = forwardRef(function Select<
     focusInput: focusSearchInput,
     resetText: resetSearchText,
     handleChange: handleSearchDraftChange,
+    handleFocus: handleSearchFocus,
+    handleClick: handleSearchClick,
     handleBlur: handleSearchBlur,
     handleKeyDown: handleSearchKeyDown,
   } = useTriggerSearch({
@@ -1913,6 +1915,7 @@ const F0SelectComponent = forwardRef(function Select<
                     handleChangeOpenLocal(true)
                   }
                   focusSearchInput()
+                  handleSearchClick()
                   return
                 }
                 handleChangeOpenLocal(!openLocal)
@@ -1934,6 +1937,7 @@ const F0SelectComponent = forwardRef(function Select<
                   autoComplete="off"
                   // On the element: the field chrome does not clone handlers.
                   onKeyDown={handleSearchKeyDown}
+                  onFocus={handleSearchFocus}
                   className="w-full shrink cursor-text bg-transparent placeholder:-z-10 disabled:cursor-not-allowed"
                 />
               ) : (
