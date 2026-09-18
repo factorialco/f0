@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { expect, fn, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { Comment, Pencil } from "@/icons/app"
 import {
   InlineFieldRow,
@@ -73,6 +73,59 @@ export const WithCopy: Story = {
     label: "Employee ID",
     value: readValue("EMP-004821"),
     copyValue: "EMP-004821",
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const value = canvasElement.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    )
+    const clipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard")
+    const writeText = fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    })
+    try {
+      canvas.getByRole("button", { name: "Employee ID" }).focus()
+      await step("confirm a successful copy, then reset", async () => {
+        await userEvent.click(
+          canvas.getByRole("button", { name: "Copy Employee ID" })
+        )
+        await expect(
+          await canvas.findByRole("button", { name: "Copied Employee ID" })
+        ).toHaveClass("text-f1-icon-positive")
+        await expect(writeText).toHaveBeenCalledWith("EMP-004821")
+        await expect(value).toHaveClass("bg-f1-background-positive")
+        await expect(value).not.toHaveClass(
+          "group-hover:bg-f1-background-secondary"
+        )
+        await waitFor(
+          () =>
+            expect(
+              canvas.getByRole("button", { name: "Copy Employee ID" })
+            ).toBeInTheDocument(),
+          { timeout: 2000 }
+        )
+        await expect(value).not.toHaveClass("bg-f1-background-positive")
+      })
+      await step("do not confirm a rejected copy", async () => {
+        writeText.mockRejectedValueOnce(new Error("denied"))
+        await userEvent.click(
+          canvas.getByRole("button", { name: "Copy Employee ID" })
+        )
+        await expect(writeText).toHaveBeenCalledTimes(2)
+        await expect(
+          canvas.queryByRole("button", { name: "Copied Employee ID" })
+        ).toBeNull()
+        await expect(value).not.toHaveClass("bg-f1-background-positive")
+      })
+    } finally {
+      if (clipboard) {
+        Object.defineProperty(navigator, "clipboard", clipboard)
+      } else {
+        Reflect.deleteProperty(navigator, "clipboard")
+      }
+    }
   },
 }
 
