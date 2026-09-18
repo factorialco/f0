@@ -113,6 +113,7 @@ export const TableCollection = <
   lockedColumnIds,
   onLockedColumnIdsChange,
   referenceRowType,
+  itemActionsOnHover,
   boldRootRows,
   headerGroups: headerGroupsOption,
   onHeaderGroupCollapsedChange,
@@ -912,6 +913,7 @@ export const TableCollection = <
                                     frozenColumnsLeft={frozenColumnsLeft}
                                     checkColumnWidth={checkColumnWidth}
                                     referenceRowType={referenceRowType}
+                                    itemActionsOnHover={itemActionsOnHover}
                                     rowWrapper={RowWrapper}
                                     cellRenderer={cellRenderer}
                                     headerGroups={headerGroups}
@@ -983,6 +985,7 @@ export const TableCollection = <
                         checkColumnWidth={checkColumnWidth}
                         tableWithChildren={tableWithChildren}
                         referenceRowType={referenceRowType}
+                        itemActionsOnHover={itemActionsOnHover}
                         boldRootRows={boldRootRows}
                         rowWrapper={RowWrapper}
                         cellRenderer={cellRenderer}

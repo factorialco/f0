@@ -97,6 +97,8 @@ export type RowProps<
   isNew?: boolean
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
+  /** Reveal the row-actions button on hover instead of on every row. Editable table only. */
+  itemActionsOnHover?: boolean
   /** In a table with nested rows, renders root rows (depth 0) in bold. */
   boldRootRows?: boolean
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
@@ -153,6 +155,14 @@ const referenceTypeClasses: Record<ReferenceType, string> = {
     "[&_*:not([data-no-strike]):not([data-no-strike]_*)]:line-through text-f1-foreground-secondary",
 }
 
+const editableActionsClass = (onHover: boolean, dropDownOpen: boolean) =>
+  cn(
+    "flex flex-nowrap justify-center",
+    onHover &&
+      !dropDownOpen &&
+      "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
+  )
+
 const RowComponentInner = <
   R extends RecordType,
   Filters extends FiltersDefinition,
@@ -181,6 +191,7 @@ const RowComponentInner = <
     disableHover = false,
     isNew = false,
     referenceRowType: referenceRowTypeFn,
+    itemActionsOnHover = false,
     boldRootRows = false,
     cellRenderer: CellRenderer,
     rowWrapper,
@@ -489,8 +500,10 @@ const RowComponentInner = <
             referenceRowType={referenceRowType}
             className="bg-f1-background !px-3 align-middle"
           >
+            {/* The cell keeps its width whether or not the actions show, so entering a row
+                cannot shift its content sideways. An open dropdown outlives the hover. */}
             <ItemActionsRow
-              className="flex flex-nowrap justify-center"
+              className={editableActionsClass(itemActionsOnHover, dropDownOpen)}
               primaryItemActions={primaryItemActions}
               dropdownItemActions={dropdownItemActions}
               handleDropDownOpenChange={handleDropDownOpenChange}

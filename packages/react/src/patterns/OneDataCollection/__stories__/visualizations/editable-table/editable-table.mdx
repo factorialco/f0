@@ -295,6 +295,22 @@ actions appear as a floating overlay on hover.
 - Remaining actions are grouped in an ellipsis dropdown menu.
 - The column is always visible — no hover required.
 
+Set `itemActionsOnHover` to reveal the button only while its row is hovered or
+focused, which keeps a long sheet from showing a column of buttons down every
+row. It is off by default, so existing tables are unaffected. The cell keeps its
+width either way, so a row's content does not shift sideways on hover.
+
+```tsx
+visualizations={[
+  {
+    type: "editableTable",
+    options: { columns, onCellChange, itemActionsOnHover: true },
+  },
+]}
+```
+
+<Canvas of={EditableTableStories.EditableTableWithItemActionsOnHover} />
+
 Define `itemActions` in `useDataCollectionSource` the same way as for any other
 visualization:
 
