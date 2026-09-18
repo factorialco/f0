@@ -1,11 +1,12 @@
 import { breakpoints, sidebarWidths } from "@factorialco/f0-core"
 import React, {
-  createContext,
   PointerEvent,
+  createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 import { useMediaQuery } from "usehooks-ts"
@@ -90,15 +91,22 @@ export function FrameProvider({ children }: FrameProviderProps) {
   const [panelWidth, setPanelWidth] = useState(sidebarWidths.panel)
   const [isLayoutJumping, setIsLayoutJumping] = useState(false)
 
-  // Two frames: one for the caller's state change to commit with the flag up,
-  // one to be sure the layout that came out of it has been painted before
-  // animation is allowed back.
+  // Held for a beat rather than a frame or two. A module change is not one
+  // commit: the panel mounts, publishes its width from an effect, and the
+  // frame reserves the room on the render after that. Two frames covered the
+  // first of those and let the rest ease.
+  const jumpTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const jumpLayout = useCallback(() => {
     setIsLayoutJumping(true)
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => setIsLayoutJumping(false))
-    )
+    if (jumpTimer.current) clearTimeout(jumpTimer.current)
+    jumpTimer.current = setTimeout(() => setIsLayoutJumping(false), 120)
   }, [])
+  useEffect(
+    () => () => {
+      if (jumpTimer.current) clearTimeout(jumpTimer.current)
+    },
+    []
+  )
   const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
     useState(false)
 

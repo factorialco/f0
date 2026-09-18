@@ -13,7 +13,11 @@ function _Page({ children, header, embedded = false }: PageProps) {
     <div
       className={cn(
         "relative flex min-h-full w-full flex-col overflow-hidden bg-f1-special-page",
-        !embedded && "xs:rounded-xl"
+        // The lightest shadow in the scale. The page is a card raised off the
+        // navigation's floor, and the only thing that says so at rest is the
+        // edge it casts — a ring alone reads as a border between two flat
+        // surfaces. Embedded pages are inside something else's card already.
+        !embedded && "shadow xs:rounded-xl"
       )}
     >
       {header && <div className="flex flex-col">{header}</div>}

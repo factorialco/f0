@@ -594,7 +594,10 @@ function ApplicationFrameContent({
             {/* Main area */}
             <motion.div
               ref={mainAreaRef}
-              className="relative min-w-0 flex-1"
+              // Above the navigation, so the content's own edge casts onto the
+              // rail rather than the rail sitting on top of it. The floating
+              // panel raises itself past this (z-30) when it has to.
+              className="relative z-20 min-w-0 flex-1"
               // Both paddings animate together, so swapping the visible side
               // (split mode) slides the main content from one edge to the
               // other — covering the outgoing window and uncovering the
