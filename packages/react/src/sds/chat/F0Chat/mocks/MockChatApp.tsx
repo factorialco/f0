@@ -70,6 +70,7 @@ const mockPathFor = (surface: MockOpenSurface | null): string => {
   if (surface.kind === "post") return `/communities/post/${surface.postId}`
   if (surface.kind === "scheduled")
     return `/communities/scheduled/${surface.postId}`
+  if (surface.kind === "chat") return `/chats/${surface.convId}`
   return surface.postId
     ? `/dashboard/post/${surface.postId}/edit`
     : "/dashboard/post/new"

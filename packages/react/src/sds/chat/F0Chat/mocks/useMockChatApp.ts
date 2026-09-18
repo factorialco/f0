@@ -57,6 +57,13 @@ export type MockOpenSurface =
    * transcript to look up, and nothing to comment on.
    */
   | { kind: "scheduled"; convId: string; postId: string }
+  /**
+   * A conversation, as the PAGE. With a module rail the chat is a destination
+   * like any other — you go to it, you do not peek at it beside whatever you
+   * were doing — so the host renders it in the main area instead of stashing
+   * it in the side panel.
+   */
+  | { kind: "chat"; convId: string }
 
 export type MockChatAppValue = {
   states: Record<string, ConvState>
@@ -116,6 +123,8 @@ export type MockChatAppValue = {
     focusComment: boolean
   ) => void
   openComposerSurface: (convId: string, postId?: string) => void
+  /** Open a conversation as the main content. */
+  openChatSurface: (convId: string) => void
   openScheduledSurface: (convId: string, postId: string) => void
   closeSurface: () => void
   createComment: (convId: string, postId: string, text: string) => void
@@ -1045,6 +1054,11 @@ export const useMockChatStore = (): MockChatAppValue => {
     []
   )
 
+  const openChatSurface = useCallback(
+    (convId: string) => setOpenSurface({ kind: "chat", convId }),
+    []
+  )
+
   const closeSurface = useCallback(() => setOpenSurface(null), [])
 
   const togglePostInteractions = useCallback(
@@ -1116,6 +1130,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       openSurface,
       openPostSurface,
       openComposerSurface,
+      openChatSurface,
       openScheduledSurface,
       closeSurface,
       createComment,
@@ -1157,6 +1172,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       openSurface,
       openPostSurface,
       openComposerSurface,
+      openChatSurface,
       openScheduledSurface,
       closeSurface,
       createComment,

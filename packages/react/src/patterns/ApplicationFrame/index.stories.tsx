@@ -24,7 +24,6 @@ import {
   FoldersFilled,
   Home,
   HomeFilled,
-  Filter,
   Hub,
   HubFilled,
   Inbox,
@@ -36,7 +35,6 @@ import {
   Pencil,
   Search,
   Settings,
-  Sliders as SlidersIcon,
   Sliders,
   Comment,
 } from "@/icons/app"
@@ -74,7 +72,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { cn, focusRing } from "@/lib/utils"
-import { Counter } from "@/ui/Counter"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -110,6 +107,7 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { MockCommunitySurface } from "@/sds/chat/F0Chat/mocks/MockCommunitySurface"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
@@ -856,7 +854,16 @@ const CommunityMain = ({
 }: {
   /** The page when no post is open. Defaults to the home page. */
   children?: ReactNode
-}): ReactNode => <MockCommunitySurface fallback={children ?? <HomePage />} />
+}): ReactNode => {
+  // A conversation opened from the rail is the PAGE: with the modules always
+  // on screen, Chats is somewhere you go, and what you go to belongs in the
+  // main area rather than in a panel beside the page you left behind.
+  const { openSurface } = useMockChatApp()
+  if (openSurface?.kind === "chat") {
+    return <MockChatPanel convId={openSurface.convId} />
+  }
+  return <MockCommunitySurface fallback={children ?? <HomePage />} />
+}
 
 /**
  * The frame as it ships: a permanent module rail beside the section panel.
@@ -1198,12 +1205,6 @@ const MockChatPanel = ({
  * subtitle and a face — at 240 every one of them truncates mid-sentence, and a
  * queue you cannot read is a queue you cannot triage.
  */
-const INBOX_PRESETS = [
-  { id: "all", label: "All", count: 10 },
-  { id: "requests", label: "Requests", count: 6 },
-  { id: "notifications", label: "Notifications", count: 4 },
-] as const
-
 type InboxItem = {
   id: string
   title: string
@@ -1308,25 +1309,23 @@ const InboxRow = ({
 }) => (
   <div
     className={cn(
-      "group flex w-full items-start gap-2 rounded-md px-1.5 py-2",
+      "flex h-[66px] w-full items-center gap-3 rounded-[10px] px-3",
       active ? "bg-f1-background-secondary" : "hover:bg-f1-background-secondary"
     )}
   >
-    <span className="flex h-5 shrink-0 items-center">
-      <F0Checkbox hideLabel title={`Select ${item.title}`} />
-    </span>
+    <F0Checkbox hideLabel title={`Select ${item.title}`} />
     <button
       type="button"
       onClick={onOpen}
       className={cn(
-        "flex min-w-0 flex-1 items-start gap-2 text-left",
+        "flex min-w-0 flex-1 items-center gap-3 text-left",
         focusRing("focus-visible:ring-inset")
       )}
     >
       <F0AvatarPerson
         firstName={item.title}
         lastName=""
-        size="sm"
+        size="md"
         badge={item.module}
       />
       <span className="flex min-w-0 flex-col">
@@ -1342,39 +1341,18 @@ const InboxRow = ({
 )
 
 const InboxPanel = () => {
-  const [preset, setPreset] = useState<string>("all")
   const [openItem, setOpenItem] = useState<string | null>(null)
-  const items = INBOX_ITEMS.filter((item) =>
-    preset === "all" ? true : `${item.kind}s` === preset
-  )
 
   return (
-    <div className="flex flex-col gap-2 px-3 pb-3">
-      <SearchBar placeholder="Search..." onClick={() => {}} />
-      {/* Presets, not tabs: they filter one list rather than swapping it, and
-          the count is the reason you press one. */}
-      <div className="flex flex-row items-center gap-1 px-0.5">
-        {INBOX_PRESETS.map(({ id, label, count }) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={preset === id}
-            onClick={() => setPreset(id)}
-            className={cn(
-              "flex items-center gap-1 rounded-full px-2 py-1 font-medium",
-              preset === id
-                ? "bg-f1-background-secondary text-f1-foreground"
-                : "text-f1-foreground-secondary hover:bg-f1-background-secondary",
-              focusRing()
-            )}
-          >
-            {label}
-            <Counter value={count} size="sm" />
-          </button>
-        ))}
+    <div className="flex flex-col gap-2 pb-3">
+      {/* Edge to edge: the search is the head of the list, not a control
+          floating above it. `SearchBar` insets itself by 12 for a menu, which
+          is the wrong gutter for a panel that IS the list. */}
+      <div className="[&>div]:px-0">
+        <SearchBar placeholder="Search..." onClick={() => {}} />
       </div>
-      <div className="flex flex-col">
-        {items.map((item) => (
+      <div className="flex flex-col px-1.5">
+        {INBOX_ITEMS.map((item) => (
           <InboxRow
             key={item.id}
             item={item}
@@ -1735,10 +1713,20 @@ const ConversationsSidebarInner = ({
     restoringPanelContentId,
     cancelPanelContentRestore,
   } = useAiChat()
+  const { openChatSurface } = useMockChatApp()
 
-  // Clicking a conversation mounts it in the side panel (one at a time).
+  // Where a conversation opens depends on what the navigation is. With a
+  // rail, Chats is a module you are IN, so the conversation is the page. With
+  // the tab row, the sidebar is the whole navigation and the conversation
+  // docks beside whatever you were doing.
+  const isRail = layout === "rail"
   const onSelect = useCallback(
     (convId: string) => {
+      if (isRail) {
+        openChatSurface(convId)
+        setActiveChat(convId)
+        return
+      }
       setPanelContent({
         id: convId,
         content: (
@@ -1746,7 +1734,7 @@ const ConversationsSidebarInner = ({
         ),
       })
     },
-    [receiptPreview, setPanelContent]
+    [isRail, openChatSurface, receiptPreview, setActiveChat, setPanelContent]
   )
 
   // Demo convenience: open a conversation straight away (e.g. the mentions story
@@ -1796,10 +1784,10 @@ const ConversationsSidebarInner = ({
   // panel. Opening the AI chat (panelContent cleared) or closing the panel
   // deselects it — the sidebar selection follows the panel, not the last click.
   useEffect(() => {
+    if (isRail) return
     setActiveChat(open && panelContent ? panelContent.id : null)
-  }, [open, panelContent, setActiveChat])
+  }, [isRail, open, panelContent, setActiveChat])
 
-  const isRail = layout === "rail"
   const tabs = [
     // The rail names the modules the way the navigation does; the tab row
     // names the panel's contents ("Menu"), which is what a row above the body
@@ -1924,28 +1912,6 @@ const ConversationsSidebarInner = ({
           <>
             <SidebarPanelHeader
               title={tabs.find((t) => t.id === tab)?.label ?? ""}
-              actions={
-                tab === "inbox" ? (
-                  <>
-                    <F0Button
-                      variant="ghost"
-                      size="md"
-                      hideLabel
-                      icon={Filter}
-                      label="Filter inbox"
-                      onClick={() => {}}
-                    />
-                    <F0Button
-                      variant="ghost"
-                      size="md"
-                      hideLabel
-                      icon={SlidersIcon}
-                      label="Inbox display options"
-                      onClick={() => {}}
-                    />
-                  </>
-                ) : undefined
-              }
             />
             {/* Search sits with the catalog: it is the panel with something to
                 search. Home's own search is the page's, not the nav's. */}
