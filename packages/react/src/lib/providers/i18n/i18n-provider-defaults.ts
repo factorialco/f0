@@ -638,6 +638,7 @@ export const defaultTranslations = {
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
+    aiAssisted: "Drafted with One",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
     you: "You",
