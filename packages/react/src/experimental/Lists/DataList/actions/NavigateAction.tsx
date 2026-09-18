@@ -8,10 +8,12 @@ import { InternalNavigateActionType } from "../ItemContainer"
 export type NavigateActionProps = {
   children: ReactNode
   className?: string
+  /** Drop the trailing chevron; the row still links and shows its hover state. */
+  hideChevron?: boolean
 } & InternalNavigateActionType
 
 export const NavigateAction = memo(
-  ({ children, className, ...props }: NavigateActionProps) => {
+  ({ children, className, hideChevron, ...props }: NavigateActionProps) => {
     return (
       <Link
         {...props}
@@ -22,9 +24,11 @@ export const NavigateAction = memo(
         )}
       >
         {children}
-        <div className="grid">
-          <F0Icon aria-hidden={true} icon={ChevronRight} size="md" />
-        </div>
+        {!hideChevron ? (
+          <div className="grid">
+            <F0Icon aria-hidden={true} icon={ChevronRight} size="md" />
+          </div>
+        ) : null}
       </Link>
     )
   }

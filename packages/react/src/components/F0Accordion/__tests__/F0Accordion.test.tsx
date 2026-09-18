@@ -136,6 +136,81 @@ describe("F0Accordion", () => {
     expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "false")
   })
 
+  it("renders rich content as the body", () => {
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            defaultOpen: true,
+            content: (
+              <ul>
+                <li>Rich line</li>
+              </ul>
+            ),
+          },
+        ]}
+      />
+    )
+    expect(screen.getByRole("listitem")).toHaveTextContent("Rich line")
+  })
+
+  it("renders the description above the content when both are given", () => {
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            defaultOpen: true,
+            description: "Summary line",
+            content: <span>Detail line</span>,
+          },
+        ]}
+      />
+    )
+    const summary = screen.getByText("Summary line")
+    const detail = screen.getByText("Detail line")
+    expect(
+      summary.compareDocumentPosition(detail) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("keeps the summary visible in the header while collapsed", () => {
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            description: "Description one",
+            summary: <span>4.2 / 5</span>,
+          },
+        ]}
+      />
+    )
+    expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "false")
+    expect(screen.getByText("4.2 / 5")).toBeInTheDocument()
+  })
+
+  it("does not toggle the item when the summary is clicked", async () => {
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            description: "Description one",
+            summary: <span>4.2 / 5</span>,
+          },
+        ]}
+      />
+    )
+    await userEvent.click(screen.getByText("4.2 / 5"))
+    expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "false")
+  })
+
   it("renders the skeleton variant", () => {
     render(<F0Accordion.Skeleton items={3} />)
     expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)

@@ -13,12 +13,41 @@ on the top.
 
 <Canvas of={DataListStories.WithLabel} />
 
-The list support four types of items:
+The list support these types of items:
 
 - `DataList.Item` - a basic text with an optional icon on the left side;
 - `DataList.PersonItem` - represents a user or an employee;
 - `DataList.CompanyItem` - represents a company;
 - `DataList.TeamItem` - represents a team;
+- `DataList.RecordItem` - an entry that is a thing rather than a fact (a
+  review, an absence, a meeting): a title, an optional secondary line and an
+  optional tag on the right.
+
+## Records
+
+A record row carries a `detail` tag using the same shapes as the tag items:
+`status-tag`, `alert-tag`, `dot-tag`, `raw-tag` or `balance-tag`. With a
+`navigate` action the whole row is the link and the trailing chevron is
+dropped, so the tag keeps the right edge.
+
+<Canvas of={DataListStories.WithRecordItems} />
+
+```tsx
+<DataList label="Reviews">
+  <DataList.RecordItem
+    title="Q4 2025 review"
+    description="Feb 28, 2026"
+    detail={{ type: "status-tag", text: "4.2 / 5", variant: "positive" }}
+    action={{ type: "navigate", href: "/reviews/q4-2025" }}
+  />
+  <DataList.RecordItem
+    title="Hire two engineers"
+    description="Q3 2026 · Target 2 hires"
+    detail={{ type: "status-tag", text: "Overdue", variant: "warning" }}
+    action={{ type: "navigate", href: "/goals/hire-engineers" }}
+  />
+</DataList>
+```
 
 ## Actions
 

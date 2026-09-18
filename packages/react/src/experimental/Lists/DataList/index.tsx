@@ -9,6 +9,7 @@ import {
   Item,
   PersonItem,
   RawTagItem,
+  RecordItem,
   StatusTagItem,
   TagListItem,
   TeamItem,
@@ -22,6 +23,8 @@ export type {
   ItemProps,
   NavigateActionType,
   OpenLinkActionType,
+  RecordDetail,
+  RecordItemProps,
 } from "./types"
 
 const _DataList = forwardRef<HTMLUListElement, DataListProps>(
@@ -69,5 +72,6 @@ export const DataList = Object.assign(_DataListComponent, {
   BalanceTagItem,
   StatusTagItem,
   RawTagItem,
+  RecordItem,
   TagListItem,
 })

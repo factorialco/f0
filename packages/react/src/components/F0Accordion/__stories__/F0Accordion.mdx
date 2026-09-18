@@ -63,6 +63,16 @@ A collapsible container that organizes related content into independent sections
       </tr>
       <tr>
         <td>
+          <code>Summary</code>
+        </td>
+        <td>
+          Optional slot in the header, before the actions, for a value that
+          stays visible while collapsed.
+        </td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>
           <code>Actions</code>
         </td>
         <td>
@@ -315,13 +325,42 @@ import { F0Accordion } from "@factorialco/f0-react"
       </tr>
       <tr>
         <td>
-          <code>description</code> <span className="text-red-500">*</span>
+          <code>description</code>
         </td>
         <td>
           <code>string</code>
         </td>
         <td>-</td>
-        <td>Body shown when the item is expanded.</td>
+        <td>
+          Plain-text body shown when the item is expanded. Optional when{" "}
+          <code>content</code> carries the body.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>content</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>-</td>
+        <td>
+          Rich body, such as a <code>DataList</code>. Rendered under the
+          description when both are given.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>summary</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>-</td>
+        <td>
+          Header slot before the actions and chevron, visible while collapsed.
+          Outside the toggle target, so it can carry its own action.
+        </td>
       </tr>
       <tr>
         <td>
@@ -474,6 +513,48 @@ return <F0Accordion items={items} value={openIds} onValueChange={setOpenIds} />
       },
     ],
   }))}
+/>
+```
+
+## With rich content
+
+<Canvas of={Stories.WithContent} />
+
+```tsx
+<F0Accordion
+  items={[
+    {
+      id: "performance",
+      title: "Performance",
+      content: (
+        <DataList>
+          <DataList.Item text="4.2 / 5" />
+          <DataList.Item text="Q4 2025 review · 4.2 / 5 · Feb 28, 2026" />
+        </DataList>
+      ),
+    },
+  ]}
+/>
+```
+
+## With summary
+
+<Canvas of={Stories.WithSummary} />
+
+```tsx
+<F0Accordion
+  items={[
+    {
+      id: "performance",
+      title: "Performance",
+      description: "Latest review cycle.",
+      summary: (
+        <DataList>
+          <DataList.Item text="4.2 / 5" action={{ type: "copy" }} />
+        </DataList>
+      ),
+    },
+  ]}
 />
 ```
 
