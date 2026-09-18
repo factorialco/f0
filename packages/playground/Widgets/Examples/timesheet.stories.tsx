@@ -1,7 +1,8 @@
-import { CategoryBarSection } from "~/packages/react/experimental/Widgets/Content/CategoryBarSection";
-import { Widget } from "~/packages/react/experimental/Widgets/Widget";
-import { WidgetSection } from "~/packages/react/experimental/Widgets/WidgetSection";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react"
+
+import { CategoryBarSection } from "~/packages/react/experimental/Widgets/Content/CategoryBarSection"
+import { Widget } from "~/packages/react/experimental/Widgets/Widget"
+import { WidgetSection } from "~/packages/react/experimental/Widgets/WidgetSection"
 
 const meta = {
   title: "Insights/Examples/Timesheet",
@@ -16,10 +17,10 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta;
+} satisfies Meta
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Timesheet: Story = {
   render: () => (
@@ -74,7 +75,7 @@ export const Timesheet: Story = {
       </Widget>
     </>
   ),
-};
+}
 
 export const TimesheetOvertime: Story = {
   render: () => (
@@ -129,4 +130,4 @@ export const TimesheetOvertime: Story = {
       </Widget>
     </>
   ),
-};
+}

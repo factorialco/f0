@@ -24,4 +24,4 @@ export const FOUNDATIONS_AUTHORS: readonly string[] = [
   "davidsalgado-fct",
   // F0 design / PM (not in the GH team yet)
   "desiree-np",
-];
+]

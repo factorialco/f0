@@ -3,4 +3,4 @@
 // while maintaining compatibility with Expo Router development
 // Import the actual expo-router entry-classic to avoid circular resolution
 // when Metro resolves 'expo-router/entry'
-import "expo-router/entry-classic";
+import "expo-router/entry-classic"

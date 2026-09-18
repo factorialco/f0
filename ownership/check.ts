@@ -1,6 +1,8 @@
 import fs from "node:fs"
 import path from "node:path"
+
 import type { PatternProblem } from "./lib.ts"
+
 import {
   CODEOWNERS_FILE,
   MANIFEST_TEMPLATE,
@@ -48,7 +50,9 @@ function validateManifestSchema(): CheckResult {
     try {
       manifest = loadManifest(manifestFile)
     } catch (error) {
-      errors.push(`  >> ${manifestFile}: invalid YAML (${(error as Error).message})`)
+      errors.push(
+        `  >> ${manifestFile}: invalid YAML (${(error as Error).message})`
+      )
       continue
     }
 
@@ -80,8 +84,13 @@ function validateTeams(): CheckResult {
   const errors: string[] = []
   for (const manifestFile of getManifestFiles()) {
     const { metadata } = loadManifest(manifestFile)
-    const teams = [metadata.owner, ...(metadata.reviewers ?? []).map((r) => r.team)]
-    for (const team of teams.filter((team) => team && !validTeams.includes(team))) {
+    const teams = [
+      metadata.owner,
+      ...(metadata.reviewers ?? []).map((r) => r.team),
+    ]
+    for (const team of teams.filter(
+      (team) => team && !validTeams.includes(team)
+    )) {
       errors.push(`  >> ${manifestFile}: unknown team "${team}"`)
     }
   }
@@ -101,7 +110,9 @@ function validateReviewerPaths(): CheckResult {
     for (const reviewer of metadata.reviewers ?? []) {
       for (const include of reviewer.include ?? []) {
         if (!fs.existsSync(path.join(REPO_ROOT, moduleDir, include))) {
-          errors.push(`  >> ${manifestFile}: include path "${include}" does not exist`)
+          errors.push(
+            `  >> ${manifestFile}: include path "${include}" does not exist`
+          )
         }
       }
     }
@@ -191,12 +202,27 @@ function validateCodeownersUpToDate(): CheckResult {
 }
 
 const checks = [
-  { name: "Every sds module has a package.yml manifest", run: validateManifestPresence },
-  { name: "Every manifest declares a valid owner", run: validateManifestSchema },
+  {
+    name: "Every sds module has a package.yml manifest",
+    run: validateManifestPresence,
+  },
+  {
+    name: "Every manifest declares a valid owner",
+    run: validateManifestSchema,
+  },
   { name: "All teams exist in ownership/teams.yml", run: validateTeams },
-  { name: "All reviewer include paths point to real files", run: validateReviewerPaths },
-  { name: "Every CODEOWNERS rule matches a real path", run: validateCodeownersPaths },
-  { name: "Every CODEOWNERS rule owner is a known team", run: validateCodeownersTeams },
+  {
+    name: "All reviewer include paths point to real files",
+    run: validateReviewerPaths,
+  },
+  {
+    name: "Every CODEOWNERS rule matches a real path",
+    run: validateCodeownersPaths,
+  },
+  {
+    name: "Every CODEOWNERS rule owner is a known team",
+    run: validateCodeownersTeams,
+  },
   { name: "CODEOWNERS is up to date", run: validateCodeownersUpToDate },
 ]
 
@@ -214,7 +240,9 @@ for (const check of checks) {
 }
 
 if (!allPassed) {
-  console.log("\nSome ownership checks failed. See the messages above to fix them.")
+  console.log(
+    "\nSome ownership checks failed. See the messages above to fix them."
+  )
   process.exit(1)
 }
 console.log("\nAll ownership checks passed!")

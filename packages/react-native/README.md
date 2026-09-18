@@ -57,11 +57,11 @@ npx expo install \
 
 ```javascript
 module.exports = function (api) {
-  api.cache(true);
+  api.cache(true)
   return {
     presets: ["babel-preset-expo"], // Expo only
-  };
-};
+  }
+}
 ```
 
 > **Note:** In managed Expo SDK 54+ apps using the standard `babel-preset-expo`, Reanimated/Worklets Babel plugins are already included and should not be added manually. In custom/bare hosts, follow [`docs/new-architecture.md`](docs/new-architecture.md) and add the required plugins explicitly.
@@ -71,18 +71,18 @@ module.exports = function (api) {
 **`metro.config.js`:**
 
 ```javascript
-const { getDefaultConfig } = require("expo/metro-config");
-const { withUniwindConfig } = require("uniwind/metro");
+const { getDefaultConfig } = require("expo/metro-config")
+const { withUniwindConfig } = require("uniwind/metro")
 
-const config = getDefaultConfig(__dirname);
+const config = getDefaultConfig(__dirname)
 
 // Ensure CSS files trigger reloads
-config.resolver.sourceExts = [...(config.resolver.sourceExts || []), "css"];
+config.resolver.sourceExts = [...(config.resolver.sourceExts || []), "css"]
 
 module.exports = withUniwindConfig(config, {
   cssEntryFile: "./global.css",
   dtsFile: "./uniwind-types.d.ts",
-});
+})
 ```
 
 ### 4️⃣ Create Global CSS
@@ -110,7 +110,7 @@ module.exports = withUniwindConfig(config, {
 **Import in your entry file (`App.tsx` or `index.js`):**
 
 ```typescript
-import "./global.css";
+import "./global.css"
 ```
 
 > **Note:** Add `@source "./node_modules/@factorialco/f0-react-native/lib";` so Tailwind can detect all component classes.
@@ -241,7 +241,7 @@ Use this section after each manual update so people can install the latest build
 ### Basic Component Usage
 
 ```tsx
-import { F0Button, F0Icon, AppIcons } from "@factorialco/f0-react-native";
+import { F0Button, F0Icon, AppIcons } from "@factorialco/f0-react-native"
 
 export default function App() {
   return (
@@ -249,7 +249,7 @@ export default function App() {
       <F0Button label="Click me" variant="default" size="md" />
       <F0Icon icon={AppIcons.Calendar} size="md" />
     </>
-  );
+  )
 }
 ```
 
@@ -260,20 +260,20 @@ export default function App() {
 The package exports a `cn` utility function for merging Tailwind classes with automatic conflict resolution:
 
 ```tsx
-import { cn } from "@factorialco/f0-react-native";
-import { View } from "react-native";
+import { cn } from "@factorialco/f0-react-native"
+import { View } from "react-native"
 
 function MyComponent({ className, isActive }) {
   return (
     <View
       className={cn(
-        "bg-background p-4 rounded-lg",
-        "border border-divider",
+        "rounded-lg bg-background p-4",
+        "border-divider border",
         isActive && "bg-accent",
-        className,
+        className
       )}
     />
-  );
+  )
 }
 ```
 
@@ -289,14 +289,14 @@ The `cn` utility:
 All components use `tailwind-variants` for type-safe variant props:
 
 ```tsx
-import { F0Button } from "@factorialco/f0-react-native";
+import { F0Button } from "@factorialco/f0-react-native"
 
 // Type-safe variants
-<F0Button
+;<F0Button
   label="Primary Button"
   variant="default" // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
   size="md" // ✅ Autocomplete: "sm" | "md" | "lg"
-/>;
+/>
 ```
 
 ## 🔧 Troubleshooting

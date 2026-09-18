@@ -1,5 +1,4 @@
 import { f1Colors } from "@factorialco/f0-core"
-
 import { ColorToken } from "./ColorToken"
 
 type F1ColorCategory = keyof typeof f1Colors

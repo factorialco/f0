@@ -24,36 +24,36 @@ This file uses the shared documentation quality scale from `documentation-qualit
 
 ## Individual Components
 
-| Component                 | MDX File                                                                                             | Quality      | Notes                                                 |
-| ------------------------- | ---------------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------- |
-| `F0Alert`                 | `F0Alert/__stories__/F0Alert.mdx`                                                                    | **Gold**     | Best-in-class reference (added in companion PR #3894) |
-| `F0AnalyticsDashboard`    | None                                                                                                 | **None**     |                                                       |
-| `F0BigNumber`             | `F0BigNumber/__stories__/controls.mdx`                                                               | **Stub**     | Needs full MDX                                        |
-| `F0Box`                   | None                                                                                                 | **None**     |                                                       |
-| `F0Button`                | `F0Button/__stories__/controls.mdx`                                                                  | **Stub**     | Has controls-only MDX; full docs pending              |
-| `F0ButtonDropdown`        | `F0ButtonDropdown/__stories__/controls.mdx`                                                          | **Stub**     | Needs full MDX                                        |
+| Component                 | MDX File                                                                                             | Quality        | Notes                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- | -------------- | ----------------------------------------------------- |
+| `F0Alert`                 | `F0Alert/__stories__/F0Alert.mdx`                                                                    | **Gold**       | Best-in-class reference (added in companion PR #3894) |
+| `F0AnalyticsDashboard`    | None                                                                                                 | **None**       |                                                       |
+| `F0BigNumber`             | `F0BigNumber/__stories__/controls.mdx`                                                               | **Stub**       | Needs full MDX                                        |
+| `F0Box`                   | None                                                                                                 | **None**       |                                                       |
+| `F0Button`                | `F0Button/__stories__/controls.mdx`                                                                  | **Stub**       | Has controls-only MDX; full docs pending              |
+| `F0ButtonDropdown`        | `F0ButtonDropdown/__stories__/controls.mdx`                                                          | **Stub**       | Needs full MDX                                        |
 | `F0ButtonToggle`          | `F0ButtonToggle/__stories__/F0ButtonToggle.mdx`                                                      | **Acceptable** | Solid, missing formal prop table                      |
-| `F0ButtonToggleGroup`     | `F0ButtonToggleGroup/__stories__/controls.mdx`                                                       | **Stub**     | Needs full MDX                                        |
-| `F0Card`                  | None                                                                                                 | **None**     | High priority — heavily used                          |
-| `F0Checkbox`              | `F0Checkbox/__stories__/F0Checkbox.mdx`                                                              | **Stub**  | 32 lines, no guidelines or a11y                       |
-| `F0ChipList`              | None                                                                                                 | **None**     | Flat stories (no `__stories__/` subfolder)            |
-| `F0DataChart`             | `F0DataChart/__stories__/F0DataChart.mdx`                                                            | **Good**     | Excellent multi-variant coverage                      |
-| `F0DatePicker`            | None                                                                                                 | **None**     |                                                       |
-| `F0Dialog`                | None                                                                                                 | **None**     | High priority — heavily used                          |
-| `F0DurationInput`         | None                                                                                                 | **None**     |                                                       |
-| `F0FilterPickerContent`   | None                                                                                                 | **None**     |                                                       |
-| `F0Form`                  | None                                                                                                 | **None**     | See `factorial-f0` skill for F0 Forms docs            |
-| `F0FormField`             | None                                                                                                 | **None**     | See `factorial-f0` skill for F0 Forms docs            |
-| `F0Heading`               | None                                                                                                 | **None**     |                                                       |
+| `F0ButtonToggleGroup`     | `F0ButtonToggleGroup/__stories__/controls.mdx`                                                       | **Stub**       | Needs full MDX                                        |
+| `F0Card`                  | None                                                                                                 | **None**       | High priority — heavily used                          |
+| `F0Checkbox`              | `F0Checkbox/__stories__/F0Checkbox.mdx`                                                              | **Stub**       | 32 lines, no guidelines or a11y                       |
+| `F0ChipList`              | None                                                                                                 | **None**       | Flat stories (no `__stories__/` subfolder)            |
+| `F0DataChart`             | `F0DataChart/__stories__/F0DataChart.mdx`                                                            | **Good**       | Excellent multi-variant coverage                      |
+| `F0DatePicker`            | None                                                                                                 | **None**       |                                                       |
+| `F0Dialog`                | None                                                                                                 | **None**       | High priority — heavily used                          |
+| `F0DurationInput`         | None                                                                                                 | **None**       |                                                       |
+| `F0FilterPickerContent`   | None                                                                                                 | **None**       |                                                       |
+| `F0Form`                  | None                                                                                                 | **None**       | See `factorial-f0` skill for F0 Forms docs            |
+| `F0FormField`             | None                                                                                                 | **None**       | See `factorial-f0` skill for F0 Forms docs            |
+| `F0Heading`               | None                                                                                                 | **None**       |                                                       |
 | `F0Icon`                  | `F0Icon/__stories__/F0Icon.mdx`                                                                      | **Acceptable** | Import pattern, color modes                           |
 | `F0Link`                  | `F0Link/__stories__/F0Link.mdx`                                                                      | **Acceptable** | When-to-use guidance                                  |
-| `F0Select`                | None                                                                                                 | **None**     | High priority — heavily used                          |
-| `F0TableOfContentPopover` | None                                                                                                 | **None**     |                                                       |
-| `F0Text`                  | None                                                                                                 | **None**     | High priority — core typography                       |
-| `F0Widget`                | None                                                                                                 | **None**     |                                                       |
-| `F0WizardForm`            | None                                                                                                 | **None**     | See `factorial-f0` skill for F0 Forms docs            |
-| `OneEllipsis`             | None                                                                                                 | **None**     | Old naming (`One` prefix, rename on touch)            |
-| `OneFilterPicker`         | `OneFilterPicker/__stories__/OneFiltersPicker.mdx` + `presets.mdx` + `OneFiltersPicker.internal.mdx` | **Good**     | Most MDX files per component                          |
+| `F0Select`                | None                                                                                                 | **None**       | High priority — heavily used                          |
+| `F0TableOfContentPopover` | None                                                                                                 | **None**       |                                                       |
+| `F0Text`                  | None                                                                                                 | **None**       | High priority — core typography                       |
+| `F0Widget`                | None                                                                                                 | **None**       |                                                       |
+| `F0WizardForm`            | None                                                                                                 | **None**       | See `factorial-f0` skill for F0 Forms docs            |
+| `OneEllipsis`             | None                                                                                                 | **None**       | Old naming (`One` prefix, rename on touch)            |
+| `OneFilterPicker`         | `OneFilterPicker/__stories__/OneFiltersPicker.mdx` + `presets.mdx` + `OneFiltersPicker.internal.mdx` | **Good**       | Most MDX files per component                          |
 
 ---
 
@@ -69,18 +69,18 @@ This file uses the shared documentation quality scale from `documentation-qualit
 
 ## Tags Group (`tags/`)
 
-| Component           | MDX File                           | Quality      | Notes                                                           |
-| ------------------- | ---------------------------------- | ------------ | --------------------------------------------------------------- |
+| Component           | MDX File                           | Quality        | Notes                                                           |
+| ------------------- | ---------------------------------- | -------------- | --------------------------------------------------------------- |
 | `tags/F0Tag`        | `tags/F0Tag/__stories__/F0Tag.mdx` | **Acceptable** | Router/index page only — links to sub-tags; uses `__stories__/` |
-| `tags/F0TagAlert`   | None                               | **None**     | Uses `__storybook__/` (old naming)                              |
-| `tags/F0TagBalance` | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagCompany` | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagDot`     | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagList`    | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagPerson`  | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagRaw`     | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagStatus`  | None                               | **None**     | Uses `__storybook__/`                                           |
-| `tags/F0TagTeam`    | None                               | **None**     | Uses `__storybook__/`                                           |
+| `tags/F0TagAlert`   | None                               | **None**       | Uses `__storybook__/` (old naming)                              |
+| `tags/F0TagBalance` | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagCompany` | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagDot`     | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagList`    | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagPerson`  | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagRaw`     | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagStatus`  | None                               | **None**       | Uses `__storybook__/`                                           |
+| `tags/F0TagTeam`    | None                               | **None**       | Uses `__storybook__/`                                           |
 
 ---
 

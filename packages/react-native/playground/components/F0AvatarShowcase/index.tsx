@@ -1,6 +1,8 @@
 import React from "react"
 import { Image as RNImage, ScrollView, View } from "react-native"
 
+import { F0Avatar } from "../../../src/components/F0Avatar"
+import { F0Text } from "../../../src/components/primitives/F0Text"
 import {
   Bell,
   Briefcase,
@@ -17,8 +19,6 @@ import {
   Person,
   Star,
 } from "../../../src/icons/app"
-import { F0Avatar } from "../../../src/components/F0Avatar"
-import { F0Text } from "../../../src/components/primitives/F0Text"
 
 const assetUri = (asset: number) => RNImage.resolveAssetSource(asset).uri
 
@@ -115,11 +115,36 @@ export function F0AvatarShowcase() {
 
       {sectionTitle("F0Avatar.Person — Deactivated (all sizes)")}
       <View className="mb-6 flex-row flex-wrap items-end gap-3">
-        <F0Avatar.Person firstName="Old" lastName="User" size="xs" deactivated />
-        <F0Avatar.Person firstName="Old" lastName="User" size="sm" deactivated />
-        <F0Avatar.Person firstName="Old" lastName="User" size="md" deactivated />
-        <F0Avatar.Person firstName="Old" lastName="User" size="lg" deactivated />
-        <F0Avatar.Person firstName="Old" lastName="User" size="xl" deactivated />
+        <F0Avatar.Person
+          firstName="Old"
+          lastName="User"
+          size="xs"
+          deactivated
+        />
+        <F0Avatar.Person
+          firstName="Old"
+          lastName="User"
+          size="sm"
+          deactivated
+        />
+        <F0Avatar.Person
+          firstName="Old"
+          lastName="User"
+          size="md"
+          deactivated
+        />
+        <F0Avatar.Person
+          firstName="Old"
+          lastName="User"
+          size="lg"
+          deactivated
+        />
+        <F0Avatar.Person
+          firstName="Old"
+          lastName="User"
+          size="xl"
+          deactivated
+        />
         <F0Avatar.Person
           firstName="Old"
           lastName="User"
@@ -312,9 +337,21 @@ export function F0AvatarShowcase() {
 
       {sectionTitle("F0Avatar.Company — With Image")}
       <View className="mb-6 flex-row flex-wrap items-end gap-3">
-        <F0Avatar.Company name="Factorial" src={IMG.companyFactorial} size="sm" />
-        <F0Avatar.Company name="Factorial" src={IMG.companyFactorial} size="md" />
-        <F0Avatar.Company name="Factorial" src={IMG.companyFactorial} size="lg" />
+        <F0Avatar.Company
+          name="Factorial"
+          src={IMG.companyFactorial}
+          size="sm"
+        />
+        <F0Avatar.Company
+          name="Factorial"
+          src={IMG.companyFactorial}
+          size="md"
+        />
+        <F0Avatar.Company
+          name="Factorial"
+          src={IMG.companyFactorial}
+          size="lg"
+        />
       </View>
 
       {sectionTitle("F0Avatar.Company — Badges (all sizes)")}
@@ -415,7 +452,9 @@ export function F0AvatarShowcase() {
       </View>
 
       {sectionTitle("F0Avatar.File — All File Types")}
-      {subTitle("PDF, IMG, DOC, XLS, PPT, TXT, VID, AUD, ZIP, CSV, HTML, MD, default")}
+      {subTitle(
+        "PDF, IMG, DOC, XLS, PPT, TXT, VID, AUD, ZIP, CSV, HTML, MD, default"
+      )}
       <View className="mb-2 flex-row flex-wrap items-end gap-3">
         <F0Avatar.File file={{ name: "contract.pdf" }} size="md" />
         <F0Avatar.File file={{ name: "photo.jpg" }} size="md" />
@@ -894,42 +933,21 @@ export function F0AvatarShowcase() {
           avatar={{ type: "person", firstName: "Ada", lastName: "L" }}
           size="md"
         />
-        <F0Avatar
-          avatar={{ type: "team", name: "Design" }}
-          size="md"
-        />
-        <F0Avatar
-          avatar={{ type: "company", name: "Factorial" }}
-          size="md"
-        />
-        <F0Avatar
-          avatar={{ type: "emoji", emoji: "🚀" }}
-          size="md"
-        />
-        <F0Avatar
-          avatar={{ type: "icon", icon: Home }}
-          size="md"
-        />
+        <F0Avatar avatar={{ type: "team", name: "Design" }} size="md" />
+        <F0Avatar avatar={{ type: "company", name: "Factorial" }} size="md" />
+        <F0Avatar avatar={{ type: "emoji", emoji: "🚀" }} size="md" />
+        <F0Avatar avatar={{ type: "icon", icon: Home }} size="md" />
         <F0Avatar
           avatar={{ type: "file", file: { name: "report.pdf" } }}
           size="md"
         />
-        <F0Avatar
-          avatar={{ type: "flag", flag: "ES" }}
-          size="md"
-        />
-        <F0Avatar
-          avatar={{ type: "alert", alertType: "critical" }}
-          size="md"
-        />
+        <F0Avatar avatar={{ type: "flag", flag: "ES" }} size="md" />
+        <F0Avatar avatar={{ type: "alert", alertType: "critical" }} size="md" />
         <F0Avatar
           avatar={{ type: "date", date: new Date(2025, 6, 10) }}
           size="md"
         />
-        <F0Avatar
-          avatar={{ type: "module", module: "home" }}
-          size="md"
-        />
+        <F0Avatar avatar={{ type: "module", module: "home" }} size="md" />
       </View>
 
       {sectionTitle("Polymorphic Root — With Badges")}

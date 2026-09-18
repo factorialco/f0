@@ -62,11 +62,7 @@ const SizeVariant = ({ icon, name, size }: SizeVariantProps) => {
   )
 }
 
-const ColorIconDisplay = ({
-  icon,
-  name,
-  color,
-}: ColorIconDisplayProps) => {
+const ColorIconDisplay = ({ icon, name, color }: ColorIconDisplayProps) => {
   const [f0Foreground] = useCSSVariable(["--color-f0-foreground"])
 
   return (
@@ -291,11 +287,7 @@ export function F0IconShowcase() {
           name="secondary"
           color="secondary"
         />
-        <ColorIconDisplay
-          icon={AppIcons.Archive}
-          name="bold"
-          color="bold"
-        />
+        <ColorIconDisplay icon={AppIcons.Archive} name="bold" color="bold" />
         <ColorIconDisplay
           icon={AppIcons.Archive}
           name="inverse"
@@ -324,11 +316,7 @@ export function F0IconShowcase() {
           name="critical-bold"
           color="critical-bold"
         />
-        <ColorIconDisplay
-          icon={AppIcons.InfoCircle}
-          name="info"
-          color="info"
-        />
+        <ColorIconDisplay icon={AppIcons.InfoCircle} name="info" color="info" />
         <ColorIconDisplay
           icon={AppIcons.Check}
           name="positive"
@@ -339,11 +327,7 @@ export function F0IconShowcase() {
           name="warning"
           color="warning"
         />
-        <ColorIconDisplay
-          icon={AppIcons.Heart}
-          name="accent"
-          color="accent"
-        />
+        <ColorIconDisplay icon={AppIcons.Heart} name="accent" color="accent" />
         <ColorIconDisplay
           icon={AppIcons.Archive}
           name="promote"

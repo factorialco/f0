@@ -22,15 +22,15 @@
       ["internal", "type-internal"],
       ["parent", "type-parent"],
       ["sibling", "type-sibling"],
-      ["index", "type-index"]
+      ["index", "type-index"],
     ],
     "internalPattern": ["@/"],
-    "newlinesBetween": true
+    "newlinesBetween": true,
   },
   "experimentalTailwindcss": {
     "stylesheet": "./.oxfmt-tailwind.css",
     "attributes": ["class", "className"],
     "functions": ["cn", "clsx", "cva", "twMerge"],
-    "preserveWhitespace": true
-  }
+    "preserveWhitespace": true,
+  },
 }

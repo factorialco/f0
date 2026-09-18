@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react"
 
-import { TasksInsight } from "./index";
+import { TasksInsight } from "./index"
 
 const meta: Meta = {
   component: TasksInsight,
@@ -37,12 +37,12 @@ const meta: Meta = {
       handleNavigate: () => {},
     },
   },
-};
+}
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}
 
 export const NoMoreTasks: Story = {
   args: {
@@ -51,7 +51,7 @@ export const NoMoreTasks: Story = {
       buttonLabel: undefined,
     },
   },
-};
+}
 
 export const EmptyState: Story = {
   args: {
@@ -65,4 +65,4 @@ export const EmptyState: Story = {
       noDueTasksCount: 0,
     },
   },
-};
+}

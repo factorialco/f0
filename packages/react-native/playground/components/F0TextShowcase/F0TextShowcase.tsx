@@ -1,5 +1,6 @@
 import React from "react"
 import { ScrollView, View } from "react-native"
+
 import { F0Text } from "../../../src/components/primitives/F0Text"
 
 export function F0TextShowcase() {
@@ -51,7 +52,7 @@ export function F0TextShowcase() {
         Text Alignment
       </F0Text>
 
-      <View className="bg-f0-background-secondary mb-8 gap-3 rounded p-4">
+      <View className="mb-8 gap-3 rounded bg-f0-background-secondary p-4">
         <F0Text align="left">Left aligned text</F0Text>
         <F0Text align="center">Center aligned text</F0Text>
         <F0Text align="right">Right aligned text</F0Text>
@@ -89,7 +90,7 @@ export function F0TextShowcase() {
         Text Truncation
       </F0Text>
 
-      <View className="bg-f0-background-secondary mb-8 gap-3 rounded p-4">
+      <View className="mb-8 gap-3 rounded bg-f0-background-secondary p-4">
         <F0Text variant="body-xs-medium" color="secondary">
           Single line truncation:
         </F0Text>
@@ -133,7 +134,7 @@ export function F0TextShowcase() {
 
       <View className="mb-8 gap-4">
         {/* Margin directly on text */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary">
             Margin: className="mt-2 mb-4"
           </F0Text>
@@ -146,21 +147,21 @@ export function F0TextShowcase() {
         </View>
 
         {/* Padding directly on text */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary">
             Padding: className="p-3 bg-f0-background-info rounded"
           </F0Text>
           <F0Text
             variant="body-sm-default"
             color="info"
-            className="mt-2 bg-f0-background-info rounded p-3"
+            className="mt-2 rounded bg-f0-background-info p-3"
           >
             Text with padding and background
           </F0Text>
         </View>
 
         {/* Flex layout */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             Flex: className="flex-1" inside a row
           </F0Text>
@@ -173,14 +174,18 @@ export function F0TextShowcase() {
         </View>
 
         {/* Self alignment */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             Self alignment: className="self-center" / "self-end"
           </F0Text>
           <F0Text variant="body-sm-default" className="self-start">
             self-start (default)
           </F0Text>
-          <F0Text variant="body-sm-medium" color="accent" className="self-center">
+          <F0Text
+            variant="body-sm-medium"
+            color="accent"
+            className="self-center"
+          >
             self-center
           </F0Text>
           <F0Text variant="body-sm-default" className="self-end">
@@ -189,13 +194,13 @@ export function F0TextShowcase() {
         </View>
 
         {/* Width */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             Width: className="w-1/2"
           </F0Text>
           <F0Text
             variant="body-sm-default"
-            className="w-1/2 bg-f0-background-warning rounded p-2"
+            className="w-1/2 rounded bg-f0-background-warning p-2"
             color="warning"
           >
             Half width text
@@ -214,7 +219,7 @@ export function F0TextShowcase() {
       </F0Text>
 
       <View className="mb-8 gap-4">
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             variant="heading-md" + className="text-xs font-normal"
           </F0Text>
@@ -223,7 +228,7 @@ export function F0TextShowcase() {
           </F0Text>
         </View>
 
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             color="positive" + className="text-red-500"
           </F0Text>
@@ -232,7 +237,7 @@ export function F0TextShowcase() {
           </F0Text>
         </View>
 
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             decoration="none" + className="underline"
           </F0Text>
@@ -241,14 +246,14 @@ export function F0TextShowcase() {
           </F0Text>
         </View>
 
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             Mixed: layout passes, typography blocked
           </F0Text>
           <F0Text
             variant="body-sm-default"
             color="accent"
-            className="mt-2 p-2 self-center font-bold text-xl text-red-500"
+            className="mt-2 self-center p-2 text-xl font-bold text-red-500"
           >
             mt-2 + p-2 + self-center applied, font-bold + text-xl + text-red
             ignored
@@ -282,7 +287,7 @@ export function F0TextShowcase() {
 
       <View className="mb-8 gap-6">
         {/* Card — using className instead of View wrappers */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="heading-sm" className="mb-1">
             Card Title
           </F0Text>
@@ -296,7 +301,7 @@ export function F0TextShowcase() {
         </View>
 
         {/* Alert — critical */}
-        <View className="bg-f0-background-critical rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-critical p-4">
           <F0Text variant="heading-sm" color="critical" className="mb-1">
             Error occurred
           </F0Text>
@@ -306,7 +311,7 @@ export function F0TextShowcase() {
         </View>
 
         {/* Alert — success */}
-        <View className="bg-f0-background-positive rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-positive p-4">
           <F0Text variant="heading-sm" color="positive" className="mb-1">
             Success!
           </F0Text>
@@ -314,7 +319,7 @@ export function F0TextShowcase() {
         </View>
 
         {/* Row items with flex */}
-        <View className="bg-f0-background-secondary rounded-lg p-4">
+        <View className="rounded-lg bg-f0-background-secondary p-4">
           <F0Text variant="body-xs-medium" color="tertiary" className="mb-2">
             Row items using flex-1 on text
           </F0Text>

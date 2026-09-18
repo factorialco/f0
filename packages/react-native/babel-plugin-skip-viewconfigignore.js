@@ -10,8 +10,8 @@ module.exports = function () {
         this.file.opts.filename.includes("ViewConfigIgnore.js")
       ) {
         // Return early to skip transformation
-        this.file.path.skip();
+        this.file.path.skip()
       }
     },
-  };
-};
+  }
+}

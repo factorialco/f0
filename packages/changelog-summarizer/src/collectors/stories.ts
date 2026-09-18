@@ -9,18 +9,18 @@
  * deployed Storybook.
  */
 
-const STORYBOOK_BASE = "https://ds.factorial.dev";
-const STORYBOOK_INDEX_URL = `${STORYBOOK_BASE}/index.json`;
+const STORYBOOK_BASE = "https://ds.factorial.dev"
+const STORYBOOK_INDEX_URL = `${STORYBOOK_BASE}/index.json`
 
 interface StorybookIndexEntry {
-  id: string;
-  title: string;
-  name?: string;
-  type?: string;
+  id: string
+  title: string
+  name?: string
+  type?: string
 }
 
 interface StorybookIndex {
-  entries: Record<string, StorybookIndexEntry>;
+  entries: Record<string, StorybookIndexEntry>
 }
 
 /**
@@ -31,13 +31,13 @@ interface StorybookIndex {
  *                   a deep-link actually exists before we emit it
  */
 export interface StoryIndex {
-  docsUrlByKey: Map<string, string>;
-  docsIdByKey: Map<string, string>;
-  storyIds: Set<string>;
+  docsUrlByKey: Map<string, string>
+  docsIdByKey: Map<string, string>
+  storyIds: Set<string>
   /** Component key → a representative story URL (fallback when there's no docs page). */
-  storyUrlByKey: Map<string, string>;
+  storyUrlByKey: Map<string, string>
   /** Component key → best URL: the docs page if it exists, else a story. */
-  urlByKey: Map<string, string>;
+  urlByKey: Map<string, string>
 }
 
 /**
@@ -51,39 +51,42 @@ export interface StoryIndex {
  *   "SDS/AI/F0AiChat"              → ["f0aichat", "aichat"]
  */
 const GENERIC_SEGMENTS =
-  /^(components?|patterns?|kits?|sds|lib|library|hooks?|utilities|charts?|experimental|forms?|navigation|information|actions?|home|communities|data|datacollection|visualizations?|inputs?|layouts?|surveys?|ai)$/i;
+  /^(components?|patterns?|kits?|sds|lib|library|hooks?|utilities|charts?|experimental|forms?|navigation|information|actions?|home|communities|data|datacollection|visualizations?|inputs?|layouts?|surveys?|ai)$/i
 
 export function keysForTitle(title: string): string[] {
-  const segments = title.split("/").map((s) => s.trim()).filter(Boolean);
-  if (segments.length === 0) return [];
+  const segments = title
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (segments.length === 0) return []
 
-  const keys = new Set<string>();
+  const keys = new Set<string>()
   const addVariants = (name: string) => {
-    const lower = name.toLowerCase().replace(/\s+/g, "");
-    if (lower.length === 0) return;
-    keys.add(lower);
+    const lower = name.toLowerCase().replace(/\s+/g, "")
+    if (lower.length === 0) return
+    keys.add(lower)
     if (lower.startsWith("f0")) {
-      const stripped = lower.slice(2);
-      if (stripped.length > 0) keys.add(stripped);
+      const stripped = lower.slice(2)
+      if (stripped.length > 0) keys.add(stripped)
     } else {
-      keys.add(`f0${lower}`);
+      keys.add(`f0${lower}`)
     }
-  };
+  }
 
   // The leaf segment is the primary key (e.g. "Components/Card" → card/f0card).
-  addVariants(segments[segments.length - 1]);
+  addVariants(segments[segments.length - 1])
 
   // Also index component-like ancestor folders, so docs split into sub-pages
   // (e.g. "Kits/F0DataChart/Bar") still resolve by the component name
   // ("f0datachart"), not only the leaf ("bar").
   for (const seg of segments.slice(0, -1)) {
-    if (GENERIC_SEGMENTS.test(seg)) continue;
+    if (GENERIC_SEGMENTS.test(seg)) continue
     if (/^(F0|One)/.test(seg) || /^[A-Z][A-Za-z0-9]+$/.test(seg)) {
-      addVariants(seg);
+      addVariants(seg)
     }
   }
 
-  return [...keys];
+  return [...keys]
 }
 
 /**
@@ -92,109 +95,109 @@ export function keysForTitle(title: string): string[] {
  * should treat a missing URL as "no precise link available".
  */
 export async function collectStoryIndex(): Promise<StoryIndex> {
-  const docsUrlByKey = new Map<string, string>();
-  const docsIdByKey = new Map<string, string>();
-  const storyIds = new Set<string>();
-  const storyUrlByKey = new Map<string, string>();
+  const docsUrlByKey = new Map<string, string>()
+  const docsIdByKey = new Map<string, string>()
+  const storyIds = new Set<string>()
+  const storyUrlByKey = new Map<string, string>()
 
   const build = (): StoryIndex => {
     // Best URL per component: prefer the docs page, fall back to a story so a
     // component that's visible in Storybook always gets a link.
-    const urlByKey = new Map(storyUrlByKey);
-    for (const [key, url] of docsUrlByKey) urlByKey.set(key, url);
-    return { docsUrlByKey, docsIdByKey, storyIds, storyUrlByKey, urlByKey };
-  };
+    const urlByKey = new Map(storyUrlByKey)
+    for (const [key, url] of docsUrlByKey) urlByKey.set(key, url)
+    return { docsUrlByKey, docsIdByKey, storyIds, storyUrlByKey, urlByKey }
+  }
 
   try {
-    const res = await fetch(STORYBOOK_INDEX_URL);
+    const res = await fetch(STORYBOOK_INDEX_URL)
     if (!res.ok) {
       console.error(
-        `[stories] Failed to fetch index.json: HTTP ${res.status} — continuing without Storybook links`,
-      );
-      return build();
+        `[stories] Failed to fetch index.json: HTTP ${res.status} — continuing without Storybook links`
+      )
+      return build()
     }
 
-    const index = (await res.json()) as StorybookIndex;
+    const index = (await res.json()) as StorybookIndex
     if (!index?.entries || typeof index.entries !== "object") {
       console.error(
-        "[stories] index.json missing 'entries' object — continuing without Storybook links",
-      );
-      return build();
+        "[stories] index.json missing 'entries' object — continuing without Storybook links"
+      )
+      return build()
     }
 
-    let docsCount = 0;
+    let docsCount = 0
     for (const entry of Object.values(index.entries)) {
       if (typeof entry.id !== "string" || typeof entry.title !== "string") {
-        continue;
+        continue
       }
 
       if (entry.type === "story") {
-        storyIds.add(entry.id);
-        const storyUrl = `${STORYBOOK_BASE}/?path=/story/${entry.id}`;
+        storyIds.add(entry.id)
+        const storyUrl = `${STORYBOOK_BASE}/?path=/story/${entry.id}`
         for (const key of keysForTitle(entry.title)) {
           // First story per component wins (usually the primary/default).
-          if (!storyUrlByKey.has(key)) storyUrlByKey.set(key, storyUrl);
+          if (!storyUrlByKey.has(key)) storyUrlByKey.set(key, storyUrl)
         }
-        continue;
+        continue
       }
 
-      if (entry.type !== "docs") continue;
+      if (entry.type !== "docs") continue
 
-      const url = `${STORYBOOK_BASE}/?path=/docs/${entry.id}`;
-      const prefix = entry.id.replace(/--documentation$/, "");
+      const url = `${STORYBOOK_BASE}/?path=/docs/${entry.id}`
+      const prefix = entry.id.replace(/--documentation$/, "")
       for (const key of keysForTitle(entry.title)) {
         // First docs entry wins.
         if (!docsUrlByKey.has(key)) {
-          docsUrlByKey.set(key, url);
-          docsIdByKey.set(key, prefix);
+          docsUrlByKey.set(key, url)
+          docsIdByKey.set(key, prefix)
         }
       }
-      docsCount += 1;
+      docsCount += 1
     }
 
     console.error(
-      `[stories] Indexed ${docsCount} docs pages, ${storyIds.size} stories, ${docsUrlByKey.size}+${storyUrlByKey.size} keys`,
-    );
+      `[stories] Indexed ${docsCount} docs pages, ${storyIds.size} stories, ${docsUrlByKey.size}+${storyUrlByKey.size} keys`
+    )
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = err instanceof Error ? err.message : String(err)
     console.error(
-      `[stories] Could not fetch Storybook index (${msg}) — continuing without Storybook links`,
-    );
+      `[stories] Could not fetch Storybook index (${msg}) — continuing without Storybook links`
+    )
   }
 
-  return build();
+  return build()
 }
 
 /**
  * Backwards-compatible helper returning just the component → docs URL map.
  */
 export async function collectStoryUrls(): Promise<Map<string, string>> {
-  return (await collectStoryIndex()).urlByKey;
+  return (await collectStoryIndex()).urlByKey
 }
 
 function lookupKeys(componentName: string): string[] {
-  const raw = componentName.trim();
-  if (raw.length === 0) return [];
-  const lower = raw.toLowerCase();
-  const compact = lower.replace(/\s+/g, "");
+  const raw = componentName.trim()
+  if (raw.length === 0) return []
+  const lower = raw.toLowerCase()
+  const compact = lower.replace(/\s+/g, "")
 
-  const variants = new Set<string>();
-  variants.add(lower);
-  variants.add(compact);
+  const variants = new Set<string>()
+  variants.add(lower)
+  variants.add(compact)
   if (compact.startsWith("f0")) {
-    const stripped = compact.slice(2);
-    if (stripped.length > 0) variants.add(stripped);
+    const stripped = compact.slice(2)
+    if (stripped.length > 0) variants.add(stripped)
   } else {
-    variants.add(`f0${compact}`);
+    variants.add(`f0${compact}`)
   }
   // Components are often coded with a `One` prefix but published without it
   // (e.g. `OneEmptyState` → `Components/EmptyState`, `OneDataCollection` →
   // `Patterns/Data collection`). Try the de-prefixed form too.
   if (compact.startsWith("one")) {
-    const stripped = compact.slice(3);
-    if (stripped.length > 0) variants.add(stripped);
+    const stripped = compact.slice(3)
+    if (stripped.length > 0) variants.add(stripped)
   }
-  return [...variants];
+  return [...variants]
 }
 
 /**
@@ -203,13 +206,13 @@ function lookupKeys(componentName: string): string[] {
  */
 export function resolveStoryUrl(
   componentName: string,
-  storyUrls: Map<string, string>,
+  storyUrls: Map<string, string>
 ): string | null {
   for (const variant of lookupKeys(componentName)) {
-    const url = storyUrls.get(variant);
-    if (url) return url;
+    const url = storyUrls.get(variant)
+    if (url) return url
   }
-  return null;
+  return null
 }
 
 /**
@@ -225,7 +228,7 @@ export function kebabFromExport(name: string): string {
     .replace(/([0-9])([A-Za-z])/g, "$1-$2")
     .replace(/[^a-zA-Z0-9]+/g, "-")
     .toLowerCase()
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-+|-+$/g, "")
 }
 
 /**
@@ -237,18 +240,18 @@ export function kebabFromExport(name: string): string {
 export function resolveStoryDeepLink(
   componentName: string,
   exportName: string,
-  index: StoryIndex,
+  index: StoryIndex
 ): string | null {
-  let prefix: string | undefined;
+  let prefix: string | undefined
   for (const variant of lookupKeys(componentName)) {
-    prefix = index.docsIdByKey.get(variant);
-    if (prefix) break;
+    prefix = index.docsIdByKey.get(variant)
+    if (prefix) break
   }
-  if (!prefix) return null;
+  if (!prefix) return null
 
-  const id = `${prefix}--${kebabFromExport(exportName)}`;
+  const id = `${prefix}--${kebabFromExport(exportName)}`
   if (index.storyIds.has(id)) {
-    return `${STORYBOOK_BASE}/?path=/story/${id}`;
+    return `${STORYBOOK_BASE}/?path=/story/${id}`
   }
-  return null;
+  return null
 }

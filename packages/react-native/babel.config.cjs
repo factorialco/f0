@@ -10,10 +10,10 @@ module.exports = function (api) {
   // when bundling the playground app), and keep it off for the bob library
   // build and for Jest (which mocks Reanimated).
   const isAppBundle = api.caller(
-    (caller) => !!caller && (caller.name === "metro" || !!caller.platform),
-  );
+    (caller) => !!caller && (caller.name === "metro" || !!caller.platform)
+  )
 
-  api.cache.using(() => isAppBundle);
+  api.cache.using(() => isAppBundle)
 
   return {
     presets: [
@@ -31,5 +31,5 @@ module.exports = function (api) {
     ],
     // react-native-worklets/plugin must be last. Only enabled for app bundles.
     plugins: isAppBundle ? ["react-native-worklets/plugin"] : [],
-  };
-};
+  }
+}

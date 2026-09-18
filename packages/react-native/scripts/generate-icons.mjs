@@ -89,7 +89,10 @@ function fixComponent(code) {
     // react-native-svg does not support SVG <filter>. svgr drops the element but
     // leaves a dangling `filter="url(#…)"` attribute, an empty <Defs>, an unused
     // Defs import and a notice comment. Strip all of that (was a manual step).
-    .replace(/\/\* SVGR has dropped some elements not supported by react-native-svg:[^*]*\*\/\n?/g, "")
+    .replace(
+      /\/\* SVGR has dropped some elements not supported by react-native-svg:[^*]*\*\/\n?/g,
+      ""
+    )
     .replace(/ filter="url\([^)]*\)"/g, "")
     .replace(/\s*<Defs>\s*<\/Defs>/g, "")
     .replace(/\s*<Defs\s*\/>/g, "")
@@ -159,7 +162,7 @@ function generateGroup(group) {
         "className={props.className}",
         srcDir,
       ],
-      { cwd: PKG_DIR, stdio: ["ignore", "ignore", "inherit"] },
+      { cwd: PKG_DIR, stdio: ["ignore", "ignore", "inherit"] }
     )
 
     // 1b. Restore intended acronym casing svgr lowercased (FaceId -> FaceID).
@@ -168,7 +171,10 @@ function generateGroup(group) {
     for (const [from, to] of Object.entries(NAME_OVERRIDES)) {
       const fromFile = join(tmp, `${from}.tsx`)
       if (!existsSync(fromFile)) continue
-      const fixed = readFileSync(fromFile, "utf8").replaceAll(`Svg${from}`, `Svg${to}`)
+      const fixed = readFileSync(fromFile, "utf8").replaceAll(
+        `Svg${from}`,
+        `Svg${to}`
+      )
       const stash = join(tmp, `__override__${to}`)
       writeFileSync(stash, fixed)
       rmSync(fromFile)
@@ -176,7 +182,9 @@ function generateGroup(group) {
     }
 
     // 2. Post-process every generated component.
-    const components = listByExt(tmp, ".tsx").map((f) => f.replace(/\.tsx$/, ""))
+    const components = listByExt(tmp, ".tsx").map((f) =>
+      f.replace(/\.tsx$/, "")
+    )
     for (const name of components) {
       const file = join(tmp, `${name}.tsx`)
       writeFileSync(file, fixComponent(readFileSync(file, "utf8")))
@@ -187,7 +195,7 @@ function generateGroup(group) {
     if (components.length < sourceCount) {
       console.warn(
         `⚠️  ${group}: ${sourceCount} source SVGs but ${components.length} components. ` +
-          `Some filenames collide after PascalCase — rename the source files in assets/icons/${group}.`,
+          `Some filenames collide after PascalCase — rename the source files in assets/icons/${group}.`
       )
     }
 
@@ -251,7 +259,8 @@ function diff(outDir, tmp) {
   const changes = []
   for (const f of [...files].sort()) {
     if (!have.has(f)) changes.push({ f, status: "missing (not generated yet)" })
-    else if (!want.has(f)) changes.push({ f, status: "stale (no longer in source)" })
+    else if (!want.has(f))
+      changes.push({ f, status: "stale (no longer in source)" })
     else if (want.get(f) !== have.get(f)) changes.push({ f, status: "changed" })
   }
   return changes
@@ -266,7 +275,7 @@ for (const group of GROUPS) {
     if (orphans.length) {
       console.warn(
         `ℹ️  ${group}: ${orphans.length} component(s) with no SVG in assets/icons ` +
-          `${PRUNE ? "REMOVED" : "kept (use --prune to remove)"}: ${orphans.join(", ")}`,
+          `${PRUNE ? "REMOVED" : "kept (use --prune to remove)"}: ${orphans.join(", ")}`
       )
     }
 
@@ -280,7 +289,8 @@ for (const group of GROUPS) {
         for (const { f, status } of changes.slice(0, 25)) {
           console.error(`    ${status.padEnd(28)} ${f}`)
         }
-        if (changes.length > 25) console.error(`    …and ${changes.length - 25} more`)
+        if (changes.length > 25)
+          console.error(`    …and ${changes.length - 25} more`)
       }
     } else {
       syncInto(outDir, tmp)
@@ -294,7 +304,7 @@ for (const group of GROUPS) {
 if (CHECK && drift) {
   console.error(
     "\nIcons are out of sync with the SVG source.\n" +
-      "Run: pnpm --filter @factorialco/f0-react-native generate-icons",
+      "Run: pnpm --filter @factorialco/f0-react-native generate-icons"
   )
   process.exit(1)
 }
