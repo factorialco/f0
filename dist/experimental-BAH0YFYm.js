@@ -33710,7 +33710,7 @@ const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motio
       }
     );
   }
-), xM = ({ action: a }) => /* @__PURE__ */ $(
+), xM = ({ action: a }) => /* @__PURE__ */ h(
   "button",
   {
     type: "button",
@@ -33718,11 +33718,11 @@ const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motio
     title: a.label,
     onClick: a.onClick,
     className: ye(
-      "relative flex size-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-f1-background-secondary",
+      "group flex w-full cursor-pointer items-center justify-center",
       fU,
-      Ji()
+      Ji("focus-visible:ring-inset")
     ),
-    children: [
+    children: /* @__PURE__ */ $("span", { className: "relative flex size-9 items-center justify-center rounded-lg transition-colors group-hover:bg-f1-background-secondary", children: [
       /* @__PURE__ */ h(ii, { icon: a.icon, size: "lg", color: "default" }),
       a.hasUpdates && /* @__PURE__ */ h(
         "span",
@@ -33732,7 +33732,7 @@ const fU = "transition-transform duration-150 ease-out active:scale-[0.97] motio
           children: /* @__PURE__ */ h(Oh, { type: "highlight", size: "sm", icon: kd })
         }
       )
-    ]
+    ] })
   }
 );
 function B9({
@@ -33790,7 +33790,7 @@ function B9({
           {
             role: "group",
             "aria-label": S.navigation.sidebar.rail.label,
-            className: "flex w-full flex-col px-1.5",
+            className: "flex w-full flex-col",
             children: I.map((O, L) => /* @__PURE__ */ h(
               kM,
               {
@@ -35876,7 +35876,7 @@ const Ed = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Td = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-BNouWi4h.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
+}, Td = "w-[24rem] max-w-full", XP = "w-[32rem] max-w-full", qP = "gap-0.5", $P = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", eV = "bg-[hsl(222_31%_11%)]", tV = "bg-[hsl(220_39%_6%/0.72)]", iV = "bg-[hsl(220_39%_6%/0.6)]", nV = "bg-[hsl(220_39%_6%/0.55)]", gV = () => import("./LocationMap-uXVEnYX2.js"), aV = Fr(gV), oV = 3 / 2, rV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -44816,7 +44816,7 @@ const RE = 1e3, ME = ({
     }
   );
 }, JT = /* @__PURE__ */ new Set(), jT = Fr(
-  () => import("./ChatPostComposerDialog-DQG9JMXL.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-AteJiL-N.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), LT = () => {
