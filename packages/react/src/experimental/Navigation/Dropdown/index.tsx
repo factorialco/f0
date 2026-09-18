@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { Fragment, useState } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
@@ -12,6 +12,7 @@ import {
   DrawerOverlay,
   DrawerTrigger,
 } from "@/ui/drawer"
+import { Switch } from "@/ui/switch"
 import { DropdownItemContent } from "./DropdownItem"
 import {
   DropdownInternal,
@@ -19,6 +20,7 @@ import {
   DropdownItem,
   DropdownItemLabel,
   DropdownItemObject,
+  DropdownItemSeparator,
 } from "./internal"
 
 const privateProps = [] as const
@@ -55,7 +57,72 @@ const _Dropdown = (props: DropdownProps) => {
  */
 export const Dropdown = experimentalComponent("Dropdown", _Dropdown)
 
-export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
+export type {
+  DropdownItem,
+  DropdownItemLabel,
+  DropdownItemObject,
+  DropdownItemSeparator,
+}
+export type { DropdownItemSubmenu, DropdownItemSwitch } from "./internal"
+
+/**
+ * The drawer's rows. Split out of `_MobileDropdown` so a submenu can render its
+ * children through the same function — a sheet has nowhere to put a menu beside
+ * a menu, so a submenu FLATTENS here: its label becomes the heading its entries
+ * sit under. Nothing a host passes goes missing on a phone.
+ */
+const MobileDropdownItems = ({
+  items,
+  onSelect,
+}: {
+  items: DropdownItem[]
+  onSelect: () => void
+}) => (
+  <>
+    {items.map((item, index) => {
+      if (item.type === "submenu") {
+        return (
+          <Fragment key={`submenu-${index}`}>
+            <span className="flex-1 px-3 py-2 text-xs font-medium leading-4 text-f1-foreground-secondary">
+              {item.label}
+            </span>
+            {item.items.length === 0 && item.emptyLabel ? (
+              <span className="px-3 py-2 text-f1-foreground-secondary">
+                {item.emptyLabel}
+              </span>
+            ) : (
+              <MobileDropdownItems items={item.items} onSelect={onSelect} />
+            )}
+          </Fragment>
+        )
+      }
+
+      if (item.type === "switch") {
+        return (
+          // The drawer stays open: a switch is set, not chosen, and closing the
+          // sheet on each one would make turning two things on a four-step job.
+          <label
+            key={`switch-${index}`}
+            className="flex w-full cursor-pointer items-center gap-2 p-3"
+          >
+            <span className="flex flex-1 items-start gap-1.5">
+              <DropdownItemContent item={item} />
+            </span>
+            <Switch
+              checked={item.checked}
+              onCheckedChange={item.onCheckedChange}
+              disabled={item.disabled}
+              title={item.label}
+              hideLabel
+            />
+          </label>
+        )
+      }
+
+      return renderFlatMobileItem(item, index, onSelect)
+    })}
+  </>
+)
 
 const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
   const [open, setOpen] = useState(false)
@@ -78,81 +145,88 @@ const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
         <DrawerOverlay className="bg-f1-background-overlay" />
         <DrawerContent className="bg-f1-background">
           <div className="flex flex-col px-2 pb-3 pt-2">
-            {items.map((item, index) => {
-              if (item.type === "separator") {
-                return (
-                  <div
-                    key={`separator-${index}`}
-                    className="mx-[-8px] my-2 h-px w-[calc(100%+16px)] bg-f1-border-secondary"
-                  />
-                )
-              }
-
-              if (item.type === "label") {
-                return (
-                  <span
-                    key={`label-${index}`}
-                    className="flex-1 px-3 py-2 text-xs font-medium leading-4 text-f1-foreground-secondary"
-                  >
-                    {item.text}
-                  </span>
-                )
-              }
-
-              if (item.href) {
-                return (
-                  <Link
-                    key={`link-${index}`}
-                    href={item.href}
-                    className={cn(
-                      "flex w-full items-start gap-1.5",
-                      item.critical && "text-f1-foreground-critical",
-                      "text-f1-foreground no-underline hover:cursor-pointer"
-                    )}
-                  >
-                    <DropdownItemContent item={item} />
-                  </Link>
-                )
-              }
-
-              return (
-                <button
-                  key={item.label}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    item.onClick?.()
-                    setOpen(false)
-                  }}
-                  className="flex w-full cursor-pointer items-center gap-2 p-3"
-                >
-                  {item.icon ? (
-                    <span
-                      className={cn(
-                        "h-5 w-5 text-f1-icon",
-                        item.critical && "text-f1-icon-critical"
-                      )}
-                    >
-                      <F0Icon icon={item.icon} size="md" />
-                    </span>
-                  ) : null}
-                  <span
-                    className={cn(
-                      "font-medium",
-                      item.critical
-                        ? "text-f1-foreground-critical"
-                        : "text-f1-foreground"
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                </button>
-              )
-            })}
+            <MobileDropdownItems
+              items={items}
+              onSelect={() => setOpen(false)}
+            />
           </div>
         </DrawerContent>
       </Drawer>
     </DataTestIdWrapper>
+  )
+}
+
+const renderFlatMobileItem = (
+  item: DropdownItemObject | DropdownItemSeparator | DropdownItemLabel,
+  index: number,
+  onSelect: () => void
+) => {
+  if (item.type === "separator") {
+    return (
+      <div
+        key={`separator-${index}`}
+        className="mx-[-8px] my-2 h-px w-[calc(100%+16px)] bg-f1-border-secondary"
+      />
+    )
+  }
+
+  if (item.type === "label") {
+    return (
+      <span
+        key={`label-${index}`}
+        className="flex-1 px-3 py-2 text-xs font-medium leading-4 text-f1-foreground-secondary"
+      >
+        {item.text}
+      </span>
+    )
+  }
+
+  if (item.href) {
+    return (
+      <Link
+        key={`link-${index}`}
+        href={item.href}
+        className={cn(
+          "flex w-full items-start gap-1.5",
+          item.critical && "text-f1-foreground-critical",
+          "text-f1-foreground no-underline hover:cursor-pointer"
+        )}
+      >
+        <DropdownItemContent item={item} />
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      key={item.label}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        item.onClick?.()
+        onSelect()
+      }}
+      className="flex w-full cursor-pointer items-center gap-2 p-3"
+    >
+      {item.icon ? (
+        <span
+          className={cn(
+            "h-5 w-5 text-f1-icon",
+            item.critical && "text-f1-icon-critical"
+          )}
+        >
+          <F0Icon icon={item.icon} size="md" />
+        </span>
+      ) : null}
+      <span
+        className={cn(
+          "font-medium",
+          item.critical ? "text-f1-foreground-critical" : "text-f1-foreground"
+        )}
+      >
+        {item.label}
+      </span>
+    </button>
   )
 }
 

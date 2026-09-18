@@ -82,6 +82,24 @@ const DropdownMenuContent = React.forwardRef<
 ))
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
+/**
+ * The row every dropdown item wears: the box, the `after:` hover overlay and
+ * its first/last insets. Pulled out of `DropdownMenuItem` so the OTHER kinds of
+ * row — a submenu trigger, a toggle — can be the same row instead of a
+ * near-copy that drifts the first time one of them is touched.
+ */
+const dropdownMenuItemClassName = cn(
+  "relative flex cursor-default select-none items-center rounded py-2 pl-3 pr-5 text-base font-medium outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:h-full after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] first:pt-3 first:after:top-1 first:after:h-[calc(100%-0.25rem)] last:pb-3 last:after:bottom-1 last:after:h-[calc(100%-0.25rem)] hover:after:opacity-100 focus:after:opacity-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+  // THE ONLY ITEM is both the first and the last, and `first:`/`last:` then
+  // pull the highlight in opposite directions with a fixed height between
+  // them: over-constrained, so one inset is dropped and the highlight runs
+  // flush to that edge — the menu reads as missing its padding on one side.
+  // Insetting from both ends and letting the height follow is the same 4px
+  // gap the multi-item cases get.
+  "only:after:inset-y-1 only:after:h-auto",
+  "focus:outline-none focus:ring-0 focus:ring-transparent" // Temporal fix for Gamma issue
+)
+
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
@@ -93,19 +111,7 @@ const DropdownMenuItem = React.forwardRef<
       e.stopPropagation()
     }}
     ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded py-2 pl-3 pr-5 text-base font-medium outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:h-full after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] first:pt-3 first:after:top-1 first:after:h-[calc(100%-0.25rem)] last:pb-3 last:after:bottom-1 last:after:h-[calc(100%-0.25rem)] hover:after:opacity-100 focus:after:opacity-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      // THE ONLY ITEM is both the first and the last, and `first:`/`last:` then
-      // pull the highlight in opposite directions with a fixed height between
-      // them: over-constrained, so one inset is dropped and the highlight runs
-      // flush to that edge — the menu reads as missing its padding on one side.
-      // Insetting from both ends and letting the height follow is the same 4px
-      // gap the multi-item cases get.
-      "only:after:inset-y-1 only:after:h-auto",
-      "focus:outline-none focus:ring-0 focus:ring-transparent", // Temporal fix for Gamma issue
-      inset && "pl-8",
-      className
-    )}
+    className={cn(dropdownMenuItemClassName, inset && "pl-8", className)}
     {...props}
   />
 ))
@@ -134,6 +140,35 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 ))
 DropdownMenuCheckboxItem.displayName =
   DropdownMenuPrimitive.CheckboxItem.displayName
+
+/**
+ * A checkbox item that reads as an ordinary row — no tick in the gutter — and
+ * that does NOT dismiss the menu when chosen.
+ *
+ * It exists for the row whose whole purpose is being flipped in place: a
+ * connector you turn on for this conversation. Closing on every toggle would
+ * make turning two of them on a four-step job. The visible control is the
+ * caller's to draw; `aria-checked` and the keyboard come from the item, so the
+ * control it draws should be decorative.
+ */
+const DropdownMenuToggleItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
+>(({ className, children, checked, onSelect, ...props }, ref) => (
+  <DropdownMenuPrimitive.CheckboxItem
+    ref={ref}
+    className={cn(dropdownMenuItemClassName, className)}
+    checked={checked}
+    onSelect={(event) => {
+      event.preventDefault()
+      onSelect?.(event)
+    }}
+    {...props}
+  >
+    {children}
+  </DropdownMenuPrimitive.CheckboxItem>
+))
+DropdownMenuToggleItem.displayName = "DropdownMenuToggleItem"
 
 const DropdownMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
@@ -212,8 +247,10 @@ export {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
+  dropdownMenuItemClassName,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
+  DropdownMenuToggleItem,
   DropdownMenuTrigger,
 }
