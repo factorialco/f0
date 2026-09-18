@@ -41,18 +41,21 @@ export function warnUnsupportedInlineField(field: F0Field): void {
   )
 }
 
-export function warnInlinePerSectionDefinition(formName: string): void {
+export function warnInlineSectionSubmitConfig(
+  formName: string,
+  sectionId: string
+): void {
   if (process.env.NODE_ENV === "production") {
     return
   }
-  const key = `per-section:${formName}`
+  const key = `section-submit:${formName}.${sectionId}`
   if (warned.has(key)) {
     return
   }
   warned.add(key)
   // eslint-disable-next-line no-console
   console.warn(
-    `[F0Form] "inline" is single-schema only. "${formName}" uses a per-section definition and renders its standard layout.`
+    `[F0Form] Inline detail rows save the whole record from one action bar, so the "submitConfig" on section "${sectionId}" of "${formName}" is ignored.`
   )
 }
 

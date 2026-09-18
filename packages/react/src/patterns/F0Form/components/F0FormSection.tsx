@@ -12,6 +12,10 @@ import { F0FormContext } from "../context"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
 import {
+  flattenInlineFields,
+  InlineFieldList,
+} from "../fields/inline/InlineFieldList"
+import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "../groupingUtils"
@@ -86,6 +90,31 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   useUpload?: import("../fields/file/types").UseFileUpload
   /** Whether async defaultValues are still being resolved */
   isLoading?: boolean
+  /** Render this section's fields as editable detail rows. */
+  inline?: boolean
+  /** Reports dirtiness and error ids to a form-level action bar. */
+  onStateChange?: (state: InlineSectionState) => void
+  /**
+   * Hands a submit/reset handle to a form-level action bar, and `null` on
+   * unmount so a section hidden by `renderIf` stops counting.
+   */
+  registerController?: (controller: InlineSectionController | null) => void
+  /** Reports this section's values so section-level `renderIf` can read them. */
+  onValuesChange?: (values: Record<string, unknown>) => void
+}
+
+/** What a form-level action bar needs to know about one section. */
+export interface InlineSectionState {
+  isDirty: boolean
+  /** Field ids currently in error, excluding the root error. */
+  errorIds: string[]
+}
+
+/** How a form-level action bar drives one section. */
+export interface InlineSectionController {
+  /** Resolves true only when this section saved. Never rejects. */
+  submit: () => Promise<boolean>
+  reset: () => void
 }
 
 /**
@@ -108,6 +137,10 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   renderCustomField,
   useUpload,
   isLoading: isFormLoading,
+  inline = false,
+  onStateChange,
+  registerController,
+  onValuesChange,
 }: F0FormSectionProps<TSchema>) {
   const i18n = useI18n()
 
@@ -145,13 +178,16 @@ export function F0FormSection<TSchema extends F0FormSchema>({
 
   const rootError = form.formState.errors.root
   const { isSubmitting, isDirty } = form.formState
-  const hasErrors =
-    Object.keys(form.formState.errors).filter((k) => k !== "root").length > 0
+  const errorIds = Object.keys(form.formState.errors).filter(
+    (k) => k !== "root"
+  )
+  const hasErrors = errorIds.length > 0
+  const errorIdsKey = errorIds.join(",")
 
   const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
 
   const handleSubmit = useCallback(
-    async (data: TValues) => {
+    async (data: TValues): Promise<boolean> => {
       const cleanedData = { ...data }
       for (const key of Object.keys(cleanedData)) {
         if ((cleanedData as Record<string, unknown>)[key] === null) {
@@ -162,16 +198,18 @@ export function F0FormSection<TSchema extends F0FormSchema>({
 
       if (result.success) {
         form.reset(data)
-      } else {
-        if (result.errors) {
-          Object.entries(result.errors).forEach(([field, message]) => {
-            form.setError(field as Path<TValues>, { message })
-          })
-        }
-        if (result.rootMessage) {
-          form.setError("root", { message: result.rootMessage })
-        }
+        return true
       }
+
+      if (result.errors) {
+        Object.entries(result.errors).forEach(([field, message]) => {
+          form.setError(field as Path<TValues>, { message })
+        })
+      }
+      if (result.rootMessage) {
+        form.setError("root", { message: result.rootMessage })
+      }
+      return false
     },
     [onSubmit, form]
   )
@@ -254,6 +292,47 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     }
   }, [isSubmitting, hasErrors])
 
+  // Report to a form-level action bar. `errorIdsKey` stands in for the array
+  // so the effect tracks its contents rather than its identity.
+  useEffect(() => {
+    onStateChange?.({
+      isDirty,
+      errorIds: errorIdsKey === "" ? [] : errorIdsKey.split(","),
+    })
+  }, [onStateChange, isDirty, errorIdsKey])
+
+  useEffect(() => {
+    if (!registerController) {
+      return
+    }
+    registerController({
+      // A refusal is an outcome, not a crash: resolve false and leave the
+      // section dirty so the action bar keeps offering its Save.
+      submit: () =>
+        new Promise<boolean>((resolve) => {
+          void form
+            .handleSubmit(
+              async (data) => resolve(await handleSubmit(data)),
+              () => resolve(false)
+            )()
+            .catch(() => resolve(false))
+        }),
+      reset: () => form.reset(),
+    })
+    return () => registerController(null)
+  }, [registerController, form, handleSubmit])
+
+  useEffect(() => {
+    if (!onValuesChange) {
+      return
+    }
+    onValuesChange(form.getValues() as Record<string, unknown>)
+    const subscription = form.watch((values) =>
+      onValuesChange({ ...(values as Record<string, unknown>) })
+    )
+    return () => subscription.unsubscribe()
+  }, [onValuesChange, form])
+
   const groupedItems = groupContiguousSwitches(definition)
 
   const contextValue = useMemo(
@@ -264,6 +343,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
       renderCustomField,
       isLoading: isFormLoading,
       useUpload,
+      inline,
     }),
     [
       formName,
@@ -272,6 +352,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
       renderCustomField,
       isFormLoading,
       useUpload,
+      inline,
     ]
   )
 
@@ -304,59 +385,69 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             ) : null}
           </div>
 
-          <div className={`flex flex-col ${FIELD_GAP}`}>
-            {groupedItems.map((groupedItem, index) => {
-              switch (groupedItem.type) {
-                case "switchGroup":
-                  return (
-                    <SwitchGroupRenderer
-                      key={`switch-group-${index}`}
-                      fields={groupedItem.fields}
-                      dependentFields={groupedItem.dependentFields}
-                      cardSelectDependentFields={
-                        groupedItem.cardSelectDependentFields
-                      }
-                      sectionId={sectionId}
-                    />
-                  )
-                case "field": {
-                  const fieldContent = groupedItem.cardSelectDependentFields ? (
-                    <CardSelectDepsContext.Provider
-                      value={buildCardSelectContentMap(
-                        groupedItem.cardSelectDependentFields,
-                        sectionId
-                      )}
-                    >
-                      <FieldRenderer
-                        field={groupedItem.item.field}
+          {inline ? (
+            <InlineFieldList
+              fields={flattenInlineFields(definition)}
+              renderField={(field) => (
+                <FieldRenderer field={field} sectionId={sectionId} />
+              )}
+            />
+          ) : (
+            <div className={`flex flex-col ${FIELD_GAP}`}>
+              {groupedItems.map((groupedItem, index) => {
+                switch (groupedItem.type) {
+                  case "switchGroup":
+                    return (
+                      <SwitchGroupRenderer
+                        key={`switch-group-${index}`}
+                        fields={groupedItem.fields}
+                        dependentFields={groupedItem.dependentFields}
+                        cardSelectDependentFields={
+                          groupedItem.cardSelectDependentFields
+                        }
                         sectionId={sectionId}
                       />
-                    </CardSelectDepsContext.Provider>
-                  ) : (
-                    <FieldRenderer
-                      field={groupedItem.item.field}
-                      sectionId={sectionId}
-                    />
-                  )
-                  return (
-                    <React.Fragment key={groupedItem.item.field.id}>
-                      {fieldContent}
-                    </React.Fragment>
-                  )
+                    )
+                  case "field": {
+                    const fieldContent =
+                      groupedItem.cardSelectDependentFields ? (
+                        <CardSelectDepsContext.Provider
+                          value={buildCardSelectContentMap(
+                            groupedItem.cardSelectDependentFields,
+                            sectionId
+                          )}
+                        >
+                          <FieldRenderer
+                            field={groupedItem.item.field}
+                            sectionId={sectionId}
+                          />
+                        </CardSelectDepsContext.Provider>
+                      ) : (
+                        <FieldRenderer
+                          field={groupedItem.item.field}
+                          sectionId={sectionId}
+                        />
+                      )
+                    return (
+                      <React.Fragment key={groupedItem.item.field.id}>
+                        {fieldContent}
+                      </React.Fragment>
+                    )
+                  }
+                  case "row":
+                    return (
+                      <RowRenderer
+                        key={`row-${groupedItem.index}`}
+                        row={groupedItem.item}
+                        sectionId={sectionId}
+                      />
+                    )
+                  default:
+                    return null
                 }
-                case "row":
-                  return (
-                    <RowRenderer
-                      key={`row-${groupedItem.index}`}
-                      row={groupedItem.item}
-                      sectionId={sectionId}
-                    />
-                  )
-                default:
-                  return null
-              }
-            })}
-          </div>
+              })}
+            </div>
+          )}
 
           {rootError ? (
             <p className="mt-4 text-base font-medium text-f1-foreground-critical">
@@ -364,7 +455,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             </p>
           ) : null}
 
-          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) ? (
+          {!inline && !hideSubmitButton && (!showSubmitWhenDirty || isDirty) ? (
             <div className="mt-4 flex justify-end">
               <F0Button
                 type="submit"

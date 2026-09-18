@@ -625,9 +625,7 @@ describe("F0Form inline mode through a form definition", () => {
     )
   })
 
-  it("keeps a per-section definition on its standard layout and warns", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-
+  it("reads a per-section definition as detail rows", async () => {
     function PerSectionProfile() {
       const formDefinition = useF0FormDefinition({
         name: "inline-per-section",
@@ -636,24 +634,20 @@ describe("F0Form inline mode through a form definition", () => {
             team: f0FormField(z.string(), { label: "Team" }),
           }),
         },
+        sections: { work: { title: "Work" } },
         defaultValues: { work: { team: "Design" } },
         onSubmit: async () => ({ success: true }),
       })
 
-      return (
-        <F0Form
-          formDefinition={formDefinition}
-          {...({ inline: true } as { inline?: never })}
-        />
-      )
+      return <F0Form formDefinition={formDefinition} inline />
     }
 
     const { container } = render(<PerSectionProfile />)
 
-    expect(container.querySelector("[data-slot='inline-field-row']")).toBeNull()
-    expect(screen.getByLabelText("Team")).toBeInTheDocument()
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0][0]).toContain("single-schema only")
+    expect(
+      container.querySelectorAll("[data-slot='inline-field-row']")
+    ).toHaveLength(1)
+    expect(screen.getByText("Design")).toBeInTheDocument()
   })
 })
 
@@ -673,15 +667,10 @@ describe("inline prop boundary on the definition overloads", () => {
     "F0FormPropsWithSingleSchema",
     "F0FormPropsWithSingleSchemaDefinition",
     "F0FormPropsWithDefinition",
-  ])("%s accepts inline", (name) => {
-    expect(bodyOf(name)).toMatch(/^\s*inline\?: boolean$/m)
-  })
-
-  it.each([
     "F0FormPropsWithPerSectionSchema",
     "F0FormPropsWithPerSectionDefinition",
-  ])("%s rejects inline with never", (name) => {
-    expect(bodyOf(name)).toMatch(/^\s*inline\?: never$/m)
+  ])("%s accepts inline", (name) => {
+    expect(bodyOf(name)).toMatch(/^\s*inline\?: boolean$/m)
   })
 })
 

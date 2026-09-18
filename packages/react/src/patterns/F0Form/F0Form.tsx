@@ -20,7 +20,11 @@ import type {
 import { useAsyncDefaultValues } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import { Form as FormProvider } from "@/ui/form"
 import { FormActionBar } from "./components/ActionBar"
-import { F0FormSection } from "./components/F0FormSection"
+import {
+  F0FormSection,
+  type InlineSectionController,
+  type InlineSectionState,
+} from "./components/F0FormSection"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
@@ -34,7 +38,7 @@ import {
   flattenInlineFields,
   InlineFieldList,
 } from "./fields/inline/InlineFieldList"
-import { warnInlinePerSectionDefinition } from "./fields/inline/support"
+import { warnInlineSectionSubmitConfig } from "./fields/inline/support"
 import type { F0Field } from "./fields/types"
 import { evaluateRenderIf } from "./fields/utils"
 import {
@@ -54,6 +58,8 @@ import type {
   FormDefinitionItem,
   F0FormSubmitResult,
   F0PerSectionSchema,
+  F0PerSectionSectionConfig,
+  F0PerSectionSubmitConfig,
   SectionDefinition,
 } from "./types"
 import { useErrorNavigation } from "./useErrorNavigation"
@@ -130,7 +136,9 @@ const ERROR_TRIGGER_MODE_MAP = {
 
 /**
  * Per-section schema mode renderer.
- * Renders each section as an independent form with its own validation and submit.
+ * Renders each section as an independent form with its own validation and
+ * submit — except in inline mode, where one action bar saves every dirty
+ * section.
  */
 function F0FormPerSection<T extends F0PerSectionSchema>(
   props: F0FormPropsWithPerSectionSchema<T>
@@ -150,7 +158,10 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     renderCustomField,
     isLoading: isFormLoading,
     useUpload,
+    inline = false,
   } = props
+
+  const { forms } = useI18n()
 
   // The sidepanel is hidden entirely on small (mobile) viewports; sections
   // then stack as in the regular layout.
@@ -159,7 +170,26 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
   const noPadding = styling?.noPadding ?? false
 
-  const sectionIds = useMemo(() => Object.keys(schema), [schema])
+  const sectionIdsKey = Object.keys(schema).join("|")
+  // Keyed on the joined ids so a schema rebuilt by the consumer on every
+  // render does not re-create every per-section callback below.
+  const sectionIds = useMemo(
+    () => (sectionIdsKey === "" ? [] : sectionIdsKey.split("|")),
+    [sectionIdsKey]
+  )
+
+  const {
+    dirtySectionIds,
+    sectionErrors,
+    visibleSectionIds,
+    sectionProps,
+    controllersRef,
+  } = useInlinePerSectionState({
+    inline,
+    sections,
+    sectionIds,
+    onSubmit: onSubmit as PerSectionSubmitFn,
+  })
 
   // Only effective when the sidepanel is actually rendered (it provides the
   // only way to switch between sections).
@@ -189,12 +219,17 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     sectionIds[0]
   )
 
+  const effectiveActiveSection =
+    activeSection && visibleSectionIds.includes(activeSection)
+      ? activeSection
+      : visibleSectionIds[0]
+
   const tocItems: TOCItem[] = useMemo(() => {
     if (!sections || !showSectionsSidepanel) {
       return []
     }
 
-    return sectionIds.map((sectionId) => ({
+    return visibleSectionIds.map((sectionId) => ({
       id: sectionId,
       label: sections[sectionId]?.title ?? sectionId,
       onClick: () => {
@@ -202,17 +237,128 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
         handleSectionClick(sectionId)
       },
     }))
-  }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
+  }, [sections, visibleSectionIds, showSectionsSidepanel, handleSectionClick])
+
+  // The whole-record bar replaces the per-section submit buttons; an
+  // action-bar config at form level only tunes its labels.
+  const inlineSubmitConfig: F0FormSubmitConfig = useMemo(
+    () =>
+      submitConfig &&
+      "type" in submitConfig &&
+      submitConfig.type === "action-bar"
+        ? submitConfig
+        : { type: "action-bar", discardable: true },
+    [submitConfig]
+  )
+
+  const {
+    submitLabel,
+    submitIcon,
+    discardableChanges,
+    discardLabel,
+    discardIcon,
+    actionBarIdleLabel,
+    actionBarSavingLabel,
+    successMessageDuration,
+  } = resolveSubmitConfig(inlineSubmitConfig, forms)
+
+  const [actionBarStatus, setActionBarStatus] =
+    useState<ActionBarStatus>("idle")
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isMountedRef = useRef(true)
+  useEffect(
+    () => () => {
+      isMountedRef.current = false
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+    },
+    []
+  )
+
+  const { hasErrors, errorCount, goToPreviousError, goToNextError } =
+    useErrorNavigation({ formName: name, errors: sectionErrors })
+
+  const handleInlineSubmit = useCallback(async () => {
+    const targets = dirtySectionIds
+      .map((sectionId) => controllersRef.current.get(sectionId))
+      .filter((controller) => controller !== undefined)
+
+    if (targets.length === 0) {
+      return
+    }
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+    setActionBarStatus("loading")
+
+    // Every dirty section saves at once, each with its own values; an
+    // untouched section is never called.
+    const results = await Promise.allSettled(
+      targets.map((controller) => controller.submit())
+    )
+
+    if (!isMountedRef.current) {
+      return
+    }
+
+    const allSaved = results.every(
+      (result) => result.status === "fulfilled" && result.value
+    )
+
+    if (!allSaved) {
+      setActionBarStatus("idle")
+      return
+    }
+
+    setActionBarStatus("success")
+    successTimerRef.current = setTimeout(() => {
+      if (!isMountedRef.current) {
+        return
+      }
+      setActionBarStatus("idle")
+      successTimerRef.current = null
+    }, successMessageDuration ?? 2000)
+  }, [dirtySectionIds, controllersRef, successMessageDuration])
+
+  const handleInlineDiscard = useCallback(() => {
+    for (const sectionId of dirtySectionIds) {
+      controllersRef.current.get(sectionId)?.reset()
+    }
+    setActionBarStatus("idle")
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }, [dirtySectionIds, controllersRef])
+
+  const resolvedActionBarLabel = (() => {
+    if (actionBarStatus === "loading") {
+      return actionBarSavingLabel
+    }
+    if (actionBarStatus === "success") {
+      return forms.actionBar.saved
+    }
+    return actionBarIdleLabel
+  })()
 
   const content = (
     <div className={cn("flex w-full flex-col max-w-content", className)}>
-      {sectionIds.map((sectionId, index) => {
+      {visibleSectionIds.map((sectionId, index) => {
         const sectionSchema = schema[sectionId]
         const sectionConfig = sections?.[sectionId]
         const sectionDefaults =
           defaultValues?.[sectionId as keyof typeof defaultValues]
-        const perSectionSubmitConfig =
-          sectionConfig?.submitConfig ?? submitConfig
+        const perSectionSubmitConfig = inline
+          ? undefined
+          : (sectionConfig?.submitConfig ??
+            (submitConfig as F0PerSectionSubmitConfig | undefined))
+
+        if (inline && sectionConfig?.submitConfig) {
+          warnInlineSectionSubmitConfig(name, sectionId)
+        }
 
         return (
           <div
@@ -234,7 +380,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               defaultValues={
                 sectionDefaults as Partial<z.infer<typeof sectionSchema>>
               }
-              onSubmit={(data) => onSubmit(sectionId, data)}
+              onSubmit={sectionProps[sectionId].onSubmit}
               submitConfig={perSectionSubmitConfig}
               errorTriggerMode={errorTriggerMode}
               initialFiles={initialFiles}
@@ -242,6 +388,10 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               renderCustomField={renderCustomField}
               isLoading={isFormLoading}
               useUpload={useUpload}
+              inline={inline}
+              onStateChange={sectionProps[sectionId].onStateChange}
+              registerController={sectionProps[sectionId].registerController}
+              onValuesChange={sectionProps[sectionId].onValuesChange}
             />
           </div>
         )
@@ -249,27 +399,184 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     </div>
   )
 
+  const actionBar = inline ? (
+    <FormActionBar
+      isActionBar
+      isDirty={dirtySectionIds.length > 0}
+      actionBarStatus={actionBarStatus}
+      hasErrors={hasErrors}
+      hasPendingUploads={false}
+      errorCount={errorCount}
+      resolvedActionBarLabel={resolvedActionBarLabel}
+      submitLabel={submitLabel}
+      submitIcon={submitIcon}
+      discardableChanges={discardableChanges}
+      discardLabel={discardLabel}
+      discardIcon={discardIcon}
+      issuesOneLabel={forms.actionBar.issues.one}
+      issuesOtherLabel={forms.actionBar.issues.other}
+      onSubmit={() => void handleInlineSubmit()}
+      onDiscard={handleInlineDiscard}
+      goToPreviousError={goToPreviousError}
+      goToNextError={goToNextError}
+    />
+  ) : null
+
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
-      <div className="flex w-full overflow-scroll">
-        <div className="sticky top-0 mr-4 h-fit shrink-0 self-start pt-2">
-          <F0TableOfContent
-            items={tocItems}
-            activeItem={activeSection}
-            scrollable={false}
-          />
+      <>
+        <div className="flex w-full overflow-scroll">
+          <div className="sticky top-0 mr-4 h-fit shrink-0 self-start pt-2">
+            <F0TableOfContent
+              items={tocItems}
+              activeItem={effectiveActiveSection}
+              scrollable={false}
+            />
+          </div>
+          <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
+          <div className="flex w-full justify-center px-4 py-2">{content}</div>
         </div>
-        <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
-        <div className="flex w-full justify-center px-4 py-2">{content}</div>
-      </div>
+        {actionBar}
+      </>
     )
   }
 
   return (
-    <div className={cn("flex justify-center", !noPadding && "p-4")}>
-      {content}
-    </div>
+    <>
+      <div className={cn("flex justify-center", !noPadding && "p-4")}>
+        {content}
+      </div>
+      {actionBar}
+    </>
   )
+}
+
+type PerSectionSubmitFn = (
+  sectionId: string,
+  data: Record<string, unknown>
+) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+
+/**
+ * Aggregates what the whole-record action bar needs from the independent
+ * section forms: which are dirty, which fields are in error, and the handles
+ * that save or reset them. Section `renderIf` is read here too, against the
+ * values of every section merged together, so a hidden section unmounts and
+ * stops counting as dirty.
+ */
+function useInlinePerSectionState({
+  inline,
+  sections,
+  sectionIds,
+  onSubmit,
+}: {
+  inline: boolean
+  sections: Record<string, F0PerSectionSectionConfig> | undefined
+  sectionIds: string[]
+  onSubmit: PerSectionSubmitFn
+}) {
+  const [sectionStates, setSectionStates] = useState<
+    Record<string, InlineSectionState>
+  >({})
+  const [sectionValues, setSectionValues] = useState<
+    Record<string, Record<string, unknown>>
+  >({})
+  const controllersRef = useRef(new Map<string, InlineSectionController>())
+
+  // Read through a ref so each section keeps one stable submit handler: a new
+  // one on every render would re-run the registration effect in a loop.
+  const onSubmitRef = useRef(onSubmit)
+  onSubmitRef.current = onSubmit
+
+  const hasConditionalSections =
+    inline && sectionIds.some((sectionId) => !!sections?.[sectionId]?.renderIf)
+
+  const sectionProps = useMemo(() => {
+    const entries: Record<
+      string,
+      {
+        onSubmit: (
+          data: Record<string, unknown>
+        ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+        onStateChange: (state: InlineSectionState) => void
+        registerController: (controller: InlineSectionController | null) => void
+        onValuesChange: ((values: Record<string, unknown>) => void) | undefined
+      }
+    > = {}
+
+    for (const sectionId of sectionIds) {
+      entries[sectionId] = {
+        onSubmit: (data) => onSubmitRef.current(sectionId, data),
+        onStateChange: (state) =>
+          setSectionStates((prev) => {
+            const previous = prev[sectionId]
+            if (
+              previous &&
+              previous.isDirty === state.isDirty &&
+              previous.errorIds.join(",") === state.errorIds.join(",")
+            ) {
+              return prev
+            }
+            return { ...prev, [sectionId]: state }
+          }),
+        registerController: (controller) => {
+          if (controller) {
+            controllersRef.current.set(sectionId, controller)
+            return
+          }
+          controllersRef.current.delete(sectionId)
+          setSectionStates((prev) =>
+            sectionId in prev
+              ? Object.fromEntries(
+                  Object.entries(prev).filter(([id]) => id !== sectionId)
+                )
+              : prev
+          )
+        },
+        onValuesChange: hasConditionalSections
+          ? (values) =>
+              setSectionValues((prev) => ({ ...prev, [sectionId]: values }))
+          : undefined,
+      }
+    }
+
+    return entries
+  }, [sectionIds, hasConditionalSections])
+
+  const visibleSectionIds = hasConditionalSections
+    ? sectionIds.filter((sectionId) => {
+        const renderIf = sections?.[sectionId]?.renderIf
+        if (!renderIf) {
+          return true
+        }
+        const merged = Object.assign(
+          {},
+          ...Object.values(sectionValues)
+        ) as Record<string, unknown>
+        return evaluateRenderIf(renderIf, merged)
+      })
+    : sectionIds
+
+  const dirtySectionIds = visibleSectionIds.filter(
+    (sectionId) => sectionStates[sectionId]?.isDirty
+  )
+
+  const sectionErrors = visibleSectionIds.reduce<Record<string, object>>(
+    (acc, sectionId) => {
+      for (const fieldId of sectionStates[sectionId]?.errorIds ?? []) {
+        acc[fieldId] = { message: "" }
+      }
+      return acc
+    },
+    {}
+  )
+
+  return {
+    dirtySectionIds,
+    sectionErrors,
+    visibleSectionIds,
+    sectionProps,
+    controllersRef,
+  }
 }
 
 /**
@@ -381,10 +688,6 @@ function F0FormFromDefinition(
   const useUpload = "useUpload" in props ? props.useUpload : undefined
   const inline = "inline" in props ? Boolean(props.inline) : false
 
-  if (inline && formDefinition._brand !== "single") {
-    warnInlinePerSectionDefinition(formDefinition.name)
-  }
-
   if (formDefinition.isLoading) {
     if (formDefinition._brand === "single") {
       return (
@@ -414,6 +717,7 @@ function F0FormFromDefinition(
         initialFiles={initialFiles}
         renderCustomField={renderCustomField}
         useUpload={useUpload}
+        inline={inline}
         isLoading
       />
     )
@@ -447,6 +751,7 @@ function F0FormFromDefinition(
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
+      inline={inline}
     />
   )
 }
@@ -512,6 +817,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
   initialFiles,
   renderCustomField,
   useUpload,
+  inline,
   isLoading,
 }: F0FormPropsWithPerSectionDefinition<T> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
@@ -566,6 +872,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading || isLoadingDefaults}
+      inline={inline}
     />
   )
 }

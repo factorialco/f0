@@ -204,7 +204,7 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
 /**
  * Submit configuration for action bar type
  */
-interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
+export interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
   /** Type of submit UI (floating action bar) */
   type: "action-bar"
   /** Whether to show a Discard button to reset form changes */
@@ -525,8 +525,12 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   }
   /** Callback when a section is submitted. Receives the section ID and its validated data, both correctly typed. */
   onSubmit: PerSectionSubmitHandler<T>
-  /** Global submit config applied to all sections (can be overridden per section) */
-  submitConfig?: F0PerSectionSubmitConfig
+  /**
+   * Global submit config applied to all sections (can be overridden per
+   * section). With `inline`, pass an action-bar config instead: one bar saves
+   * the whole record and the per-section overrides are ignored.
+   */
+  submitConfig?: F0PerSectionSubmitConfig | F0FormActionBarSubmitConfig
   /** Additional class name for the form container */
   className?: string
   /**
@@ -568,8 +572,13 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
-  /** Detail rows are single-schema only; a per-section form cannot render them. */
-  inline?: never
+  /**
+   * Render editable detail rows. Every section becomes a card of rows under
+   * its own heading, and one floating action bar saves each dirty section
+   * through its own `onSubmit`.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**
@@ -625,8 +634,13 @@ export interface F0FormPropsWithPerSectionDefinition<
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
-  /** Detail rows are single-schema only; a per-section form cannot render them. */
-  inline?: never
+  /**
+   * Render editable detail rows. Every section becomes a card of rows under
+   * its own heading, and one floating action bar saves each dirty section
+   * through the definition's `onSubmit`.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**
@@ -656,7 +670,6 @@ export interface F0FormPropsWithDefinition {
   isLoading?: boolean
   /**
    * Render editable detail rows using the existing save action bar.
-   * Ignored, with a development warning, when the definition is per-section.
    * @default false
    */
   inline?: boolean

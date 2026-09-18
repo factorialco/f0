@@ -1,6 +1,7 @@
 import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./F0Form.stories"
 import * as InlineStories from "./F0FormInline.stories"
+import * as PerSectionStories from "./F0FormInlinePerSection.stories"
 import * as ProfileStories from "./F0FormInlineProfile.stories"
 import * as WizardStories from "../../F0WizardForm/__stories__/F0WizardForm.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
@@ -970,9 +971,8 @@ const formDefinition = useF0FormDefinition({
 return <F0Form formDefinition={formDefinition} inline />
 ```
 
-Detail rows are single-schema only. A per-section schema or definition rejects
-`inline` at the type level, and a definition whose branch is only known at
-runtime keeps its standard layout with a development warning.
+A per-section schema takes `inline` too, with one bar for the whole record —
+see _A record split across per-section schemas_ below.
 
 <Canvas of={InlineStories.EveryTypeReading} />
 
@@ -1038,6 +1038,65 @@ Rows stack inside a bordered card. Section titles stay above their own card, and
 there is nothing left to arrange side by side.
 
 <Canvas of={InlineStories.WithSections} />
+
+### Section navigation
+
+`styling: { showSectionsSidepanel: true }` works in this mode too. Every row
+carries its own anchor id, so the sidepanel scrolls to a section and the action
+bar's error navigation scrolls to the row that failed.
+
+<Canvas of={InlineStories.SectionsSidepanel} />
+
+### A record split across per-section schemas
+
+A per-section schema takes `inline` as well, and it is what an eleven-section
+page wants: each section keeps its own schema, its own validation and its own
+`onSubmit`, while the user sees one record and one Save.
+
+```tsx
+<F0Form
+  name="employee-record"
+  inline
+  schema={{
+    personal: z.object({
+      fullName: f0FormField(z.string(), { label: "Full name" }),
+    }),
+    work: z.object({
+      jobTitle: f0FormField(z.string(), { label: "Job title" }),
+    }),
+  }}
+  sections={{ personal: { title: "Personal" }, work: { title: "Work" } }}
+  defaultValues={{ personal: employee.personal, work: employee.work }}
+  onSubmit={async (sectionId, data) => saveSection(sectionId, data)}
+  submitConfig={{ type: "action-bar", discardable: true }}
+/>
+```
+
+`onSubmit` keeps its per-section signature: `(sectionId, data)` narrowed to that
+section's schema, or `({ sectionId, data, fullData })` with a definition.
+
+What one Save does:
+
+| Situation                          | What happens                                                         |
+| ---------------------------------- | -------------------------------------------------------------------- |
+| One section edited                 | the bar opens; Save runs that section's `onSubmit` with its values   |
+| Several sections edited            | every dirty section runs at once, each with its own values           |
+| A section untouched                | its `onSubmit` is never called                                       |
+| A section returns `success: false` | it keeps its changes and shows its message; the bar stays open       |
+| The others succeeded               | they reset to their saved values, so only the refused one runs again |
+| Discard                            | every dirty section goes back to its last saved values               |
+
+The bar is form-level: pass `submitConfig: { type: "action-bar" }` to label it.
+A `submitConfig` on an individual section has nothing left to drive and is
+ignored with a development warning.
+
+A section's `renderIf` is read against the values of every section merged
+together, and a section it hides is unmounted, so it can never be dirty and is
+never saved.
+
+<Canvas of={PerSectionStories.ThreeSectionRecord} />
+
+<Canvas of={PerSectionStories.OneSectionRefused} />
 
 ### One schema, three viewers
 
