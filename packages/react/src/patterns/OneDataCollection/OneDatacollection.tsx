@@ -894,6 +894,9 @@ const OneDataCollectionComp = <
   }
 
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
+  const [selectableTotal, setSelectableTotal] = useState<undefined | number>(
+    undefined
+  )
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   const elementsRightActions = useMemo(
@@ -935,6 +938,7 @@ const OneDataCollectionComp = <
 
   const onLoadData = ({
     totalItems,
+    selectableTotal,
     filters,
     isInitialLoading: isInitialLoadingFromCallback,
     search,
@@ -945,6 +949,7 @@ const OneDataCollectionComp = <
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
+    setSelectableTotal(selectableTotal ?? totalItems)
     setFirstDataLoaded(true)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
@@ -1886,7 +1891,7 @@ const OneDataCollectionComp = <
               onUnselect={() => clearSelectedItemsFunc?.()}
               allPagesSelection={!!source.allPagesSelection}
               isAllItemsSelected={isAllItemsSelected}
-              totalItems={totalItems}
+              totalItems={selectableTotal}
             />
           ) : null}
         </>

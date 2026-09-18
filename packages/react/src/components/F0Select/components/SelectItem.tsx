@@ -1,3 +1,4 @@
+import { useContext } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
@@ -5,8 +6,10 @@ import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { cn } from "@/lib/utils"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
+import { ActiveOptionContext } from "./ActiveOptionContext"
 
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
 
@@ -31,14 +34,45 @@ const metadataText = (metadata: F0SelectItemMetadata): string => {
 
 export const SelectItem = <T extends string, R>({
   item,
+  optionId,
 }: {
   item: F0SelectItemObject<T, R>
+  /** Set when the field drives this list: `aria-activedescendant` points here. */
+  optionId?: string
 }) => {
   const isStatusTag =
     item.tag && typeof item.tag !== "string" && item.tag.type === "status"
 
+  const value = String(item.value)
+  const activeOption = useContext(ActiveOptionContext)
+  const active = activeOption?.value === value
+
   return (
-    <SelectItemPrimitive value={String(item.value)} disabled={item.disabled}>
+    <SelectItemPrimitive
+      value={value}
+      disabled={item.disabled}
+      id={optionId}
+      data-active={active ? "true" : undefined}
+      onPointerMove={
+        activeOption && !item.disabled
+          ? (event) => {
+              // The primitive would focus the row here, pulling the caret out
+              // of the field. Hover marks it active instead.
+              event.preventDefault()
+              activeOption.setActive(value)
+            }
+          : undefined
+      }
+      className={cn(
+        // The `focus:` highlight, for an option made active by
+        // `aria-activedescendant` rather than focused.
+        "data-[active=true]:after:bg-f1-background-hover data-[active=true]:after:text-f1-foreground data-[active=true]:after:opacity-100",
+        // Selected outranks hover, focus and active: none of them may swap
+        // its colour for the plain highlight.
+        "focus:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:focus:data-[state=checked]:after:bg-f1-background-selected-bold/20",
+        "data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/20"
+      )}
+    >
       <div
         className={`flex w-full gap-1.5 ${item.description ? "items-start" : "items-center"}`}
       >

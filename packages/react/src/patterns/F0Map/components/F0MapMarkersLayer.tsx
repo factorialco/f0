@@ -275,8 +275,7 @@ export const F0MapMarkersLayer = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0, transition: { duration: 0.12 } }}
             transition={{ duration: 0.3, ease: [0.34, 1.7, 0.5, 1] }}
-            className="flex leading-none"
-            style={{ position: "absolute", left: 0, top: 0 }}
+            className="absolute left-0 top-0 flex leading-none"
           >
             <F0MapCluster
               count={c.count}
@@ -313,7 +312,7 @@ export const F0MapMarkersLayer = ({
                 transition: { duration: 0.12, ease: "easeIn" },
               }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              style={{ position: "absolute", left: 0, top: 0 }}
+              className="absolute left-0 top-0"
             >
               <AnimatePresence initial={false}>
                 <motion.span
@@ -325,8 +324,7 @@ export const F0MapMarkersLayer = ({
                   // `flex` + zero line-height: without it the marker's
                   // inline-flex root sits on a text baseline, offsetting the
                   // head from the origin.
-                  className="flex leading-none"
-                  style={{ position: "absolute", left: 0, top: 0 }}
+                  className="absolute left-0 top-0 flex leading-none"
                 >
                   <F0MapMarker
                     {...variantProps(point)}

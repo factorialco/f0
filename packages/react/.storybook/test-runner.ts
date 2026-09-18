@@ -1,3 +1,5 @@
+import { appendFileSync, readFileSync } from "fs"
+import { join } from "path"
 import type { TestRunnerConfig } from "@storybook/test-runner"
 import { getStoryContext } from "@storybook/test-runner"
 import {
@@ -7,9 +9,6 @@ import {
   injectAxe,
 } from "axe-playwright"
 import type Reporter from "axe-playwright/dist/types"
-import { appendFileSync, readFileSync } from "fs"
-import { join } from "path"
-
 // NOTE: the `.ts` extension is required — the test-runner's loader does not
 // resolve extensionless sibling imports (Storybook warns "extensionless imports
 // detected" and the module fails to load at runtime).
@@ -17,12 +16,16 @@ import {
   A11Y_CI_CONTEXT,
   A11Y_RUN_ONLY,
 } from "../src/lib/storybook-utils/a11yAxeConfig.ts"
+import {
+  extractAriaSurface,
+  type AriaSurface,
+} from "../src/lib/storybook-utils/ariaSurface.ts"
 
 // Story files grandfathered to skip axe while their violations are burned
 // down (Path to AA). Maps file → number of allowed skip call-sites; counts
 // may only shrink. Enforced per-count by a11ySkipAllowlist.test.ts; here we
 // only need the file names.
-const a11ySkipAllowlist: Set<string> = new Set(
+const a11ySkipAllowlist = new Set<string>(
   Object.keys(
     JSON.parse(
       readFileSync(
@@ -42,6 +45,12 @@ const A11Y_TEST_MODES = ["error", "todo", "warning"] as const
 // matching where the check script reads it) — an absolute path, since the
 // test-runner relocates import.meta.url when it transforms this module.
 const A11Y_ARTIFACT = join(process.cwd(), "a11y-violations.jsonl")
+
+// Machine-readable aria-surface record consumed by the aria-surface diff step
+// (.scripts/check-aria-surface.ts). One JSONL line per story holding the
+// role + accessible-name pairs it renders, so a PR can be diffed against the
+// baseline captured on main. Same location/rationale as A11Y_ARTIFACT above.
+const ARIA_ARTIFACT = join(process.cwd(), "aria-snapshots.jsonl")
 
 /**
  * Map an axe rule's tags to its WCAG success criterion, level and version.
@@ -99,6 +108,47 @@ function recordA11yViolations(
     appendFileSync(A11Y_ARTIFACT, line)
   } catch {
     // ignore — the comment is a nice-to-have, not worth failing CI over
+  }
+}
+
+/**
+ * Capture the story's aria surface — the role + accessible-name pairs it
+ * renders — and append one JSONL line for the diff step.
+ *
+ * Scoped to `body`, deliberately *wider* than the `#storybook-root` context
+ * axe uses (see A11Y_CI_CONTEXT). In the test-runner `page` is the preview
+ * iframe, so `body` adds exactly the portaled content axe currently cannot see
+ * — dropdowns, dialogs, tooltips, the Select listbox — which is the part
+ * consumers' Cypress suites struggle with most. Storybook's own wrappers are
+ * plain `div`s and map to `generic`, which Playwright omits from the snapshot,
+ * so nothing of the harness leaks in.
+ *
+ * Best-effort throughout: a story that cannot be snapshotted is skipped, never
+ * failed. This hook is observational and must not change which tests pass.
+ */
+async function recordAriaSurface(
+  page: Parameters<NonNullable<TestRunnerConfig["postVisit"]>>[0],
+  story: { id: string; title: string; name: string; file: string }
+): Promise<void> {
+  try {
+    // Same two-frame settle the axe path uses further down, for the same
+    // reason: entry animations (AnimatePresence mounts the F0InputField clear
+    // button, for one) must reach their committed state, or the snapshot
+    // records a tree that never existed and reports a phantom diff.
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        })
+    )
+    const snapshot = await page.locator("body").ariaSnapshot()
+    const surface: AriaSurface = extractAriaSurface(snapshot)
+    appendFileSync(
+      ARIA_ARTIFACT,
+      JSON.stringify({ ...story, nodes: surface }) + "\n"
+    )
+  } catch {
+    // ignore — a missing snapshot degrades the PR comment, nothing more
   }
 }
 
@@ -242,6 +292,22 @@ const config: TestRunnerConfig = {
         /^\.\//,
         ""
       )
+
+      // Capture the aria surface first, before any of the axe branches below
+      // can return or throw. Every story contributes — including the ones
+      // grandfathered out of axe via `skipCi`, whose accessible names are still
+      // a contract consumers query. Stories with nondeterministic content
+      // (random ids, `new Date()`) can opt out with
+      // `parameters: { ariaSnapshot: { skip: true } }` rather than emit a diff
+      // on every run.
+      if (storyContext.parameters?.ariaSnapshot?.skip !== true) {
+        await recordAriaSurface(page, {
+          id: context.id,
+          title: context.title,
+          name: context.name,
+          file: storyFile,
+        })
+      }
 
       if (a11yParams.skipCi) {
         // Grandfathered files keep skipping while their violations are burned

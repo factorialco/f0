@@ -1,7 +1,6 @@
 import "@testing-library/jest-dom/vitest"
-import type * as ReactTypes from "react"
-
 import { cleanup } from "@testing-library/react"
+import type * as ReactTypes from "react"
 import { afterEach, vi } from "vitest"
 
 afterEach(() => {

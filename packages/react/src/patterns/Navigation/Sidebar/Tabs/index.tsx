@@ -138,10 +138,7 @@ const TabButton = ({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded"
         >
-          <span
-            style={{ animationDuration: "8s" }}
-            className="absolute inset-0 animate-rotate-gradient rounded bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] opacity-80 blur-sm [--gradient-angle:0deg]"
-          />
+          <span className="[animation-duration:8s] absolute inset-0 animate-rotate-gradient rounded bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] opacity-80 blur-sm [--gradient-angle:0deg]" />
           <span className="absolute inset-0 rounded bg-f1-background" />
         </span>
       ) : null}

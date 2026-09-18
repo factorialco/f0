@@ -321,7 +321,7 @@ const ChatSpinnerComponent = (
         viewBox={`0 0 ${size} ${size}`}
         xmlns="http://www.w3.org/2000/svg"
         shapeRendering="geometricPrecision"
-        style={{ display: "block", overflow: "visible" }}
+        className="block overflow-visible"
       >
         {placeholders.map((_, i) => (
           <polygon key={i} stroke="none" display="none" />
