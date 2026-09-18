@@ -196,6 +196,25 @@ describe("F0NumberInput inline variant", () => {
 
       expect(screen.queryAllByRole("button").length).toBeGreaterThan(0)
     })
+
+    it("draws the critical border and tint while the value is invalid", () => {
+      const { container } = render(
+        <F0NumberInput
+          variant="inline"
+          editing
+          error
+          locale="en-US"
+          label="Salary"
+          value={1234}
+        />
+      )
+
+      const wrapper = container.querySelector(
+        '[data-testid="input-field-wrapper"]'
+      )
+      expect(wrapper?.className).toContain("border-f1-border-critical-bold")
+      expect(wrapper?.className).toContain("bg-f1-background-critical")
+    })
   })
 
   describe("onDismiss", () => {

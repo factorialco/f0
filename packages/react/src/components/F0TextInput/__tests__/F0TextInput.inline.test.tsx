@@ -225,6 +225,24 @@ describe("F0TextInput inline variant", () => {
       const input = screen.getByRole("textbox", { name: "Job title" })
       expect(document.activeElement).not.toBe(input)
     })
+
+    it("draws the critical border and tint while the value is invalid", () => {
+      const { container } = render(
+        <F0TextInput
+          variant="inline"
+          editing
+          error
+          label="Job title"
+          value="Head of design"
+        />
+      )
+
+      const wrapper = container.querySelector(
+        '[data-testid="input-field-wrapper"]'
+      )
+      expect(wrapper?.className).toContain("border-f1-border-critical-bold")
+      expect(wrapper?.className).toContain("bg-f1-background-critical")
+    })
   })
 
   describe("onDismiss", () => {

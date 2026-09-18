@@ -131,6 +131,170 @@ export const EditingATextRow: Story = {
   },
 }
 
+/** A row in error keeps the editor open and tints it like a focused error. */
+export const ErrorWhileEditing: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="inline-error-editing"
+        inline
+        errorTriggerMode="on-change"
+        schema={z.object({
+          fullName: f0FormField(z.string().min(3, "Too short"), {
+            label: "Full name",
+          }),
+        })}
+        defaultValues={{ fullName: "Ada Lovelace" }}
+        onSubmit={submit}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Type a value the schema rejects", async () => {
+      await userEvent.tab()
+      await userEvent.keyboard("{Enter}")
+      const input = await canvas.findByRole("textbox")
+      await userEvent.clear(input)
+      await userEvent.type(input, "Ad")
+      await expect(await canvas.findByText("Too short")).toBeVisible()
+    })
+
+    await step("Keep the editor open, tinted and outlined", async () => {
+      const input = canvas.getByRole("textbox")
+      const wrapper = input.closest(
+        '[data-testid="input-field-wrapper"]'
+      ) as HTMLElement
+      await expect(wrapper).toHaveClass("border-f1-border-critical-bold")
+      await expect(wrapper).toHaveClass("bg-f1-background-critical")
+    })
+  },
+}
+
+/**
+ * Only the value cell is the hover target. A play function cannot produce a
+ * real CSS `:hover`, so the story pins the geometry the reveal keys off.
+ */
+export const HoverScopeIsTheValueCell: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="inline-hover-scope"
+        inline
+        schema={z.object({
+          fullName: f0FormField(z.string(), { label: "Full name" }),
+          team: f0FormField(z.enum(["design", "engineering"]), {
+            label: "Team",
+            options: TEAMS,
+          }),
+        })}
+        defaultValues={{ fullName: "Ada Lovelace", team: "design" as const }}
+        onSubmit={submit}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const rows = canvasElement.querySelectorAll<HTMLElement>(
+      '[data-slot="inline-field-row"]'
+    )
+    const [textRow, selectRow] = [rows[0], rows[1]]
+    const strip = textRow.querySelector<HTMLElement>(
+      '[data-slot="inline-field-row-actions"]'
+    )!
+    const chevron = selectRow.querySelector<HTMLElement>(
+      '[data-testid="select-inline-value"] span[aria-hidden="true"]'
+    )!
+    const group = strip.closest(".group") as HTMLElement
+
+    await step("The strip and the chevron key off the same group", async () => {
+      await expect(strip.matches(".group *")).toBe(true)
+      await expect(chevron.matches(".group *")).toBe(true)
+      const selectGroup = chevron.closest(".group") as HTMLElement
+      await expect(
+        selectGroup.contains(
+          within(selectRow).getByRole("button", { name: "Team" })
+        )
+      ).toBe(true)
+      await expect(
+        selectGroup.contains(within(selectRow).getByText("Team"))
+      ).toBe(false)
+    })
+
+    await step(
+      "That group covers the value cell and nothing else",
+      async () => {
+        const box = canvas
+          .getByRole("button", { name: "Full name" })
+          .getBoundingClientRect()
+        const hoverArea = group.getBoundingClientRect()
+
+        await expect(Math.round(hoverArea.left)).toBe(Math.round(box.left))
+        await expect(Math.round(hoverArea.right)).toBe(Math.round(box.right))
+        await expect(
+          group.contains(within(textRow).getByText("Full name"))
+        ).toBe(false)
+      }
+    )
+
+    await step("Both start hidden", async () => {
+      await expect(strip).toHaveStyle({ opacity: "0" })
+      await expect(chevron).toHaveStyle({ opacity: "0" })
+    })
+  },
+}
+
+/** A mouse-driven edit must not pin the strip open once the pointer leaves. */
+export const StripHidesAfterAMouseEdit: Story = {
+  render: () => (
+    <div className="flex w-160 flex-col gap-4">
+      <F0Form
+        name="inline-strip-unpin"
+        inline
+        schema={z.object({
+          fullName: f0FormField(z.string(), { label: "Full name" }),
+        })}
+        defaultValues={{ fullName: "Ada Lovelace" }}
+        onSubmit={submit}
+      />
+      <div data-testid="elsewhere">Elsewhere</div>
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    // The strip unmounts while the row is editing, so re-query it every time.
+    const strip = () =>
+      canvasElement.querySelector<HTMLElement>(
+        '[data-slot="inline-field-row-actions"]'
+      )!
+
+    await step("Edit with the mouse and commit with Enter", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Full name" }))
+      const input = await canvas.findByRole("textbox")
+      await userEvent.clear(input)
+      await userEvent.type(input, "Grace Hopper{Enter}")
+      await waitFor(() => expect(canvas.queryByRole("textbox")).toBeNull())
+    })
+
+    await step("Keep the strip hidden once focus comes back", async () => {
+      const activator = canvas.getByRole("button", { name: "Full name" })
+      await waitFor(() => expect(activator).toHaveFocus())
+      await waitFor(() => expect(strip()).toHaveStyle({ opacity: "0" }))
+    })
+
+    await step("Still reveal it when it takes the focus ring", async () => {
+      await userEvent.tab()
+      await waitFor(() =>
+        expect(
+          canvas.getByRole("button", { name: "Edit Full name" })
+        ).toHaveFocus()
+      )
+      await waitFor(() => expect(strip()).toHaveStyle({ opacity: "1" }))
+    })
+  },
+}
+
 export const ActionBarAfterAnEdit: Story = {
   render: () => (
     <div className="w-160">
