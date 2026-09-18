@@ -360,7 +360,13 @@
     "typescript/non-nullable-type-assertion-style": "off", // 38; would add non-null assertions
     "typescript/no-unnecessary-boolean-literal-compare": "off", // 23
     "typescript/prefer-optional-chain": "off", // 47; nursery rule in oxlint
-    "react/rules-of-hooks": "off", // 65 from the _Component naming convention, 414 from story render functions
+    // 485 on 2026-09-18, none of them a hook-order bug: 422 are story `render`
+    // functions, 41 are the `_Component` wrappers behind withDataTestId and
+    // experimentalComponent (the underscore reads as "helper" to the rule), and
+    // 22 are forwardRef/memo callbacks this implementation does not recognise
+    // as components. Enabling it means a stories override, renaming the
+    // wrappers, and eslint-plugin-react-hooks' version for the callbacks.
+    "react/rules-of-hooks": "off",
     "import/named": "off", // nursery rule, false positives
     "import/export": "off", // nursery rule, false positives on export *
     "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
