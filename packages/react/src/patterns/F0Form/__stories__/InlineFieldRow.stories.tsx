@@ -86,8 +86,14 @@ export const WithCopy: Story = {
       value: { writeText },
     })
     try {
+      // The strip only takes pointer events once it holds the focus ring, so
+      // tab onto the copy button rather than onto the activator beside it.
       canvas.getByRole("button", { name: "Employee ID" }).focus()
+      await userEvent.tab()
       await step("confirm a successful copy, then reset", async () => {
+        await expect(
+          canvas.getByRole("button", { name: "Copy Employee ID" })
+        ).toHaveFocus()
         await userEvent.click(
           canvas.getByRole("button", { name: "Copy Employee ID" })
         )

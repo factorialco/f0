@@ -183,8 +183,47 @@ describe("InlineFieldRow", () => {
       "[@media(hover:none)]:pointer-events-auto"
     )
     expect(strip?.className).toContain("group-hover:opacity-100")
-    expect(strip?.className).toContain("group-focus-within:opacity-100")
+    expect(strip?.className).toContain("has-[:focus-visible]:opacity-100")
     expect(strip?.className).toContain("motion-reduce:transition-none")
+  })
+
+  it("takes its focus reveal from its own buttons, not from the activator", () => {
+    renderRow({ actions: fakeActions(), onActivate: vi.fn() })
+
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    )
+
+    // Focus restored to the activator after an edit must not pin it open.
+    expect(strip?.className).not.toContain("group-focus-within")
+    expect(strip?.className).not.toContain("group-has-[:focus-visible]")
+  })
+
+  it("scopes the hover group to the value cell, never the whole row", () => {
+    renderRow({ actions: fakeActions(), onActivate: vi.fn() })
+
+    const row = document.querySelector(
+      '[data-slot="inline-field-row"]'
+    ) as HTMLElement
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    ) as HTMLElement
+    const group = strip.closest(".group") as HTMLElement
+
+    expect(row).not.toHaveClass("group")
+    expect(group).not.toBe(row)
+    expect(group.contains(screen.getByText("Job title"))).toBe(false)
+    expect(
+      group.contains(screen.getByRole("button", { name: "Job title" }))
+    ).toBe(true)
+  })
+
+  it("marks the hint as a help affordance", () => {
+    renderRow({ hint: "As it appears on the contract" })
+
+    expect(
+      screen.getByRole("button", { name: "As it appears on the contract" })
+    ).toHaveClass("cursor-help")
   })
 
   it("keeps the activator a sibling of the strip, never its parent", () => {

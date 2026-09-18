@@ -16,11 +16,15 @@ import type { InlineFieldRowProps, RowAction } from "./types"
 
 const COPIED_MS = 1400
 
-/** Keep hidden actions tabbable; always reveal them on touch screens. */
+/**
+ * The strip shows itself once one of its own buttons takes a focus ring, so it
+ * stays tabbable without being pinned open by the focus the row restores to
+ * the activator after a mouse-driven edit.
+ */
 const REVEAL_CLASS = cn(
   "pointer-events-none opacity-0 transition-opacity motion-reduce:transition-none",
   "group-hover:pointer-events-auto group-hover:opacity-100",
-  "group-focus-within:pointer-events-auto group-focus-within:opacity-100",
+  "has-[:focus-visible]:pointer-events-auto has-[:focus-visible]:opacity-100",
   "[@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100"
 )
 
@@ -50,7 +54,7 @@ const Hint = ({ hint }: { hint: string }) => (
       type="button"
       aria-label={hint}
       className={cn(
-        "flex h-5 w-5 shrink-0 cursor-default items-center justify-center rounded-xs border-0 bg-transparent p-0 text-f1-foreground-secondary",
+        "flex h-5 w-5 shrink-0 cursor-help items-center justify-center rounded-xs border-0 bg-transparent p-0 text-f1-foreground-secondary",
         focusRing()
       )}
     >
@@ -191,7 +195,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
         id={anchorId}
         data-slot="inline-field-row"
         className={cn(
-          "group flex min-h-14 scroll-mt-4 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2",
+          "flex min-h-14 scroll-mt-4 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2",
           // Hidden controllers render spans; only the last div row loses its divider.
           "border-0 border-b border-solid border-f1-border-secondary last-of-type:border-b-0"
         )}
@@ -202,7 +206,8 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
         </div>
 
         <div className="flex min-w-40 max-w-96 grow shrink basis-40 flex-col gap-1">
-          <div className="relative flex w-full min-w-0 items-center">
+          {/* The hover group is the value cell, so the label never triggers it. */}
+          <div className="group relative flex w-full min-w-0 items-center">
             <RowValue
               ref={ref}
               label={label}
