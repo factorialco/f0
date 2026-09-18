@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { expect, within } from "storybook/test"
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -28,6 +28,14 @@ const meta = {
 
       const [globalCounter, setGlobalCounter] = useState<number>(0)
 
+      // Added widgets are numbered from a per-mount counter rather than
+      // `Math.random()`. The widget title renders as a heading, so a random one
+      // renames that heading on every run and reports a phantom break in the
+      // aria-surface check; the same index also seeds the mock content, so a
+      // given widget always looks the same. The prefix keeps these ids clear of
+      // the `widget-1` seeded through `args`.
+      const addedWidgetCount = useRef(0)
+
       const deleteWidget = (widgetId: string) => {
         setWidgets((prev) => prev.filter((widget) => widget.id !== widgetId))
       }
@@ -46,18 +54,20 @@ const meta = {
 
       const createWidgetContent = (
         type: "text" | "chart" | "table" | "kpi",
-        counter: number
+        counter: number,
+        variant: number
       ) => {
         return {
-          text: <TextWidget globalCounter={counter} />,
-          chart: <ChartWidget />,
+          text: <TextWidget globalCounter={counter} variant={variant} />,
+          chart: <ChartWidget variant={variant} />,
           table: <TableWidget />,
           kpi: <KpiWidget />,
         }[type]
       }
 
       const handleAddWidget = (type: "text" | "chart" | "table" | "kpi") => {
-        const id = `widget-${Math.random()}`
+        const variant = addedWidgetCount.current++
+        const id = `added-widget-${variant + 1}`
 
         const availableSizes = {
           text: [
@@ -91,12 +101,13 @@ const meta = {
               content: (deps: Record<string, unknown>) => {
                 return createWidgetContent(
                   "text",
-                  deps["globalCounter"] as number
+                  deps["globalCounter"] as number,
+                  variant
                 )
               },
             }
           : {
-              content: createWidgetContent(type, globalCounter),
+              content: createWidgetContent(type, globalCounter, variant),
             }
 
         setWidgets((prev) => [
@@ -109,7 +120,7 @@ const meta = {
             availableSizes,
             meta: {
               actions: getCommonActions(id),
-              title: `Title ${Math.random()}`,
+              title: `Title ${variant + 1}`,
               aiButton: () => {
                 console.log("ai button clicked")
               },
