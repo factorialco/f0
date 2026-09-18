@@ -6190,6 +6190,10 @@ declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -9544,34 +9548,13 @@ declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 /** @experimental This is an experimental component, use it at your own risk. */
 export declare const F0LocationInput: ForwardRefExoticComponent<F0LocationInputProps_2 & RefAttributes<HTMLInputElement>>;
 
-export declare type F0LocationInputChangeMeta = {
-    /**
-     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
-     * `"typed"` in every other case, which includes a suggestion that could not
-     * be resolved, so do not read `"typed"` as "the user did not use the list".
-     * `isResolved` is what says whether the value can be trusted.
-     */
-    source: "picked" | "typed";
-    /** Whether the value still carries trustworthy coordinates and place id */
-    isResolved: boolean;
-};
-
-export declare interface F0LocationInputProps {
+declare type F0LocationInputBaseProps = {
     label: string;
     /** Controlled value */
     value?: F0LocationInputValue;
     /** Initial value when uncontrolled */
     defaultValue?: F0LocationInputValue;
     onChange?: (value: F0LocationInputValue | undefined, meta: F0LocationInputChangeMeta) => void;
-    /**
-     * Renders the whole address as separate fields the user can fill in by
-     * hand: country, address line 1 and 2, city, region and postal code.
-     * Changing the country clears the other parts, since they described a
-     * place in the previous one. Without it the component is the address
-     * field alone.
-     * @default false
-     */
-    manualEntry?: boolean;
     /** Overrides for the per-part labels, which default to translated copy */
     partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
@@ -9583,20 +9566,6 @@ export declare interface F0LocationInputProps {
      * silently lock every later search to its country.
      */
     defaultCountry?: CountryCode;
-    /**
-     * Suggestion provider. Without it there is no autocomplete and the parts
-     * stand alone as plain fields. Called with the current country so the
-     * consumer can restrict the provider (e.g. Places `componentRestrictions`).
-     */
-    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /**
-     * Resolves a picked suggestion into a full value. Every field of
-     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
-     * the value needs `formatted` or `addressLine1` to be shown at all, and
-     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
-     * provider's formatted address without its granular parts is supported.
-     */
-    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
     placeholder?: string;
     hideLabel?: boolean;
     labelIcon?: IconType;
@@ -9613,7 +9582,27 @@ export declare interface F0LocationInputProps {
     autoFocus?: boolean;
     onBlur?: () => void;
     onFocus?: () => void;
-}
+};
+
+export declare type F0LocationInputChangeMeta = {
+    /**
+     * `"picked"` when a suggestion was chosen *and* resolved into a full value.
+     * `"typed"` in every other case, which includes a suggestion that could not
+     * be resolved, so do not read `"typed"` as "the user did not use the list".
+     * `isResolved` is what says whether the value can be trusted.
+     */
+    source: "picked" | "typed";
+    /** Whether the value still carries trustworthy coordinates and place id */
+    isResolved: boolean;
+};
+
+export declare type F0LocationInputProps = F0LocationInputBaseProps & F0LocationInputShapeProps;
+
+/**
+ * The two shapes a location field takes: a searchable address line, or every
+ * part typed by hand.
+ */
+export declare type F0LocationInputShapeProps = F0LocationSearchProps | F0LocationManualProps;
 
 /**
  * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
@@ -9641,9 +9630,57 @@ export declare type F0LocationInputValue = {
     timezone?: string;
 };
 
+/**
+ * Every part typed by hand. Nothing is searched in this shape, so a provider
+ * would never be called: `searchPlaces` and `resolvePlace` are ruled out
+ * rather than quietly ignored.
+ */
+declare type F0LocationManualProps = {
+    /**
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code.
+     * Changing the country clears the other parts, since they described a
+     * place in the previous one.
+     */
+    manualEntry: true;
+    searchPlaces?: never;
+    resolvePlace?: never;
+    manualEntryFallback?: never;
+};
+
 export declare type F0LocationSearchContext = {
     /** Country to scope the search to, when one is selected or implied */
     country?: CountryCode;
+};
+
+/**
+ * The address line as an autocomplete. A provider makes the suggestions, and
+ * the user who finds nothing there can still fall back to typing.
+ */
+declare type F0LocationSearchProps = {
+    manualEntry?: false;
+    /**
+     * Suggestion provider. Without it there is no autocomplete and the address
+     * line is a plain field. Called with the current country so the consumer
+     * can restrict the provider (e.g. Places `componentRestrictions`).
+     */
+    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
+    /**
+     * Resolves a picked suggestion into a full value. Every field of
+     * `F0LocationInputValue` is optional, so two thresholds are worth knowing:
+     * the value needs `formatted` or `addressLine1` to be shown at all, and
+     * `placeId` plus both coordinates to report `isResolved: true`. Returning a
+     * provider's formatted address without its granular parts is supported.
+     */
+    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
+    /**
+     * Whether a search that comes back empty offers to switch to manual entry.
+     * Turn it off where a typed address is of no use to the consumer, such as a
+     * field that feeds a map or a geofence and needs the coordinates only a
+     * picked place carries.
+     * @default true
+     */
+    manualEntryFallback?: boolean;
 };
 
 export declare type F0LocationSuggestion = {
@@ -14071,6 +14108,7 @@ export declare const OneRestrictComponent: FC<RestrictComponentProps>;
 
 export declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
+    selectableTotal?: number;
     filters: FiltersState<Filters>;
     search: string | undefined;
     isInitialLoading: boolean;
@@ -17961,9 +17999,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -17971,10 +18010,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
