@@ -568,6 +568,8 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /** Detail rows are single-schema only; a per-section form cannot render them. */
+  inline?: never
 }
 
 /**
@@ -590,6 +592,11 @@ export interface F0FormPropsWithSingleSchemaDefinition<
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
   renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Render editable detail rows using the existing save action bar.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**
@@ -618,6 +625,8 @@ export interface F0FormPropsWithPerSectionDefinition<
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /** Detail rows are single-schema only; a per-section form cannot render them. */
+  inline?: never
 }
 
 /**
@@ -645,6 +654,12 @@ export interface F0FormPropsWithDefinition {
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /**
+   * Render editable detail rows using the existing save action bar.
+   * Ignored, with a development warning, when the definition is per-section.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**

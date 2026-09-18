@@ -954,6 +954,26 @@ whole record.
 
 The mode is form-wide: either every field reads as a row or none does.
 
+`inline` is a prop on F0Form, not part of the schema or the definition, so a form
+built with `useF0FormDefinition` passes it the same way. The action bar comes
+from the definition's own `submitConfig`:
+
+```tsx
+const formDefinition = useF0FormDefinition({
+  name: "employee-profile",
+  schema: profileSchema,
+  defaultValues: profile,
+  onSubmit: ({ data }) => save(data),
+  submitConfig: { type: "action-bar", discardable: true },
+})
+
+return <F0Form formDefinition={formDefinition} inline />
+```
+
+Detail rows are single-schema only. A per-section schema or definition rejects
+`inline` at the type level, and a definition whose branch is only known at
+runtime keeps its standard layout with a development warning.
+
 <Canvas of={InlineStories.EveryTypeReading} />
 
 ### What each key does while a row is open

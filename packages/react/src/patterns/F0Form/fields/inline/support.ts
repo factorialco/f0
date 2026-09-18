@@ -41,6 +41,21 @@ export function warnUnsupportedInlineField(field: F0Field): void {
   )
 }
 
+export function warnInlinePerSectionDefinition(formName: string): void {
+  if (process.env.NODE_ENV === "production") {
+    return
+  }
+  const key = `per-section:${formName}`
+  if (warned.has(key)) {
+    return
+  }
+  warned.add(key)
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[F0Form] "inline" is single-schema only. "${formName}" uses a per-section definition and renders its standard layout.`
+  )
+}
+
 /** Reset process-wide warnings between tests. */
 export function resetInlineWarnings(): void {
   warned.clear()

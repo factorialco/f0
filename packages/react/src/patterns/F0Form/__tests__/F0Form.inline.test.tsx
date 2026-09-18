@@ -1,6 +1,10 @@
+import { readFileSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import {
   fireEvent,
   zeroRender as render,
@@ -548,5 +552,134 @@ describe("F0Form inline mode", () => {
 
     expect(container.querySelector("[data-slot='inline-field-row']")).toBeNull()
     expect(screen.getByLabelText("Full name")).toBeInTheDocument()
+  })
+})
+
+describe("F0Form inline mode through a form definition", () => {
+  global.ResizeObserver = class MockResizeObserver {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  } as typeof ResizeObserver
+
+  beforeEach(() => resetInlineWarnings())
+  afterEach(() => vi.restoreAllMocks())
+
+  function DefinitionProfile({
+    onSubmit = async () => ({ success: true }),
+  }: {
+    onSubmit?: (arg: { data: { fullName: string } }) => Promise<{
+      success: true
+    }>
+  }) {
+    const formDefinition = useF0FormDefinition({
+      name: "inline-definition-profile",
+      schema: z.object({
+        fullName: f0FormField(z.string(), { label: "Full name" }),
+      }),
+      defaultValues: { fullName: "Ada Lovelace" },
+      onSubmit,
+      submitConfig: { type: "action-bar", discardable: true },
+    })
+
+    return <F0Form formDefinition={formDefinition} inline />
+  }
+
+  it("reads the definition's fields as detail rows", () => {
+    render(<DefinitionProfile />)
+
+    expect(screen.getByText("Full name")).toBeInTheDocument()
+    expect(screen.getByText("Ada Lovelace")).toBeInTheDocument()
+    expect(screen.queryByRole("textbox")).toBeNull()
+    expect(
+      document.querySelector("[data-slot='inline-field-row']")
+    ).toBeInTheDocument()
+  })
+
+  it("shows the definition's action bar after an edit and submits the draft", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+    render(<DefinitionProfile onSubmit={onSubmit} />)
+
+    await user.click(activator("Full name"))
+    const input = await screen.findByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "Grace Hopper{Enter}")
+
+    await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
+    await waitFor(() =>
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    )
+    expect(screen.getByRole("button", { name: /discard/i })).toBeInTheDocument()
+
+    const [submit] = await screen.findAllByRole("button", { name: /submit/i })
+    await user.click(submit)
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: { fullName: "Grace Hopper" },
+      })
+    )
+  })
+
+  it("keeps a per-section definition on its standard layout and warns", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+    function PerSectionProfile() {
+      const formDefinition = useF0FormDefinition({
+        name: "inline-per-section",
+        schema: {
+          work: z.object({
+            team: f0FormField(z.string(), { label: "Team" }),
+          }),
+        },
+        defaultValues: { work: { team: "Design" } },
+        onSubmit: async () => ({ success: true }),
+      })
+
+      return (
+        <F0Form
+          formDefinition={formDefinition}
+          {...({ inline: true } as { inline?: never })}
+        />
+      )
+    }
+
+    const { container } = render(<PerSectionProfile />)
+
+    expect(container.querySelector("[data-slot='inline-field-row']")).toBeNull()
+    expect(screen.getByLabelText("Team")).toBeInTheDocument()
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain("single-schema only")
+  })
+})
+
+/** Source-check the prop boundary because test files are excluded from tsc. */
+describe("inline prop boundary on the definition overloads", () => {
+  const TYPES = join(dirname(fileURLToPath(import.meta.url)), "../types.ts")
+
+  const bodyOf = (name: string): string => {
+    const text = readFileSync(TYPES, "utf8")
+    const start = text.indexOf(`export interface ${name}`)
+    expect(start).toBeGreaterThan(-1)
+    const open = text.indexOf("{", start)
+    return text.slice(open, text.indexOf("\n}", open))
+  }
+
+  it.each([
+    "F0FormPropsWithSingleSchema",
+    "F0FormPropsWithSingleSchemaDefinition",
+    "F0FormPropsWithDefinition",
+  ])("%s accepts inline", (name) => {
+    expect(bodyOf(name)).toMatch(/^\s*inline\?: boolean$/m)
+  })
+
+  it.each([
+    "F0FormPropsWithPerSectionSchema",
+    "F0FormPropsWithPerSectionDefinition",
+  ])("%s rejects inline with never", (name) => {
+    expect(bodyOf(name)).toMatch(/^\s*inline\?: never$/m)
   })
 })

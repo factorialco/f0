@@ -34,6 +34,7 @@ import {
   flattenInlineFields,
   InlineFieldList,
 } from "./fields/inline/InlineFieldList"
+import { warnInlinePerSectionDefinition } from "./fields/inline/support"
 import type { F0Field } from "./fields/types"
 import { evaluateRenderIf } from "./fields/utils"
 import {
@@ -378,6 +379,11 @@ function F0FormFromDefinition(
   } = props
 
   const useUpload = "useUpload" in props ? props.useUpload : undefined
+  const inline = "inline" in props ? Boolean(props.inline) : false
+
+  if (inline && formDefinition._brand !== "single") {
+    warnInlinePerSectionDefinition(formDefinition.name)
+  }
 
   if (formDefinition.isLoading) {
     if (formDefinition._brand === "single") {
@@ -392,6 +398,7 @@ function F0FormFromDefinition(
           initialFiles={initialFiles}
           renderCustomField={renderCustomField}
           useUpload={useUpload}
+          inline={inline}
           isLoading
         />
       )
@@ -424,6 +431,7 @@ function F0FormFromDefinition(
         initialFiles={initialFiles}
         renderCustomField={renderCustomField}
         useUpload={useUpload}
+        inline={inline}
       />
     )
   }
@@ -451,6 +459,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
   initialFiles,
   renderCustomField,
   useUpload,
+  inline,
   isLoading,
 }: F0FormPropsWithSingleSchemaDefinition<TSchema> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
@@ -488,6 +497,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading || isLoadingDefaults}
+      inline={inline}
       defaultValuesParamsSchema={def.defaultValuesParamsSchema}
       defaultValuesFn={def.defaultValuesFn}
     />
