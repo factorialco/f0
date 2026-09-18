@@ -10,11 +10,6 @@ import {
 import { InlineFieldRow } from "../InlineFieldRow"
 import type { InlineFieldRowProps } from "../types"
 
-/**
- * The row is meant to work with a node and a list of callbacks and nothing
- * else. Every test builds it that way, so anything field-shaped leaking into
- * the props would show up here as a compile error.
- */
 const renderRow = (props: Partial<InlineFieldRowProps> = {}) =>
   render(
     <InlineFieldRow
@@ -26,11 +21,7 @@ const renderRow = (props: Partial<InlineFieldRowProps> = {}) =>
     />
   )
 
-/**
- * jsdom has no clipboard, and spreading `navigator` to add one drops every
- * prototype getter on it — `userAgent` included, which the platform provider
- * reads on mount. Define the one property instead.
- */
+/** Define clipboard without replacing navigator prototype getters. */
 const stubClipboard = (writeText: () => Promise<void>) =>
   Object.defineProperty(navigator, "clipboard", {
     value: { writeText },
@@ -198,7 +189,7 @@ describe("InlineFieldRow", () => {
     )
 
     await screen.findByRole("button", { name: "Copied Job title" })
-    // Still pinned well after a frame, and gone once the hold expires.
+
     await new Promise((resolve) => setTimeout(resolve, 900))
     expect(
       screen.getByRole("button", { name: "Copied Job title" })
