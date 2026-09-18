@@ -137,10 +137,8 @@ describe("Breadcrumbs", async () => {
     const lastElement = nav!.querySelector('[aria-current="page"]')
     expect(lastElement).toHaveTextContent(settings.label)
 
-    // Only the separator. A crumb no longer draws its module's avatar: the
-    // page header says which module you are in through the navigation beside
-    // it, and a mark repeating that in the title was the same fact twice.
-    expect(nav!.querySelectorAll("svg")).toHaveLength(1)
+    // Check if icons are rendered (2 icons + 1 separator)
+    expect(nav!.querySelectorAll("svg")).toHaveLength(3)
   })
 
   it("renders correct links for non-last items", () => {

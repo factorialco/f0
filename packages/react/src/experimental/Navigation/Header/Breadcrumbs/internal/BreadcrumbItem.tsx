@@ -1,6 +1,7 @@
 import { motion } from "motion/react"
 import { forwardRef, PropsWithChildren, ReactNode } from "react"
 
+import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
 import { getBreadcrumbKey } from "@/experimental/Navigation/Header/Breadcrumbs/getBreadcrumbKey"
@@ -61,13 +62,16 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
         className={cn(
           "flex items-center gap-2 px-1.5",
           isFirst && "pl-0",
-          // One step above `F0Text`'s heading rather than two: at 22px the
-          // page title was the largest thing on any screen, competing with the
-          // content it names.
-          isOnly && "text-xl font-semibold"
+          isOnly && "text-2xl font-semibold"
         )}
         transition={{ duration: 0.15 }}
       >
+        {!isLoading &&
+          "module" in item &&
+          item.module &&
+          (isOnly || isFirst) && (
+            <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
+          )}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}
         </span>

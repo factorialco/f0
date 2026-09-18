@@ -128,9 +128,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        // No padding above: the row is a fixed height and centres its own
-        // contents, so the top padding only pushed the title off that centre.
-        "flex items-center justify-between px-page pb-4",
+        "flex items-center justify-between px-page py-4",
         embedded ? "h-12" : "h-16"
       )}
     >
