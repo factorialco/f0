@@ -3,6 +3,10 @@ import { useState } from "react"
 import { F0VersionHistory } from ".."
 import { Version } from "../types"
 
+// Fixed timestamps on purpose. `VersionItem` formats each one with date-fns
+// `PPPp` and uses the result as the button's `aria-label`, so a
+// `Date.now()`-relative fixture would rename every version button each day and
+// report a phantom break in the aria-surface check.
 const mockVersions: Version[] = [
   {
     id: "4",
@@ -29,7 +33,7 @@ const mockVersions: Version[] = [
       lastName: "Roosevelt",
       src: "/avatars/person05.jpg",
     },
-    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+    timestamp: new Date("2025-01-09T09:15:00"),
   },
   {
     id: "1",
@@ -38,7 +42,7 @@ const mockVersions: Version[] = [
       lastName: "Sigüenza",
       src: "/avatars/person04.jpg",
     },
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
+    timestamp: new Date("2025-01-15T16:45:00"),
   },
 ]
 
@@ -128,7 +132,7 @@ export const WithClickableCurrentVersion: Story = {
       title: "Current draft",
       onClick: () => console.log("Current version clicked!"),
     },
-    versions: mockVersions.reverse().map((v, i) => ({
+    versions: [...mockVersions].reverse().map((v, i) => ({
       ...v,
       onClick: () => console.log(`Version ${i + 1} clicked!`),
     })),
@@ -147,7 +151,7 @@ export const WithClickableCurrentVersion: Story = {
 export const WithoutCurrentVersion: Story = {
   args: {
     title: "Version history",
-    versions: mockVersions.reverse(),
+    versions: [...mockVersions].reverse(),
     activeVersionId: "2",
   },
   parameters: {

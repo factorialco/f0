@@ -340,6 +340,7 @@
     "sonarjs/cognitive-complexity": "warn", // 187 at the default threshold of 15
     "f0-styles/no-inline-styles": "warn", // see the src/ui override below
     "f0-i18n/no-untranslated-copy": "warn", // 133; copy must come from useI18n()/t()
+    "f0-stories/no-nondeterministic-story-names": "warn", // a story accessible name must not move run to run; the rule scopes itself to story sources
 
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.
@@ -407,6 +408,7 @@
     "./.oxlint-plugins/f0-styles/index.js",
     "./.oxlint-plugins/f0-i18n/index.js",
     "./.oxlint-plugins/f0-react/index.js",
+    "./.oxlint-plugins/f0-stories/index.js",
     "eslint-plugin-sonarjs",
     {
       "name": "import-js",

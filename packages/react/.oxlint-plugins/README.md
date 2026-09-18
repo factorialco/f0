@@ -83,6 +83,40 @@ CI. Keep the messages self-contained enough to act on from a CI log.
   the `allow` option rather than suppressed inline, so the debt stays in one
   readable place and the rule still blocks new ones.
 
+### `f0-stories`
+
+- **`no-nondeterministic-story-names`** — a story's _accessible names_ must be
+  the same on every run. CI captures each story's aria surface — its `role` +
+  accessible-name pairs — and diffs it against the baseline from the latest
+  `main` run (`.scripts/check-aria-surface.ts`), so a name built from
+  `Math.random()` or the clock is reported as a rename on every run of every
+  PR, whichever files that PR touched. That noise buries the real renames the
+  check exists to catch.
+
+  Deliberately narrow. The moving read — `Math.random()`, `Date.now()`,
+  `performance.now()`, `crypto.randomUUID()`, or a zero-argument `new Date()`
+  — is only reported where it lands somewhere a name comes from: rendered JSX
+  text, a naming attribute (`aria-label`, `alt`, `title`, …), or a fixture key
+  a component formats into a name (`title`, `label`, `timestamp`, `createdAt`,
+  …). A random id, `key`, coordinate or play-function delay never reaches an
+  accessible name and is none of the rule's business. `new Date(…)` with an
+  argument is the fix, not the problem.
+
+  Shallow, like the `f0-security` rules: it sees the naming position and the
+  expression sitting in it, not a value routed through another function. A
+  helper that hides `Math.random()` one hop away (`<p>{pickCopy()}</p>`) gets
+  past it. A tripwire for the ordinary case, not a proof.
+
+  The rule scopes itself by filename rather than through an override: it fires
+  on `*.stories.*` and on anything under `__stories__/`, since the fixtures and
+  mock widgets a story imports render into the same tree. A RATCHET rule:
+  existing hits are in `.scripts/lint-debt.json` and that count may only
+  shrink.
+
+  A story that genuinely needs the real clock in a naming position — a
+  "relative time" demo — keeps it behind an `oxlint-disable` comment naming the
+  reason, so it lands in the diff where a reviewer can judge it.
+
 ### `f0-styles`
 
 - **`no-inline-styles`** — styling comes from Tailwind classes. An inline
