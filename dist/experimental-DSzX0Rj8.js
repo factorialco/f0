@@ -500,7 +500,7 @@ function GD({ children: a }) {
       j || ue || (ee.clientX >= Q && ee.clientX < Q + 32 && ie(!0), ee.clientX > Q + 280 && ie(!1));
     },
     [j, ue, ie, Q]
-  ), z = bt(() => ue && !j ? te ? "locked" : "hidden" : j ? T ? "unlocked" : "hidden" : !te && !T ? "hidden" : !te && T ? "unlocked" : "locked", [ue, j, T, te]);
+  ), z = bt(() => ue ? te ? "locked" : "hidden" : j ? T ? "unlocked" : "hidden" : !te && !T ? "hidden" : !te && T ? "unlocked" : "locked", [ue, j, T, te]);
   return Xe(() => {
     ie(!1);
   }, [I]), Xe(() => {
@@ -32873,7 +32873,7 @@ const CM = Hn(IM), IU = ({
       V.below
     )
   ] });
-}, Gd = "transition-transform duration-150 ease-out group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100";
+}, Gd = "transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none motion-reduce:group-active:scale-100";
 function AU({
   companies: a,
   selected: I,
@@ -34018,10 +34018,18 @@ function xM({
       "h-full",
       // The hairline between the two levels of the navigation. It is the
       // panel's, not the rail's: it exists to separate the pair, so it
-      // leaves when the panel leaves. Inside the panel's own width
-      // (border-box), so the 1px does not push it off the room the frame
-      // reserved.
-      Q && "border-0 border-l border-solid border-f1-border-secondary"
+      // leaves when the panel leaves.
+      //
+      // Drawn as a masked pseudo-element rather than a border so it can
+      // fade out over its last 16px at each end. A hairline that runs the
+      // full height reads as a frame around the rail; one that dissolves
+      // into the ground reads as a seam between two things standing on it,
+      // which is what these are. It is inside the panel's own box, so the
+      // 1px does not push it off the room the frame reserved.
+      Q && [
+        "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-f1-border-secondary before:content-['']",
+        "before:[mask-image:linear-gradient(to_bottom,transparent_0,#000_16px,#000_calc(100%-16px),transparent_100%)]"
+      ]
     )
   ), ee = {
     top: se ? r ? 0 : "8px" : 0,
@@ -35968,7 +35976,7 @@ const Nd = (a, I) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Zd = "w-[24rem] max-w-full", LP = "w-[32rem] max-w-full", XP = "gap-0.5", qP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", $P = "bg-[hsl(222_31%_11%)]", eV = "bg-[hsl(220_39%_6%/0.72)]", tV = "bg-[hsl(220_39%_6%/0.6)]", iV = "bg-[hsl(220_39%_6%/0.55)]", nV = () => import("./LocationMap-ckWMDM1O.js"), gV = Fr(nV), aV = 3 / 2, oV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
+}, Zd = "w-[24rem] max-w-full", LP = "w-[32rem] max-w-full", XP = "gap-0.5", qP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", $P = "bg-[hsl(222_31%_11%)]", eV = "bg-[hsl(220_39%_6%/0.72)]", tV = "bg-[hsl(220_39%_6%/0.6)]", iV = "bg-[hsl(220_39%_6%/0.55)]", nV = () => import("./LocationMap-CnNnFnVl.js"), gV = Fr(nV), aV = 3 / 2, oV = ({ latitude: a, longitude: I }) => `https://www.google.com/maps?q=${a},${I}`, OU = ({
   location: a,
   cornerClass: I = "rounded-xl",
   surfaceClassName: f,
@@ -44908,7 +44916,7 @@ const SE = 1e3, RE = ({
     }
   );
 }, OT = /* @__PURE__ */ new Set(), JT = Fr(
-  () => import("./ChatPostComposerDialog-q4OcnpCe.js").then((a) => ({
+  () => import("./ChatPostComposerDialog-DfUYM1Fr.js").then((a) => ({
     default: a.ChatPostComposerDialog
   }))
 ), jT = () => {
