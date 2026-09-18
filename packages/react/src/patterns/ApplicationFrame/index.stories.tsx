@@ -25,6 +25,7 @@ import {
   Hub,
   HubFilled,
   Lightbulb,
+  LifeBuoy,
   MessagesFilled,
   New,
   Pencil,
@@ -1651,8 +1652,7 @@ const ConversationsSidebarInner = ({
       <OneHistoryTab forceEmpty={forceEmpty} />
     ) : tab === "tools" ? (
       <Menu tree={toolsMenuTree} />
-    ) : isRail ? // the rail had not changed anything. // the honest state: falling through to another module's list would say // Home, Calendar and Files have no second level yet. An empty panel is
-    undefined : (
+    ) : isRail ? undefined : ( // the rail had not changed anything. // the honest state: falling through to another module's list would say // Home, Calendar and Files have no second level yet. An empty panel is
       <Menu tree={toolsMenuTree} />
     )
 
@@ -1684,6 +1684,12 @@ const ConversationsSidebarInner = ({
                 id: "marketplace",
                 label: "Marketplace",
                 icon: Marketplace,
+                onClick: () => {},
+              },
+              {
+                id: "help",
+                label: "Help",
+                icon: LifeBuoy,
                 onClick: () => {},
               },
               {
