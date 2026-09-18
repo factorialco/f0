@@ -49,9 +49,14 @@ declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
 declare interface ActionCommonProps {
     /**
-     * Tooltip
+     * Tooltip. A string is the description on its own; the object form adds a
+     * bold first line above it — for "which control this is" over "what it holds",
+     * the same two-line shape `F0Select`'s trigger tooltip uses.
      */
-    tooltip?: string | false;
+    tooltip?: string | false | {
+        label?: string;
+        description: string;
+    };
     /**
      * The variant of the action.
      */
@@ -189,10 +194,19 @@ export declare type AiChatCredits = {
 export declare type AiChatCreditWarning = {
     /** The severity level of the warning. */
     level: "soft";
+    /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+    text?: string;
+    /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+    actionLabel?: string;
     /** Called when the user dismisses the credit warning banner. */
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
     onGetCredits?: () => void;
+    /**
+     * Icon rendered to the left of the "Get Credits" label. Only used when
+     * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+     */
+    getCreditsIcon?: IconType;
 };
 
 /**
@@ -261,6 +275,15 @@ export declare type AiChatProviderProps = {
      */
     side?: "left" | "right";
     /**
+     * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+     * `side`, keeping everything in one panel. Set it to the opposite edge to
+     * split them — e.g. communications: conversations dock left while the AI
+     * chat keeps its right-side panel and toggle. The two are still exclusive
+     * (opening one swaps the other out); only the main content moves during
+     * the swap, uncovering the incoming panel in place.
+     */
+    panelContentSide?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -289,8 +312,15 @@ export declare type AiChatProviderProps = {
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
-     * Enable resizable chat window
-     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     * Enable the panel's drag-to-resize seam.
+     *
+     * The width is bounded by the room the frame actually has, not by a flat
+     * number: 300–712px while there is space for both, then whatever leaves the
+     * main content its minimum, then an even split. Narrower still and the panel
+     * covers the frame rather than splitting it. See `utils/panelWidth.ts`.
+     *
+     * The width the user drags to is remembered; a narrow window only shrinks
+     * what is displayed, so widening it again restores their choice.
      */
     resizable?: boolean;
     /**
@@ -393,6 +423,13 @@ export declare type AiChatProviderProps = {
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    /**
+     * Optional host-provided content rendered above the complete chat surface.
+     * The chat owns the scoped backdrop and disables its header, messages, and
+     * input while this content is mounted; the host owns the overlay content and
+     * its dismissal behavior.
+     */
+    chatOverlay?: React.ReactNode;
     /** Children rendered inside the provider. */
     children?: React.ReactNode;
 };
@@ -428,7 +465,8 @@ declare type AiChatProviderReturnValue = {
     }) => void;
     tracking?: AiChatTrackingOptions;
     /**
-     * Current width of the chat window (for resizable mode)
+     * The user's preferred width, persisted against the absolute range. This is
+     * NOT what the layout reserves — read `effectiveChatWidth` for that.
      */
     chatWidth: number;
     setChatWidth: React.Dispatch<React.SetStateAction<number>>;
@@ -436,6 +474,44 @@ declare type AiChatProviderReturnValue = {
      * Reset the chat width to the default value (360px)
      */
     resetChatWidth: () => void;
+    /**
+     * `chatWidth` held inside what the measured frame can actually give it. The
+     * preference survives a narrow window; only this shrinks.
+     *
+     * OPTIONAL for the same reason as `isResizing` below: the provider always
+     * supplies it, but making it required reads as a breaking public-API change.
+     */
+    effectiveChatWidth?: number;
+    /** The range the panel may be dragged to at the frame's current width. */
+    chatWidthBounds?: PanelBounds;
+    /**
+     * True when the panel covers the frame rather than sitting beside it.
+     *
+     * Read this instead of re-deriving it from a media query: the rule combines
+     * the measured frame with the pointer type, and two consumers computing it
+     * separately is how a resize handle ends up on a full-screen panel.
+     */
+    panelOverlays?: boolean;
+    /**
+     * Publishes the frame's content-box width. Called by ApplicationFrame, which
+     * is the only thing that knows how much room is left beside the navigation.
+     */
+    setFrameWidth?: (width: number) => void;
+    /**
+     * True while the user is dragging the chat's resize handle. Broadcast here
+     * because everything laid out against the chat's edge has to follow the drag
+     * 1:1 — an eased width leaves the seam trailing the cursor.
+     *
+     * OPTIONAL on purpose: the provider always supplies both, but a required
+     * addition to this return type reads as a breaking change to the public API
+     * check even though callers only ever read it.
+     *
+     * The window that renders the handle keeps its own local drag state and
+     * mirrors it here; it does not read this back as the gate for its listener,
+     * since a split layout has two windows and only one is being dragged.
+     */
+    isResizing?: boolean;
+    setIsResizing?: React.Dispatch<React.SetStateAction<boolean>>;
     /**
      * The current visualization mode of the chat
      */
@@ -492,6 +568,12 @@ declare type AiChatProviderReturnValue = {
     processDroppedFiles: (files: File[]) => void;
     /* Excluded from this release type: setProcessDroppedFilesFunction */
     /**
+     * Move focus into the mounted chat composer, or queue it until mount.
+     * Returns whether focus moved synchronously.
+     */
+    focusChatInput: () => boolean;
+    /* Excluded from this release type: setFocusChatInputFunction */
+    /**
      * Pre-loaded context shown as an empty state in the chat.
      * Prepended to the first user message as `<pending-context>`.
      */
@@ -520,6 +602,16 @@ declare type AiChatProviderReturnValue = {
     /** Clear the custom panel content and fall back to the F0.ai chat. */
     clearPanelContent: () => void;
     /**
+     * Id of the hosted content that was showing when the page last unloaded,
+     * pending restoration. The panel holds a skeleton (no AI-chat flash) until
+     * the host re-mounts it via `setPanelContent`, cancels via
+     * `cancelPanelContentRestore` (content no longer accessible), or a safety
+     * timeout falls back to the AI chat.
+     */
+    restoringPanelContentId: string | null;
+    /** Give up on restoring the persisted panel content — show the AI chat. */
+    cancelPanelContentRestore: () => void;
+    /**
      * Edge the whole side panel docks to — the AI chat, hosted content and the
      * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
      * chat-first experience (e.g. communications), where left is comfier to
@@ -528,7 +620,15 @@ declare type AiChatProviderReturnValue = {
     panelSide: "left" | "right";
     /** Set which edge the side panel docks to. */
     setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+    /**
+     * Edge hosted panel content (`setPanelContent`) docks to. Defaults to
+     * `panelSide`; when it differs, the AI chat and hosted content render in
+     * separate windows, one per edge, still mutually exclusive.
+     */
+    panelContentSide: "left" | "right";
+    /** Set which edge hosted panel content docks to. */
+    setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "chatOverlay" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -552,11 +652,14 @@ declare interface AiChatState {
     enabled: boolean;
     /** Initial edge the panel docks to. @default "right" */
     side?: "left" | "right";
+    /** Initial edge hosted panel content docks to. Defaults to `side`. */
+    panelContentSide?: "left" | "right";
     agent?: string;
     initialMessage?: string | string[];
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
+    chatOverlay?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
@@ -587,6 +690,8 @@ declare interface AiChatState {
     tracking?: AiChatTrackingOptions;
 }
 
+export declare type AiChatTextAreaUsageLimits = Pick<F0AiChatUsageLimitsButtonProps, "usage" | "error" | "onOpenChange">;
+
 export declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
     onClose?: () => void;
@@ -614,6 +719,32 @@ export declare interface AiChatTranslationsProviderProps {
     translations: AiChatTranslations;
 }
 
+/**
+ * Host-resolved numbers for `F0AiChatUsageLimitsButton`. Percentages only: the
+ * product avoids credit counts in the chat.
+ */
+export declare type AiChatUsageLimits = {
+    /** The viewer's own allowance, 0–100. */
+    usedPercentage: number;
+    /** Already localized, e.g. "Resets in 3h 6m". */
+    description?: string;
+    unlimited?: boolean;
+    /** Extra rows below a divider, typically for admins. */
+    sections?: AiChatUsageLimitsSection[];
+    /** Renders the "Your company" row. */
+    onSeeCompany?: () => void;
+};
+
+export declare type AiChatUsageLimitsSection = {
+    id: string;
+    /** Already localized. */
+    label: string;
+    /** Already localized, e.g. "Renews Sep 4". */
+    description?: string;
+    usedPercentage: number;
+    unlimited?: boolean;
+};
+
 export declare type AiInsightCardContent = {
     content: "text";
 } | {
@@ -621,7 +752,7 @@ export declare type AiInsightCardContent = {
     avatar: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">;
 } | {
     content: "people";
-    avatars: Array<Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">>;
+    avatars: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">[];
 } | {
     content: "team";
     avatar: Pick<F0AvatarTeamProps, "name" | "src">;
@@ -666,6 +797,13 @@ export declare const aiTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
+        readonly attribution: "Suggested by One";
+        readonly evidence: {
+            readonly show: "See {{name}}";
+            readonly hide: "Hide {{name}}";
+        };
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -715,6 +853,13 @@ export declare const aiTranslations: {
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
         };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
+        };
         readonly reportCard: {
             readonly tableLabel: "Table";
             readonly openButton: "Open";
@@ -734,6 +879,7 @@ export declare const aiTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -766,6 +912,7 @@ export declare const aiTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -871,6 +1018,38 @@ export declare type AttachedFile = {
     status: "uploading" | "uploaded" | "error";
     uploadedFile?: UploadedFile;
     errorMessage?: string;
+};
+
+/**
+ * Autofill-timesheet canvas content — renders an editable timesheet proposal
+ * (day-grouped shift blocks the user can adjust and confirm) in the canvas panel.
+ */
+export declare type AutofillTimesheetCanvasContent = CanvasContentBase & {
+    type: "autofillTimesheet";
+    employeeId: string;
+    startOn: string;
+    endOn: string;
+    shifts: AutofillTimesheetShift[];
+};
+
+/**
+ * A single proposed shift block in a timesheet-autofill preview. Every proposed
+ * block carries concrete employee-local clock times (ISO datetime or "HH:MM");
+ * days that cannot be proposed are omitted rather than emitted with empty bounds.
+ */
+export declare type AutofillTimesheetShift = {
+    date: string;
+    clockIn: string;
+    clockOut: string;
+    workable: boolean;
+    workplaceId?: string | null;
+    workAreaId?: string | null;
+    /**
+     * Host-defined work-location kind. Left as a loose string to keep the kit
+     * host-agnostic; the factorial consumer narrows it to its attendance
+     * location-type enum (today: "office" | "work_from_home" | "business_trip").
+     */
+    locationType?: string | null;
 };
 
 declare const Avatar: React_2.ForwardRefExoticComponent<Omit<AvatarPrimitive.AvatarProps & React_2.RefAttributes<HTMLSpanElement>, "ref"> & {
@@ -1033,19 +1212,28 @@ declare type CanvasCardAction = {
     hideLabel?: boolean;
 };
 
+/** The card's own control: open/close, or the host's custom action. */
+declare const CanvasCardAction: ({ action, isActive, }: Pick<F0CanvasCardProps, "action" | "isActive">) => JSX_2.Element | null;
+
 declare type CanvasCardAvatar = {
     type: "module";
     module: ModuleId;
 } | {
     type: "file";
     file: FileDef;
+} | {
+    type: "icon";
+    icon: IconType;
 };
+
+/** Whichever avatar the card was given: a module, a file, or an icon. */
+declare const CanvasCardAvatar: ({ avatar }: Pick<F0CanvasCardProps, "avatar">) => JSX_2.Element | null;
 
 /**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export declare type CanvasContent = DashboardCanvasContent | FormCanvasContent | DataDownloadCanvasContent;
+export declare type CanvasContent = DashboardCanvasContent | FormCanvasContent | DataDownloadCanvasContent | AutofillTimesheetCanvasContent;
 
 /**
  * Base shape shared by all canvas content types.
@@ -1056,6 +1244,21 @@ export declare type CanvasContentBase = {
     title: string;
     description?: string;
     toolCallId?: string;
+    /**
+     * Render this content across the whole frame, covering the docked chat
+     * instead of hugging a seam beside it. For content that is a step of its own
+     * rather than something you work through while talking — picking a template,
+     * say. The chat is only covered, never closed, so the conversation is exactly
+     * where it was when the canvas is dismissed.
+     *
+     * Deliberately NOT called `fullscreen`: the chat's own
+     * `visualizationMode: "fullscreen"` means the opposite arrangement (chat full
+     * width, no canvas), and going back to it is how a covering canvas is
+     * dismissed.
+     *
+     * Defaults to the docked split.
+     */
+    coversChat?: boolean;
 };
 
 /**
@@ -1255,7 +1458,7 @@ export declare interface ChatDashboardBarChartConfig extends ChatDashboardChartC
     stacked?: boolean;
 }
 
-export declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig;
+export declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig | ChatDashboardScatterChartConfig;
 
 declare interface ChatDashboardChartConfigBase {
     showLegend?: boolean;
@@ -1267,7 +1470,7 @@ declare interface ChatDashboardChartConfigBase {
 export declare interface ChatDashboardChartItem extends ChatDashboardItemBase {
     type: "chart";
     chart: ChatDashboardChartConfig;
-    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation;
+    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation | ScatterComputation;
 }
 
 export declare interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
@@ -1454,6 +1657,23 @@ export declare interface ChatDashboardRadarChartConfig extends ChatDashboardChar
     showArea?: boolean;
 }
 
+export declare interface ChatDashboardScatterChartConfig {
+    type: "scatter";
+    pointSize?: number;
+    scaleAxes?: boolean;
+    showGrid?: boolean;
+    /** Only rendered with 2+ series, but still needed so a skeleton can reserve for it. */
+    showLegend?: boolean;
+    /** What the X measure is, e.g. "salary" — labels the x row in the tooltip */
+    xAxisName?: string;
+    /** What the Y measure is, e.g. "tenure" — labels the y row in the tooltip */
+    yAxisName?: string;
+    /** Formats the Y measure */
+    valueFormat?: FormatPreset;
+    /** Formats the X measure, which is a second measure rather than a category */
+    xValueFormat?: FormatPreset;
+}
+
 export declare const ChatSpinner: ForwardRefExoticComponent<ChatSpinnerProps & RefAttributes<HTMLDivElement>>;
 
 declare interface ChatSpinnerProps {
@@ -1462,10 +1682,16 @@ declare interface ChatSpinnerProps {
     style?: CSSProperties;
     /**
      * "default" → spins 2 rotations, pauses, repeats.
-     * "continuous" → 2 rotations forward, then 2 backward, no pause. Used for
-     * "writing"-style activity where the indicator should never rest.
+     * "continuous" → rotates forward at a constant rate, never pausing. Used
+     * for "writing"-style activity where the indicator should never rest.
      */
     variant?: "default" | "continuous";
+    /**
+     * When false, the spinner rests at its base orientation (the static One
+     * mark). A spin already in progress completes its current cycle before
+     * resting, so toggling mid-spin never jumps. Only affects "default".
+     */
+    playing?: boolean;
 }
 
 export declare type ChatThread = {
@@ -1473,6 +1699,13 @@ export declare type ChatThread = {
     title: string;
     createdAt: string;
     updatedAt: string;
+    /** Rendered before the title (e.g. a chart icon for Analytics chats). */
+    icon?: IconType;
+    /**
+     * Secondary label at the row's end, revealed on hover/focus like the date
+     * (e.g. "Analytics" for mode-bound chats).
+     */
+    trailingLabel?: string;
 };
 
 /**
@@ -1646,10 +1879,10 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
 };
 
 export declare interface DashboardFetchSpec {
-    fetch: Array<{
+    fetch: {
         toolId: string;
         args: Record<string, unknown>;
-    }>;
+    }[];
     query: string | null;
     columnLabels?: Record<string, string>;
 }
@@ -1754,7 +1987,11 @@ declare type DataListProps = {
 export declare type DateGroup = "today" | "yesterday" | "thisMonth" | "older";
 
 export declare const defaultTranslations: {
+    readonly common: {
+        readonly selectPlaceholder: "Select";
+    };
     readonly countries: {
+        ac: string;
         ad: string;
         ae: string;
         af: string;
@@ -1779,14 +2016,19 @@ export declare const defaultTranslations: {
         bh: string;
         bi: string;
         bj: string;
+        bl: string;
         bm: string;
+        bn: string;
         bo: string;
+        bq: string;
         br: string;
+        bs: string;
         bt: string;
         bw: string;
         by: string;
         bz: string;
         ca: string;
+        cc: string;
         cd: string;
         cf: string;
         cg: string;
@@ -1801,6 +2043,7 @@ export declare const defaultTranslations: {
         cu: string;
         cv: string;
         cw: string;
+        cx: string;
         cy: string;
         cz: string;
         de: string;
@@ -1812,6 +2055,7 @@ export declare const defaultTranslations: {
         ec: string;
         ee: string;
         eg: string;
+        eh: string;
         er: string;
         es: string;
         et: string;
@@ -1825,17 +2069,20 @@ export declare const defaultTranslations: {
         gb: string;
         gd: string;
         ge: string;
+        gf: string;
         gg: string;
         gh: string;
         gi: string;
         gl: string;
         gm: string;
         gn: string;
+        gp: string;
         gq: string;
         gr: string;
         gt: string;
         gu: string;
         gw: string;
+        gy: string;
         hk: string;
         hn: string;
         hr: string;
@@ -1856,6 +2103,140 @@ export declare const defaultTranslations: {
         jo: string;
         jp: string;
         ke: string;
+        kg: string;
+        kh: string;
+        ki: string;
+        km: string;
+        kn: string;
+        kp: string;
+        kr: string;
+        kw: string;
+        ky: string;
+        kz: string;
+        la: string;
+        lb: string;
+        lc: string;
+        li: string;
+        lk: string;
+        lr: string;
+        ls: string;
+        lt: string;
+        lu: string;
+        lv: string;
+        ly: string;
+        ma: string;
+        mc: string;
+        md: string;
+        me: string;
+        mf: string;
+        mg: string;
+        mh: string;
+        mk: string;
+        ml: string;
+        mm: string;
+        mn: string;
+        mo: string;
+        mp: string;
+        mq: string;
+        mr: string;
+        ms: string;
+        mt: string;
+        mu: string;
+        mv: string;
+        mw: string;
+        mx: string;
+        my: string;
+        mz: string;
+        na: string;
+        nc: string;
+        ne: string;
+        nf: string;
+        ng: string;
+        ni: string;
+        nl: string;
+        no: string;
+        np: string;
+        nr: string;
+        nu: string;
+        nz: string;
+        om: string;
+        pa: string;
+        pe: string;
+        pf: string;
+        pg: string;
+        ph: string;
+        pk: string;
+        pl: string;
+        pm: string;
+        pn: string;
+        pr: string;
+        ps: string;
+        pt: string;
+        pw: string;
+        py: string;
+        qa: string;
+        re: string;
+        ro: string;
+        rs: string;
+        ru: string;
+        rw: string;
+        sa: string;
+        sb: string;
+        sc: string;
+        sd: string;
+        se: string;
+        sg: string;
+        sh: string;
+        si: string;
+        sj: string;
+        sk: string;
+        sl: string;
+        sm: string;
+        sn: string;
+        so: string;
+        sr: string;
+        ss: string;
+        st: string;
+        sv: string;
+        sx: string;
+        sy: string;
+        sz: string;
+        ta: string;
+        tc: string;
+        td: string;
+        tg: string;
+        th: string;
+        tj: string;
+        tk: string;
+        tl: string;
+        tm: string;
+        tn: string;
+        to: string;
+        tr: string;
+        tt: string;
+        tv: string;
+        tw: string;
+        tz: string;
+        ua: string;
+        ug: string;
+        us: string;
+        uy: string;
+        uz: string;
+        va: string;
+        vc: string;
+        ve: string;
+        vg: string;
+        vi: string;
+        vn: string;
+        vu: string;
+        wf: string;
+        ws: string;
+        xk: string;
+        ye: string;
+        yt: string;
+        za: string;
+        zm: string;
+        zw: string;
     };
     readonly approvals: {
         readonly history: "Approval history";
@@ -1881,6 +2262,10 @@ export declare const defaultTranslations: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
             };
+        };
+        readonly sidePanel: {
+            readonly resize: "Resize side panel";
+            readonly width: "{{width}} pixels";
         };
         readonly previous: "Previous";
         readonly next: "Next";
@@ -1908,7 +2293,55 @@ export declare const defaultTranslations: {
         readonly position: "{{current}} of {{total}}";
         readonly viewDetail: "View detail";
         readonly hideDetail: "Hide detail";
+        readonly viewTranscription: "View transcription";
+        readonly hideTranscription: "Hide transcription";
+        readonly viewSummary: "View summary";
+        readonly hideSummary: "Hide summary";
         readonly details: "Recording details";
+        readonly summary: "Summary";
+        readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
+        readonly language: "Language";
+        readonly audio: "Audio";
+    };
+    readonly meetingCard: {
+        readonly today: "Today";
+        readonly yesterday: "Yesterday";
+        readonly tomorrow: "Tomorrow";
+        readonly inProgress: "In progress";
+        readonly inProgressTitle: "Call in progress";
+        readonly summarizing: "Summarizing";
+        readonly finished: "Finished";
+        readonly cancelled: "Cancelled";
+        readonly startingNow: "Starting now";
+        readonly startsIn: {
+            readonly one: "In {{count}} min";
+            readonly other: "In {{count}} mins";
+        };
+        readonly startedAgo: {
+            readonly one: "{{count}} min ago";
+            readonly other: "{{count}} mins ago";
+        };
+        readonly invited: {
+            readonly one: "{{count}} guest";
+            readonly other: "{{count}} guests";
+        };
+        readonly inside: {
+            readonly one: "{{count}} inside";
+            readonly other: "{{count}} inside";
+        };
+        readonly duration: {
+            readonly one: "{{count}} min";
+            readonly other: "{{count}} mins";
+        };
+        readonly attendees: "Attendees";
+        readonly join: "Join";
+        readonly summary: "Summary";
+    };
+    readonly coachmark: {
+        readonly next: "Next";
+        readonly done: "Got it";
     };
     readonly actions: {
         readonly add: "Add";
@@ -1921,6 +2354,7 @@ export declare const defaultTranslations: {
         readonly copy: "Copy";
         readonly paste: "Paste";
         readonly close: "Close";
+        readonly back: "Back";
         readonly collapse: "Collapse";
         readonly collapseItem: "Collapse {{title}}";
         readonly expand: "Expand";
@@ -2047,11 +2481,14 @@ export declare const defaultTranslations: {
             readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
+            readonly seeMoreChildren: "See more";
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
                 readonly addColumn: "Add column";
                 readonly removeColumn: "Remove column";
+                readonly lockColumn: "Lock column: {{label}}";
+                readonly unlockColumn: "Unlock column: {{label}}";
             };
         };
         readonly editableTable: {
@@ -2059,6 +2496,9 @@ export declare const defaultTranslations: {
                 readonly saveFailed: "Save failed";
             };
             readonly addRow: "Add row";
+            readonly removeRow: "Remove row";
+            readonly editRow: "Edit";
+            readonly reorderRow: "Drag to reorder";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -2096,6 +2536,8 @@ export declare const defaultTranslations: {
         readonly date: "Date";
         readonly custom: "Custom period";
         readonly selectDate: "Select Date";
+        readonly selectMonth: "Select month";
+        readonly selectYear: "Select year";
         readonly compareTo: "Compare to";
         readonly presets: {
             readonly last7Days: "Last 7 days";
@@ -2147,6 +2589,11 @@ export declare const defaultTranslations: {
                 readonly currentDate: "Today";
                 readonly label: "Range";
             };
+            readonly periods: {
+                readonly currentDate: "Current period";
+                readonly label: "Periods";
+                readonly empty: "No periods available";
+            };
         };
         readonly month: {
             readonly january: "January";
@@ -2184,6 +2631,13 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
+        readonly attribution: "Suggested by One";
+        readonly evidence: {
+            readonly show: "See {{name}}";
+            readonly hide: "Hide {{name}}";
+        };
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -2233,6 +2687,13 @@ export declare const defaultTranslations: {
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
         };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
+        };
         readonly reportCard: {
             readonly tableLabel: "Table";
             readonly openButton: "Open";
@@ -2252,6 +2713,7 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -2284,6 +2746,7 @@ export declare const defaultTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -2330,16 +2793,39 @@ export declare const defaultTranslations: {
         readonly closeSearch: "Close search";
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
+        readonly readOnly: "You can't send messages in this conversation";
+        readonly online: "Online";
         readonly muted: "Muted";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
+        readonly emojiPicker: {
+            readonly search: "Search emoji";
+            readonly frequentlyUsed: "Frequently used";
+            readonly noResults: "No emoji found";
+            readonly grid: "Emoji";
+            readonly categories: {
+                readonly people: "Smileys & people";
+                readonly nature: "Animals & nature";
+                readonly foods: "Food & drink";
+                readonly activity: "Activity";
+                readonly places: "Travel & places";
+                readonly objects: "Objects";
+                readonly symbols: "Symbols";
+                readonly flags: "Flags";
+            };
+        };
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
         readonly cancelRecording: "Cancel recording";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -2357,6 +2843,13 @@ export declare const defaultTranslations: {
         readonly twoTyping: "{{first}} and {{second}} are writing…";
         readonly severalTyping: "Several people are writing…";
         readonly deletedMessage: "Message deleted";
+        readonly location: "Location";
+        readonly voiceNote: "Voice note";
+        readonly sendVoiceNote: "Send voice note";
+        readonly sendingVoiceNote: "Sending voice note…";
+        readonly sending: "Sending…";
+        readonly notSent: "Not sent";
+        readonly retry: "Retry";
         readonly moreActions: "Message actions";
         readonly options: "Options";
         readonly pin: "Pin";
@@ -2368,6 +2861,7 @@ export declare const defaultTranslations: {
         readonly reply: "Reply";
         readonly react: "Add reaction";
         readonly download: "Download";
+        readonly downloadNamedFile: "Download {{name}}";
         readonly removeQuote: "Remove quote";
         readonly edit: "Edit";
         readonly editing: "Editing";
@@ -2380,6 +2874,11 @@ export declare const defaultTranslations: {
         readonly closePreview: "Close";
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
+        readonly openDocument: "Open document";
+        readonly openNamedDocument: "Open {{name}}";
+        readonly documentPreview: "Document preview";
+        readonly videoPlayerLabel: "Video player: {{name}}";
+        readonly loadingVideo: "Loading video: {{name}}";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -2395,14 +2894,84 @@ export declare const defaultTranslations: {
         };
         readonly scrollToBottom: "Scroll to bottom";
         readonly newMessages: "New messages";
+        readonly system: {
+            readonly memberAdded: {
+                readonly one: "{{members}} was added to the group";
+                readonly other: "{{members}} were added to the group";
+            };
+            readonly memberRemoved: {
+                readonly one: "{{members}} was removed from the group";
+                readonly other: "{{members}} were removed from the group";
+            };
+            readonly memberLeft: {
+                readonly one: "{{members}} left the group";
+                readonly other: "{{members}} left the group";
+            };
+            readonly membersWithLast: "{{names}} and {{last}}";
+            readonly membersWithMore: "{{names}} and {{count}} more";
+        };
         readonly unreadCount: {
             readonly one: "{{count}} unread";
             readonly other: "{{count}} unread";
+        };
+        readonly unreadChatsAbove: {
+            readonly one: "{{count}} unread chat above";
+            readonly other: "{{count}} unread chats above";
+        };
+        readonly unreadChatsBelow: {
+            readonly one: "{{count}} unread chat below";
+            readonly other: "{{count}} unread chats below";
         };
         readonly emptyConversation: "No messages yet";
         readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
+        readonly newPosts: "New posts";
+        readonly newPostsCount: {
+            readonly one: "{{count}} new post";
+            readonly other: "{{count}} new posts";
+        };
+        readonly unreadMentionCount: {
+            readonly one: "{{count}} unread, mentions you";
+            readonly other: "{{count}} unread, mentions you";
+        };
+        readonly post: {
+            readonly in: "in";
+            readonly comment: "Comment";
+            readonly views: {
+                readonly one: "{{count}} view";
+                readonly other: "{{count}} views";
+            };
+            readonly comments: {
+                readonly one: "{{count}} comment";
+                readonly other: "{{count}} comments";
+            };
+        };
+        readonly community: {
+            readonly readOnly: "You can't post in this community";
+            readonly writePost: "Write a post…";
+            readonly newPost: "New post";
+            readonly postTitle: "Title";
+            readonly postTitlePlaceholder: "Add a title";
+            readonly postBodyPlaceholder: "Share something with the community…";
+            readonly publish: "Publish";
+            readonly cancel: "Cancel";
+            readonly discardTitle: "Discard this post?";
+            readonly discardDescription: "What you've written won't be saved.";
+            readonly discard: "Discard";
+            readonly keepEditing: "Keep editing";
+            readonly publishError: "Couldn't publish this post";
+            readonly pinnedPost: "Pinned post";
+            readonly pinnedPosts: "Pinned";
+            readonly unpinPost: "Unpin post";
+            readonly goToPost: "Go to post";
+            readonly scheduledPosts: "Scheduled";
+            readonly scheduledEvent: "Event";
+            readonly draftPosts: "Drafts";
+            readonly draftUntitled: "Untitled post";
+            readonly draftSavedAt: "Saved {{when}}";
+            readonly shelfLabel: "Pinned, scheduled and draft posts";
+        };
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -2416,6 +2985,20 @@ export declare const defaultTranslations: {
             readonly title: "No data available";
             readonly description: "Try a different date or fewer filters";
         };
+        readonly windowedCategories: "Showing {{count}} of {{total}} categories";
+        readonly tooltip: {
+            readonly ofTotal: "of total";
+            readonly total: "total";
+            readonly target: "target";
+            readonly ofTarget: "of target";
+            readonly ofRange: "of range";
+            readonly fromPrevious: "from previous";
+            readonly fromStage: "from {{stage}}";
+        };
+    };
+    readonly progressSeries: {
+        readonly noData: "No data";
+        readonly canceled: "Canceled";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2429,6 +3012,37 @@ export declare const defaultTranslations: {
         readonly between: "It should be between {{min}} and {{max}}";
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
+    };
+    readonly phoneInput: {
+        readonly country: "Country";
+        readonly countryWithDialCode: "{{country}} {{dialCode}}";
+        readonly searchCountry: "Search country or dial code";
+        readonly noResults: "No country found";
+    };
+    readonly locationInput: {
+        readonly country: "Country";
+        readonly addressLine1: "Address line 1";
+        readonly addressLine2: "Address line 2";
+        readonly city: "City";
+        readonly state: "Region";
+        readonly postalCode: "Postal code";
+        readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
+        readonly searchCountry: "Search country";
+        readonly noCountryResults: "No country found";
+        readonly noResults: "No addresses found";
+        readonly searchHint: "Type an address to search";
+        readonly noResultsHelp: "Can't find an address?";
+        readonly enterManually: "Enter it manually";
+        readonly addressLine1Placeholder: "Enter a street and number";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly postalCodePlaceholder: "e.g., 08001";
+        readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -2601,6 +3215,19 @@ export declare const defaultTranslations: {
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
             readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
+        readonly entitiesList: {
+            readonly add: "Add";
+            readonly edit: "Edit";
+            readonly remove: "Remove";
+            readonly view: "View";
+            readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
+            readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
+            readonly addBlockedMaxHint: "You've reached the maximum number of items";
+            readonly removeConfirmTitle: "Remove item?";
+            readonly removeConfirmMessage: "This item will be removed. This action cannot be undone.";
+            readonly removeError: "Couldn't remove the item. Please try again.";
+            readonly removeErrorTitle: "Remove failed";
+        };
         readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
@@ -2630,6 +3257,13 @@ export declare const defaultTranslations: {
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
             };
+            readonly phone: {
+                readonly invalid: "Enter a valid phone number";
+            };
+            readonly location: {
+                readonly empty: "Enter an address";
+                readonly unresolved: "Select an address from the suggestions";
+            };
         };
     };
     readonly graph: {
@@ -2643,11 +3277,41 @@ export declare const defaultTranslations: {
             readonly navigation: "Graph navigation";
         };
     };
+    readonly map: {
+        readonly region: "Map";
+        readonly navigation: "Map navigation";
+        readonly listLabel: "Locations";
+        readonly location: "location";
+        readonly locations: "locations";
+        readonly unnamedLocation: "Location";
+        readonly cluster: "Cluster of {{count}} locations";
+        readonly skipToList: "Skip to location list";
+        readonly loadError: "Couldn't load the map.";
+        readonly retry: "Retry";
+        readonly currentLocation: "Your location";
+        readonly controls: {
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly fit: "Fit to markers";
+            readonly locate: "My location";
+        };
+    };
     readonly wizard: {
         readonly previous: "Previous";
         readonly next: "Continue";
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
+    };
+    readonly widgets: {
+        readonly whatThisMeans: "What this info means?";
+        readonly gotIt: "Got it";
+        readonly editParams: "Edit params";
+        readonly editParamsTitle: "Edit widget params";
+        readonly removeWidget: "Remove widget";
+        readonly addWidget: "Add widget";
+        readonly configureWidget: "Configure {{title}}";
+        readonly recommended: "Recommended";
+        readonly cannotMoveHere: "You can't move a widget here — {{title}} is locked.";
     };
     readonly pdfViewer: {
         readonly toolbar: "Document toolbar";
@@ -2662,6 +3326,34 @@ export declare const defaultTranslations: {
         readonly print: "Print";
         readonly download: "Download";
         readonly loading: "Loading document";
+        readonly previewFailed: "Preview isn't available for this file";
+        readonly showingFirstRows: {
+            readonly one: "Showing the first row";
+            readonly other: "Showing the first {{count}} rows";
+        };
+    };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly noAudio: "No audio";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
+        readonly captions: "Captions";
+        readonly audioDescription: "Audio description";
+        readonly audio: "Audio";
+        readonly subtitles: "Subtitles";
+        readonly settings: "Settings";
+        readonly off: "Off";
     };
 };
 
@@ -2727,17 +3419,31 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
+    /**
+     * Tooltip shown on hover while the item is `disabled` — use it to explain why
+     * the action is unavailable. Ignored when the item is not disabled. The
+     * tooltip trigger re-enables pointer events, so it works despite the disabled
+     * item's `pointer-events: none`.
+     */
+    disabledTooltip?: string;
 };
 
 declare type DropdownItemSeparator = {
     type: "separator";
 };
 
-export declare const DropOverlay: ({ visible, onFilesDropped }: DropOverlayProps) => JSX_2.Element;
+export declare const DropOverlay: ({ visible, onFilesDropped, mode, }: DropOverlayProps) => JSX_2.Element;
 
 declare interface DropOverlayProps {
     visible: boolean;
-    onFilesDropped: (files: File[]) => void;
+    /**
+     * Handles a native file drop. Omit for `mode="discuss"`, where the drag is a
+     * pointer gesture and carries no `dataTransfer`.
+     */
+    onFilesDropped?: (files: File[]) => void;
+    /** Which drop the overlay is inviting. */
+    mode?: "files" | "discuss";
 }
 
 /**
@@ -2808,7 +3514,7 @@ export declare type ExpenseProfile = {
     status?: string;
 };
 
-export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+export declare const F0ActionItem: ({ title, suffix, status, inGroup, }: F0ActionItemProps) => JSX_2.Element;
 
 /**
  * Props for the F0ActionItem component
@@ -2818,6 +3524,14 @@ export declare interface F0ActionItemProps {
      * The title text displayed next to the status icon
      */
     title?: string;
+    /**
+     * Rendered inline after the title — used for the elapsed-time counter.
+     *
+     * A node rather than a string so that whatever ticks inside it owns its own
+     * state: passing a composed label would re-render this item, and everything
+     * above it, on every tick.
+     */
+    suffix?: ReactNode;
     /**
      * Current status of the action item
      */
@@ -2831,7 +3545,7 @@ export declare interface F0ActionItemProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
+export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, overlay: overlayProp, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
  * The AI chat credits / settings popover button, on its own. Use it to surface
@@ -2850,10 +3564,22 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - with-history: title acts as a thread selector (clickable) — the host
  *   wires `onOpenHistory` to mount its own history dialog.
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
+ * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
- * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ * Decoupled from CopilotKit, and prop-driven apart from one read: whether the
+ * panel is currently covering the frame, which decides if expanding means
+ * anything. Only the provider knows that, and it answers safely when absent.
  */
-export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, }: F0AiChatHeaderProps) => JSX_2.Element;
+export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
+
+export declare interface F0AiChatHeaderAction {
+    /** Stable identifier used as the React key. */
+    id: string;
+    /** Already-localized accessible label and tooltip. */
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+}
 
 export declare type F0AiChatHeaderProps = {
     /**
@@ -2888,9 +3614,9 @@ export declare type F0AiChatHeaderProps = {
     /** Legacy variant gate: only renders the "new chat" button when true. */
     hasMessages?: boolean;
     /**
-     * Minimal header: render only the expand + close controls (no title, new
-     * chat or credits popover). Use when a sidebar owns the chat navigation and
-     * the credits/settings popover (see `F0AiChatCreditsButton`).
+     * Minimal header: render only header actions plus the expand and close controls
+     * (no title, new chat or credits popover). Use when a sidebar owns the chat
+     * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
      */
     compact?: boolean;
     /** Credits configuration. When present, renders the credits popover button. */
@@ -2901,6 +3627,11 @@ export declare type F0AiChatHeaderProps = {
      * with `credits`). Hosts opt in per-employee.
      */
     employeeCredits?: AiChatEmployeeCredits;
+    /**
+     * Additional actions rendered immediately before the fullscreen and close
+     * controls. F0 owns their presentation so they match the built-in actions.
+     */
+    actions?: F0AiChatHeaderAction[];
 };
 
 /**
@@ -2949,12 +3680,17 @@ export declare interface F0AiChatProps {
     messages?: ReactNode;
     /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
     input?: ReactNode;
+    /**
+     * Host-provided content rendered above the complete chat surface. F0
+     * supplies the scoped backdrop and makes the chat beneath it inert.
+     */
+    overlay?: ReactNode;
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, chatOverlay, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -2965,7 +3701,7 @@ export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHea
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, usageLimits, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenSuggestionsCollapsedByDefault, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -3004,6 +3740,13 @@ export declare type F0AiChatTextAreaProps = {
     /** File attachment configuration. When omitted, attachments are disabled. */
     fileAttachments?: AiChatFileAttachmentConfig;
     /**
+     * Host-owned compact controls rendered after the attachment action in the
+     * normal action row. Controls render inside the chat form, so buttons must
+     * use `type="button"` unless they intentionally submit it. Hidden while the
+     * composer is clarifying or recording.
+     */
+    toolbarStart?: ReactNode;
+    /**
      * Voice dictation. When provided, a microphone button is shown: recorded
      * audio is transcribed and the transcript fills the textarea (the user
      * reviews and sends it manually). When omitted, the microphone is hidden.
@@ -3022,6 +3765,8 @@ export declare type F0AiChatTextAreaProps = {
      * the welcome screen of the fullscreen layout to give the footer room.
      */
     disclaimer?: AiChatDisclaimer;
+    /** Usage ring at the right end of the disclaimer row; the text then aligns left. */
+    usageLimits?: AiChatTextAreaUsageLimits;
     /**
      * Optional footer (e.g. powered-by, legal copy) rendered below the
      * textarea on the welcome screen.
@@ -3046,6 +3791,72 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
+     * Where the welcome suggestions row sits relative to the composer.
+     *
+     * - `"above"` (the default) — its own block over the field, the arrangement
+     *   every consumer has had: the row stands on the page, the field below it is
+     *   a plain composer, and its popover opens upward into the welcome screen's
+     *   empty space.
+     *
+     * - `"inside"` — the row moves INTO the field, at its foot, so the field's own
+     *   border and AI focus highlight enclose it and the composer reads as a
+     *   single bar about two lines tall. Its popover opens downward, because up is
+     *   now the text you are about to type.
+     *
+     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. The chips do not get
+     * a band of their own: they take the middle of the ACTION row, between the
+     * attachment/host controls and the dictation · send pair, and One's mark goes
+     * in front of the text. That is what keeps the field two bands tall — text,
+     * then one row of controls — instead of three. Because the chips share that
+     * line, they scroll sideways rather than wrapping, with the overflowing ends
+     * faded: ten groups cost the same height as three.
+     *
+     * THE SHAPE FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
+     * themselves are welcome-screen-only as they always were, but a composer that
+     * dropped One's mark the moment the first message landed would change shape
+     * under the reader mid-conversation. `"inside"` therefore keeps the bar for the
+     * whole thread; after the welcome screen it is simply a bar with no chips in
+     * it.
+     *
+     * @default "above"
+     */
+    welcomeScreenSuggestionsPlacement?: "above" | "inside";
+    /**
+     * Start closed, and open when the reader focuses the input — with a motion
+     * reveal, the row growing into place.
+     *
+     * For hosts where the composer is not the thing the reader came for — a Home
+     * hero, say — so the bar sits quiet until it is addressed, and the starter
+     * prompts arrive at the moment they are useful.
+     *
+     * ⚠️ WITH `"inside"` THIS COLLAPSES THE WHOLE CONTROL ROW, not just the chips:
+     * the field becomes ONE LINE — One's mark, the text, then dictation and send
+     * trailing it at `sm` — and the chips, attachment and host controls arrive with
+     * the row on focus. A row emptied of its chips would still be 56px of padding
+     * around two buttons, which is not a quiet bar; it is the same two-band field
+     * with a hole in it. Send comes along because a bar you cannot send from is not
+     * a composer, and dictation because talking is a way to start a prompt without
+     * typing one. With the row `"above"`, only that row collapses — the field below
+     * it is a plain composer and does not change shape.
+     *
+     * FOCUS IS TRACKED ON THE WHOLE COMPOSER, not on the textarea: it closes when
+     * focus leaves the field AND everything in it, including the suggestion panel
+     * (which Radix portals outside the form). Closing on the textarea's own blur
+     * would close the row the moment a chip took focus, which is every way of
+     * picking one. Three things hold it open regardless of focus: anything already
+     * typed or attached (a half-written prompt with no visible way to send it would
+     * be a trap — and a host that forwards a dropped file can put one there without
+     * the textarea ever being focused), and a recording in flight (its cancel ·
+     * confirm pair lives in the row).
+     *
+     * ⚠️ It also suppresses the composer's own autofocus-on-mount, which would
+     * otherwise open everything before the reader had touched anything and make
+     * this prop a no-op. A collapsed composer starts unfocused.
+     *
+     * @default false
+     */
+    welcomeScreenSuggestionsCollapsedByDefault?: boolean;
+    /**
      * Cards rendered as a grid below the composer on the fullscreen welcome
      * screen. Each card carries its own `onClick`; the host decides the behavior.
      *
@@ -3054,6 +3865,25 @@ export declare type F0AiChatTextAreaProps = {
      * dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
+     * The composer's own inset against whatever contains it.
+     *
+     * - `"default"` — the gutter the chat layouts expect (16px sides, 8px top,
+     *   12px bottom). It is what keeps the field off the chat window's edges and
+     *   leaves room for the focus glow, which bleeds a few pixels outside the
+     *   field's border box.
+     *
+     * - `"none"` — no inset, for hosts that place the composer inside a container
+     *   that already owns the spacing (a landing/home hero, a card). The host then
+     *   owns BOTH sides of that bargain: give the composer some room of your own,
+     *   and don't clip overflow around it, or the focus glow gets cut at the edge.
+     *
+     * Only the outer inset changes; the gap between the composer and the blocks
+     * below it (suggestions, cards, footer, disclaimer) is unaffected.
+     *
+     * @default "default"
+     */
+    padding?: "default" | "none";
     /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
@@ -3077,6 +3907,25 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     context: PendingContext | null;
     quote: PendingQuote | null;
 };
+
+/**
+ * Headless usage-limits popover with its ring trigger. `F0AiChatTextArea`
+ * renders it from its `usageLimits` prop.
+ */
+export declare const F0AiChatUsageLimitsButton: ({ usage, error, onOpenChange, trigger, side, }: F0AiChatUsageLimitsButtonProps) => JSX_2.Element;
+
+export declare interface F0AiChatUsageLimitsButtonProps {
+    /** `null` while loading: empty ring, skeleton in the popover. */
+    usage: AiChatUsageLimits | null;
+    /** Shows an error line instead of the rows. */
+    error?: boolean;
+    /** Hosts refetch on open. */
+    onOpenChange?: (open: boolean) => void;
+    /** Custom popover trigger (asChild). Defaults to the usage ring button. */
+    trigger?: ReactNode;
+    /** `"top"` suits the composer row; use `"bottom"` from a header. */
+    side?: UsageLimitsPopoverSide;
+}
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
@@ -3174,6 +4023,14 @@ export declare type F0AiMessagesContainerProps = {
     /** Welcome phrase shown centered when the chat is empty. Falls back to
      *  `translations.ai.defaultInitialMessage` if omitted. */
     initialMessage?: string | string[];
+    /** Static line above the welcome phrase, same size but secondary color
+     *  (e.g. "Analytics mode:"). */
+    initialMessageCaption?: string;
+    /** Smaller secondary line below the welcome phrase. */
+    initialMessageSubtitle?: string;
+    /** Optional call-to-action pill rendered above the welcome phrase (e.g. a
+     *  "How to use One" shortcut). Only shown on the empty welcome screen. */
+    initialMessageCta?: WelcomeScreenCta;
     /** Called when the user clicks the welcome phrase (used by F0AiChat to open
      *  the pong easter egg). When omitted the phrase is non-interactive. */
     onWelcomeClick?: () => void;
@@ -3436,8 +4293,16 @@ declare type F0AvatarListProps = {
      */
     noTooltip?: boolean;
     /**
-     * The maximum number of avatars to display.
-     * @default 3
+     * The exact number of avatars to keep visible; the rest collapse into the
+     * `+N` counter. Not a soft cap — a provided `max` is forwarded as
+     * `OverflowList`'s `min` as well, so exactly this many avatars render even in
+     * a container too narrow to fit them (see `F0AvatarList.tsx`).
+     *
+     * There is no numeric default. Left unset, the visible count is
+     * container-driven: `OverflowList` measures the available width and shows as
+     * many avatars as fit, collapsing the remainder into the counter. So passing
+     * a number opts into a fixed footprint, and omitting it opts into filling
+     * the row.
      */
     max?: number;
     /**
@@ -3445,18 +4310,30 @@ declare type F0AvatarListProps = {
      */
     remainingCount?: number;
     /**
-     * The layout of the avatar list.
-     * - "fill" - Avatars will expand to fill the available width, with overflow items shown in a counter
-     * - "compact" - Avatars will be stacked tightly together up to the max limit, with remaining shown in counter
-     * @default "compact"
+     * @deprecated Never implemented — `F0AvatarList` has always ignored this
+     * prop — and not needed, because `max` already selects between the two
+     * layouts it described. Omit `max` for what this called `"fill"`:
+     * `OverflowList` measures the row and shows as many avatars as fit. Pass a
+     * `max` for `"compact"`: it doubles as `min`, so exactly that many stay
+     * visible. A separate switch could only contradict `max` — `layout="fill"`
+     * with `max={3}` has no coherent meaning — which is why this is going rather
+     * than getting an implementation.
+     * @removeIn 7.0.0
+     * @migration Remove the prop. If you were passing `layout="compact"` to cap
+     * the row, add `max={n}`: `"compact"` never capped anything.
      */
     layout?: "fill" | "compact";
     /**
-     * Controls the scroll behavior of the `+N` overflow popover that lists
-     * collapsed avatars (including their `tooltipDescription` entries).
-     * - `"vertical"` (default): caps the popover height and scrolls vertically.
-     * - `"none"`: lets the popover grow to fit all entries.
-     * @default "vertical"
+     * @deprecated No longer has any effect. The `+N` popover now always caps at
+     * the available viewport height and scrolls, and that scrolling is reachable
+     * by keyboard — neither of the old values is worth selecting. `"vertical"`
+     * used to cap and scroll inside a hover card, where Radix strips every tab
+     * stop on each render, so no keyboard user could operate the scroll (axe
+     * `scrollable-region-focusable`, WCAG 2.1.1); `"none"` avoided that by
+     * letting the card grow without limit, off the screen for a large cluster.
+     * @removeIn 5.0
+     * @migration Remove the prop. The current behaviour is what `"vertical"`
+     * always intended, minus the accessibility defect.
      */
     tooltipScroll?: "vertical" | "none";
 } & F0AvatarListPropsAvatars;
@@ -3502,8 +4379,20 @@ declare type F0AvatarPersonProps = {
     badge?: AvatarBadge;
     /**
      * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     *
+     * Mutually exclusive with `pending`: they represent opposite ends of the
+     * employee lifecycle. If both are set, `deactivated` takes precedence.
      */
     deactivated?: boolean;
+    /**
+     * Whether the position is still to be filled — a person who is planned but
+     * not hired yet (e.g. an open role in headcount planning). If true, the
+     * avatar will display a search-person icon instead of the person's name or
+     * picture.
+     *
+     * Mutually exclusive with `deactivated`.
+     */
+    pending?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare type F0AvatarTeamProps = {
@@ -3530,7 +4419,7 @@ declare type F0AvatarTeamProps = {
  * Shows an avatar, title, optional description, and a configurable action button.
  *
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
- * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * The AI Cocreation flow already renders these cards with `F0CardHorizontal` directly
  * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
  * wrapper). Don't add new usages; migrate the remaining one
  * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
@@ -3548,7 +4437,7 @@ export declare namespace F0CanvasCard {
  * @removeIn 5.0.0
  */
 export declare type F0CanvasCardProps = {
-    /** Avatar to display: a module icon or a file-type badge */
+    /** Avatar to display: a module icon, a file-type badge, or a plain icon */
     avatar?: CanvasCardAvatar;
     /** Primary title */
     title: string;
@@ -3742,7 +4631,7 @@ declare const f0FileItemSizes: readonly ["md", "lg"];
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
  * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
  * `rejectAction` for the pending state, `status` for the resolved outcome, and
- * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * `secondaryActions` for a single CTA. The AI Cocreation flow no longer uses this component —
  * don't add new usages.
  * @removeIn 5.0.0
  */
@@ -3916,7 +4805,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T]>;
+    tags: TagTypeMapping[T][];
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -3947,6 +4836,11 @@ declare type F0TagRawProps = {
      * Extra classes merged onto the tag (e.g. to give it a background).
      */
     className?: string;
+    /**
+     * The size of the tag
+     * @default "md"
+     */
+    size?: "md" | "sm";
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -4213,14 +5107,14 @@ declare type Message = {
     id?: string;
     role?: string;
     content?: unknown;
-    toolCalls?: Array<{
+    toolCalls?: {
         id: string;
         type?: string;
         function?: {
             name: string;
             arguments: string;
         };
-    }>;
+    }[];
     generativeUI?: () => unknown;
     rawData?: unknown;
     /**
@@ -4457,6 +5351,22 @@ export declare type OneIconSize = (typeof oneIconSizes)[number];
 
 export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
+declare type PanelBounds = {
+    min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
+    max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
+    /** The frame is too narrow to split: the panel should cover it instead. */
+    shouldOverlay: boolean;
+};
+
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
@@ -4547,11 +5457,11 @@ declare type Props_2 = {
 export declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
-    indicators: Array<{
+    indicators: {
         column: string;
         label: string;
         max?: number;
-    }>;
+    }[];
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -4596,6 +5506,14 @@ export declare type RenderableTurn = {
          * the last item is `executing` while the rest are `completed`.
          */
         isWriting?: boolean;
+        /**
+         * Epoch ms for when the turn actually started thinking, if the host knows.
+         *
+         * Optional anchor, not a requirement: turns arrive with no timestamps, so
+         * by default the elapsed counter starts when F0 first saw the signal.
+         * Supplying this makes it survive a reload mid-stream.
+         */
+        startedAt?: number;
     };
     /** Messages rendered after the thinking section (assistant replies). */
     assistantMessages: Message[];
@@ -4656,13 +5574,28 @@ export declare interface ResolvedStepAnswer {
     cancelled?: boolean;
 }
 
+/**
+ * Both axes are measures, so there is no aggregation: a scatter plots one
+ * point per row rather than grouping rows into categories. `label` names the
+ * column identifying each point, and `series` the optional column that splits
+ * the points into colour groups.
+ */
+export declare interface ScatterComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    label?: string;
+    series?: string;
+    limit?: number;
+}
+
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
- * A single piece of content hosted in the side panel — the same resizable +
- * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
- * the `id` keys the content so switching conversations unmounts the previous
- * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ * A single piece of content hosted in the side panel — the resizable,
+ * fullscreen-able space beside the page. Only one is mounted at a time: the
+ * `id` keys the content, so switching views unmounts the previous one and
+ * mounts the next.
  */
 export declare type SidePanelContent = {
     id: string;
@@ -4739,6 +5672,12 @@ export declare type ThinkingProps = {
      * every item renders as `completed` regardless of `inProgress`.
      */
     isWriting?: boolean;
+    /**
+     * When the turn started thinking, from `useThinkingClock`. Drives the
+     * elapsed counter on whichever step is executing. `null` means no clock is
+     * running, and nothing is rendered.
+     */
+    startedAt?: number | null;
 };
 
 export declare interface ThreadActionHandlers {
@@ -4822,11 +5761,18 @@ export declare type UploadedFile = {
     mimetype: string;
 };
 
+export declare type UsageLimitsPopoverSide = (typeof usageLimitsPopoverSides)[number];
+
+export declare const usageLimitsPopoverSides: readonly ["top", "bottom"];
+
 /**
- * Read the AiChat context. Returns an inert fallback when no provider
- * is mounted — that case is intentional in `ApplicationFrame`, which
- * renders chat-aware components in both the AI-enabled tree and the
- * promotion-chat tree.
+ * Read the AiChat context.
+ *
+ * Composed from two providers: the chat's own state, and the side panel it
+ * lives in. Returns an inert fallback for the chat half when no provider is
+ * mounted — that case is intentional in `ApplicationFrame`, which renders
+ * chat-aware components in both the AI-enabled tree and the promotion-chat
+ * tree.
  */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
@@ -4876,7 +5822,7 @@ declare type UseChatHistoryReturn = {
     threads: ChatThread[];
     isLoading: boolean;
     error: string | null;
-    refetch: () => void;
+    refetch: () => Promise<void>;
     pinnedIds: Set<string>;
     /**
      * Ids of threads with an in-flight pin/unpin/delete request. Use it to show a
@@ -4970,6 +5916,17 @@ declare interface WeekdaysProps {
 }
 
 /**
+ * Optional call-to-action rendered as a pill above the welcome phrase (e.g. a
+ * "How to use One" shortcut). The host owns `onClick`; f0 owns the pill styling
+ * so it stays consistent with the rest of the welcome screen.
+ */
+export declare type WelcomeScreenCta = {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+};
+
+/**
  * A welcome-screen group rendered as an outline button in the welcome row.
  * Clicking the group opens a popover listing its `items`. The number of groups
  * is not capped yet (unlike welcome cards, which top out at 4).
@@ -5039,17 +5996,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
@@ -5083,8 +6040,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -5092,8 +6050,19 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -5110,6 +6079,15 @@ declare module "@tiptap/core" {
 }
 
 
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
+}
+
+
 declare namespace F0GraphNodeWrapperInner {
     var displayName: string;
 }
@@ -5121,5 +6099,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }

@@ -1,4 +1,5 @@
 const e = {
+  ac: "Ascension Island",
   ad: "Andorra",
   ae: "United Arab Emirates",
   af: "Afghanistan",
@@ -23,14 +24,19 @@ const e = {
   bh: "Bahrain",
   bi: "Burundi",
   bj: "Benin",
+  bl: "St. Barthélemy",
   bm: "Bermuda",
+  bn: "Brunei",
   bo: "Bolivia",
+  bq: "Caribbean Netherlands",
   br: "Brazil",
+  bs: "Bahamas",
   bt: "Bhutan",
   bw: "Botswana",
   by: "Belarus",
   bz: "Belize",
   ca: "Canada",
+  cc: "Cocos (Keeling) Islands",
   cd: "Democratic Republic of the Congo",
   cf: "Central African Republic",
   cg: "Republic of the Congo",
@@ -45,6 +51,7 @@ const e = {
   cu: "Cuba",
   cv: "Cape Verde",
   cw: "Curaçao",
+  cx: "Christmas Island",
   cy: "Cyprus",
   cz: "Czech Republic",
   de: "Germany",
@@ -56,6 +63,7 @@ const e = {
   ec: "Ecuador",
   ee: "Estonia",
   eg: "Egypt",
+  eh: "Western Sahara",
   er: "Eritrea",
   es: "Spain",
   et: "Ethiopia",
@@ -69,17 +77,20 @@ const e = {
   gb: "United Kingdom",
   gd: "Grenada",
   ge: "Georgia",
+  gf: "French Guiana",
   gg: "Guernsey",
   gh: "Ghana",
   gi: "Gibraltar",
   gl: "Greenland",
   gm: "Gambia",
   gn: "Guinea",
+  gp: "Guadeloupe",
   gq: "Equatorial Guinea",
   gr: "Greece",
   gt: "Guatemala",
   gu: "Guam",
   gw: "Guinea-Bissau",
+  gy: "Guyana",
   hk: "Hong Kong",
   hn: "Honduras",
   hr: "Croatia",
@@ -99,8 +110,145 @@ const e = {
   jm: "Jamaica",
   jo: "Jordan",
   jp: "Japan",
-  ke: "Kenya"
+  ke: "Kenya",
+  kg: "Kyrgyzstan",
+  kh: "Cambodia",
+  ki: "Kiribati",
+  km: "Comoros",
+  kn: "St. Kitts & Nevis",
+  kp: "North Korea",
+  kr: "South Korea",
+  kw: "Kuwait",
+  ky: "Cayman Islands",
+  kz: "Kazakhstan",
+  la: "Laos",
+  lb: "Lebanon",
+  lc: "St. Lucia",
+  li: "Liechtenstein",
+  lk: "Sri Lanka",
+  lr: "Liberia",
+  ls: "Lesotho",
+  lt: "Lithuania",
+  lu: "Luxembourg",
+  lv: "Latvia",
+  ly: "Libya",
+  ma: "Morocco",
+  mc: "Monaco",
+  md: "Moldova",
+  me: "Montenegro",
+  mf: "St. Martin",
+  mg: "Madagascar",
+  mh: "Marshall Islands",
+  mk: "North Macedonia",
+  ml: "Mali",
+  mm: "Myanmar (Burma)",
+  mn: "Mongolia",
+  mo: "Macao SAR China",
+  mp: "Northern Mariana Islands",
+  mq: "Martinique",
+  mr: "Mauritania",
+  ms: "Montserrat",
+  mt: "Malta",
+  mu: "Mauritius",
+  mv: "Maldives",
+  mw: "Malawi",
+  mx: "Mexico",
+  my: "Malaysia",
+  mz: "Mozambique",
+  na: "Namibia",
+  nc: "New Caledonia",
+  ne: "Niger",
+  nf: "Norfolk Island",
+  ng: "Nigeria",
+  ni: "Nicaragua",
+  nl: "Netherlands",
+  no: "Norway",
+  np: "Nepal",
+  nr: "Nauru",
+  nu: "Niue",
+  nz: "New Zealand",
+  om: "Oman",
+  pa: "Panama",
+  pe: "Peru",
+  pf: "French Polynesia",
+  pg: "Papua New Guinea",
+  ph: "Philippines",
+  pk: "Pakistan",
+  pl: "Poland",
+  pm: "St. Pierre & Miquelon",
+  pn: "Pitcairn Islands",
+  pr: "Puerto Rico",
+  ps: "Palestinian Territories",
+  pt: "Portugal",
+  pw: "Palau",
+  py: "Paraguay",
+  qa: "Qatar",
+  re: "Réunion",
+  ro: "Romania",
+  rs: "Serbia",
+  ru: "Russia",
+  rw: "Rwanda",
+  sa: "Saudi Arabia",
+  sb: "Solomon Islands",
+  sc: "Seychelles",
+  sd: "Sudan",
+  se: "Sweden",
+  sg: "Singapore",
+  sh: "St. Helena",
+  si: "Slovenia",
+  sj: "Svalbard & Jan Mayen",
+  sk: "Slovakia",
+  sl: "Sierra Leone",
+  sm: "San Marino",
+  sn: "Senegal",
+  so: "Somalia",
+  sr: "Suriname",
+  ss: "South Sudan",
+  st: "São Tomé & Príncipe",
+  sv: "El Salvador",
+  sx: "Sint Maarten",
+  sy: "Syria",
+  sz: "Eswatini",
+  ta: "Tristan da Cunha",
+  tc: "Turks & Caicos Islands",
+  td: "Chad",
+  tg: "Togo",
+  th: "Thailand",
+  tj: "Tajikistan",
+  tk: "Tokelau",
+  tl: "Timor-Leste",
+  tm: "Turkmenistan",
+  tn: "Tunisia",
+  to: "Tonga",
+  tr: "Türkiye",
+  tt: "Trinidad & Tobago",
+  tv: "Tuvalu",
+  tw: "Taiwan",
+  tz: "Tanzania",
+  ua: "Ukraine",
+  ug: "Uganda",
+  us: "United States",
+  uy: "Uruguay",
+  uz: "Uzbekistan",
+  va: "Vatican City",
+  vc: "St. Vincent & Grenadines",
+  ve: "Venezuela",
+  vg: "British Virgin Islands",
+  vi: "U.S. Virgin Islands",
+  vn: "Vietnam",
+  vu: "Vanuatu",
+  wf: "Wallis & Futuna",
+  ws: "Samoa",
+  xk: "Kosovo",
+  ye: "Yemen",
+  yt: "Mayotte",
+  za: "South Africa",
+  zm: "Zambia",
+  zw: "Zimbabwe"
 }, t = {
+  common: {
+    selectPlaceholder: "Select"
+  },
   countries: e,
   approvals: {
     history: "Approval history",
@@ -126,6 +274,10 @@ const e = {
         label: "Select a company",
         placeholder: "Select a company"
       }
+    },
+    sidePanel: {
+      resize: "Resize side panel",
+      width: "{{width}} pixels"
     },
     previous: "Previous",
     next: "Next"
@@ -153,7 +305,55 @@ const e = {
     position: "{{current}} of {{total}}",
     viewDetail: "View detail",
     hideDetail: "Hide detail",
-    details: "Recording details"
+    viewTranscription: "View transcription",
+    hideTranscription: "Hide transcription",
+    viewSummary: "View summary",
+    hideSummary: "Hide summary",
+    details: "Recording details",
+    summary: "Summary",
+    transcription: "Transcription",
+    jumpTo: "Jump to {{time}}",
+    transcriptHint: "Select a line to move the recording to that moment",
+    language: "Language",
+    audio: "Audio"
+  },
+  meetingCard: {
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    inProgress: "In progress",
+    inProgressTitle: "Call in progress",
+    summarizing: "Summarizing",
+    finished: "Finished",
+    cancelled: "Cancelled",
+    startingNow: "Starting now",
+    startsIn: {
+      one: "In {{count}} min",
+      other: "In {{count}} mins"
+    },
+    startedAgo: {
+      one: "{{count}} min ago",
+      other: "{{count}} mins ago"
+    },
+    invited: {
+      one: "{{count}} guest",
+      other: "{{count}} guests"
+    },
+    inside: {
+      one: "{{count}} inside",
+      other: "{{count}} inside"
+    },
+    duration: {
+      one: "{{count}} min",
+      other: "{{count}} mins"
+    },
+    attendees: "Attendees",
+    join: "Join",
+    summary: "Summary"
+  },
+  coachmark: {
+    next: "Next",
+    done: "Got it"
   },
   actions: {
     add: "Add",
@@ -166,6 +366,7 @@ const e = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -292,18 +493,24 @@ const e = {
       viewSelectorLabel: "Select view"
     },
     table: {
+      seeMoreChildren: "See more",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
         addColumn: "Add column",
-        removeColumn: "Remove column"
+        removeColumn: "Remove column",
+        lockColumn: "Lock column: {{label}}",
+        unlockColumn: "Unlock column: {{label}}"
       }
     },
     editableTable: {
       errors: {
         saveFailed: "Save failed"
       },
-      addRow: "Add row"
+      addRow: "Add row",
+      removeRow: "Remove row",
+      editRow: "Edit",
+      reorderRow: "Drag to reorder"
     },
     itemsCount: "items",
     emptyStates: {
@@ -341,6 +548,8 @@ const e = {
     date: "Date",
     custom: "Custom period",
     selectDate: "Select Date",
+    selectMonth: "Select month",
+    selectYear: "Select year",
     compareTo: "Compare to",
     presets: {
       last7Days: "Last 7 days",
@@ -391,6 +600,11 @@ const e = {
       range: {
         currentDate: "Today",
         label: "Range"
+      },
+      periods: {
+        currentDate: "Current period",
+        label: "Periods",
+        empty: "No periods available"
       }
     },
     month: {
@@ -429,6 +643,13 @@ const e = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
+    attribution: "Suggested by One",
+    evidence: {
+      show: "See {{name}}",
+      hide: "Hide {{name}}"
+    },
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -478,6 +699,13 @@ const e = {
       upgradePlan: "Upgrade",
       needMoreCredits: "Need more credits?"
     },
+    usageLimits: {
+      title: "Personal allowance",
+      used: "{{percentage}}% used",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
+      error: "Could not load usage"
+    },
     reportCard: {
       tableLabel: "Table",
       openButton: "Open"
@@ -497,6 +725,7 @@ const e = {
       exporting: "Exporting…"
     },
     dashboardItem: {
+      askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",
@@ -529,6 +758,7 @@ const e = {
     fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    dropWidgetToDiscuss: "Drop here to discuss with One",
     reply: "Reply",
     removeQuote: "Remove quote",
     clarifyingQuestion: {
@@ -575,25 +805,45 @@ const e = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    readOnly: "You can't send messages in this conversation",
+    online: "Online",
     muted: "Muted",
+    mute: "Mute",
+    unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
+    emojiPicker: {
+      search: "Search emoji",
+      frequentlyUsed: "Frequently used",
+      noResults: "No emoji found",
+      grid: "Emoji",
+      categories: {
+        people: "Smileys & people",
+        nature: "Animals & nature",
+        foods: "Food & drink",
+        activity: "Activity",
+        places: "Travel & places",
+        objects: "Objects",
+        symbols: "Symbols",
+        flags: "Flags"
+      }
+    },
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",
     cancelRecording: "Cancel recording",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
-    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    removeNamedFile: "Remove {{name}}",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
+    messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
     fileUploadError: "Upload failed",
     micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
     micError: "Couldn't access the microphone.",
     transcriptionError: "Couldn't transcribe the audio. Try again.",
     sent: "Sent",
     read: "Read",
-    // Plural shape (one/other) so other languages can diverge — selected by the
-    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
     readBy: {
       one: "Read by {{count}}",
       other: "Read by {{count}}"
@@ -605,38 +855,42 @@ const e = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
+    location: "Location",
+    voiceNote: "Voice note",
+    sendVoiceNote: "Send voice note",
+    sendingVoiceNote: "Sending voice note…",
+    sending: "Sending…",
+    notSent: "Not sent",
+    retry: "Retry",
     moreActions: "Message actions",
-    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
     pin: "Pin",
     unpin: "Unpin",
     info: "Info",
     viewProfile: "View profile",
-    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
-    // for a group-wide ping (localize the word, e.g. es "aquí").
     mentionEveryone: "here",
     mentionEveryoneDescription: "Notify everyone in this group",
     reply: "Reply",
     react: "Add reaction",
     download: "Download",
+    downloadNamedFile: "Download {{name}}",
     removeQuote: "Remove quote",
-    // Editing your own message (within the edit window). `editing` heads the
-    // composer chip; `edited` is the muted marker after an edited message body.
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
-    // Shown as the quoted sender's name when the replied-to message is your own.
     you: "You",
-    // In-chat image lightbox.
     openImage: "Open image",
     imagePreview: "Image preview",
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
-    // Attachment previews in reply quotes + the composer chip (a lone file shows
-    // its real name instead of a count).
+    openDocument: "Open document",
+    openNamedDocument: "Open {{name}}",
+    documentPreview: "Document preview",
+    videoPlayerLabel: "Video player: {{name}}",
+    loadingVideo: "Loading video: {{name}}",
     photo: "Photo",
     photoCount: {
       one: "{{count}} photo",
@@ -652,14 +906,84 @@ const e = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
+    system: {
+      memberAdded: {
+        one: "{{members}} was added to the group",
+        other: "{{members}} were added to the group"
+      },
+      memberRemoved: {
+        one: "{{members}} was removed from the group",
+        other: "{{members}} were removed from the group"
+      },
+      memberLeft: {
+        one: "{{members}} left the group",
+        other: "{{members}} left the group"
+      },
+      membersWithLast: "{{names}} and {{last}}",
+      membersWithMore: "{{names}} and {{count}} more"
+    },
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread"
     },
+    unreadChatsAbove: {
+      one: "{{count}} unread chat above",
+      other: "{{count}} unread chats above"
+    },
+    unreadChatsBelow: {
+      one: "{{count}} unread chat below",
+      other: "{{count}} unread chats below"
+    },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
     error: "Couldn't load this conversation",
-    loadingOlder: "Loading earlier messages…"
+    loadingOlder: "Loading earlier messages…",
+    newPosts: "New posts",
+    newPostsCount: {
+      one: "{{count}} new post",
+      other: "{{count}} new posts"
+    },
+    unreadMentionCount: {
+      one: "{{count}} unread, mentions you",
+      other: "{{count}} unread, mentions you"
+    },
+    post: {
+      in: "in",
+      comment: "Comment",
+      views: {
+        one: "{{count}} view",
+        other: "{{count}} views"
+      },
+      comments: {
+        one: "{{count}} comment",
+        other: "{{count}} comments"
+      }
+    },
+    community: {
+      readOnly: "You can't post in this community",
+      writePost: "Write a post…",
+      newPost: "New post",
+      postTitle: "Title",
+      postTitlePlaceholder: "Add a title",
+      postBodyPlaceholder: "Share something with the community…",
+      publish: "Publish",
+      cancel: "Cancel",
+      discardTitle: "Discard this post?",
+      discardDescription: "What you've written won't be saved.",
+      discard: "Discard",
+      keepEditing: "Keep editing",
+      publishError: "Couldn't publish this post",
+      pinnedPost: "Pinned post",
+      pinnedPosts: "Pinned",
+      unpinPost: "Unpin post",
+      goToPost: "Go to post",
+      scheduledPosts: "Scheduled",
+      scheduledEvent: "Event",
+      draftPosts: "Drafts",
+      draftUntitled: "Untitled post",
+      draftSavedAt: "Saved {{when}}",
+      shelfLabel: "Pinned, scheduled and draft posts"
+    }
   },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
@@ -672,7 +996,21 @@ const e = {
     emptyState: {
       title: "No data available",
       description: "Try a different date or fewer filters"
+    },
+    windowedCategories: "Showing {{count}} of {{total}} categories",
+    tooltip: {
+      ofTotal: "of total",
+      total: "total",
+      target: "target",
+      ofTarget: "of target",
+      ofRange: "of range",
+      fromPrevious: "from previous",
+      fromStage: "from {{stage}}"
     }
+  },
+  progressSeries: {
+    noData: "No data",
+    canceled: "Canceled"
   },
   select: {
     noResults: "No results found",
@@ -686,6 +1024,37 @@ const e = {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}"
+  },
+  phoneInput: {
+    country: "Country",
+    countryWithDialCode: "{{country}} {{dialCode}}",
+    searchCountry: "Search country or dial code",
+    noResults: "No country found"
+  },
+  locationInput: {
+    country: "Country",
+    addressLine1: "Address line 1",
+    addressLine2: "Address line 2",
+    city: "City",
+    state: "Region",
+    postalCode: "Postal code",
+    placeholder: "Enter an address",
+    selectCountry: "Select a country",
+    searchCountry: "Search country",
+    noCountryResults: "No country found",
+    noResults: "No addresses found",
+    searchHint: "Type an address to search",
+    noResultsHelp: "Can't find an address?",
+    enterManually: "Enter it manually",
+    addressLine1Placeholder: "Enter a street and number",
+    addressLine2Placeholder: "Enter a floor or unit",
+    postalCodePlaceholder: "e.g., 08001",
+    searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found"
+    }
   },
   imageUpload: {
     uploading: "Uploading...",
@@ -858,6 +1227,19 @@ const e = {
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
       maxFilesReached: "Maximum {{maxFiles}} files"
     },
+    entitiesList: {
+      add: "Add",
+      edit: "Edit",
+      remove: "Remove",
+      view: "View",
+      addBlockedHint: "Finish filling out the last item you just added in order to add another one",
+      addBlockedErrorHint: "Fix the errors in the existing items before adding another one",
+      addBlockedMaxHint: "You've reached the maximum number of items",
+      removeConfirmTitle: "Remove item?",
+      removeConfirmMessage: "This item will be removed. This action cannot be undone.",
+      removeError: "Couldn't remove the item. Please try again.",
+      removeErrorTitle: "Remove failed"
+    },
     moreInformation: "More information",
     validation: {
       required: "This field is required",
@@ -886,6 +1268,13 @@ const e = {
       },
       checkbox: {
         mustBeChecked: "This option must be selected"
+      },
+      phone: {
+        invalid: "Enter a valid phone number"
+      },
+      location: {
+        empty: "Enter an address",
+        unresolved: "Select an address from the suggestions"
       }
     }
   },
@@ -900,11 +1289,41 @@ const e = {
       navigation: "Graph navigation"
     }
   },
+  map: {
+    region: "Map",
+    navigation: "Map navigation",
+    listLabel: "Locations",
+    location: "location",
+    locations: "locations",
+    unnamedLocation: "Location",
+    cluster: "Cluster of {{count}} locations",
+    skipToList: "Skip to location list",
+    loadError: "Couldn't load the map.",
+    retry: "Retry",
+    currentLocation: "Your location",
+    controls: {
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fit: "Fit to markers",
+      locate: "My location"
+    }
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}"
+  },
+  widgets: {
+    whatThisMeans: "What this info means?",
+    gotIt: "Got it",
+    editParams: "Edit params",
+    editParamsTitle: "Edit widget params",
+    removeWidget: "Remove widget",
+    addWidget: "Add widget",
+    configureWidget: "Configure {{title}}",
+    recommended: "Recommended",
+    cannotMoveHere: "You can't move a widget here — {{title}} is locked."
   },
   pdfViewer: {
     toolbar: "Document toolbar",
@@ -918,7 +1337,35 @@ const e = {
     rotate: "Rotate",
     print: "Print",
     download: "Download",
-    loading: "Loading document"
+    loading: "Loading document",
+    previewFailed: "Preview isn't available for this file",
+    showingFirstRows: {
+      one: "Showing the first row",
+      other: "Showing the first {{count}} rows"
+    }
+  },
+  videoPlayer: {
+    regionLabel: "Video player",
+    play: "Play",
+    pause: "Pause",
+    playing: "Playing",
+    paused: "Paused",
+    mute: "Mute",
+    unmute: "Unmute",
+    noAudio: "No audio",
+    volume: "Volume",
+    seekLabel: "Seek",
+    enterFullscreen: "Enter fullscreen",
+    exitFullscreen: "Exit fullscreen",
+    playbackSpeed: "Playback speed ({{rate}})",
+    playbackSpeedLabel: "Playback speed",
+    timeProgress: "{{current}} of {{total}}",
+    captions: "Captions",
+    audioDescription: "Audio description",
+    audio: "Audio",
+    subtitles: "Subtitles",
+    settings: "Settings",
+    off: "Off"
   }
 };
 export {

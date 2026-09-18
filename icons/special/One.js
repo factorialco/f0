@@ -24,7 +24,7 @@ const SvgOne = (props, ref) => {
         props.style?.color !== undefined;
     const clipPathId = useId();
     return (_jsxs("svg", { viewBox: "0 0 24 24", fill: "none", xmlns: "http://www.w3.org/2000/svg", ref: ref, ...props, children: [_jsx("defs", { children: pieces.map((piece) => (_jsx("clipPath", { id: `${clipPathId}-${piece.id}`, children: _jsx("path", { d: piece.path }) }, piece.id))) }), hasColorClass
-                ? pieces.map((piece) => (_jsx("path", { d: piece.path, fill: "currentColor", vectorEffect: "non-scaling-stroke" }, piece.id)))
+                ? pieces.map((piece) => (_jsx("path", { d: piece.path, fill: "currentColor" }, piece.id)))
                 : pieces.map((piece) => (_jsx("foreignObject", { x: "0", y: "0", width: "24", height: "24", clipPath: `url(#${clipPathId}-${piece.id})`, children: _jsx("div", { style: {
                             width: "100%",
                             height: "100%",
