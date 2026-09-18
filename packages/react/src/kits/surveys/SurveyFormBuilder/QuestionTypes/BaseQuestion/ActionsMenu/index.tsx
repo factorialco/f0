@@ -307,6 +307,7 @@ const QuestionRowActions = ({
   onDelete: () => void
 }) => {
   const { t } = useI18n()
+  const { labels } = useSurveyFormBuilderContext()
 
   if (!showDuplicate && !showDelete) {
     return null
@@ -318,14 +319,20 @@ const QuestionRowActions = ({
       <DropdownMenuGroup>
         {showDuplicate ? (
           <SimpleItem
-            label={t("surveyFormBuilder.actions.duplicateQuestion")}
+            label={
+              labels?.duplicateQuestion ??
+              t("surveyFormBuilder.actions.duplicateQuestion")
+            }
             icon={LayersFront}
             onClick={onDuplicate}
           />
         ) : null}
         {showDelete ? (
           <SimpleItem
-            label={t("surveyFormBuilder.actions.deleteQuestion")}
+            label={
+              labels?.deleteQuestion ??
+              t("surveyFormBuilder.actions.deleteQuestion")
+            }
             icon={Delete}
             onClick={onDelete}
             critical
@@ -346,7 +353,7 @@ export function ActionsMenu({
 }: ActionsMenuProps) {
   const { t } = useI18n()
 
-  const { isQuestionTypeAllowed } = useSurveyFormBuilderContext()
+  const { isQuestionTypeAllowed, labels } = useSurveyFormBuilderContext()
 
   const {
     question,
@@ -410,7 +417,8 @@ export function ActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80" align="start">
         <DropdownMenuLabel className="p-4 pb-2 font-medium text-f1-foreground-secondary">
-          {t("surveyFormBuilder.labels.questionOptions")}
+          {labels?.questionOptions ??
+            t("surveyFormBuilder.labels.questionOptions")}
         </DropdownMenuLabel>
         {showRequired ? (
           <DropdownMenuGroup>
@@ -445,7 +453,10 @@ export function ActionsMenu({
         {showQuestionType ? (
           <DropdownMenuGroup>
             <QuestionTypeMenuItem
-              label={t("surveyFormBuilder.labels.questionType")}
+              label={
+                labels?.questionType ??
+                t("surveyFormBuilder.labels.questionType")
+              }
               value={questionType}
               currentDatasetKey={currentDatasetKey}
               questionTypes={questionTypes}

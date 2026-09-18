@@ -89,19 +89,24 @@ export const TableOfContent = ({
   answering?: boolean
 }) => {
   const { t } = useI18n()
-  const { disabled } = useSurveyFormBuilderContext()
+  const { disabled, labels } = useSurveyFormBuilderContext()
   const { portalContainer } = useContext(F0DialogContext)
 
   const tocItems = useTableOfContentItems(elements, {
     untitledSectionLabel: t("surveyFormBuilder.labels.sectionTitlePlaceholder"),
     untitledQuestionLabel: t("surveyFormBuilder.labels.titlePlaceholder"),
-    duplicateQuestionLabel: t("surveyFormBuilder.actions.duplicateQuestion"),
-    deleteQuestionLabel: t("surveyFormBuilder.actions.deleteQuestion"),
+    duplicateQuestionLabel:
+      labels?.duplicateQuestion ??
+      t("surveyFormBuilder.actions.duplicateQuestion"),
+    deleteQuestionLabel:
+      labels?.deleteQuestion ?? t("surveyFormBuilder.actions.deleteQuestion"),
     duplicateSectionLabel: t("surveyFormBuilder.actions.duplicateSection"),
     deleteSectionLabel: t("surveyFormBuilder.actions.deleteSection"),
-    questionOptionsLabel: t("surveyFormBuilder.labels.questionOptions"),
+    questionOptionsLabel:
+      labels?.questionOptions ?? t("surveyFormBuilder.labels.questionOptions"),
     requiredLabel: t("surveyFormBuilder.labels.required"),
-    questionTypeLabel: t("surveyFormBuilder.labels.questionType"),
+    questionTypeLabel:
+      labels?.questionType ?? t("surveyFormBuilder.labels.questionType"),
     singleSelectionLabel: t("surveyFormBuilder.labels.singleSelection"),
     multiSelectionLabel: t("surveyFormBuilder.labels.multiSelection"),
   })

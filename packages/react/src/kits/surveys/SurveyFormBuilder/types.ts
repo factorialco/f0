@@ -241,6 +241,14 @@ export type SurveyFormBuilderPlaceholders = {
 export type SurveyFormBuilderLabels = {
   /** Overrides the label/tooltip of the "add" buttons (default: "Add question"). */
   addQuestion?: string
+  /** Overrides the duplicate action in a question's menu (default: "Duplicate question"). */
+  duplicateQuestion?: string
+  /** Overrides the delete action in a question's menu (default: "Delete question"). */
+  deleteQuestion?: string
+  /** Overrides the heading of a question's options menu (default: "Question options"). */
+  questionOptions?: string
+  /** Overrides the type entry in a question's options menu (default: "Question type"). */
+  questionType?: string
 }
 
 export type SurveyFormBuilderProps = {
