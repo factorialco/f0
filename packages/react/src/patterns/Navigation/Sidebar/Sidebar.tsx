@@ -219,14 +219,15 @@ function _Sidebar({
           // leaves when the panel leaves.
           //
           // Drawn as a masked pseudo-element rather than a border so it can
-          // fade out over its last 16px at each end. A hairline that runs the
+          // end before the panel does: nothing for the first 12px, fully drawn
+          // by 24, and the same in reverse at the foot. A hairline that runs the
           // full height reads as a frame around the rail; one that dissolves
           // into the ground reads as a seam between two things standing on it,
           // which is what these are. It is inside the panel's own box, so the
           // 1px does not push it off the room the frame reserved.
           rail && [
             "before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-f1-border-secondary before:content-['']",
-            "before:[mask-image:linear-gradient(to_bottom,transparent_0,#000_16px,#000_calc(100%-16px),transparent_100%)]",
+            "before:[mask-image:linear-gradient(to_bottom,transparent_0,transparent_12px,#000_24px,#000_calc(100%-24px),transparent_calc(100%-12px),transparent_100%)]",
           ]
         )
       : cn(

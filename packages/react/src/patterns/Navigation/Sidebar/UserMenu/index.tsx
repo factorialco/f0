@@ -3,7 +3,7 @@ import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
-import { PRESSABLE_CHIP } from "../pressable"
+import { PRESSABLE_CHIP_TRIGGER } from "../pressable"
 
 export type SidebarUser = {
   firstName: string
@@ -71,7 +71,7 @@ export function SidebarUserMenu({
           <span
             className={cn(
               "flex size-10 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary",
-              PRESSABLE_CHIP
+              PRESSABLE_CHIP_TRIGGER
             )}
           >
             <F0AvatarPerson

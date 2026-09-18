@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import { PRESSABLE_CHIP } from "../pressable"
+import { PRESSABLE_CHIP_TRIGGER } from "../pressable"
 
 interface Company {
   id: string
@@ -186,7 +186,7 @@ const Selector = ({
           <span
             className={cn(
               "flex size-10 items-center justify-center rounded-lg group-hover:bg-f1-background-secondary group-data-[state=open]:bg-f1-background-secondary",
-              PRESSABLE_CHIP
+              PRESSABLE_CHIP_TRIGGER
             )}
           >
             {children}

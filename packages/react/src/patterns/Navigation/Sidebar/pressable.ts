@@ -14,3 +14,14 @@
  */
 export const PRESSABLE_CHIP =
   "transition-transform duration-150 ease-out group-active:scale-95 motion-reduce:transition-none motion-reduce:group-active:scale-100"
+
+/**
+ * The same press, for a chip that opens a menu.
+ *
+ * `:active` is no use on those: the menu opens on pointer DOWN, and Radix
+ * seals the rest of the document off the moment it does, so the trigger stops
+ * matching `:active` before a frame of the press has rendered. While the menu
+ * is open the chip is held in, which is what a pressed control looks like and
+ * what the state actually is.
+ */
+export const PRESSABLE_CHIP_TRIGGER = `${PRESSABLE_CHIP} group-data-[state=open]:scale-95`

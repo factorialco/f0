@@ -14,9 +14,7 @@ import {
 import { expect, waitFor, within } from "storybook/test"
 
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -76,7 +74,6 @@ import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { cn, focusRing } from "@/lib/utils"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -963,9 +960,7 @@ const InboxPage = () => (
     }
   >
     <div className="flex flex-1 items-center justify-center p-6">
-      <span className="text-f1-foreground-secondary">
-        Select an item to read it
-      </span>
+      <span className="text-f1-foreground-secondary">Aquí va la inbox</span>
     </div>
   </Page>
 )
@@ -1342,172 +1337,6 @@ const MockChatPanel = ({
       {/* The Edit action's dialog is the HOST's — rendered outside F0Chat. */}
       {editDialog}
     </F0ChatProvider>
-  )
-}
-
-/**
- * The Inbox panel: the list IS the module, so it lives in the second level
- * and the content side is what you picked from it.
- *
- * Wider than a menu (420 rather than 240) because the rows carry a title, a
- * subtitle and a face — at 240 every one of them truncates mid-sentence, and a
- * queue you cannot read is a queue you cannot triage.
- */
-type InboxItem = {
-  id: string
-  title: string
-  meta: string
-  seed: string
-  module: ComponentProps<typeof F0AvatarPerson>["badge"]
-  kind: "request" | "notification"
-}
-
-const INBOX_ITEMS: InboxItem[] = [
-  {
-    id: "time-off",
-    title: "Approve 12 time off requests",
-    meta: "All within policy · Jun–Jul · no team conflicts",
-    seed: "person01",
-    module: { type: "module", module: "timeoff" },
-    kind: "request",
-  },
-  {
-    id: "hire",
-    title: "Pick Lucia for Senior Designer",
-    meta: "Score 9.2 / 10 · within band · 14 interviews done",
-    seed: "person02",
-    module: { type: "module", module: "ats" },
-    kind: "request",
-  },
-  {
-    id: "renewals",
-    title: "Confirm 4 contract renewals",
-    meta: "All within standard policy and budget · already drafted",
-    seed: "person03",
-    module: { type: "module", module: "company_documents" },
-    kind: "request",
-  },
-  {
-    id: "promotion",
-    title: "Approve Marc's promotion to Senior",
-    meta: "2 yrs as Mid · 3 reviews at 4.5+/5 · committee agreed",
-    seed: "person04",
-    module: { type: "module", module: "performance" },
-    kind: "request",
-  },
-  {
-    id: "bonus",
-    title: "Send Q2 bonus list — €34,200 across 14 people",
-    meta: "Aligned with February formula · within €35k budget",
-    seed: "person05",
-    module: { type: "module", module: "payroll_bundle" },
-    kind: "request",
-  },
-  {
-    id: "workshop",
-    title: "Approve €890 design team workshop",
-    meta: "Within Q2 L&D budget · requested by Marta",
-    seed: "person06",
-    module: { type: "module", module: "company_trainings" },
-    kind: "request",
-  },
-  {
-    id: "taco",
-    title: "Taco Tuesday! 🌮",
-    meta: "Eleanor Pena · Company updates · 2 days ago",
-    seed: "person07",
-    module: { type: "module", module: "communities" },
-    kind: "notification",
-  },
-  {
-    id: "remote",
-    title: "Four weeks of work from anywhere, from January",
-    meta: "Marie Curie · Company updates · 1 day ago",
-    seed: "person08",
-    module: { type: "module", module: "communities" },
-    kind: "notification",
-  },
-  {
-    id: "engineering",
-    title: "Ada Lovelace posted in Engineering",
-    meta: "Ada Lovelace · Engineering · 3 days ago",
-    seed: "person09",
-    module: { type: "module", module: "communities" },
-    kind: "notification",
-  },
-  {
-    id: "portraits",
-    title: "Olga Steinepreis' self portraits unpack the pose",
-    meta: "René Galindo · Product Design · 5 days ago",
-    seed: "person10",
-    module: { type: "module", module: "communities" },
-    kind: "notification",
-  },
-]
-
-/** One row: what it is, what it is about, and who it came from. */
-const InboxRow = ({
-  item,
-  active,
-  onOpen,
-}: {
-  item: InboxItem
-  active: boolean
-  onOpen: () => void
-}) => (
-  <div
-    className={cn(
-      "flex h-[66px] w-full items-center gap-3 rounded-[10px] px-3",
-      active ? "bg-f1-background-secondary" : "hover:bg-f1-background-secondary"
-    )}
-  >
-    <F0Checkbox hideLabel title={`Select ${item.title}`} />
-    <button
-      type="button"
-      onClick={onOpen}
-      className={cn(
-        "flex min-w-0 flex-1 items-center gap-3 text-left",
-        focusRing("focus-visible:ring-inset")
-      )}
-    >
-      <F0AvatarPerson
-        firstName={item.title}
-        lastName=""
-        size="md"
-        badge={item.module}
-      />
-      <span className="flex min-w-0 flex-col">
-        <OneEllipsis className="font-medium text-f1-foreground">
-          {item.title}
-        </OneEllipsis>
-        <OneEllipsis className="text-f1-foreground-secondary">
-          {item.meta}
-        </OneEllipsis>
-      </span>
-    </button>
-  </div>
-)
-
-const InboxPanel = () => {
-  const [openItem, setOpenItem] = useState<string | null>(null)
-
-  return (
-    <div className="flex flex-col gap-2 pb-3">
-      {/* `SearchBar`'s own 12px gutter, the same one the Chats panel sits in:
-          two panels of the same navigation should not disagree about where
-          their search starts. */}
-      <SearchBar placeholder="Search..." onClick={() => {}} />
-      <div className="flex flex-col px-1.5">
-        {INBOX_ITEMS.map((item) => (
-          <InboxRow
-            key={item.id}
-            item={item}
-            active={openItem === item.id}
-            onOpen={() => setOpenItem(item.id)}
-          />
-        ))}
-      </div>
-    </div>
   )
 }
 
@@ -1993,11 +1822,9 @@ const ConversationsSidebarInner = ({
       />
     ) : tab === "one" ? (
       <OneHistoryTab forceEmpty={forceEmpty} />
-    ) : tab === "inbox" ? (
-      <InboxPanel />
     ) : tab === "tools" ? (
       <Menu tree={toolsMenuTree} />
-    ) : isRail ? undefined : ( // the rail had not changed anything. // the honest state: falling through to another module's list would say // Home, Calendar and Files have no second level yet. An empty panel is
+    ) : isRail ? undefined : ( // contents for one screen. // module IS the content, and a column beside it would be a table of // Only Chats and Tools have a second level. The rest are pages: the
       <Menu tree={toolsMenuTree} />
     )
 
@@ -2007,12 +1834,9 @@ const ConversationsSidebarInner = ({
     // conversations, the queue, the catalog. Home, Calendar, Directory and
     // Files are pages — the module IS the content, and a column of links
     // beside it would be a table of contents for one page.
-    const hasPanel = ["messages", "inbox", "tools"].includes(tab)
+    const hasPanel = ["messages", "tools"].includes(tab)
     return (
       <Sidebar
-        // The inbox list IS the module, and its rows do not fit in a menu's
-        // 240. Every other panel keeps the default.
-        panelWidth={tab === "inbox" ? 420 : undefined}
         rail={
           <SidebarRail
             company={{
