@@ -860,7 +860,14 @@ const CommunityMain = ({
   // main area rather than in a panel beside the page you left behind.
   const { openSurface } = useMockChatApp()
   if (openSurface?.kind === "chat") {
-    return <MockChatPanel convId={openSurface.convId} />
+    // In the app shell's sheet, like every other page. Rendered bare it
+    // floated on the frame's own ground with no edge of its own — a
+    // transcript is content, and content lives on the card.
+    return (
+      <Page>
+        <MockChatPanel convId={openSurface.convId} />
+      </Page>
+    )
   }
   return <MockCommunitySurface fallback={children ?? <HomePage />} />
 }
