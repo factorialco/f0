@@ -10599,7 +10599,18 @@ export { F0SelectItemProps as SelectItemProps }
 declare type F0SelectPopupProps<T extends string, R = unknown> = {
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     open?: boolean;
+    /**
+     * Whether the list can be searched.
+     *
+     * With no filters the trigger itself is the search field: you type where the
+     * value shows. With filters, and for `variant="inline"`, `asList` and custom
+     * triggers, the search box stays in the dropdown's top row.
+     */
     showSearchBox?: boolean;
+    /**
+     * Placeholder for the search field. When the trigger is the search field the
+     * select's own `placeholder` wins and this stands in.
+     */
     searchBoxPlaceholder?: string;
     onSearchChange?: (value: string) => void;
     searchValue?: string;
@@ -12343,10 +12354,29 @@ declare type InputFieldProps<T> = {
     labelIcon?: IconType;
     hideLabel?: boolean;
     hidePlaceholder?: boolean;
+    /**
+     * Rich content drawn where the typed text would be, for a field whose value
+     * is not text: icons, avatars, a count. Dropped as soon as there is text,
+     * and it hides the placeholder while shown.
+     */
+    valueSlot?: React.ReactNode;
+    /**
+     * Leaves the typed text alone when the clear button is pressed, so `onClear`
+     * is the whole behavior. For a field whose value is not its text, the button
+     * clears that value and the text is the user's query.
+     */
+    clearKeepsText?: boolean;
+    /**
+     * Whether there is anything to clear, when `isEmpty` cannot answer it: with
+     * a `valueSlot` the placeholder follows the text and the clear button
+     * follows the value.
+     */
+    canClear?: boolean;
     name?: string;
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
-    onClickContent?: () => void;
+    /** Receives the click, so a caller can tell where in the field it landed. */
+    onClickContent?: (event: React.MouseEvent) => void;
     value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
@@ -12369,9 +12399,11 @@ declare type InputFieldProps<T> = {
      * selection moves elsewhere, so a screen reader hears nothing. */
     "aria-activedescendant"?: AriaAttributes["aria-activedescendant"];
     "aria-autocomplete"?: AriaAttributes["aria-autocomplete"];
+    /** How a `valueSlot` value reaches a screen reader. */
+    "aria-describedby"?: AriaAttributes["aria-describedby"];
     onClear?: () => void;
     onFocus?: () => void;
-    onBlur?: () => void;
+    onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     canGrow?: boolean;
     children: React.ReactNode & {
@@ -16249,6 +16281,17 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      */
     onLockedColumnIdsChange?: (columnIds: ColId[]) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
+    /**
+     * Reveals the row-actions button only while its row is hovered or focused,
+     * instead of painting it on every row. Editable-table only — the plain table
+     * always reveals its actions on hover.
+     *
+     * The cell keeps its width either way, so a row's content cannot shift
+     * sideways as the pointer enters it.
+     *
+     * @default false
+     */
+    itemActionsOnHover?: boolean;
     referenceRowType?: (item: R) => ReferenceType;
     /**
      * In a table with nested rows, renders the cell text of the root rows
