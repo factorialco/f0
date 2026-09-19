@@ -12081,6 +12081,16 @@ export declare interface F0FormStylingConfig {
      */
     showSectionsSidepanel?: boolean;
     /**
+     * Distance in pixels between the pinned sections rail and the top of the
+     * scrolling ancestor. Raise it to clear a sticky app header that overlaps
+     * the top of the scroll area. Applies to inline forms, where the rail pins
+     * against a page-level scroll container; also published as the
+     * `--f0-form-sections-rail-top` custom property, so a consumer can set it
+     * from its own layout.
+     * @default 0
+     */
+    sectionsSidepanelOffset?: number;
+    /**
      * Removes the default padding around the form content.
      * @default false
      */
@@ -21348,12 +21358,12 @@ declare global {
 }
 
 
-declare namespace _Page {
+declare namespace _DaytimePage {
     var displayName: string;
 }
 
 
-declare namespace _DaytimePage {
+declare namespace _Page {
     var displayName: string;
 }
 
@@ -21404,9 +21414,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -21414,10 +21425,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
