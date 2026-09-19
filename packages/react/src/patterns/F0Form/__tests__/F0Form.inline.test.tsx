@@ -796,7 +796,7 @@ describe("F0Form inline anchors", () => {
     expect(document.getElementById("forms.anchored.work")).toBeInTheDocument()
   })
 
-  it("scrolls to a section from the sidepanel", async () => {
+  it("scrolls its own container to a section when that container has a scroll range", async () => {
     const user = userEvent.setup()
     const scrollTo = vi.fn()
     Object.defineProperty(Element.prototype, "scrollTo", {
@@ -809,12 +809,78 @@ describe("F0Form inline anchors", () => {
       styling: { showSectionsSidepanel: true },
     })
 
-    const sidebar = container.querySelector(".sticky") as HTMLElement
-    expect(sidebar).toBeInTheDocument()
+    const layout = container.querySelector(
+      "[data-slot='form-sections-layout']"
+    ) as HTMLElement
+    Object.defineProperty(layout, "scrollHeight", { value: 2000 })
+    Object.defineProperty(layout, "clientHeight", { value: 400 })
 
+    const sidebar = container.querySelector(".sticky") as HTMLElement
     await user.click(within(sidebar).getByText("Work"))
 
     expect(scrollTo).toHaveBeenCalled()
+  })
+
+  it("scrolls the page to a section when its own container grew to fit the form", async () => {
+    const user = userEvent.setup()
+    const scrollTo = vi.fn()
+    Object.defineProperty(Element.prototype, "scrollTo", {
+      configurable: true,
+      writable: true,
+      value: scrollTo,
+    })
+    const scrolled: HTMLElement[] = []
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      writable: true,
+      value: function (this: HTMLElement) {
+        scrolled.push(this)
+      },
+    })
+
+    const { container } = renderAnchored({
+      styling: { showSectionsSidepanel: true },
+    })
+
+    const sidebar = container.querySelector(".sticky") as HTMLElement
+    await user.click(within(sidebar).getByText("Work"))
+
+    expect(scrollTo).not.toHaveBeenCalled()
+    expect(scrolled).toContain(document.getElementById("forms.anchored.work"))
+  })
+
+  it("pins the rail against the scrolling ancestor instead of a box of its own", () => {
+    const { container } = renderAnchored({
+      styling: { showSectionsSidepanel: true },
+    })
+
+    const layout = container.querySelector(
+      "[data-slot='form-sections-layout']"
+    ) as HTMLElement
+    // An overflow box that never scrolls is still the rail's scrollport, so
+    // the inline layout must not declare one.
+    expect(layout).not.toHaveClass("overflow-scroll")
+
+    const rail = layout.querySelector(
+      "[data-slot='form-sections-rail']"
+    ) as HTMLElement
+    expect(rail).toHaveClass("top-[var(--f0-form-sections-rail-top,0px)]")
+  })
+
+  it("moves the rail and the section anchors down by the configured offset", () => {
+    const { container } = renderAnchored({
+      styling: { showSectionsSidepanel: true, sectionsSidepanelOffset: 56 },
+    })
+
+    const layout = container.querySelector(
+      "[data-slot='form-sections-layout']"
+    ) as HTMLElement
+    expect(layout.style.getPropertyValue("--f0-form-sections-rail-top")).toBe(
+      "56px"
+    )
+    expect(document.getElementById("forms.anchored.work")).toHaveClass(
+      "scroll-mt-[calc(1rem_+_var(--f0-form-sections-rail-top,0px))]"
+    )
   })
 
   it("anchors the rows left of the rail, with no rule between them", () => {
@@ -822,7 +888,9 @@ describe("F0Form inline anchors", () => {
       styling: { showSectionsSidepanel: true },
     })
 
-    const rail = container.querySelector(".overflow-scroll") as HTMLElement
+    const rail = container.querySelector(
+      "[data-slot='form-sections-layout']"
+    ) as HTMLElement
     const columns = Array.from(rail.children)
 
     expect(columns.some((c) => c.classList.contains("justify-start"))).toBe(

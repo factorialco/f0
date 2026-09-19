@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form"
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/patterns/SectionHeader"
-import { FIELD_GAP } from "../constants"
+import { FIELD_GAP, SECTION_SCROLL_MARGIN_CLASS } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
@@ -50,7 +50,10 @@ export function SectionRenderer({ section }: SectionRendererProps) {
   const anchorId = generateAnchorId(formName, sectionId)
 
   return (
-    <section id={anchorId} className="flex scroll-mt-4 flex-col">
+    <section
+      id={anchorId}
+      className={cn("flex flex-col", SECTION_SCROLL_MARGIN_CLASS)}
+    >
       <div
         className={cn(
           "flex items-start justify-between py-5",

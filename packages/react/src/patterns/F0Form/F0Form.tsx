@@ -29,7 +29,12 @@ import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
-import { SECTION_MARGIN } from "./constants"
+import {
+  SECTION_MARGIN,
+  SECTION_SCROLL_MARGIN_CLASS,
+  SECTIONS_RAIL_TOP_CLASS,
+  SECTIONS_RAIL_TOP_VAR,
+} from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
@@ -45,6 +50,7 @@ import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "./groupingUtils"
+import { scrollSectionIntoView } from "./scrollToSection"
 import type {
   F0FormPropsWithPerSectionSchema,
   F0FormPropsWithPerSectionDefinition,
@@ -87,6 +93,12 @@ const useIsSmallScreen = () =>
  * Section rail beside the form content. Detail rows already read as a bordered
  * card, so inline drops the rule and anchors the card against the rail instead
  * of floating it in the middle of the space.
+ *
+ * Inline forms stretch to their full height and are scrolled by a page-level
+ * container, so the layout must not declare an `overflow` of its own: an
+ * `overflow` box that never scrolls is still the rail's scrollport, and
+ * pinning against it leaves the rail travelling with the content. The
+ * bounded-height layouts the non-inline form is used in keep theirs.
  */
 const SectionsSidepanelLayout = React.forwardRef<
   HTMLDivElement,
@@ -94,15 +106,37 @@ const SectionsSidepanelLayout = React.forwardRef<
     inline: boolean
     items: TOCItem[]
     activeItem: string | undefined
+    /** Pixels between the rail and the top of the scrolling ancestor. */
+    railOffset: number | undefined
     children: React.ReactNode
   }
 >(function SectionsSidepanelLayout(
-  { inline, items, activeItem, children },
+  { inline, items, activeItem, railOffset, children },
   ref
 ) {
   return (
-    <div ref={ref} className="flex w-full overflow-scroll">
-      <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
+    <div
+      ref={ref}
+      data-slot="form-sections-layout"
+      className={cn("flex w-full", !inline && "overflow-scroll")}
+      // The offset is a measured distance the consumer supplies; it reaches
+      // the rail and the section anchors as a custom property.
+      // oxlint-disable-next-line f0-styles/no-inline-styles
+      style={
+        railOffset === undefined
+          ? undefined
+          : ({
+              [SECTIONS_RAIL_TOP_VAR]: `${railOffset}px`,
+            } as React.CSSProperties)
+      }
+    >
+      <div
+        data-slot="form-sections-rail"
+        className={cn(
+          "sticky h-fit shrink-0 self-start pt-2",
+          inline ? SECTIONS_RAIL_TOP_CLASS : "top-0"
+        )}
+      >
         <F0TableOfContent
           items={items}
           activeItem={activeItem}
@@ -213,6 +247,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   const showSectionsSidepanel =
     (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
   const noPadding = styling?.noPadding ?? false
+  const sectionsSidepanelOffset = styling?.sectionsSidepanelOffset
 
   const sectionIdsKey = Object.keys(schema).join("|")
   // Keyed on the joined ids so a schema rebuilt by the consumer on every
@@ -409,7 +444,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
             key={sectionId}
             id={generateAnchorId(name, sectionId)}
             className={cn(
-              "scroll-mt-4",
+              SECTION_SCROLL_MARGIN_CLASS,
               index !== 0 && !showOnlySelectedSection && SECTION_MARGIN,
               // Hide (rather than unmount) inactive sections so each
               // section form keeps its values and dirty state.
@@ -473,6 +508,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           inline={inline}
           items={tocItems}
           activeItem={effectiveActiveSection}
+          railOffset={sectionsSidepanelOffset}
         >
           {content}
         </SectionsSidepanelLayout>
@@ -1081,6 +1117,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const showSectionsSidepanel =
     (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
   const noPadding = styling?.noPadding ?? false
+  const sectionsSidepanelOffset = styling?.sectionsSidepanelOffset
 
   const {
     isActionBar,
@@ -1159,13 +1196,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       const container = scrollContainerRef.current
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      if (element && container) {
-        // Scroll within the form's own scroll container to avoid
-        // shifting parent containers (e.g. the canvas panel).
-        container.scrollTo({
-          top: element.offsetTop - container.offsetTop,
-          behavior: "smooth",
-        })
+      if (element) {
+        scrollSectionIntoView(container, element)
       }
     },
     [name]
@@ -1882,6 +1914,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             inline={inline}
             items={tocItems}
             activeItem={effectiveActiveSection}
+            railOffset={sectionsSidepanelOffset}
           >
             {formContent}
           </SectionsSidepanelLayout>

@@ -757,6 +757,7 @@ const formDefinition = useF0FormDefinition({ ... })
 The optional `styling` config controls the form layout:
 
 - `showSectionsSidepanel` — render a sticky table-of-contents sidebar for the form's sections (see the example above).
+- `sectionsSidepanelOffset` — pixels between the pinned rail and the top of the scrolling ancestor, for a page whose own header overlaps the top of the scroll area. Defaults to `0`. It reaches the rail and the section anchors as the `--f0-form-sections-rail-top` custom property, so a host that cannot pass the prop can set that property on any element above the form instead.
 - `noPadding` — remove the default `p-4` padding around the form content. Use it when embedding the form flush inside a host surface (e.g. an AI canvas panel) that already provides its own spacing. Defaults to `false`, so existing forms are unaffected.
 
 ```tsx
@@ -1097,6 +1098,17 @@ never saved.
 <Canvas of={PerSectionStories.ThreeSectionRecord} />
 
 <Canvas of={PerSectionStories.OneSectionRefused} />
+
+### The rail while the record scrolls
+
+An inline form fills its height and is scrolled by a container it does not own,
+so the sidepanel layout declares no `overflow` of its own and the rail pins
+against the nearest ancestor that really scrolls. A host that wraps the form in
+an `overflow` box which grew to fit its content takes that ancestor's place
+without ever scrolling, and the rail travels with the rows again — an
+`overflow` box is a scrollport whether or not it has anything to scroll.
+
+<Canvas of={PerSectionStories.StickySectionsRail} />
 
 ### One schema, three viewers
 

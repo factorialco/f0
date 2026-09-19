@@ -75,7 +75,9 @@ describe("F0Form inline per-section mode", () => {
       styling: { showSectionsSidepanel: true },
     })
 
-    const rail = container.querySelector(".overflow-scroll") as HTMLElement
+    const rail = container.querySelector(
+      "[data-slot='form-sections-layout']"
+    ) as HTMLElement
     const columns = Array.from(rail.children)
 
     expect(columns.some((c) => c.classList.contains("justify-start"))).toBe(

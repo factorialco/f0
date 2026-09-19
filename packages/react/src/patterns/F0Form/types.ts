@@ -260,6 +260,16 @@ export interface F0FormStylingConfig {
    */
   showSectionsSidepanel?: boolean
   /**
+   * Distance in pixels between the pinned sections rail and the top of the
+   * scrolling ancestor. Raise it to clear a sticky app header that overlaps
+   * the top of the scroll area. Applies to inline forms, where the rail pins
+   * against a page-level scroll container; also published as the
+   * `--f0-form-sections-rail-top` custom property, so a consumer can set it
+   * from its own layout.
+   * @default 0
+   */
+  sectionsSidepanelOffset?: number
+  /**
    * Removes the default padding around the form content.
    * @default false
    */
