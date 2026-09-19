@@ -13331,18 +13331,36 @@ declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupPr
     hideArrow?: boolean;
 } & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
-declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled" | "hideLabel"> & {
-    /** Single-value detail row. Shows text until editing; label supplies the accessible name. */
+/**
+ * The multi-value selection an inline row accepts: the field variant's shape,
+ * minus the deferred apply, which needs the committed-selection restore that
+ * `editing` bypasses.
+ */
+declare type F0SelectInlineMultipleProps<T extends string, R = unknown> = {
+    multiple: true;
+    clearable?: boolean;
+    value?: T[];
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[];
+    onChange?: (value: T[], originalItems: ResolvedRecordType<R>[], options: F0SelectItemObject<T, ResolvedRecordType<R>>[]) => void;
+    onSelectItems?: OnSelectItemsCallback<ResolvedRecordType<R>, FiltersDefinition>;
+    disableSelectAll?: boolean;
+};
+
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectInlineSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled" | "hideLabel"> & {
+    /** Detail row. Shows text until editing; label supplies the accessible name. */
     variant: "inline";
     /**
      * Controlled dropdown visibility. Reports dismissal through onDismiss.
      * @default false
      */
     editing?: boolean;
-    /** What ended the edit. The value change still arrives through `onChange`. */
+    /**
+     * What ended the edit. The value change still arrives through `onChange`.
+     * A single selection commits as soon as an option is taken; a multiple one
+     * stays open, so `commit` is the close that follows a changed selection.
+     */
     onDismiss?: (reason: SelectInlineDismissReason) => void;
     size?: never;
-    disableSelectAll?: never;
     withApplySelection?: never;
     applySelectionLabel?: never;
     children?: never;
@@ -13360,6 +13378,10 @@ declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupP
     status?: never;
     hint?: never;
 };
+
+declare type F0SelectInlineSelectionProps<T extends string, R = unknown> = (F0SelectSingleSelectionProps<T, R> & {
+    disableSelectAll?: never;
+}) | F0SelectInlineMultipleProps<T, R>;
 
 /**
  * Short token rendered next to the option label, in secondary color, on a
@@ -21424,10 +21446,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -21435,8 +21455,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
