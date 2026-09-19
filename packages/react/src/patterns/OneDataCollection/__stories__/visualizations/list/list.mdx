@@ -22,6 +22,34 @@ are fixed fiedlds (title, avatar, description) and dynamic fields (properties).
 
 <Canvas of={ListStories.BasicListVisualization} />
 
+### Icon colors
+
+An `icon` avatar takes an optional `color` from f0's named palette —
+`viridian`, `malibu`, `yellow`, `purple`, `lilac`, `barbie`, `smoke`, `army`,
+`flubber`, `indigo`, `camel` (exported as `listIconColors`):
+
+```tsx
+avatar: { type: "icon", icon: Clock, color: "purple" }
+```
+
+The tile is the hue at a tenth of its strength and the icon is the hue itself,
+which is what keeps a column of them legible. A color says **which kind of
+thing** the row is, not how urgent it is — for "this is urgent", use an alert
+avatar instead.
+
+`color` also takes a hex — `#RGB` or `#RRGGBB` — for a color that is already
+data (a calendar's own color, a module's brand, a category a user picked).
+Prefer a palette name: those eleven hues were picked to sit beside each other in
+one column and to hold up in both themes. A hex that cannot be parsed falls back
+to the plain, untinted glyph rather than drawing nothing.
+
+Without a `color` the row draws the neutral avatar, unchanged. The color must
+never be the only thing carrying a meaning — several of the hues sit below a 3:1
+contrast ratio against their own tile, so pair it with a field or an
+`aria-label` that says the same thing in words.
+
+<Canvas of={ListStories.ListVisualizationWithIconColors} />
+
 ## Setting Up List Visualization
 
 To enable the List visualization in your data collection component, provide the
@@ -72,9 +100,9 @@ type ListVisualizationOptions<T> = {
   itemDefinition: (item: T) => {
     title: string
     description?: string[]
-    avatar?: AvatarVariant & {
-      badge?: AvatarBadge
-    }
+    avatar?:
+      | Exclude<AvatarVariant, IconAvatarVariant>
+      | (IconAvatarVariant & { color?: ListIconColor })
   }
 }
 ```

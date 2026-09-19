@@ -1,4 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { getMockValue, MOCK_ICONS } from "@/mocks"
 import {
   createDataAdapter,
   ExampleComponent,
@@ -28,6 +30,39 @@ export const BasicListVisualization: Story = {
     const mockVisualizations = getMockVisualizations()
     return <ExampleComponent visualizations={[mockVisualizations.list]} />
   },
+}
+
+const ICON_COLORS = ["viridian", "malibu", "purple", "camel"] as const
+
+export const ListVisualizationWithIconColors: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <ExampleComponent
+      visualizations={[
+        {
+          type: "list",
+          options: {
+            itemDefinition: (item) => ({
+              title: item.name,
+              description: [item.email, item.role],
+              avatar: {
+                type: "icon",
+                icon: getMockValue(MOCK_ICONS, item.index),
+                color:
+                  item.index === 0
+                    ? "#4F46E5"
+                    : ICON_COLORS[item.index % ICON_COLORS.length],
+              },
+            }),
+            fields: [
+              { label: "Email", render: (item) => item.email },
+              { label: "Role", render: (item) => item.role },
+            ],
+          },
+        },
+      ]}
+    />
+  ),
 }
 
 export const ListVisualizationWithGrouping: Story = {
