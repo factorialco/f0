@@ -148,6 +148,72 @@ describe("F0Form inline mode", () => {
     )
   })
 
+  it("reopens a row whose value the save refused, with the reason under it", async () => {
+    const user = userEvent.setup()
+    renderProfile({
+      onSubmit: async () => ({
+        success: false,
+        errors: { fullName: "Invalid DNI number" },
+      }),
+    })
+
+    await user.click(activator("Full name"))
+    const input = await screen.findByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "Grace Hopper{Enter}")
+    await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
+
+    const [submit] = await screen.findAllByRole("button", { name: /submit/i })
+    await user.click(submit)
+
+    const reopened = await screen.findByRole("textbox", { name: "Full name" })
+    expect(reopened).toHaveValue("Grace Hopper")
+
+    const message = document.querySelector(
+      '[data-slot="inline-field-row-message"]'
+    ) as HTMLElement
+    expect(message).toHaveTextContent("Invalid DNI number")
+    expect(message.querySelector("svg")).toBeInTheDocument()
+  })
+
+  it("focuses one editor only when a refusal reopens several rows", async () => {
+    const user = userEvent.setup()
+    const focused: string[] = []
+    const realFocus = HTMLInputElement.prototype.focus
+    vi.spyOn(HTMLInputElement.prototype, "focus").mockImplementation(function (
+      this: HTMLInputElement,
+      options?: FocusOptions
+    ) {
+      focused.push(this.getAttribute("aria-label") ?? this.name)
+      realFocus.call(this, options)
+    })
+
+    renderProfile({
+      schema: z.object({
+        fullName: f0FormField(z.string(), { label: "Full name" }),
+        nickname: f0FormField(z.string(), { label: "Nickname" }),
+      }),
+      defaultValues: { fullName: "Ada Lovelace", nickname: "Ada" },
+      onSubmit: async () => ({
+        success: false,
+        errors: { fullName: "Unknown name", nickname: "Unknown nickname" },
+      }),
+    })
+
+    await user.click(activator("Full name"))
+    const input = await screen.findByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "Grace Hopper{Enter}")
+    await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
+
+    const [submit] = await screen.findAllByRole("button", { name: /submit/i })
+    focused.length = 0
+    await user.click(submit)
+
+    await waitFor(() => expect(screen.getAllByRole("textbox")).toHaveLength(2))
+    expect(focused).toEqual(["Full name"])
+  })
+
   it("puts the value back on Escape", async () => {
     const user = userEvent.setup()
     renderProfile()

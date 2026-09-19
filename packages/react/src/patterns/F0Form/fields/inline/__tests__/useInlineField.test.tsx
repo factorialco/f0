@@ -69,6 +69,96 @@ describe("useInlineField", () => {
     expect(result.current.editing).toBe(false)
   })
 
+  it("opens the editor when an error reaches a reading row", () => {
+    const { result, rerender } = renderHook(
+      ({ hasError }: { hasError: boolean }) =>
+        useInlineField({
+          hasError,
+          openOnError: true,
+          readValue: () => "73194628S",
+          restoreValue: vi.fn(),
+        }),
+      { initialProps: { hasError: false } }
+    )
+
+    expect(result.current.editing).toBe(false)
+
+    rerender({ hasError: true })
+
+    expect(result.current.editing).toBe(true)
+    expect(result.current.autoFocus).toBe(false)
+  })
+
+  it("keeps a reading row shut when its editor is a popup", () => {
+    const { result, rerender } = renderHook(
+      ({ hasError }: { hasError: boolean }) =>
+        useInlineField({
+          hasError,
+          readValue: () => "a",
+          restoreValue: vi.fn(),
+        }),
+      { initialProps: { hasError: false } }
+    )
+
+    rerender({ hasError: true })
+
+    expect(result.current.editing).toBe(false)
+  })
+
+  it("never opens a row the viewer cannot edit", () => {
+    const { result, rerender } = renderHook(
+      ({ hasError }: { hasError: boolean }) =>
+        useInlineField({
+          editable: false,
+          hasError,
+          openOnError: true,
+          readValue: () => "a",
+          restoreValue: vi.fn(),
+        }),
+      { initialProps: { hasError: false } }
+    )
+
+    rerender({ hasError: true })
+
+    expect(result.current.editing).toBe(false)
+  })
+
+  it("focuses the editor the user asked for", () => {
+    const { result } = renderHook(() =>
+      useInlineField({
+        openOnError: true,
+        readValue: () => "a",
+        restoreValue: vi.fn(),
+      })
+    )
+
+    act(() => result.current.activate?.())
+
+    expect(result.current.autoFocus).toBe(true)
+  })
+
+  it("snapshots the refused value so escape can put it back", () => {
+    const restoreValue = vi.fn()
+    let current = "73194628S"
+    const { result, rerender } = renderHook(
+      ({ hasError }: { hasError: boolean }) =>
+        useInlineField({
+          hasError,
+          openOnError: true,
+          readValue: () => current,
+          restoreValue,
+        }),
+      { initialProps: { hasError: false } }
+    )
+
+    rerender({ hasError: true })
+    current = "typed something else"
+    rerender({ hasError: false })
+    act(() => result.current.dismiss("escape"))
+
+    expect(restoreValue).toHaveBeenCalledWith("73194628S")
+  })
+
   it("restores focus to the activator one frame after the edit ends", async () => {
     const { result } = renderHook(() =>
       useInlineField({ readValue: () => "a", restoreValue: vi.fn() })

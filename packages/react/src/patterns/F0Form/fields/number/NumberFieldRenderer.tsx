@@ -57,6 +57,7 @@ export function NumberFieldRenderer({
         variant="inline"
         editing={inline.editing}
         onDismiss={inline.onDismiss}
+        autoFocus={inline.autoFocus}
       />
     )
   }

@@ -63,6 +63,7 @@ export function TextFieldRenderer({
         variant="inline"
         editing={inline.editing}
         onDismiss={inline.onDismiss}
+        autoFocus={inline.autoFocus}
       />
     )
   }

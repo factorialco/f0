@@ -184,6 +184,62 @@ describe("F0Form inline per-section mode", () => {
     expect(onSubmit).toHaveBeenCalledWith("work", { jobTitle: "Lead" })
   })
 
+  it("reopens the row a section refused by field, with the reason under it", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn(async (sectionId: string) =>
+      sectionId === "identification"
+        ? ({
+            success: false,
+            errors: { taxId: "Invalid DNI number" },
+          } as const)
+        : ({ success: true } as const)
+    )
+
+    renderRecord({ onSubmit })
+
+    await editRow(user, "Tax id", "73194628S")
+    await user.click(await saveButton())
+
+    const reopened = await screen.findByRole("textbox", { name: "Tax id" })
+    expect(reopened).toHaveValue("73194628S")
+
+    const message = document.querySelector(
+      '[data-slot="inline-field-row-message"]'
+    ) as HTMLElement
+    expect(message).toHaveTextContent("Invalid DNI number")
+    expect(message.querySelector("svg")).toBeInTheDocument()
+  })
+
+  it("focuses one editor only when two sections refuse at once", async () => {
+    const user = userEvent.setup()
+    const focused: string[] = []
+    const realFocus = HTMLInputElement.prototype.focus
+    vi.spyOn(HTMLInputElement.prototype, "focus").mockImplementation(function (
+      this: HTMLInputElement,
+      options?: FocusOptions
+    ) {
+      focused.push(this.getAttribute("aria-label") ?? this.name)
+      realFocus.call(this, options)
+    })
+
+    renderRecord({
+      onSubmit: async (sectionId: string) =>
+        sectionId === "personal"
+          ? { success: false, errors: { fullName: "Unknown name" } }
+          : { success: false, errors: { jobTitle: "Unknown title" } },
+    })
+
+    await editRow(user, "Full name", "Grace Hopper")
+    await editRow(user, "Job title", "Lead")
+
+    const save = await saveButton()
+    focused.length = 0
+    await user.click(save)
+
+    await waitFor(() => expect(screen.getAllByRole("textbox")).toHaveLength(2))
+    expect(focused).toEqual(["Full name"])
+  })
+
   it("throws nothing at the bar when a section's onSubmit rejects", async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn(async (sectionId: string) => {

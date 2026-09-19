@@ -173,6 +173,68 @@ export const ErrorWhileEditing: Story = {
 }
 
 /**
+ * A value the save refuses comes back as a field error. The row reopens on the
+ * refused value and looks exactly like a client-side one.
+ */
+export const ErrorFromTheSave: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="inline-error-save"
+        inline
+        schema={z.object({
+          identifier: f0FormField(z.string(), { label: "ID number" }),
+        })}
+        defaultValues={{ identifier: "73194628" }}
+        submitConfig={actionBar}
+        onSubmit={async () => ({
+          success: false,
+          errors: { identifier: "Invalid DNI number" },
+        })}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await step("Edit the row and save it", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "ID number" }))
+      const input = await canvas.findByRole("textbox", { name: "ID number" })
+      await userEvent.clear(input)
+      await userEvent.type(input, "73194628S{Enter}")
+      await waitFor(() => expect(canvas.getByText("73194628S")).toBeVisible())
+
+      await userEvent.click(body.getByRole("button", { name: /submit/i }))
+    })
+
+    await step("Reopen the row on the refused value", async () => {
+      const reopened = await canvas.findByRole("textbox", {
+        name: "ID number",
+      })
+      await expect(reopened).toHaveValue("73194628S")
+      await waitFor(() => expect(reopened).toHaveFocus())
+
+      const wrapper = reopened.closest(
+        '[data-testid="input-field-wrapper"]'
+      ) as HTMLElement
+      await expect(wrapper).toHaveClass("border-f1-border-critical-bold")
+      await expect(wrapper).toHaveClass("bg-f1-background-critical")
+    })
+
+    await step("Print the reason with its glyph", async () => {
+      const slot = canvasElement.querySelector<HTMLElement>(
+        '[data-slot="inline-field-row-message"]'
+      )
+      await expect(slot?.querySelector("svg")).toBeInTheDocument()
+      await expect(canvas.getByText("Invalid DNI number")).toBeVisible()
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 800))
+  },
+}
+
+/**
  * Only the value cell is the hover target. A play function cannot produce a
  * real CSS `:hover`, so the story pins the geometry the reveal keys off.
  */

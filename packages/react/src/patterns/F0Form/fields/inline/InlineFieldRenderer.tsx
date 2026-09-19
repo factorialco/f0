@@ -60,12 +60,16 @@ export function InlineFieldRenderer({
 
   const readValue = useCallback(() => formField.value, [formField.value])
 
-  const { editing, activate, dismiss, activatorRef } = useInlineField({
-    editable: activatable,
-    hasError: !!fieldState.error,
-    readValue,
-    restoreValue,
-  })
+  const { editing, autoFocus, activate, dismiss, activatorRef } =
+    useInlineField({
+      editable: activatable,
+      hasError: !!fieldState.error,
+      // A refused save has to land somewhere the user can type; a popup editor
+      // would instead open itself over the row.
+      openOnError: !opensPopup,
+      readValue,
+      restoreValue,
+    })
 
   const onDismiss = useCallback(
     (reason: InlineDismissReason) => dismiss(reason),
@@ -85,7 +89,7 @@ export function InlineFieldRenderer({
     isRequired,
     values,
     isFormLoading,
-    inline: supported ? { editing, onDismiss } : undefined,
+    inline: supported ? { editing, onDismiss, autoFocus } : undefined,
   })
 
   // Resolve validation copy before passing it to the presentation-only row.

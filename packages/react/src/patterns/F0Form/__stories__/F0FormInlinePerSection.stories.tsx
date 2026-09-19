@@ -48,6 +48,14 @@ const refuseWork = async (
     ? { success: false, rootMessage: "A job title change needs HR approval" }
     : { success: true }
 
+const refuseJobTitle = async (
+  sectionId: keyof typeof recordSchema,
+  _data: unknown
+): Promise<F0FormSubmitResult> =>
+  sectionId === "work"
+    ? { success: false, errors: { jobTitle: "Invalid DNI number" } }
+    : { success: true }
+
 const meta: Meta = {
   title: "Forms/F0Form/Inline per section",
   component: F0Form,
@@ -195,6 +203,62 @@ export const OneSectionRefused: Story = {
 
     // The a11y pass scans the whole body with no settle, and the bar's
     // entrance animation samples mid-fade. Wait the known duration.
+    await new Promise((resolve) => setTimeout(resolve, 800))
+  },
+}
+
+/**
+ * A field the server rejects reopens its row, so the refused value is where
+ * the user left it and ready to be corrected.
+ */
+export const OneFieldRefused: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="employee-record-field-refused"
+        inline
+        schema={recordSchema}
+        sections={recordSections}
+        defaultValues={recordDefaults}
+        onSubmit={refuseJobTitle}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await step("Edit the field the server will reject", async () => {
+      await editRow(canvas, "Job title", "73194628S")
+    })
+
+    await step("Reopen the refused row with its value", async () => {
+      await userEvent.click(body.getByRole("button", { name: /submit/i }))
+
+      const reopened = await canvas.findByRole("textbox", {
+        name: "Job title",
+      })
+      await expect(reopened).toHaveValue("73194628S")
+      await waitFor(() => expect(reopened).toHaveFocus())
+    })
+
+    await step("Draw the editor critical", async () => {
+      const wrapper = canvasElement.querySelector<HTMLElement>(
+        '[data-testid="input-field-wrapper"]'
+      )
+      await expect(wrapper?.className).toContain(
+        "border-f1-border-critical-bold"
+      )
+    })
+
+    await step("Print the reason with its glyph", async () => {
+      const slot = canvasElement.querySelector<HTMLElement>(
+        '[data-slot="inline-field-row-message"]'
+      )
+      await expect(slot?.querySelector("svg")).toBeInTheDocument()
+      await expect(canvas.getByText("Invalid DNI number")).toBeVisible()
+    })
+
     await new Promise((resolve) => setTimeout(resolve, 800))
   },
 }
