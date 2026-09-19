@@ -45,7 +45,7 @@ const InputMessages = ({ status }: InputMessagesProps) => {
 
   return (
     messages.length > 0 && (
-      <div className="flex gap-1">
+      <div className="flex items-start gap-1">
         {icon ? (
           <F0Icon
             icon={icon}

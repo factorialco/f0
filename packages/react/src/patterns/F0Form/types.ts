@@ -204,7 +204,7 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
 /**
  * Submit configuration for action bar type
  */
-interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
+export interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
   /** Type of submit UI (floating action bar) */
   type: "action-bar"
   /** Whether to show a Discard button to reset form changes */
@@ -259,6 +259,16 @@ export interface F0FormStylingConfig {
    * @default false
    */
   showSectionsSidepanel?: boolean
+  /**
+   * Distance in pixels between the pinned sections rail and the top of the
+   * scrolling ancestor. Raise it to clear a sticky app header that overlaps
+   * the top of the scroll area. Applies to inline forms, where the rail pins
+   * against a page-level scroll container; also published as the
+   * `--f0-form-sections-rail-top` custom property, so a consumer can set it
+   * from its own layout.
+   * @default 0
+   */
+  sectionsSidepanelOffset?: number
   /**
    * Removes the default padding around the form content.
    * @default false
@@ -423,6 +433,11 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    */
   styling?: F0FormStylingConfig
   /**
+   * Render editable detail rows using the existing save action bar.
+   * @default false
+   */
+  inline?: boolean
+  /**
    * Ref to control the form programmatically from outside.
    * Use with the `useF0Form` hook to get a ref and submit/reset functions.
    */
@@ -520,8 +535,12 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   }
   /** Callback when a section is submitted. Receives the section ID and its validated data, both correctly typed. */
   onSubmit: PerSectionSubmitHandler<T>
-  /** Global submit config applied to all sections (can be overridden per section) */
-  submitConfig?: F0PerSectionSubmitConfig
+  /**
+   * Global submit config applied to all sections (can be overridden per
+   * section). With `inline`, pass an action-bar config instead: one bar saves
+   * the whole record and the per-section overrides are ignored.
+   */
+  submitConfig?: F0PerSectionSubmitConfig | F0FormActionBarSubmitConfig
   /** Additional class name for the form container */
   className?: string
   /**
@@ -563,6 +582,13 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /**
+   * Render editable detail rows. Every section becomes a card of rows under
+   * its own heading, and one floating action bar saves each dirty section
+   * through its own `onSubmit`.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**
@@ -585,6 +611,11 @@ export interface F0FormPropsWithSingleSchemaDefinition<
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
   renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Render editable detail rows using the existing save action bar.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**
@@ -613,6 +644,13 @@ export interface F0FormPropsWithPerSectionDefinition<
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /**
+   * Render editable detail rows. Every section becomes a card of rows under
+   * its own heading, and one floating action bar saves each dirty section
+   * through the definition's `onSubmit`.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**
@@ -640,6 +678,11 @@ export interface F0FormPropsWithDefinition {
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /**
+   * Render editable detail rows using the existing save action bar.
+   * @default false
+   */
+  inline?: boolean
 }
 
 /**

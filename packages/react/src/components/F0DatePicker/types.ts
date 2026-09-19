@@ -1,4 +1,8 @@
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
+import {
+  INPUTFIELD_SIZES,
+  InputFieldProps,
+  type InlineDismissReason,
+} from "@/components/F0InputField"
 import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import {
@@ -11,7 +15,7 @@ export * from "@/ui/DatePickerPopup/types"
 
 export type DatePickerValue = DatePickerPopupValue
 
-export type F0DatePickerProps = Pick<
+type F0DatePickerBaseProps = Pick<
   DatePickerPopupProps,
   | "minDate"
   | "maxDate"
@@ -31,5 +35,20 @@ export type F0DatePickerProps = Pick<
   ) => void
   value?: DatePickerValue
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
+
+export type F0DatePickerFieldProps = F0DatePickerBaseProps & {
+  variant?: "field"
+  editing?: never
+  onDismiss?: never
+}
+
+export type F0DatePickerInlineProps = F0DatePickerBaseProps & {
+  variant: "inline"
+  /** The row owns the mode; the picker never changes it. */
+  editing?: boolean
+  onDismiss?: (reason: InlineDismissReason) => void
+}
+
+export type F0DatePickerProps = F0DatePickerFieldProps | F0DatePickerInlineProps
 
 export const datepickerSizes = INPUTFIELD_SIZES

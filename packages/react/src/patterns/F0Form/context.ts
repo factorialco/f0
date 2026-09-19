@@ -25,6 +25,8 @@ interface F0FormContextValue {
    * Submit configuration for the form.
    */
   submitConfig?: F0FormSubmitConfig
+  /** Render the whole form as editable detail rows. */
+  inline?: boolean
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

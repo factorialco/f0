@@ -67,7 +67,7 @@
       "f0-styles/no-inline-styles": 1
     },
     "src/components/F0Select/F0Select.tsx": {
-      "sonarjs/cognitive-complexity": 2
+      "sonarjs/cognitive-complexity": 1
     },
     "src/components/F0Select/components/SelectItem.tsx": {
       "sonarjs/cognitive-complexity": 1

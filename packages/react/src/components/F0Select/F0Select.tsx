@@ -63,6 +63,7 @@ import type {
   F0SelectItemProps,
   F0SelectProps,
   ResolvedRecordType,
+  SelectInlineDismissReason,
 } from "./types"
 import { displayLabel } from "./utils"
 export * from "./types"
@@ -140,51 +141,130 @@ const asListContainerVariants = cva({
   },
 })
 
+/**
+ * Keep the text inset identical in both modes and equal to the 13px an
+ * `F0InputField` editor produces from `px-3` plus its 1px border.
+ */
+const INLINE_SELECT_INSET = "border border-solid border-transparent px-3"
+
+/** Match the body size and colour of adjacent inline inputs. */
+const INLINE_SELECT_TEXT = textVariants({ variant: "body" })
+
+/** The prototype prints a value medium at rest and regular inside its editor. */
+const INLINE_SELECT_REST_WEIGHT = "font-medium"
+const INLINE_SELECT_EDIT_WEIGHT = "font-normal"
+
 const inlineSelectTriggerClassName = cn(
-  "group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
-  textVariants({ variant: "label" })
+  "group flex h-full w-full max-w-full items-center justify-between gap-1 rounded bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
+  INLINE_SELECT_INSET,
+  INLINE_SELECT_TEXT,
+  INLINE_SELECT_EDIT_WEIGHT
 )
 
-type InlineSelectTriggerProps = {
+/**
+ * Reveal on hover of the value cell, or once something around the chevron
+ * takes a focus ring; always show on touch screens. Plain focus is not enough:
+ * a row restores focus to its activator after a mouse-driven edit, and
+ * `group-focus-within` read that as reason to keep the chevron out.
+ */
+const INLINE_SELECT_CHEVRON_REVEAL = cn(
+  "opacity-0 transition-opacity motion-reduce:transition-none",
+  "group-hover:opacity-100 [:focus-visible_&]:opacity-100",
+  "[@media(hover:none)]:opacity-100"
+)
+
+const InlineSelectChevron = ({ className }: { className?: string }) => (
+  <span
+    className={cn(
+      "flex size-4 shrink-0 items-center justify-center text-f1-icon",
+      className
+    )}
+    aria-hidden="true"
+  >
+    <F0Icon icon={ChevronDown} size="sm" />
+  </span>
+)
+
+type InlineSelectValueProps = {
   label: string
   placeholder?: string
   selection: F0SelectItemObject<string>[]
   hasValue: boolean
+  multiple?: boolean
+  /** Only read for a multiple selection, which may hold more than it can show. */
+  selectedCount?: number
+  allSelected?: boolean | "indeterminate"
 }
+
+const InlineSelectValue = ({
+  label,
+  placeholder,
+  selection,
+  hasValue,
+  multiple,
+  selectedCount,
+  allSelected,
+}: InlineSelectValueProps) =>
+  hasValue ? (
+    <SelectedItems
+      multiple={multiple}
+      selection={selection}
+      totalSelectedCount={multiple ? selectedCount : 1}
+      allSelected={allSelected}
+    />
+  ) : (
+    <span className="truncate text-f1-foreground-secondary">
+      {placeholder ?? label}
+    </span>
+  )
 
 const InlineSelectTrigger = forwardRef<
   HTMLButtonElement,
-  InlineSelectTriggerProps
->(function InlineSelectTrigger(
-  { label, placeholder, selection, hasValue },
-  ref
-) {
+  InlineSelectValueProps
+>(function InlineSelectTrigger(props, ref) {
   return (
     <SelectTrigger
       ref={ref}
-      aria-label={label}
+      aria-label={props.label}
       className={cn(inlineSelectTriggerClassName, focusRing())}
     >
-      <span className="flex min-w-0 max-w-full items-center">
-        {hasValue ? (
-          <SelectedItems selection={selection} totalSelectedCount={1} />
-        ) : (
-          <span className="truncate text-f1-foreground-secondary">
-            {placeholder ?? label}
-          </span>
-        )}
+      <span className="flex min-w-0 flex-1 items-center">
+        <InlineSelectValue {...props} />
       </span>
-      <span
-        className="flex size-4 shrink-0 items-center justify-center text-f1-icon"
-        aria-hidden="true"
-      >
-        <F0Icon icon={ChevronDown} size="sm" />
-      </span>
+      <InlineSelectChevron />
     </SelectTrigger>
   )
 })
 
 InlineSelectTrigger.displayName = "InlineSelectTrigger"
+
+/** Keep static text contrast when disabled; the row handles activation. */
+const InlineSelectText = ({
+  hideLabel,
+  disabled,
+  ...valueProps
+}: InlineSelectValueProps & {
+  hideLabel?: boolean
+  disabled?: boolean
+}) => (
+  <div
+    data-testid="select-inline-value"
+    aria-label={hideLabel ? valueProps.label : undefined}
+    className={cn(
+      "flex h-full w-full min-w-0 max-w-full items-center justify-between gap-1",
+      INLINE_SELECT_INSET,
+      INLINE_SELECT_TEXT,
+      INLINE_SELECT_REST_WEIGHT
+    )}
+  >
+    <span className="flex min-w-0 flex-1 items-center">
+      <InlineSelectValue {...valueProps} />
+    </span>
+    {disabled ? null : (
+      <InlineSelectChevron className={INLINE_SELECT_CHEVRON_REVEAL} />
+    )}
+  </div>
+)
 
 const F0SelectComponent = forwardRef(function Select<
   T extends string,
@@ -234,6 +314,8 @@ const F0SelectComponent = forwardRef(function Select<
     fitContentWidth,
     getSelectedLabel,
     dataTestId,
+    editing,
+    onDismiss,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -285,15 +367,42 @@ const F0SelectComponent = forwardRef(function Select<
   const inlineTriggerRef = useRef<HTMLElement>(null)
   const arrowRef = useRef<HTMLDivElement>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
-  const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
 
+  const isInline = variant === "inline"
+  /** editing controls inline visibility; open remains a compatibility fallback. */
+  const inlineOpen = editing ?? open ?? false
+  const isOpen = isInline ? inlineOpen : openLocal
+
+  /** Focus the trigger only if the popup has not focused an option. */
   useEffect(() => {
-    if (variant === "inline" && previousOpenRef.current && !openLocal) {
-      inlineTriggerRef.current?.focus({ preventScroll: true })
+    if (!isInline || !inlineOpen) {
+      return
     }
-    previousOpenRef.current = openLocal
-  }, [openLocal, variant])
+    const frame = requestAnimationFrame(() => {
+      if (document.activeElement && document.activeElement !== document.body) {
+        return
+      }
+      inlineTriggerRef.current?.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isInline, inlineOpen])
+
+  /** Record the cause before Radix reports a close without a reason. */
+  const inlineDismissReasonRef = useRef<SelectInlineDismissReason | null>(null)
+
+  useEffect(() => {
+    if (!isInline || !inlineOpen) {
+      return
+    }
+    const recordEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        inlineDismissReasonRef.current = "escape"
+      }
+    }
+    document.addEventListener("keydown", recordEscape, true)
+    return () => document.removeEventListener("keydown", recordEscape, true)
+  }, [isInline, inlineOpen])
 
   const defaultItems = useMemo(
     () =>
@@ -674,17 +783,36 @@ const F0SelectComponent = forwardRef(function Select<
 
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
-  const isFirstRender = useRef(true)
 
-  // Track the last value emitted via onChange to avoid spurious re-emits when
-  // the effect deps change but the selected value did not. Without this guard,
-  // async datasources (records resolving after the click), or downstream
-  // clones of `selectedState` items, can re-fire the emit effect with the
-  // same logical selection.
-  const lastEmittedSingleRef = useRef<{ value: string | undefined } | null>(
-    null
-  )
+  // Ignore multi-selection data refreshes that leave the selected IDs unchanged.
   const lastEmittedMultiRef = useRef<string | null>(null)
+
+  const handleSingleSelectionChange = useCallback(
+    (value: string, checked: boolean) => {
+      if (multiple) {
+        return
+      }
+      const selected = checked ? itemsByValue[String(value)] : undefined
+      const nextValue = checked
+        ? (selected?.option.value ?? (value as T))
+        : undefined
+      if (controlledInlineValue === undefined) {
+        setLocalValue(nextValue === undefined ? [] : [String(nextValue)])
+      }
+      if (String(nextValue ?? "") !== String(localValue[0] ?? "")) {
+        const originalItem = source ? selected?.item : selected?.option.item
+        onChange?.(nextValue as T, originalItem, selected?.option)
+      }
+    },
+    [
+      multiple,
+      itemsByValue,
+      controlledInlineValue,
+      localValue,
+      source,
+      onChange,
+    ]
+  )
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
@@ -694,7 +822,14 @@ const F0SelectComponent = forwardRef(function Select<
       }
 
       hasUserInteracted.current = true
+      // A multiple selection outlives each click, so every change — taking an
+      // option or dropping one — arms the close that follows as the commit.
+      if (isInline && (multiple || checked)) {
+        inlineDismissReasonRef.current = "commit"
+      }
       handleSelectItemChange(value, checked)
+
+      handleSingleSelectionChange(value, checked)
 
       // Only call onChangeSelectedOption if we have the item data
       // Use string key for consistent lookup
@@ -713,9 +848,11 @@ const F0SelectComponent = forwardRef(function Select<
     },
     [
       hasDeferredApply,
+      handleSingleSelectionChange,
       onChangeSelectedOption,
       itemsByValue,
       handleSelectItemChange,
+      isInline,
       multiple,
       clearable,
       localValue,
@@ -734,9 +871,12 @@ const F0SelectComponent = forwardRef(function Select<
     (checked: boolean) => {
       hasUserInteracted.current = true
       selectAllActiveRef.current = checked
+      if (isInline) {
+        inlineDismissReasonRef.current = "commit"
+      }
       handleSelectAllItems(checked)
     },
-    [handleSelectAllItems]
+    [handleSelectAllItems, isInline]
   )
 
   // Extract the original item from a record.
@@ -797,117 +937,56 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [extractOriginalItem, optionMapper, selectedState.items, source])
 
-  /**
-   * Emit the value change. The type depends on the multiple prop and selectionMode.
-   * Only emit after user interaction to avoid spurious onChange calls on mount.
-   */
+  // The primitive updates optimistically. Restore a rejected inline selection
+  // after the owner has had a chance to accept onChange in the event handler.
+  useEffect(() => {
+    if (controlledInlineValue === undefined) {
+      return
+    }
+    const selected = Array.from(selectedState.items.values()).find(
+      (item) => item.checked
+    )
+    if (selected?.id !== controlledInlineValue) {
+      clearSelection()
+      handleSelectItemChange(controlledInlineValue, true)
+    }
+  }, [
+    controlledInlineValue,
+    selectedState.items,
+    clearSelection,
+    handleSelectItemChange,
+  ])
+
+  // Multi-selection also changes when all-selected pages arrive or the dataset
+  // resets. Keep that synchronization separate from single-select user events.
   useDeepCompareEffect(() => {
     // Skip onChange before user has interacted with the component
     // This prevents emitting undefined values on initial mount/data load
-    if (!hasUserInteracted.current) {
-      // Mark first render as complete
-      if (isFirstRender.current) {
-        isFirstRender.current = false
-      }
+    if (!multiple || !hasUserInteracted.current) {
       return
     }
 
-    // Only reset search in single select mode when dropdown is closed
-    // Don't clear while user is still typing/searching with dropdown open
-    // Don't clear in asList mode since openLocal is never true (no popover)
-    // and clearing would trigger useSelectable to reset the selection
-    if (!multiple && !openLocal && !asList) {
-      setCurrentSearch(undefined)
+    const { values, originalItems, options } = getMultiSelectionPayload()
+
+    // Sync localValue with actual selection state (as strings for internal comparison)
+    // This ensures the preview shows correct items after deselection
+    // Use Set to ensure unique values and prevent duplicates
+    setLocalValue(Array.from(new Set(values.map(String))))
+
+    // Guard: only emit when the set of selected values actually changes.
+    // Sort + join to compare order-independently with a stable key.
+    const valuesKey = values.map(String).sort().join("\u0000")
+    if (lastEmittedMultiRef.current === valuesKey) {
+      return
     }
 
-    // TypeScript cannot infer the type of the onChange callback when it has generics,
-    // so we need to cast it to the correct type
-    if (multiple) {
-      const { values, originalItems, options } = getMultiSelectionPayload()
-
-      // Sync localValue with actual selection state (as strings for internal comparison)
-      // This ensures the preview shows correct items after deselection
-      // Use Set to ensure unique values and prevent duplicates
-      setLocalValue(Array.from(new Set(values.map(String))))
-
-      // Guard: only emit when the set of selected values actually changes.
-      // Sort + join to compare order-independently with a stable key.
-      const valuesKey = values.map(String).sort().join("\u0000")
-      if (lastEmittedMultiRef.current === valuesKey) {
-        return
-      }
-
-      if (!hasDeferredApply) {
-        // Only commit to the ref what we actually emit, so a later transition
-        // from deferred-apply back to immediate-emit isn't suppressed.
-        lastEmittedMultiRef.current = valuesKey
-        onChange?.(values, originalItems, options)
-      }
-    } else {
-      const checkedItems = Array.from(
-        selectedState.items.values() || []
-      ).filter((item) => item.checked)
-      const selectedItem = checkedItems[0]
-      const record = selectedItem?.item as ActualRecordType | undefined
-      const originalItem = extractOriginalItem(record)
-      const option = record
-        ? (optionMapper(record) as F0SelectItemObject<T, ResolvedRecordType<R>>)
-        : undefined
-
-      // Use original option value to preserve the type (number vs string)
-      const value = option
-        ? (option.value as T)
-        : selectedItem
-          ? (String(selectedItem.id) as T)
-          : undefined
-
-      // Sync localValue with actual selection state (as string for internal comparison)
-      setLocalValue(value !== undefined ? [String(value)] : [])
-
-      // Guard: only emit when the selected value identity actually changes.
-      // Without this, async datasources (record resolving after a click) or
-      // unrelated `source`/`selectedState` content changes can re-fire the
-      // effect with the same selection and produce duplicate onChange calls.
-      const valueKey = value === undefined ? undefined : String(value)
-      if (
-        lastEmittedSingleRef.current !== null &&
-        lastEmittedSingleRef.current.value === valueKey
-      ) {
-        return
-      }
-
-      if (!hasDeferredApply) {
-        // Only commit to the ref what we actually emit, so a later transition
-        // from deferred-apply back to immediate-emit isn't suppressed.
-        lastEmittedSingleRef.current = { value: valueKey }
-        onChange?.(value as T, originalItem, option)
-
-        // A controlled inline select must keep the prop as its source of truth.
-        // The selection hook updates optimistically so `onChange` can be emitted;
-        // if the parent leaves `value` unchanged, restore both the selection
-        // state and the primitive value after that emission. Resetting the
-        // emission guard also allows the user to retry the same rejected value.
-        if (
-          controlledInlineValue !== undefined &&
-          valueKey !== controlledInlineValue
-        ) {
-          hasUserInteracted.current = false
-          lastEmittedSingleRef.current = null
-          clearSelection()
-          handleSelectItemChange(controlledInlineValue, true)
-          setLocalValue([controlledInlineValue])
-        }
-      }
+    if (!hasDeferredApply) {
+      // Only commit to the ref what we actually emit, so a later transition
+      // from deferred-apply back to immediate-emit isn't suppressed.
+      lastEmittedMultiRef.current = valuesKey
+      onChange?.(values, originalItems, options)
     }
-  }, [
-    extractOriginalItem,
-    controlledInlineValue,
-    getMultiSelectionPayload,
-    hasDeferredApply,
-    optionMapper,
-    selectedState,
-    source,
-  ])
+  }, [getMultiSelectionPayload, hasDeferredApply, multiple, selectedState])
 
   // Debounced open/close via plain setTimeout instead of usehooks-ts'
   // `useDebounceCallback` (lodash.debounce). lodash decides the trailing edge
@@ -979,6 +1058,20 @@ const F0SelectComponent = forwardRef(function Select<
   }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
 
   const handleChangeOpenLocal = (open: boolean) => {
+    if (!open && !multiple && !asList) {
+      setCurrentSearch(undefined)
+    }
+    // Report dismissal; the parent controls editing.
+    if (isInline) {
+      if (!open) {
+        const reason = inlineDismissReasonRef.current ?? "popupClose"
+        inlineDismissReasonRef.current = null
+        onOpenChange?.(false)
+        onDismiss?.(reason)
+      }
+      return
+    }
+
     if (!open && hasDeferredApply && !isApplyingRef.current) {
       restoreCommittedSelection()
     }
@@ -1309,7 +1402,7 @@ const F0SelectComponent = forwardRef(function Select<
     ...props,
     onItemCheckChange,
     disabled,
-    open: openLocal,
+    open: isOpen,
     onOpenChange: handleChangeOpenLocal,
   }
 
@@ -1435,6 +1528,7 @@ const F0SelectComponent = forwardRef(function Select<
   const clearFromField = () => {
     hasUserInteracted.current = true
     clearSelection()
+    handleSingleSelectionChange(localValue[0], false)
     selectedItemsCache.current.clear()
     ;(
       onChangeSelectedOption as (option: undefined, checked: boolean) => void
@@ -1793,16 +1887,32 @@ const F0SelectComponent = forwardRef(function Select<
     )
   }
 
+  const inlineValueProps = {
+    label,
+    placeholder,
+    selection: getDisplayItemsForSelection,
+    hasValue: hasSelection,
+    multiple,
+    selectedCount,
+    allSelected: multiple ? selectedState.allSelected : undefined,
+  }
+
+  if (isInline && !inlineOpen) {
+    return (
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        <InlineSelectText
+          {...inlineValueProps}
+          hideLabel={hideLabel}
+          disabled={disabled}
+        />
+      </DataTestIdWrapper>
+    )
+  }
+
   const triggerWithContent = (
     <SelectPrimitive {...selectPrimitiveProps}>
-      {variant === "inline" ? (
-        <InlineSelectTrigger
-          ref={composedTriggerRef}
-          label={label}
-          placeholder={placeholder}
-          selection={getDisplayItemsForSelection}
-          hasValue={!!localValue[0]}
-        />
+      {isInline ? (
+        <InlineSelectTrigger ref={composedTriggerRef} {...inlineValueProps} />
       ) : (
         <SelectTrigger
           ref={composedTriggerRef}
@@ -1955,7 +2065,7 @@ const F0SelectComponent = forwardRef(function Select<
           )}
         </SelectTrigger>
       )}
-      {openLocal ? (
+      {isOpen ? (
         <ActiveOptionContext.Provider
           value={
             inlineSearch
@@ -1971,9 +2081,7 @@ const F0SelectComponent = forwardRef(function Select<
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
-      {variant === "inline"
-        ? triggerWithContent
-        : withTriggerTooltip(triggerWithContent)}
+      {isInline ? triggerWithContent : withTriggerTooltip(triggerWithContent)}
     </DataTestIdWrapper>
   )
 })

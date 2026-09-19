@@ -299,8 +299,10 @@ export function DatePickerPopup({
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent
         ref={contentRef}
-        className="w-full overflow-auto"
+        // Let the calendar show all six week rows without an internal scrollbar.
+        className="w-full max-h-none overflow-visible"
         align="start"
+        collisionPadding={8}
         container={portalContainer}
         {...dismissalHandlers}
       >

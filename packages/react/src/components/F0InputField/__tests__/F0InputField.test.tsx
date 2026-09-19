@@ -16,6 +16,54 @@ describe("F0InputField", () => {
     consoleErrorSpy.mockRestore()
   })
 
+  describe("inline display text", () => {
+    it.each([undefined, ""])(
+      "keeps placeholders for empty values (%s)",
+      (value) => {
+        render(
+          <F0InputField
+            variant="inline"
+            label="Amount"
+            value={value}
+            inlineText="Hidden"
+            placeholder="Add amount"
+          >
+            <input />
+          </F0InputField>
+        )
+        expect(screen.getByText("Add amount")).toBeInTheDocument()
+        expect(screen.queryByText("Hidden")).toBeNull()
+      }
+    )
+
+    it("uses display text for a zero value", () => {
+      render(
+        <F0InputField
+          variant="inline"
+          label="Amount"
+          value="0"
+          inlineText="0.00"
+        >
+          <input />
+        </F0InputField>
+      )
+      expect(screen.getByTitle("0.00")).toHaveTextContent("0.00")
+    })
+
+    it("prints the resting value in medium body text", () => {
+      render(
+        <F0InputField variant="inline" label="Job title" value="Analyst">
+          <input />
+        </F0InputField>
+      )
+
+      const text = screen.getByTitle("Analyst")
+      expect(text).toHaveClass("text-base")
+      expect(text).toHaveClass("font-medium")
+      expect(text).toHaveClass("text-f1-foreground")
+    })
+  })
+
   describe("Label validation", () => {
     it("should emit an error when label is empty string", () => {
       render(
@@ -469,7 +517,7 @@ describe("F0InputField", () => {
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
-      expect(wrapper).toHaveClass("h-[32px]")
+      expect(wrapper).toHaveClass("h-8")
     })
 
     it("should apply medium size classes", () => {
@@ -480,7 +528,7 @@ describe("F0InputField", () => {
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
-      expect(wrapper).toHaveClass("h-[40px]")
+      expect(wrapper).toHaveClass("h-10")
     })
 
     it("should handle canGrow prop", () => {
@@ -491,7 +539,7 @@ describe("F0InputField", () => {
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
-      expect(wrapper).toHaveClass("min-h-[40px]")
+      expect(wrapper).toHaveClass("min-h-10")
     })
   })
 

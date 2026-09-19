@@ -1,0 +1,73 @@
+import { F0Icon, type IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
+import { textVariants } from "@/ui/Text/variants"
+import {
+  inputElementVariants,
+  inputFieldVariants,
+  type InputFieldSize,
+} from "../variants"
+
+type InlineValueProps = {
+  label: string
+  hideLabel?: boolean
+  text: string
+  placeholder?: string
+  size?: InputFieldSize
+  icon?: IconType
+  /** Print line breaks and wrap instead of truncating, for a growable field. */
+  multiline?: boolean
+}
+
+/** Match the editor border, padding, and icon offsets to prevent text movement. */
+const InlineValue = ({
+  label,
+  hideLabel,
+  text,
+  placeholder,
+  size = "md",
+  icon,
+  multiline = false,
+}: InlineValueProps) => {
+  const empty = text.length === 0
+  const display = empty ? (placeholder ?? "") : text
+
+  return (
+    <div
+      data-testid="input-field-inline-value"
+      aria-label={hideLabel ? label : undefined}
+      className={cn(
+        "relative flex w-full min-w-0 border border-solid border-transparent",
+        multiline ? "items-start" : "items-center",
+        inputFieldVariants({ size, canGrow: true })
+      )}
+    >
+      {icon ? (
+        <div
+          data-slot="icon"
+          className={cn(
+            "pointer-events-none absolute left-2 top-1.25 my-auto h-5 w-5 shrink-0",
+            size === "md" && "left-3 top-2.25"
+          )}
+        >
+          <F0Icon icon={icon} color="default" />
+        </div>
+      ) : null}
+      <span
+        title={multiline ? undefined : display}
+        className={cn(
+          textVariants({ variant: "body" }),
+          "min-w-0 px-3 font-medium",
+          multiline ? "w-full whitespace-pre-wrap break-words" : "truncate",
+          icon && "pl-8",
+          icon && size === "md" && "pl-9",
+          inputElementVariants({ size }),
+          empty ? "text-f1-foreground-secondary" : "text-f1-foreground"
+        )}
+      >
+        {display}
+      </span>
+    </div>
+  )
+}
+
+export { InlineValue }

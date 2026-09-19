@@ -3,7 +3,7 @@ import { expect, userEvent, within } from "storybook/test"
 import { inputSizes } from "@/components/F0TextInput/types"
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { F0TextAreaInput } from ".."
+import { F0TextAreaInput, type F0TextAreaInputFieldProps } from ".."
 
 const meta = {
   title: "Inputs/Text area input",
@@ -26,7 +26,7 @@ const meta = {
 } satisfies Meta<typeof F0TextAreaInput>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<F0TextAreaInputFieldProps>
 
 export const Default: Story = {
   args: {

@@ -1,0 +1,491 @@
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { AlertCircle, Pencil, Star } from "@/icons/app"
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
+import { InlineFieldRow } from "../InlineFieldRow"
+import type { InlineFieldRowProps } from "../types"
+
+const renderRow = (props: Partial<InlineFieldRowProps> = {}) =>
+  render(
+    <InlineFieldRow
+      label="Job title"
+      value={<span>Hello</span>}
+      actions={[]}
+      editing={false}
+      {...props}
+    />
+  )
+
+/** Define clipboard without replacing navigator prototype getters. */
+const stubClipboard = (writeText: () => Promise<void>) =>
+  Object.defineProperty(navigator, "clipboard", {
+    value: { writeText },
+    configurable: true,
+  })
+
+afterEach(() => {
+  Reflect.deleteProperty(navigator, "clipboard")
+})
+
+const fakeActions = (onClick = vi.fn()) => [
+  { key: "one", icon: Pencil, label: "First action", onClick },
+  { key: "two", icon: Star, label: "Second action", onClick },
+]
+
+describe("InlineFieldRow", () => {
+  it("renders the label and the value node", () => {
+    renderRow()
+
+    expect(screen.getByText("Job title")).toBeInTheDocument()
+    expect(screen.getByText("Hello")).toBeInTheDocument()
+  })
+
+  it("names the hint affordance with the hint copy", () => {
+    renderRow({ hint: "As it appears on the contract" })
+
+    expect(
+      screen.getByRole("button", { name: "As it appears on the contract" })
+    ).toBeInTheDocument()
+  })
+
+  it("renders no activator when onActivate is absent", () => {
+    renderRow()
+
+    expect(screen.queryByRole("button", { name: "Job title" })).toBeNull()
+    expect(document.querySelector('[tabindex="0"]')).toBeNull()
+  })
+
+  it("renders an activator when onActivate is present", () => {
+    renderRow({ onActivate: vi.fn() })
+
+    const activator = screen.getByRole("button", { name: "Job title" })
+    expect(activator).toHaveAttribute("tabindex", "0")
+  })
+
+  it.each([
+    ["click", (el: HTMLElement) => fireEvent.click(el)],
+    ["Enter", (el: HTMLElement) => fireEvent.keyDown(el, { key: "Enter" })],
+    ["Space", (el: HTMLElement) => fireEvent.keyDown(el, { key: " " })],
+  ])("activates on %s", (_name, act) => {
+    const onActivate = vi.fn()
+    renderRow({ onActivate })
+
+    act(screen.getByRole("button", { name: "Job title" }))
+
+    expect(onActivate).toHaveBeenCalledTimes(1)
+  })
+
+  it("ignores other keys", () => {
+    const onActivate = vi.fn()
+    renderRow({ onActivate })
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "Job title" }), {
+      key: "a",
+    })
+
+    expect(onActivate).not.toHaveBeenCalled()
+  })
+
+  it("renders the actions in the given order with their labels", () => {
+    renderRow({ actions: fakeActions(), onActivate: vi.fn() })
+
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    )
+    const labels = Array.from(strip?.querySelectorAll("button") ?? []).map(
+      (button) => button.getAttribute("aria-label")
+    )
+
+    expect(labels).toEqual(["First action", "Second action"])
+  })
+
+  it("calls the action back when it is pressed", async () => {
+    const onClick = vi.fn()
+    renderRow({ actions: fakeActions(onClick) })
+
+    await userEvent.click(screen.getByRole("button", { name: "First action" }))
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("hides the strip and the activator while editing", () => {
+    renderRow({
+      actions: fakeActions(),
+      onActivate: vi.fn(),
+      copyValue: "Designer",
+      editing: true,
+    })
+
+    expect(
+      document.querySelector('[data-slot="inline-field-row-actions"]')
+    ).toBeNull()
+    expect(screen.queryByRole("button", { name: "Job title" })).toBeNull()
+  })
+
+  describe("the activator's cursor", () => {
+    const valueBox = () =>
+      document.querySelector('[data-slot="inline-field-row-value"]')
+
+    it("promises a caret by default", () => {
+      renderRow({ onActivate: vi.fn() })
+
+      expect(valueBox()).toHaveClass("cursor-text")
+    })
+
+    it("promises a click when the caller asks for one", () => {
+      renderRow({ onActivate: vi.fn(), activatorCursor: "pointer" })
+
+      expect(valueBox()).toHaveClass("cursor-pointer")
+      expect(valueBox()).not.toHaveClass("cursor-text")
+    })
+
+    it("promises nothing on a row that cannot be activated", () => {
+      renderRow({ activatorCursor: "pointer" })
+
+      expect(valueBox()).not.toHaveClass("cursor-pointer")
+      expect(valueBox()).not.toHaveClass("cursor-text")
+    })
+  })
+
+  it("keeps the value's DOM in place when the row starts editing", () => {
+    const { rerender } = renderRow({ onActivate: vi.fn() })
+
+    const before = screen.getByText("Hello")
+
+    rerender(
+      <InlineFieldRow
+        label="Job title"
+        value={<span>Hello</span>}
+        actions={[]}
+        onActivate={vi.fn()}
+        editing
+      />
+    )
+
+    // Keep the value mounted so pending changes survive mode transitions.
+    expect(screen.getByText("Hello")).toBe(before)
+  })
+
+  it("keeps the strip reachable where there is no hover to reveal it with", () => {
+    renderRow({ actions: fakeActions() })
+
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    )
+
+    expect(strip?.className).toContain("[@media(hover:none)]:opacity-100")
+    expect(strip?.className).toContain(
+      "[@media(hover:none)]:pointer-events-auto"
+    )
+    expect(strip?.className).toContain("group-hover:opacity-100")
+    expect(strip?.className).toContain("has-[:focus-visible]:opacity-100")
+    expect(strip?.className).toContain("motion-reduce:transition-none")
+  })
+
+  it("takes its focus reveal from its own buttons, not from the activator", () => {
+    renderRow({ actions: fakeActions(), onActivate: vi.fn() })
+
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    )
+
+    // Focus restored to the activator after an edit must not pin it open.
+    expect(strip?.className).not.toContain("group-focus-within")
+    expect(strip?.className).not.toContain("group-has-[:focus-visible]")
+  })
+
+  it("scopes the hover group to the value cell, never the whole row", () => {
+    renderRow({ actions: fakeActions(), onActivate: vi.fn() })
+
+    const row = document.querySelector(
+      '[data-slot="inline-field-row"]'
+    ) as HTMLElement
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    ) as HTMLElement
+    const group = strip.closest(".group") as HTMLElement
+
+    expect(row).not.toHaveClass("group")
+    expect(group).not.toBe(row)
+    expect(group.contains(screen.getByText("Job title"))).toBe(false)
+    expect(
+      group.contains(screen.getByRole("button", { name: "Job title" }))
+    ).toBe(true)
+  })
+
+  it("marks the hint as a help affordance", () => {
+    renderRow({ hint: "As it appears on the contract" })
+
+    expect(
+      screen.getByRole("button", { name: "As it appears on the contract" })
+    ).toHaveClass("cursor-help")
+  })
+
+  it("prints the label as regular body text, as the prototype does", () => {
+    renderRow()
+
+    const label = screen.getByText("Job title")
+    expect(label).toHaveClass("text-base")
+    expect(label).toHaveClass("font-normal")
+    expect(label).toHaveClass("text-f1-foreground")
+    expect(label).not.toHaveClass("text-f1-foreground-secondary")
+  })
+
+  it("keeps the activator a sibling of the strip, never its parent", () => {
+    renderRow({ actions: fakeActions(), onActivate: vi.fn() })
+
+    const activator = screen.getByRole("button", { name: "Job title" })
+    const strip = document.querySelector(
+      '[data-slot="inline-field-row-actions"]'
+    )
+
+    expect(activator.contains(strip)).toBe(false)
+    expect(activator.parentElement).toBe(strip?.parentElement)
+  })
+
+  it("appends the copy action last and writes copyValue, not the text", async () => {
+    // Real timers: fake ones deadlock userEvent's clipboard stub.
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    stubClipboard(writeText)
+
+    renderRow({
+      actions: fakeActions(),
+      copyValue: "Senior designer",
+      value: <span>Hello</span>,
+    })
+
+    const buttons = Array.from(
+      document
+        .querySelector('[data-slot="inline-field-row-actions"]')
+        ?.querySelectorAll("button") ?? []
+    )
+    expect(buttons.at(-1)).toHaveAttribute("aria-label", "Copy Job title")
+
+    await userEvent.click(buttons.at(-1) as HTMLElement)
+
+    expect(writeText).toHaveBeenCalledWith("Senior designer")
+  })
+
+  it("pins the confirmation for 1400ms and then drops it", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    stubClipboard(writeText)
+
+    renderRow({ copyValue: "Senior designer", onActivate: vi.fn() })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Copy Job title" })
+    )
+
+    const confirmation = await screen.findByRole("button", {
+      name: "Copied Job title",
+    })
+    const value = document.querySelector('[data-slot="inline-field-row-value"]')
+    expect(value).toHaveClass("bg-f1-background-positive")
+    expect(value).not.toHaveClass("group-hover:bg-f1-background-secondary")
+    expect(confirmation).toHaveClass(
+      "text-f1-icon-positive",
+      "motion-reduce:transition-none"
+    )
+    expect(
+      confirmation.querySelector('svg path[fill="currentColor"]')
+    ).not.toBeNull()
+
+    await new Promise((resolve) => setTimeout(resolve, 900))
+    expect(
+      screen.getByRole("button", { name: "Copied Job title" })
+    ).toBeInTheDocument()
+
+    await waitFor(
+      () =>
+        expect(
+          screen.getByRole("button", { name: "Copy Job title" })
+        ).toBeInTheDocument(),
+      { timeout: 2000 }
+    )
+    expect(value).not.toHaveClass("bg-f1-background-positive")
+    expect(value).toHaveClass("group-hover:bg-f1-background-secondary")
+  })
+
+  it("removes copy styling when editing starts", async () => {
+    stubClipboard(vi.fn().mockResolvedValue(undefined))
+    const { rerender } = renderRow({ copyValue: "Senior designer" })
+    await userEvent.click(
+      screen.getByRole("button", { name: "Copy Job title" })
+    )
+    await screen.findByRole("button", { name: "Copied Job title" })
+    rerender(
+      <InlineFieldRow
+        label="Job title"
+        value={<input aria-label="Job title" />}
+        actions={[]}
+        copyValue="Senior designer"
+        editing
+      />
+    )
+    expect(
+      document.querySelector('[data-slot="inline-field-row-value"]')
+    ).not.toHaveClass("bg-f1-background-positive")
+    expect(
+      screen.queryByRole("button", { name: "Copied Job title" })
+    ).toBeNull()
+  })
+
+  it("confirms nothing when the clipboard refuses", async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error("denied"))
+    stubClipboard(writeText)
+
+    renderRow({ copyValue: "Senior designer" })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Copy Job title" })
+    )
+
+    await waitFor(() => expect(writeText).toHaveBeenCalled())
+    expect(
+      document.querySelector('[data-slot="inline-field-row-value"]')
+    ).not.toHaveClass("bg-f1-background-positive")
+    expect(
+      screen.queryByRole("button", { name: "Copied Job title" })
+    ).toBeNull()
+    expect(
+      screen.getByRole("button", { name: "Copy Job title" })
+    ).toBeInTheDocument()
+  })
+
+  it("renders no message slot when there is nothing to say", () => {
+    renderRow()
+
+    expect(
+      document.querySelector('[data-slot="inline-field-row-message"]')
+    ).toBeNull()
+  })
+
+  it("prints the message under the value, in the critical token", () => {
+    renderRow({ message: "Enter a valid email address" })
+
+    const slot = document.querySelector(
+      '[data-slot="inline-field-row-message"]'
+    ) as HTMLElement
+    const box = document.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    ) as HTMLElement
+
+    expect(slot).toHaveTextContent("Enter a valid email address")
+    expect(
+      slot.querySelector(".text-f1-foreground-critical")
+    ).toHaveTextContent("Enter a valid email address")
+
+    expect(
+      box.compareDocumentPosition(slot) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("leads the message with the critical alert glyph", () => {
+    renderRow({ message: "Invalid DNI number" })
+
+    const slot = document.querySelector(
+      '[data-slot="inline-field-row-message"]'
+    ) as HTMLElement
+    const glyph = slot.querySelector("svg") as SVGSVGElement
+    const text = slot.querySelector(
+      ".text-f1-foreground-critical"
+    ) as HTMLElement
+
+    const { container } = render(<AlertCircle />)
+    expect(glyph.querySelector("path")?.getAttribute("d")).toBe(
+      container.querySelector("path")?.getAttribute("d")
+    )
+
+    expect(
+      glyph.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("keeps the message while the row is editing", () => {
+    renderRow({ message: "Too short", editing: true, onActivate: vi.fn() })
+
+    expect(
+      document.querySelector('[data-slot="inline-field-row-message"]')
+    ).toHaveTextContent("Too short")
+  })
+
+  it("draws the value box as critical while a message reads", () => {
+    renderRow({ message: "Invalid DNI number", onActivate: vi.fn() })
+
+    const box = document.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    ) as HTMLElement
+
+    expect(box.className).toContain("ring-f1-border-critical-bold")
+    expect(box.className).toContain("bg-f1-background-critical")
+    expect(box.className).not.toContain(
+      "group-hover:bg-f1-background-secondary"
+    )
+  })
+
+  it("leaves the critical box to the editor while the row edits", () => {
+    renderRow({
+      message: "Invalid DNI number",
+      editing: true,
+      onActivate: vi.fn(),
+    })
+
+    const box = document.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    ) as HTMLElement
+
+    expect(box.className).not.toContain("ring-f1-border-critical-bold")
+  })
+
+  it("forwards a ref to the activator so the caller can focus it again", () => {
+    const ref = { current: null as HTMLDivElement | null }
+    render(
+      <InlineFieldRow
+        ref={ref}
+        label="Job title"
+        value={<span>Hello</span>}
+        actions={[]}
+        editing={false}
+        onActivate={vi.fn()}
+      />
+    )
+
+    expect(ref.current).toBe(screen.getByRole("button", { name: "Job title" }))
+    ref.current?.focus()
+    expect(document.activeElement).toBe(ref.current)
+  })
+
+  describe("valueHeight", () => {
+    const box = () =>
+      document.querySelector('[data-slot="inline-field-row-value"]')
+
+    it("pins the box to the form control height by default", () => {
+      renderRow()
+
+      expect(box()).toHaveClass("h-10", "[&>*]:h-full")
+      expect(box()).not.toHaveClass("min-h-10")
+    })
+
+    it("lets the box grow with its value when asked", () => {
+      renderRow({ valueHeight: "auto" })
+
+      expect(box()).toHaveClass("min-h-10")
+      expect(box()).not.toHaveClass("h-10", "[&>*]:h-full")
+    })
+
+    it("keeps the action strip on the first line of a growing box", () => {
+      renderRow({ valueHeight: "auto", actions: fakeActions() })
+
+      const strip = document.querySelector(
+        '[data-slot="inline-field-row-actions"]'
+      )
+      expect(strip?.className).toContain("items-start")
+      expect(strip?.className).not.toContain("items-center")
+    })
+  })
+})

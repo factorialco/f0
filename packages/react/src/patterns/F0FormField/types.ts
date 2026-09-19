@@ -41,6 +41,11 @@ interface F0FormFieldCommonProps {
   disabled?: boolean
   /** Whether to hide the label (useful when label is rendered externally) */
   hideLabel?: boolean
+  /**
+   * Render an editable detail row. The row owns the label; edits still call onChange.
+   * @default false
+   */
+  inline?: boolean
 }
 
 export interface F0FormFieldFileProps extends F0FormFieldCommonProps {

@@ -3,6 +3,7 @@ import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { F0TextInput } from "@/components/F0TextInput"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { FORM_SIZE } from "../../constants"
+import type { InlineEditing } from "../inline/useInlineField"
 import type { ResolvedField } from "../types"
 import type { F0TextConfig, F0TextField } from "./types"
 
@@ -12,6 +13,8 @@ interface TextFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+
+  inline?: InlineEditing
 }
 
 const DEFAULT_PLACEHOLDERS: Partial<
@@ -29,27 +32,41 @@ export function TextFieldRenderer({
   error,
   loading,
   status,
+  inline,
 }: TextFieldRendererProps) {
   const inputType = field.inputType ?? "text"
   const placeholder =
     field.placeholder ?? DEFAULT_PLACEHOLDERS[inputType] ?? undefined
   const icon = getFieldInputIcon(inputType)
 
-  return (
-    <F0TextInput
-      {...formField}
-      label={field.label}
-      type={inputType}
-      placeholder={placeholder}
-      disabled={field.disabled}
-      value={formField.value != null ? String(formField.value) : ""}
-      size={FORM_SIZE}
-      hideLabel
-      error={error}
-      status={status}
-      loading={loading}
-      icon={icon}
-      clearable={field.clearable}
-    />
-  )
+  const shared = {
+    ...formField,
+    label: field.label,
+    type: inputType,
+    placeholder,
+    disabled: field.disabled,
+    value: formField.value != null ? String(formField.value) : "",
+    size: FORM_SIZE,
+    hideLabel: true,
+    error,
+    status,
+    loading,
+    icon,
+    clearable: field.clearable,
+  }
+
+  // Separate branches preserve the discriminated prop union.
+  if (inline) {
+    return (
+      <F0TextInput
+        {...shared}
+        variant="inline"
+        editing={inline.editing}
+        onDismiss={inline.onDismiss}
+        autoFocus={inline.autoFocus}
+      />
+    )
+  }
+
+  return <F0TextInput {...shared} />
 }

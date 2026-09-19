@@ -12,7 +12,11 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
-import { datepickerSizes, DatePickerValue } from "../types"
+import {
+  datepickerSizes,
+  DatePickerValue,
+  type F0DatePickerFieldProps,
+} from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
 
 const mockDate = new Date(2025, 6, 30)
@@ -95,10 +99,10 @@ const meta = {
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "stable"],
+  tags: ["stable", "!autodocs"],
   decorators: [
     (Story, { args, parameters }) => {
-      const width = parameters?.width || "300px"
+      const width = parameters?.width
       const [value, setValue] = useState<DatePickerValue | undefined>(
         args?.value as DatePickerValue
       )
@@ -106,7 +110,7 @@ const meta = {
       const [valueSimple, setValueSimple] = useState<string | undefined>()
 
       return (
-        <div style={{ width }}>
+        <div className="w-75" style={width ? { width } : undefined}>
           <Story
             args={{
               ...args,
@@ -128,7 +132,8 @@ const meta = {
 } satisfies Meta<typeof F0DatePicker>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// Use explicit props because StoryObj<typeof meta> collapses this union to never.
+type Story = StoryObj<F0DatePickerFieldProps>
 
 const today = mockDate
 const presets = [
@@ -353,6 +358,73 @@ export const WithClearable: Story = {
   },
 }
 
+/** March 2026 needs six week rows with a Monday week start. */
+const sixWeekMonth = new Date(2026, 2, 10)
+
+export const KeepsTheCalendarWhole: Story = {
+  async beforeEach() {
+    MockDate.set(sixWeekMonth)
+    return () => MockDate.reset()
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The calendar is a fixed grid: it either shows every week or it is broken. A popover that caps itself at the space Radix measured on the chosen side hides the last weeks behind a scrollbar, so this story opens the picker inside a short container and checks the calendar kept its own height.",
+      },
+    },
+  },
+  args: {
+    label: "Date",
+    placeholder: "Select a date",
+    value: {
+      value: { from: sixWeekMonth, to: sixWeekMonth },
+      granularity: "day",
+    },
+  },
+  render: (args) => (
+    <div className="h-75 overflow-auto rounded-md border border-solid border-f1-border-secondary p-4">
+      <F0DatePicker {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("open the calendar", async () => {
+      await userEvent.click(canvas.getByRole("textbox"))
+      await expect((await screen.findAllByRole("grid")).length).toBeGreaterThan(
+        0
+      )
+    })
+
+    // The runner does not pause the month animation.
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
+    // The outgoing month remains mounted during the transition.
+    const grid = screen.getAllByRole("grid")[0]
+    const popup = grid.closest("[data-radix-popper-content-wrapper]")
+      ?.firstElementChild as HTMLElement
+
+    await step("the popup carries no scroll of its own", async () => {
+      await expect(popup.scrollHeight).toBe(popup.clientHeight)
+      const style = getComputedStyle(popup)
+      await expect(style.maxHeight).toBe("none")
+      await expect(style.overflowY).toBe("visible")
+    })
+
+    await step("every week row is on screen", async () => {
+      const weeks = [...grid.querySelectorAll("tbody tr")]
+      await expect(weeks).toHaveLength(6)
+
+      for (const week of weeks) {
+        const rect = week.getBoundingClientRect()
+        await expect(rect.top).toBeGreaterThanOrEqual(0)
+        await expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight)
+      }
+    })
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({ width: "100%" })),
   args: {
@@ -395,12 +467,12 @@ export const Snapshot: Story = {
               {snapshotVariants.map((variant, index) => (
                 <div
                   key={`${size}-${index}`}
-                  className={variant.open ? "mb-[400px]" : ""}
+                  className={variant.open ? "mb-100" : ""}
                 >
                   <p className="mb-3 text-sm">
                     Variant: {JSON.stringify(variant)}
                   </p>
-                  <div style={{ width: "300px" }}>
+                  <div className="w-75">
                     <F0DatePicker size={size} {...variant} onChange={fn()} />
                   </div>
                 </div>

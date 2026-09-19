@@ -1,6 +1,10 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
+import {
+  INPUTFIELD_SIZES,
+  InputFieldProps,
+  type InlineDismissReason,
+} from "@/components/F0InputField"
 import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import type {
@@ -26,6 +30,15 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
 
 export const selectVariants = ["field", "inline"] as const
 export type F0SelectVariant = (typeof selectVariants)[number]
+
+/** Select dismiss reasons exclude blur because opening the popup moves focus. */
+export const selectInlineDismissReasons = [
+  "popupClose",
+  "escape",
+  "commit",
+] as const satisfies readonly InlineDismissReason[]
+export type SelectInlineDismissReason =
+  (typeof selectInlineDismissReasons)[number]
 
 /** Props shared by the field and inline select variants. */
 type F0SelectPopupProps<T extends string, R = unknown> = {
@@ -203,6 +216,8 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
   F0SelectSelectionProps<T, R> & {
     /** Standard form-field presentation. This remains the default. */
     variant?: "field"
+    editing?: never
+    onDismiss?: never
     withApplySelection?: boolean
     applySelectionLabel?: string
     children?: React.ReactNode
@@ -243,19 +258,55 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
     | "hint"
   >
 
+/**
+ * The multi-value selection an inline row accepts: the field variant's shape,
+ * minus the deferred apply, which needs the committed-selection restore that
+ * `editing` bypasses.
+ */
+type F0SelectInlineMultipleProps<T extends string, R = unknown> = {
+  multiple: true
+  clearable?: boolean
+  value?: T[]
+  defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+  onChange?: (
+    value: T[],
+    originalItems: ResolvedRecordType<R>[],
+    options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+  ) => void
+  onSelectItems?: OnSelectItemsCallback<
+    ResolvedRecordType<R>,
+    FiltersDefinition
+  >
+  disableSelectAll?: boolean
+}
+
+type F0SelectInlineSelectionProps<T extends string, R = unknown> =
+  | (F0SelectSingleSelectionProps<T, R> & { disableSelectAll?: never })
+  | F0SelectInlineMultipleProps<T, R>
+
 type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
   T,
   R
 > &
-  F0SelectSingleSelectionProps<T, R> &
-  Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
-    /**
-     * Compact borderless presentation for single-value controls embedded in rows.
-     * The required label is used as the accessible name and is not shown visually.
-     */
+  F0SelectInlineSelectionProps<T, R> &
+  Pick<
+    InputFieldProps<T>,
+    "label" | "placeholder" | "disabled" | "hideLabel"
+  > & {
+    /** Detail row. Shows text until editing; label supplies the accessible name. */
     variant: "inline"
+    /**
+     * Controlled dropdown visibility. Reports dismissal through onDismiss.
+     * @default false
+     */
+    editing?: boolean
+    /**
+     * What ended the edit. The value change still arrives through `onChange`.
+     * A single selection commits as soon as an option is taken; a multiple one
+     * stays open, so `commit` is the close that follows a changed selection.
+     */
+    onDismiss?: (reason: SelectInlineDismissReason) => void
     size?: never
-    disableSelectAll?: never
     withApplySelection?: never
     applySelectionLabel?: never
     children?: never
@@ -266,7 +317,6 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     showPreview?: never
     required?: never
     loading?: never
-    hideLabel?: never
     labelIcon?: never
     icon?: never
     name?: never

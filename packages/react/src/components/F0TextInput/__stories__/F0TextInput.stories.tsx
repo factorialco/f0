@@ -4,7 +4,7 @@ import { inputFieldStatus } from "@/components/F0InputField"
 import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { F0TextInput } from ".."
+import { F0TextInput, type F0TextInputFieldProps } from ".."
 import { inputSizes } from "../types"
 
 const meta = {
@@ -69,7 +69,8 @@ const meta = {
 } satisfies Meta<typeof F0TextInput>
 
 export default meta
-type Story = StoryObj<typeof meta>
+// Use explicit props because StoryObj<typeof meta> collapses this union to never.
+type Story = StoryObj<F0TextInputFieldProps>
 
 export const Primary: Story = {
   args: {
@@ -129,6 +130,17 @@ export const Private: Story = {
     value: "123-45-6789",
     disabled: false,
     placeholder: "Placeholder text here",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText("Social security number", {
+      selector: "input",
+    })
+    await expect(input).toHaveAttribute("type", "password")
+    await userEvent.click(input)
+    await expect(input).toHaveAttribute("type", "text")
+    await userEvent.tab()
+    await expect(input).toHaveAttribute("type", "password")
   },
 }
 

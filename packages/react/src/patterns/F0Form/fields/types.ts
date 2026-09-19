@@ -146,6 +146,16 @@ export interface F0BaseField {
    * Used with the form-level `renderCustomField` callback.
    */
   customFieldName?: string
+  /**
+   * Allow editing in inline mode.
+   * @default true
+   */
+  editable?: boolean
+  /**
+   * Add a plain-text copy action in inline mode.
+   * @default false
+   */
+  copyable?: boolean
 }
 
 /**

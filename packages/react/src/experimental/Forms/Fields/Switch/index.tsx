@@ -1,8 +1,9 @@
 import { DataAttributes } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
+import { inlineControlBox } from "@/lib/inline-variant"
 import { Switch as SwitchRoot } from "@/ui/switch"
 
-interface SwitchProps extends DataAttributes {
+interface SwitchBaseProps extends DataAttributes {
   /**
    * The title of the switch
    */
@@ -54,7 +55,31 @@ interface SwitchProps extends DataAttributes {
   required?: boolean
 }
 
+export type SwitchFieldProps = SwitchBaseProps & {
+  /**
+   * @default "field"
+   */
+  variant?: "field"
+  editing?: never
+  onDismiss?: never
+}
+
+export type SwitchInlineProps = SwitchBaseProps & {
+  /** Fills the detail row without field chrome. */
+  variant: "inline"
+
+  /** Toggles commit directly through onCheckedChange and have no edit mode. */
+  editing?: never
+  onDismiss?: never
+}
+
+export type SwitchProps = SwitchFieldProps | SwitchInlineProps
+
 function _Switch({
+  variant = "field",
+  // Strip unsupported props from untyped callers before spreading to the DOM.
+  editing: _editing,
+  onDismiss: _onDismiss,
   title,
   onCheckedChange,
   id,
@@ -66,7 +91,7 @@ function _Switch({
   required = false,
   ...rest
 }: SwitchProps) {
-  return (
+  const control = (
     <SwitchRoot
       title={title}
       onCheckedChange={onCheckedChange}
@@ -79,6 +104,16 @@ function _Switch({
       tabIndex={presentational ? -1 : undefined}
       {...rest}
     />
+  )
+
+  if (variant !== "inline") {
+    return control
+  }
+
+  return (
+    <div data-testid="switch-inline-box" className={inlineControlBox}>
+      {control}
+    </div>
   )
 }
 

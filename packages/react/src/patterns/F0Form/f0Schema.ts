@@ -222,6 +222,16 @@ export interface F0BaseConfig {
    * field-specific configuration (e.g. data source, options) or a custom component.
    */
   customFieldName?: string
+  /**
+   * Allow editing in inline mode. Resolve viewer permissions when building the schema.
+   * @default true
+   */
+  editable?: boolean
+  /**
+   * Add a plain-text copy action in inline mode.
+   * @default false
+   */
+  copyable?: boolean
 }
 
 // Re-export field-specific config types

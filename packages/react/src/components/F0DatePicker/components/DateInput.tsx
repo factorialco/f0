@@ -1,5 +1,8 @@
 import { forwardRef, useEffect, useState } from "react"
-import { InputFieldProps } from "@/components/F0InputField"
+import {
+  InputFieldProps,
+  type InputFieldVariant,
+} from "@/components/F0InputField"
 import type {
   GranularityDefinition,
   NavigationGranularityKey,
@@ -24,6 +27,9 @@ type DateInputProps = {
   maxDate?: Date
   showIcon?: boolean
   displayFormat?: DateStringFormat
+  variant?: InputFieldVariant
+  editing?: boolean
+  onInputBlur?: () => void
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -38,13 +44,18 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       onClear,
       showIcon = true,
       displayFormat,
+      variant,
+      editing,
+      onInputBlur,
       ...inputProps
     },
     ref
   ) => {
-    const [inputValue, setInputValue] = useState("")
-    const [error, setError] = useState(false)
     const i18n = useI18n()
+    const [inputValue, setInputValue] = useState(() =>
+      granularity.toString(value?.value, i18n, displayFormat ?? "long")
+    )
+    const [error, setError] = useState(false)
 
     useEffect(() => {
       setInputValue(
@@ -100,11 +111,14 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     // Use granularity placeholder as default if no placeholder provided
     const placeholder = inputProps.placeholder ?? granularity.placeholder()
 
+    // A detail row reads as plain text, so the glyph belongs to the editor only.
+    const withIcon = showIcon && !(variant === "inline" && !editing)
+
     return (
       <Input
         {...inputProps}
         placeholder={placeholder}
-        icon={showIcon ? getFieldInputIcon("date") : undefined}
+        icon={withIcon ? getFieldInputIcon("date") : undefined}
         ref={ref}
         onFocus={() => onOpenChange?.(true)}
         onClear={() => {
@@ -114,15 +128,24 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
+            // Prevent Enter from submitting the surrounding form.
+            if (variant === "inline") {
+              e.preventDefault()
+            }
             handleBlur()
           }
         }}
         type="text"
         onChange={handleChange}
         error={error || inputProps.error}
-        onBlur={handleBlur}
+        onBlur={() => {
+          handleBlur()
+          onInputBlur?.()
+        }}
         value={inputValue}
         onClickContent={() => onOpenChange?.(true)}
+        variant={variant}
+        editing={editing}
       />
     )
   }

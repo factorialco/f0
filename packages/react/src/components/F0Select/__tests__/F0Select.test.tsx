@@ -341,19 +341,23 @@ describe("Select", () => {
 
     const fieldWrapper = screen.getByTestId("input-field-wrapper")
 
-    expect(fieldWrapper).toHaveClass("h-[32px]", "rounded")
-    expect(fieldWrapper).not.toHaveClass("h-[40px]", "rounded-md")
+    expect(fieldWrapper).toHaveClass("h-8", "rounded")
+    expect(fieldWrapper).not.toHaveClass("h-10", "rounded-md")
     expect(screen.getByRole("combobox").className).not.toContain("h-7")
   })
 
   describe("inline variant", () => {
-    it("exposes the single, non-clearable inline type contract", () => {
+    it("exposes the inline type contract for both selection shapes", () => {
       type InlineProps = Extract<F0SelectProps<"viewer">, { variant: "inline" }>
+      type SingleInlineProps = Extract<InlineProps, { multiple?: false }>
+      type MultipleInlineProps = Extract<InlineProps, { multiple: true }>
 
       expectTypeOf<InlineProps["label"]>().toEqualTypeOf<string>()
-      expectTypeOf<InlineProps["multiple"]>().toEqualTypeOf<false | undefined>()
-      expectTypeOf<InlineProps["clearable"]>().toEqualTypeOf<
+      expectTypeOf<SingleInlineProps["clearable"]>().toEqualTypeOf<
         false | undefined
+      >()
+      expectTypeOf<MultipleInlineProps["value"]>().toEqualTypeOf<
+        "viewer"[] | undefined
       >()
       expectTypeOf<InlineProps["children"]>().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["asList"]>().toEqualTypeOf<undefined>()
@@ -385,6 +389,19 @@ describe("Select", () => {
       },
     ]
 
+    const inlineValue = () => screen.getByTestId("select-inline-value")
+
+    /** The open popup aria-hides its trigger, so query the DOM directly. */
+    const inlineTrigger = (name: string) =>
+      screen.getByRole("combobox", { name, hidden: true })
+
+    const waitForInlineDropdown = async () => {
+      await waitFor(() =>
+        expect(screen.getByRole("listbox")).toBeInTheDocument()
+      )
+      fireEvent.animationStart(screen.getByRole("listbox"))
+    }
+
     it("renders selected and placeholder states and follows controlled updates", async () => {
       const { rerender } = render(
         <F0Select
@@ -397,8 +414,7 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      expect(within(inlineValue()).getByText("Viewer")).toBeInTheDocument()
       expect(screen.queryByText("Access level")).not.toBeInTheDocument()
 
       rerender(
@@ -413,7 +429,7 @@ describe("Select", () => {
       )
 
       await waitFor(() => {
-        expect(within(trigger).getByText("Editor")).toBeInTheDocument()
+        expect(within(inlineValue()).getByText("Editor")).toBeInTheDocument()
       })
 
       rerender(
@@ -428,7 +444,9 @@ describe("Select", () => {
       )
 
       await waitFor(() => {
-        expect(within(trigger).getByText("Select role")).toBeInTheDocument()
+        expect(
+          within(inlineValue()).getByText("Select role")
+        ).toBeInTheDocument()
       })
     })
 
@@ -443,12 +461,13 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(within(trigger).getByText("Access level")).toBeInTheDocument()
+      expect(
+        within(inlineValue()).getByText("Access level")
+      ).toBeInTheDocument()
     })
 
-    it("uses fixed md dimensions, label typography, and the default icon color", () => {
-      render(
+    it("reads as text at rest, at the editor's inset and size", () => {
+      const rest = render(
         <F0Select
           variant="inline"
           label="Access level"
@@ -458,15 +477,40 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const text = inlineValue()
+      expect(text.className).toContain("px-3")
+      expect(text.className).toContain("h-full")
+      expect(text.className).toContain("w-full")
+      expect(text.className).toContain("text-base")
+
+      // The prototype prints a resting value medium and its editor regular.
+      expect(text.className).toContain("font-medium")
+      expect(text.className).not.toContain("text-sm")
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+      expect(screen.queryByRole("button")).not.toBeInTheDocument()
+
+      rest.unmount()
+
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          editing
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = inlineTrigger("Access level")
       const chevron = trigger.querySelector("[aria-hidden='true']")
 
-      expect(trigger.className).toContain("h-8")
-      expect(trigger.className).toContain("pl-3")
-      expect(trigger.className).toContain("pr-2")
+      expect(trigger.className).toContain("px-3")
+      expect(trigger.className).toContain("h-full")
+      expect(trigger.className).toContain("w-full")
+      expect(trigger.className).not.toContain("w-fit")
       expect(trigger.className).toContain("text-base")
-      expect(trigger.className).toContain("font-medium")
-      expect(trigger.className).not.toContain("text-sm")
+      expect(trigger.className).not.toContain("font-medium")
       expect(chevron).toHaveClass("text-f1-icon")
       expect(chevron).not.toHaveClass("text-f1-icon-secondary")
     })
@@ -502,11 +546,7 @@ describe("Select", () => {
         />
       )
 
-      expect(
-        within(
-          screen.getByRole("combobox", { name: "Access level" })
-        ).getByText("Viewer")
-      ).toBeInTheDocument()
+      expect(within(inlineValue()).getByText("Viewer")).toBeInTheDocument()
     })
 
     it("uses intrinsic borderless trigger styling and a plain chevron", () => {
@@ -516,17 +556,19 @@ describe("Select", () => {
           label="Access level"
           options={roleOptions}
           value="viewer"
+          editing
           onChange={() => {}}
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(trigger.className).toContain("w-fit")
+      const trigger = inlineTrigger("Access level")
       expect(trigger.className).toContain("gap-1")
       expect(trigger).toHaveClass("rounded")
       expect(trigger).not.toHaveClass("rounded-sm")
       expect(trigger).not.toHaveClass("rounded-md")
-      expect(trigger.className).toContain("border-0")
+      // A transparent border, not none: it buys the same 13px inset an
+      // F0InputField editor has, so text never shifts between row types.
+      expect(trigger.className).toContain("border-transparent")
       expect(trigger.className).toContain("bg-transparent")
       expect(trigger.className).toContain("shadow-none")
 
@@ -535,7 +577,7 @@ describe("Select", () => {
       expect(chevron?.parentElement?.className).not.toContain("bg-")
     })
 
-    it("does not open when disabled", async () => {
+    it("renders a disabled value as text with nothing to activate", async () => {
       const user = userEvent.setup()
       render(
         <F0Select
@@ -548,16 +590,12 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
-      expect(trigger).toBeDisabled()
-      expect(trigger.className).toContain("disabled:bg-f1-background-tertiary")
-      expect(trigger.className).toContain(
-        "disabled:text-f1-foreground-disabled"
-      )
+      const text = inlineValue()
+      expect(within(text).getByText("Viewer")).toBeInTheDocument()
 
-      await user.click(trigger)
+      await user.click(text)
 
-      expect(trigger).toHaveAttribute("aria-expanded", "false")
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
     })
 
@@ -574,6 +612,7 @@ describe("Select", () => {
             label="Access level"
             options={roleOptions}
             value={value}
+            editing
             onChange={(nextValue, originalItem, option) => {
               handleChange(nextValue, originalItem, option)
               setValue(nextValue)
@@ -584,7 +623,7 @@ describe("Select", () => {
 
       render(<ControlledInlineSelect />)
 
-      await openSelect(user)
+      await waitForInlineDropdown()
       await user.keyboard("{ArrowUp}{Enter}")
 
       await waitFor(() => {
@@ -596,13 +635,10 @@ describe("Select", () => {
         expect(handleChange).toHaveBeenCalledTimes(1)
       })
       await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+        expect(
+          within(inlineTrigger("Access level")).getByText("Editor")
+        ).toBeInTheDocument()
       })
-      expect(
-        within(
-          screen.getByRole("combobox", { name: "Access level" })
-        ).getByText("Editor")
-      ).toBeInTheDocument()
     })
 
     it("restores a controlled value rejected by the parent and allows retrying it", async () => {
@@ -614,13 +650,14 @@ describe("Select", () => {
           label="Access level"
           options={roleOptions}
           value="viewer"
+          editing
           onChange={handleChange}
         />
       )
 
-      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const trigger = inlineTrigger("Access level")
 
-      await openSelect(user)
+      await waitForInlineDropdown()
       await user.keyboard("{ArrowUp}{Enter}")
 
       await waitFor(() => {
@@ -634,19 +671,17 @@ describe("Select", () => {
       })
 
       await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+        expect(screen.getByRole("option", { name: /Viewer/ })).toHaveAttribute(
+          "data-state",
+          "checked"
+        )
       })
-      await openSelect(user)
-
-      expect(screen.getByRole("option", { name: /Viewer/ })).toHaveAttribute(
-        "data-state",
-        "checked"
-      )
       expect(screen.getByRole("option", { name: /Editor/ })).toHaveAttribute(
         "data-state",
         "unchecked"
       )
 
+      screen.getByRole("option", { name: /Viewer/ }).focus()
       await user.keyboard("{ArrowUp}{Enter}")
 
       await waitFor(() => {
@@ -661,18 +696,18 @@ describe("Select", () => {
     })
 
     it("defaults to content width and honors an explicit popup-width override", async () => {
-      const user = userEvent.setup()
       const firstRender = render(
         <F0Select
           variant="inline"
           label="Access level"
           options={roleOptions}
           value="viewer"
+          editing
           onChange={() => {}}
         />
       )
 
-      await openSelect(user)
+      await waitForInlineDropdown()
       expect(getSelectContent().className).toContain("w-max")
 
       firstRender.unmount()
@@ -683,28 +718,29 @@ describe("Select", () => {
           label="Access level"
           options={roleOptions}
           value="viewer"
+          editing
           fitContentWidth={false}
           onChange={() => {}}
         />
       )
 
-      await openSelect(user)
+      await waitForInlineDropdown()
       expect(getSelectContent().className).toContain("min-w-80")
     })
 
     it("reuses the standard popup and option presentation", async () => {
-      const user = userEvent.setup()
       render(
         <F0Select
           variant="inline"
           label="Access level"
           options={roleOptions}
           value="viewer"
+          editing
           onChange={() => {}}
         />
       )
 
-      await openSelect(user)
+      await waitForInlineDropdown()
 
       const content = getSelectContent()
       const option = screen.getByRole("option", { name: /Viewer/ })
@@ -739,6 +775,7 @@ describe("Select", () => {
           label="Access level"
           options={roleOptions}
           value="viewer"
+          editing
           onChange={() => {}}
           showSearchBox
           actions={[
@@ -756,7 +793,7 @@ describe("Select", () => {
         />
       )
 
-      await openSelect(user)
+      await waitForInlineDropdown()
       const search = screen.getByRole("searchbox")
       const action = screen.getByRole("button", { name: "Remove access" })
       const disabledAction = screen.getByRole("button", {
@@ -814,13 +851,12 @@ describe("Select", () => {
           label="Inline access level"
           options={roleOptions}
           value="viewer"
+          editing
           onChange={() => {}}
         />
       )
 
-      expect(inlineRef.current).toBe(
-        screen.getByRole("combobox", { name: "Inline access level" })
-      )
+      expect(inlineRef.current).toBe(inlineTrigger("Inline access level"))
     })
   })
 
@@ -993,8 +1029,8 @@ describe("Select", () => {
       />
     )
 
-    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
-    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+    expect(container.querySelector(".h-10")).toBeTruthy()
+    expect(container.querySelector(".h-8")).toBeFalsy()
   })
 
   it("forces at least md trigger size for a preselected status pill not yet in the dataset", () => {
@@ -1017,8 +1053,8 @@ describe("Select", () => {
       />
     )
 
-    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
-    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+    expect(container.querySelector(".h-10")).toBeTruthy()
+    expect(container.querySelector(".h-8")).toBeFalsy()
   })
 
   it("keeps the requested sm trigger size when no status tags are present", () => {
@@ -1031,8 +1067,8 @@ describe("Select", () => {
       />
     )
 
-    expect(container.querySelector(".h-\\[32px\\]")).toBeTruthy()
-    expect(container.querySelector(".h-\\[40px\\]")).toBeFalsy()
+    expect(container.querySelector(".h-8")).toBeTruthy()
+    expect(container.querySelector(".h-10")).toBeFalsy()
   })
 
   // Regression: matching was label-only, so a row reading "Spain +34" could not

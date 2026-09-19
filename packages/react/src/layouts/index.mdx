@@ -53,7 +53,10 @@ specified.
 
 - Applies page padding according to design specifications.
 - Content blocks are stacked vertically and flow naturally from top to bottom.
-- The container scrolls automatically when content exceeds the viewport.
+- The layout grows to fit its content and declares no `overflow` of its own, so
+  the page container around it does the scrolling. That keeps a
+  `position: sticky` child — a section rail, a table header — pinned against the
+  container that really scrolls.
 - No manual content positioning control is needed.
 
 <Canvas of={StandardLayoutStories.Default} />

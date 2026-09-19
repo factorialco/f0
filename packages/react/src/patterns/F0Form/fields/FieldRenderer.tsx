@@ -13,6 +13,7 @@ import {
 } from "@/ui/form"
 import { generateAnchorId, useF0FormContext } from "../context"
 import type { RenderCustomFieldSelectConfig } from "../types"
+import { InlineFieldRenderer } from "./inline/InlineFieldRenderer"
 import { renderFieldInput } from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
@@ -139,6 +140,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     isLoading: isFormLoading,
     renderCustomField,
     submitConfig,
+    inline,
   } = useF0FormContext()
   const { forms } = useI18n()
 
@@ -204,6 +206,37 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
         name={field.id}
         {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
         render={() => <span className="hidden" aria-hidden="true" />}
+      />
+    )
+  }
+
+  if (inline) {
+    return (
+      <FormFieldPrimitive
+        control={form.control}
+        name={field.id}
+        {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
+        render={({ field: formField, fieldState }) => (
+          /* The anchor id rides on the row element itself: a wrapper would stop
+             the rows being direct children of the card, which is what lets the
+             last one drop its divider. */
+          <InlineFieldRenderer
+            anchorId={anchorId}
+            field={field}
+            formField={formField}
+            fieldState={fieldState}
+            isSubmitting={isSubmitting}
+            isRequired={isRequired}
+            values={values}
+            isFormLoading={isFormLoading}
+            restoreValue={(value) =>
+              form.setValue(field.id, value, {
+                shouldDirty: true,
+                shouldValidate: false,
+              })
+            }
+          />
+        )}
       />
     )
   }

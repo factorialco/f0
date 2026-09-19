@@ -1,8 +1,9 @@
 import { DataAttributes } from "@/global.types"
 import { withDataTestId } from "@/lib/data-testid"
+import { inlineControlBox } from "@/lib/inline-variant"
 import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
 
-interface CheckboxProps extends DataAttributes {
+interface CheckboxBaseProps extends DataAttributes {
   /**
    * The title of the checkbox
    */
@@ -78,7 +79,31 @@ interface CheckboxProps extends DataAttributes {
   required?: boolean
 }
 
+export type F0CheckboxFieldProps = CheckboxBaseProps & {
+  /**
+   * @default "field"
+   */
+  variant?: "field"
+  editing?: never
+  onDismiss?: never
+}
+
+export type F0CheckboxInlineProps = CheckboxBaseProps & {
+  /** Fills the detail row without field chrome. */
+  variant: "inline"
+
+  /** Toggles commit directly through onCheckedChange and have no edit mode. */
+  editing?: never
+  onDismiss?: never
+}
+
+export type F0CheckboxProps = F0CheckboxFieldProps | F0CheckboxInlineProps
+
 function _F0Checkbox({
+  variant = "field",
+  // Strip unsupported props from untyped callers before spreading to the DOM.
+  editing: _editing,
+  onDismiss: _onDismiss,
   title,
   description,
   onCheckedChange,
@@ -93,8 +118,8 @@ function _F0Checkbox({
   name,
   required = false,
   ...rest
-}: CheckboxProps) {
-  return (
+}: F0CheckboxProps) {
+  const control = (
     <CheckboxRoot
       title={title}
       description={description}
@@ -111,6 +136,16 @@ function _F0Checkbox({
       onClick={(e) => stopPropagation && e.stopPropagation()}
       {...rest}
     />
+  )
+
+  if (variant !== "inline") {
+    return control
+  }
+
+  return (
+    <div data-testid="checkbox-inline-box" className={inlineControlBox}>
+      {control}
+    </div>
   )
 }
 

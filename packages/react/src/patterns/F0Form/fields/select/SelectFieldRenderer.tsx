@@ -3,6 +3,7 @@ import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { F0Select } from "@/components/F0Select"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { FORM_SIZE } from "../../constants"
+import type { InlineEditing } from "../inline/useInlineField"
 import type { ResolvedField } from "../types"
 import type { F0SelectField } from "./types"
 
@@ -12,6 +13,73 @@ interface SelectFieldRendererProps {
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
+
+  inline?: InlineEditing
+}
+
+/** Inline selects have a separate prop contract from standard fields. */
+function InlineSelect({
+  field,
+  formField,
+  inline,
+}: SelectFieldRendererProps & { inline: InlineEditing }) {
+  const shared = {
+    variant: "inline" as const,
+    label: field.label,
+    placeholder: field.placeholder,
+    disabled: field.disabled,
+    hideLabel: true,
+    showSearchBox: field.showSearchBox,
+    searchBoxPlaceholder: field.searchBoxPlaceholder,
+    onCreate: field.onCreate,
+    editing: inline.editing,
+    onDismiss: inline.onDismiss,
+  }
+
+  if (field.multiple) {
+    const multiple = {
+      ...shared,
+      multiple: true as const,
+      value: (formField.value as string[]) ?? [],
+      onChange: (value: string[]) => {
+        formField.onChange(value)
+        formField.onBlur()
+      },
+    }
+
+    if (field.source !== undefined && field.mapOptions !== undefined) {
+      return (
+        <F0Select
+          {...multiple}
+          source={field.source}
+          mapOptions={field.mapOptions}
+        />
+      )
+    }
+
+    return <F0Select {...multiple} options={field.options ?? []} />
+  }
+
+  const single = {
+    ...shared,
+    value: (formField.value as string) ?? undefined,
+    onChange: (value: string) => {
+      formField.onChange(value)
+      formField.onBlur()
+    },
+  }
+
+  if (field.source !== undefined && field.mapOptions !== undefined) {
+    return (
+      <F0Select
+        {...single}
+        source={field.source}
+        mapOptions={field.mapOptions}
+      />
+    )
+  }
+
+  return <F0Select {...single} options={field.options ?? []} />
 }
 
 /**
@@ -178,6 +246,10 @@ export function SelectFieldRenderer(props: SelectFieldRendererProps) {
   const field = {
     ...props.field,
     placeholder: props.field.placeholder ?? t("common.selectPlaceholder"),
+  }
+
+  if (props.inline) {
+    return <InlineSelect {...props} field={field} inline={props.inline} />
   }
 
   // Route to appropriate renderer based on field configuration

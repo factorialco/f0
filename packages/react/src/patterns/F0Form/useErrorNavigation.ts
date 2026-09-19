@@ -117,7 +117,11 @@ function focusElement(
 ) {
   const visibleElement = getVisibleElement(element)
   visibleElement.scrollIntoView({ behavior: "smooth", block: "center" })
-  const input = visibleElement.querySelector("input, textarea, select, button")
+  // An inline detail row reads as text: its activator is the first
+  // `role="button"` in the row, before the action strip.
+  const input = visibleElement.querySelector(
+    'input, textarea, select, button, [role="button"]'
+  )
   if (input instanceof HTMLElement) {
     input.focus()
   }

@@ -90,7 +90,7 @@ const meta: Meta = {
         component:
           "<p>Renders a select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so it can handle a large number of items.</p>" +
-          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
+          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for detail rows: the selection reads as plain text — avatar and icon included — until the row sets <code>editing</code>, and only then does it become the dropdown. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided. <code>editing</code> is controlled and the component never changes it: it reports <code>commit</code>, <code>escape</code> and <code>popupClose</code> through <code>onDismiss</code> and keeps the dropdown open until the owner says otherwise.</p>' +
           "<p>With <code>showSearchBox</code>, a field select is searched from its own trigger: the field is the search box, so there is one place to look and one place to type. Filters are what keep the search box in the dropdown instead, beside the filter picker. A grouping selector does not move the search: the dropdown's row keeps it and the field keeps the query.</p>" +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
@@ -101,7 +101,7 @@ const meta: Meta = {
       control: "radio",
       options: selectVariants,
       description:
-        "Field renders the standard form control. Inline renders a compact, borderless single-value row control and does not support clearing, multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props.",
+        "Field renders the standard form control. Inline renders a detail-row control that reads as text at rest and fills its container in both axes. It does not support clearing, multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props.",
       table: {
         type: { summary: selectVariants.join(" | ") },
         defaultValue: { summary: "field" },
@@ -125,7 +125,7 @@ const meta: Meta = {
       options: selectSizes,
       if: { arg: "variant", neq: "inline" },
       description:
-        "Size of the field select. Inline selects use a fixed 32px trigger.",
+        "Size of the field select. Inline selects have no size of their own: they fill the box the row declares.",
       table: { defaultValue: { summary: "sm" } },
     },
     disabled: {
@@ -134,7 +134,20 @@ const meta: Meta = {
     },
     open: {
       control: "boolean",
-      description: "Controls whether the select dropdown is open",
+      description:
+        "Controls whether the select dropdown is open. The inline variant takes this from `editing` instead, and falls back to `open` only when `editing` is not passed.",
+    },
+    editing: {
+      control: "boolean",
+      if: { arg: "variant", eq: "inline" },
+      description:
+        "Inline only. Whether the dropdown is the presentation right now. Controlled: the component never changes it, it reports what the user did through `onDismiss` and keeps the dropdown open until the owner says otherwise.",
+      table: { defaultValue: { summary: "false" } },
+    },
+    onDismiss: {
+      if: { arg: "variant", eq: "inline" },
+      description:
+        "Inline only. Called with `commit` when an option is selected (the value still arrives through `onChange`), `escape` when Escape is pressed, and `popupClose` when the popup closes without a selection.",
     },
     hideLabel: {
       control: "boolean",
