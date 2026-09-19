@@ -1,5 +1,6 @@
-import { AvatarVariant } from "@/components/avatars/F0Avatar"
+import { AvatarVariant, IconAvatarVariant } from "@/components/avatars/F0Avatar"
 import { RecordType, SortingKey, SortingsDefinition } from "@/hooks/datasource"
+import { type ListIconColor } from "@/lib/ListIcon"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { PropertyDefinition } from "../../../property-render"
 
@@ -10,10 +11,14 @@ export type WithOptionalSorting<
   sorting?: SortingKey<Sortings>
 }
 
+export type ListItemAvatar =
+  | Exclude<AvatarVariant, IconAvatarVariant>
+  | (IconAvatarVariant & { color?: ListIconColor })
+
 export type ItemDefinition = {
   title: string
   description?: string[]
-  avatar?: AvatarVariant
+  avatar?: ListItemAvatar
 }
 
 export type ListPropertyDefinition<

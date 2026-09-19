@@ -457,6 +457,9 @@
     "src/lib/F0GridStack/components/grid-stack-provider.tsx": {
       "f0-i18n/no-untranslated-copy": 1
     },
+    "src/lib/ListIcon/ListIcon.tsx": {
+      "f0-styles/no-inline-styles": 1
+    },
     "src/lib/VirtualList/index.tsx": {
       "f0-styles/no-inline-styles": 3
     },
@@ -712,9 +715,6 @@
       "f0-i18n/no-untranslated-copy": 1
     },
     "src/sds/Home/home-motion.tsx": {
-      "f0-styles/no-inline-styles": 1
-    },
-    "src/sds/Home/slotRenderers.tsx": {
       "f0-styles/no-inline-styles": 1
     },
     "src/sds/Profile/TasksList/index.tsx": {
