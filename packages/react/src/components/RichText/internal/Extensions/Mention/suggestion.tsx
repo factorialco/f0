@@ -1,5 +1,5 @@
 import { Editor, ReactRenderer } from "@tiptap/react"
-import { createRoot, Root } from "react-dom/client"
+import type { ComponentProps } from "react"
 import { MentionList } from "./MentionList"
 import { MentionPopover } from "./MentionPopover"
 import { MentionedUser, MentionListRef } from "./types"
@@ -171,24 +171,20 @@ export function createSuggestionConfig(
       searchUsers ? requestItems(query) : Promise.resolve(mentionSuggestions),
     render: () => {
       let component: ReactRenderer | null = null
-      let popoverRoot: Root | null = null
-      let container: HTMLDivElement | null = null
+      let popover: ReactRenderer | null = null
       let latestProps: SuggestionRenderProps | null = null
 
       // Clearing the references is what stops a still-suspended tiptap update
-      // from rendering into a root that has already been unmounted, which React
+      // from updating a renderer that has already been destroyed, which React
       // treats as an error rather than a no-op.
       const dismiss = () => {
         latestProps = null
         resetSuggestionState()
-        if (popoverRoot && container) {
-          popoverRoot.unmount()
-          container.remove()
-        }
+        popover?.destroy()
+        popover?.element.remove()
         component?.destroy()
         component = null
-        popoverRoot = null
-        container = null
+        popover = null
       }
 
       const getAtSymbolRect = (): DOMRect => {
@@ -268,36 +264,39 @@ export function createSuggestionConfig(
             props: { items: props.items, command: commandFn },
             editor: props.editor,
           })
-          const anchorRect = safeGetRect(props)
 
-          container = document.createElement("div")
-          document.body.appendChild(container)
+          // Render the popover through the editor's own React tree (tiptap's
+          // ReactRenderer portals it from `EditorContent`) instead of a second
+          // `createRoot`. A separate root is invisible to the React tree above
+          // the editor, so a dialog's Radix `DismissableLayer` never sees the
+          // focus the popover's `Popover.Content` takes on mousedown, treats it
+          // as `focusOutside` and dismisses itself: picking a mention closed the
+          // surrounding non-modal side panel. The DOM still lives on
+          // `document.body`, so positioning and clipping are unchanged.
+          popover = new ReactRenderer(MentionPopover, {
+            // tiptap types renderer props as `Record<string, any>`, so
+            // `satisfies` is what keeps a renamed prop a compile error.
+            props: {
+              content: component.element as HTMLElement,
+              anchorRect: safeGetRect(props),
+              editor: props.editor,
+            } satisfies ComponentProps<typeof MentionPopover>,
+            editor: props.editor,
+          })
+          document.body.appendChild(popover.element)
 
-          popoverRoot = createRoot(container)
-          popoverRoot.render(
-            <MentionPopover
-              content={component.element as HTMLElement}
-              anchorRect={anchorRect}
-              editor={props.editor}
-            />
-          )
           props.editor?.commands.focus()
         },
         onUpdate: (props: SuggestionRenderProps) => {
           latestProps = props
 
-          if (!component || !container || !popoverRoot) {
+          if (!component || !popover) {
             return
           }
           component.updateProps({ items: props.items })
-          const anchorRect = safeGetRect(props)
-          popoverRoot.render(
-            <MentionPopover
-              content={component.element as HTMLElement}
-              anchorRect={anchorRect}
-              editor={props.editor}
-            />
-          )
+          popover.updateProps({
+            anchorRect: safeGetRect(props),
+          } satisfies Partial<ComponentProps<typeof MentionPopover>>)
         },
         onKeyDown: (props: { event: KeyboardEvent }) => {
           if (!component) {
