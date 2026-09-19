@@ -22,7 +22,14 @@ const Glyph = ({ avatar }: { avatar: ListItemAvatar }) => {
       : undefined
 
   return tint && avatar.type === "icon" ? (
-    <ListIconGlyph icon={avatar.icon} tint={tint} size="md" />
+    <ListIconGlyph
+      icon={avatar.icon}
+      tint={tint}
+      size="md"
+      state={avatar.state}
+      aria-label={avatar["aria-label"]}
+      aria-labelledby={avatar["aria-labelledby"]}
+    />
   ) : (
     <F0Avatar avatar={avatar} size="md" />
   )

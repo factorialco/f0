@@ -1,5 +1,6 @@
 import { type CSSProperties } from "react"
-import { F0Icon, type IconType } from "@/components/F0Icon"
+import type { BaseAvatarProps } from "@/components/avatars/internal/BaseAvatar"
+import { F0Icon, type F0IconProps, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
 /**
@@ -149,11 +150,15 @@ export const ListIconGlyph = ({
   icon,
   tint,
   size,
+  state,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
 }: {
   icon: IconType
   tint: NonNullable<ReturnType<typeof listIconTint>>
   size: ListGlyphSize
-}) => (
+  state?: F0IconProps["state"]
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>) => (
   <div
     className={cn(
       "flex aspect-square items-center justify-center",
@@ -161,9 +166,11 @@ export const ListIconGlyph = ({
       tint.className
     )}
     style={tint.style}
+    aria-label={ariaLabel}
+    aria-labelledby={ariaLabelledby}
   >
     {/* No `color`: F0Icon defaults to `currentColor`, which the tile's own
         `text-` class has already set to the hue. */}
-    <F0Icon icon={icon} size={size} />
+    <F0Icon icon={icon} size={size} state={state} />
   </div>
 )
