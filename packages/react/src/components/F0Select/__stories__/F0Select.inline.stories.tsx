@@ -200,6 +200,79 @@ export const AtRest: Story = {
   },
 }
 
+/** The row chrome reduced to what the chevron's reveal reads: hover cell, activator. */
+function RowActivator({ value = "viewer" as Role }: InlineRoleSelectProps) {
+  return (
+    <div className="flex w-80 flex-col gap-2">
+      <button
+        type="button"
+        data-testid="focus-sink"
+        className="w-fit rounded border border-solid border-f1-border bg-f1-background px-2 py-1 text-f1-foreground"
+      >
+        Focus something else
+      </button>
+      <div className="group h-10 w-80">
+        <div
+          data-testid="activator"
+          role="button"
+          tabIndex={0}
+          aria-label="Edit access level"
+          className="h-full w-full rounded-md"
+        >
+          <F0Select
+            variant="inline"
+            label="Access level"
+            hideLabel
+            options={roleOptions}
+            value={value}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export const RevealsOnKeyboardFocusOnly: Story = {
+  args: {
+    value: "viewer",
+  },
+  render: (args) => <RowActivator {...args} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const chevron = () =>
+      canvas.getByTestId("select-inline-value").lastElementChild
+    const activator = canvas.getByTestId("activator")
+
+    await waitFor(async () => {
+      await expect(canvas.getByTestId("select-inline-value")).toHaveTextContent(
+        "Viewer"
+      )
+    })
+
+    await step("at rest the chevron is hidden", async () => {
+      await expect(chevron()).toHaveStyle({ opacity: "0" })
+    })
+
+    await step(
+      "the focus a row restores after an edit keeps it so",
+      async () => {
+        activator.focus()
+        await expect(activator).toHaveFocus()
+        await expect(chevron()).toHaveStyle({ opacity: "0" })
+      }
+    )
+
+    await step("tabbing onto the activator brings it out", async () => {
+      canvas.getByTestId("focus-sink").focus()
+      await userEvent.tab()
+      await expect(activator).toHaveFocus()
+      await waitFor(async () => {
+        await expect(chevron()).toHaveStyle({ opacity: "1" })
+      })
+    })
+  },
+}
+
 export const DisabledHasNoChevron: Story = {
   args: {
     value: "viewer",

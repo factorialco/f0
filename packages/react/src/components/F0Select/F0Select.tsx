@@ -161,10 +161,15 @@ const inlineSelectTriggerClassName = cn(
   INLINE_SELECT_EDIT_WEIGHT
 )
 
-/** Reveal on row hover or focus; always show on touch screens. */
+/**
+ * Reveal on hover of the value cell, or once something around the chevron
+ * takes a focus ring; always show on touch screens. Plain focus is not enough:
+ * a row restores focus to its activator after a mouse-driven edit, and
+ * `group-focus-within` read that as reason to keep the chevron out.
+ */
 const INLINE_SELECT_CHEVRON_REVEAL = cn(
   "opacity-0 transition-opacity motion-reduce:transition-none",
-  "group-hover:opacity-100 group-focus-within:opacity-100",
+  "group-hover:opacity-100 [:focus-visible_&]:opacity-100",
   "[@media(hover:none)]:opacity-100"
 )
 

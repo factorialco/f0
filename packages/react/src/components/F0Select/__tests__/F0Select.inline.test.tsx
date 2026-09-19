@@ -110,7 +110,7 @@ describe("F0Select inline variant", () => {
       expect(chevron?.querySelector("svg")).toBeInTheDocument()
     })
 
-    it("hides the chevron until the row is hovered or holds focus", () => {
+    it("hides the chevron until the row is hovered or holds a focus ring", () => {
       render(
         <F0Select
           variant="inline"
@@ -125,7 +125,12 @@ describe("F0Select inline variant", () => {
       expect(chevron).toHaveAttribute("aria-hidden", "true")
       expect(chevron?.className).toContain("opacity-0")
       expect(chevron?.className).toContain("group-hover:opacity-100")
-      expect(chevron?.className).toContain("group-focus-within:opacity-100")
+      // A focus ring above the chevron, not any focus: a row restores focus to
+      // its activator after a mouse edit and must not pin the chevron open.
+      // Whether a browser draws that ring is a Storybook test; jsdom's selector
+      // engine never matches `:focus-visible`.
+      expect(chevron?.className).toContain("[:focus-visible_&]:opacity-100")
+      expect(chevron?.className).not.toContain("group-focus-within")
 
       expect(chevron?.className).toContain("[@media(hover:none)]:opacity-100")
     })
