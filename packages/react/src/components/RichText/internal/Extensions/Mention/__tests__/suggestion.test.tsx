@@ -1,47 +1,54 @@
+import { createRoot } from "react-dom/client"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { MentionPopover } from "../MentionPopover"
 import { createSuggestionConfig } from "../suggestion"
 import { MentionedUser } from "../types"
 
-const rendererState: {
-  props: {
-    items: MentionedUser[]
-    command: (item: MentionedUser) => void
-  } | null
+vi.mock("react-dom/client", () => ({
+  createRoot: vi.fn(),
+}))
+
+type RendererRecord = {
+  component: unknown
+  editor: unknown
+  props: Record<string, unknown>
+  element: HTMLElement
+  updateProps: ReturnType<typeof vi.fn>
   destroy: ReturnType<typeof vi.fn>
-} = {
-  props: null,
-  destroy: vi.fn(),
+}
+
+const rendererState: { renderers: RendererRecord[] } = {
+  renderers: [],
 }
 
 vi.mock("@tiptap/react", () => {
   class MockReactRenderer {
     element = document.createElement("div")
     ref = { onKeyDown: vi.fn(() => false) }
+    record: RendererRecord
 
     constructor(
-      _component: unknown,
-      options: {
-        props: {
-          items: MentionedUser[]
-          command: (item: MentionedUser) => void
-        }
-      }
+      component: unknown,
+      options: { props: Record<string, unknown>; editor: unknown }
     ) {
-      rendererState.props = options.props
+      this.record = {
+        component,
+        editor: options.editor,
+        props: options.props,
+        element: this.element,
+        updateProps: vi.fn(),
+        destroy: vi.fn(),
+      }
+      rendererState.renderers.push(this.record)
     }
 
-    updateProps(nextProps: { items: MentionedUser[] }) {
-      if (!rendererState.props) {
-        return
-      }
-      rendererState.props = {
-        ...rendererState.props,
-        ...nextProps,
-      }
+    updateProps(nextProps: Record<string, unknown>) {
+      this.record.updateProps(nextProps)
+      this.record.props = { ...this.record.props, ...nextProps }
     }
 
     destroy() {
-      rendererState.destroy()
+      this.record.destroy()
     }
   }
 
@@ -52,26 +59,6 @@ vi.mock("@tiptap/react", () => {
     ReactRenderer: MockReactRenderer,
   }
 })
-
-const rootState: {
-  roots: {
-    render: ReturnType<typeof vi.fn>
-    unmount: ReturnType<typeof vi.fn>
-  }[]
-} = {
-  roots: [],
-}
-
-vi.mock("react-dom/client", () => ({
-  createRoot: () => {
-    const root = {
-      render: vi.fn(),
-      unmount: vi.fn(),
-    }
-    rootState.roots.push(root)
-    return root
-  },
-}))
 
 const users: MentionedUser[] = [
   { id: 1, label: "Alice", image_url: "/alice.png", href: "/alice" },
@@ -134,9 +121,7 @@ const createEditorMock = () => {
 
 describe("createSuggestionConfig", () => {
   beforeEach(() => {
-    rendererState.props = null
-    rendererState.destroy.mockClear()
-    rootState.roots = []
+    rendererState.renderers = []
   })
 
   const startPopover = () => {
@@ -152,34 +137,64 @@ describe("createSuggestionConfig", () => {
 
     renderer.onStart(props)
 
-    const root = rootState.roots.at(-1)
-    expect(root?.render).toHaveBeenCalledTimes(1)
-    const container = document.body.lastElementChild
-    expect(container).not.toBeNull()
+    const [list, popover] = rendererState.renderers
+    expect(list).toBeDefined()
+    expect(popover).toBeDefined()
+    expect(popover.element.parentElement).toBe(document.body)
 
-    return { config, renderer, props, root, container }
+    return { config, renderer, props, list, popover }
   }
 
-  it("ignores a suspended update that resumes after the popover exited", () => {
-    const { renderer, props, root } = startPopover()
+  it("renders the popover through the editor's React tree, not a standalone root", () => {
+    const { popover, props } = startPopover()
 
-    renderer.onExit()
-    expect(root?.unmount).toHaveBeenCalledTimes(1)
+    expect(popover.component).toBe(MentionPopover)
+    expect(popover.editor).toBe(props.editor)
+    expect(createRoot).not.toHaveBeenCalled()
+  })
+
+  it("keeps the popover anchored as the query changes", () => {
+    const { renderer, props, list, popover } = startPopover()
 
     renderer.onUpdate(props)
 
-    expect(root?.render).toHaveBeenCalledTimes(1)
+    expect(list.updateProps).toHaveBeenCalledWith({ items: props.items })
+    expect(popover.updateProps).toHaveBeenCalledTimes(1)
+    expect(popover.updateProps.mock.calls[0][0]).toHaveProperty("anchorRect")
+  })
+
+  it("tears down only once when Escape is followed by the exit callback", () => {
+    const { renderer, list, popover } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+    expect(() => renderer.onExit()).not.toThrow()
+
+    expect(list.destroy).toHaveBeenCalledTimes(1)
+    expect(popover.destroy).toHaveBeenCalledTimes(1)
+  })
+
+  it("ignores a suspended update that resumes after the popover exited", () => {
+    const { renderer, props, list, popover } = startPopover()
+
+    renderer.onExit()
+    expect(popover.destroy).toHaveBeenCalledTimes(1)
+
+    renderer.onUpdate(props)
+
+    expect(list.updateProps).not.toHaveBeenCalled()
+    expect(popover.updateProps).not.toHaveBeenCalled()
   })
 
   it("ignores a suspended update that resumes after Escape dismissed it", () => {
-    const { renderer, props, root } = startPopover()
+    const { renderer, props, list, popover } = startPopover()
 
     renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
-    expect(root?.unmount).toHaveBeenCalledTimes(1)
+    expect(popover.destroy).toHaveBeenCalledTimes(1)
 
     renderer.onUpdate(props)
 
-    expect(root?.render).toHaveBeenCalledTimes(1)
+    expect(list.updateProps).not.toHaveBeenCalled()
+    expect(popover.updateProps).not.toHaveBeenCalled()
   })
 
   it("clears a pending debounce when Escape dismisses the popover", async () => {
@@ -212,27 +227,29 @@ describe("createSuggestionConfig", () => {
     }
   })
 
-  it("destroys the renderer and removes the container on Escape", () => {
-    const { renderer, container } = startPopover()
+  it("destroys both renderers and removes the container on Escape", () => {
+    const { renderer, list, popover } = startPopover()
 
     renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
 
-    expect(rendererState.destroy).toHaveBeenCalledTimes(1)
-    expect(container?.isConnected).toBe(false)
+    expect(list.destroy).toHaveBeenCalledTimes(1)
+    expect(popover.destroy).toHaveBeenCalledTimes(1)
+    expect(popover.element.isConnected).toBe(false)
   })
 
-  it("destroys the renderer and removes the container on exit", () => {
-    const { renderer, container } = startPopover()
+  it("destroys both renderers and removes the container on exit", () => {
+    const { renderer, list, popover } = startPopover()
 
     renderer.onExit()
 
-    expect(rendererState.destroy).toHaveBeenCalledTimes(1)
-    expect(container?.isConnected).toBe(false)
+    expect(list.destroy).toHaveBeenCalledTimes(1)
+    expect(popover.destroy).toHaveBeenCalledTimes(1)
+    expect(popover.element.isConnected).toBe(false)
   })
 
   it("ignores a command fired after the popover was dismissed", () => {
-    const { renderer, props } = startPopover()
-    const command = rendererState.props?.command
+    const { renderer, props, list } = startPopover()
+    const command = list.props.command as (item: MentionedUser) => void
 
     renderer.onUpdate(props)
     renderer.onExit()
@@ -275,7 +292,9 @@ describe("createSuggestionConfig", () => {
       range: { from: 5, to: 9 },
     })
 
-    const command = rendererState.props?.command
+    const command = rendererState.renderers[0]?.props.command as (
+      item: MentionedUser
+    ) => void
     expect(command).toBeDefined()
 
     renderer.onUpdate({

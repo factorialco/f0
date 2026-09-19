@@ -2,7 +2,6 @@ import * as Popover from "@radix-ui/react-popover"
 import { Editor, Extension, ReactRenderer } from "@tiptap/react"
 import { Suggestion } from "@tiptap/suggestion"
 import React from "react"
-import { createRoot, Root } from "react-dom/client"
 import { I18nContextType } from "@/lib/providers/i18n"
 import { ImageUploadConfig } from "../Image"
 import {
@@ -129,8 +128,14 @@ const createSlashCommandExtension = ({
           items: ({ query }: { query: string }) => filterCommands(query),
           render: () => {
             let component: ReactRenderer | null = null
-            let popoverRoot: Root | null = null
-            let container: HTMLDivElement | null = null
+            let popover: ReactRenderer | null = null
+            const dismiss = () => {
+              popover?.destroy()
+              popover?.element.remove()
+              component?.destroy()
+              component = null
+              popover = null
+            }
 
             const getSlashRect = (): DOMRect => {
               const selection = window.getSelection()
@@ -233,19 +238,15 @@ const createSlashCommandExtension = ({
                   editor: props.editor,
                 })
 
-                const anchorRect = safeGetRect(props.clientRect)
-
-                container = document.createElement("div")
-                document.body.appendChild(container)
-
-                popoverRoot = createRoot(container)
-                popoverRoot.render(
-                  <PopoverComponent
-                    content={component.element as HTMLElement}
-                    anchorRect={anchorRect}
-                    editor={props.editor}
-                  />
-                )
+                popover = new ReactRenderer(PopoverComponent, {
+                  props: {
+                    content: component.element as HTMLElement,
+                    anchorRect: safeGetRect(props.clientRect),
+                    editor: props.editor,
+                  } satisfies React.ComponentProps<typeof PopoverComponent>,
+                  editor: props.editor,
+                })
+                document.body.appendChild(popover.element)
               },
               onUpdate: (props: {
                 items: CommandItem[]
@@ -253,7 +254,7 @@ const createSlashCommandExtension = ({
                 editor: Editor
                 query?: string
               }) => {
-                if (!component || !container || !popoverRoot) {
+                if (!component || !popover) {
                   return
                 }
 
@@ -264,33 +265,23 @@ const createSlashCommandExtension = ({
                 })
 
                 // Control visibility based on whether we have items
+                const popoverElement = popover.element as HTMLElement
                 if (props.items.length === 0) {
                   // Hide the popover content
-                  if (container) {
-                    ;(container as HTMLElement).style.display = "none"
-                  }
+                  popoverElement.style.display = "none"
                 } else {
                   // Show the popover content and update position
-                  if (container) {
-                    ;(container as HTMLElement).style.display = ""
-                  }
-
-                  const anchorRect = safeGetRect(props.clientRect)
-                  popoverRoot.render(
-                    <PopoverComponent
-                      content={component.element as HTMLElement}
-                      anchorRect={anchorRect}
-                      editor={props.editor}
-                    />
-                  )
+                  popoverElement.style.display = ""
+                  popover.updateProps({
+                    anchorRect: safeGetRect(props.clientRect),
+                  } satisfies Partial<
+                    React.ComponentProps<typeof PopoverComponent>
+                  >)
                 }
               },
               onKeyDown: (props: { event: KeyboardEvent }) => {
                 if (props.event.key === "Escape") {
-                  if (popoverRoot && container) {
-                    popoverRoot.unmount()
-                    container.remove()
-                  }
+                  dismiss()
                   return true
                 }
                 const ref = component?.ref
@@ -302,11 +293,7 @@ const createSlashCommandExtension = ({
                   : false
               },
               onExit() {
-                if (popoverRoot && container) {
-                  popoverRoot.unmount()
-                  container.remove()
-                }
-                component?.destroy()
+                dismiss()
               },
             }
           },

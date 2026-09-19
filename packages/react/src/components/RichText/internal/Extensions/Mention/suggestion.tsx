@@ -1,5 +1,5 @@
 import { Editor, ReactRenderer } from "@tiptap/react"
-import { createRoot, Root } from "react-dom/client"
+import type { ComponentProps } from "react"
 import { MentionList } from "./MentionList"
 import { MentionPopover } from "./MentionPopover"
 import { MentionedUser, MentionListRef } from "./types"
@@ -171,24 +171,17 @@ export function createSuggestionConfig(
       searchUsers ? requestItems(query) : Promise.resolve(mentionSuggestions),
     render: () => {
       let component: ReactRenderer | null = null
-      let popoverRoot: Root | null = null
-      let container: HTMLDivElement | null = null
+      let popover: ReactRenderer | null = null
       let latestProps: SuggestionRenderProps | null = null
 
-      // Clearing the references is what stops a still-suspended tiptap update
-      // from rendering into a root that has already been unmounted, which React
-      // treats as an error rather than a no-op.
       const dismiss = () => {
         latestProps = null
         resetSuggestionState()
-        if (popoverRoot && container) {
-          popoverRoot.unmount()
-          container.remove()
-        }
+        popover?.destroy()
+        popover?.element.remove()
         component?.destroy()
         component = null
-        popoverRoot = null
-        container = null
+        popover = null
       }
 
       const getAtSymbolRect = (): DOMRect => {
@@ -268,36 +261,28 @@ export function createSuggestionConfig(
             props: { items: props.items, command: commandFn },
             editor: props.editor,
           })
-          const anchorRect = safeGetRect(props)
+          popover = new ReactRenderer(MentionPopover, {
+            props: {
+              content: component.element as HTMLElement,
+              anchorRect: safeGetRect(props),
+              editor: props.editor,
+            } satisfies ComponentProps<typeof MentionPopover>,
+            editor: props.editor,
+          })
+          document.body.appendChild(popover.element)
 
-          container = document.createElement("div")
-          document.body.appendChild(container)
-
-          popoverRoot = createRoot(container)
-          popoverRoot.render(
-            <MentionPopover
-              content={component.element as HTMLElement}
-              anchorRect={anchorRect}
-              editor={props.editor}
-            />
-          )
           props.editor?.commands.focus()
         },
         onUpdate: (props: SuggestionRenderProps) => {
           latestProps = props
 
-          if (!component || !container || !popoverRoot) {
+          if (!component || !popover) {
             return
           }
           component.updateProps({ items: props.items })
-          const anchorRect = safeGetRect(props)
-          popoverRoot.render(
-            <MentionPopover
-              content={component.element as HTMLElement}
-              anchorRect={anchorRect}
-              editor={props.editor}
-            />
-          )
+          popover.updateProps({
+            anchorRect: safeGetRect(props),
+          } satisfies Partial<ComponentProps<typeof MentionPopover>>)
         },
         onKeyDown: (props: { event: KeyboardEvent }) => {
           if (!component) {
