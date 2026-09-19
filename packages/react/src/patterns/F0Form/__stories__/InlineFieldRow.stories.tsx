@@ -170,6 +170,51 @@ export const WithMessage: Story = {
           ?.getBoundingClientRect().height
       ).toBe(40)
     })
+
+    await step("Lead the reason with the critical glyph", async () => {
+      const slot = canvasElement.querySelector<HTMLElement>(
+        '[data-slot="inline-field-row-message"]'
+      )
+      const glyph = slot?.querySelector("svg")
+      await expect(glyph).toBeInTheDocument()
+
+      const text = canvas.getByText("Enter a valid email address")
+      await expect(text.className).toContain("text-f1-foreground-critical")
+      // The glyph sits on the first line, whatever the copy wraps to.
+      const glyphRect = (glyph as SVGSVGElement).getBoundingClientRect()
+      const textRect = text.getBoundingClientRect()
+      await expect(glyphRect.right).toBeLessThanOrEqual(textRect.left)
+      await expect(Math.abs(glyphRect.top - textRect.top)).toBeLessThanOrEqual(
+        2
+      )
+    })
+  },
+}
+
+/**
+ * A refused save can reach a row that is not editing — a date or a select,
+ * whose editor is a popup. The box turns critical where it reads.
+ */
+export const MessageWhileReading: Story = {
+  args: {
+    label: "Start date",
+    value: readValue("10 Apr 2026"),
+    message: "That date is before the contract starts",
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Draw the value box as critical", async () => {
+      const box = canvasElement.querySelector<HTMLElement>(
+        '[data-slot="inline-field-row-value"]'
+      ) as HTMLElement
+
+      await expect(box.getBoundingClientRect().height).toBe(40)
+      await expect(getComputedStyle(box).boxShadow).not.toBe("none")
+      await expect(
+        canvas.getByText("That date is before the contract starts")
+      ).toBeVisible()
+    })
   },
 }
 

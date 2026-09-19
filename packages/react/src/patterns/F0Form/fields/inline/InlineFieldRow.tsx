@@ -8,6 +8,7 @@ import {
   useState,
 } from "react"
 import { F0Icon } from "@/components/F0Icon"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CheckCircle, InfoCircleLine, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -101,12 +102,13 @@ const RowValue = forwardRef<
     value: ReactNode
     editing: boolean
     copied: boolean
+    critical: boolean
     activatable: boolean
     cursor: "caret" | "pointer"
     onActivate: (() => void) | undefined
   }
 >(function RowValue(
-  { label, value, editing, copied, activatable, cursor, onActivate },
+  { label, value, editing, copied, critical, activatable, cursor, onActivate },
   ref
 ) {
   const { t } = useI18n()
@@ -142,7 +144,14 @@ const RowValue = forwardRef<
           "h-10 w-full min-w-0 rounded-md [&>*]:h-full [&>*]:w-full",
           !editing && "transition-colors motion-reduce:transition-none",
           copied && !editing && "bg-f1-background-positive",
-          activatable && !copied && "group-hover:bg-f1-background-secondary",
+          // A ring, not a border: the editor's own critical border is 1px
+          // inside the box, and a second one would move the text.
+          critical &&
+            "bg-f1-background-critical bg-opacity-10 ring-1 ring-inset ring-f1-border-critical-bold",
+          activatable &&
+            !copied &&
+            !critical &&
+            "group-hover:bg-f1-background-secondary",
           activatable &&
             (cursor === "pointer" ? "cursor-pointer" : "cursor-text")
         )}
@@ -222,6 +231,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
               value={value}
               editing={editing}
               copied={copied}
+              critical={!!message && !editing}
               activatable={activatable}
               cursor={activatorCursor}
               onActivate={onActivate}
@@ -246,11 +256,8 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
 
           {/* Place errors below the value to preserve its width. */}
           {message ? (
-            <div
-              data-slot="inline-field-row-message"
-              className="px-3 text-base font-medium text-f1-foreground-critical"
-            >
-              {message}
+            <div data-slot="inline-field-row-message" className="px-3">
+              <InputMessages status={{ type: "error", message }} />
             </div>
           ) : null}
         </div>

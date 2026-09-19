@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { Pencil, Star } from "@/icons/app"
+import { AlertCircle, Pencil, Star } from "@/icons/app"
 import {
   fireEvent,
   screen,
@@ -370,17 +370,39 @@ describe("InlineFieldRow", () => {
 
     const slot = document.querySelector(
       '[data-slot="inline-field-row-message"]'
-    )
+    ) as HTMLElement
     const box = document.querySelector(
       '[data-slot="inline-field-row-value"]'
     ) as HTMLElement
 
     expect(slot).toHaveTextContent("Enter a valid email address")
-    expect(slot?.className).toContain("text-f1-foreground-critical")
+    expect(
+      slot.querySelector(".text-f1-foreground-critical")
+    ).toHaveTextContent("Enter a valid email address")
 
     expect(
-      box.compareDocumentPosition(slot as Node) &
-        Node.DOCUMENT_POSITION_FOLLOWING
+      box.compareDocumentPosition(slot) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("leads the message with the critical alert glyph", () => {
+    renderRow({ message: "Invalid DNI number" })
+
+    const slot = document.querySelector(
+      '[data-slot="inline-field-row-message"]'
+    ) as HTMLElement
+    const glyph = slot.querySelector("svg") as SVGSVGElement
+    const text = slot.querySelector(
+      ".text-f1-foreground-critical"
+    ) as HTMLElement
+
+    const { container } = render(<AlertCircle />)
+    expect(glyph.querySelector("path")?.getAttribute("d")).toBe(
+      container.querySelector("path")?.getAttribute("d")
+    )
+
+    expect(
+      glyph.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 
@@ -390,6 +412,34 @@ describe("InlineFieldRow", () => {
     expect(
       document.querySelector('[data-slot="inline-field-row-message"]')
     ).toHaveTextContent("Too short")
+  })
+
+  it("draws the value box as critical while a message reads", () => {
+    renderRow({ message: "Invalid DNI number", onActivate: vi.fn() })
+
+    const box = document.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    ) as HTMLElement
+
+    expect(box.className).toContain("ring-f1-border-critical-bold")
+    expect(box.className).toContain("bg-f1-background-critical")
+    expect(box.className).not.toContain(
+      "group-hover:bg-f1-background-secondary"
+    )
+  })
+
+  it("leaves the critical box to the editor while the row edits", () => {
+    renderRow({
+      message: "Invalid DNI number",
+      editing: true,
+      onActivate: vi.fn(),
+    })
+
+    const box = document.querySelector(
+      '[data-slot="inline-field-row-value"]'
+    ) as HTMLElement
+
+    expect(box.className).not.toContain("ring-f1-border-critical-bold")
   })
 
   it("forwards a ref to the activator so the caller can focus it again", () => {

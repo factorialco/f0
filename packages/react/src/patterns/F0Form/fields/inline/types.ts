@@ -26,6 +26,9 @@ export type InlineFieldRowProps = {
   /** Use a caret for text editors and a pointer for popup editors. */
   activatorCursor?: "caret" | "pointer"
   editing: boolean
-  /** Validation content displayed below the value. */
-  message?: ReactNode
+  /**
+   * Validation copy displayed below the value. Its presence also marks the
+   * value box as critical while the row reads.
+   */
+  message?: string
 }
