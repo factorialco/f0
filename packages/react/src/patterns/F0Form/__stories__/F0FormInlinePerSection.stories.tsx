@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
+import { StandardLayout } from "@/layouts/StandardLayout"
 import { f0FormField, F0Form, type F0FormSubmitResult } from ".."
 
 const recordSchema = {
@@ -65,6 +66,14 @@ const meta: Meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+function queryIn<T extends HTMLElement>(root: HTMLElement, selector: string) {
+  const found = root.querySelector<T>(selector)
+  if (!found) {
+    throw new Error(`Missing ${selector}`)
+  }
+  return found
+}
 
 /**
  * Edits a text row and lets the row's deferred focus restore land, so it
@@ -287,13 +296,8 @@ export const StickySectionsRail: Story = {
     </div>
   ),
   play: async ({ canvasElement, step }) => {
-    const query = <T extends HTMLElement>(selector: string) => {
-      const found = canvasElement.querySelector<T>(selector)
-      if (!found) {
-        throw new Error(`Missing ${selector}`)
-      }
-      return found
-    }
+    const query = <T extends HTMLElement>(selector: string) =>
+      queryIn<T>(canvasElement, selector)
 
     const scroller = query('[data-testid="rail-scroller"]')
     const rail = query('[data-slot="form-sections-rail"]')
@@ -331,6 +335,91 @@ export const StickySectionsRail: Story = {
       )
       await expect(
         Math.abs(rail.getBoundingClientRect().top - railTop)
+      ).toBeLessThanOrEqual(1)
+    })
+  },
+}
+
+/**
+ * The same rail, one layout deeper: `StandardLayout` sits between the page's
+ * scroller and the form. The layout used to open two `overflow` boxes of its
+ * own, and the rail pinned against the inner one — content-height, so it never
+ * scrolls — which left the rail travelling with the rows.
+ */
+export const StickySectionsRailInStandardLayout: Story = {
+  render: () => (
+    <div
+      data-testid="page-scroller"
+      className="h-80 w-180 overflow-auto rounded-md border border-solid border-f1-border-secondary"
+    >
+      <StandardLayout data-testid="standard-layout">
+        <F0Form
+          name="employee-in-standard-layout"
+          inline
+          schema={recordSchema}
+          sections={recordSections}
+          defaultValues={recordDefaults}
+          onSubmit={saveEverything}
+          styling={{ showSectionsSidepanel: true }}
+        />
+      </StandardLayout>
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const query = <T extends HTMLElement>(selector: string) =>
+      queryIn<T>(canvasElement, selector)
+
+    const scroller = query('[data-testid="page-scroller"]')
+    const layoutSection = query('[data-testid="standard-layout"]')
+    const layoutInner = layoutSection.firstElementChild as HTMLElement | null
+    const rail = query('[data-slot="form-sections-rail"]')
+    const lastSection = query(
+      "#forms\\.employee-in-standard-layout\\.identification"
+    )
+
+    await step("Open no scrollport in the layout", async () => {
+      await expect(getComputedStyle(layoutSection).overflowY).toBe("visible")
+      await expect(layoutInner).not.toBeNull()
+      await expect(getComputedStyle(layoutInner!).overflowY).toBe("visible")
+    })
+
+    await step("Leave the scroll range to the page's box", async () => {
+      await expect(scroller.scrollHeight).toBeGreaterThan(
+        scroller.clientHeight + 1
+      )
+      await expect(layoutSection.scrollHeight).toBe(layoutSection.clientHeight)
+    })
+
+    const sectionTop = lastSection.getBoundingClientRect().top
+    // The rail pins against the page's box, so it comes to rest on that box's
+    // top edge rather than where it started — the layout's `py-5` sits above it.
+    const pinnedTop = scroller.getBoundingClientRect().top + scroller.clientTop
+
+    await step(
+      "Pin the rail to the page's box as a heading travels",
+      async () => {
+        scroller.scrollTop = 200
+        await waitFor(() =>
+          expect(
+            sectionTop - lastSection.getBoundingClientRect().top
+          ).toBeGreaterThan(150)
+        )
+        await expect(
+          Math.abs(rail.getBoundingClientRect().top - pinnedTop)
+        ).toBeLessThanOrEqual(1)
+      }
+    )
+
+    await step("Hold it there for the rest of the scroll", async () => {
+      const travelled = lastSection.getBoundingClientRect().top
+      scroller.scrollTop = 280
+      await waitFor(() =>
+        expect(lastSection.getBoundingClientRect().top).toBeLessThan(
+          travelled - 70
+        )
+      )
+      await expect(
+        Math.abs(rail.getBoundingClientRect().top - pinnedTop)
       ).toBeLessThanOrEqual(1)
     })
   },
