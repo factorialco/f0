@@ -627,7 +627,7 @@ const QuickFilterPane = ({
         }}
       />
       <p className="text-f1-foreground-secondary">
-        Staged, not applied — the apply button is still what commits it.
+        Nothing changes in the list until you press Apply.
       </p>
     </div>
   )
