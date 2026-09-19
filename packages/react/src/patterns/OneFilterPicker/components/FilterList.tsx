@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useId, useMemo } from "react"
 import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, type IconType } from "@/components/F0Icon"
 import { ChevronRight } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -33,6 +33,14 @@ interface FilterListProps<Definition extends FiltersDefinition> {
   isCompactMode?: boolean
   /** Callback fired when the apply filters button is clicked */
   onClickApplyFilters: () => void
+  /** Label for the entry that opens the quick filter, listed before the filters */
+  quickFilterLabel?: string
+  /** Icon drawn before that label */
+  quickFilterIcon?: IconType
+  /** Whether that entry is the selected one */
+  quickFilterSelected?: boolean
+  /** Callback fired when that entry is picked */
+  onQuickFilterSelect?: () => void
 }
 
 /**
@@ -55,6 +63,10 @@ export function FilterList<Definition extends FiltersDefinition>({
   onFilterSelect,
   isCompactMode,
   onClickApplyFilters,
+  quickFilterLabel,
+  quickFilterIcon,
+  quickFilterSelected,
+  onQuickFilterSelect,
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
   const activeDescriptionId = useId()
@@ -94,6 +106,26 @@ export function FilterList<Definition extends FiltersDefinition>({
         ) : null}
         <ListScrollArea className="flex-1 min-h-0 max-h-full">
           <div className="flex flex-col gap-1">
+            {quickFilterLabel ? (
+              <button
+                className={cn(
+                  "group relative flex w-full appearance-none items-center justify-between rounded px-2 py-1.5 font-medium transition-colors",
+                  "hover:bg-f1-background-secondary",
+                  quickFilterSelected && "bg-f1-background-secondary",
+                  focusRing()
+                )}
+                onClick={onQuickFilterSelect}
+                aria-label={quickFilterLabel}
+              >
+                <div className="flex w-full items-center justify-start gap-2.5 overflow-hidden">
+                  {quickFilterIcon ? <F0Icon icon={quickFilterIcon} /> : null}
+                  <OneEllipsis className="flex-1 text-left text-f1-foreground">
+                    {quickFilterLabel}
+                  </OneEllipsis>
+                  {isCompactMode ? <F0Icon icon={ChevronRight} /> : null}
+                </div>
+              </button>
+            ) : null}
             {Object.entries(definition).map(([key, filter]) => {
               const filterType = getFilterType(filter.type)
 
