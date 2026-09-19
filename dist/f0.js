@@ -36,7 +36,7 @@ import './f0.css';const CG = {
     ] })
   ] }) });
 }), DG = mn({
-  base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-page py-5",
+  base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center px-page py-5",
   variants: {
     variant: {
       narrow: "max-w-screen-lg"
@@ -46,7 +46,7 @@ import './f0.css';const CG = {
   "section",
   {
     ref: i,
-    className: oe("relative flex-1 overflow-auto", t),
+    className: oe("relative flex-1", t),
     ...n,
     children: /* @__PURE__ */ x("div", { className: oe(DG({ variant: e })), children: r })
   }
