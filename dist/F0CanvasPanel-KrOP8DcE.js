@@ -117781,7 +117781,7 @@ const UY1 = ({ text: e }) => /* @__PURE__ */ i(
   if (!e)
     return null;
   const t = (Array.isArray(e.message) ? e.message : [e.message]).filter(Boolean), n = Jy[e.type].icon;
-  return t.length > 0 && /* @__PURE__ */ $("div", { className: "flex gap-1", children: [
+  return t.length > 0 && /* @__PURE__ */ $("div", { className: "flex items-start gap-1", children: [
     n ? /* @__PURE__ */ i(
       m1,
       {
