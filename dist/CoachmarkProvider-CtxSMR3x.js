@@ -69722,8 +69722,6 @@ function M3e(e, t, n, i) {
             props: { items: E.items, command: S },
             editor: E.editor
           }), x = new Cu(D3e, {
-            // tiptap types renderer props as `Record<string, any>`, so
-            // `satisfies` is what keeps a renamed prop a compile error.
             props: {
               content: w.element,
               anchorRect: C(E),
@@ -71523,8 +71521,6 @@ const D_e = ({
                   },
                   editor: h.editor
                 }), l = new Cu(u, {
-                  // tiptap types renderer props as `Record<string, any>`, so
-                  // `satisfies` is what keeps a renamed prop a compile error.
                   props: {
                     content: a.element,
                     anchorRect: f(h.clientRect),
