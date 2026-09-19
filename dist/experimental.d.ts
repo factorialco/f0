@@ -72,7 +72,11 @@ import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from './experimental';
+import { IconType as IconType_3 } from './experimental';
 import { InFilterOptions } from './InFilter/types';
+import { InlineDismissReason as InlineDismissReason_2 } from './experimental';
+import { InputFieldSize as InputFieldSize_2 } from './experimental';
+import { InputFieldStatus as InputFieldStatus_2 } from './experimental';
 import { ItemProps } from './types';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
@@ -10912,10 +10916,36 @@ declare const F0TagTeam: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0
  * F0TextAreaInput is the writable multi-line text field for forms — a box
  * where the user types longer text spanning multiple lines (notes,
  * descriptions, comments). For a single line of text use F0TextInput.
+ *
+ * `variant="inline"` is the detail-row presentation: the value prints as
+ * wrapped multi-line text until the row hands it `editing`, and the editor
+ * takes over in the same box at the same inset.
  */
-export declare const F0TextAreaInput: React.FC<F0TextAreaInputProps>;
+export declare const F0TextAreaInput: ForwardRefExoticComponent<(Omit<F0TextAreaInputBaseProps & {
+variant?: "field";
+editing?: never;
+onDismiss?: never;
+} & RefAttributes<HTMLTextAreaElement>, "ref"> | Omit<F0TextAreaInputBaseProps & {
+variant: "inline";
+editing?: boolean;
+onDismiss?: (reason: InlineDismissReason) => void;
+} & RefAttributes<HTMLTextAreaElement>, "ref">) & RefAttributes<HTMLTextAreaElement>>;
 
-export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
+declare type F0TextAreaInputBaseProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight" | "autoFocus">;
+
+export declare type F0TextAreaInputFieldProps = F0TextAreaInputBaseProps & {
+    variant?: "field";
+    editing?: never;
+    onDismiss?: never;
+};
+
+export declare type F0TextAreaInputInlineProps = F0TextAreaInputBaseProps & {
+    variant: "inline";
+    editing?: boolean;
+    onDismiss?: (reason: InlineDismissReason) => void;
+};
+
+export declare type F0TextAreaInputProps = F0TextAreaInputFieldProps | F0TextAreaInputInlineProps;
 
 /**
  * F0TextInput is the writable text field for forms — a box where the user
@@ -16534,13 +16564,69 @@ declare type TeamTagProps = ComponentProps<typeof F0TagTeam>;
  *
  * @removeIn 2.0.0
  */
-export declare const Textarea: FC<F0TextAreaInputProps>;
+export declare const Textarea: ForwardRefExoticComponent<(Omit<{
+label: string;
+value?: string | undefined;
+onChange?: ((value: string) => void) | undefined;
+name?: string | undefined | undefined;
+size?: InputFieldSize_2 | undefined;
+icon?: IconType_3 | undefined;
+onFocus?: (() => void) | undefined;
+onBlur?: ((event: React.FocusEvent<HTMLInputElement>) => void) | undefined;
+status?: InputFieldStatus_2 | undefined;
+autoFocus?: boolean | undefined | undefined;
+maxHeight?: number | undefined;
+loading?: boolean | undefined;
+disabled?: boolean | undefined | undefined;
+maxLength?: number | undefined | undefined;
+placeholder?: string | undefined | undefined;
+required?: boolean | undefined | undefined;
+cols?: number | undefined | undefined;
+rows?: number | undefined | undefined;
+error?: string | boolean | undefined;
+hideLabel?: boolean | undefined;
+hint?: string | undefined;
+labelIcon?: IconType_3 | undefined;
+clearable?: boolean | undefined;
+} & {
+variant?: "field";
+editing?: never;
+onDismiss?: never;
+} & RefAttributes<HTMLTextAreaElement>, "ref"> | Omit<{
+label: string;
+value?: string | undefined;
+onChange?: ((value: string) => void) | undefined;
+name?: string | undefined | undefined;
+size?: InputFieldSize_2 | undefined;
+icon?: IconType_3 | undefined;
+onFocus?: (() => void) | undefined;
+onBlur?: ((event: React.FocusEvent<HTMLInputElement>) => void) | undefined;
+status?: InputFieldStatus_2 | undefined;
+autoFocus?: boolean | undefined | undefined;
+maxHeight?: number | undefined;
+loading?: boolean | undefined;
+disabled?: boolean | undefined | undefined;
+maxLength?: number | undefined | undefined;
+placeholder?: string | undefined | undefined;
+required?: boolean | undefined | undefined;
+cols?: number | undefined | undefined;
+rows?: number | undefined | undefined;
+error?: string | boolean | undefined;
+hideLabel?: boolean | undefined;
+hint?: string | undefined;
+labelIcon?: IconType_3 | undefined;
+clearable?: boolean | undefined;
+} & {
+variant: "inline";
+editing?: boolean;
+onDismiss?: (reason: InlineDismissReason_2) => void;
+} & RefAttributes<HTMLTextAreaElement>, "ref">) & RefAttributes<HTMLTextAreaElement>>;
 
 declare const Textarea_2: ForwardRefExoticComponent<Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
 value?: string;
 /** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
 maxHeight?: number;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "editing" | "variant" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
 
 /**
  * @deprecated Renamed to `F0TextAreaInputProps`. See the `Textarea`
@@ -18138,8 +18224,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -18147,10 +18235,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

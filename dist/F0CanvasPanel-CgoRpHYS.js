@@ -117715,16 +117715,18 @@ const UY1 = ({ text: e }) => /* @__PURE__ */ i(
   text: n,
   placeholder: r,
   size: a = "md",
-  icon: o
+  icon: o,
+  multiline: s = !1
 }) => {
-  const s = n.length === 0, l = s ? r ?? "" : n;
+  const l = n.length === 0, u = l ? r ?? "" : n;
   return /* @__PURE__ */ $(
     "div",
     {
       "data-testid": "input-field-inline-value",
       "aria-label": t ? e : void 0,
       className: U(
-        "relative flex w-full min-w-0 items-center border border-solid border-transparent",
+        "relative flex w-full min-w-0 border border-solid border-transparent",
+        s ? "items-start" : "items-center",
         fe2({ size: a, canGrow: !0 })
       ),
       children: [
@@ -117742,16 +117744,17 @@ const UY1 = ({ text: e }) => /* @__PURE__ */ i(
         /* @__PURE__ */ i(
           "span",
           {
-            title: l,
+            title: s ? void 0 : u,
             className: U(
               e8({ variant: "body" }),
-              "min-w-0 truncate px-3 font-medium",
+              "min-w-0 px-3 font-medium",
+              s ? "w-full whitespace-pre-wrap break-words" : "truncate",
               o && "pl-8",
               o && a === "md" && "pl-9",
               Ia({ size: a }),
-              s ? "text-f1-foreground-secondary" : "text-f1-foreground"
+              l ? "text-f1-foreground-secondary" : "text-f1-foreground"
             ),
-            children: l
+            children: u
           }
         )
       ]
@@ -117988,7 +117991,8 @@ const UY1 = ({ text: e }) => /* @__PURE__ */ i(
               text: O2 == null || O2 === "" ? "" : u2 ?? O2,
               placeholder: b,
               size: p2,
-              icon: h
+              icon: h,
+              multiline: m
             }
           ),
           /* @__PURE__ */ i(oo, { status: c })
