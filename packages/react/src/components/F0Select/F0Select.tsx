@@ -147,13 +147,18 @@ const asListContainerVariants = cva({
  */
 const INLINE_SELECT_INSET = "border border-solid border-transparent px-3"
 
-/** Match the body size and weight of adjacent inline inputs. */
-const INLINE_SELECT_TEXT = cn(textVariants({ variant: "body" }), "font-normal")
+/** Match the body size and colour of adjacent inline inputs. */
+const INLINE_SELECT_TEXT = textVariants({ variant: "body" })
+
+/** The prototype prints a value medium at rest and regular inside its editor. */
+const INLINE_SELECT_REST_WEIGHT = "font-medium"
+const INLINE_SELECT_EDIT_WEIGHT = "font-normal"
 
 const inlineSelectTriggerClassName = cn(
   "group flex h-full w-full max-w-full items-center justify-between gap-1 rounded bg-transparent shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled",
   INLINE_SELECT_INSET,
-  INLINE_SELECT_TEXT
+  INLINE_SELECT_TEXT,
+  INLINE_SELECT_EDIT_WEIGHT
 )
 
 /** Reveal on row hover or focus; always show on touch screens. */
@@ -231,7 +236,8 @@ const InlineSelectText = ({
     className={cn(
       "flex h-full w-full min-w-0 max-w-full items-center justify-between gap-1",
       INLINE_SELECT_INSET,
-      INLINE_SELECT_TEXT
+      INLINE_SELECT_TEXT,
+      INLINE_SELECT_REST_WEIGHT
     )}
   >
     <span className="flex min-w-0 flex-1 items-center">

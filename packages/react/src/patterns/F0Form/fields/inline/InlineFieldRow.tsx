@@ -205,7 +205,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
           <span
             className={cn(
               textVariants({ variant: "body" }),
-              "truncate font-normal text-f1-foreground-secondary"
+              "truncate font-normal"
             )}
           >
             {label}

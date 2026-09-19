@@ -50,7 +50,7 @@ describe("F0InputField", () => {
       expect(screen.getByTitle("0.00")).toHaveTextContent("0.00")
     })
 
-    it("prints the resting value in regular body text", () => {
+    it("prints the resting value in medium body text", () => {
       render(
         <F0InputField variant="inline" label="Job title" value="Analyst">
           <input />
@@ -59,7 +59,7 @@ describe("F0InputField", () => {
 
       const text = screen.getByTitle("Analyst")
       expect(text).toHaveClass("text-base")
-      expect(text).toHaveClass("font-normal")
+      expect(text).toHaveClass("font-medium")
       expect(text).toHaveClass("text-f1-foreground")
     })
   })

@@ -52,7 +52,7 @@ const InlineValue = ({
         title={display}
         className={cn(
           textVariants({ variant: "body" }),
-          "min-w-0 truncate px-3 font-normal",
+          "min-w-0 truncate px-3 font-medium",
           icon && "pl-8",
           icon && size === "md" && "pl-9",
           inputElementVariants({ size }),

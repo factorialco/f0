@@ -226,13 +226,14 @@ describe("InlineFieldRow", () => {
     ).toHaveClass("cursor-help")
   })
 
-  it("prints the label as regular secondary body text", () => {
+  it("prints the label as regular body text, as the prototype does", () => {
     renderRow()
 
     const label = screen.getByText("Job title")
     expect(label).toHaveClass("text-base")
     expect(label).toHaveClass("font-normal")
-    expect(label).toHaveClass("text-f1-foreground-secondary")
+    expect(label).toHaveClass("text-f1-foreground")
+    expect(label).not.toHaveClass("text-f1-foreground-secondary")
   })
 
   it("keeps the activator a sibling of the strip, never its parent", () => {

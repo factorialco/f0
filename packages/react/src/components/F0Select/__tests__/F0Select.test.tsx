@@ -462,7 +462,7 @@ describe("Select", () => {
       ).toBeInTheDocument()
     })
 
-    it("reads as text at rest, with the same inset and typography as the editor", () => {
+    it("reads as text at rest, at the editor's inset and size", () => {
       const rest = render(
         <F0Select
           variant="inline"
@@ -479,7 +479,8 @@ describe("Select", () => {
       expect(text.className).toContain("w-full")
       expect(text.className).toContain("text-base")
 
-      expect(text.className).not.toContain("font-medium")
+      // The prototype prints a resting value medium and its editor regular.
+      expect(text.className).toContain("font-medium")
       expect(text.className).not.toContain("text-sm")
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
       expect(screen.queryByRole("button")).not.toBeInTheDocument()
