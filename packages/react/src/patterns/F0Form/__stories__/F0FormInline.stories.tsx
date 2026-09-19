@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
 import { f0FormField, F0Form } from ".."
 
@@ -554,6 +554,71 @@ export const Copyable: Story = {
       await expect(
         canvas.getByRole("button", { name: "Copy Team" })
       ).toBeInTheDocument()
+    })
+  },
+}
+
+const COMMUTES = [
+  { value: "bicycle", label: "Bicycle" },
+  { value: "walking", label: "Walking" },
+  { value: "train", label: "Train" },
+]
+
+export const MultiSelectRow: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="inline-multi-select"
+        inline
+        schema={z.object({
+          commute: f0FormField(z.array(z.string()), {
+            label: "Commute",
+            multiple: true,
+            options: COMMUTES,
+            copyable: true,
+          }),
+        })}
+        defaultValues={{ commute: ["bicycle", "walking"] }}
+        onSubmit={submit}
+        submitConfig={actionBar}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Read the whole selection as one line of text", async () => {
+      await expect(await canvas.findByText("Bicycle, Walking")).toBeVisible()
+      await expect(canvas.queryByRole("combobox")).toBeNull()
+    })
+
+    await step("Leave the chevron as the row's only affordance", async () => {
+      await expect(
+        canvas.queryByRole("button", { name: "Edit Commute" })
+      ).toBeNull()
+    })
+
+    await step("Copy the labels, joined the way the row reads", async () => {
+      const writeText = fn(async () => {})
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText },
+        configurable: true,
+      })
+
+      // The strip is inert until the row is hovered or holds a focus ring, and
+      // a synthetic hover does not raise :hover in a real browser.
+      await userEvent.tab()
+      await expect(
+        canvas.getByRole("button", { name: "Commute" })
+      ).toHaveFocus()
+
+      await userEvent.tab()
+      const copy = canvas.getByRole("button", { name: "Copy Commute" })
+      await expect(copy).toHaveFocus()
+      await userEvent.keyboard("{Enter}")
+      await waitFor(async () => {
+        await expect(writeText).toHaveBeenCalledWith("Bicycle, Walking")
+      })
     })
   },
 }

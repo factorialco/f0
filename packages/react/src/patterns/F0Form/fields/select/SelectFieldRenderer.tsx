@@ -34,6 +34,34 @@ function InlineSelect({
     onCreate: field.onCreate,
     editing: inline.editing,
     onDismiss: inline.onDismiss,
+  }
+
+  if (field.multiple) {
+    const multiple = {
+      ...shared,
+      multiple: true as const,
+      value: (formField.value as string[]) ?? [],
+      onChange: (value: string[]) => {
+        formField.onChange(value)
+        formField.onBlur()
+      },
+    }
+
+    if (field.source !== undefined && field.mapOptions !== undefined) {
+      return (
+        <F0Select
+          {...multiple}
+          source={field.source}
+          mapOptions={field.mapOptions}
+        />
+      )
+    }
+
+    return <F0Select {...multiple} options={field.options ?? []} />
+  }
+
+  const single = {
+    ...shared,
     value: (formField.value as string) ?? undefined,
     onChange: (value: string) => {
       formField.onChange(value)
@@ -44,14 +72,14 @@ function InlineSelect({
   if (field.source !== undefined && field.mapOptions !== undefined) {
     return (
       <F0Select
-        {...shared}
+        {...single}
         source={field.source}
         mapOptions={field.mapOptions}
       />
     )
   }
 
-  return <F0Select {...shared} options={field.options ?? []} />
+  return <F0Select {...single} options={field.options ?? []} />
 }
 
 /**

@@ -371,6 +371,76 @@ describe("F0Form inline mode", () => {
     )
   })
 
+  it("opens a multi-select row as a checkbox list and keeps it open while picking", async () => {
+    const user = userEvent.setup()
+    renderProfile({
+      schema: z.object({
+        commute: f0FormField(z.array(z.string()), {
+          label: "Commute",
+          multiple: true,
+          options: [
+            { value: "bicycle", label: "Bicycle" },
+            { value: "walking", label: "Walking" },
+            { value: "train", label: "Train" },
+          ],
+        }),
+      }),
+      defaultValues: { commute: ["bicycle", "walking"] },
+    })
+
+    expect(screen.queryByTestId("input-field-wrapper")).toBeNull()
+
+    await user.click(activator("Commute"))
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    fireEvent.animationStart(screen.getByRole("listbox"))
+
+    const options = await screen.findAllByRole("option")
+    expect(options).toHaveLength(3)
+    for (const option of options) {
+      expect(within(option).getByRole("checkbox")).toBeInTheDocument()
+    }
+    // The three options plus the list's own select-all.
+    expect(screen.getAllByRole("checkbox")).toHaveLength(4)
+
+    await user.click(screen.getByRole("option", { name: /Train/ }))
+
+    // A multiple selection outlives each pick: the list stays up.
+    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    )
+  })
+
+  it("returns a multi-select row to reading once its popup closes", async () => {
+    const user = userEvent.setup()
+    renderProfile({
+      schema: z.object({
+        commute: f0FormField(z.array(z.string()), {
+          label: "Commute",
+          multiple: true,
+          options: [
+            { value: "bicycle", label: "Bicycle" },
+            { value: "walking", label: "Walking" },
+          ],
+        }),
+      }),
+      defaultValues: { commute: ["bicycle"] },
+    })
+
+    await user.click(activator("Commute"))
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    fireEvent.animationStart(screen.getByRole("listbox"))
+    await screen.findAllByRole("option")
+
+    // An open Radix popup blocks body pointer events.
+    fireEvent.pointerDown(document.body)
+
+    await waitFor(() => expect(screen.queryByRole("listbox")).toBeNull())
+    expect(screen.getByTestId("select-inline-value")).toBeInTheDocument()
+  })
+
   it("keeps the component mounted across a mode change", async () => {
     const user = userEvent.setup()
     const { container } = renderProfile()
@@ -553,6 +623,17 @@ describe("F0Form inline mode", () => {
         label: "Bio",
       } as F0Field)
     ).toBe(false)
+  })
+
+  it("counts a multi-select as inline-supported", () => {
+    expect(
+      isInlineSupported({
+        id: "commute",
+        type: "select",
+        label: "Commute",
+        multiple: true,
+      } as F0Field)
+    ).toBe(true)
   })
 
   it("leaves the last visible row undivided when renderIf hides the one after it", () => {

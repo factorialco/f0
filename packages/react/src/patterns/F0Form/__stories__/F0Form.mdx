@@ -1000,8 +1000,9 @@ Two field properties are read only in this mode:
   activator, no edit action, and a switch or checkbox is drawn disabled.
 - **`copyable`** (default `false`) — adds a copy action that writes the value as
   plain text: the raw string or number with no grouping or units, the rendered
-  date, or the selected option's label. Toggles have nothing to copy and get no
-  action.
+  date, or the selected option's label — several labels joined with a comma for
+  a multi-select. Toggles have nothing to copy and get no action, and neither do
+  source-backed selects, whose labels are resolved inside the dropdown.
 
 ```tsx
 const profileSchema = z.object({
@@ -1027,10 +1028,17 @@ and the employee.
 `text`, `number` (including `money` and `percentage`), `select`, `date`,
 `switch` and `checkbox` have an inline presentation. Any other type keeps its
 standard field inside the row and logs one development warning, so a single
-textarea or file field does not take a whole profile out of the mode. A
-multi-select falls back the same way — the inline select is single-value.
+textarea or file field does not take a whole profile out of the mode.
 
 <Canvas of={InlineStories.UnsupportedTypeFallsBack} />
+
+A `multiple: true` select reads as its selected labels joined with a comma, and
+falls back to a count once they stop fitting the row. The dropdown stays open
+while options are taken and closes on a click away or the apply button; the row
+returns to text with the draft kept, so the action bar picks the save up like
+any other edit. `copyable` writes the same joined labels.
+
+<Canvas of={InlineStories.MultiSelectRow} />
 
 ### Layout
 

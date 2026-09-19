@@ -1,3 +1,4 @@
+import { LABEL_SEPARATOR } from "@/components/F0Select/utils"
 import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 import { useI18n } from "@/lib/providers/i18n"
 import type { F0Field } from "../types"
@@ -19,18 +20,29 @@ export function useInlineCopyValue(
       return String(value)
 
     case "select": {
-      if (field.multiple) {
-        return undefined
-      }
       const options = field.options ?? []
-      const selected = options.find(
-        (option) => option.type !== "separator" && option.value === value
-      )
-      if (selected && selected.type !== "separator") {
-        return selected.selectedLabel ?? selected.label
-      }
       // Source-backed labels are resolved inside F0Select and are unavailable here.
-      return undefined
+      const labelOf = (optionValue: unknown): string | undefined => {
+        const selected = options.find(
+          (option) =>
+            option.type !== "separator" && option.value === optionValue
+        )
+        return selected && selected.type !== "separator"
+          ? (selected.selectedLabel ?? selected.label)
+          : undefined
+      }
+
+      if (field.multiple) {
+        if (!Array.isArray(value)) {
+          return undefined
+        }
+        const labels = value
+          .map(labelOf)
+          .filter((label): label is string => label !== undefined)
+        return labels.length > 0 ? labels.join(LABEL_SEPARATOR) : undefined
+      }
+
+      return labelOf(value)
     }
 
     case "date": {
