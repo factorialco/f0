@@ -11,6 +11,7 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { F0ActionBar } from "@/components/F0ActionBar"
+import type { IconType } from "@/components/F0Icon"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
@@ -150,6 +151,17 @@ export type OneDataCollectionProps<
     NavigationFilters,
     Grouping
   >[]
+  /**
+   * An entry listed above the filters inside the panel, with a pane of its
+   * own. For a way of narrowing the list that is not one filter.
+   */
+  quickFilter?: {
+    label: string
+    icon?: IconType
+    render: (api: {
+      stage: (filters: Record<string, unknown>) => void
+    }) => React.ReactNode
+  }
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   onBulkAction?: OnBulkActionCallback<R, Filters>
   /**
@@ -264,6 +276,7 @@ const OneDataCollectionComp = <
 >({
   source,
   visualizations,
+  quickFilter,
   onSelectItems,
   onBulkAction,
   autoManageBulkActionStatus = false,
@@ -1745,6 +1758,7 @@ const OneDataCollectionComp = <
           ) : null}
           <div className="flex-1">
             <OneFilterPicker
+              quickFilter={quickFilter}
               filters={effectiveFilters}
               value={activeCurrentFilters}
               presets={mergedPresets}
