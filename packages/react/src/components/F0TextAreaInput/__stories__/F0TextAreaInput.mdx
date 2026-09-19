@@ -83,6 +83,82 @@ The textarea grows in height as the user types, never forcing the user to scroll
 
 `Enter` inserts a new line — there is no `onPressEnter` shortcut, because submitting a multi-line field with `Enter` would conflict with paragraph breaks. Wrap in `<form onSubmit>` and use a submit button.
 
+### Inline variant
+
+`variant="inline"` is the detail-row presentation: a form that reads as rows, where the value prints as text and becomes its own editor when the row activates it. With no `variant`, nothing changes — the field presentation is still the default.
+
+The variant is presentational only. It holds no mode state: the parent passes `editing` and the component draws the matching presentation. When the user does something that would end an edit, the component reports it through `onDismiss` and keeps drawing the textarea until `editing` changes. A component that closed itself would leave the row stuck, because the row decides whether a value commits, reverts, or stays in edit with a validation error showing.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Accepted when</th>
+        <th className="text-left">What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>variant</code>
+        </td>
+        <td>Always</td>
+        <td>
+          <code>"field"</code> (default) or <code>"inline"</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>editing</code>
+        </td>
+        <td>
+          <code>variant="inline"</code> only
+        </td>
+        <td>
+          <code>false</code> (default) draws the value as plain text;{" "}
+          <code>true</code> draws the textarea and focuses it
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onDismiss</code>
+        </td>
+        <td>
+          <code>variant="inline"</code> only
+        </td>
+        <td>
+          Reports <code>"commit"</code> on Cmd/Ctrl+Enter, <code>"escape"</code>{" "}
+          on Escape, and <code>"blur"</code> when focus leaves
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Enter types, Cmd/Ctrl+Enter commits.** A bare `Enter` is a newline in a textarea, so the inline variant leaves it alone and takes `Cmd+Enter` (`Ctrl+Enter` on Windows and Linux) as the commit. This is the one place the inline contract differs from `F0TextInput`, where `Enter` itself commits.
+
+**The box grows in both modes.** At rest the value prints with `white-space: pre-wrap`, so it keeps its line breaks and wraps at the box width; the box is as tall as the text, and never shorter than one 40px row. The editor opens at `rows` lines (the inline default is 1, not the standard 2) and auto-grows from there, so text with the same number of lines reads and edits at the same height. Give the row a value box that grows with it: in `F0Form`'s inline mode that is automatic, and `InlineFieldRow` takes `valueHeight="auto"` when driven directly.
+
+`label` stays required. Pass `hideLabel`, as every inline field renderer does, and it becomes the value's accessible name instead of a visible label.
+
+```tsx
+const [editing, setEditing] = useState(false)
+
+<F0TextAreaInput
+  variant="inline"
+  label="Bio"
+  hideLabel
+  value={value}
+  editing={editing}
+  onChange={setValue}
+  onDismiss={(reason) => {
+    if (reason === "escape") setValue(valueAtActivation)
+    setEditing(false)
+  }}
+/>
+```
+
 ### Character limit
 
 Setting `maxLength` (inherited from `F0InputField`) shows a live `n/max` counter under the field and blocks further typing once the limit is reached — the value is truncated on change, not just visually capped.
@@ -97,6 +173,7 @@ Setting `maxLength` (inherited from `F0InputField`) shows a live `n/max` counter
 - `Enter` inserts a new line instead of submitting — keyboard-only users must reach an actual submit button; there is no Enter-to-submit shortcut like `F0TextInput`'s `onPressEnter`.
 - Setting `error` overrides `hint`, so only one status message is ever rendered — screen readers never announce a stale hint next to an active error.
 - When `clearable` is set and the field has a value, a "Clear" button appears with its own accessible name and is reachable by `Tab` like any other control.
+- At rest the inline variant is text, not a control: no role, no tab stop. The activator that opens it belongs to the row, so an inline textarea outside a row is unreachable by keyboard.
 
 ---
 

@@ -32,10 +32,11 @@ export type TextareaProps = Omit<
     | "error"
     | "status"
     | "hint"
-    | "onKeyDown"
     | "size"
     | "loading"
     | "required"
+    | "variant"
+    | "editing"
   >
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -61,10 +62,15 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       size,
       loading,
       maxHeight,
+      variant,
+      editing,
+      autoFocus,
+      onKeyDown,
       ...props
     },
     ref
   ) => {
+    const inline = variant === "inline"
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     useImperativeHandle(ref, () => textareaRef.current!)
@@ -120,15 +126,25 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         size={size}
         loading={loading}
         inputRef={textareaRef}
+        variant={variant}
+        editing={editing}
         {...props}
       >
         <textarea
-          className={cn("block w-full resize-none pt-2", className)}
+          className={cn(
+            "block w-full resize-none pt-2",
+            // Pin the editor to the typography the at-rest text prints in, so
+            // the same content occupies the same number of lines in both modes.
+            inline && "text-base font-normal",
+            className
+          )}
           value={value}
           cols={cols}
           rows={rows}
           disabled={disabled}
           required={required}
+          autoFocus={autoFocus}
+          onKeyDown={onKeyDown}
         />
       </F0InputField>
     )

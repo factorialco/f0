@@ -440,6 +440,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             placeholder={placeholder}
             size={size}
             icon={icon}
+            multiline={canGrow}
           />
           <InputMessages status={status} />
         </div>

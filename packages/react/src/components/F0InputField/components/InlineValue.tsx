@@ -14,6 +14,8 @@ type InlineValueProps = {
   placeholder?: string
   size?: InputFieldSize
   icon?: IconType
+  /** Print line breaks and wrap instead of truncating, for a growable field. */
+  multiline?: boolean
 }
 
 /** Match the editor border, padding, and icon offsets to prevent text movement. */
@@ -24,6 +26,7 @@ const InlineValue = ({
   placeholder,
   size = "md",
   icon,
+  multiline = false,
 }: InlineValueProps) => {
   const empty = text.length === 0
   const display = empty ? (placeholder ?? "") : text
@@ -33,7 +36,8 @@ const InlineValue = ({
       data-testid="input-field-inline-value"
       aria-label={hideLabel ? label : undefined}
       className={cn(
-        "relative flex w-full min-w-0 items-center border border-solid border-transparent",
+        "relative flex w-full min-w-0 border border-solid border-transparent",
+        multiline ? "items-start" : "items-center",
         inputFieldVariants({ size, canGrow: true })
       )}
     >
@@ -49,10 +53,11 @@ const InlineValue = ({
         </div>
       ) : null}
       <span
-        title={display}
+        title={multiline ? undefined : display}
         className={cn(
           textVariants({ variant: "body" }),
-          "min-w-0 truncate px-3 font-medium",
+          "min-w-0 px-3 font-medium",
+          multiline ? "w-full whitespace-pre-wrap break-words" : "truncate",
           icon && "pl-8",
           icon && size === "md" && "pl-9",
           inputElementVariants({ size }),
