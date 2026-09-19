@@ -15988,12 +15988,6 @@ declare const listIconColors: readonly ["viridian", "malibu", "yellow", "purple"
 
 declare type ListIconPaletteColor = (typeof listIconColors)[number];
 
-/**
- * A row's avatar. The ICON kind alone may name a tint — every other kind
- * carries its own identity already (a face, a flag, a module's brand) and an
- * icon does not. The same rule the Home's `list` slot applies, because these
- * rows are read as the same thing in two places.
- */
 declare type ListItemAvatar = Exclude<AvatarVariant, IconAvatarVariant> | (IconAvatarVariant & {
     color?: ListIconColor;
 });
