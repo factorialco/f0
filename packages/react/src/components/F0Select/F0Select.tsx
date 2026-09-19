@@ -190,6 +190,10 @@ type InlineSelectValueProps = {
   placeholder?: string
   selection: F0SelectItemObject<string>[]
   hasValue: boolean
+  multiple?: boolean
+  /** Only read for a multiple selection, which may hold more than it can show. */
+  selectedCount?: number
+  allSelected?: boolean | "indeterminate"
 }
 
 const InlineSelectValue = ({
@@ -197,9 +201,17 @@ const InlineSelectValue = ({
   placeholder,
   selection,
   hasValue,
+  multiple,
+  selectedCount,
+  allSelected,
 }: InlineSelectValueProps) =>
   hasValue ? (
-    <SelectedItems selection={selection} totalSelectedCount={1} />
+    <SelectedItems
+      multiple={multiple}
+      selection={selection}
+      totalSelectedCount={multiple ? selectedCount : 1}
+      allSelected={allSelected}
+    />
   ) : (
     <span className="truncate text-f1-foreground-secondary">
       {placeholder ?? label}
@@ -810,7 +822,9 @@ const F0SelectComponent = forwardRef(function Select<
       }
 
       hasUserInteracted.current = true
-      if (isInline && checked) {
+      // A multiple selection outlives each click, so every change — taking an
+      // option or dropping one — arms the close that follows as the commit.
+      if (isInline && (multiple || checked)) {
         inlineDismissReasonRef.current = "commit"
       }
       handleSelectItemChange(value, checked)
@@ -857,9 +871,12 @@ const F0SelectComponent = forwardRef(function Select<
     (checked: boolean) => {
       hasUserInteracted.current = true
       selectAllActiveRef.current = checked
+      if (isInline) {
+        inlineDismissReasonRef.current = "commit"
+      }
       handleSelectAllItems(checked)
     },
-    [handleSelectAllItems]
+    [handleSelectAllItems, isInline]
   )
 
   // Extract the original item from a record.
@@ -1874,7 +1891,10 @@ const F0SelectComponent = forwardRef(function Select<
     label,
     placeholder,
     selection: getDisplayItemsForSelection,
-    hasValue: !!localValue[0],
+    hasValue: hasSelection,
+    multiple,
+    selectedCount,
+    allSelected: multiple ? selectedState.allSelected : undefined,
   }
 
   if (isInline && !inlineOpen) {

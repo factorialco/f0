@@ -347,13 +347,17 @@ describe("Select", () => {
   })
 
   describe("inline variant", () => {
-    it("exposes the single, non-clearable inline type contract", () => {
+    it("exposes the inline type contract for both selection shapes", () => {
       type InlineProps = Extract<F0SelectProps<"viewer">, { variant: "inline" }>
+      type SingleInlineProps = Extract<InlineProps, { multiple?: false }>
+      type MultipleInlineProps = Extract<InlineProps, { multiple: true }>
 
       expectTypeOf<InlineProps["label"]>().toEqualTypeOf<string>()
-      expectTypeOf<InlineProps["multiple"]>().toEqualTypeOf<false | undefined>()
-      expectTypeOf<InlineProps["clearable"]>().toEqualTypeOf<
+      expectTypeOf<SingleInlineProps["clearable"]>().toEqualTypeOf<
         false | undefined
+      >()
+      expectTypeOf<MultipleInlineProps["value"]>().toEqualTypeOf<
+        "viewer"[] | undefined
       >()
       expectTypeOf<InlineProps["children"]>().toEqualTypeOf<undefined>()
       expectTypeOf<InlineProps["asList"]>().toEqualTypeOf<undefined>()

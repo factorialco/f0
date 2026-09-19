@@ -153,7 +153,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no button and no hover background of its own; a chevron sits at the far edge of the value, hidden until the surrounding row is hovered or holds focus, and it is the row's only affordance for a select. The dropdown replaces the text only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Single selection calls `onChange` before `onDismiss`, so the owner can unmount the editor on commit without losing the selected value. Prop and option refreshes do not emit `onChange`. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
+          "The detail-row presentation of F0Select. At rest the selection reads as plain text — avatar and icon included — with no button and no hover background of its own; a chevron sits at the far edge of the value, hidden until the surrounding row is hovered or holds focus, and it is the row's only affordance for a select. The dropdown replaces the text only while `editing` is true. `editing` is controlled and the component never changes it: it reports `commit`, `escape` and `popupClose` through `onDismiss` and keeps the dropdown up until the owner says otherwise. Single selection calls `onChange` before `onDismiss`, so the owner can unmount the editor on commit without losing the selected value. A `multiple` row reads as the selected labels joined with a comma — the same summary the field variant gives a trigger, a count once they stop fitting — and its dropdown stays up while options are taken, so `commit` is the close that follows a changed selection. Prop and option refreshes do not emit `onChange`. Both presentations fill the box the row declares and start their text at the same inset, so the value does not move when the row is activated.",
       },
     },
   },
@@ -505,6 +505,179 @@ export const ReportsDismissWithoutClosing: Story = {
   },
 }
 
+type Commute = "bicycle" | "walking" | "train"
+
+const commuteOptions: F0SelectItemProps<Commute>[] = [
+  { value: "bicycle", label: "Bicycle" },
+  { value: "walking", label: "Walking" },
+  { value: "train", label: "Train" },
+]
+
+/** The multi-value row: same box, same inset, a comma-separated summary. */
+function InlineCommuteSelect({
+  value: initialValue = ["bicycle", "walking"],
+  editing: initialEditing = false,
+  onDismiss,
+  label = "Commute",
+}: {
+  value?: Commute[]
+  editing?: boolean
+  onDismiss?: (reason: SelectInlineDismissReason) => void
+  label?: string
+}) {
+  const [value, setValue] = useState<string[]>(initialValue)
+  const [editing, setEditing] = useState(initialEditing)
+
+  return (
+    <div className="flex w-80 flex-col gap-2">
+      <button
+        type="button"
+        data-testid="toggle-editing"
+        className="w-fit rounded border border-solid border-f1-border bg-f1-background px-2 py-1 text-f1-foreground"
+        onClick={() => setEditing((current) => !current)}
+      >
+        {editing ? "Stop editing" : "Start editing"}
+      </button>
+      <div data-testid="value-box" className="group h-10 w-80">
+        <F0Select
+          variant="inline"
+          multiple
+          label={label}
+          placeholder="Add a commute"
+          options={commuteOptions}
+          value={value}
+          editing={editing}
+          onDismiss={onDismiss}
+          onChange={(next) => setValue(next)}
+        />
+      </div>
+    </div>
+  )
+}
+
+export const MultipleAtRest: Story = {
+  render: (args) => <InlineCommuteSelect onDismiss={args.onDismiss} />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("the selection reads as one line of text", async () => {
+      await waitFor(async () => {
+        await expect(
+          canvas.getByTestId("select-inline-value")
+        ).toHaveTextContent("Bicycle, Walking")
+      })
+    })
+
+    await step("with nothing to press and nothing to clear", async () => {
+      await expect(canvas.queryByRole("combobox")).toBeNull()
+      const chevron = canvas.getByTestId("select-inline-value").lastElementChild
+      await expect(chevron).toHaveAttribute("aria-hidden", "true")
+      await expect(chevron).toHaveStyle({ opacity: "0" })
+    })
+  },
+}
+
+export const MultipleEditing: Story = {
+  args: { editing: true },
+  parameters: {
+    a11y: { test: "todo" },
+  },
+  render: (args) => <InlineCommuteSelect editing onDismiss={args.onDismiss} />,
+  play: async ({ canvasElement, args, step }) => {
+    const page = within(canvasElement.ownerDocument.body)
+
+    await waitFor(
+      async () => {
+        await expect(page.getAllByRole("option")).toHaveLength(3)
+      },
+      { timeout: 5000 }
+    )
+
+    await step("every option carries a checkbox", async () => {
+      for (const option of page.getAllByRole("option")) {
+        await expect(within(option).getByRole("checkbox")).toBeInTheDocument()
+      }
+    })
+
+    await step("picking one leaves the list up", async () => {
+      await userEvent.click(page.getByRole("option", { name: /Train/ }))
+      await expect(page.getByRole("listbox")).toBeInTheDocument()
+      await expect(args.onDismiss).not.toHaveBeenCalled()
+    })
+
+    await step("and the close that follows is the commit", async () => {
+      // Radix blocks body pointer events; dispatch pointerdown to dismiss.
+      fireEvent.pointerDown(document.body)
+      await waitFor(async () => {
+        await expect(args.onDismiss).toHaveBeenCalledWith("commit")
+      })
+      await expect(page.getByRole("listbox")).toBeInTheDocument()
+    })
+  },
+}
+
+/** One value or several, the text has to start at the same x and fill the same box. */
+export const MultipleMatchesSingleGlyphPosition: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div data-testid="single-box" className="h-10 w-80">
+        <F0Select
+          variant="inline"
+          label="Access level"
+          hideLabel
+          options={roleOptions}
+          value="viewer"
+        />
+      </div>
+      <div data-testid="multiple-box" className="h-10 w-80">
+        <F0Select
+          variant="inline"
+          multiple
+          label="Commute"
+          hideLabel
+          options={commuteOptions}
+          value={["bicycle", "walking"]}
+        />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const valueIn = (testId: string) =>
+      within(canvas.getByTestId(testId)).getByTestId("select-inline-value")
+
+    await waitFor(async () => {
+      await expect(valueIn("multiple-box")).toHaveTextContent(
+        "Bicycle, Walking"
+      )
+    })
+
+    const single = valueIn("single-box")
+    const multiple = valueIn("multiple-box")
+
+    await step("both start their text at the same inset", async () => {
+      await expect(
+        Math.abs(textStartX(multiple) - textStartX(single))
+      ).toBeLessThanOrEqual(1)
+    })
+
+    await step("and fill the same 40px box", async () => {
+      await expect(multiple.getBoundingClientRect().height).toBe(40)
+      await expect(multiple.getBoundingClientRect().height).toBe(
+        single.getBoundingClientRect().height
+      )
+    })
+
+    await step("with the chevron in the same slot", async () => {
+      const chevronX = (element: Element) =>
+        element.lastElementChild!.getBoundingClientRect().right
+      await expect(
+        Math.abs(chevronX(multiple) - chevronX(single))
+      ).toBeLessThanOrEqual(1)
+    })
+  },
+}
+
 export const DarkMode: Story = {
   args: {
     value: "viewer",
@@ -553,6 +726,17 @@ export const Snapshot: Story = {
       <SnapshotRow value="viewer" disabled />
       <SnapshotRow value="viewer" options={peopleOptions} />
       <SnapshotRow value="viewer" options={longRoleOptions} width="w-48" />
+      <div className="h-10 w-80">
+        <F0Select
+          variant="inline"
+          multiple
+          label="Commute"
+          hideLabel
+          placeholder="Add a commute"
+          options={commuteOptions}
+          value={["bicycle", "walking"]}
+        />
+      </div>
       <div className="dark flex items-center gap-4 rounded-md bg-f1-background p-4">
         <div className="flex flex-col gap-1">
           <span className="text-xs text-f1-foreground-secondary">Enabled</span>
