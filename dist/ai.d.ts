@@ -6070,8 +6070,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -6079,10 +6081,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }

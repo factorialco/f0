@@ -13862,6 +13862,17 @@ declare type OneDataCollectionGeneric = <R extends RecordType, Filters extends F
 declare type OneDataCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
     source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     visualizations: readonly Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>[];
+    /**
+     * An entry listed above the filters inside the panel, with a pane of its
+     * own. For a way of narrowing the list that is not one filter.
+     */
+    quickFilter?: {
+        label: string;
+        icon?: IconType;
+        render: (api: {
+            stage: (filters: Record<string, unknown>) => void;
+        }) => React.ReactNode;
+    };
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     onBulkAction?: OnBulkActionCallback<R, Filters>;
     /**
@@ -18082,8 +18093,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -18091,10 +18104,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
