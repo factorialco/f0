@@ -2354,6 +2354,13 @@ export const WithProgressBar: Story = {
               itemDefinition: (item) => ({
                 title: item.title,
                 description: [item.module],
+                // One hue per status, so a column of rows shows the tint doing
+                // the job it exists for: telling KINDS of row apart at a glance.
+                avatar: {
+                  type: "icon",
+                  icon: Placeholder,
+                  color: item.status === "Completed" ? "viridian" : "malibu",
+                },
               }),
               fields: [
                 {

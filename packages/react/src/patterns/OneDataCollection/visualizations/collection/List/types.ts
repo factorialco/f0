@@ -1,5 +1,6 @@
-import { AvatarVariant } from "@/components/avatars/F0Avatar"
+import { AvatarVariant, IconAvatarVariant } from "@/components/avatars/F0Avatar"
 import { RecordType, SortingKey, SortingsDefinition } from "@/hooks/datasource"
+import { type ListIconColor } from "@/lib/ListIcon"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { PropertyDefinition } from "../../../property-render"
 
@@ -10,10 +11,20 @@ export type WithOptionalSorting<
   sorting?: SortingKey<Sortings>
 }
 
+/**
+ * A row's avatar. The ICON kind alone may name a tint — every other kind
+ * carries its own identity already (a face, a flag, a module's brand) and an
+ * icon does not. The same rule the Home's `list` slot applies, because these
+ * rows are read as the same thing in two places.
+ */
+export type ListItemAvatar =
+  | Exclude<AvatarVariant, IconAvatarVariant>
+  | (IconAvatarVariant & { color?: ListIconColor })
+
 export type ItemDefinition = {
   title: string
   description?: string[]
-  avatar?: AvatarVariant
+  avatar?: ListItemAvatar
 }
 
 export type ListPropertyDefinition<
