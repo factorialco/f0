@@ -16,6 +16,7 @@ export function useInlineCopyValue(
 
   switch (field.type) {
     case "text":
+    case "textarea":
     case "number":
       return String(value)
 

@@ -105,10 +105,21 @@ const RowValue = forwardRef<
     critical: boolean
     activatable: boolean
     cursor: "caret" | "pointer"
+    height: "fixed" | "auto"
     onActivate: (() => void) | undefined
   }
 >(function RowValue(
-  { label, value, editing, copied, critical, activatable, cursor, onActivate },
+  {
+    label,
+    value,
+    editing,
+    copied,
+    critical,
+    activatable,
+    cursor,
+    height,
+    onActivate,
+  },
   ref
 ) {
   const { t } = useI18n()
@@ -141,7 +152,8 @@ const RowValue = forwardRef<
       <div
         data-slot="inline-field-row-value"
         className={cn(
-          "h-10 w-full min-w-0 rounded-md [&>*]:h-full [&>*]:w-full",
+          "w-full min-w-0 rounded-md [&>*]:w-full",
+          height === "fixed" ? "h-10 [&>*]:h-full" : "min-h-10",
           !editing && "transition-colors motion-reduce:transition-none",
           copied && !editing && "bg-f1-background-positive",
           // A ring, not a border: the editor's own critical border is 1px
@@ -174,6 +186,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
       copyValue,
       onActivate,
       activatorCursor = "caret",
+      valueHeight = "fixed",
       editing,
       message,
     },
@@ -234,6 +247,7 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
               critical={!!message && !editing}
               activatable={activatable}
               cursor={activatorCursor}
+              height={valueHeight}
               onActivate={onActivate}
             />
 
@@ -242,7 +256,10 @@ export const InlineFieldRow = forwardRef<HTMLDivElement, InlineFieldRowProps>(
               <div
                 data-slot="inline-field-row-actions"
                 className={cn(
-                  "absolute inset-y-0 right-1 flex items-center gap-0.5",
+                  "absolute inset-y-0 right-1 flex gap-0.5",
+                  // A growing box keeps the strip on the first line; 8px is
+                  // the offset a centred 24px button has in a 40px box.
+                  valueHeight === "fixed" ? "items-center" : "items-start py-2",
                   // Keep copy confirmation visible after hover ends.
                   copied ? "opacity-100" : REVEAL_CLASS
                 )}

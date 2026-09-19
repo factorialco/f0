@@ -594,35 +594,22 @@ describe("F0Form inline mode", () => {
 
     renderProfile({
       schema: z.object({
-        bio: f0FormField(z.string(), { label: "Bio", fieldType: "textarea" }),
-        notes: f0FormField(z.string(), {
-          label: "Notes",
-          fieldType: "textarea",
+        tenure: f0FormField(z.number(), {
+          label: "Tenure",
+          fieldType: "duration",
+        }),
+        notice: f0FormField(z.number(), {
+          label: "Notice period",
+          fieldType: "duration",
         }),
       }),
-      defaultValues: { bio: "Mathematician", notes: "" },
+      defaultValues: { tenure: 60, notice: 30 },
     })
 
-    const bio = screen.getByRole("textbox", { name: "Bio" })
-
-    // A live textarea proves inline props did not reach the input wrapper.
-    expect(bio.tagName).toBe("TEXTAREA")
-    expect(bio).toHaveValue("Mathematician")
-    expect(bio).not.toHaveAttribute("variant")
-    expect(bio).not.toHaveAttribute("editing")
-    expect(screen.queryByRole("button", { name: "Edit Bio" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Edit Tenure" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Tenure" })).toBeNull()
     expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0][0]).toContain("textarea")
-  })
-
-  it("keeps textarea out of the inline supported set", () => {
-    expect(
-      isInlineSupported({
-        id: "bio",
-        type: "textarea",
-        label: "Bio",
-      } as F0Field)
-    ).toBe(false)
+    expect(warn.mock.calls[0][0]).toContain("duration")
   })
 
   it("counts a multi-select as inline-supported", () => {
@@ -634,6 +621,91 @@ describe("F0Form inline mode", () => {
         multiple: true,
       } as F0Field)
     ).toBe(true)
+  })
+
+  it("counts a textarea as inline-supported", () => {
+    expect(
+      isInlineSupported({
+        id: "bio",
+        type: "textarea",
+        label: "Bio",
+      } as F0Field)
+    ).toBe(true)
+  })
+
+  describe("textarea rows", () => {
+    const bioSchema = z.object({
+      bio: f0FormField(z.string(), {
+        label: "Bio",
+        fieldType: "textarea",
+        copyable: true,
+      }),
+    })
+
+    const renderBio = (bio: string) =>
+      renderProfile({ schema: bioSchema, defaultValues: { bio } })
+
+    it("reads a multi-line value as text with its line breaks kept", () => {
+      const { container } = renderBio("First line\nSecond line")
+
+      expect(screen.queryByRole("textbox", { name: "Bio" })).toBeNull()
+
+      const text = container.querySelector(
+        "[data-testid='input-field-inline-value'] span"
+      )
+      expect(text).toHaveTextContent("First line Second line")
+      expect(text?.className).toContain("whitespace-pre-wrap")
+      expect(text?.className).not.toContain("truncate")
+    })
+
+    it("lets the value box grow instead of pinning it to 40px", () => {
+      const { container } = renderBio("First line\nSecond line")
+
+      const box = container.querySelector(
+        "[data-slot='inline-field-row-value']"
+      )
+      expect(box).toHaveClass("min-h-10")
+      expect(box).not.toHaveClass("h-10")
+    })
+
+    it("keeps every other row's box fixed", () => {
+      const { container } = renderProfile()
+
+      const box = container.querySelector(
+        "[data-slot='inline-field-row-value']"
+      )
+      expect(box).toHaveClass("h-10")
+      expect(box).not.toHaveClass("min-h-10")
+    })
+
+    it("opens the textarea on activation and reads as text again on Escape", async () => {
+      const user = userEvent.setup()
+      renderBio("First line")
+
+      await user.click(activator("Bio"))
+
+      const textarea = screen.getByRole("textbox", { name: "Bio" })
+      expect(textarea.tagName).toBe("TEXTAREA")
+      await waitFor(() => expect(textarea).toHaveFocus())
+
+      await user.keyboard("{Escape}")
+
+      await waitFor(() =>
+        expect(screen.queryByRole("textbox", { name: "Bio" })).toBeNull()
+      )
+    })
+
+    it("copies the raw multi-line value", async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined)
+      stubClipboard(writeText)
+      renderBio("First line\nSecond line")
+
+      await userEvent.click(screen.getByRole("button", { name: "Copy Bio" }))
+
+      await waitFor(() =>
+        expect(writeText).toHaveBeenCalledWith("First line\nSecond line")
+      )
+    })
   })
 
   it("leaves the last visible row undivided when renderIf hides the one after it", () => {

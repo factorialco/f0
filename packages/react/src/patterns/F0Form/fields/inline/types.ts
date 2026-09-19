@@ -25,6 +25,12 @@ export type InlineFieldRowProps = {
   onActivate?: () => void
   /** Use a caret for text editors and a pointer for popup editors. */
   activatorCursor?: "caret" | "pointer"
+  /**
+   * `"fixed"` pins the value box to the form's 40px control height. `"auto"`
+   * lets it grow with whatever it holds, never shrinking below 40px.
+   * @default "fixed"
+   */
+  valueHeight?: "fixed" | "auto"
   editing: boolean
   /**
    * Validation copy displayed below the value. Its presence also marks the

@@ -3,6 +3,7 @@ import type { F0Field } from "../types"
 /** Unsupported fields fall back to their standard presentation. */
 const INLINE_SUPPORTED_TYPES = [
   "text",
+  "textarea",
   "number",
   "select",
   "date",

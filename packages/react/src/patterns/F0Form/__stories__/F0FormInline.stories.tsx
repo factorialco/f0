@@ -357,6 +357,72 @@ export const StripHidesAfterAMouseEdit: Story = {
   },
 }
 
+/**
+ * A textarea row grows with its value in both modes, so activating a note
+ * never shifts the rows under it. Enter types a newline there, so the commit
+ * shortcut is Cmd/Ctrl+Enter.
+ */
+export const EditingATextareaRow: Story = {
+  render: () => (
+    <div className="w-160">
+      <F0Form
+        name="inline-textarea"
+        inline
+        schema={z.object({
+          fullName: f0FormField(z.string(), { label: "Full name" }),
+          bio: f0FormField(z.string(), {
+            label: "Bio",
+            fieldType: "textarea",
+            copyable: true,
+          }),
+        })}
+        defaultValues={{
+          fullName: "Ada Lovelace",
+          bio: "Wrote the first algorithm.\nSigned off the Engine notes.",
+        }}
+        onSubmit={submit}
+        submitConfig={actionBar}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const boxes = () =>
+      canvasElement.querySelectorAll<HTMLElement>(
+        '[data-slot="inline-field-row-value"]'
+      )
+
+    await step("Read the note with its line breaks", async () => {
+      const text = canvas.getByText(/first algorithm/)
+      await expect(getComputedStyle(text).whiteSpace).toBe("pre-wrap")
+      await expect(canvas.queryByRole("textbox")).toBeNull()
+    })
+
+    await step("Grow the box past the 40px the text row keeps", async () => {
+      const [nameBox, noteBox] = boxes()
+      await expect(nameBox.getBoundingClientRect().height).toBe(40)
+      await expect(noteBox.getBoundingClientRect().height).toBeGreaterThan(40)
+    })
+
+    await step("Hold that height while the textarea takes over", async () => {
+      const before = boxes()[1].getBoundingClientRect().height
+      await userEvent.click(canvas.getByRole("button", { name: "Bio" }))
+      const textarea = await canvas.findByRole("textbox", { name: "Bio" })
+      await expect(textarea.tagName).toBe("TEXTAREA")
+      await waitFor(async () => {
+        await expect(boxes()[1].getBoundingClientRect().height).toBe(before)
+      })
+    })
+
+    await step("Commit with Cmd/Ctrl+Enter", async () => {
+      await userEvent.keyboard("{Control>}{Enter}{/Control}")
+      await waitFor(async () => {
+        await expect(canvas.queryByRole("textbox", { name: "Bio" })).toBeNull()
+      })
+    })
+  },
+}
+
 export const ActionBarAfterAnEdit: Story = {
   render: () => (
     <div className="w-160">
@@ -631,9 +697,13 @@ export const UnsupportedTypeFallsBack: Story = {
         inline
         schema={z.object({
           fullName: f0FormField(z.string(), { label: "Full name" }),
-          bio: f0FormField(z.string(), { label: "Bio", fieldType: "textarea" }),
+          tenure: f0FormField(z.number(), {
+            label: "Tenure",
+            fieldType: "duration",
+            units: ["hours", "minutes"],
+          }),
         })}
-        defaultValues={{ fullName: "Ada Lovelace", bio: "Mathematician" }}
+        defaultValues={{ fullName: "Ada Lovelace", tenure: 90 }}
         onSubmit={submit}
         submitConfig={actionBar}
       />
@@ -645,9 +715,17 @@ export const UnsupportedTypeFallsBack: Story = {
     await step(
       "Render the standard field, with nothing to activate",
       async () => {
-        await expect(canvas.getByRole("textbox", { name: "Bio" })).toBeVisible()
+        const row = canvasElement.querySelectorAll<HTMLElement>(
+          '[data-slot="inline-field-row"]'
+        )[1]
+
+        // A live editor, not the at-rest text every supported row prints.
+        await expect(row.querySelector("input")).not.toBeNull()
         await expect(
-          canvas.queryByRole("button", { name: "Edit Bio" })
+          row.querySelector('[data-testid="input-field-inline-value"]')
+        ).toBeNull()
+        await expect(
+          canvas.queryByRole("button", { name: "Edit Tenure" })
         ).toBeNull()
       }
     )

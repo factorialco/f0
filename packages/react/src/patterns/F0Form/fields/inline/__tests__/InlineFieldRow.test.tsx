@@ -459,4 +459,33 @@ describe("InlineFieldRow", () => {
     ref.current?.focus()
     expect(document.activeElement).toBe(ref.current)
   })
+
+  describe("valueHeight", () => {
+    const box = () =>
+      document.querySelector('[data-slot="inline-field-row-value"]')
+
+    it("pins the box to the form control height by default", () => {
+      renderRow()
+
+      expect(box()).toHaveClass("h-10", "[&>*]:h-full")
+      expect(box()).not.toHaveClass("min-h-10")
+    })
+
+    it("lets the box grow with its value when asked", () => {
+      renderRow({ valueHeight: "auto" })
+
+      expect(box()).toHaveClass("min-h-10")
+      expect(box()).not.toHaveClass("h-10", "[&>*]:h-full")
+    })
+
+    it("keeps the action strip on the first line of a growing box", () => {
+      renderRow({ valueHeight: "auto", actions: fakeActions() })
+
+      const strip = document.querySelector(
+        '[data-slot="inline-field-row-actions"]'
+      )
+      expect(strip?.className).toContain("items-start")
+      expect(strip?.className).not.toContain("items-center")
+    })
+  })
 })

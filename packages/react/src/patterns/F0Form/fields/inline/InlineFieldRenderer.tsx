@@ -50,6 +50,8 @@ export function InlineFieldRenderer({
   const isSelect = supported && field.type === "select"
 
   const opensPopup = isSelect || (supported && field.type === "date")
+  // A textarea holds as many lines as it holds, in both modes.
+  const growsWithContent = field.type === "textarea"
   const editable = field.editable ?? true
 
   if (!supported) {
@@ -122,6 +124,7 @@ export function InlineFieldRenderer({
       copyValue={field.copyable ? copyValue : undefined}
       onActivate={activate}
       activatorCursor={opensPopup ? "pointer" : "caret"}
+      valueHeight={growsWithContent ? "auto" : "fixed"}
       editing={editing}
       message={message}
     />

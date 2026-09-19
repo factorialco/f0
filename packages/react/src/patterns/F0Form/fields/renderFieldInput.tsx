@@ -114,6 +114,7 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
+          inline={inline}
         />
       )
     case "select":
